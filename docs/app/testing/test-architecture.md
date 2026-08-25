@@ -25,7 +25,8 @@ packages/geoview-test-suite/src/
     │   ├── suite-details.ts            # Details panel tests
     │   ├── suite-ui.ts                 # DOM-level UI tests
     │   ├── suite-utilities.ts          # Utility function tests
-    │   └── suite-swiper.ts             # Swiper plugin tests
+    │   ├── suite-swiper.ts             # Swiper plugin tests
+    │   └── suite-time-slider.ts         # Time Slider plugin tests
     └── testers/                         # GeoView-specific testers
         ├── abstract-gv-tester.ts        # GV base — constants, URLs, helpers
         ├── core-tester.ts
@@ -35,7 +36,8 @@ packages/geoview-test-suite/src/
         ├── map-config-tester.ts
         ├── geochart-tester.ts
         ├── details-tester.ts
-        └── ui-tester.ts
+        ├── ui-tester.ts
+        └── time-slider-tester.ts
 ```
 
 ## Test Lifecycle
@@ -108,7 +110,7 @@ Test instance
 | `Promise.all()` (parallel)      | Independent tests, no shared state | `suite-config`, `suite-ui`        |
 | Mixed parallel + sequential     | Some tests modify map state        | `suite-layer`                     |
 | Sequential `await`              | All tests modify shared state      | `suite-map`, `suite-map-config`   |
-| `onCanExecuteTestSuite()` guard | Suite requires specific plugin     | `suite-geochart`, `suite-details` |
+| `onCanExecuteTestSuite()` guard | Suite requires specific plugin     | `suite-geochart`, `suite-details`, `suite-time-slider` |
 
 ## Key Design Decisions
 
@@ -342,6 +344,7 @@ class TestSuitePlugin {
       "suite-map": GVTestSuiteMapVaria,
       "suite-layer": GVTestSuiteLayer,
       "suite-geochart": GVTestSuiteGeochart,
+      "suite-time-slider": GVTestSuiteTimeSlider,
     };
 
     // Instantiate configured suites

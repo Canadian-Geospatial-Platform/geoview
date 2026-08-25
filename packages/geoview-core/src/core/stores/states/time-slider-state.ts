@@ -695,6 +695,9 @@ export interface TypeTimeSliderValues {
   /** Animation delay in milliseconds between steps. */
   delay: number;
 
+  /** The initial slider handle values used as the reset target. */
+  defaultValues: number[];
+
   /** Optional description displayed in the time slider panel. */
   description?: string;
 

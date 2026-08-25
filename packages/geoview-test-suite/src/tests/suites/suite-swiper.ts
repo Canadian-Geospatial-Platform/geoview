@@ -42,8 +42,9 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Swiper plugin lifecycle:<br/>
-      <b>Lifecycle</b> — Plugin initialization, layer assignment, drag interaction, and cleanup`;
+    return `Tests the Swiper plugin lifecycle and rendering isolation:<br/>
+      <b>Lifecycle</b> — Plugin initialization, layer assignment, drag interaction, and cleanup<br/>
+      <b>Rendering isolation</b> — Per-layer render clipping is attached only to selected layers`;
   }
 
   /**
@@ -70,8 +71,9 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
-    // Run the swiper lifecycle test
+  protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Run sequentially because both tests modify shared swiper state
+    await this.#swiperTester.testSwiperRenderIsolation();
     return this.#swiperTester.testSwiperLifecycle();
   }
 }

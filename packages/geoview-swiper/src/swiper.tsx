@@ -2,6 +2,10 @@ import type { SxProps } from 'geoview-core/ui/style/types';
 import Draggable from 'react-draggable';
 import { useMemo } from 'react';
 
+import type RenderEvent from 'ol/render/Event';
+import { getRenderPixel } from 'ol/render';
+import type Layer from 'ol/layer/Layer';
+
 import type { SwipeOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { useStoreSwiperLayerPaths, useStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -17,6 +21,22 @@ import { getSxClasses } from './swiper-style';
 
 /** The number of milliseconds to wait for a layer when trying to attach it to the swiper */
 const TIMEOUT_WAIT_TO_ATTACH_LAYERS = 20000;
+
+/** Saved WebGL scissor state restored after a swiped layer renders. */
+type WebGLScissorState = {
+  /** Whether the scissor test was enabled before rendering. */
+  enabled: boolean;
+  /** The scissor box active before rendering. */
+  box: Int32Array;
+};
+
+/** Registered render handlers for a swiped layer. */
+type LayerRenderHandlers = {
+  /** Handles clipping before the layer renders. */
+  preRender: (event: RenderEvent) => void;
+  /** Restores the rendering context after the layer renders. */
+  postRender: (event: RenderEvent) => void;
+};
 
 /** Properties for the Swiper component. */
 type SwiperProps = {
@@ -94,40 +114,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Applies CSS clip-path on each tracked OL layer's renderer container to clip the layer
-   * at the swiper position. This approach works regardless of layer opacity because it clips
-   * the final rendered DOM element, not the canvas context.
-   */
-  const applyClipPath = useCallback((): void => {
-    const swiperValue = orientation === 'vertical' ? swiperValueVertical.current : swiperValueHorizontal.current;
-
-    gvLayers.forEach((layer) => {
-      const container = layer.getRendererContainer();
-      if (container) {
-        if (orientation === 'vertical') {
-          // Clip: show left portion up to swiperValue%
-          container.style.clipPath = `inset(0 ${100 - swiperValue}% 0 0)`;
-        } else {
-          // Clip: show top portion up to swiperValue%
-          container.style.clipPath = `inset(0 0 ${100 - swiperValue}% 0)`;
-        }
-      }
-    });
-  }, [gvLayers, orientation]);
-
-  /**
-   * Removes CSS clip-path from all tracked OL layer renderer containers.
-   */
-  const removeClipPath = useCallback((): void => {
-    gvLayers.forEach((layer) => {
-      const container = layer.getRendererContainer();
-      if (container) {
-        container.style.clipPath = '';
-      }
-    });
-  }, [gvLayers]);
-
-  /**
    * Calculates the computed style to return values of x and y position.
    *
    * @returns The array of value for x and y position for the swiper bar
@@ -139,7 +125,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   };
 
   /**
-   * Handles drag events - update refs and apply clip-path.
+   * Handles drag events and requests a render at the updated swiper position.
    */
   const onDrag = debounce(() => {
     if (!layerPaths.length) return;
@@ -156,8 +142,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
       swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
     }
 
-    // Apply CSS clip-path
-    applyClipPath();
+    // Render the map so the target layers use the updated clip position
+    viewer.map.render();
   }, 100);
 
   /**
@@ -184,9 +170,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
       controllerRegistry.swiperController?.setSwiperPosition(swiperValueHorizontal.current);
     }
 
-    // Apply CSS clip-path
-    applyClipPath();
-  }, [layerPaths.length, viewer.map, orientation, controllerRegistry.swiperController, applyClipPath]);
+    // Render the map so the target layers use the updated clip position
+    viewer.map.render();
+  }, [layerPaths.length, viewer.map, orientation, controllerRegistry.swiperController]);
 
   /**
    * Updates swiper and layers from keyboard CTRL + Arrow key.
@@ -231,7 +217,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // #endregion
 
   /**
-   * UseEffect for tracking layers. This will track the OL layers at the layer paths for clip-path application.
+   * Tracks the OL layers resolved from the configured swiper layer paths.
    */
   useEffect(() => {
     // Log
@@ -270,52 +256,133 @@ export function Swiper(props: SwiperProps): JSX.Element {
       logger.logTraceUseEffectUnmount('SWIPER - layerPaths', layerPaths);
       cancelled = true;
 
-      // Remove clip-path from layers and clear tracking
-      associatedLayerPaths.forEach((layerPath: string) => {
-        try {
-          const gvLayer = controllerRegistry.layerController.getGeoviewLayerIfExists(layerPath);
-          if (gvLayer) {
-            const container = gvLayer.getRendererContainer();
-            if (container) {
-              container.style.clipPath = '';
-            }
-          }
-        } catch (error: unknown) {
-          logger.logError('SWIPER - Failed to remove clip-path from layer', layerPath, error);
-        }
-      });
-
       // Empty layers array
       setGvLayers([]);
     };
   }, [controllerRegistry, layerPaths, visibleLayers]);
 
   /**
-   * UseEffect for applying and maintaining clip-path. Applies clip-path on initial layer tracking
-   * and re-applies after each map render (OL may recreate renderer containers during renders).
+   * Registers per-layer render handlers so clipping affects only the configured layers.
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SWIPER - applyClipPath', gvLayers);
+    logger.logTraceUseEffect('SWIPER - layer render clipping', gvLayers, orientation);
 
     if (!gvLayers.length) return undefined;
 
-    // Apply clip-path immediately for newly tracked layers
-    applyClipPath();
+    // Keep each handler pair so the exact same function references can be removed during cleanup.
+    const handlersByLayer = new Map<AbstractBaseGVLayer, LayerRenderHandlers>();
 
-    // Re-apply clip-path after each map render cycle (OL may replace containers)
-    const handlePostRender = (): void => {
-      applyClipPath();
-    };
-    viewer.map.on('postrender', handlePostRender);
+    gvLayers.forEach((layer) => {
+      // OpenLayers may render layers with either a Canvas 2D or WebGL context. Each renderer
+      // requires its own state tracking so postrender can restore the context to its prior state.
+      let canvasContextSaved = false;
+      let webGLScissorState: WebGLScissorState | undefined;
+
+      // Clip immediately before this specific layer renders. Applying the clip at the layer event
+      // level is important because OpenLayers can compose multiple layers into one shared canvas.
+      const preRender = (event: RenderEvent): void => {
+        const { context } = event;
+        const currentMapSize = viewer.map.getSize();
+        if (!context || !currentMapSize) return;
+
+        // Convert the current divider percentage into a rectangle in map viewport CSS pixels.
+        // Vertical swiping exposes the left side; horizontal swiping exposes the top side.
+        const swiperValue = orientation === 'vertical' ? swiperValueVertical.current : swiperValueHorizontal.current;
+        const clipWidth = orientation === 'vertical' ? (currentMapSize[0] * swiperValue) / 100 : currentMapSize[0];
+        const clipHeight = orientation === 'horizontal' ? (currentMapSize[1] * swiperValue) / 100 : currentMapSize[1];
+
+        // A WebGL context exposes scissor(). Save its existing state because another renderer or
+        // consumer may already be using a scissor box on the same context.
+        if ('scissor' in context) {
+          // WebGL's origin is at the bottom-left. getRenderPixel handles the CSS-to-render-pixel
+          // conversion, including device pixel ratio and the renderer's coordinate transform.
+          const bottomLeft = getRenderPixel(event, [0, clipHeight]);
+          const topRight = getRenderPixel(event, [clipWidth, 0]);
+          webGLScissorState = {
+            enabled: context.isEnabled(context.SCISSOR_TEST),
+            box: new Int32Array(context.getParameter(context.SCISSOR_BOX) as Int32Array),
+          };
+
+          // Limit this layer's WebGL draw calls to the visible side of the swiper.
+          context.enable(context.SCISSOR_TEST);
+          context.scissor(
+            Math.min(bottomLeft[0], topRight[0]),
+            Math.min(bottomLeft[1], topRight[1]),
+            Math.abs(topRight[0] - bottomLeft[0]),
+            Math.abs(topRight[1] - bottomLeft[1])
+          );
+          return;
+        }
+
+        // Canvas clipping uses all four viewport corners. getRenderPixel makes the polygon safe
+        // for rotated maps and high-DPI displays instead of assuming CSS and canvas pixels match.
+        const topLeft = getRenderPixel(event, [0, 0]);
+        const topRight = getRenderPixel(event, [clipWidth, 0]);
+        const bottomRight = getRenderPixel(event, [clipWidth, clipHeight]);
+        const bottomLeft = getRenderPixel(event, [0, clipHeight]);
+
+        // Save before clipping because Canvas clip regions are cumulative and cannot be directly
+        // reset. postrender restores this state after only the target layer has been drawn.
+        context.save();
+        canvasContextSaved = true;
+        context.beginPath();
+        context.moveTo(topLeft[0], topLeft[1]);
+        context.lineTo(bottomLeft[0], bottomLeft[1]);
+        context.lineTo(bottomRight[0], bottomRight[1]);
+        context.lineTo(topRight[0], topRight[1]);
+        context.closePath();
+        context.clip();
+      };
+
+      // Restore whichever rendering context was changed in prerender. Leaving either clipping
+      // mechanism active would affect layers rendered afterward on the same underlying context.
+      const postRender = (event: RenderEvent): void => {
+        const { context } = event;
+        if (!context) return;
+
+        if ('scissor' in context) {
+          if (!webGLScissorState) return;
+
+          // Restore both the previous box and whether scissor testing was originally enabled.
+          context.scissor(webGLScissorState.box[0], webGLScissorState.box[1], webGLScissorState.box[2], webGLScissorState.box[3]);
+          if (!webGLScissorState.enabled) context.disable(context.SCISSOR_TEST);
+          webGLScissorState = undefined;
+          return;
+        }
+
+        if (canvasContextSaved) {
+          context.restore();
+          canvasContextSaved = false;
+        }
+      };
+
+      // AbstractBaseGVLayer exposes BaseLayer, but resolved leaf layers use the renderable Layer
+      // event surface that provides the prerender and postrender events.
+      const olLayer = layer.getOLLayer() as Layer;
+      olLayer.on('prerender', preRender);
+      olLayer.on('postrender', postRender);
+      handlersByLayer.set(layer, { preRender, postRender });
+    });
+
+    // Request a frame immediately so newly selected layers are clipped without waiting for a map interaction.
+    viewer.map.render();
 
     return () => {
       // Log
-      logger.logTraceUseEffectUnmount('SWIPER - applyClipPath', gvLayers);
-      viewer.map.un('postrender', handlePostRender);
-      removeClipPath();
+      logger.logTraceUseEffectUnmount('SWIPER - layer render clipping', gvLayers, orientation);
+
+      // Remove handlers before requesting the next frame so deselected layers render in full.
+      handlersByLayer.forEach(({ preRender, postRender }, layer) => {
+        const olLayer = layer.getOLLayer() as Layer;
+        olLayer.un('prerender', preRender);
+        olLayer.un('postrender', postRender);
+      });
+
+      // Repaint after cleanup to remove the previous frame's clipped target output immediately.
+      viewer.map.render();
     };
-  }, [gvLayers, applyClipPath, removeClipPath, viewer.map]);
+  }, [gvLayers, orientation, viewer.map]);
 
   /**
    * UseEffect for WCAG keyboard navigation.

@@ -45,6 +45,7 @@ Add `test-suite` to your map configuration:
 | `suite-ui`         | DOM-level UI tests                                   |
 | `suite-utilities`  | Utility function tests (core, date, geo, projection) |
 | `suite-swiper`     | Swiper plugin tests (requires swiper)                |
+| `suite-time-slider` | Time Slider plugin tests (requires time-slider)       |
 
 ## Architecture Overview
 

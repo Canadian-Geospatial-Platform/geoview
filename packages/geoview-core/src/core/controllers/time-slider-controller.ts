@@ -71,12 +71,13 @@ export class TimeSliderController extends AbstractMapViewerController {
     // Try to get the temporal dimension from the layer's metadata
     let layerTimeDimension = layer.getTimeDimension();
 
-    // If the VCS config provides a timeDimension, it overrides the metadata-derived one except for the field property
+    // If the config provides a timeDimension, overlay it on the metadata-derived one except for the field property
     if (timesliderConfig?.timeDimension) {
       layerTimeDimension = {
+        ...layerTimeDimension,
         ...timesliderConfig.timeDimension,
         field: layerTimeDimension?.field ?? timesliderConfig.timeDimension.field,
-        isValid: !!timesliderConfig.timeDimension.rangeItems?.range?.length,
+        isValid: !!(timesliderConfig.timeDimension.rangeItems ?? layerTimeDimension?.rangeItems)?.range?.length,
       };
 
       // The field property is overridden if it actually exists in the outfields
@@ -131,6 +132,41 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // Save in the store
     setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
+  }
+
+  /**
+   * Resets the time slider values for a layer path to their registration defaults.
+   *
+   * @param layerPath - The layer path
+   */
+  resetValues(layerPath: string): void {
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
+    if (!timeSliderValues) return;
+
+    this.updateTimeSliderValues(layerPath, [...timeSliderValues.defaultValues]);
+  }
+
+  /**
+   * Constrains dual-handle values to keep one valid increment between the handles.
+   *
+   * @param layerPath - The layer path
+   * @param values - The proposed slider values
+   * @param activeThumb - The index of the thumb being moved
+   * @returns The constrained slider values
+   */
+  constrainValues(layerPath: string, values: number[], activeThumb: number): number[] {
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
+    if (!timeSliderValues) return values;
+
+    const timeStampRange = timeSliderValues.range.map((date) => DateMgt.convertToMilliseconds(date));
+    return TimeSliderController.#constrainValues(
+      values,
+      activeThumb,
+      timeSliderValues.discreteValues,
+      timeStampRange,
+      timeSliderValues.step,
+      timeSliderValues.minAndMax
+    );
   }
 
   /**
@@ -342,10 +378,9 @@ export class TimeSliderController extends AbstractMapViewerController {
     // Set defaults values from temporal dimension
     const { range } = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
 
-    const defaultDates = configTimeDimension?.default || layerTimeDimensionInfo.default;
-
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
     const singleHandle = configTimeDimension?.singleHandle ?? layerTimeDimensionInfo?.singleHandle ?? false;
+    const defaultDates = configTimeDimension?.default?.length ? configTimeDimension.default : layerTimeDimensionInfo.default;
     const nearestValues = configTimeDimension?.nearestValues ?? layerTimeDimensionInfo?.nearestValues;
 
     // Check if the time slider info is associated with another time slider
@@ -369,8 +404,6 @@ export class TimeSliderController extends AbstractMapViewerController {
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }
 
-    const values = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
-
     // If using absolute axis
     let step: number | undefined;
     if (nearestValues === 'continuous') {
@@ -378,9 +411,15 @@ export class TimeSliderController extends AbstractMapViewerController {
       step = DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
 
+    const timeStampRange = range.map((date) => DateMgt.convertToMilliseconds(date));
+    let initialValues = singleHandle ? [minAndMax[1]] : [...minAndMax];
+    if (defaultDates?.length) initialValues = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
+    const values = TimeSliderController.#constrainValues(initialValues, 1, nearestValues === 'discrete', timeStampRange, step, minAndMax);
+
     return {
       additionalLayerpaths,
       delay: timesliderConfig?.delay || 1000,
+      defaultValues: [...values],
       discreteValues: nearestValues === 'discrete',
       description: timesliderConfig?.description,
       displayDateFormat: configTimeDimension?.displayDateFormat,
@@ -400,6 +439,61 @@ export class TimeSliderController extends AbstractMapViewerController {
       title: timesliderConfig?.title,
       values,
     };
+  }
+
+  /**
+   * Constrains dual-handle values according to the slider mode and selected step.
+   *
+   * Absolute dual-handle sliders use the selected step as their minimum separation.
+   * For discrete sliders, the active thumb is moved to the nearest available timestamp
+   * on its valid side of the other thumb. A range with fewer than two distinct timestamps
+   * cannot be separated and is returned unchanged.
+   *
+   * @param values - The proposed slider values
+   * @param activeThumb - The index of the thumb being moved
+   * @param discreteValues - Whether the slider uses discrete values
+   * @param timeStampRange - The available timestamps for a discrete slider
+   * @param step - Optional minimum separation for an absolute slider
+   * @param minAndMax - The minimum and maximum slider values
+   * @returns The constrained slider values
+   */
+  static #constrainValues(
+    values: number[],
+    activeThumb: number,
+    discreteValues: boolean,
+    timeStampRange: number[],
+    step?: number,
+    minAndMax?: number[]
+  ): number[] {
+    // Single-handle sliders and incomplete ranges do not require separation.
+    if (values.length !== 2) return values;
+
+    // Absolute sliders use the selected or estimated step to keep dual handles separable.
+    if (!discreteValues) {
+      const minimumDistance = step ?? (minAndMax ? (minAndMax[1] - minAndMax[0]) / 20 : 0);
+      if (minimumDistance <= 0 || values[1] - values[0] >= minimumDistance) return values;
+      if (activeThumb === 0) return [Math.max(values[1] - minimumDistance, minAndMax?.[0] ?? Number.NEGATIVE_INFINITY), values[1]];
+      return [values[0], Math.min(values[0] + minimumDistance, minAndMax?.[1] ?? Number.POSITIVE_INFINITY)];
+    }
+
+    // Preserve already ordered discrete values.
+    if (values[0] < values[1]) return values;
+
+    // Remove duplicate timestamps before finding an adjacent value.
+    const distinctTimeStampRange = [...new Set(timeStampRange)].sort((first, second) => first - second);
+    if (distinctTimeStampRange.length < 2) return values;
+
+    if (activeThumb === 0) {
+      // Move the left thumb to the closest timestamp below the right thumb.
+      const previousValue = distinctTimeStampRange.findLast((timeStamp) => timeStamp < values[1]);
+      if (previousValue !== undefined) return [previousValue, values[1]];
+      return [distinctTimeStampRange[0], distinctTimeStampRange[1]];
+    }
+
+    // Move the right thumb to the closest timestamp above the left thumb.
+    const nextValue = distinctTimeStampRange.find((timeStamp) => timeStamp > values[0]);
+    if (nextValue !== undefined) return [values[0], nextValue];
+    return [distinctTimeStampRange[distinctTimeStampRange.length - 2], distinctTimeStampRange[distinctTimeStampRange.length - 1]];
   }
 
   /**

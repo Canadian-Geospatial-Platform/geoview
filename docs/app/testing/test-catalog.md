@@ -64,6 +64,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 - [5. Packages](#5-packages)
   - [5.1 Geochart](#51-geochart)
   - [5.2 Swiper](#52-swiper)
+  - [5.3 Time Slider](#53-time-slider)
 - [Summary](#summary)
 
 ---
@@ -82,8 +83,9 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 12         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
-| 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
-| **Total**         |                    |                                                                                                 | **195**    |                             |
+| 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
+| 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
+| **Total**         |                    |                                                                                                 | **198**    |                             |
 
 ---
 
@@ -744,8 +746,23 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-swiper` · **File:** `tests/suites/suite-swiper.ts` · **Tester:** `SwiperTester` (`tests/testers/swiper-tester.ts`)
-**Execution:** Single test · **Guard:** `swiper` must be in `corePackages` and swiper controller must exist
+**Execution:** Sequential · **Guard:** `swiper` must be in `corePackages` and swiper controller must exist
+
+| #   | Method                      | Type | Description                                                                              |
+| --- | --------------------------- | ---- | ---------------------------------------------------------------------------------------- |
+| 1   | `testSwiperRenderIsolation` | test | Test Swiper rendering isolation with a higher-level layer selector...                    |
+| 2   | `testSwiperLifecycle`       | test | Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all... |
+
+---
+
+### 5.3 Time Slider
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-time-slider` · **File:** `tests/suites/suite-time-slider.ts` · **Tester:** `TimeSliderTester` (`tests/testers/time-slider-tester.ts`)
+**Execution:** Sequential · **Guard:** `time-slider` must be in `footerBar.tabs.core` and time-slider controller must exist
 
 | #   | Method                | Type | Description                                                                              |
 | --- | --------------------- | ---- | ---------------------------------------------------------------------------------------- |
-| 1   | `testSwiperLifecycle` | test | Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all... |
+| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                             |
+| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges...      |
