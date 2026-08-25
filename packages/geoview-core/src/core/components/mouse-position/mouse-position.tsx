@@ -174,8 +174,8 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
           padding: theme.spacing(0, 6),
           // Show focus ring when any child Radio has focus
           '&:has(:focus-visible)': {
-            outline: `2px solid ${theme.palette.common.black}`,
-            outlineOffset: '2px',
+            outline: `3px solid ${theme.palette.common.black}`,
+            outlineOffset: 0,
             borderRadius: '4px',
           },
         }}

@@ -4,6 +4,7 @@ import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import type { CircularProgressProps } from '@mui/material';
 import { CircularProgress as MaterialCircularProgress, Box, Fade } from '@mui/material';
+import type { SxProps as MuiSxProps } from '@mui/material';
 
 import { getSxClasses } from '@/ui/circular-progress/circular-progress-style';
 import { logger } from '@/core/utils/logger';
@@ -70,8 +71,9 @@ function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const sxMerged = { ...sxClasses.loading, ...sx };
-  const sxCircularMerged = { ...sxClasses.progress, ...sxCircular };
+  // Compose sx as array to support all valid SxProps shapes (object, array, function)
+  const sxMerged = [sxClasses.loading, sx] as MuiSxProps;
+  const sxCircularMerged = [sxClasses.progress, sxCircular] as MuiSxProps;
 
   return (
     <Fade in={!isLoaded} timeout={{ enter: 0, exit: theme.transitions.duration.splash }} mountOnEnter unmountOnExit>

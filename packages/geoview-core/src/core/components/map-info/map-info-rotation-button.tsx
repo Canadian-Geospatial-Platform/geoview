@@ -41,15 +41,15 @@ export function MapInfoRotationButton(): JSX.Element {
       : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
 
   const containerStyles = {
-    width: '40px',
-    height: '40px',
-    my: '1rem',
     color: theme.palette.geoViewColor?.bgColor.light[800],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     '&:focus-visible': {
-      outlineColor: theme.palette.geoViewColor?.primary.main,
+      outline: `3px solid ${theme.palette.common.black}`,
+      outlineOffset: 0,
+      borderRadius: '4px',
+      // outlineColor: theme.palette.geoViewColor?.primary.main,
     },
   };
 
