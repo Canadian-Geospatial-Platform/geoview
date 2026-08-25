@@ -64,7 +64,7 @@ function BaseLightBoxComponent({
       const element = document.getElementById(returnFocusId);
       if (element) {
         element.focus();
-        element.classList.add('keyboard-focused');
+        // Note: :focus-visible will auto-apply when element receives keyboard focus
       } else {
         logger.logWarning(`LightBox focus restoration failed: element "${returnFocusId}" not found`);
       }

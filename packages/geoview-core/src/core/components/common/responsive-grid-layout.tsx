@@ -643,8 +643,8 @@ const ResponsiveGridLayout = forwardRef(
                 onClick={handleCloseGuide}
                 sx={{
                   position: 'absolute',
-                  top: 15,
-                  right: 0,
+                  top: 16,
+                  right: 16,
                   zIndex: 1000,
                 }}
                 tabIndex={0}

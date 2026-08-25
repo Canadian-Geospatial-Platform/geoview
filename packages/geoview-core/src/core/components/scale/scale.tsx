@@ -213,8 +213,8 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
           ...memoSxClasses.scaleExpandedContainer,
           // Show focus ring when any child Radio has focus
           '&:has(:focus-visible)': {
-            outline: `2px solid ${theme.palette.common.black}`,
-            outlineOffset: '2px',
+            outline: `3px solid ${theme.palette.common.black}`,
+            outlineOffset: 0,
             borderRadius: '4px',
           },
         }}
@@ -298,7 +298,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
           <Button
             onClick={handleCycleScale}
             type="text"
-            sx={{ ...memoSxClasses.scaleContainer, maxHeight: '40px' }}
+            sx={{ ...memoSxClasses.scaleContainerButton }}
             disableRipple
             className={`interaction-${interaction}`}
             aria-label={t('mapnav.cycleHint')}

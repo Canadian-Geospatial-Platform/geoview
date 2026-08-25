@@ -9,4 +9,10 @@ export const lightThemeColors: IGeoViewColors = {
   bgColor: new GeoViewColorClass('#F9F9F9'),
   primary: new GeoViewColorClass('#0066CC'),
   textColor: new GeoViewColorClass('#000000'),
+
+  /** Light theme focus indicator with black outline and white halo */
+  focusIndicator: {
+    outline: '#000',
+    halo: '#fff',
+  },
 };

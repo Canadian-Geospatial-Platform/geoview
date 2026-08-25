@@ -129,6 +129,7 @@ export const FocusTrapContainer = memo(({
     () => ({
       ...EXIT_BUTTON_STYLES,
       display: activeTrapGeoView ? 'block' : 'none',
+      marginTop: '32px',
     }),
     [activeTrapGeoView]
   );

@@ -69,6 +69,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       justifyContent: 'center',
     },
   },
+  pinnedColumnButton: {
+    '&:focus-visible': {
+      outlineOffset: `-3px`,
+      boxShadow: 'none',
+    },
+  },
   tableHeadCell: {
     '& .MuiCollapse-wrapperInner': {
       '& .MuiBox-root': {
@@ -82,10 +88,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         marginTop: '0.25rem',
         marginBottom: '0.25rem',
       },
-      '& .keyboard-focused': {
+      '&:focus-visible': {
         backgroundColor: theme.palette.action.focus,
         borderRadius: '50%',
-        border: `1px solid black !important`,
+        outlineOffset: `-3px`,
+        boxShadow: 'none',
         '> svg': {
           opacity: 1,
         },
@@ -120,10 +127,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         borderRadius: '50%',
         border: `2px solid ${theme.palette.divider}`,
       },
-      '&.keyboard-focused, &:focus-visible': {
+      '&:focus-visible': {
         backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
         borderRadius: '50%',
-        border: `2px solid black !important`,
+        outlineOffset: `-3px`,
+        boxShadow: 'none',
       },
     },
     '& .Mui-TableHeadCell-Content-Actions': {
@@ -133,9 +141,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         '&:hover': {
           border: `2px solid ${theme.palette.divider}`,
         },
-        '&.keyboard-focused, &:focus-visible': {
+        '&:focus-visible': {
           borderRadius: '50%',
-          border: `2px solid black !important`,
+          outlineOffset: `-3px`,
+          boxShadow: 'none',
         },
       },
     },
@@ -155,9 +164,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   toolbarContainer: {
     justifyContent: 'space-between',
     borderBottom: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(4),
+    padding: theme.spacing(5),
     display: 'flex',
-    gap: theme.spacing(4),
+    gap: theme.spacing(6),
     flexDirection: 'column',
   },
   toolbarRow: {
@@ -165,7 +174,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: theme.spacing(4),
+    gap: theme.spacing(5),
     '& > *': {
       flex: '0 1 auto', // Default: can shrink
       minWidth: 0, // Allow shrinking below content size

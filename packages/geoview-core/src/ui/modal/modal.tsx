@@ -3,7 +3,7 @@ import { Fragment, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import type { DialogProps } from '@mui/material';
+import type { DialogProps, SxProps } from '@mui/material';
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 import { animated } from '@react-spring/web';
@@ -236,14 +236,18 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
         onClose={modal.close}
         container={container}
         style={fadeInAnimation}
-        sx={{
-          ...sxClasses.dialog,
-          '& .MuiDialog-paper': {
-            width: modal.width,
-            height: modal.height,
-            maxWidth: 'none',
-          },
-        }}
+        sx={
+          [
+            sxClasses.dialog,
+            {
+              '& .MuiDialog-paper': {
+                width: modal.width,
+                height: modal.height,
+                maxWidth: 'none',
+              },
+            },
+          ] as SxProps
+        }
         className={`${className && className}`}
         aria-labelledby={ariaLabeledBy}
         aria-describedby={ariaDescribedBy}

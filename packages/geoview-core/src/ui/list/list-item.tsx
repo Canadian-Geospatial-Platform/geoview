@@ -1,6 +1,6 @@
 import type { Ref } from 'react';
 import { forwardRef } from 'react';
-import type { ListItemProps } from '@mui/material';
+import type { ListItemProps, SxProps } from '@mui/material';
 import { ListItem as MaterialListItem } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
@@ -25,11 +25,14 @@ const sxClasses = {
 function ListItemUI(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/list/list-item', props);
 
-  // Get constant from props
-  const { children } = props;
+  // Extract sx prop to merge with internal styles
+  const { children, sx, ...rest } = props;
+
+  // Compose sx as array to support all valid SxProps shapes (object, array, function)
+  const sxMerged = [sxClasses.listItem, sx] as SxProps;
 
   return (
-    <MaterialListItem sx={sxClasses.listItem} {...props} ref={ref}>
+    <MaterialListItem sx={sxMerged} {...rest} ref={ref}>
       {children !== undefined && children}
     </MaterialListItem>
   );

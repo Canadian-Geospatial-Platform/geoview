@@ -1,9 +1,13 @@
 /*
 Hold viewer specific css not inside theme
 */
-.keyboard-focused {
-  border: revert !important;
-}
+
+/*
+ * Note: The .keyboard-focused class is applied by JavaScript (api.ts #manageKeyboardFocus)
+ * when the map element receives Tab focus. This triggers crosshair activation logic and
+ * is used for the map container border workaround below. All other focus indicators use
+ * native :focus-visible and MUI's .Mui-focusVisible.
+ */
 
 /* Work around to have border map container focus */
 [class*='mapContainer'].keyboard-focused {
