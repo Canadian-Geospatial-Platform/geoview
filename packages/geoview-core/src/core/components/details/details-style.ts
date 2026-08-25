@@ -128,9 +128,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   imageButton: {
     background: 'transparent',
-    '&:focus-visible': {
-      border: '2px solid currentColor',
-    },
   },
   coordinateInfoContainer: {
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[600],

@@ -109,7 +109,7 @@ const Sublayer = memo(({ layerPath }: SubLayerProps): JSX.Element => {
 
   // Return the ui
   return (
-    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', p: 0 }}>
+    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
       <FormControlLabel
         sx={sxClasses.formControlLabelFull}
         control={

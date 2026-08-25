@@ -19,9 +19,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'inherit !important',
     color: theme.palette.geoViewColor?.bgColor.dark[650],
     lineHeight: 1.5,
+    minHeight: '33px',
+    paddingBlock: '2px',
     ':hover': {
       backgroundColor: 'transparent !important',
       color: theme.palette.geoViewColor?.bgColor.dark[750],
+    },
+    '&.Mui-focusVisible': {
+      outlineOffset: '0',
+      boxShadow: 'none',
     },
   },
   mousePositionTextContainer: {
