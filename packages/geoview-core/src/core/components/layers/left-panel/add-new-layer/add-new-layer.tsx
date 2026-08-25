@@ -294,8 +294,7 @@ function FileUploadSection({
                 outline: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
                 outlineOffset: '2px',
               },
-              '& textarea.keyboard-focused': {
-                // hide keyboard-focused default black outline (style.css)
+              '& textarea:focus-visible': {
                 // MUI adds a 2px border to the bottom of the input parent on focus.
                 // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
                 border: 'none !important',

@@ -2,6 +2,7 @@ import type { Ref } from 'react';
 import { forwardRef } from 'react';
 import type { ListItemProps } from '@mui/material';
 import { ListItem as MaterialListItem } from '@mui/material';
+import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
 const sxClasses = {
@@ -25,11 +26,14 @@ const sxClasses = {
 function ListItemUI(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/list/list-item', props);
 
-  // Get constant from props
-  const { children } = props;
+  // Extract sx prop to merge with internal styles
+  const { children, sx, ...rest } = props;
+
+  // Compose internal and caller sx props without nesting array-form sx.
+  const sxMerged = composeSxProps(sxClasses.listItem, sx);
 
   return (
-    <MaterialListItem sx={sxClasses.listItem} {...props} ref={ref}>
+    <MaterialListItem sx={sxMerged} {...rest} ref={ref}>
       {children !== undefined && children}
     </MaterialListItem>
   );

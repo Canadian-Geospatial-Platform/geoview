@@ -856,6 +856,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         ICON: icon,
         ZOOM: (
           <IconButton
+            sx={memoSxClasses.pinnedColumnButton}
             data-feature-index={featureIndex}
             color="primary"
             aria-label={`${t('dataTable.zoom')}${feature?.nameField && feature.fieldInfo[feature.nameField] ? ` - ${feature.fieldInfo[feature.nameField]?.value}` : ''}`}
@@ -870,6 +871,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         ),
         DETAILS: (
           <IconButton
+            sx={memoSxClasses.pinnedColumnButton}
             id={featureDetailsButtonId}
             data-feature-index={featureIndex}
             color="primary"
@@ -886,7 +888,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
       return featureInfo;
     });
-  }, [memoFilteredFeatures, mapId, containerType, t, handleZoomClickWrapper, handleDetailsClickWrapper]);
+  }, [memoFilteredFeatures, mapId, containerType, t, handleZoomClickWrapper, handleDetailsClickWrapper, memoSxClasses]);
 
   // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.

@@ -112,7 +112,7 @@ export default function BasemapSelect(): JSX.Element {
     return (
       <List key="basemapButtons" role="group" aria-label={t('mapnav.basemap')}>
         {!noDefault && (
-          <ListItem>
+          <ListItem sx={memoSxClasses.listItem}>
             <Button
               id={`${mapId}-button-default`}
               type="textWithIcon"
@@ -127,7 +127,7 @@ export default function BasemapSelect(): JSX.Element {
             </Button>
           </ListItem>
         )}
-        <ListItem>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             id={`${mapId}-button-transport`}
             type="textWithIcon"
@@ -141,7 +141,7 @@ export default function BasemapSelect(): JSX.Element {
             {t('basemaps.transport')}
           </Button>
         </ListItem>
-        <ListItem>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             id={`${mapId}-button-imagery`}
             type="textWithIcon"
@@ -155,7 +155,7 @@ export default function BasemapSelect(): JSX.Element {
             {t('basemaps.imagery')}
           </Button>
         </ListItem>
-        <ListItem>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             id={`${mapId}-button-simple`}
             type="textWithIcon"
@@ -169,7 +169,7 @@ export default function BasemapSelect(): JSX.Element {
             {t('basemaps.simple')}
           </Button>
         </ListItem>
-        <ListItem>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             id={`${mapId}-button-nogeom`}
             type="textWithIcon"

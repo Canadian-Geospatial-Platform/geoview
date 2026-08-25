@@ -96,6 +96,12 @@ export const geoViewColors: IGeoViewColors = {
   warning: new GeoViewColorClass('#ed6c02'),
   info: new GeoViewColorClass('#2e7d32'),
   grey: new GeoViewColorClass('#9e9e9e'),
+
+  /** Default focus indicator for WCAG compliance (geo.ca theme baseline) */
+  focusIndicator: {
+    outline: '#000',
+    halo: '#fff',
+  },
 };
 
 const fontSizes: IGeoViewFontSizes = {
