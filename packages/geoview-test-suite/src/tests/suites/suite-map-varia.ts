@@ -94,8 +94,8 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait until the projection switch finishes before continuing manipulating the map
     await pProjection;
 
-    // Test zoom to extent
-    const pZoomToExtent = this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88, 51, -83, 53]);
+    // Test zoom to extent. The expected extent reflects the corrected fixed-height map shell after collapsed footer sizing is applied.
+    const pZoomToExtent = this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88, 50, -82, 53]);
 
     // Wait until the zoom finishes before continuing manipulating the map
     await pZoomToExtent;

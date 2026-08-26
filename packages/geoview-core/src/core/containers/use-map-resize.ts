@@ -9,6 +9,7 @@ interface UseMapResizeProps {
   isFooterBarOpen: boolean;
   footerPanelResizeValue: number;
   isFooterBar: boolean;
+  collapsedFooterHeight: number;
   geoviewElement: HTMLElement;
   appHeight: number;
 }
@@ -29,6 +30,7 @@ export const useMapResize = ({
   isFooterBarOpen,
   footerPanelResizeValue,
   isFooterBar,
+  collapsedFooterHeight,
   geoviewElement,
   appHeight,
 }: UseMapResizeProps): TypeUseMapResize => {
@@ -44,8 +46,10 @@ export const useMapResize = ({
       return;
     }
 
+    const availableMapHeight = Math.max(appHeight - (isFooterBar ? collapsedFooterHeight : 0), 0);
+
     // default values as set by the height of the div
-    let containerHeight = `${appHeight}px`;
+    let containerHeight = `${availableMapHeight}px`;
     let containerFlex = '';
     let visibility = 'visible';
 
@@ -71,7 +75,7 @@ export const useMapResize = ({
     mapShellContainerRef.current.style.visibility = visibility;
     mapShellContainerRef.current.style.height = containerHeight;
     mapShellContainerRef.current.style.flex = containerFlex;
-  }, [footerPanelResizeValue, isFooterBarOpen, isMapFullScreen, appHeight]);
+  }, [footerPanelResizeValue, isFooterBar, isFooterBarOpen, isMapFullScreen, appHeight, collapsedFooterHeight]);
 
   /**
    * Adjusts geoviewElement height to accommodate the footer bar.

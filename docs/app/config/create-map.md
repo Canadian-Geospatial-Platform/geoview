@@ -40,6 +40,7 @@ Specifically, it looks for `<div>` elements with the `geoview-map` class that id
 - `cgpv.init()` finds all such elements in the DOM.
 - For each, it reads the configuration and initializes a map viewer instance inside the div.
 - The initialization process uses the provided attributes to determine map settings, language, and data sources.
+- When the container has an explicit CSS height, that height applies to the full collapsed GeoView viewer. If a footer bar is configured, the collapsed footer header is included in that height; only expanded footer panel content may make the viewer taller.
 
 **Tip:**
 Make sure your map container divs are present in the DOM before calling `cgpv.init()`, and that they have the required attributes for your use case.
@@ -80,7 +81,7 @@ The JSON file should have the same structure as the inline `data-config` value.
 
 #### `data-footer-height`
 
-The `data-footer-height` attribute allows for manually setting the height of the footer bar so that it is not default 600px or the same height as the map. The value can be any css height value although pixels (px) and view height (vh) are recommended.
+The `data-footer-height` attribute allows for manually setting the expanded footer panel height so that it is not default 600px or the same height as the map. The value can be any css height value although pixels (px) and view height (vh) are recommended. This attribute does not set the height of the collapsed footer header; the collapsed header is automatically accounted for inside the map container's explicit height.
 
 ```html
 <div

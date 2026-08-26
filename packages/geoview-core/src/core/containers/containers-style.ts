@@ -78,6 +78,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     },
   },
   shell: {
+    boxSizing: 'border-box',
     scrollMarginTop: '20px',
     display: 'flex',
     flexDirection: 'column',
@@ -90,6 +91,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     height: '100%',
   },
   mapShellContainer: {
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'row',
     height: `${appHeight}px`,
@@ -101,6 +103,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     containerName: 'map',
   },
   mapContainer: {
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

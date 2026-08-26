@@ -99,9 +99,11 @@ export function Shell(props: ShellProps): JSX.Element {
   const geoviewElement = useStoreAppGeoviewHTMLElement();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
+  const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
 
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
+  const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
 
   /**
    * Computes the style classes for the shell container.
@@ -116,7 +118,8 @@ export function Shell(props: ShellProps): JSX.Element {
     isMapFullScreen,
     isFooterBarOpen: isOpen,
     footerPanelResizeValue,
-    isFooterBar: !!geoviewConfig?.footerBar,
+    isFooterBar,
+    collapsedFooterHeight,
     geoviewElement,
     appHeight,
   });
@@ -339,6 +342,62 @@ export function Shell(props: ShellProps): JSX.Element {
     return undefined;
   }, [circularProgressActive, t]);
 
+  /**
+   * Measures the collapsed footer header so fixed-height maps include it in the requested viewer height.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - collapsed footer height measurement', isFooterBar, isOpen, mapId);
+
+    if (!isFooterBar) {
+      setCollapsedFooterHeight(0);
+      return undefined;
+    }
+
+    const footerContainer = document.getElementById(`${mapId}-tabsContainer`);
+    const footerHeader = document.getElementById(`${mapId}-footerbar-header`);
+    if (!footerHeader || !footerContainer) {
+      setCollapsedFooterHeight(0);
+      return undefined;
+    }
+
+    const updateCollapsedFooterHeight = (): void => {
+      const measuredFooterElement = isOpen ? footerHeader : footerContainer;
+      const nextHeight = Math.ceil(measuredFooterElement.getBoundingClientRect().height);
+      setCollapsedFooterHeight((previousHeight) => (previousHeight === nextHeight ? previousHeight : nextHeight));
+    };
+
+    updateCollapsedFooterHeight();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+
+    const resizeObserver = new ResizeObserver(updateCollapsedFooterHeight);
+    resizeObserver.observe(footerContainer);
+    resizeObserver.observe(footerHeader);
+
+    return (): void => {
+      resizeObserver.disconnect();
+    };
+  }, [isFooterBar, isOpen, mapId]);
+
+  /**
+   * Updates the OpenLayers map size after shell height calculations change.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect(
+      'SHELL - update OpenLayers size after layout change',
+      appHeight,
+      collapsedFooterHeight,
+      isMapFullScreen,
+      isOpen
+    );
+
+    mapViewer.map?.updateSize();
+  }, [mapViewer, appHeight, collapsedFooterHeight, isMapFullScreen, isOpen]);
+
   return (
     <Box sx={memoSxClasses.all}>
       <Link
@@ -396,7 +455,7 @@ export function Shell(props: ShellProps): JSX.Element {
               onClose={handleSnackBarClose}
             />
           </Box>
-          {geoviewConfig?.footerBar && interaction === 'dynamic' && <FooterBar api={mapViewer.footerBarApi} />}
+          {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
             <Modal
               key={modalId}

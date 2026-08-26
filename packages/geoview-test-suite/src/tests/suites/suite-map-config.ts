@@ -69,6 +69,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Test fixed-height map layout without footer bar
+    const pFixedHeightWithoutFooterBar = this.#mapConfigTester.testFixedHeightWithoutFooterBar();
+    await pFixedHeightWithoutFooterBar;
+
+    // Test fixed-height map layout with collapsed footer bar
+    const pFixedHeightWithCollapsedFooterBar = this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
+    await pFixedHeightWithCollapsedFooterBar;
+
     // Test data table pre-loaded in footer bar
     const pDataTableInFooterBar = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
     await pDataTableInFooterBar;
