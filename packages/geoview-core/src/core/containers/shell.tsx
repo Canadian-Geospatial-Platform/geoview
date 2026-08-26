@@ -253,13 +253,37 @@ export function Shell(props: ShellProps): JSX.Element {
     document.getElementById(`mapTargetElement-${mapId}`)?.focus();
   }, [mapId, uiController]);
 
+  /**
+   * Handles navigation from the top skip link to the bottom skip link.
+   */
+  const handleSkipToBottomLink = useCallback((): void => {
+    handleSkipLinkClick(`bottomlink-${mapViewer.mapId}`);
+  }, [handleSkipLinkClick, mapViewer.mapId]);
+
+  /**
+   * Handles navigation from the main-content skip link to the map.
+   */
+  const handleSkipToMap = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>): void => {
+      event.preventDefault();
+      handleSkipToMainContent();
+    },
+    [handleSkipToMainContent]
+  );
+
+  /**
+   * Handles navigation from the bottom skip link to the top skip link.
+   */
+  const handleSkipToTopLink = useCallback((): void => {
+    handleSkipLinkClick(`toplink-${mapViewer.mapId}`);
+  }, [handleSkipLinkClick, mapViewer.mapId]);
+
   // #endregion HANDLERS
 
   /**
    * Registers map viewer event listeners on mount and cleans up on unmount.
    */
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('SHELL - mount');
 
     // listen to Notifications event when app wants to show message
@@ -279,7 +303,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
     return () => {
       mapViewer.offMapComponentRemoved(handleMapRemoveComponent);
-      mapViewer.onMapComponentAdded(handleMapAddComponent);
+      mapViewer.offMapComponentAdded(handleMapAddComponent);
       mapViewer.modal.offModalClosed(handleModalClose);
       mapViewer.modal.offModalOpened(handleModalOpen);
       mapViewer.notifications.offSnackbarOpen(handleSnackBarOpen);
@@ -290,7 +314,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * Announces when the map finishes loading, then clears the announcement.
    */
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('SHELL - map loaded announcement', mapLoaded);
 
     // Capture previous value before updating
@@ -318,7 +341,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * Announces when processing completes, then clears the announcement.
    */
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('SHELL - processing complete announcement', circularProgressActive);
 
     // Capture previous value before updating
@@ -346,14 +368,15 @@ export function Shell(props: ShellProps): JSX.Element {
    * Measures the collapsed footer header so fixed-height maps include it in the requested viewer height.
    */
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect('SHELL - collapsed footer height measurement', isFooterBar, isOpen, mapId);
 
+    // Static maps do not render a footer bar, so no footer height belongs in the shell size calculation.
     if (!isFooterBar) {
       setCollapsedFooterHeight(0);
       return undefined;
     }
 
+    // Wait for both footer elements because the measured element depends on whether the panel is open.
     const footerContainer = document.getElementById(`${mapId}-tabsContainer`);
     const footerHeader = document.getElementById(`${mapId}-footerbar-header`);
     if (!footerHeader || !footerContainer) {
@@ -362,6 +385,7 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     const updateCollapsedFooterHeight = (): void => {
+      // Use the full container while expanded and the header alone while collapsed.
       const measuredFooterElement = isOpen ? footerHeader : footerContainer;
       const nextHeight = Math.ceil(measuredFooterElement.getBoundingClientRect().height);
       setCollapsedFooterHeight((previousHeight) => (previousHeight === nextHeight ? previousHeight : nextHeight));
@@ -373,6 +397,7 @@ export function Shell(props: ShellProps): JSX.Element {
       return undefined;
     }
 
+    // Recalculate when either the footer panel or its header changes size.
     const resizeObserver = new ResizeObserver(updateCollapsedFooterHeight);
     resizeObserver.observe(footerContainer);
     resizeObserver.observe(footerHeader);
@@ -386,7 +411,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * Updates the OpenLayers map size after shell height calculations change.
    */
   useEffect(() => {
-    // Log
     logger.logTraceUseEffect(
       'SHELL - update OpenLayers size after layout change',
       appHeight,
@@ -405,7 +429,7 @@ export function Shell(props: ShellProps): JSX.Element {
         href={`#bottomlink-${mapViewer.mapId}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
-        onClick={() => handleSkipLinkClick(`bottomlink-${mapViewer.mapId}`)}
+        onClick={handleSkipToBottomLink}
       >
         {t('keyboardnav.start')}
       </Link>
@@ -430,10 +454,7 @@ export function Shell(props: ShellProps): JSX.Element {
               href={`#main-map-${mapViewer.mapId}`}
               tabIndex={0}
               sx={{ ...memoSxClasses.skip, top: '0px' }}
-              onClick={(e) => {
-                e.preventDefault();
-                handleSkipToMainContent();
-              }}
+              onClick={handleSkipToMap}
             >
               {t('keyboardnav.map')}
             </Link>
@@ -482,7 +503,7 @@ export function Shell(props: ShellProps): JSX.Element {
         href={`#toplink-${mapViewer.mapId}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
-        onClick={() => handleSkipLinkClick(`toplink-${mapViewer.mapId}`)}
+        onClick={handleSkipToTopLink}
       >
         {t('keyboardnav.end')}
       </Link>

@@ -172,6 +172,8 @@ cgpv.init();
 - The **map element** is keyboard-focusable (`tabIndex=0`). Ctrl+M focuses it and activates the crosshair.
 - The **viewer** renders the full shell: app bar with all tabs, footer bar, nav bar, map info bar.
 
+**Fixed-height viewer sizing:** When a `geoview-map` div has an explicit CSS height, or when `createMapFromConfig()` / `createMapFromConfigFast()` receives a height, that height is the full collapsed GeoView viewer height, not just the map shell or OpenLayers canvas height. If a dynamic footer bar exists, `Shell` measures the collapsed footer chrome and `useMapResize()` subtracts that height from the map shell height. The viewer may exceed the configured height only when the footer panel is expanded. Keep `box-sizing: border-box` on the viewer/shell/map containers so border thickness does not create small fixed-height overruns.
+
 **Map info bar** — The map info bar (attribution, scale, rotation display) is **separate from the footer bar** and has no schema configuration. It always renders automatically:
 
 - **Dynamic mode**: Displays attribution, scale, and rotation value.
