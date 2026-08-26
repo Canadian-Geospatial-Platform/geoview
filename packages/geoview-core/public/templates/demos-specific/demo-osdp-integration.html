@@ -32,10 +32,11 @@
       <h4 id="HMap1">OSDP Integration</h4>
     </div>
 
-    <div id="mapSection">
+    <div id="mapSection" style="display: grid; min-height: 700px">
       <div
         id="Map1"
         class="geoview-map"
+        style="height: 100%"
         data-lang="fr"
         data-config="{
         'map': {
@@ -68,6 +69,9 @@
         'corePackages': [],
         'serviceUrls': {
           'metadataUrl': 'https://osdp-psdo.canada.ca/dp/en/search/metadata/NRCAN-FGP-1-'
+        },
+        'globalSettings': {
+          'canRemoveSublayers': false
         },
         'theme': 'geo.ca'
       }"
@@ -374,6 +378,9 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         corePackages: [],
         serviceUrls: {
           metadataUrl: 'https://osdp-psdo.canada.ca/dp/en/search/metadata/NRCAN-FGP-1-',
+        },
+        globalSettings: {
+          canRemoveSublayers: false
         },
         theme: 'geo.ca',
       };

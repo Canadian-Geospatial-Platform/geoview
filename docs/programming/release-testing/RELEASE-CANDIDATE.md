@@ -144,6 +144,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
 - Fixed initial extent being slightly off vertically vs the home view extent, causing the home view button to shift the map (#3562)
+- Fixed configured `geoview-map` height being exceeded when the collapsed footer bar is rendered (#3601)
 - Fixed CESI layer in outlier-style.html template to point to a valid layer id (#3562)
 - Fixed Permafrost by Ecoprovince in outlier-metadata template to point to a valid layer URL (#3562)
 - Fixed broken layer in performance.json template demo (#3562)
@@ -243,6 +244,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Updated test for JSON behind CORS (URL blocked by NRCan) (#3562)
 - Configured new proxy in test-suite for upcoming proxy features (#3562)
 - New `RUN_DEBUG_ONLY` flag for isolating test execution during development (#3562)
+- Added fixed-height map layout tests for maps with and without a footer bar (#3601)
 
 ## Config Schema Changes
 
@@ -252,8 +254,8 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 900    | 901   |
-| Automated (A) | 59     | 60    |
+| Total tests   | 901    | 903   |
+| Automated (A) | 60     | 62    |
 | Candidate (C) | 169    | 169   |
 | Manual (M)    | 672    | 672   |
 
