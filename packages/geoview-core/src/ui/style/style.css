@@ -11,6 +11,7 @@ Hold viewer specific css not inside theme
 }
 
 .geoview-map {
+  box-sizing: border-box;
   position: relative !important;
 }
 

@@ -15,6 +15,7 @@ import {
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/states/data-table-state';
 import { getStoreLayerBounds, getStoreLayerControls, getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import {
   getStoreMapPointMarkers,
   getStoreMapConfigOverviewMap,
@@ -23,6 +24,17 @@ import {
   getStoreMapNorthArrow,
 } from 'geoview-core/core/stores/states/map-state';
 import { Projection } from 'geoview-core/geo/utils/projection';
+
+/** Fixed map height used by map config layout tests. */
+const MAP_CONFIG_TEST_HEIGHT = 500;
+
+/** Height measurements for fixed-height map layout tests. */
+type TypeMapHeightMeasurements = {
+  /** Height of the root GeoView map element. */
+  geoviewMapHeight: number;
+  /** Height of the rendered collapsed footer chrome. */
+  footerChromeHeight: number;
+};
 
 /**
  * Main Map Config testing class.
@@ -35,6 +47,64 @@ export class MapConfigTester extends GVAbstractTester {
    */
   override getName(): string {
     return 'MapConfigTester';
+  }
+
+  /**
+   * Tests that a fixed-height map without a footer bar keeps the requested viewer height.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testFixedHeightWithoutFooterBar(): Promise<Test<TypeMapHeightMeasurements>> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test fixed-height map without footer bar keeps requested viewer height...',
+      async (test) => {
+        test.addStep('Creating fixed-height map with no footer bar...');
+        await this.#helperCreateMapConfig(test, mapId, ['footerBar', { tabs: { core: [] } }]);
+
+        test.addStep('Waiting for layout effects to settle...');
+        await delay(TIMEOUT.tabsContainerResize);
+
+        return MapConfigTester.#measureMapHeights(mapId);
+      },
+      (test, result) => {
+        test.addStep('Verifying root GeoView map height matches requested height...');
+        Test.assertIsEqual(result.geoviewMapHeight, MAP_CONFIG_TEST_HEIGHT);
+
+        test.addStep('Verifying there is no collapsed footer chrome height...');
+        Test.assertIsEqual(result.footerChromeHeight, 0);
+      }
+    );
+  }
+
+  /**
+   * Tests that a fixed-height map with a collapsed footer bar keeps the requested viewer height.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testFixedHeightWithCollapsedFooterBar(): Promise<Test<TypeMapHeightMeasurements>> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test fixed-height map with collapsed footer bar keeps requested viewer height...',
+      async (test) => {
+        test.addStep('Creating fixed-height map with default collapsed footer bar...');
+        await this.#helperCreateMapConfig(test, mapId);
+
+        test.addStep('Waiting for collapsed footer measurement to settle...');
+        await delay(TIMEOUT.tabsContainerResize);
+
+        return MapConfigTester.#measureMapHeights(mapId);
+      },
+      (test, result) => {
+        test.addStep('Verifying root GeoView map height matches requested height...');
+        Test.assertIsEqual(result.geoviewMapHeight, MAP_CONFIG_TEST_HEIGHT);
+
+        test.addStep('Verifying collapsed footer chrome is rendered...');
+        if (result.footerChromeHeight <= 0) Test.assertFail('Collapsed footer chrome height should be greater than 0.');
+      }
+    );
   }
 
   /**
@@ -1915,7 +1985,10 @@ export class MapConfigTester extends GVAbstractTester {
     };
 
     // Apply overrides - normalize to array format then apply each path-value pair
-    const overridesArray = Array.isArray(overrides[0]) ? (overrides as [string, unknown][]) : [overrides as [string, unknown]];
+    let overridesArray: [string, unknown][] = [];
+    if (overrides.length > 0) {
+      overridesArray = Array.isArray(overrides[0]) ? (overrides as [string, unknown][]) : [overrides as [string, unknown]];
+    }
     overridesArray.forEach(([path, value]) => {
       MapConfigTester.#setValueByPath(baseConfig, path, value);
     });
@@ -1958,5 +2031,23 @@ export class MapConfigTester extends GVAbstractTester {
     } else {
       current[finalKey] = value;
     }
+  }
+
+  /**
+   * Measures fixed-height map layout elements.
+   *
+   * @param mapId - The map identifier
+   * @returns The measured map layout heights
+   */
+  static #measureMapHeights(mapId: string): TypeMapHeightMeasurements {
+    const geoviewMapElement = document.getElementById(mapId) ?? undefined;
+    const footerContainerElement = document.getElementById(`${mapId}-tabsContainer`) ?? undefined;
+
+    Test.assertIsDefined('geoviewMapElement', geoviewMapElement);
+
+    return {
+      geoviewMapHeight: Math.round(geoviewMapElement.getBoundingClientRect().height),
+      footerChromeHeight: footerContainerElement ? Math.round(footerContainerElement.getBoundingClientRect().height) : 0,
+    };
   }
 }
