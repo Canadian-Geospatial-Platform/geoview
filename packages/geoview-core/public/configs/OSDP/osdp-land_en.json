@@ -102,6 +102,9 @@
   "corePackages": [
     "swiper"
   ],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca",
   "corePackagesConfig": [
     {

@@ -54,10 +54,14 @@
       "core": [
         "layers",
         "data-table",
-        "time-slider"
+        "time-slider",
+        "geochart"
       ]
     }
   },
   "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca"
 }

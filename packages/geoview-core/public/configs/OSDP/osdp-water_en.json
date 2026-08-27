@@ -66,5 +66,8 @@
     }
   },
   "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca"
 }
