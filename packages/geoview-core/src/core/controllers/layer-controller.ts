@@ -150,9 +150,6 @@ export class LayerController extends AbstractMapViewerController {
   /** Holds all the layers in process of being deleted from the map */
   #layersBeingDeleted: Record<string, LayerDeletionJob> = {};
 
-  /** Flag indicating if the controller is currently handling layer item visibility adjustments (batch processing) */
-  #isBatchingLayerItemsVisibility = false;
-
   /** The bounded reference to the handle map layers processed event */
   #boundedHandleMapLayersProcessed: MapLayersProcessedDelegate;
 
@@ -1532,61 +1529,18 @@ export class LayerController extends AbstractMapViewerController {
    * @throws {LayerStyleGeometryNotFoundError} When the geometry type of an item doesn't match any geometry type in the layer style configuration (propagated from `setItemVisibility()`)
    */
   async setAllItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<void> {
-    // TODO: REFACTOR IMPORTANT - Move setAllItemsVisibility to the domain eventually and move the this.#isBatchingLayerItemsVisibility flag in the domain as well.
     // Get the layer
     const layer = this.getGeoviewLayerRegular(layerPath);
 
-    // Set layer to visible
-    layer.setVisible(true);
+    // Delegate the batch style mutation to the domain/layer and keep controller responsibilities
+    // limited to store synchronization and controller-level event emission.
+    const itemsToggled = await this.#layerDomain.setAllLayerItemsVisibility(layerPath, visible, waitForRender);
 
-    // Get the particular object holding the items array itself from the store
-    const layerStore = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)!;
-
-    const itemsToggled: TypeLegendItem[] = [];
-    try {
-      // Flag that the controller is handling the item visibility process for now
-      this.#isBatchingLayerItemsVisibility = true;
-
-      // For each
-      const promisesVisibility: Promise<void>[] = [];
-      layerStore.items.forEach((item) => {
-        // Set the item visibility and send waitForRender to false to not wait for each item to render separately.
-        const promiseVis = this.setItemVisibility(layerPath, item, visible, false);
-
-        // If the visibility state indeed changed
-        if (item.isVisible !== visible) {
-          // Add to toggled items array
-          itemsToggled.push(item);
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        item.isVisible = visible;
-
-        // Add the promise
-        promisesVisibility.push(promiseVis);
-      });
-
-      // Wait for all promises (should be instant in this batch calling context)
-      await Promise.all(promisesVisibility);
-    } finally {
-      // Reset the flag
-      this.#isBatchingLayerItemsVisibility = false;
-    }
-
-    // Now that the loop is done for the batch mode, update the store as well
-    layerStore.items.forEach((item) => {
+    // Update the store using the changed items returned by the domain batch.
+    itemsToggled.forEach((item) => {
       // Save in the store
       setStoreLayerItemVisibility(this.getMapId(), layerPath, item, visible, layer.getLayerFilters().getClassFilter());
-    });
 
-    // If must wait for the renderer
-    if (waitForRender) {
-      // Get the layer
-      await layer.waitForRender();
-    }
-
-    // For each visibility state that truly changed
-    itemsToggled.forEach((item) => {
       // Emit event for each item visibility changed
       this.#emitLayerItemVisibilityChanged({ layer, item, visible });
     });
@@ -2457,14 +2411,6 @@ export class LayerController extends AbstractMapViewerController {
    * @param event - The event containing the layer and new visibility state
    */
   #handleDomainLayerItemVisibilityChanged(sender: LayerDomain, event: DomainLayerItemVisibilityChangedEvent): void {
-    // Check if we're controlling the visibility adjustments
-    if (this.#isBatchingLayerItemsVisibility) {
-      // Ignore - we initiated this by batch process
-      return;
-    }
-
-    // Here, the item visibility was set on the GV Layer directly, we're not in batch mode.
-
     // Get the layer path
     const layerPath = event.layer.getLayerPath();
 
