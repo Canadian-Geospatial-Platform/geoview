@@ -29,6 +29,9 @@ export abstract class AbstractTestSuite {
   /** Indicates whether the plugin is running on a VPN */
   #isRunningOnVPN = false;
 
+  /** Indicates whether the plugin is running the heavy tests */
+  #isRunningHeavyTests = true;
+
   // Indicates if the test suite should only run the DEBUG tests
   DEBUG_RUN_ONLY_DEBUG_FUNCTION = false;
 
@@ -247,6 +250,24 @@ export abstract class AbstractTestSuite {
    */
   setIsRunningOnVPN(isRunningOnVPN: boolean): void {
     this.#isRunningOnVPN = isRunningOnVPN;
+  }
+
+  /**
+   * Gets whether the test suite is running heavy tests.
+   *
+   * @returns Whether the environment is running heavy tests
+   */
+  getIsRunningHeavyTests(): boolean {
+    return this.#isRunningHeavyTests;
+  }
+
+  /**
+   * Sets whether the test suite is running heavy tests.
+   *
+   * @param isHeavyTests - Whether the environment is running heavy tests
+   */
+  setIsRunningHeavyTests(isRunningHeavyTests: boolean): void {
+    this.#isRunningHeavyTests = isRunningHeavyTests;
   }
 
   // #endregion PUBLIC METHODS
