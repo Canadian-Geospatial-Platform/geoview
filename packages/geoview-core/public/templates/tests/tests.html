@@ -204,6 +204,12 @@
         <span class="toggle-label">VPN</span>
         <span id="vpnStatus" class="toggle-status off">OFF</span>
       </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)" />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">Heavy tests</span>
+        <span id="heavyTestsStatus" class="toggle-status off">OFF</span>
+      </label>
     </div>
 
     <!-- Group Navigation -->
@@ -1313,7 +1319,7 @@
         const htmlSection = testSuiteCreateTable(plugin);
 
         // Create the table html for individual map tab
-        document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(htmlSection);
+        document.getElementById('testSuiteTable-' + mapViewer.mapId).appendChild(htmlSection);
 
         // Create a second table for the "Run All Tests" tab with modified IDs
         const htmlSectionClone = testSuiteCreateTable(plugin);
@@ -1333,10 +1339,23 @@
         }
 
         // Append to the "Run All Tests" collapsible section
-        const runAllResultsId = 'runAll-' + plugin.mapViewer.mapId + '-results';
+        const runAllResultsId = 'runAll-' + mapViewer.mapId + '-results';
         const runAllContainer = document.getElementById(runAllResultsId);
         if (runAllContainer) {
           runAllContainer.appendChild(htmlSectionClone);
+        }
+
+        // Update the VPN and heavy tests toggle buttons based on the plugin's current state
+        const btnRunningVPN = document.getElementById('vpnToggle');
+        if (btnRunningVPN && plugin.getIsRunningOnVPN()) {
+          btnRunningVPN.checked = true;
+          toggleVPN(true);
+        }
+
+        const btnRunningHeavyTests = document.getElementById('heavyTestsToggle');
+        if (btnRunningHeavyTests && plugin.getIsRunningHeavyTests()) {
+          btnRunningHeavyTests.checked = true;
+          toggleHeavyTests(true);
         }
 
         // Hook the test update to update BOTH tables
@@ -1378,7 +1397,7 @@
         Object.keys(testSuitesPlugins).forEach((mapId) => {
           const plugin = testSuitesPlugins[mapId];
           const statsSpan = document.getElementById('stats-' + mapId);
-          if (statsSpan) {
+          if (plugin && statsSpan) {
             const running = plugin.getTestsRunning();
             const doneSuccess = plugin.getTestsDoneSuccess();
             const doneSkipped = plugin.getTestsDoneSkipped();
@@ -1447,17 +1466,30 @@
         });
       }
 
-      function toggleVPN(checked) {
+      function toggleOption(checked, statusId, setPluginOptionCallback) {
         // Update the status badge
-        const status = document.getElementById('vpnStatus');
+        const status = document.getElementById(statusId);
         if (status) {
           status.textContent = checked ? 'ON' : 'OFF';
           status.className = 'toggle-status ' + (checked ? 'on' : 'off');
         }
 
-        // Set the VPN flag on all registered test suites
+        // Apply the option flag on all registered test suites
         Object.keys(testSuitesPlugins).forEach((mapId) => {
-          testSuitesPlugins[mapId].setIsRunningOnVPN(checked);
+          const plugin = testSuitesPlugins[mapId];
+          if (plugin) setPluginOptionCallback(plugin, checked);
+        });
+      }
+
+      function toggleVPN(checked) {
+        toggleOption(checked, 'vpnStatus', (plugin, value) => {
+          plugin.setIsRunningOnVPN(value);
+        });
+      }
+
+      function toggleHeavyTests(checked) {
+        toggleOption(checked, 'heavyTestsStatus', (plugin, value) => {
+          plugin.setIsRunningHeavyTests(value);
         });
       }
 
