@@ -380,6 +380,19 @@ class TestSuitePlugin extends AbstractPlugin {
   getTestsDoneAllSuccessAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAllSuccess();
   }
+
+  /**
+   * Gets whether the test suites are configured to run in VPN mode.
+   *
+   * Returns the flag from the first registered suite as the canonical source,
+   * or false when no suites are registered.
+   *
+   * @returns Whether the test suites are running in VPN mode
+   */
+  getIsRunningOnVPN(): boolean {
+    return this.testSuites[0]?.getIsRunningOnVPN() ?? false;
+  }
+
   /**
    * Sets the VPN flag on all registered test suites.
    *
@@ -389,6 +402,30 @@ class TestSuitePlugin extends AbstractPlugin {
     // Set the running on VPN flag for all all test suites
     this.testSuites.forEach((testSuite) => {
       testSuite.setIsRunningOnVPN(runningOnVPN);
+    });
+  }
+
+  /**
+   * Gets whether the test suites are configured to run heavy tests.
+   *
+   * Returns the flag from the first registered suite as the canonical source,
+   * or false when no suites are registered.
+   *
+   * @returns Whether the test suites are running heavy tests
+   */
+  getIsRunningHeavyTests(): boolean {
+    return this.testSuites[0]?.getIsRunningHeavyTests() ?? false;
+  }
+
+  /**
+   * Sets the heavy tests flag on all registered test suites.
+   *
+   * @param runningHeavyTests - Whether the test environment is running heavy tests
+   */
+  setIsRunningHeavyTests(runningHeavyTests: boolean): void {
+    // Set the running heavy tests flag for all test suites
+    this.testSuites.forEach((testSuite) => {
+      testSuite.setIsRunningHeavyTests(runningHeavyTests);
     });
   }
 

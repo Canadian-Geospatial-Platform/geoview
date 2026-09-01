@@ -668,18 +668,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
    */
   async setStyleItemVisibility(item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
-    // Get the style config
-    const geometryStyleConfig = this.getStyle()?.[item.geometryType];
-
-    // If the style was not found, throw
-    if (!geometryStyleConfig) throw new LayerStyleGeometryNotFoundError(this.getLayerName(), item.geometryType);
-
-    // Get all styles with the label matching the name of the clicked item and update their visibility
-    const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
-    styleInfos?.forEach((styleInfo) => {
-      // eslint-disable-next-line no-param-reassign
-      styleInfo.visible = visible;
-    });
+    // Apply the visibility mutation using the same item-matching semantics as batch updates.
+    this.#setStyleItemVisibilityInternal(item, visible);
 
     // Also refresh the filter class, this will force a re-render of the layer source (this is required if there are classes)
     this.#setLayerFiltersClass();
@@ -692,6 +682,70 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       // Wait for the render to complete
       await this.waitForRender();
     }
+  }
+
+  /**
+   * Updates the visibility of all style items on the layer and triggers a single re-render.
+   *
+   * This method walks the layer style configuration directly, updates every unique legend item
+   * visibility in one batch, refreshes the class filter once, and optionally waits for the next
+   * render cycle. It intentionally does not emit per-item visibility events because callers use
+   * the returned changed items list to synchronize UI/store state as a single batch.
+   *
+   * @param visible - Whether all style items should be visible
+   * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
+   * @returns A promise that resolves with the legend items whose visibility actually changed
+   */
+  async setAllStyleItemsVisibility(visible: boolean, waitForRender: boolean): Promise<TypeLegendItem[]> {
+    // Work against the effective style (runtime override when present, config fallback otherwise).
+    const styleConfig = this.getStyle();
+    // Return payload consumed by callers (domain/controller) to synchronize store/UI in one pass.
+    const changedItems: TypeLegendItem[] = [];
+    // De-duplicate by geometry+label so a repeated style entry is toggled and reported only once.
+    const seenKeys = new Set<string>();
+
+    // No style means nothing to mutate; optional render wait keeps API behavior consistent.
+    if (!styleConfig) {
+      if (waitForRender) await this.waitForRender();
+      return changedItems;
+    }
+
+    Object.entries(styleConfig).forEach(([geometryType, geometryStyleConfig]) => {
+      geometryStyleConfig?.info.forEach((styleInfo) => {
+        const { label } = styleInfo;
+        // Style entries without labels are not representable as legend items, skip them.
+        if (!label) return;
+
+        // Match identity semantics used by the legend: one item per geometry type + label pair.
+        const itemKey = `${geometryType}/${label}`;
+
+        if (seenKeys.has(itemKey)) return;
+
+        const item: TypeLegendItem = {
+          geometryType: geometryType as TypeStyleGeometry,
+          name: label,
+          isVisible: visible,
+          icon: null,
+        };
+
+        // Reuse the single-item mutation path so batch and non-batch behavior stay aligned.
+        if (this.#setStyleItemVisibilityInternal(item, visible)) {
+          // Report only items that truly changed state.
+          changedItems.push(item);
+        }
+
+        seenKeys.add(itemKey);
+      });
+    });
+
+    // Recompute class filter once after all mutations to avoid repeated re-renders during batch updates.
+    this.#setLayerFiltersClass();
+
+    if (waitForRender) {
+      await this.waitForRender();
+    }
+
+    return changedItems;
   }
 
   /**
@@ -1690,6 +1744,37 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Redirect
     this.#setLayerFilters(curLayerFilter, 'initial');
+  }
+
+  /**
+   * Updates a single style item's visibility in the layer style configuration.
+   *
+   * Matches the same legend-item semantics used by the controller path: geometry type first,
+   * then all style infos whose label matches the item name.
+   *
+   * @param item - The legend/style item whose visibility will be updated
+   * @param visible - Whether the style item should be visible
+   * @returns Whether at least one matched style entry changed visibility
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
+   */
+  #setStyleItemVisibilityInternal(item: TypeLegendItem, visible: boolean): boolean {
+    // First constrain the lookup by geometry bucket; mismatched geometry is considered a configuration error.
+    const geometryStyleConfig = this.getStyle()?.[item.geometryType];
+
+    if (!geometryStyleConfig) throw new LayerStyleGeometryNotFoundError(this.getLayerName(), item.geometryType);
+
+    // Within the geometry bucket, all style infos sharing the legend label represent the same logical item.
+    const styleInfos = geometryStyleConfig.info.filter((styleInfo) => styleInfo.label === item.name);
+    // Preserve legacy semantics: missing visibility defaults to true, so toggling to true may be a no-op.
+    const didChange = styleInfos.some((styleInfo) => (styleInfo.visible ?? true) !== visible);
+
+    styleInfos.forEach((styleInfo) => {
+      // Mutate in place because style config objects are shared with renderer/filter derivation.
+      // eslint-disable-next-line no-param-reassign
+      styleInfo.visible = visible;
+    });
+
+    return didChange;
   }
 
   /**
