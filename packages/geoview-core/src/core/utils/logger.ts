@@ -1,4 +1,4 @@
-import { isLocalhost } from './utilities';
+import { isLocalhost, formatDuration } from './utilities';
 import { LocalStorage } from './localStorage';
 
 // The log levels.
@@ -302,24 +302,8 @@ export class ConsoleLogger {
     if (!this.markers[markerKey]) return;
 
     // Calculate the time span between now and marked date
-    let timeSpan = new Date().getTime() - this.markers[markerKey].getTime();
-
-    const days = Math.floor(timeSpan / (1000 * 60 * 60 * 24));
-    timeSpan -= days * (1000 * 60 * 60 * 24);
-
-    const hours = Math.floor(timeSpan / (1000 * 60 * 60));
-    timeSpan -= hours * (1000 * 60 * 60);
-
-    const mins = Math.floor(timeSpan / (1000 * 60));
-    timeSpan -= mins * (1000 * 60);
-
-    const seconds = Math.floor(timeSpan / 1000);
-    timeSpan -= seconds * 1000;
-
-    // Let's say we always want seconds and milliseconds at least
-    let logMsg = `${seconds} seconds, and ${timeSpan} ms`;
-    if (mins) logMsg = `${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
-    if (hours) logMsg = `${hours} hours, ${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
+    const durationMs = new Date().getTime() - this.markers[markerKey].getTime();
+    const logMsg = formatDuration(durationMs);
 
     // Redirect
     this.#logLevel(LOG_DEBUG, 'MARKR', 'yellowgreen', logMsg, ...messages, `(${markerKey})`); // Not a typo, 5 characters for alignment

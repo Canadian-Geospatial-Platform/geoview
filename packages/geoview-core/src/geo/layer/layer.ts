@@ -132,6 +132,7 @@ export class LayerApi {
     geometryApi: GeometryApi,
     featureHighlight: FeatureHighlight
   ) {
+    // Keep a reference on the controller registry
     this.#controllers = controllerRegistry;
 
     // Keep a reference on the layer sets

@@ -21,7 +21,7 @@ import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
-import { generateId } from 'geoview-core/core/utils/utilities';
+import { formatDuration, generateId } from 'geoview-core/core/utils/utilities';
 
 export class Test<T = unknown> {
   /** A unique id for the test */
@@ -354,6 +354,20 @@ export class Test<T = unknown> {
   }
 
   /**
+   * Gets the total test duration as a compact human-readable string.
+   *
+   * @returns The formatted duration, or an empty string if the test has not completed
+   */
+  getDurationFormatted(): string {
+    // Get the duration
+    const duration = this.getDurationMs();
+    if (!duration) return '';
+
+    // Return the duration formatted
+    return formatDuration(duration);
+  }
+
+  /**
    * Gets the duration of the test callback execution in milliseconds.
    *
    * @returns The callback duration in milliseconds, or undefined if timestamps are not set
@@ -486,13 +500,26 @@ export class Test<T = unknown> {
     return this.#estimatedStarvationMs;
   }
 
+  /**
+   * Gets the estimated event loop starvation duration as a compact human-readable string.
+   *
+   * @returns The formatted starvation duration
+   */
+  getDurationStarvationFormatted(): string {
+    // Get the duration
+    const duration = this.getDurationStarvationMs();
+
+    // Return the duration formatted
+    return formatDuration(duration);
+  }
+
   // #region EVENT LOOP MONITOR
 
   /** The heartbeat interval in milliseconds used to probe event loop availability. */
-  static readonly HEARTBEAT_INTERVAL_MS = 200;
+  static readonly HEARTBEAT_INTERVAL_MS = 250;
 
   /** Per-tick jitter threshold in milliseconds below which excess is ignored (normal timer imprecision). */
-  static readonly HEARTBEAT_JITTER_THRESHOLD_MS = 10;
+  static readonly HEARTBEAT_JITTER_THRESHOLD_MS = 50;
 
   /**
    * Starts the event loop starvation monitor.
