@@ -10,6 +10,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import type {
@@ -450,6 +451,23 @@ export class LayerDomain {
 
     // Return the layer or undefined
     return layer;
+  }
+
+  /**
+   * Sets the visibility of all style items for a regular layer.
+   *
+   * This delegates the batch mutation to the underlying GV layer so item visibility updates,
+   * class-filter regeneration, and optional render waiting remain owned by the layer/domain side.
+   *
+   * @param layerPath - The layer path
+   * @param visible - Whether all style items should be visible
+   * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
+   * @returns A promise that resolves with the legend items whose visibility actually changed
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+   */
+  setAllLayerItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<TypeLegendItem[]> {
+    return this.getGeoviewLayerRegular(layerPath).setAllStyleItemsVisibility(visible, waitForRender);
   }
 
   /**
