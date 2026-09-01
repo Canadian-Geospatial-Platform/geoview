@@ -500,24 +500,6 @@ function cleanURL(url) {
   return `${protocolPart}://${domain}${path}`;
 }
 
-/**
- * Formats a duration in milliseconds into a short human-readable string.
- * Under 1s: shows milliseconds (e.g., "123ms").
- * Under 1min: shows seconds with ms precision (e.g., "4.512s").
- * 1min and over: shows minutes and seconds (e.g., "2m 05s").
- *
- * @param {number} ms - The duration in milliseconds.
- * @returns {string} The formatted duration string.
- */
-function formatDuration(ms) {
-  if (ms === undefined || ms === null) return '';
-  if (ms < 1000) return `${Math.round(ms)}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(3)}s`;
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.round((ms % 60000) / 1000);
-  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
-}
-
 function testSuiteCreateTable(plugin) {
   // The map id
   const mapId = plugin.mapViewer.mapId;
@@ -718,16 +700,17 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   }
 
   // Exec time section
-  const durationAll = test.getDurationMs();
+  const durationAllFormatted = test.getDurationFormatted();
   const durationStarvation = test.getDurationStarvationMs();
+  const durationStarvationFormatted = test.getDurationStarvationFormatted();
 
   // If the test was starved for over 1 second, put it red
   let durationStarvationIndicator = '';
   if (durationStarvation > 1000) {
-    durationStarvationIndicator = ` <span style='color:orange' title='Estimated starvation duration'>(${formatDuration(durationStarvation)})</span>`;
+    durationStarvationIndicator = ` <span style='color:orange' title='Estimated starvation duration'>(${durationStarvationFormatted})</span>`;
   }
 
-  const duration = `<span>${formatDuration(durationAll)}</span>${durationStarvationIndicator}`;
+  const duration = `<span>${durationAllFormatted}</span>${durationStarvationIndicator}`;
   execTimeCell.innerHTML = duration;
 
   // Details section

@@ -662,13 +662,15 @@ export type TypeOutfields = {
   name: string;
   alias: string;
   type: TypeOutfieldsType;
-  domain?: codedValueType | rangeDomainType | null; // null here, because that's what Esri uses in the response
+  domain?: TypeDomain;
   /** Whether this field appears in summary views. Default = true. */
   summary?: boolean;
 };
 
 /** The types supported by the outfields object. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
+
+export type TypeDomain = codedValueType | rangeDomainType | null; // null here, because that's what Esri uses in the response
 
 export type codedValueType = {
   type: 'codedValue';
@@ -693,7 +695,7 @@ export type TypeFieldEntry = {
   value: unknown;
   dataType: TypeOutfieldsType;
   alias: string;
-  domain?: codedValueType | rangeDomainType;
+  domain?: TypeDomain;
 };
 
 // Definition of the alias lookup for matching field names to aliases

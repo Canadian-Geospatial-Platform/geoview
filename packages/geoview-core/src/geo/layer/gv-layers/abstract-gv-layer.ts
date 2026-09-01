@@ -30,10 +30,9 @@ import type {
   TypeOutfields,
   TypeLayerStyleSettings,
   TypeFeatureInfoResult,
-  codedValueType,
-  rangeDomainType,
   TypeDisplayLanguage,
   TypeFieldEntry,
+  TypeDomain,
 } from '@/api/types/map-schema-types';
 import type {
   TypeLayerMetadataFields,
@@ -2484,7 +2483,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       name: string;
       type: TypeOutfieldsType;
       alias: string;
-      domain?: codedValueType | rangeDomainType;
+      domain?: TypeDomain;
     }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name }));
 
     for (const fieldEntry of fieldEntries) {
@@ -2546,7 +2545,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     feature: Feature,
     fieldName: string,
     fieldType: TypeOutfieldsType,
-    fieldDomain: codedValueType | rangeDomainType | undefined,
+    fieldDomain: TypeDomain | undefined,
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined
@@ -2583,7 +2582,7 @@ export type GetFieldValueDelegate = (
   feature: Feature,
   fieldName: string,
   fieldType: TypeOutfieldsType,
-  fieldDomain: codedValueType | rangeDomainType | undefined,
+  fieldDomain: TypeDomain | undefined,
   inputFormat: string | string[] | undefined,
   inputTimezone: TimeIANA | undefined,
   inputTemporalMode: TemporalMode | undefined

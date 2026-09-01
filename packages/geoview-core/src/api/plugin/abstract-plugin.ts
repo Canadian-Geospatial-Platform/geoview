@@ -130,7 +130,7 @@ export abstract class AbstractPlugin {
    */
   add(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' loaded, adding it on map ${this.mapViewer.mapId}`);
+    logger.logDebug(`Plugin '${this.pluginId}' loaded, adding it on map ${this.mapViewer.mapId}`);
 
     // Add
     this.onAdd();
@@ -147,7 +147,7 @@ export abstract class AbstractPlugin {
    */
   remove(): void {
     // Log
-    logger.logInfo(`Plugin '${this.pluginId}' being removed from map ${this.mapViewer.mapId}`);
+    logger.logDebug(`Plugin '${this.pluginId}' being removed from map ${this.mapViewer.mapId}`);
 
     // Remove
     this.onRemove();
