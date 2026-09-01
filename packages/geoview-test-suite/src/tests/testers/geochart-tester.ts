@@ -158,38 +158,29 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   async helperStepLayerWithGeochart<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
-    // Update the step
-    test.addStep(`Getting the layer with the geochart ${layerPath}...`);
-
     // Get the layer
+    test.addStep(`Getting the layer with the geochart ${layerPath}...`);
     const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
-    // Update the step
-    test.addStep(`Waiting for its layer 'loaded' status...`);
-
     // Wait until the layer has at least loaded once
+    test.addStep(`Waiting for its layer 'loaded' status...`);
     await layer.waitForLoadedOnce();
 
-    // Update the step
-    test.addStep(`Perform query operation at given coordinates...`);
-
     // Perform a map click using the feature info layer set
+    test.addStep(`Perform query operation at given coordinates...`);
     await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
-    // Update the step
-    test.addStep(`Setting active footerbar tab to geochart...`);
-
     // Set the footer tab to Geochart
+    test.addStep(`Setting active footerbar tab to geochart...`);
     this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
+    await GVAbstractTester.waitForReactIdle();
 
     // Wait for the React UI to actually pick up on the store update
     test.addStep(`Waiting on UI to refresh and the active footer tab to be geochart...`);
-    await GVAbstractTester.waitForUI();
-
-    // Update the step
-    test.addStep(`Selecting the geochart for the added layer...`);
+    await GVAbstractTester.waitForReactIdle();
 
     // Select the right layer path
+    test.addStep(`Selecting the geochart for the added layer...`);
     this.getControllersRegistry().geoChartController?.setSelectedLayerPath(layerPath);
 
     // Wait for fun so that we can see the actual chart in the UI before terminating the test

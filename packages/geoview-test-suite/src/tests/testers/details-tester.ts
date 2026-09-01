@@ -156,7 +156,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
-        await GVAbstractTester.waitForUI();
+        await GVAbstractTester.waitForReactIdle();
 
         // Wait for the React UI to actually pick up on the store update
         // GV The highlight only happens through a React render effect so we can't wait for a particular event
@@ -187,7 +187,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open (again)...`);
-        await GVAbstractTester.waitForUI();
+        await GVAbstractTester.waitForReactIdle();
 
         // Wait for the React UI to actually pick up on the store update
         // GV The highlight only happens through a React render effect so we can't wait for a particular event
@@ -203,7 +203,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to close...`);
-        await GVAbstractTester.waitForUI();
+        await GVAbstractTester.waitForReactIdle();
 
         // Wait for the React UI to actually pick up on the store update
         // GV The highlight only happens through a React render effect so we can't wait for a particular event
@@ -219,7 +219,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to reopen...`);
-        await GVAbstractTester.waitForUI();
+        await GVAbstractTester.waitForReactIdle();
 
         // Wait for the React UI to actually pick up on the store update
         // GV The highlight only happens through a React render effect so we can't wait for a particular event

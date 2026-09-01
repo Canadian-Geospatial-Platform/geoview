@@ -1,7 +1,6 @@
 import type {
-  codedValueType,
   Extent,
-  rangeDomainType,
+  TypeDomain,
   TypeEsriFormatParameter,
   TypeLayerStyleConfig,
   TypeOutfields,
@@ -1520,7 +1519,7 @@ export type TypeLayerMetadataFields = {
   name: string;
   type: string;
   alias: string;
-  domain: codedValueType | rangeDomainType;
+  domain: TypeDomain;
 };
 
 export type TypeMetadataOGCFeature = {

@@ -98,7 +98,7 @@ import type {
   LayerDomain,
 } from '@/core/domains/layer-domain';
 import type { UIDomain } from '@/core/domains/ui-domain';
-import { doTimeout, isValidUUID, type DelayJob } from '@/core/utils/utilities';
+import { doTimeout, doUntilPromise, isValidUUID, type DelayJob } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
@@ -2151,6 +2151,37 @@ export class LayerController extends AbstractMapViewerController {
 
     // Redirect
     return this.waitForAllLayersStatus('loaded');
+  }
+
+  /**
+   * Waits for all map layers to reach the loaded status while periodically forcing OpenLayers render cycles.
+   *
+   * In background tabs, browsers throttle or pause `requestAnimationFrame` callbacks. This starves
+   * OpenLayers of render frames, which prevents:
+   * - Tile and image sources from requesting data (blocking layer loaded status transitions).
+   * - The `rendercomplete` event from firing (blocking any code that awaits full render completion).
+   *
+   * To work around this, the method calls `map.renderSync()` every 1 000 ms via `doUntilPromise`
+   * until the layers-loaded promise resolves. This keeps the OL rendering pipeline alive so layers
+   * can load regardless of tab visibility.
+   *
+   * @returns A promise that resolves with the number of layers that have reached the loaded status
+   */
+  waitForLayersLoadedForcingRenders(): Promise<number> {
+    // Start waiting for all layers to reach the loaded status
+    const waitPromise = this.waitForLayersLoaded();
+
+    // Force a synchronous OL render every 1 000 ms until all layers are loaded
+    doUntilPromise(
+      (): void => {
+        // Trigger an immediate, synchronous render frame on the OL map
+        this.getMapViewer().map?.renderSync();
+      },
+      waitPromise,
+      1000
+    );
+
+    return waitPromise;
   }
 
   // #endregion PUBLIC METHODS

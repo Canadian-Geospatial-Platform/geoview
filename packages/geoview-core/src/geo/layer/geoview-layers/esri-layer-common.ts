@@ -11,12 +11,11 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
-  codedValueType,
-  rangeDomainType,
   TypeOutfields,
   TypeOutfieldsType,
   TypeFieldEntry,
   DisplayDateMode,
+  TypeDomain,
 } from '@/api/types/map-schema-types';
 import type {
   TypeMetadataEsriDynamic,
@@ -352,7 +351,7 @@ export class EsriUtilities {
    * @param fieldName - Field name for which we want to get the domain
    * @returns The domain of the field, or `null` if not found
    */
-  static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): codedValueType | rangeDomainType | undefined {
+  static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): TypeDomain | undefined {
     // Find the field definition in the provided fields array
     return fields?.find((metadataEntry) => metadataEntry.name === fieldName)?.domain;
   }
