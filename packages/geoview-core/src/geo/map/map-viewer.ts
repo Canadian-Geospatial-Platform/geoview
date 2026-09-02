@@ -212,6 +212,9 @@ export class MapViewer {
   /** Callback delegates for the map ready event */
   #onMapReadyHandlers: MapReadyDelegate[] = [];
 
+  /** Callback delegates for the map ready zoomed event */
+  #onMapReadyZoomedHandlers: MapReadyZoomedDelegate[] = [];
+
   /** Callback delegates for the map layers processed event */
   #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
 
@@ -1320,6 +1323,18 @@ export class MapViewer {
   }
 
   /**
+   * Waits for the map ready zoomed event before resolving the promise.
+   *
+   * This function waits for the next onMapReadyZoomed event to be triggered.
+   *
+   * @returns A promise that resolves when the map ready zoomed event fires
+   */
+  waitForMapReadyZoomed(): Promise<MapBaseEvent> {
+    // Wait for the map ready to be done with the initial zooming
+    return this.onceMapReadyZoomed();
+  }
+
+  /**
    * Waits for the next map move-end event to be emitted.
    *
    * @returns A promise that resolves when the map move-end event fires
@@ -1338,17 +1353,29 @@ export class MapViewer {
   /**
    * Waits for the next rendercomplete event to be emitted.
    *
-   * Forces a synchronous frame via `map.renderSync()` so `rendercomplete` is guaranteed to fire,
-   * even when the map is idle. Without this, waiting on `rendercomplete` for an idle map hangs
-   * forever because OL does not schedule a frame unless something invalidates the view.
+   * If the map is attached, this forces a synchronous frame via `map.renderSync()` so idle maps
+   * still emit `rendercomplete`. If the map is detached, or if OpenLayers cannot render
+   * synchronously during teardown/recreate transitions, the promise resolves immediately.
    *
    * @returns A promise that resolves when the map render is complete
    */
   waitForRender(): Promise<void> {
+    // If map is detached from the DOM, there is no render cycle to wait for.
+    if (!this.map.getTargetElement()) return Promise.resolve();
+
     // Return a promise that resolves when the map render is complete
     return new Promise((resolve) => {
-      this.map.once('rendercomplete', () => resolve());
-      this.map.renderSync();
+      const onRenderComplete = (): void => resolve();
+      this.map.once('rendercomplete', onRenderComplete);
+
+      try {
+        this.map.renderSync();
+      } catch (error: unknown) {
+        // If OL cannot render synchronously (e.g., map teardown/recreate race), resolve instead of throwing.
+        this.map.un('rendercomplete', onRenderComplete);
+        logger.logDebug('Skipped waitForRender because map cannot render synchronously', error);
+        resolve();
+      }
     });
   }
 
@@ -1676,7 +1703,7 @@ export class MapViewer {
   /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
    *
-   * This approach is rotation-agnostic — it works regardless of the map's current rotation angle.
+   * This approach is rotation-agnostic - it works regardless of the map's current rotation angle.
    *
    * @returns True if the north pole is visible in the viewport, false otherwise
    */
@@ -2232,17 +2259,22 @@ export class MapViewer {
     // Await for all layers to be 'processed'
     await this.#checkMapLayersProcessed();
 
-    // Zoom to extent if necessary, but don't wait for it
-    this.#zoomOnExtentMaybe().catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('in #zoomOnExtentMaybe in #readyMap', error);
-    });
+    // Zoom to extent if necessary and keep promise
+    const promiseZoomedExtent = this.#zoomOnExtentMaybe();
 
-    // Zoom on layers ids, if necessary, but don't wait for it
-    this.#zoomOnLayerIdsMaybe().catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('in #zoomOnLayerIdsMaybe in initMap', error);
-    });
+    // Zoom on layers ids if necessary and keep promise
+    const promiseZoomOnLayerIds = this.#zoomOnLayerIdsMaybe();
+
+    // Once both zoom promises are resolved
+    Promise.all([promiseZoomedExtent, promiseZoomOnLayerIds])
+      .then(() => {
+        // Emit map ready zoomed only when this path performs a zoom.
+        this.#emitMapReadyZoomed();
+      })
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('in Promise.all for zooming in #readyMap', error);
+      });
 
     // If there's a layer path that should be selected in footerBar or appBar configs, select it
     const selectedLayerPath =
@@ -2285,7 +2317,7 @@ export class MapViewer {
    *
    * @returns A promise that resolves when the zoom operation completes
    */
-  #zoomOnExtentMaybe(): Promise<void> {
+  async #zoomOnExtentMaybe(): Promise<void> {
     // Zoom to extents of layers selected in config, if provided
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.extent) {
       // Not zooming on layers, but we have an extent to zoom to instead
@@ -2295,11 +2327,8 @@ export class MapViewer {
         : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 
       // Zoom to extent
-      return this.zoomToExtent(extent, false);
+      await this.zoomToExtent(extent, false);
     }
-
-    // No zoom to do, resolve
-    return Promise.resolve();
   }
 
   /**
@@ -2329,12 +2358,9 @@ export class MapViewer {
       // Zoom to calculated extent
       if (layerExtents.length) {
         // Zoom on the layers extents
-        return this.zoomToExtent(layerExtents);
+        await this.zoomToExtent(layerExtents);
       }
     }
-
-    // No zoom to do, resolve
-    return Promise.resolve();
   }
 
   /**
@@ -2473,6 +2499,46 @@ export class MapViewer {
   offMapReady(callback: MapReadyDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapReadyHandlers, callback);
+  }
+
+  /**
+   * Emits a map ready zoomed event to all handlers.
+   */
+  #emitMapReadyZoomed(): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapReadyZoomedHandlers, {});
+  }
+
+  /**
+   * Returns a promise that resolves the next time the map ready zoomed event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the event payload when map ready zoomed fires
+   */
+  onceMapReadyZoomed(filter?: (event: MapBaseEvent) => boolean): Promise<MapBaseEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onMapReadyZoomedHandlers, filter);
+  }
+
+  /**
+   * Registers a map ready zoomed event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onMapReadyZoomed(callback: MapReadyZoomedDelegate): MapReadyZoomedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onMapReadyZoomedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map ready zoomed event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapReadyZoomed(callback: MapReadyZoomedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMapReadyZoomedHandlers, callback);
   }
 
   /**
@@ -3051,6 +3117,11 @@ export type MapInitDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
  * Delegate for the map ready event handler function signature.
  */
 export type MapReadyDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
+
+/**
+ * Delegate for the map ready zoomed event handler function signature.
+ */
+export type MapReadyZoomedDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 
 /**
  * Delegate for the map layers processed event handler function signature.

@@ -1,6 +1,6 @@
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
-import { isLocalhost } from 'geoview-core/core/utils/utilities';
+import { formatDuration } from 'geoview-core/core/utils/utilities';
 import type { AbstractTester, FailureEvent, SkippedEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
 import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions';
 
@@ -32,8 +32,17 @@ export abstract class AbstractTestSuite {
   /** Indicates whether the plugin is running the heavy tests */
   #isRunningHeavyTests = true;
 
-  // Indicates if the test suite should only run the DEBUG tests
-  DEBUG_RUN_ONLY_DEBUG_FUNCTION = false;
+  /** Indicates whether the test suite should force sequential execution of tests */
+  #isRunningSequentially = false;
+
+  /** Indicates if the test suite should only run the DEBUG tests */
+  DEBUG_RUN_ONLY_DEBUG_FUNCTION = false; // true or false or isLocalhost()
+
+  /** Datetime when the latest test suite launch started. */
+  #launchStartedAt?: Date;
+
+  /** Datetime when the latest test suite launch ended. */
+  #launchEndedAt?: Date;
 
   // #region OVERRIDES
 
@@ -177,64 +186,6 @@ export abstract class AbstractTestSuite {
   }
 
   /**
-   * Initializes a tester as part of the Test Suite.
-   *
-   * @param tester - The tester to initialize
-   */
-  addTester(tester: AbstractTester): void {
-    // Add it
-    this.#testers.push(tester);
-
-    // Hook it
-    tester.onStarted(this.#handleTesterTestStarted.bind(this));
-    tester.onStepUpdated(this.#handleTesterTestStepUpdated.bind(this));
-    tester.onSuccess(this.#handleTesterSuccess.bind(this));
-    tester.onFailure(this.#handleTesterFailure.bind(this));
-    tester.onSkipped(this.#handleTesterSkipped.bind(this));
-  }
-
-  /**
-   * Launches the test suite.
-   *
-   * When `DEBUG_RUN_ONLY_DEBUG_FUNCTION` is `true` and the environment is localhost,
-   * only the debug subset (`onLaunchTestSuiteDEBUG`) is executed instead of the full suite.
-   *
-   * @returns A promise that resolves when the tests are over
-   * @throws {TestSuiteRunningError} When the test suite is already running
-   * @throws {TestSuiteCannotExecuteError} When `onCanExecuteTestSuite()` resolves to false
-   */
-  async launchTestSuite(): Promise<unknown> {
-    // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
-
-    // Validates the Test Suite can execute
-    if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();
-
-    // Prepare to launch the test suite
-    await this.onPrepareLaunchTestSuite();
-
-    // If only running the debug tests
-    if (this.DEBUG_RUN_ONLY_DEBUG_FUNCTION && isLocalhost()) {
-      // Launching the debug test suite first to see if we proceed with the full tests or not
-      return this.onLaunchTestSuiteDEBUG();
-    }
-
-    // Launching full test suite
-    return this.onLaunchTestSuite();
-  }
-
-  /**
-   * Resets all the testers in the suite.
-   */
-  resetTestSuite(): void {
-    // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
-
-    // Resets tests in all testers
-    this.#testers.forEach((tester) => tester.resetTests());
-  }
-
-  /**
    * Gets whether the test suite is running on a VPN.
    *
    * @returns Whether the environment is running on VPN
@@ -268,6 +219,135 @@ export abstract class AbstractTestSuite {
    */
   setIsRunningHeavyTests(isRunningHeavyTests: boolean): void {
     this.#isRunningHeavyTests = isRunningHeavyTests;
+  }
+
+  /**
+   * Gets whether sequential execution is forced for tests in this suite.
+   *
+   * @returns Whether tests in this suite are forced to run sequentially
+   */
+  getIsRunningSequentially(): boolean {
+    return this.#isRunningSequentially;
+  }
+
+  /**
+   * Sets whether sequential execution is forced for tests in this suite.
+   *
+   * @param isRunningSequentially - Whether tests in this suite should be forced to run sequentially
+   */
+  setIsRunningSequentially(isRunningSequentially: boolean): void {
+    this.#isRunningSequentially = isRunningSequentially;
+  }
+
+  /**
+   * Gets the datetime when the latest test suite launch started.
+   *
+   * @returns The latest launch start datetime, or undefined if never launched
+   */
+  getLaunchStartedAt(): Date | undefined {
+    return this.#launchStartedAt;
+  }
+
+  /**
+   * Gets the datetime when the latest test suite launch ended.
+   *
+   * @returns The latest launch end datetime, or undefined if launch is in progress or never launched
+   */
+  getLaunchEndedAt(): Date | undefined {
+    return this.#launchEndedAt;
+  }
+
+  /**
+   * Gets the duration of the latest test suite launch in milliseconds.
+   *
+   * @returns The latest launch duration in milliseconds, or undefined if start or end time is unavailable
+   */
+  getDurationMs(): number {
+    if (this.#launchStartedAt && this.#launchEndedAt) {
+      return this.#launchEndedAt.getTime() - this.#launchStartedAt.getTime();
+    }
+    return 0;
+  }
+
+  /**
+   * Gets the formatted duration of the latest test suite launch.
+   *
+   * @returns The latest launch duration formatted as a string, or an empty string if start or end time is unavailable
+   */
+  getDurationFormatted(): string {
+    // Get the duration
+    const duration = this.getDurationMs();
+    if (!duration) return '';
+
+    // Return the duration formatted
+    return formatDuration(duration);
+  }
+
+  /**
+   * Initializes a tester as part of the Test Suite.
+   *
+   * @param tester - The tester to initialize
+   */
+  addTester(tester: AbstractTester): void {
+    // Add it
+    this.#testers.push(tester);
+
+    // Hook it
+    tester.onStarted(this.#handleTesterTestStarted.bind(this));
+    tester.onStepUpdated(this.#handleTesterTestStepUpdated.bind(this));
+    tester.onSuccess(this.#handleTesterSuccess.bind(this));
+    tester.onFailure(this.#handleTesterFailure.bind(this));
+    tester.onSkipped(this.#handleTesterSkipped.bind(this));
+  }
+
+  /**
+   * Launches the test suite.
+   *
+   * When `DEBUG_RUN_ONLY_DEBUG_FUNCTION` is `true` and the environment is localhost,
+   * only the debug subset (`onLaunchTestSuiteDEBUG`) is executed instead of the full suite.
+   *
+   * @returns A promise that resolves when the tests are over
+   * @throws {TestSuiteRunningError} When the test suite is already running
+   * @throws {TestSuiteCannotExecuteError} When `onCanExecuteTestSuite()` resolves to false
+   */
+  async launchTestSuite(): Promise<unknown> {
+    // Validates the Test Suite isn't already running tests
+    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+
+    // Validates the Test Suite can execute
+    if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();
+
+    // Track launch timing for this execution.
+    this.#launchStartedAt = new Date();
+    this.#launchEndedAt = undefined;
+
+    try {
+      // Prepare to launch the test suite
+      await this.onPrepareLaunchTestSuite();
+
+      // If only running the debug tests
+      if (this.DEBUG_RUN_ONLY_DEBUG_FUNCTION) {
+        // Launching the debug test suite first to see if we proceed with the full tests or not
+        return await this.onLaunchTestSuiteDEBUG();
+      }
+
+      // Launching full test suite
+      return await this.onLaunchTestSuite();
+    } finally {
+      // Record the end time whether launch succeeded or failed.
+      this.#launchEndedAt = new Date();
+    }
+  }
+
+  /**
+   * Resets all the testers in the suite.
+   */
+  resetTestSuite(): void {
+    // Validates the Test Suite isn't already running tests
+    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
+
+    // Resets tests in all testers
+    this.#testers.forEach((tester) => tester.resetTests());
   }
 
   // #endregion PUBLIC METHODS
