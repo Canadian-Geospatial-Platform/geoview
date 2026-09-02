@@ -117,6 +117,7 @@
         align-items: center;
         gap: 8px;
         margin-left: 12px;
+        margin-right: 18px;
         font-size: 13px;
         font-weight: 500;
         color: #555;
@@ -205,6 +206,12 @@
         <span id="vpnStatus" class="toggle-status off">OFF</span>
       </label>
       <label class="toggle-switch">
+        <input type="checkbox" id="runSequentially" onchange="toggleRunSequentially(this.checked)" />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">Run sequentially</span>
+        <span id="runSequentiallyStatus" class="toggle-status off">OFF</span>
+      </label>
+      <label class="toggle-switch">
         <input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)" />
         <span class="toggle-slider"></span>
         <span class="toggle-label">Heavy tests</span>
@@ -269,12 +276,15 @@
         Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> |
         Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
       </div>
+      <div style="text-align: right">
+        Duration: <span id="allSuitesTotalDuration">0</span>
+      </div>
       <button id="btnLaunchTestsAll" class="btnLaunchTestsAll" onclick="launchTestsAll()" disabled="true">LAUNCH TESTS ALL MAPS!</button>
 
       <h3 style="margin-top: 30px">Test Results by Group</h3>
 
       <!-- Group 1: Core / Utility -->
-      <div class="group-header">Group 1 — Core / Utility</div>
+      <div class="group-header">Group 1 - Core / Utility</div>
 
       <!-- Map 0 Results -->
       <button id="collapsible-map0" class="collapsible" onclick="toggleCollapsible(this)">
@@ -304,7 +314,7 @@
       </div>
 
       <!-- Group 2: Layers -->
-      <div class="group-header">Group 2 — Layers</div>
+      <div class="group-header">Group 2 - Layers</div>
 
       <!-- Map 2 Results -->
       <button id="collapsible-map2" class="collapsible" onclick="toggleCollapsible(this)">
@@ -325,7 +335,7 @@
       </div>
 
       <!-- Group 3: Map -->
-      <div class="group-header">Group 3 — Map</div>
+      <div class="group-header">Group 3 - Map</div>
 
       <!-- Map 4 Results -->
       <button id="collapsible-map4" class="collapsible" onclick="toggleCollapsible(this)">
@@ -346,7 +356,7 @@
       </div>
 
       <!-- Group 4: Components -->
-      <div class="group-header">Group 4 — Components</div>
+      <div class="group-header">Group 4 - Components</div>
 
       <!-- Map 7 Results -->
       <button id="collapsible-map7" class="collapsible" onclick="toggleCollapsible(this)">
@@ -367,7 +377,7 @@
       </div>
 
       <!-- Group 5: Plugins -->
-      <div class="group-header">Group 5 — Packages</div>
+      <div class="group-header">Group 5 - Packages</div>
 
       <!-- Map 5 Results -->
       <button id="collapsible-map5" class="collapsible" onclick="toggleCollapsible(this)">
@@ -1345,13 +1355,21 @@
           runAllContainer.appendChild(htmlSectionClone);
         }
 
-        // Update the VPN and heavy tests toggle buttons based on the plugin's current state
+        // Update the VPN and heavy tests toggle button based on the plugin's current state
         const btnRunningVPN = document.getElementById('vpnToggle');
         if (btnRunningVPN && plugin.getIsRunningOnVPN()) {
           btnRunningVPN.checked = true;
           toggleVPN(true);
         }
 
+        // Update the run sequentially toggle button based on the plugin's current state
+        const btnRunningSequentially = document.getElementById('runSequentially');
+        if (btnRunningSequentially && plugin.getIsRunningSequentially()) {
+          btnRunningSequentially.checked = true;
+          toggleRunSequentially(true);
+        }
+
+        // Update the heavy tests toggle button based on the plugin's current state
         const btnRunningHeavyTests = document.getElementById('heavyTestsToggle');
         if (btnRunningHeavyTests && plugin.getIsRunningHeavyTests()) {
           btnRunningHeavyTests.checked = true;
@@ -1373,6 +1391,16 @@
 
           // Update global stats
           updateGlobalStats();
+        });
+
+        // Hook the test suites completed to update the total time it took
+        plugin.onTestSuitesCompleted((sender, event) => {
+          // Stop live duration timers and apply the final duration value.
+          testSuiteStopLiveDuration(plugin);
+          testSuiteUpdateTotalsDurations(plugin, '');
+          testSuiteStopLiveDuration(plugin, 'runAll');
+          testSuiteUpdateTotalsDurations(plugin, 'runAll');
+          testSuiteUpdateGrandTotalDurations(testSuitesPlugins);
         });
       });
 
@@ -1419,6 +1447,18 @@
         // Update button states based on running tests
         updateButtonStates();
       }
+
+      // Keep grand total duration live even between test update events.
+      setInterval(() => {
+        const anyTestsRunning = Object.keys(testSuitesPlugins).some((mapId) => {
+          const plugin = testSuitesPlugins[mapId];
+          return plugin?.getTestsRunning() > 0;
+        });
+
+        if (anyTestsRunning) {
+          testSuiteUpdateGrandTotalDurations(testSuitesPlugins);
+        }
+      }, 200);
 
       // Function to update button states based on running tests
       function updateButtonStates() {
@@ -1487,6 +1527,12 @@
         });
       }
 
+      function toggleRunSequentially(checked) {
+        toggleOption(checked, 'runSequentiallyStatus', (plugin, value) => {
+          plugin.setIsRunningSequentially(value);
+        });
+      }
+
       function toggleHeavyTests(checked) {
         toggleOption(checked, 'heavyTestsStatus', (plugin, value) => {
           plugin.setIsRunningHeavyTests(value);
@@ -1503,12 +1549,19 @@
           testSuiteEmptyTestResults(plugin);
           testSuiteEmptyTestResults(plugin, 'runAll');
 
-          // Set the VPN flag from the toggle before launching
-          const vpnToggle = document.getElementById('vpnToggle');
-          plugin.setIsRunningOnVPN(vpnToggle?.checked ?? false);
+          // Start live duration timers for both result tables.
+          testSuiteStartLiveDuration(plugin);
+          testSuiteStartLiveDuration(plugin, 'runAll');
 
           // Launch the test suites
-          await plugin.launchTestSuites();
+          void plugin
+            .launchTestSuites()
+            .catch((error) => {
+              // Stop timers if launch failed before completion event can be emitted.
+              testSuiteStopLiveDuration(plugin);
+              testSuiteStopLiveDuration(plugin, 'runAll');
+              console.error('Failed to launch test suites', error);
+            });
 
           // Update
           testSuiteUpdateTotals(plugin);

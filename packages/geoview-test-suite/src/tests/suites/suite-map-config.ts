@@ -60,7 +60,11 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    return Promise.resolve();
+    // Test DEBUG
+    const pDevTest0 = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
+
+    // Resolve when all
+    return Promise.all([pDevTest0]);
   }
 
   /**
