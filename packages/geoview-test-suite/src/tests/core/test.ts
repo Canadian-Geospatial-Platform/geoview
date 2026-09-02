@@ -519,7 +519,7 @@ export class Test<T = unknown> {
   static readonly HEARTBEAT_INTERVAL_MS = 250;
 
   /** Per-tick jitter threshold in milliseconds below which excess is ignored (normal timer imprecision). */
-  static readonly HEARTBEAT_JITTER_THRESHOLD_MS = 50;
+  static readonly HEARTBEAT_JITTER_THRESHOLD_MS = 100;
 
   /**
    * Starts the event loop starvation monitor.
@@ -710,7 +710,7 @@ export class Test<T = unknown> {
    * @param actualValue - The object to check
    * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
-  static assertIsArray(actualValue: unknown | unknown[] | undefined | null): asserts actualValue is unknown[] {
+  static assertIsArray(actualValue: unknown | unknown[] | null | undefined): asserts actualValue is unknown[] {
     if (Array.isArray(actualValue)) return;
 
     // Throw

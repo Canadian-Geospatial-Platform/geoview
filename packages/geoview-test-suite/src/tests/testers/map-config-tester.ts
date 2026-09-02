@@ -2,7 +2,6 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
@@ -383,12 +382,11 @@ export class MapConfigTester extends GVAbstractTester {
         // Replace initialView with layerIds only
         const initialViewConfig = { layerIds: [LAYER_PATH] };
 
+        // Create a new map viewer from a new config
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
 
-        // GV The zoom on layers happens asynchronously and is not awaited during the map creation processing.
-        // GV Therefore, we have to wait a short while here to let the zoom on layer extent happen.
-        // TODO: Add a promise on the zoom on layer extent, upon map creation processing, so that we can properly await on that promise instead of using a delay here
-        await delay(2000);
+        // Wait for the zoom to happen on the map upon initialization
+        await mapViewer.waitForMapReadyZoomed();
 
         // Return the map viewer
         return mapViewer;
@@ -462,6 +460,7 @@ export class MapConfigTester extends GVAbstractTester {
           },
         };
 
+        // Create a new map viewer from a new config
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.overlayObjects', overlayObjectsConfig]]);
         return mapViewer;
       },
@@ -512,6 +511,7 @@ export class MapConfigTester extends GVAbstractTester {
           projection: 3978,
         };
 
+        // Create a new map viewer from a new config
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
         return mapViewer;
       },
@@ -851,6 +851,7 @@ export class MapConfigTester extends GVAbstractTester {
           homeView: { zoomAndCenter: [4, [-95, 60]] },
         };
 
+        // Create a new map viewer from a new config
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
         return mapViewer;
       },
@@ -893,6 +894,7 @@ export class MapConfigTester extends GVAbstractTester {
           homeView: { zoomAndCenter: [4, [-95, 60]] },
         };
 
+        // Create a new map viewer from a new config
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
 
         // Call zoomToInitialExtent which navigates to homeView
@@ -954,6 +956,7 @@ export class MapConfigTester extends GVAbstractTester {
         controlNames.forEach((name) => {
           controls[name] = false;
         });
+        // Create a new map viewer from a new config
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, controls);
       },
       (test) => {
@@ -991,6 +994,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings states.visible = false...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with states.visible = false...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { visible: false });
       },
@@ -1019,6 +1023,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings states.opacity = 0.5...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with states.opacity = 0.5...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { opacity: 0.5 });
       },
@@ -1042,6 +1047,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings states.queryable = false...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with states.queryable = false...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { queryable: false });
       },
@@ -1070,6 +1076,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings states.hoverable = false...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with states.hoverable = false...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { hoverable: false });
       },
@@ -1103,6 +1110,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test opacity cascading: child (1.0) capped by parent (0.5) = effective 0.5...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent opacity 0.5 and child opacity 1.0...');
         return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 0.5 }, { opacity: 1.0 });
       },
@@ -1133,6 +1141,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test opacity cascading: child (0.3) below parent (0.5) = effective 0.3...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent opacity 0.5 and child opacity 0.3...');
         return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 0.5 }, { opacity: 0.3 });
       },
@@ -1163,6 +1172,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test opacity cascading: runtime parent change cascades to children...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent opacity 1.0 and child opacity 0.8...');
         return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 1.0 }, { opacity: 0.8 });
       },
@@ -1203,6 +1213,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test controls.remove cascading: parent false cascades unless child explicitly overrides with true...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent controls.remove = false, subgroup default, child controls.remove = true...');
         return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
           test,
@@ -1249,6 +1260,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test states.visible cascading: parent false hides all descendants on map, children keep visible true in store...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent states.visible = false, child states.visible = true...');
         return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
           test,
@@ -1307,6 +1319,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings controls.query = true + states.queryable = false...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with controls.query = true and states.queryable = false...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, { query: true }, { queryable: false });
       },
@@ -1358,6 +1371,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings controls.hover = true + states.hoverable = false...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with controls.hover = true and states.hoverable = false...');
         return this.#helperCreateMapConfigWithInitialSettings(test, mapId, { hover: true }, { hoverable: false });
       },
@@ -1408,6 +1422,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test initialSettings states.legendCollapsed = true on group layer...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with group layer having states.legendCollapsed = true...');
         return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { legendCollapsed: true });
       },
@@ -1440,6 +1455,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test parent controls { highlight: false, zoom: false, hover: false, query: false } cascade to children...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent controls all false, no overrides on children...');
         return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
           test,
@@ -1491,6 +1507,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test group-level override: parent { highlight: false, zoom: false }, subgroup overrides { highlight: true, zoom: true }...',
       (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with parent controls and subgroup overrides...');
         return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
           test,
@@ -1542,6 +1559,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test GeoJSON layerFilter is stored and accessible after loading...',
       async (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with GeoJSON layer having layerFilter...');
         await this.#helperCreateMapConfig(test, mapId, [
           [
@@ -1596,6 +1614,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test OGC Feature layerFilter is stored and accessible after loading...',
       async (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with OGC Feature layer having layerFilter...');
         await this.#helperCreateMapConfig(test, mapId, [
           [
@@ -1646,6 +1665,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test WFS layerFilter is stored and accessible after loading...',
       async (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with WFS layer having layerFilter...');
         await this.#helperCreateMapConfig(test, mapId, [
           [
@@ -1696,6 +1716,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test Esri Dynamic layerFilter is stored and accessible after loading...',
       async (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Dynamic layer having layerFilter...');
         await this.#helperCreateMapConfig(test, mapId, [
           [
@@ -1746,6 +1767,7 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test Esri Feature layerFilter is stored and accessible after loading...',
       async (test) => {
+        // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Feature layer having layerFilter...');
         await this.#helperCreateMapConfig(test, mapId, [
           [
@@ -1803,6 +1825,7 @@ export class MapConfigTester extends GVAbstractTester {
     if (controls) initialSettings.controls = controls;
     if (states) initialSettings.states = states;
 
+    // Create a new map viewer from a new config
     return this.#helperCreateMapConfig(test, mapId, [
       [
         'map.listOfGeoviewLayerConfig',
@@ -1847,6 +1870,7 @@ export class MapConfigTester extends GVAbstractTester {
     const childInitialSettings: Record<string, unknown> = {};
     if (childStates) childInitialSettings.states = childStates;
 
+    // Create a new map viewer from a new config
     return this.#helperCreateMapConfig(test, mapId, [
       [
         'map.listOfGeoviewLayerConfig',
@@ -1893,6 +1917,7 @@ export class MapConfigTester extends GVAbstractTester {
     subGroupSettings?: Record<string, unknown>,
     childSettings?: Record<string, unknown>
   ): Promise<MapViewer> {
+    // Create a new map viewer from a new config
     return this.#helperCreateMapConfig(test, mapId, [
       [
         'map.listOfGeoviewLayerConfig',

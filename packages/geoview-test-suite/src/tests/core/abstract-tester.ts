@@ -4,6 +4,7 @@ import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
+import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { Test } from './test';
 import { TestSkippedError } from './exceptions';
 
@@ -563,7 +564,183 @@ export abstract class AbstractTester {
     this.onPerformingTestStepChanged(sender, event);
   }
 
-  // #endregion
+  // #endregion PRIVATE
+
+  // #region STATIC METHODS
+
+  /**
+   * Returns a promise that resolves when an element matching the given selector exists in the DOM.
+   *
+   * Resolves immediately if the element already exists. Otherwise, uses a MutationObserver on the parent
+   * to wait for the element to appear. Useful for waiting on React to mount a component.
+   *
+   * @param selector - The CSS selector to query for
+   * @param parent - Optional parent element to observe (default: document.body)
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves with the matched element
+   */
+  static waitForDomElement(selector: string, parent?: Element, timeout?: number): Promise<Element> {
+    const root = parent ?? document.body;
+
+    // If the element already exists, resolve immediately
+    const existing = root.querySelector(selector);
+    if (existing) {
+      return Promise.resolve(existing);
+    }
+
+    return new Promise<Element>((resolve, reject) => {
+      const state = { resolved: false };
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        const el = root.querySelector(selector);
+        if (el) {
+          state.resolved = true;
+          observer.disconnect();
+          resolve(el);
+        }
+      });
+      observer.observe(root, { childList: true, subtree: true });
+
+      // Only set up the timeout when a duration is provided; otherwise wait indefinitely
+      if (timeout !== undefined) {
+        setTimeout(() => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForDomElement timed out after ${timeout}ms waiting for "${selector}"`));
+        }, timeout);
+      }
+    });
+  }
+
+  /**
+   * Returns a promise that resolves when the given element has non-empty text content.
+   *
+   * Resolves immediately if the element already has text content. Otherwise, delegates to waitForDomChange
+   * with a filter that checks for non-empty text. Useful for waiting on React to render text into a DOM element.
+   *
+   * @param element - The DOM element to check for text content
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves when the element has text content, or rejects on timeout
+   */
+  static waitForDomContent(element: Element, timeout?: number): Promise<void> {
+    // If the element already has content, resolve immediately
+    if (element.textContent?.trim()) {
+      return Promise.resolve();
+    }
+
+    // Otherwise, wait for a DOM change that results in non-empty text content
+    return this.waitForDomChange(element, () => !!element.textContent?.trim(), timeout);
+  }
+
+  /**
+   * Returns a promise that resolves when a DOM mutation is observed on the given element.
+   *
+   * Uses a MutationObserver to detect changes (childList, subtree, characterData) without polling.
+   * Useful for waiting on React UI updates after a store change.
+   * When a filter is provided, the observer keeps listening until the filter returns true.
+   *
+   * @param element - The DOM element to observe for changes
+   * @param filter - Optional predicate evaluated on each mutation. When provided, only resolves when filter returns true
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves when the DOM changes (and passes the filter), or rejects on timeout
+   */
+  static waitForDomChange(element: Element, filter?: () => boolean, timeout?: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const state = { resolved: false };
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        if (filter && !filter()) return;
+        state.resolved = true;
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(element, { childList: true, subtree: true, characterData: true });
+
+      // Only set up the timeout when a duration is provided; otherwise wait indefinitely
+      if (timeout !== undefined) {
+        setTimeout(() => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForDomChange timed out after ${timeout}ms`));
+        }, timeout);
+      }
+    });
+  }
+
+  /**
+   * Polls a condition at short intervals until it returns true, then resolves.
+   *
+   * This is the preferred way to wait for an expected state change (e.g., store update, layer registration)
+   * rather than using a fixed delay. Delegates to `whenThisThen` from geoview-core utilities.
+   *
+   * @param condition - A predicate that returns true when the expected state is reached
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+   * @returns A promise that resolves with true when the condition is met, or rejects on timeout
+   */
+  static waitForCondition(condition: () => boolean, timeout?: number): Promise<boolean> {
+    return whenThisThen(condition, timeout);
+  }
+
+  /**
+   * Waits for React to fully settle after a state change.
+   *
+   * Uses two nested `requestAnimationFrame` calls followed by a `requestIdleCallback` to ensure
+   * that React's commit phase has completed, the browser has painted the updated DOM, and all
+   * `useEffect` callbacks and microtasks have run before resolving. This is more reliable than a
+   * single `requestIdleCallback` (which can fire between React's render and effect phases) and
+   * avoids the arbitrary fixed delays of `waitForFun`.
+   *
+   * Prefer `waitForCondition` when a specific expected outcome can be checked; use this method
+   * when you need a general "wait for React to finish" without knowing the exact condition.
+   *
+   * @returns A promise that resolves once React has rendered, painted, and executed effects
+   */
+  static waitForReactIdle(): Promise<void> {
+    return new Promise((resolve) => {
+      // First rAF: React's commit phase may still be in progress
+      requestAnimationFrame(() => {
+        // Second rAF: ensures the paint after commit has occurred
+        requestAnimationFrame(() => {
+          // Idle callback: fires after useEffect and any microtasks settle
+          (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => resolve());
+        });
+      });
+    });
+  }
+
+  /**
+   * Waits until the browser's main thread becomes idle using `requestIdleCallback`.
+   *
+   * This is useful for waiting until React has finished its render and commit phases, since the
+   * idle callback fires only after all pending tasks (renders, effects, layout) have completed.
+   * Prefer polling with `whenThisThen` for specific expected outcomes; use this when you need a
+   * lightweight "wait for React to settle" without knowing the exact condition to check.
+   *
+   * @returns A promise that resolves when the browser reports an idle period
+   */
+  static waitForBrowserIdle(): Promise<void> {
+    return new Promise((resolve) => {
+      (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(resolve);
+    });
+  }
+
+  /**
+   * Waits for a purely aesthetic delay to allow the test UI to visually catch up.
+   *
+   * This should only be used for display purposes (e.g., giving the human observer time to see
+   * intermediate state changes in the test runner UI). Never use this for functional synchronization.
+   *
+   * @param period - Optional delay in milliseconds (default: 5000)
+   * @returns A promise that resolves after the delay
+   */
+  static waitForFun(period = 5000): Promise<void> {
+    // Wait for the React UI to actually pick up on the store update
+    return delay(period);
+  }
+
+  // #endregion STATIC METHODS
 
   // #region EVENTS
 

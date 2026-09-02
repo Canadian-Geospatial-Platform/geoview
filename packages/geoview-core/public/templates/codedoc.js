@@ -517,6 +517,9 @@ function testSuiteCreateTable(plugin) {
     <div style="text-align:right;">
       Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
+    <div style="text-align:right;">
+      Duration: <span id="testsDuration-${mapId}">0</span>
+    </div>
     <button id="btnLaunchTest-${mapId}" class="btnLaunchTests" onclick="launchTests('${mapId}')" disabled="true">LAUNCH TESTS ${mapId} !</button>
     <br/><br/>
     <table id="tableResults-${mapId}" class="tableResults">
@@ -533,6 +536,58 @@ function testSuiteCreateTable(plugin) {
   `;
 
   return wrapper;
+}
+
+const testSuiteDurationTimers = {};
+
+function getTestSuiteDurationTimerKey(plugin, idPrefix = '') {
+  return `${idPrefix || 'default'}-${plugin.mapViewer.mapId}`;
+}
+
+function testSuiteStartLiveDuration(plugin, idPrefix = '') {
+  const prefix = idPrefix ? idPrefix + '-' : '';
+  const testsDurationSpan = document.getElementById(prefix + 'testsDuration-' + plugin.mapViewer.mapId);
+  if (!testsDurationSpan) return;
+
+  // Clear any stale timer before starting a new run.
+  testSuiteStopLiveDuration(plugin, idPrefix);
+
+  const timerKey = getTestSuiteDurationTimerKey(plugin, idPrefix);
+  const startedAt = Date.now();
+  const intervalId = setInterval(() => {
+    const duration = Date.now() - startedAt;
+    testsDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(duration);
+  }, 200);
+
+  testSuiteDurationTimers[timerKey] = {
+    intervalId,
+    startedAt,
+  };
+}
+
+function testSuiteStopLiveDuration(plugin, idPrefix = '', finalDurationMs) {
+  const timerKey = getTestSuiteDurationTimerKey(plugin, idPrefix);
+  const timerInfo = testSuiteDurationTimers[timerKey];
+  if (timerInfo) {
+    clearInterval(timerInfo.intervalId);
+    delete testSuiteDurationTimers[timerKey];
+  }
+
+  if (finalDurationMs !== undefined) {
+    const prefix = idPrefix ? idPrefix + '-' : '';
+    const testsDurationSpan = document.getElementById(prefix + 'testsDuration-' + plugin.mapViewer.mapId);
+    if (testsDurationSpan) {
+      testsDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(finalDurationMs);
+    }
+  }
+}
+
+function testSuiteGetLiveDuration(plugin, idPrefix = '') {
+  const timerKey = getTestSuiteDurationTimerKey(plugin, idPrefix);
+  const timerInfo = testSuiteDurationTimers[timerKey];
+  if (!timerInfo) return undefined;
+
+  return Date.now() - timerInfo.startedAt;
 }
 
 function testSuiteUpdateTotals(plugin, idPrefix = '') {
@@ -568,6 +623,22 @@ function testSuiteUpdateTotals(plugin, idPrefix = '') {
   if (testsDone) testsDone.textContent = plugin.getTestsDone();
   const testsTotal = document.getElementById(prefix + 'testsTotal-' + plugin.mapViewer.mapId);
   if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
+}
+
+function testSuiteUpdateTotalsDurations(plugin, idPrefix = '') {
+  const prefix = idPrefix ? idPrefix + '-' : '';
+  const testsDurationSpan = document.getElementById(prefix + 'testsDuration-' + plugin.mapViewer.mapId);
+  if (testsDurationSpan) {
+    const liveDuration = testSuiteGetLiveDuration(plugin, idPrefix);
+
+    // Always prefer live duration while a timer is active.
+    if (liveDuration !== undefined) {
+      testsDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(liveDuration);
+    } else if (plugin.getTestsRunning() === 0) {
+      const duration = plugin.getDurationAllSuites();
+      testsDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(duration);
+    }
+  }
 }
 
 function testSuiteUpdateGrandTotal(plugins) {
@@ -612,6 +683,23 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsDone.textContent = totalTestsDone;
   const testsTotal = document.getElementById('allSuitesTestsTotal');
   testsTotal.textContent = totalTestsTotal;
+}
+
+function testSuiteUpdateGrandTotalDurations(plugins) {
+  let maxDuration = 0;
+  const thePlugins = Object.values(plugins);
+  thePlugins.forEach((plugin) => {
+    let pluginDuration = plugin.getDurationAllSuites();
+    if (plugin.getTestsRunning() > 0) {
+      const liveDuration = testSuiteGetLiveDuration(plugin);
+      pluginDuration = liveDuration ?? pluginDuration;
+    }
+
+    maxDuration = Math.max(maxDuration, pluginDuration);
+  });
+
+  const allSuitesTotalDurationSpan = document.getElementById('allSuitesTotalDuration');
+  allSuitesTotalDurationSpan.innerText = cgpv.api.utilities.core.formatDuration(maxDuration);
 }
 
 function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, idPrefix = '') {
