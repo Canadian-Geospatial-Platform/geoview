@@ -73,9 +73,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Keep if running sequentially
+    const isRunningSequentially = this.getIsRunningSequentially();
+
     // Test adding layer
     const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
-    if (this.getIsRunningSequentially()) await pLayerEsriDynamicHistoFloods;
+    if (isRunningSequentially) await pLayerEsriDynamicHistoFloods;
 
     // Test adding layer EsriDynamic with Raster Layer inside, via Geocore UUID
     // GV Commented out for now, because the layer uuid has changed and the NRCan catalog is broken to go find the new uuid for this test
@@ -83,149 +86,149 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
     // Test true negative
     const pLayerEsriDynamicBadUrl = this.#layerTester.testAddEsriDynamicBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerEsriDynamicBadUrl;
+    if (isRunningSequentially) await pLayerEsriDynamicBadUrl;
 
     // Test adding layer
     const pLayerEsriFeatureForestIndustry = this.#layerTester.testAddEsriFeatureForestIndustry();
-    if (this.getIsRunningSequentially()) await pLayerEsriFeatureForestIndustry;
+    if (isRunningSequentially) await pLayerEsriFeatureForestIndustry;
 
     // Test true negative
     const pLayerEsriFeatureBadUrl = this.#layerTester.testAddEsriFeatureBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerEsriFeatureBadUrl;
+    if (isRunningSequentially) await pLayerEsriFeatureBadUrl;
 
     // Test adding layer
     const playerEsriFeatureInvalidGeometry = this.#layerTester.testAddEsriFeatureInvalidGeometry();
-    if (this.getIsRunningSequentially()) await playerEsriFeatureInvalidGeometry;
+    if (isRunningSequentially) await playerEsriFeatureInvalidGeometry;
 
     // Test adding layer
     const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
-    if (this.getIsRunningSequentially()) await pLayerEsriImageElevation;
+    if (isRunningSequentially) await pLayerEsriImageElevation;
 
     // Test true negative
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerEsriImageBadUrl;
+    if (isRunningSequentially) await pLayerEsriImageBadUrl;
 
     // Test adding layer OWS Mundialis
     const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
-    if (this.getIsRunningSequentially()) await pLayerWMSOWSMundialis;
+    if (isRunningSequentially) await pLayerWMSOWSMundialis;
 
     // Test adding layer
     const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
-    if (this.getIsRunningSequentially()) await pLayerWMSDatacubeOWSMSI;
+    if (isRunningSequentially) await pLayerWMSDatacubeOWSMSI;
 
     // Test adding layer
     const pLayerWMSDatacubeRingFireHalifax = this.#layerTester.testAddWMSLayerWithDatacubeRingOfFire();
-    if (this.getIsRunningSequentially()) await pLayerWMSDatacubeRingFireHalifax;
+    if (isRunningSequentially) await pLayerWMSDatacubeRingFireHalifax;
 
     // Test adding layer
     const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
-    if (this.getIsRunningSequentially()) await pLayerNonnaWithCors;
+    if (isRunningSequentially) await pLayerNonnaWithCors;
 
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerWMSBadUrl;
+    if (isRunningSequentially) await pLayerWMSBadUrl;
 
     // Test adding layer
     const pLayerWFSWithGeometCurrentConditions = this.#layerTester.testAddWFSLayerWithWithGeometCurrentConditions();
-    if (this.getIsRunningSequentially()) await pLayerWFSWithGeometCurrentConditions;
+    if (isRunningSequentially) await pLayerWFSWithGeometCurrentConditions;
 
     // Test true negative
     const pLayerWFSBadUrl = this.#layerTester.testAddWFSBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerWFSBadUrl;
+    if (isRunningSequentially) await pLayerWFSBadUrl;
 
     // Test true negative
     const pLayerWFSOkayUrlNoCap = this.#layerTester.testAddWFSOkayUrlNoCap();
-    if (this.getIsRunningSequentially()) await pLayerWFSOkayUrlNoCap;
+    if (isRunningSequentially) await pLayerWFSOkayUrlNoCap;
 
     // Test adding layer
     const pLayerGeoJSONWithPolygons = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
-    if (this.getIsRunningSequentially()) await pLayerGeoJSONWithPolygons;
+    if (isRunningSequentially) await pLayerGeoJSONWithPolygons;
 
     // Test true negative
     const pLayerGeoJSonBadUrl = this.#layerTester.testAddGeoJSONBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerGeoJSonBadUrl;
+    if (isRunningSequentially) await pLayerGeoJSonBadUrl;
 
     // Test adding layer
     const pLayerCSVStationList = this.#layerTester.testAddCSVWithStationList();
-    if (this.getIsRunningSequentially()) await pLayerCSVStationList;
+    if (isRunningSequentially) await pLayerCSVStationList;
 
     // Test true negative
     const pLayerCSVBadUrl = this.#layerTester.testAddCSVWithBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerCSVBadUrl;
+    if (isRunningSequentially) await pLayerCSVBadUrl;
 
     // Test adding layer
     const pLayerOGCFeatureWithPygeoapi = this.#layerTester.testAddOGCFeatureWithPygeoapi();
-    if (this.getIsRunningSequentially()) await pLayerOGCFeatureWithPygeoapi;
+    if (isRunningSequentially) await pLayerOGCFeatureWithPygeoapi;
 
     // Test true negative
     const pLayerOGCFeatureBadUrl = this.#layerTester.testAddOGCFeatureWithBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerOGCFeatureBadUrl;
+    if (isRunningSequentially) await pLayerOGCFeatureBadUrl;
 
     // Test adding layer
     const pLayerWKBWithSouthAfrica = this.#layerTester.testAddWKBWithSouthAfrica();
-    if (this.getIsRunningSequentially()) await pLayerWKBWithSouthAfrica;
+    if (isRunningSequentially) await pLayerWKBWithSouthAfrica;
 
     // Test true negative
     const pLayerWKBBadUrl = this.#layerTester.testAddWKBWithBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerWKBBadUrl;
+    if (isRunningSequentially) await pLayerWKBBadUrl;
 
     // Test adding layer
     const pLayerKMLWithTornado = this.#layerTester.testAddKMLWithTornado();
-    if (this.getIsRunningSequentially()) await pLayerKMLWithTornado;
+    if (isRunningSequentially) await pLayerKMLWithTornado;
 
     // Test true negative
     const pLayerKMLBadUrl = this.#layerTester.testAddKMLWithBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerKMLBadUrl;
+    if (isRunningSequentially) await pLayerKMLBadUrl;
 
     // Test adding layer
     const pLayerGeoTIFFVegetation = this.#layerTester.testAddGeotiffLayerWithDatacubeVegetation();
-    if (this.getIsRunningSequentially()) await pLayerGeoTIFFVegetation;
+    if (isRunningSequentially) await pLayerGeoTIFFVegetation;
 
     // Test true negative
     const pLayerGeoTIFFBadUrl = this.#layerTester.testAddGeoTIFFWithBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerGeoTIFFBadUrl;
+    if (isRunningSequentially) await pLayerGeoTIFFBadUrl;
 
     // Test adding layer
     const pLayerWMTSWorldTimezones = this.#layerTester.testAddWMTSWorldTimezones();
-    if (this.getIsRunningSequentially()) await pLayerWMTSWorldTimezones;
+    if (isRunningSequentially) await pLayerWMTSWorldTimezones;
 
     // Test true negative
     const pLayerWMTSBadUrl = this.#layerTester.testAddWMTSBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerWMTSBadUrl;
+    if (isRunningSequentially) await pLayerWMTSBadUrl;
 
     // Test adding layer
     const pLayerXYZTilesOSM = this.#layerTester.testAddXYZTilesOSM();
-    if (this.getIsRunningSequentially()) await pLayerXYZTilesOSM;
+    if (isRunningSequentially) await pLayerXYZTilesOSM;
 
     // Test true negative
     const pLayerXYZTilesBadUrl = this.#layerTester.testAddXYZTilesBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerXYZTilesBadUrl;
+    if (isRunningSequentially) await pLayerXYZTilesBadUrl;
 
     // Test adding layer
     const pLayerVectorTilesCBMT = this.#layerTester.testAddVectorTilesCBMT();
-    if (this.getIsRunningSequentially()) await pLayerVectorTilesCBMT;
+    if (isRunningSequentially) await pLayerVectorTilesCBMT;
 
     // Test true negative
     const pLayerVectorTilesBadUrl = this.#layerTester.testAddVectorTilesBadUrl();
-    if (this.getIsRunningSequentially()) await pLayerVectorTilesBadUrl;
+    if (isRunningSequentially) await pLayerVectorTilesBadUrl;
 
     // Test initial settings cascade
     const pInitialSettingsCascade = this.#layerTester.testInitialSettingsCascade();
-    if (this.getIsRunningSequentially()) await pInitialSettingsCascade;
+    if (isRunningSequentially) await pInitialSettingsCascade;
 
     // Test geocore custom inline override scenarios
     const pGeocoreInlineListOverride = this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
-    if (this.getIsRunningSequentially()) await pGeocoreInlineListOverride;
+    if (isRunningSequentially) await pGeocoreInlineListOverride;
 
     const pGeocoreSimplifiedNameOverride = this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
-    if (this.getIsRunningSequentially()) await pGeocoreSimplifiedNameOverride;
+    if (isRunningSequentially) await pGeocoreSimplifiedNameOverride;
 
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
-    if (this.getIsRunningSequentially()) await pEsriDynamicDomainField;
+    if (isRunningSequentially) await pEsriDynamicDomainField;
 
     const pEsriFeatureDomainField = this.#layerTester.testAddEsriFeatureWithDomainField();
-    if (this.getIsRunningSequentially()) await pEsriFeatureDomainField;
+    if (isRunningSequentially) await pEsriFeatureDomainField;
 
     // Resolve when all parallel tests are done
     await Promise.all([

@@ -372,6 +372,7 @@ export class DataTableTester extends GVAbstractTester {
    */
   testFilterByExtentOnGeoJSONOntario(): Promise<Test<unknown>> {
     const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
+    const MAP_WIDTH_WHEN_3_FEATURES_SHOW = 1747;
 
     return this.test(
       'Test filter-by-extent on GeoJSON layer (zoom to Ontario)...',
@@ -393,25 +394,21 @@ export class DataTableTester extends GVAbstractTester {
         test.addStep('Waiting for filter-results-summary to render...');
         const summaryEl = await GVAbstractTester.waitForDomElement(`#${this.getMapId()} .filter-results-summary`);
 
-        // Start observing for DOM change, then trigger the store change
-        test.addStep('Enabling filter by extent...');
-        let domChanged = GVAbstractTester.waitForDomChange(summaryEl);
+        // Trigger the store change
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
 
-        // Wait for the UI to react to the store change
-        await domChanged;
+        // Wait for react to update the content
+        await GVAbstractTester.waitForReactIdle();
 
         // Read DOM summary text with filter enabled
         test.addStep('Reading filter-results-summary with extent filter ON...');
         const summaryTextEnabled = summaryEl.textContent;
 
-        // Start observing for DOM change, then disable filter by extent
-        test.addStep('Disabling filter by extent...');
-        domChanged = GVAbstractTester.waitForDomChange(summaryEl);
+        // Disable filter by extent
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
 
-        // Wait for the UI to react to the store change
-        await domChanged;
+        // Wait for react to update the content
+        await GVAbstractTester.waitForReactIdle();
 
         // Read DOM summary text with filter disabled
         test.addStep('Reading filter-results-summary with extent filter OFF...');
@@ -421,8 +418,15 @@ export class DataTableTester extends GVAbstractTester {
       },
       (test, result) => {
         const { summaryTextEnabled, summaryTextDisabled } = result as { summaryTextEnabled: string; summaryTextDisabled: string };
-        test.addStep(`Verifying extent filter shows "2 feature(s)" (got "${summaryTextEnabled}")...`);
-        Test.assertIsEqual(summaryTextEnabled.includes('2'), true);
+
+        // If the map width is greater than map width when 3 features show
+        let includeCount = '2';
+        if (this.getMapViewer().map.getSize()![0] >= MAP_WIDTH_WHEN_3_FEATURES_SHOW) {
+          includeCount = '3';
+        }
+
+        test.addStep(`Verifying extent filter shows correct number of features (got "${summaryTextEnabled}")...`);
+        Test.assertIsEqual(summaryTextEnabled.includes(includeCount), true);
 
         test.addStep(`Verifying without extent filter shows "3 of 4 row(s) filtered" (got "${summaryTextDisabled}")...`);
         Test.assertIsEqual(summaryTextDisabled.includes('3'), true);
