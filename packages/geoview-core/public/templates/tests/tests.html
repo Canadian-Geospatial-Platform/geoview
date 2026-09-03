@@ -1355,21 +1355,21 @@
           runAllContainer.appendChild(htmlSectionClone);
         }
 
-        // Update the VPN and heavy tests toggle button based on the plugin's current state
+        // Update the VPN and heavy tests toggle button based on the plugin's configuration defined in the code
         const btnRunningVPN = document.getElementById('vpnToggle');
         if (btnRunningVPN && plugin.getIsRunningOnVPN()) {
           btnRunningVPN.checked = true;
           toggleVPN(true);
         }
 
-        // Update the run sequentially toggle button based on the plugin's current state
+        // Update the run sequentially toggle button based on the plugin's configuration defined in the code
         const btnRunningSequentially = document.getElementById('runSequentially');
         if (btnRunningSequentially && plugin.getIsRunningSequentially()) {
           btnRunningSequentially.checked = true;
           toggleRunSequentially(true);
         }
 
-        // Update the heavy tests toggle button based on the plugin's current state
+        // Update the heavy tests toggle button based on the plugin's configuration defined in the code
         const btnRunningHeavyTests = document.getElementById('heavyTestsToggle');
         if (btnRunningHeavyTests && plugin.getIsRunningHeavyTests()) {
           btnRunningHeavyTests.checked = true;
