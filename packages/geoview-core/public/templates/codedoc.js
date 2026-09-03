@@ -515,7 +515,7 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>/<span id="testsTotalFinal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
       Duration: <span id="testsDuration-${mapId}">0</span>
@@ -623,6 +623,8 @@ function testSuiteUpdateTotals(plugin, idPrefix = '') {
   if (testsDone) testsDone.textContent = plugin.getTestsDone();
   const testsTotal = document.getElementById(prefix + 'testsTotal-' + plugin.mapViewer.mapId);
   if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
+  const testsTotalFinal = document.getElementById(prefix + 'testsTotalFinal-' + plugin.mapViewer.mapId);
+  if (testsTotalFinal) testsTotalFinal.textContent = plugin.getTestsTotalFinal();
 }
 
 function testSuiteUpdateTotalsDurations(plugin, idPrefix = '') {
@@ -650,6 +652,7 @@ function testSuiteUpdateGrandTotal(plugins) {
   let totalTestsDoneFailed = 0;
   let totalTestsDone = 0;
   let totalTestsTotal = 0;
+  let totalTestsTotalFinal = 0;
   const thePlugins = Object.values(plugins);
   thePlugins.forEach((plugin) => {
     totalSuitesCompleted += plugin.getSuitesCompleted();
@@ -660,6 +663,7 @@ function testSuiteUpdateGrandTotal(plugins) {
     totalTestsDoneFailed += plugin.getTestsDoneFailed();
     totalTestsDone += plugin.getTestsDone();
     totalTestsTotal += plugin.getTestsTotal();
+    totalTestsTotalFinal += plugin.getTestsTotalFinal();
   });
   const suitesCompleted = document.getElementById('allSuitesCompleted');
   suitesCompleted.textContent = totalSuitesCompleted;
@@ -683,6 +687,8 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsDone.textContent = totalTestsDone;
   const testsTotal = document.getElementById('allSuitesTestsTotal');
   testsTotal.textContent = totalTestsTotal;
+  const testsTotalFinal = document.getElementById('allSuitesTestsTotalFinal');
+  testsTotalFinal.textContent = totalTestsTotalFinal;
 }
 
 function testSuiteUpdateGrandTotalDurations(plugins) {

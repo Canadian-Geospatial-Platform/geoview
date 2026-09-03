@@ -30,7 +30,7 @@ export abstract class AbstractTestSuite {
   #isRunningOnVPN = false;
 
   /** Indicates whether the plugin is running the heavy tests */
-  #isRunningHeavyTests = true;
+  #isRunningHeavyTests = false;
 
   /** Indicates whether the test suite should force sequential execution of tests */
   #isRunningSequentially = false;
@@ -55,6 +55,9 @@ export abstract class AbstractTestSuite {
    * Mustoverride function to provide a description, in Html format, for the Test Suite.
    */
   abstract getDescriptionAsHtml(): string;
+
+  /** Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded. */
+  abstract getTestsTotalFinal(): number;
 
   /**
    * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
