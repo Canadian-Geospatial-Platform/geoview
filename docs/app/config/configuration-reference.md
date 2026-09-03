@@ -135,7 +135,7 @@ When writing or editing map configuration JSON files, properties **must** follow
 | 8     | `corePackages`       | No       | Core plugin packages to load               |
 | 9     | `globalSettings`     | No       | Universal map settings                     |
 | 10    | `serviceUrls`        | No       | Override service endpoints                 |
-| 11    | `theme`              | No       | Display theme (`geo.ca`, `dark`, `light`)  |
+| 11    | `theme`              | No       | Display theme (`geo.ca`, `dark`, `light`, `canada.ca`) |
 | 12    | `corePackagesConfig` | No       | Configuration for core packages            |
 | 13    | `externalPackages`   | No       | External plugin packages                   |
 
@@ -783,7 +783,7 @@ serviceUrls?: {
 Visual theme for the map interface.
 
 ```typescript
-theme?: "dark" | "light" | "geo.ca";
+theme?: "dark" | "light" | "geo.ca" | "canada.ca";
 ```
 
 **Valid Values:**
@@ -791,6 +791,7 @@ theme?: "dark" | "light" | "geo.ca";
 - `"dark"` - Dark theme
 - `"light"` - Light theme
 - `"geo.ca"` - Default Geo.ca theme
+- `"canada.ca"` - Government of Canada Federal Identity Program-inspired theme
 
 **Default:** `"geo.ca"`
 

@@ -59,7 +59,9 @@ The class also has a method `.darken(coefficient, opacity)` for getting a darker
 
 ## Customizing An Existing Theme
 
-The system currently has 3 themes `dark`, `light` and `geo.ca`. All themes are in the [style folder](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/ui/style).
+The system currently has 4 themes: `dark`, `light`, `geo.ca`, and `canada.ca`. All themes are in the [style folder](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/ui/style).
+
+The `canada.ca` theme uses Government of Canada-inspired colours with `#26374a` as the main colour and a Helvetica font stack. The default theme remains `geo.ca`.
 
 Our themes are basically involve defining the geoView colors. Below is an example of the dark theme file.
 

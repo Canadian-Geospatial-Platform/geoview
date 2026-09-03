@@ -876,6 +876,14 @@ Use theme tokens instead of hard-coded colors/sizes:
 - **Font sizes**: `theme.palette.geoViewFontSize.sm`, `.default`, `.lg`
 - **Spacing**: `theme.spacing(1)` for standard MUI spacing
 
+### Display Theme Registration
+
+Display themes are registered across several surfaces. When adding or renaming a theme, update `TypeDisplayTheme` and `VALID_DISPLAY_THEME` in `map-schema-types.ts`, the `TypeDisplayTheme` enum in `schema.json`, `getThemeOptions()` in `theme.tsx`, `MapViewer` theme JSDoc, theme docs, sandbox help text, navigator theme selectors (`demos-navigator.html` and `layers-navigator.html`), and release-testing pages.
+
+Theme palettes live in `packages/geoview-core/src/ui/style/*-theme.ts` and should spread `defaultGeoViewColors` before overriding specific `IGeoViewColors` entries. If a theme needs its own typography, export a theme font and pass it to `generateThemeOptions(geoViewColors, themeFont)` so the base typography and `h1`-`h5` heading styles use the same family.
+
+When adding a theme case to `rt-18-global-settings.html`, insert a dedicated map configuration rather than replacing an existing scenario. Renumber each following map's DOM id, heading, and configuration-snippet target together, then update the matching map numbers in `18-global-settings.md`.
+
 ### Combining sx Styles
 
 When combining multiple sx style objects (e.g., for conditional styling), use the array syntax with `SxProps` cast:
@@ -1090,7 +1098,7 @@ When creating or editing map configuration JSON files (navigator demos, test con
 8. corePackages        — Core plugin packages to load
 9. globalSettings      — Universal map settings (sublayer removal, disabled types)
 10. serviceUrls        — Override service endpoints
-11. theme              — Display theme (geo.ca, dark, light)
+11. theme              — Display theme (geo.ca, canada.ca, dark, light)
 12. corePackagesConfig — Configuration for core packages
 13. externalPackages   — External plugin packages
 ```
