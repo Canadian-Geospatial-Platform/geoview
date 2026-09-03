@@ -74,7 +74,8 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
     return Promise.resolve();
   }
 

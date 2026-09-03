@@ -69,52 +69,55 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Keep if running sequentially
+    const isRunningSequentially = this.getIsRunningSequentially();
+
     // Test validateAndPingUrl (simple)
     const pSimplePingValid = this.#coreTester.testSimplePingValidReachable();
-    if (this.getIsRunningSequentially()) await pSimplePingValid;
+    if (isRunningSequentially) await pSimplePingValid;
 
     const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
-    if (this.getIsRunningSequentially()) await pSimplePingValid;
+    if (isRunningSequentially) await pSimplePingValid;
 
     const pSimplePingXyz401 = this.#coreTester.testSimplePingXyzTileUrlUnauthorized();
-    if (this.getIsRunningSequentially()) await pSimplePingXyz401;
+    if (isRunningSequentially) await pSimplePingXyz401;
 
     // Test validateAndPingUrlOGC (OGC-aware)
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
-    if (this.getIsRunningSequentially()) await pPingInvalidFormat;
+    if (isRunningSequentially) await pPingInvalidFormat;
 
     const pPingUnreachable = this.#coreTester.testValidateAndPingUrlUnreachable();
-    if (this.getIsRunningSequentially()) await pPingUnreachable;
+    if (isRunningSequentially) await pPingUnreachable;
 
     const pPingWmsService = this.#coreTester.testValidateAndPingUrlWmsService();
-    if (this.getIsRunningSequentially()) await pPingWmsService;
+    if (isRunningSequentially) await pPingWmsService;
 
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
-    if (this.getIsRunningSequentially()) await pGeometryCollectionLegendStyles;
+    if (isRunningSequentially) await pGeometryCollectionLegendStyles;
 
     // Test GeoUtilities service metadata functions
     const pWmsMetadata = this.#coreTester.testProxyGetWMSServiceMetadata();
-    if (this.getIsRunningSequentially()) await pWmsMetadata;
+    if (isRunningSequentially) await pWmsMetadata;
 
     const pWmsMetadataBadUrl = this.#coreTester.testProxyGetWMSServiceMetadataBadUrl();
-    if (this.getIsRunningSequentially()) await pWmsMetadataBadUrl;
+    if (isRunningSequentially) await pWmsMetadataBadUrl;
 
     const pWfsMetadata = this.#coreTester.testProxyGetWFSServiceMetadata();
-    if (this.getIsRunningSequentially()) await pWfsMetadata;
+    if (isRunningSequentially) await pWfsMetadata;
 
     const pWfsMetadataBadUrl = this.#coreTester.testProxyGetWFSServiceMetadataBadUrl();
-    if (this.getIsRunningSequentially()) await pWfsMetadataBadUrl;
+    if (isRunningSequentially) await pWfsMetadataBadUrl;
 
     const pWmtsMetadata = this.#coreTester.testProxyGetWMTSServiceMetadata();
-    if (this.getIsRunningSequentially()) await pWmtsMetadata;
+    if (isRunningSequentially) await pWmtsMetadata;
 
     const pWmtsMetadataBadUrl = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
-    if (this.getIsRunningSequentially()) await pWmtsMetadataBadUrl;
+    if (isRunningSequentially) await pWmtsMetadataBadUrl;
 
     // Test GeoUtilities fetch with proxy fallback
     // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
-    if (this.getIsRunningSequentially()) await pFetchJsonProxyBadUrl;
+    if (isRunningSequentially) await pFetchJsonProxyBadUrl;
 
     // Resolve when all
     return Promise.all([
