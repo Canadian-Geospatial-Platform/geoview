@@ -537,9 +537,6 @@ export class UIController extends AbstractMapViewerController {
    * @returns A promise that resolves when the guide has been created and stored
    */
   async createGuide(): Promise<void> {
-    // Start guide loading tracker
-    // logger.logMarkerStart('map-guide');
-
     const mapId = this.getMapId();
     const language = this.#uiDomain.getLanguage();
 
@@ -555,9 +552,6 @@ export class UIController extends AbstractMapViewerController {
 
       // Save in store
       setStoreAppGuide(mapId, guide);
-
-      // Check guide loading tracker
-      // logger.logMarkerCheck('map-guide', 'for guide to be loaded');
     } catch (error: unknown) {
       // Log error
       logger.logError(mapId, error, 'createGuide');
