@@ -126,10 +126,16 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
  * to match GeoView's design system.
  *
  * @param geoViewColors - Optional color palette to generate theme from
+ * @param themeFont - Optional font family stack to apply to the generated theme
  * @returns Complete MUI ThemeOptions configuration
  */
-export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
+export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors, themeFont = font): ThemeOptions => {
   logger.logTraceCore('ui/style/themeOptionsGenerator - generateThemeOptions', geoViewColors);
+
+  const themeHeadingStyles = {
+    ...headingStyles,
+    fontFamily: themeFont,
+  };
 
   const themeOptions: ThemeOptions = {
     palette: {
@@ -210,12 +216,12 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
     typography: {
       // fontSize: `${defaultFontSize}rem`,
       htmlFontSize: 16,
-      fontFamily: font,
-      h1: headingStyles,
-      h2: headingStyles,
-      h3: headingStyles,
-      h4: headingStyles,
-      h5: headingStyles,
+      fontFamily: themeFont,
+      h1: themeHeadingStyles,
+      h2: themeHeadingStyles,
+      h3: themeHeadingStyles,
+      h4: themeHeadingStyles,
+      h5: themeHeadingStyles,
       h6: {
         fontWeight: 400,
       },
