@@ -74,161 +74,164 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Keep if running sequentially
+    const isRunningSequentially = this.getIsRunningSequentially();
+
     // Test EsriDynamic HistoricalFlood config
     const pInitEsriDynamicHistoFlood = this.#configTester.testInitEsriDynamicWithHistoricalFlood();
-    if (this.getIsRunningSequentially()) await pInitEsriDynamicHistoFlood;
+    if (isRunningSequentially) await pInitEsriDynamicHistoFlood;
 
     // Test EsriDynamic CESI config
     const pInitEsriDynamicCESI = this.#configTester.testInitEsriDynamicWithCESI();
-    if (this.getIsRunningSequentially()) await pInitEsriDynamicCESI;
+    if (isRunningSequentially) await pInitEsriDynamicCESI;
 
     // Test a true negative
     const pInitEsriDynamicBadUrl = this.#configTester.testInitEsriDynamicBadUrl();
-    if (this.getIsRunningSequentially()) await pInitEsriDynamicBadUrl;
+    if (isRunningSequentially) await pInitEsriDynamicBadUrl;
 
     // Process the EsriDynamic Historical Flood
     const pProcessEsriDynamicHistoFlood = this.#configTester.testProcessEsriDynamicHistoricalFlood();
-    if (this.getIsRunningSequentially()) await pProcessEsriDynamicHistoFlood;
+    if (isRunningSequentially) await pProcessEsriDynamicHistoFlood;
 
     // Test EsriFeature TorontoNeighbourhoods config
     const pEsriFeatureToronto = this.#configTester.testInitEsriFeatureWithTorontoNeighbourhoods();
-    if (this.getIsRunningSequentially()) await pEsriFeatureToronto;
+    if (isRunningSequentially) await pEsriFeatureToronto;
 
     // Test EsriFeature HistoricalFloodEvents config
     const pEsriFeatureHisto = this.#configTester.testInitEsriFeatureWithHistoricalFloodEvents();
-    if (this.getIsRunningSequentially()) await pEsriFeatureHisto;
+    if (isRunningSequentially) await pEsriFeatureHisto;
 
     // Test EsriFeature Forest Industry config
     const pEsriFeatureForest = this.#configTester.testInitEsriFeatureWithForestIndustry();
-    if (this.getIsRunningSequentially()) await pEsriFeatureForest;
+    if (isRunningSequentially) await pEsriFeatureForest;
 
     // Test a true negative
     const pEsriFeatureBadUrl = this.#configTester.testInitEsriFeatureBadUrl();
-    if (this.getIsRunningSequentially()) await pEsriFeatureBadUrl;
+    if (isRunningSequentially) await pEsriFeatureBadUrl;
 
     // Process the EsriFeature Toronto Neighbourhoods
     const pProcessEsriFeatureToronto = this.#configTester.testProcessEsriFeatureWithTorontoNeighbourhoods();
-    if (this.getIsRunningSequentially()) await pProcessEsriFeatureToronto;
+    if (isRunningSequentially) await pProcessEsriFeatureToronto;
 
     // Test EsriImage Elevation config
     const pInitEsriImage = this.#configTester.testInitEsriImageWithElevation();
-    if (this.getIsRunningSequentially()) await pInitEsriImage;
+    if (isRunningSequentially) await pInitEsriImage;
 
     // Test a true negative
     const pInitEsriImageBadUrl = this.#configTester.testInitEsriImageBadUrl();
-    if (this.getIsRunningSequentially()) await pInitEsriImageBadUrl;
+    if (isRunningSequentially) await pInitEsriImageBadUrl;
 
     // Test EsriImage Elevation config
     const pProcessEsriImage = this.#configTester.testInitEsriImageWithElevation();
-    if (this.getIsRunningSequentially()) await pProcessEsriImage;
+    if (isRunningSequentially) await pProcessEsriImage;
 
     // Test WMS OWSMundialis config
     const pWMSMundialis = this.#configTester.testInitWMSLayerWithOWSMundialis();
-    if (this.getIsRunningSequentially()) await pWMSMundialis;
+    if (isRunningSequentially) await pWMSMundialis;
 
     // Test WMS OWSMundialis config no full sub layers
     const pWMSMundialisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSMundialisNoFullSubLayers();
-    if (this.getIsRunningSequentially()) await pWMSMundialisNoFullSubLayers;
+    if (isRunningSequentially) await pWMSMundialisNoFullSubLayers;
 
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testInitWMSLayerWithDatacubeMSI();
-    if (this.getIsRunningSequentially()) await pWMSDatacubeMSI;
+    if (isRunningSequentially) await pWMSDatacubeMSI;
 
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSINoFullSubLayers = this.#configTester.testInitWMSLayerWithDatacubeMSINoFullSubLayers();
-    if (this.getIsRunningSequentially()) await pWMSDatacubeMSINoFullSubLayers;
+    if (isRunningSequentially) await pWMSDatacubeMSINoFullSubLayers;
 
     // Test a true negative
     const pWMSBadUrl = this.#configTester.testInitWMSBadUrl();
-    if (this.getIsRunningSequentially()) await pWMSBadUrl;
+    if (isRunningSequentially) await pWMSBadUrl;
 
     // Process the WMS Airborne Radioactivity
     const pProcessWMSAirborneRadioactivity = this.#configTester.testProcessWMSAirborneRadioactivity(this.getIsRunningOnVPN());
-    if (this.getIsRunningSequentially()) await pProcessWMSAirborneRadioactivity;
+    if (isRunningSequentially) await pProcessWMSAirborneRadioactivity;
 
     // Test WFS CurrentCondition config
     const pWFSCurrentConditions = this.#configTester.testInitWFSLayerWithGeometCurrentConditions();
-    if (this.getIsRunningSequentially()) await pWFSCurrentConditions;
+    if (isRunningSequentially) await pWFSCurrentConditions;
 
     // Test a true negative
     const pWFSBadUrl = this.#configTester.testInitWFSBadUrl();
-    if (this.getIsRunningSequentially()) await pWFSBadUrl;
+    if (isRunningSequentially) await pWFSBadUrl;
 
     // Test a true negative
     const pWFSOkayUrlNoCap = this.#configTester.testInitWFSOkayUrlNoCap();
-    if (this.getIsRunningSequentially()) await pWFSOkayUrlNoCap;
+    if (isRunningSequentially) await pWFSOkayUrlNoCap;
 
     // Process the WFS Geomet
     const pWFSGeomet = this.#configTester.testProcessWFSGeomet();
-    if (this.getIsRunningSequentially()) await pWFSGeomet;
+    if (isRunningSequentially) await pWFSGeomet;
 
     // Test OGC Feature config
     const pOGcFeature = this.#configTester.testOGCFeatureWithPygeoapi();
-    if (this.getIsRunningSequentially()) await pOGcFeature;
+    if (isRunningSequentially) await pOGcFeature;
 
     // Test a true negative
     const pOgcFeatureBadUrl = this.#configTester.testOGCFeatureBadUrl();
-    if (this.getIsRunningSequentially()) await pOgcFeatureBadUrl;
+    if (isRunningSequentially) await pOgcFeatureBadUrl;
 
     // Test a GeoJSON Metadata.meta config
     const pGeoJson = this.#configTester.testGeojsonWithMetadataMeta();
-    if (this.getIsRunningSequentially()) await pGeoJson;
+    if (isRunningSequentially) await pGeoJson;
 
     // Test a GeoJSON GeometryCollection sample config
     const pGeoJsonGeometryCollection = this.#configTester.testGeojsonWithGeometryCollection();
-    if (this.getIsRunningSequentially()) await pGeoJsonGeometryCollection;
+    if (isRunningSequentially) await pGeoJsonGeometryCollection;
 
     // Test a skip
     const pGeoJsonBadUrlSkip = this.#configTester.testGeoJSONBadUrlExpectSkip();
-    if (this.getIsRunningSequentially()) await pGeoJsonBadUrlSkip;
+    if (isRunningSequentially) await pGeoJsonBadUrlSkip;
 
     // Test a true negative
     const pGeoJsonBadUrlFail = this.#configTester.testGeoJSONBadUrlExpectError();
-    if (this.getIsRunningSequentially()) await pGeoJsonBadUrlFail;
+    if (isRunningSequentially) await pGeoJsonBadUrlFail;
 
     // Process the Geojson Polygons
     const pGeoJsonPolygons = this.#configTester.testProcessGeoJsonPolygons();
-    if (this.getIsRunningSequentially()) await pGeoJsonPolygons;
+    if (isRunningSequentially) await pGeoJsonPolygons;
 
     // Test a CSV file
     const pCSV = this.#configTester.testCSVWithStationList();
-    if (this.getIsRunningSequentially()) await pCSV;
+    if (isRunningSequentially) await pCSV;
 
     // Test a skip
     const pCSVBadUrlSkip = this.#configTester.testCSVBadUrlExpectSkip();
-    if (this.getIsRunningSequentially()) await pCSVBadUrlSkip;
+    if (isRunningSequentially) await pCSVBadUrlSkip;
 
     // Test a WKB file
     const pWKB = this.#configTester.testWKBWithSouthAfrica();
-    if (this.getIsRunningSequentially()) await pWKB;
+    if (isRunningSequentially) await pWKB;
 
     // Test a true negative
     const pWKBBadUrlFail = this.#configTester.testWKBBadUrlExpectFail();
-    if (this.getIsRunningSequentially()) await pWKBBadUrlFail;
+    if (isRunningSequentially) await pWKBBadUrlFail;
 
     // Test a KML file
     const pKMLTornado = this.#configTester.testKMLWithTornado();
-    if (this.getIsRunningSequentially()) await pKMLTornado;
+    if (isRunningSequentially) await pKMLTornado;
 
     // Test a skip
     const pKMLSkip = this.#configTester.testKMLBadUrlExpectSkip();
-    if (this.getIsRunningSequentially()) await pKMLSkip;
+    if (isRunningSequentially) await pKMLSkip;
 
     // Test a KML file
     const pLayerGeoTIFFVegetation = this.#configTester.testGeoTIFFWithVegetation();
-    if (this.getIsRunningSequentially()) await pLayerGeoTIFFVegetation;
+    if (isRunningSequentially) await pLayerGeoTIFFVegetation;
 
     // Test a skip
     const pGeoTIFFSkip = this.#configTester.testGeoTIFFBadUrlExpectSkip();
-    if (this.getIsRunningSequentially()) await pGeoTIFFSkip;
+    if (isRunningSequentially) await pGeoTIFFSkip;
 
     // Test a Geocore
     const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
-    if (this.getIsRunningSequentially()) await pGeocoreAirborne;
+    if (isRunningSequentially) await pGeocoreAirborne;
 
     // Test settings cascade to sublayers
     const pSettingsCascadeToSublayers = this.#configTester.testSettingsCascadeToSublayers();
-    if (this.getIsRunningSequentially()) await pSettingsCascadeToSublayers;
+    if (isRunningSequentially) await pSettingsCascadeToSublayers;
 
     // Resolve when all
     return Promise.all([
