@@ -6,6 +6,8 @@ const { WebpackBundleSizeAnalyzerPlugin } = require('webpack-bundle-size-analyze
 const CompressionPlugin = require('compression-webpack-plugin');
 const zlib = require('zlib');
 
+// Release build (clean version) unless the deploy explicitly marks it as a dev/preview (e.g. gh-pages from develop)
+process.env.GEOVIEW_BUILD_IS_DEV = process.env.GEOVIEW_BUILD_IS_DEV ?? 'false';
 const common = require('./webpack.common');
 
 const config = {

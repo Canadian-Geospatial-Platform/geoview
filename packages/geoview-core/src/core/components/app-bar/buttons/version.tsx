@@ -26,6 +26,8 @@ export type TypeAppVersion = {
   minor: number;
   patch: number;
   timestamp: string;
+  /** Optional build suffix (e.g. 'dev.a1b2c3d') appended for development builds; empty for release builds. */
+  suffix?: string;
 };
 
 /**
@@ -180,7 +182,9 @@ export default function Version(): JSX.Element {
                       {t('appbar.repoLink')}
                     </Link>
                   </Box>
-                  <Typography component="li">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}`}</Typography>
+                  <Typography component="li">{`v.${__VERSION__.major}.${__VERSION__.minor}.${__VERSION__.patch}${
+                    __VERSION__.suffix ? `-${__VERSION__.suffix}` : ''
+                  }`}</Typography>
                   <Typography component="li">
                     <time dateTime={DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}>
                       {DateMgt.formatDate(__VERSION__.timestamp, 'YYYY-MM-DD')}

@@ -11,9 +11,16 @@ const packageJSON = require('./package.json');
 // get date, version numbers and the hash of the current commit
 const date = new Date().toISOString();
 const [major, minor, patch] = packageJSON.version.split('.');
-const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
+const hashRaw = childProcess.execSync('git rev-parse HEAD').toString().trim();
+const hash = JSON.stringify(hashRaw);
+const shortHash = hashRaw.substring(0, 7);
 
-console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
+// Development builds (serve, build-dev, gh-pages preview) are tagged with a '-dev.<shortHash>' suffix so users
+// can tell them apart from official releases. Only webpack.prod.js sets GEOVIEW_BUILD_IS_DEV to 'false'.
+const isDevBuild = process.env.GEOVIEW_BUILD_IS_DEV !== 'false';
+const versionSuffix = isDevBuild ? `dev.${shortHash}` : '';
+
+console.log(`Build CGP Viewer: ${major}.${minor}.${patch}${versionSuffix ? `-${versionSuffix}` : ''} - ${date}`);
 
 // inject all sample files
 const multipleHtmlPluginsSamples = globSync('./public/templates/*.html')
@@ -94,7 +101,7 @@ const config = {
   cache: {
     type: 'filesystem',
     buildDependencies: {
-      config: [__filename],
+      config: [path.resolve(__dirname, 'webpack.common.js')],
     },
   },
   entry: {
@@ -310,7 +317,7 @@ const config = {
       ],
     }),
     new webpack.BannerPlugin({
-      banner: `Package:[name]: ${major}.${minor}.${patch} - ${hash} - ${date}`,
+      banner: `Package:[name]: ${major}.${minor}.${patch}${versionSuffix ? `-${versionSuffix}` : ''} - ${hash} - ${date}`,
       raw: false,
       entryOnly: true,
       include: /\.js$/,
@@ -322,6 +329,7 @@ const config = {
         minor,
         patch,
         timestamp: Date.now(),
+        suffix: JSON.stringify(versionSuffix),
       },
     }),
   ]
