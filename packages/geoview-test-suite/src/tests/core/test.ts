@@ -564,7 +564,7 @@ export class Test<T = unknown> {
    *
    * @param actualValue - The actual value being checked
    * @param expectedValue - The expected value to compare against
-   * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only)
+   * @param [roundToPrecision] - Decimal places to round numeric values: 1 means one, 10 means ten, and 100 means one hundred; this is not a tolerance
    * @throws {AssertionError} When the values are not strictly equal.
    */
   static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
@@ -574,8 +574,26 @@ export class Test<T = unknown> {
     // If equal
     if (equalResult.equal) return;
 
-    // Throw
+    // Throw an error if the values are not equal
     throw new AssertionValueError(equalResult.actualValue, equalResult.expectedValue);
+  }
+
+  /**
+   * Asserts that two numeric values differ by no more than the specified tolerance.
+   *
+   * The comparison succeeds when `Math.abs(actualValue - expectedValue) <= tolerance`. A tolerance of `1` allows
+   * values up to one unit apart, while a tolerance of `0.01` allows values up to one hundredth apart.
+   *
+   * @param actualValue - The actual numeric value being checked
+   * @param expectedValue - The expected numeric value to compare against
+   * @param tolerance - The maximum allowed absolute difference
+   * @throws {AssertionValueError} When the absolute difference is greater than the tolerance
+   */
+  static assertIsEqualWithinTolerance(actualValue: number, expectedValue: number, tolerance: number): void {
+    if (Math.abs(actualValue - expectedValue) <= tolerance) return;
+
+    // Throw an error if the values differ by more than the allowed tolerance
+    throw new AssertionValueError(actualValue, expectedValue);
   }
 
   /**
@@ -593,7 +611,7 @@ export class Test<T = unknown> {
     // If not equal
     if (!equalResult.equal) return;
 
-    // Throw
+    // Throw an error if the values are equal
     throw new AssertionValueDifferentError(equalResult.actualValue);
   }
 
@@ -608,7 +626,7 @@ export class Test<T = unknown> {
     // Checks if the value is defined
     if (actualValue !== undefined && actualValue !== null) return;
 
-    // Throw
+    // Throw an error if the value is not defined
     throw new AssertionUndefinedError(propertyPath);
   }
 
@@ -623,7 +641,7 @@ export class Test<T = unknown> {
     // Checks if the value is defined
     if (actualValue === undefined || actualValue === null) return;
 
-    // Throw
+    // Throw an error if the value is defined
     throw new AssertionDefinedError(propertyPath, actualValue);
   }
 
@@ -641,7 +659,7 @@ export class Test<T = unknown> {
     // Checks if the value is of the expected instance type
     if (actualValue instanceof expectedType) return;
 
-    // Throw
+    // Throw an error if the value is not of the expected instance type
     throw new AssertionWrongInstanceError(actualValue, expectedType);
   }
 
@@ -659,7 +677,7 @@ export class Test<T = unknown> {
     // Checks if the value is of the expected instance type
     if (actualError instanceof expectedType) return;
 
-    // Throw
+    // Throw an error if the error is not of the expected instance type
     throw new AssertionWrongErrorInstanceError(actualError, expectedType);
   }
 
@@ -713,7 +731,7 @@ export class Test<T = unknown> {
   static assertIsArray(actualValue: unknown | unknown[] | null | undefined): asserts actualValue is unknown[] {
     if (Array.isArray(actualValue)) return;
 
-    // Throw
+    // Throw an error if the value is not an array
     throw new AssertionValueNotAnArrayError(actualValue);
   }
 
@@ -731,7 +749,7 @@ export class Test<T = unknown> {
 
     if (array?.length === expectedValue) return;
 
-    // Throw
+    // Throw an error if the array length is not equal to the expected length
     throw new AssertionArrayLengthError(array?.length, expectedValue);
   }
 
@@ -749,7 +767,7 @@ export class Test<T = unknown> {
 
     if (array?.length ?? 0 >= expectedMinimumLength) return;
 
-    // Throw
+    // Throw an error if the array length is less than the expected minimum length
     throw new AssertionArrayLengthMinimalError(array?.length ?? 0, expectedMinimumLength);
   }
 
@@ -768,7 +786,7 @@ export class Test<T = unknown> {
 
     if (array.includes(expectedValue)) return;
 
-    // Throw
+    // Throw an error if the expected value is not found in the array
     throw new AssertionArrayIncludingError(array, expectedValue);
   }
 
@@ -787,7 +805,7 @@ export class Test<T = unknown> {
 
     if (!array.includes(expectedValue)) return;
 
-    // Throw
+    // Throw an error if the expected value is found in the array
     throw new AssertionArrayExcludingError(array, expectedValue);
   }
 
@@ -893,7 +911,7 @@ export class Test<T = unknown> {
 
     // If not good
     if (!result.ok) {
-      // Throw
+      // Throw an error if the JSON object does not contain at least all properties and matching values of the expected object
       throw new AssertionJSONObjectError(result.mismatches, actualObject, expectedObject);
     }
   }

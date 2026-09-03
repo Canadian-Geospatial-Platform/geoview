@@ -58,7 +58,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
    */
   override getTestsTotalFinal(): number {
-    return 37;
+    return 39;
   }
 
   /**
@@ -70,7 +70,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
+    const pDevTest0 = this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
 
     // Resolve when all
     return Promise.all([pDevTest0]);

@@ -73,19 +73,19 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 | Group             | Suite              | Tester(s)                                                                                       | Test Count | Execution                   |
 | ----------------- | ------------------ | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`       | `CoreTester`                                                                                    | 5          | Parallel                    |
+| 1. Core / Utility | `suite-core`       | `CoreTester`                                                                                    | 14         | Parallel                    |
 | 1. Core / Utility | `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
-| 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 52         | Parallel                    |
-| 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 34         | Mixed parallel + sequential |
+| 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
+| 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
 | 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 16         | Complex mixed               |
-| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 37         | Fully sequential            |
+| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 39         | Fully sequential            |
 | 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
 | 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 12         | Guarded sequential          |
-| 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
+| 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                    |                                                                                                 | **198**    |                             |
+| **Total**         |                    |                                                                                                 | **229**    |                             |
 
 ---
 

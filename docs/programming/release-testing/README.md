@@ -62,7 +62,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 
 | #   | File                                                           | Area                                                   | Est. Time    | Tests (A/C/M)        |
 | --- | -------------------------------------------------------------- | ------------------------------------------------------ | ------------ | -------------------- |
-| 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite execution                         | 5 min        | 208 automated        |
+| 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite execution                         | 5 min        | 272 executions      |
 | 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications   | 25 min       | 56 (0/15/41)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation         | 15 min       | 20 (2/7/11)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers       | 15 min       | 23 (6/16/1)          |
@@ -95,16 +95,16 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator       | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                        | **~445 min** | **901 (60/169/672)** |
+|     | **TOTAL**                                                      |                                                        | **~445 min** | **903 (62/169/672)** |
 
 **Test breakdown:**
 
 | Category          | Count   | Description                                                |
 | ----------------- | ------- | ---------------------------------------------------------- |
-| **A** — Automated | 59      | Covered by `geoview-test-suite` (no manual effort needed)  |
+| **A** — Automated | 62      | Covered by `geoview-test-suite` (no manual effort needed)  |
 | **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
 | **M** — Manual    | 672     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **901** | All tests across all files                                 |
+| **Total**         | **903** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 
@@ -120,7 +120,7 @@ Before testing, ensure the following setup:
 
 Before starting manual testing, run the automated test suite.
 
-The automated suite covers **183 tests** across 11 suites. See [00-automated-suite.md](00-automated-suite.md) for the full checklist of suites and expected results.
+The automated suite declares **229 tests** across 12 registered suites. The release checklist executes the layer suite for both EPSG:3978 and EPSG:3857, for **272 test executions** when all listed suites run. See [00-automated-suite.md](00-automated-suite.md) for the full checklist.
 
 ## Config Files Reference
 

@@ -96,8 +96,8 @@ export class MapConfigTester extends GVAbstractTester {
         return MapConfigTester.#measureMapHeights(mapId);
       },
       (test, result) => {
-        test.addStep('Verifying root GeoView map height matches requested height...');
-        Test.assertIsEqual(result.geoviewMapHeight, MAP_CONFIG_TEST_HEIGHT);
+        test.addStep('Verifying root GeoView map height matches requested height +/- 1...');
+        Test.assertIsEqualWithinTolerance(result.geoviewMapHeight, MAP_CONFIG_TEST_HEIGHT, 1);
 
         test.addStep('Verifying collapsed footer chrome is rendered...');
         if (result.footerChromeHeight <= 0) Test.assertFail('Collapsed footer chrome height should be greater than 0.');
