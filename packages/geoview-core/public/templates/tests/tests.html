@@ -274,7 +274,7 @@
         Success: <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> |
         Skipped: <span id="allSuitesTestsDoneSkipped" style="color: orange">0</span> |
         Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> |
-        Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>
+        Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span>
       </div>
       <div style="text-align: right">
         Duration: <span id="allSuitesTotalDuration">0</span>
@@ -1432,6 +1432,7 @@
             const doneFailed = plugin.getTestsDoneFailed();
             const done = plugin.getTestsDone();
             const total = plugin.getTestsTotal();
+            const totalFinal = plugin.getTestsTotalFinal();
 
             let colorRunning = 'inherit';
             if (running > 0) colorRunning = 'orange';
@@ -1440,7 +1441,7 @@
             let colorFailed = '#00ff00'; // green
             if (doneFailed) colorFailed = 'red';
 
-            statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Success: <span style="color: #00ff00;">${doneSuccess}</span> | Skipped: <span style="color: ${colorSkipped};">${doneSkipped}</span> | Failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Done: ${done}/${total}`;
+            statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Success: <span style="color: #00ff00;">${doneSuccess}</span> | Skipped: <span style="color: ${colorSkipped};">${doneSkipped}</span> | Failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Done: ${done}/${total}/${totalFinal}`;
           }
         });
 

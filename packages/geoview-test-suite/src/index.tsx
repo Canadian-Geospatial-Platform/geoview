@@ -361,6 +361,13 @@ class TestSuitePlugin extends AbstractPlugin {
     }, 0);
   }
 
+  getTestsTotalFinal(): number {
+    // For each test suite
+    return this.testSuites.reduce((total, testSuite) => {
+      return total + testSuite.getTestsTotalFinal();
+    }, 0);
+  }
+
   /**
    * Gets if all tests are done.
    *

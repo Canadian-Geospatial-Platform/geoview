@@ -54,6 +54,15 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
   }
 
   /**
+   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   *
+   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   */
+  override getTestsTotalFinal(): number {
+    return 16;
+  }
+
+  /**
    * Overrides the debug hook for running a subset of tests during development.
    *
    * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME

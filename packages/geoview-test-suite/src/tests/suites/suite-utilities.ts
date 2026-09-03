@@ -69,6 +69,15 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
   }
 
   /**
+   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   *
+   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   */
+  override getTestsTotalFinal(): number {
+    return 53;
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
