@@ -212,12 +212,12 @@ When the team agrees that `develop` has all the features intended for the releas
 
 The app bar **Version** popover shows the build version. To make it obvious when a user is looking at a non-release (development) deployment — such as the gh-pages preview published from `develop` — development builds append a `-dev.<shortHash>` suffix to the version.
 
-| Build | Config | `GEOVIEW_BUILD_IS_DEV` | Version shown | Example |
-| ----- | ------ | ---------------------- | ------------- | ------- |
-| `rush serve` / `npm run serve` | `webpack.dev.js` | `true` | with suffix | `v.2.3.0-dev.a1b2c3d` |
-| `npm run build-dev` | `webpack.dev-build.js` | `true` | with suffix | `v.2.3.0-dev.a1b2c3d` |
-| gh-pages develop preview (CI) | `webpack.prod.js` | `true` (set in `build.yml`) | with suffix | `v.2.3.0-dev.a1b2c3d` |
-| Official release / local `npm run build` | `webpack.prod.js` | unset → `false` | clean | `v.2.3.0` |
+| Build                                    | Config                 | `GEOVIEW_BUILD_IS_DEV`      | Version shown | Example               |
+| ---------------------------------------- | ---------------------- | --------------------------- | ------------- | --------------------- |
+| `rush serve` / `npm run serve`           | `webpack.dev.js`       | `true`                      | with suffix   | `v.2.3.0-dev.a1b2c3d` |
+| `npm run build-dev`                      | `webpack.dev-build.js` | `true`                      | with suffix   | `v.2.3.0-dev.a1b2c3d` |
+| gh-pages develop preview (CI)            | `webpack.prod.js`      | `true` (set in `build.yml`) | with suffix   | `v.2.3.0-dev.a1b2c3d` |
+| Official release / local `npm run build` | `webpack.prod.js`      | unset → `false`             | clean         | `v.2.3.0`             |
 
 **How it works:**
 
@@ -227,4 +227,3 @@ The app bar **Version** popover shows the build version. To make it obvious when
 - `version.tsx` appends `-${__VERSION__.suffix}` to the displayed version only when a suffix is present.
 
 The distinction is driven by the **build/deploy context** (the `GEOVIEW_BUILD_IS_DEV` flag), not the branch. Release builds default to clean; any development or preview build opts into the suffix.
-

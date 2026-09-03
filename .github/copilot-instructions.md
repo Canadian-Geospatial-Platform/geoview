@@ -35,6 +35,16 @@ npm run fix         # ESLint auto-fix
 
 **NEVER** run `npm audit fix` — it does not work in Rush/pnpm workspaces (no `package-lock.json` exists). It would corrupt the dependency tree.
 
+### gh-pages Deployment & Build Version Suffix
+
+- **The gh-pages develop preview is built with the PRODUCTION webpack config, not `webpack.dev-build.js`.** The `.github/workflows/build.yml` job runs `rush build`, which maps to each package's `build` script; for `geoview-core` that is `webpack --config webpack.prod.js`. So the public preview at `canadian-geospatial-platform.github.io/geoview/public/` is a minified/brotli **prod** bundle deployed from the `develop` branch. Official releases use the same prod build, just deployed to the CDN (`viewer-visualiseur.services.geo.ca/apps/GeoView/{VERSION}/`). "dev vs release" is therefore a **deployment** distinction, not a webpack-config one.
+- **Version suffix mechanism** (`v.2.3.0-dev.<shortHash>` on dev/preview, clean `v.2.3.0` on release): a `GEOVIEW_BUILD_IS_DEV` env flag drives it.
+  - `webpack.common.js` computes `shortHash` and `versionSuffix = isDevBuild ? 'dev.<shortHash>' : ''`, injects `suffix` into `__VERSION__` via `DefinePlugin` (must be `JSON.stringify()`'d — DefinePlugin values are injected as raw code, so strings need quoting), and mirrors it in the `BannerPlugin`.
+  - `webpack.dev.js` / `webpack.dev-build.js` set `process.env.GEOVIEW_BUILD_IS_DEV = 'true'` **before** `require('./webpack.common')`.
+  - `webpack.prod.js` respects an external override and defaults to release: `process.env.GEOVIEW_BUILD_IS_DEV ??= 'false'`. This is why the gh-pages CI (`build.yml`) can set `GEOVIEW_BUILD_IS_DEV: 'true'` to tag the develop preview even though it uses the prod config, while an unflagged release stays clean.
+  - `version.tsx` renders `__VERSION__.suffix` (typed as optional `suffix?: string` on `TypeAppVersion`) only when present.
+- **Config-file `no-undef` gotcha:** in the webpack `.js` config files, `__dirname` is accepted by ESLint but `__filename` triggers `no-undef`. Use `path.resolve(__dirname, 'webpack.common.js')` instead of `__filename`.
+
 ### Package Manager & Security Auditing
 
 - **pnpm 8.x** is the package manager under Rush (configured in `rush.json`)
@@ -253,13 +263,13 @@ const isVisible =
 
 **Per-instance proxy** — Each layer stores its own proxy URL on `AbstractBaseLayerEntryConfig`. There is NO shared mutable static for proxy configuration.
 
-| Method on `AbstractBaseLayerEntryConfig` | Purpose |
-|---|---|
-| `getProxyUrl()` | Returns the proxy URL for this layer, or `undefined` if none |
-| `setProxyUrl(proxy)` | Sets the proxy URL; also snapshots `#dataAccessPathBeforeProxy` |
-| `getIsUsingProxy()` | Returns `true` if a proxy URL is set (`!!this.#proxy`) |
-| `getIsUsingEsriProxy()` | Returns `true` if the proxy matches the ESRI proxy pattern |
-| `getDataAccessPathBeforeProxy()` | Returns the original URL before proxy was applied (falls back to current data access path) |
+| Method on `AbstractBaseLayerEntryConfig` | Purpose                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `getProxyUrl()`                          | Returns the proxy URL for this layer, or `undefined` if none                               |
+| `setProxyUrl(proxy)`                     | Sets the proxy URL; also snapshots `#dataAccessPathBeforeProxy`                            |
+| `getIsUsingProxy()`                      | Returns `true` if a proxy URL is set (`!!this.#proxy`)                                     |
+| `getIsUsingEsriProxy()`                  | Returns `true` if the proxy matches the ESRI proxy pattern                                 |
+| `getDataAccessPathBeforeProxy()`         | Returns the original URL before proxy was applied (falls back to current data access path) |
 
 **How proxy is assigned** — `LayerCreatorController.#addGeoviewLayerStep2()` calls `geoviewLayer.setConfigServiceUrls(mapFeaturesConfig.serviceUrls)` on the `AbstractGeoViewLayer` instance. During metadata fetch, if a network error triggers a proxy retry, the callback calls `layerConfig.setProxyUrl(proxyUsed)` on the individual layer entry config.
 

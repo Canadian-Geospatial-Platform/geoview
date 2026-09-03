@@ -48,4 +48,4 @@ jobs:
         run: node common/scripts/install-run-rush.js build
         env:
           # This build feeds the gh-pages develop preview, so tag the version with a '-dev.<hash>' suffix
-          GEOVIEW_BUILD_IS_DEV: 'true'
+          GEOVIEW_BUILD_IS_DEV: "true"

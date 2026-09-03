@@ -4,14 +4,13 @@
 
 ![BigPicture](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
 
-
 ## Creating and Managing Map Configurations
 
 To assist you in creating or customizing map configurations, we provide a dedicated [Map Configuration Repository on [GitHub]:(https://github.com/Canadian-Geospatial-Platform/geoview-demo). This repository contains a collection of sample configurations, documentation, API functions to help you get started quickly.
 
 ## Solution
 
-GeoView mapping capabilities are based on [OpenLayers](https://openlayers.org/) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
+GeoView mapping capabilities are based on [OpenLayers](https://openlayers.org/) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 19+. With this in mind, here is the list of the main dependencies
 
 - [i18next](https://www.i18next.com/) to do localization in English and French
 
@@ -141,6 +140,8 @@ https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js
 ```
 
 _As the viewer is still in development, this bundle will always contain the latest commits. We really recommand to use one of our release on your web server_
+
+_Development builds (local `rush serve` / `rush build-dev` and the hosted gh-pages preview) display their version with a `-dev.<shortHash>` suffix in the app bar **Version** popover (e.g. `v.2.3.0-dev.a1b2c3d`), so you can tell them apart from an official release (clean `v.2.3.0`). See [docs/programming/release-workflow.md](./docs/programming/release-workflow.md#build-version-suffix-dev-vs-release) for details._
 
 To use the viewer on your own project, you need to include the above script in a script tag in your **HTML** file
 
