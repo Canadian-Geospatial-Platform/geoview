@@ -361,6 +361,13 @@ class TestSuitePlugin extends AbstractPlugin {
     }, 0);
   }
 
+  /**
+   * Gets the total number of tests declared by all registered suites.
+   *
+   * Each suite total must match the number of active tester test calls in its full launch pipeline; debug-only calls are excluded.
+   *
+   * @returns The total number of tests declared by all test suites
+   */
   getTestsTotalFinal(): number {
     // For each test suite
     return this.testSuites.reduce((total, testSuite) => {

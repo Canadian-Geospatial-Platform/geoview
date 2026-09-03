@@ -152,6 +152,10 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
     return "Tests for My Feature.";
   }
 
+  override getTestsTotalFinal(): number {
+    return 2;
+  }
+
   protected override onLaunchTestSuite(): Promise<unknown> {
     // Parallel: independent tests
     const p1 = this.#tester.testSomething();
@@ -160,6 +164,8 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   }
 }
 ```
+
+`getTestsTotalFinal()` is required for every concrete suite. Its numeric return value must match the number of tester test calls in the full `onLaunchTestSuite()` implementation, such as `this.#tester.testSomething()` and `this.#tester.testSomethingElse()` above. Do not count calls made only by `onLaunchTestSuiteDEBUG()`, and update the value whenever tests are added, removed, or renamed.
 
 ### Conditional Execution
 
