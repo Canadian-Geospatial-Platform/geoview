@@ -1324,6 +1324,7 @@ The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSet
 > 11. Removed TODO/NOTE comments — **never delete** existing TODO/NOTE comments during cleanup
 > 12. Missing `#region Handlers` / `#endregion` around handler groups
 > 13. Missing `memo` justification in component JSDoc when `memo()` is used
+> 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls
 
 ### Logging
 
@@ -2515,6 +2516,10 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
     return "Tests for My Feature.";
   }
 
+  override getTestsTotalFinal(): number {
+    return 1;
+  }
+
   // Optional: Guard — only run if the feature is enabled
   // protected override async onCanExecuteTestSuite(): Promise<boolean> {
   //   const config = this.getMapViewer().mapFeaturesConfig;
@@ -2527,6 +2532,8 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   }
 }
 ```
+
+Every concrete test suite must implement `getTestsTotalFinal()`. Set its return value to the exact number of tester `testXXXX()` and `testErrorXXXX()` calls made by the full `onLaunchTestSuite()` method. Count each call once, regardless of whether it runs sequentially or inside `Promise.all()`. Do not count calls that exist only in `onLaunchTestSuiteDEBUG()`. When reviewing a suite, compare the returned number directly with those calls and flag any mismatch.
 
 3. **Register in `index.tsx`** — Add import + else-if branch
 
@@ -2567,6 +2574,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
 9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
+10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls and update the count whenever the pipeline changes
 
 ### Gotchas & Pitfalls
 
