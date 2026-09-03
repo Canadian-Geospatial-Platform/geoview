@@ -23,6 +23,7 @@ import {
   getStoreMapNorthArrow,
 } from 'geoview-core/core/stores/states/map-state';
 import { Projection } from 'geoview-core/geo/utils/projection';
+import { delay } from 'geoview-core/core/utils/utilities';
 
 /** Fixed map height used by map config layout tests. */
 const MAP_CONFIG_TEST_HEIGHT = 500;
@@ -63,7 +64,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.#helperCreateMapConfig(test, mapId, ['footerBar', { tabs: { core: [] } }]);
 
         test.addStep('Waiting for layout effects to settle...');
-        await delay(TIMEOUT.tabsContainerResize);
+        await delay(TIMEOUT.tabsContainerResize); // TODO: CHECK - Can this be changed to GVAbstractTester.waitForReactIdle()?
 
         return MapConfigTester.#measureMapHeights(mapId);
       },
@@ -92,7 +93,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.#helperCreateMapConfig(test, mapId);
 
         test.addStep('Waiting for collapsed footer measurement to settle...');
-        await delay(TIMEOUT.tabsContainerResize);
+        await delay(TIMEOUT.tabsContainerResize); // TODO: CHECK - Can this be changed to GVAbstractTester.waitForReactIdle()?
 
         return MapConfigTester.#measureMapHeights(mapId);
       },
