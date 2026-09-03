@@ -3,6 +3,7 @@
     "viewSettings": {
       "projection": 3978
     },
+    "highlightColor": "red",
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": true,
@@ -45,5 +46,5 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "canada.ca"
 }

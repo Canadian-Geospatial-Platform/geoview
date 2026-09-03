@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-18-global-settings.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-18-global-settings.html) — Map 1 (geo.ca theme + global settings), Map 2 (dark theme), Map 3 (light theme), Map 4 (red highlight color).
+> **Test page**: [rt-18-global-settings.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-18-global-settings.html) — Map 1 (geo.ca theme + global settings), Map 2 (dark theme), Map 3 (light theme), Map 4 (Canada.ca theme), Map 5 (red highlight color), Map 6 (ISO date display mode).
 
 Global settings that affect all layers and panels.
 
@@ -47,13 +47,14 @@ Config: `configs/navigator/demos/19-global-settings.json`
 
 ## Theme
 
-Theme is set via config property `"theme"`: `"geo.ca"` (default), `"light"`, or `"dark"`.
+Theme is set via config property `"theme"`: `"geo.ca"` (default), `"light"`, `"dark"`, or `"canada.ca"`.
 
-| Test         | Description                                 | Steps                                  | Expected Result                                        | Auto |
-| ------------ | ------------------------------------------- | -------------------------------------- | ------------------------------------------------------ | ---- |
-| geo.ca theme | Branded geo.ca theme renders                | 1. Load default config                 | Branded geo.ca theme renders (standard GeoView colors) | M    |
-| Dark theme   | Dark backgrounds, light text, correct icons | 1. Load config with `"theme": "dark"`  | Dark backgrounds, light text, correct icon colors      | M    |
-| Light theme  | Light backgrounds, dark text                | 1. Load config with `"theme": "light"` | Light backgrounds, dark text                           | M    |
+| Test            | Description                                               | Steps                                      | Expected Result                                                  | Auto |
+| --------------- | --------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------- | ---- |
+| geo.ca theme    | Branded geo.ca theme renders                              | 1. Load default config                     | Branded geo.ca theme renders (standard GeoView colors)           | M    |
+| Dark theme      | Dark backgrounds, light text, correct icons               | 1. Load config with `"theme": "dark"`      | Dark backgrounds, light text, correct icon colors                | M    |
+| Light theme     | Light backgrounds, dark text                              | 1. Load config with `"theme": "light"`     | Light backgrounds, dark text                                     | M    |
+| Canada.ca theme | Government of Canada colours and typography are available | 1. Load config with `"theme": "canada.ca"` | `#26374a` main colour, black/white/grey styling, and Helvetica typography render | M    |
 
 ## Highlight Color
 
@@ -78,6 +79,6 @@ Config property: `serviceUrls` — overrides default service endpoints.
 
 | Test                | Description             | Steps                                                                                  | Expected Result                                              | Auto |
 | ------------------- | ----------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ---- |
-| ISO date format     | Dates show as ISO       | 1. On Map 5, click a feature with date fields<br>2. Check details panel and data table | Dates display in ISO format (e.g., `2024-01-15`)             | C    |
+| ISO date format     | Dates show as ISO       | 1. On Map 6, click a feature with date fields<br>2. Check details panel and data table | Dates display in ISO format (e.g., `2024-01-15`)             | C    |
 | Default date format | Dates show as localized | 1. Change `displayDateMode` to `'default'` via API<br>2. Check same layer              | Dates display in localized format (e.g., `January 15, 2024`) | C    |
-| Date timezone local | Local timezone applied  | 1. On Map 5, check date values with time components                                    | Times reflect the browser's local timezone                   | M    |
+| Date timezone local | Local timezone applied  | 1. On Map 6, check date values with time components                                    | Times reflect the browser's local timezone                   | M    |

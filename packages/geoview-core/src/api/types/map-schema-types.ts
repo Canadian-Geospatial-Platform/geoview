@@ -56,10 +56,10 @@ export type DisplayDateMode = 'iso' | 'long';
 // #region MAP FEATURES
 
 /** Supported geoview themes. */
-export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
+export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca' | 'canada.ca';
 
 /** Array of valid geoview themes. */
-export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
+export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca', 'canada.ca'];
 
 /** Valid values for the navBar array. */
 export type TypeValidNavBarProps =
@@ -89,13 +89,16 @@ export const DEFAULT_FOOTERBAR_CORE = {
   GUIDE: 'guide',
 } as const;
 
-/** Default tabs order */
+/** Default order of footer bar tabs. */
 export const DEFAULT_FOOTER_TABS_ORDER = ['legend', 'layers', 'details', 'geochart', 'time-slider', 'data-table', 'guide'];
 
 /** Footer bar tabs custom definition. */
 export type TypeFooterBarTabsCustomProps = {
+  /** Custom tab identifier. */
   id: string;
+  /** Custom tab label. */
   label: string;
+  /** HTML content rendered inside the custom tab. */
   contentHTML: string;
 };
 
@@ -105,11 +108,17 @@ export type TypeFooterBarProps = {
     core: TypeValidFooterBarTabsCoreProps[];
     custom: TypeFooterBarTabsCustomProps[];
   };
+  /** Currently selected footer tab. */
   selectedTab: TypeValidFooterBarTabsCoreProps;
+  /** Selected layer path for the details tab. */
   selectedDetailsLayerPath: string;
+  /** Selected layer path for the geochart tab. */
   selectedGeochartLayerPath: string;
+  /** Selected layer path for the layers tab. */
   selectedLayersLayerPath: string;
+  /** Selected layer path for the data-table tab. */
   selectedDataTableLayerPath: string;
+  /** Selected layer path for the time-slider tab. */
   selectedTimeSliderLayerPath: string;
 };
 
@@ -133,10 +142,15 @@ export type TypeAppBarProps = {
   tabs: {
     core: TypeValidAppBarCoreProps[];
   };
+  /** Currently selected application bar tab. */
   selectedTab: TypeValidAppBarCoreProps;
+  /** Selected layer path for the layers tab. */
   selectedLayersLayerPath: string;
+  /** Selected layer path for the data-table tab. */
   selectedDataTableLayerPath: string;
+  /** Selected layer path for the time-slider tab. */
   selectedTimeSliderLayerPath: string;
+  /** Selected layer path for the details tab. */
   selectedDetailsLayerPath: string;
 };
 
@@ -359,36 +373,35 @@ export const VALID_PROJECTION_CODES = [3978, 3857, 3573];
 /** Definition of the basemap options type. */
 export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 'nogeom', 'shaded', 'imagery', 'labeled'];
 
-/** default configuration if provided configuration is missing or wrong */
-// valid basemap ids
+/** Valid basemap ids for each supported projection. */
 export const BASEMAP_ID: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
   3857: VALID_BASEMAP_ID,
   3978: VALID_BASEMAP_ID,
   3573: ['nogeom'] as TypeBasemapId[], // Only nogeom basemap is available for 3573 projection
 };
 
-// valid shaded basemap values for each projection
+/** Valid shaded basemap values for each supported projection. */
 export const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
   3573: [false], // Only nogeom basemap is available for 3573 projection
 };
 
-// valid labeled basemap values for each projection
+/** Valid labeled basemap values for each supported projection. */
 export const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
   3573: [false], // Only nogeom basemap is available for 3573 projection
 };
 
-// valid center levels from each projection
+/** Valid latitude and longitude center ranges for each supported projection. */
 export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
   3857: { lat: [-90, 90], long: [-180, 180] },
   3978: { lat: [40, 90], long: [-140, -60] },
   3573: { lat: [45, 90], long: [-180, 180] },
 };
 
-// Map view extents for each projection
+/** Default map view extents for each supported projection. */
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
   // TODO: INVESTIGATE - Tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION_LONLAT
@@ -396,19 +409,21 @@ export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3573: [-180, 45, 180, 90],
 };
 
-// Extent restrictions for each projection
+/** Maximum view extents for each supported projection. */
 export const MAX_EXTENTS_RESTRICTION_LONLAT: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, -85.05112877980659, 180, 85.05112877980659],
   3978: [-150, -10, -30, 90],
   3573: [-180, 45, 180, 90],
 };
 
+/** Default map centers for each supported projection. */
 export const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]> = {
   3857: [-90, 65],
   3978: [-90, 60],
   3573: [-90, 60],
 };
 
+/** Default map zoom levels for each supported projection. */
 export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
   3857: 3.5,
   3978: 4.5,
@@ -418,6 +433,7 @@ export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
 /** Type used to define valid highlight colors. */
 export type TypeHighlightColors = 'aqua' | 'black' | 'white' | 'red' | 'green';
 
+/** Default color used to highlight map features. */
 export const DEFAULT_HIGHLIGHT_COLOR: TypeHighlightColors = 'aqua';
 
 /** Type used to define overlay objects. */
@@ -448,12 +464,19 @@ export type TypePointMarker = {
  *  Definition of map state to attach to the map object for reference.
  */
 export type TypeMapState = {
+  /** Current map projection code. */
   currentProjection: number;
+  /** Current map zoom level. */
   currentZoom: number;
+  /** Current map center coordinates. */
   mapCenterCoordinates: Coordinate;
+  /** Current map extent. */
   mapExtent: Extent;
+  /** Current map rotation in radians. */
   rotation: number;
+  /** Most recent single-click information. */
   singleClickedPosition: TypeMapMouseInfo;
+  /** Most recent pointer position information. */
   pointerPosition: TypeMapMouseInfo;
 };
 
@@ -461,9 +484,13 @@ export type TypeMapState = {
  * Type used to define the map mouse information
  * */
 export type TypeMapMouseInfo = {
+  /** Pointer longitude and latitude coordinates. */
   lonlat: Coordinate;
+  /** Pointer pixel coordinates. */
   pixel: Coordinate;
+  /** Pointer coordinates in the map projection. */
   projected: Coordinate;
+  /** Whether the pointer event occurred while dragging. */
   dragging: boolean;
 };
 
@@ -471,6 +498,7 @@ export type TypeMapMouseInfo = {
 
 // #region GEOVIEW LAYERS
 
+/** Schema path for map feature configuration validation. */
 export const MAP_CONFIG_SCHEMA_PATH = 'https://cgpv/schema#/definitions/TypeMapFeaturesInstance';
 
 /** The default geocore url */
@@ -497,12 +525,16 @@ export const CONFIG_NTS_SHEET_URL = 'https://geogratis.gc.ca/services/delimitati
 /** The default altitude url */
 export const CONFIG_ALTITUDE_URL = 'https://geogratis.gc.ca/services/elevation/cdem/altitude';
 
+/** Configuration layer type identifier for GeoCore layers. */
 export const CONFIG_GEOCORE_TYPE = 'geoCore';
+/** Configuration layer type identifier for RCS layers. */
 export const CONFIG_RCS_TYPE = 'rcs';
+/** Configuration layer type identifier for GeoPackage layers. */
 export const CONFIG_GEOPACKAGE_TYPE = 'GeoPackage';
+/** Configuration layer type identifier for shapefile layers. */
 export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 
-// valid zoom levels from each projection
+/** Valid minimum and maximum zoom levels. */
 export const VALID_ZOOM_LEVELS: number[] = [0, 20];
 
 /** Definition of the MapFeatureConfig default values. */
@@ -586,6 +618,7 @@ export const DEFAULT_APPBAR_TABS_ORDER = [
   'guide',
 ];
 
+/** Built-in app bar core components that are not plugins. */
 export const DEFAULT_APPBAR_CORE = {
   GEOLOCATOR: 'geolocator',
   EXPORT: 'export',
@@ -600,6 +633,7 @@ export const DEFAULT_APPBAR_CORE = {
 
 // #region SUB LAYERS
 
+/** Geometry types supported by layer styles. */
 export const STYLE_GEOMETRY_TYPES = [
   'Point',
   'MultiPoint',
@@ -613,6 +647,7 @@ export const STYLE_GEOMETRY_TYPES = [
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = (typeof STYLE_GEOMETRY_TYPES)[number];
 
+/** Serialized geometry definitions used by map feature results. */
 export type SerializedGeometry =
   | {
       type: 'Point';
@@ -645,7 +680,9 @@ export type SerializedGeometry =
 
 /** Definition of the range object that is part of the temporal dimension. */
 export type TypeRangeItems = {
+  /** Range representation type. */
   type: string;
+  /** Values contained in the range. */
   range: string[];
 };
 
@@ -654,20 +691,23 @@ export type TypeNearestValues = 'discrete' | 'absolute';
 
 // #endregion SUB LAYERS
 
-/** The format used by the image layer. */
+/** Supported image formats for ESRI layers. */
 export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 
 /** The definition of the fields to be displayed by the UI. */
 export type TypeOutfields = {
+  /** Source field name. */
   name: string;
+  /** Display alias for the field. */
   alias: string;
+  /** Field data type. */
   type: TypeOutfieldsType;
   domain?: TypeDomain;
   /** Whether this field appears in summary views. Default = true. */
   summary?: boolean;
 };
 
-/** The types supported by the outfields object. */
+/** Supported field data types for outfields. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
 
 export type TypeDomain = codedValueType | rangeDomainType | null; // null here, because that's what Esri uses in the response
@@ -679,17 +719,20 @@ export type codedValueType = {
   codedValues: codeValueEntryType[];
 };
 
+/** Range domain definition. */
 export type rangeDomainType = {
   type: 'range';
   name: string;
   range: [minValue: unknown, maxValue: unknown];
 };
 
+/** Entry in a coded-value domain. */
 export type codeValueEntryType = {
   name: string;
   code: unknown;
 };
 
+/** Field value returned by a feature query. */
 export type TypeFieldEntry = {
   fieldKey: number;
   value: unknown;
@@ -698,7 +741,7 @@ export type TypeFieldEntry = {
   domain?: TypeDomain;
 };
 
-// Definition of the alias lookup for matching field names to aliases
+/** Alias lookup for matching field names to aliases. */
 export type TypeAliasLookup = { [key: string]: string };
 
 // #region STYLE
@@ -905,9 +948,12 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   zIndex?: number;
 }
 
+/** Graphic stroke settings with optional placement information. */
 export interface GraphicStrokeWithPlacement {
-  placement?: string; // associated placement if any
-  settings: unknown; // the graphic stroke settings
+  /** Associated placement for the graphic stroke. */
+  placement?: string;
+  /** Graphic stroke settings. */
+  settings: unknown;
 }
 
 export interface GraphicFillWithPattern {
@@ -1031,36 +1077,57 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
 
 // #region RESULT SET
 
+/** Status values for feature queries. */
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
 
+/** Supported feature query methods. */
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_lon_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
 
+/** Supported locations for feature queries. */
 export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 
+/** Base properties for a result-set entry. */
 export type TypeResultSetEntry = {
+  /** Layer path associated with the result. */
   layerPath: string;
 };
 
+/** Collection of result-set entries keyed by layer path. */
 export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
   [layerPath: string]: T;
 };
 
+/** Result returned by a feature information query. */
 export type TypeFeatureInfoResult = {
+  /** Feature information entries returned by the query. */
   results: TypeFeatureInfoEntry[];
+  /** Optional promise that resolves after feature geometries are loaded. */
   promiseGeometries?: Promise<boolean>;
 };
 
+/** Feature information returned for a queried layer. */
 export type TypeFeatureInfoEntry = {
+  /** Feature identifier. */
   featureKey: number;
+  /** Geoview layer type that produced the result. */
   geoviewLayerType: TypeGeoviewLayerType;
+  /** Whether the feature supports zooming. */
   supportZoomTo: boolean;
+  /** Optional feature identifier from the source. */
   uid?: string;
+  /** Optional OpenLayers feature. */
   feature?: Feature<Geometry>;
+  /** Optional feature geometry. */
   geometry?: Geometry;
+  /** Optional feature extent. */
   extent?: Extent;
+  /** Optional icon used to represent the feature. */
   featureIcon?: string;
+  /** Field values returned for the feature. */
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  /** Optional field used as the feature name. */
   nameField?: string;
+  /** Layer path associated with the feature. */
   layerPath: string;
 };
 
@@ -1073,10 +1140,15 @@ export type TypeFeatureInfoEntry = {
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
 
 export type TypeLayerData = {
-  // When property features is undefined, we are waiting for the query result.
-  // when Array.isArray(features) is true, the features property contains the query result.
-  // when property features is null, the query ended with an error.
+  /**
+   * Current query status.
+   *
+   * When property features is undefined, we are waiting for the query result.
+   * When Array.isArray(features) is true, the features property contains the query result.
+   * When property features is null, the query ended with an error.
+   */
   queryStatus: TypeQueryStatus;
+  /** Query features, undefined while pending and null when the query fails. */
   features?: TypeFeatureInfoEntry[];
 };
 

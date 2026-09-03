@@ -87,7 +87,7 @@
     "TypeDisplayTheme": {
       "description": "Valid values for the theme property.",
       "additionalProperties": false,
-      "enum": ["dark", "light", "geo.ca"],
+      "enum": ["dark", "light", "geo.ca", "canada.ca"],
       "default": "geo.ca"
     },
     "TypeValidNavBarProps": {

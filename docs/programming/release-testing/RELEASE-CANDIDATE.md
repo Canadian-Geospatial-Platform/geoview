@@ -108,6 +108,7 @@ _(User-facing features added or enabled)_
 - New `MapViewer.updateViewPadding()` and `mapController.updateViewPadding()` for dynamic map-info bar padding (#3562)
 - New `waitForLayerQueryToFinish` timeout parameter on `AllFeatureInfoLayerSet` (#3562)
 - Development builds (local `rush serve` / `rush build-dev` and the gh-pages develop preview) now show a `-dev.<shortHash>` suffix in the app bar Version popover (e.g. `v.2.3.0-dev.a1b2c3d`) so users can distinguish them from official releases, which stay clean (`v.2.3.0`) (#3610)
+- Added built-in `canada.ca` display theme with Government of Canada-inspired colors and typography (#3609)
 
 ## Bug Fixes
 
@@ -256,6 +257,8 @@ _(Tests added, moved, removed, or reorganized)_
 ## Config Schema Changes
 
 _(Properties added, renamed, or with changed defaults)_
+
+- Added `canada.ca` as a valid `theme` configuration value; default remains `geo.ca` (#3609)
 
 ## Updated Counts
 

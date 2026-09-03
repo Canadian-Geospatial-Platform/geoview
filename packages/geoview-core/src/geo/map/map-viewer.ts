@@ -657,7 +657,7 @@ export class MapViewer {
   /**
    * Returns the current display theme.
    *
-   * @returns The display theme
+   * @returns The display theme (geo.ca, canada.ca, light, or dark)
    */
   getDisplayTheme(): TypeDisplayTheme {
     return this.#uiDomain.getDisplayTheme();
@@ -666,7 +666,7 @@ export class MapViewer {
   /**
    * Set the display theme of the map.
    *
-   * @param displayTheme - The theme to use (geo.ca, light, dark)
+   * @param displayTheme - The theme to use (geo.ca, canada.ca, light, dark)
    */
   // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it has nothing to do with the map itself
   setTheme(displayTheme: TypeDisplayTheme): void {
