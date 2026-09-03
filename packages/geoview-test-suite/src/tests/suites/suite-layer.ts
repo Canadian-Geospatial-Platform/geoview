@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
    */
   override getTestsTotalFinal(): number {
-    return 43;
+    return 41;
   }
 
   /**

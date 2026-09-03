@@ -231,12 +231,12 @@ _(Doc updates, demo cleanup, code organization)_
 _(Tests added, moved, removed, or reorganized)_
 
 - New automated test case for group layer with `defaultVisibility: false` (#3544)
-- New `suite-data-table` test suite (13 tests): allFeaturesDataArray populated, row count, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, tableFilters on apply, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
+- New `suite-data-table` test suite (12 tests): allFeaturesDataArray populated, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
 - New `suite-details` tests (6 total): details panel query, clear all highlights, zoom to feature, nameField as label, summary false hides field, field alias renames field
 - Added `getStoreDataTableLayerSettings` getter to `data-table-state.ts` (moved paired hook from OTHERS region to main region)
 - Added `getStoreMapClickMarker` and `getStoreMapNorthArrow` getters to `map-state.ts` (moved from OTHERS to main region)
 - Map 11 test page added for `suite-data-table` (GeoJSON + Commemorative Map + Esri Dynamic + Permafrost layers)
-- Updated test-catalog.md: total 196 tests, 00-automated-suite.md: ~200, README: 901 (60/169/672)
+- Updated test-catalog.md and automated-suite documentation to distinguish declared suite totals from release-run executions. The current registered suites declare 229 tests; the release checklist runs the layer suite on both LCC and Web Mercator maps, for 272 executions when all listed suites run.
 - Added WMTS, VectorTiles, and XYZTiles layer types to automated functional testing (#3562)
 - Moved `testAddGeocoreWithGroupDefaultVisibilityFalse` to end of suite to reduce resource contention with other tests (#3562)
 - Fixed automated tests for new `viewSettings` padding behavior (#3562)
@@ -250,6 +250,8 @@ _(Tests added, moved, removed, or reorganized)_
 - Added a swiper rendering-isolation regression test covering descendant path resolution, per-target OL render handlers, CSS clip-path removal, and listener cleanup
 - Added `suite-time-slider` with reset-to-default and dual-handle overlap constraint regression tests, plus a dedicated temporal-layer test map
 - Added fixed-height map layout tests for maps with and without a footer bar (#3601)
+- Audited suite totals against active full-suite tester calls: corrected `suite-map-config` to 39; debug-only and commented-out calls remain excluded
+- Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
 
 ## Config Schema Changes
 

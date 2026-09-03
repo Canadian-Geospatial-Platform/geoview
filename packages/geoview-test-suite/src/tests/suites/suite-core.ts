@@ -86,7 +86,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     if (isRunningSequentially) await pSimplePingValid;
 
     const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
-    if (isRunningSequentially) await pSimplePingValid;
+    if (isRunningSequentially) await pSimplePingXyz;
 
     const pSimplePingXyz401 = this.#coreTester.testSimplePingXyzTileUrlUnauthorized();
     if (isRunningSequentially) await pSimplePingXyz401;

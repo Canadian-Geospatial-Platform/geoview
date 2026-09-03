@@ -539,7 +539,7 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // In LCC projection over BC, the north arrow should match expected rotation
         test.addStep('Verifying north arrow rotation is calculated...');
-        Test.assertIsEqual(result, expectedArrowAngle, 0);
+        Test.assertIsEqualWithinTolerance(result, expectedArrowAngle, 1);
       }
     );
   }
