@@ -105,11 +105,36 @@
         }"
       ></div>
 
-      <!-- Map 4: Custom highlight color (red) -->
-      <h5>Map 4 — Custom Highlight Color (red)</h5>
-      <p>Click a feature — highlight should be red instead of default aqua.</p>
+      <!-- Map 4: Canada.ca theme -->
+      <h5>Map 4 — Canada.ca Theme</h5>
+      <p>Government of Canada Federal Identity Program colours and Helvetica typography.</p>
       <div
         id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'canada.ca'
+        }"
+      ></div>
+
+      <!-- Map 5: Custom highlight color (red) -->
+      <h5>Map 5 — Custom Highlight Color (red)</h5>
+      <p>Click a feature — highlight should be red instead of default aqua.</p>
+      <div
+        id="map5"
         class="geoview-map"
         data-lang="en"
         data-config="{
@@ -131,11 +156,11 @@
         }"
       ></div>
 
-      <!-- Map 5: Date Display Mode (ISO) -->
-      <h5>Map 5 — Date Display Mode (ISO)</h5>
+      <!-- Map 6: Date Display Mode (ISO) -->
+      <h5>Map 6 — Date Display Mode (ISO)</h5>
       <p>globalSettings.displayDateMode set to 'iso'. Click a feature with date fields to see ISO-formatted dates in details/data table.</p>
       <div
-        id="map5"
+        id="map6"
         class="geoview-map"
         data-lang="en"
         data-config="{
@@ -167,6 +192,8 @@
       <pre id="map4CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 5 - Configuration Snippet</button>
       <pre id="map5CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 6 - Configuration Snippet</button>
+      <pre id="map6CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>

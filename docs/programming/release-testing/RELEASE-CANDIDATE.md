@@ -107,6 +107,7 @@ _(User-facing features added or enabled)_
 - Map view now uses `viewOptions.padding` to account for the map-info bar height (#3562)
 - New `MapViewer.updateViewPadding()` and `mapController.updateViewPadding()` for dynamic map-info bar padding (#3562)
 - New `waitForLayerQueryToFinish` timeout parameter on `AllFeatureInfoLayerSet` (#3562)
+- Added built-in `canada.ca` display theme with Government of Canada-inspired colors and typography (#3609)
 
 ## Bug Fixes
 
@@ -253,6 +254,8 @@ _(Tests added, moved, removed, or reorganized)_
 ## Config Schema Changes
 
 _(Properties added, renamed, or with changed defaults)_
+
+- Added `canada.ca` as a valid `theme` configuration value; default remains `geo.ca` (#3609)
 
 ## Updated Counts
 
