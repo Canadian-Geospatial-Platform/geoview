@@ -25,7 +25,7 @@ const HideMeasurementIcon = createSvgIcon(
  */
 export default function Measurements(): JSX.Element {
   // Log
-  logger.logTraceRender('geoview-drawer/src/buttons/clear');
+  logger.logTraceRender('geoview-drawer/src/buttons/measurements');
 
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
@@ -39,7 +39,7 @@ export default function Measurements(): JSX.Element {
   const drawerController = useDrawerController();
 
   /**
-   * Handles a click on the clear button
+   * Handles a click on the measurements button to toggle measurement overlays.
    */
   const handleToggleMeasurements = (): void => {
     drawerController.toggleHideMeasurements();
@@ -47,7 +47,6 @@ export default function Measurements(): JSX.Element {
 
   return (
     <IconButton
-      id="measure"
       aria-label={t('drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}

@@ -34,6 +34,7 @@ export const NorthArrow = memo((): JSX.Element => {
   const northArrowRef = useRef<HTMLDivElement>(null);
 
   // Store
+  const mapId = useStoreGeoViewMapId();
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const northArrowElement = useStoreMapNorthArrowElement();
   const { rotationAngle, northOffset } = useManageArrow();
@@ -62,7 +63,7 @@ export const NorthArrow = memo((): JSX.Element => {
         left: northOffset,
       }}
     >
-      <NorthArrowIcon width={memoSxClasses.northArrow.width || 30} height={memoSxClasses.northArrow.height || 30} />
+      <NorthArrowIcon width={memoSxClasses.northArrow.width || 30} height={memoSxClasses.northArrow.height || 30} mapId={mapId} />
     </Box>
   );
 });

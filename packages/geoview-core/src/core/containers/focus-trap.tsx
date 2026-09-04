@@ -7,6 +7,7 @@ import { Modal, Button } from '@/ui';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
+import type { SxStyles } from '@/ui/style/types';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
@@ -45,7 +46,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getFocusTrapSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getFocusTrapSxClasses(theme), [theme]);
 
   // State
   const [open, setOpen] = useState(false);
@@ -321,9 +322,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   useEffect(() => {
     if (open) {
-      setTimeout(() => document.getElementById('enable-focus')?.focus(), FOCUS_DELAY);
+      setTimeout(() => document.getElementById(`${focusTrapId}-enable-focus`)?.focus(), FOCUS_DELAY);
     }
-  }, [open]);
+  }, [open, focusTrapId]);
 
   /**
    * Logs the currently active focused element for debugging.
@@ -353,21 +354,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       container={document.getElementById(focusTrapId)!}
       modalId={focusTrapId}
       open={open}
-      aria-labelledby={t('keyboardnav.focusdialog.title')}
-      aria-describedby={t('keyboardnav.focusdialog.title')}
+      aria-labelledby={`${focusTrapId}-wcag-dialog-title`}
+      aria-describedby={`${focusTrapId}-wcag-dialog-description`}
       fullScreen={fullScreen}
-      sx={sxClasses.trap}
-      titleId="wcag-dialog-title"
+      sx={memoSxClasses.trap}
+      titleId={`${focusTrapId}-wcag-dialog-title`}
       title={t('keyboardnav.focusdialog.title')}
-      contentTextId="wcag-dialog-description"
+      contentTextId={`${focusTrapId}-wcag-dialog-description`}
       contentModal={<UseHtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
       actions={
         <>
-          <Button id="enable-focus" autoFocus onClick={handleEnable} type="text" sx={MODAL_BUTTON_STYLES}>
+          <Button id={`${focusTrapId}-enable-focus`} autoFocus onClick={handleEnable} type="text" sx={MODAL_BUTTON_STYLES}>
             {t('keyboardnav.focusdialog.button.enable')}
           </Button>
           <Button
-            id="skip-focus"
+            id={`${focusTrapId}-skip-focus`}
             onClick={handleSkip}
             type="text"
             sx={{

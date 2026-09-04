@@ -1504,7 +1504,7 @@ export class DrawerController extends AbstractMapViewerController {
     const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
 
     // Find the style button within this map's container
-    const styleButton = geoViewElement.querySelector('#drawer-style') as HTMLElement;
+    const styleButton = geoViewElement.querySelector(`#${mapId}-drawer-style`) as HTMLElement;
     if (styleButton) {
       styleButton.click();
     } else {

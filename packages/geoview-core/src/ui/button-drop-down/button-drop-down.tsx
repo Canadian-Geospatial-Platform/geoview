@@ -1,5 +1,5 @@
 // GV: THIS UI COMPONENT IS NOT USED
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { ButtonGroupProps } from '@mui/material';
 import { ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -60,7 +60,8 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
 
   // Hook
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const menuId = useId();
 
   // State
   const [open, setOpen] = useState<boolean>(false);
@@ -105,23 +106,27 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
 
   // #endregion
 
-  const memoMenuItems = useMemo(
-    () =>
-      options.map((option, index) => (
-        <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
-          {option}
-        </MenuItem>
-      )),
-    [options, selectedIndex, handleMenuItemClick]
-  );
+  /**
+   * Builds the drop down menu item elements.
+   */
+  const memoMenuItems = useMemo((): JSX.Element[] => {
+    // Log
+    logger.logTraceUseMemo('BUTTON-DROP-DOWN - memoMenuItems', options, selectedIndex);
+
+    return options.map((option, index) => (
+      <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
+        {option}
+      </MenuItem>
+    ));
+  }, [options, selectedIndex, handleMenuItemClick]);
 
   return (
     <>
-      <ButtonGroup {...otherProps} sx={sxClasses.buttonDropDown} ref={anchorRef}>
-        <Button sx={sxClasses.buttonText} type="text" onClick={handleClick}>
+      <ButtonGroup {...otherProps} sx={memoSxClasses.buttonDropDown} ref={anchorRef}>
+        <Button sx={memoSxClasses.buttonText} type="text" onClick={handleClick}>
           {options[selectedIndex]}
         </Button>
-        <Button sx={sxClasses.buttonArrow} type="icon" size="small" onClick={handleToggle}>
+        <Button sx={memoSxClasses.buttonArrow} type="icon" size="small" onClick={handleToggle}>
           <ArrowDownIcon />
         </Button>
       </ButtonGroup>
@@ -135,7 +140,7 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
           >
             <Paper>
               <ClickAwayListener onClickAway={handleClickAway}>
-                <MenuList id="split-button-menu" autoFocusItem>
+                <MenuList id={menuId} autoFocusItem>
                   {memoMenuItems}
                 </MenuList>
               </ClickAwayListener>

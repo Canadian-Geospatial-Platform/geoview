@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useId, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -35,6 +35,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
   const { t } = useTranslation<string>();
   const layerName = useStoreLayerName(layerPath) ?? '';
+  const menuId = useId();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -111,7 +112,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
     <>
       <IconButton
         onClick={handleClick}
-        aria-controls={open ? 'data-table-export-menu' : undefined}
+        aria-controls={open ? menuId : undefined}
         aria-expanded={open ? 'true' : 'false'}
         aria-haspopup="true"
         aria-label={t('dataTable.exportBtn')}
@@ -119,7 +120,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
       >
         <DownloadIcon />
       </IconButton>
-      <Menu id="data-table-export-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
+      <Menu id={menuId} anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={handleExportData}>{t('dataTable.downloadAsCSV')}</MenuItem>
         {children}
       </Menu>

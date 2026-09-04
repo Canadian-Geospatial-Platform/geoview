@@ -68,7 +68,7 @@ export function MapInfoRotationButton(): JSX.Element {
             justifyContent: 'center',
           }}
         >
-          <NorthArrowIcon width={30} height={30} />
+          <NorthArrowIcon width={30} height={30} mapId={mapId} />
         </Box>
       </Box>
     </Tooltip>
