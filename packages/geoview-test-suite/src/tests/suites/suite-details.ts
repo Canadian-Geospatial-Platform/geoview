@@ -81,7 +81,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
     return Promise.resolve();
   }
 
@@ -92,14 +93,11 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Details with polygons (visibility toggling)
-    const pGeochartPolygons = this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
+    await this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
       'geojsonLYR5/polygons.json',
       GVAbstractTester.ONTARIO_CENTER_LONLAT,
       GVAbstractTester.ALBERTA_CENTER_LONLAT
     );
-
-    // Wait for the test with polygons to complete
-    await pGeochartPolygons;
 
     // Test clear all highlights
     await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
