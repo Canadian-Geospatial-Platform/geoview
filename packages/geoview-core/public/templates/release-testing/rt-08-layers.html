@@ -295,6 +295,33 @@
         data-config-url="./../../configs/navigator/demos/08-all-layer-zoom-levels.json"
       ></div>
 
+      <!-- Map 10: WMS duplicate group names (#3521) -->
+      <h5>Map 10 — WMS Duplicate Group Names (#3521)</h5>
+      <p>WMS service (canimage_en) where a parent group and its child group share the same &lt;Name&gt; "canimage". Config uses layerId "canimage". All sublayers must load without an infinite loop / hang.</p>
+      <div
+        id="map10"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-95, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'wmsCanimage',
+                'geoviewLayerName': 'CanImage',
+                'metadataAccessPath': 'https://maps.geogratis.gc.ca/wms/canimage_en',
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'canimage' }]
+              }
+            ]
+          },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
@@ -313,6 +340,8 @@
       <pre id="map8CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 9 — Configuration Snippet</button>
       <pre id="map9CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 10 — Configuration Snippet</button>
+      <pre id="map10CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>

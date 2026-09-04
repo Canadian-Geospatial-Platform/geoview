@@ -1340,7 +1340,7 @@ The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSet
 > 11. Removed TODO/NOTE comments — **never delete** existing TODO/NOTE comments during cleanup
 > 12. Missing `#region Handlers` / `#endregion` around handler groups
 > 13. Missing `memo` justification in component JSDoc when `memo()` is used
-> 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls
+> 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()` (including heavy-conditional calls gated by `getIsRunningHeavyTests()`); exclude only debug-only and commented-out calls
 
 ### Logging
 
@@ -2549,7 +2549,7 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 }
 ```
 
-Every concrete test suite must implement `getTestsTotalFinal()`. Set its return value to the exact number of tester `testXXXX()` and `testErrorXXXX()` calls made by the full `onLaunchTestSuite()` method. Count each call once, regardless of whether it runs sequentially or inside `Promise.all()`. Do not count calls that exist only in `onLaunchTestSuiteDEBUG()`. When reviewing a suite, compare the returned number directly with those calls and flag any mismatch.
+Every concrete test suite must implement `getTestsTotalFinal()`. Set its return value to the exact number of tester `testXXXX()` and `testErrorXXXX()` calls made by the full `onLaunchTestSuite()` method. Count each call once, regardless of whether it runs sequentially, inside `Promise.all()`, or inside a conditional block such as `if (this.getIsRunningHeavyTests())` — heavy tests count because they are gated by a runtime toggle, not removed from the suite. Do not count calls that exist only in `onLaunchTestSuiteDEBUG()` or that are commented out. This number must be **equal** to the `suite-layer` (and every other suite) count in [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md) and the suite's summary count in [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) — not merely incremented in lockstep. When reviewing a suite, compare the returned number directly with those calls and flag any mismatch.
 
 3. **Register in `index.tsx`** — Add import + else-if branch
 
@@ -2590,7 +2590,8 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
 9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
-10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls and update the count whenever the pipeline changes
+10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`, **including** heavy-conditional calls gated by `getIsRunningHeavyTests()` (they are toggle-gated, not removed); exclude only debug-only and commented-out calls, and update the count whenever the pipeline changes
+11. **Update the automated-suite checklist** — Each time you add/remove a test, also update [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md): bump the affected suite's `Tests` count (remember `suite-layer` is listed twice — LCC and WM — so a single new layer test is +1 to each row and +2 to the **Total**) and recompute the **Total** row. When adding a layer test, the four counts that must move together — and must all be **equal** to the same call count — are: the TS `getTestsTotalFinal()`, `test-catalog.md` summary, both `00-automated-suite.md` suite-layer rows, and the `00-automated-suite.md` Total.
 
 ### Gotchas & Pitfalls
 

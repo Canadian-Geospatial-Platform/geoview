@@ -112,9 +112,9 @@ labels: ["testing", "release"]
 ## 08 — Layers
 
 - [ ] [Left Panel — Layer List](../docs/programming/release-testing/08-layers.md#left-panel--layer-list) (16 tests)
-- [ ] [Add Layer](../docs/programming/release-testing/08-layers.md#add-layer) (36 tests)
+- [ ] [Add Layer](../docs/programming/release-testing/08-layers.md#add-layer) (37 tests)
 - [ ] [Right Panel — Layer Info & Settings](../docs/programming/release-testing/08-layers.md#right-panel--layer-info--settings) (46 tests)
-- [ ] [Layer Type Configs](../docs/programming/release-testing/08-layers.md#layer-type-configs) (25 tests)
+- [ ] [Layer Type Configs](../docs/programming/release-testing/08-layers.md#layer-type-configs) (27 tests)
 
 ## 09 — Styles
 

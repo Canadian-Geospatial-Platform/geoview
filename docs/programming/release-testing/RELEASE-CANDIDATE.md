@@ -255,6 +255,8 @@ _(Tests added, moved, removed, or reorganized)_
 - Added fixed-height map layout tests for maps with and without a footer bar (#3601)
 - Audited suite totals against active full-suite tester calls: corrected `suite-map-config` to 39; debug-only and commented-out calls remain excluded
 - Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
+- Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
+- Added automated `suite-layer` test `testAddWMSDuplicateGroupNames` (LayerTester) guarding issue #3521 — loads the `canimage_en` WMS by its duplicate top group id, asserts the nested `canimage/canimage` path is built and a deep leaf loads without infinite-looping (`suite-layer` total 41 → 43: +1 for the new test and +1 for correctly counting the heavy-conditional test that was previously excluded)
 
 ## Config Schema Changes
 
@@ -266,10 +268,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 903   |
+| Total tests   | 901    | 906   |
 | Automated (A) | 60     | 62    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 672   |
+| Manual (M)    | 672    | 675   |
 
 ## Notes for Release Notes Author
 
