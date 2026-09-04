@@ -47,7 +47,6 @@ export default function Snapping(): JSX.Element {
 
   return (
     <IconButton
-      id="snap"
       aria-label={t('drawer.toggleSnapping')}
       tooltipPlacement="left"
       onClick={handleToggleSnapping}

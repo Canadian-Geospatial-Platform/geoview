@@ -646,7 +646,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG exists inside the map target element (not the map-info rotation section)
         test.addStep('Verifying north arrow SVG exists inside mapTargetElement...');
-        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} #northarrow`);
+        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} [data-testid="north-arrow"] svg`);
         Test.assertIsDefined('northArrowDomElement', northArrowEl);
       }
     );
@@ -681,7 +681,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG does NOT exist inside the map target element
         test.addStep('Verifying north arrow SVG does not exist inside mapTargetElement...');
-        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} #northarrow`);
+        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} [data-testid="north-arrow"] svg`);
         Test.assertIsUndefined('northArrowDomElement', northArrowEl ?? undefined);
       }
     );

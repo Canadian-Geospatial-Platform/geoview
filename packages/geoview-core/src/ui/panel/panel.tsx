@@ -173,7 +173,11 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-panel`}
       className={`appbar-panel${panelId ? ` appbar-panel-${panelId}` : ''}`}
     >
-      <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
+      <FocusTrapContainer
+        open={isFocusTrapped}
+        focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-focus-trap`}
+        containerType={CONTAINER_TYPE.APP_BAR}
+      >
         <Card
           sx={{
             ...memoSxClasses.panelCard,

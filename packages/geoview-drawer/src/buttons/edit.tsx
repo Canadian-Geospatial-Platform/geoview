@@ -36,7 +36,6 @@ export default function Edit(): JSX.Element {
 
   return (
     <IconButton
-      id="clear"
       aria-label={t('drawer.edit')}
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
