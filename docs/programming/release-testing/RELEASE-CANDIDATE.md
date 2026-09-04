@@ -213,6 +213,9 @@ _(WCAG fixes and improvements)_
 - Updated A11Y documentation: documented ESC key behavior in fullscreen mode and focus trap behavior when multiple panels auto-open simultaneously (#3490)
 - Improved about panel styling: replaced hard-coded values with theme tokens, consolidated CSS into about-panel-style.ts (#3477)
 - Implemented comprehensive focus indicator system with new `IGeoViewFocusIndicator` interface (outline + halo colors) in all themes, `getFocusIndicatorStyles()` helper for WCAG 2.1 SC 2.4.7 compliance, and consistent 3px outline width across all interactive components (#3236)
+- Fixed the footer panel close button breaking the focus trap when viewing the guide (#3618)
+- Fixed the count styling next to duplicated notification items in the notifications panel (#3622)
+- Enforced unique, `mapId`-scoped DOM element IDs across the viewer to prevent duplicate-ID conflicts with multiple map instances: removed unused IDs from drawer buttons, crosshair, and the `GeoCaIcon`/north-arrow decorative paths; `mapId`-scoped the remaining drawer button, north-arrow group (`NorthArrowIcon` now takes a `mapId` prop), export button, and keyboard-navigation (WCAG) modal button IDs; and refactored `FocusTrapContainer`'s ambiguous `id` prop into a clearly-named, `mapId`-scoped `focusTrapContainerId` across all 4 call sites (panel, geolocator, version, tab-panel) (#3220)
 
 ## Documentation & Cleanup
 

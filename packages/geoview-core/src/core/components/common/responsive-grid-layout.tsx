@@ -142,6 +142,9 @@ const ResponsiveGridLayout = forwardRef(
      */
     const handleClosePanel = useCallback((): void => {
       setIsRightPanelVisible(false);
+      // Also close the guide so it doesn't stay stuck open and mask the next selected layer's content
+      setIsGuideOpen(false);
+      wasAutoOpenedRef.current = false;
       onRightPanelClosed?.();
     }, [onRightPanelClosed]);
 

@@ -1023,7 +1023,7 @@ export class ExportUtilities {
     let northArrowSvgPaths;
     if (northArrow && currentProjection !== 3573) {
       try {
-        const iconString = renderToString(createElement(NorthArrowIcon, { width: 24, height: 24 }));
+        const iconString = renderToString(createElement(NorthArrowIcon, { width: 24, height: 24, mapId }));
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(iconString, 'image/svg+xml');
         const paths = svgDoc.querySelectorAll('path');

@@ -13,7 +13,8 @@ import { logger } from '@/core/utils/logger';
 /** Properties for the FocusTrapContainer component. */
 interface FocusTrapContainerProps {
   children: ReactNode;
-  id: string;
+  /** Key for focus-trap coordination, compared against the focusItem.activeElementId store field; also used as the real DOM id to restore/watch focus on for FOOTER_BAR containers. */
+  focusTrapContainerId: string;
   containerType: TypeContainerBox;
   open?: boolean;
 }
@@ -51,7 +52,7 @@ const extractTabName = (fullTabId: string, mapId: string): string => {
 export const FocusTrapContainer = memo(({
   children,
   open = false,
-  id,
+  focusTrapContainerId,
   containerType,
 }: FocusTrapContainerProps): JSX.Element => {
   logger.logTraceRender('component/common/FocusTrapContainer', containerType);
@@ -83,14 +84,14 @@ export const FocusTrapContainer = memo(({
         }
       }, TIMEOUT.focusDelay);
     } else {
-      uiController.disableFocusTrap(id);
+      uiController.disableFocusTrap(focusTrapContainerId);
     }
-  }, [uiController, id, containerType]);
+  }, [uiController, focusTrapContainerId, containerType]);
 
   // #endregion Handlers
 
   // Extract tab name from the full tab ID (e.g., "map1-tab-layers" → "layers")
-  const tabName = extractTabName(id, mapId);
+  const tabName = extractTabName(focusTrapContainerId, mapId);
 
   // Construct exit button ID using clean format: {mapId}-{containerType}-{tabName}-panel-close-btn
   const exitBtnId = `${mapId}-${containerType}-${tabName}-panel-close-btn`;
@@ -100,20 +101,27 @@ export const FocusTrapContainer = memo(({
    */
   const memoIsActive = useMemo((): boolean => {
     // Log
-    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - memoIsActive', id, focusItem.activeElementId, open, containerType, activeTrapGeoView);
+    logger.logTraceUseMemo(
+      'FOCUS-TRAP-ELEMENT - memoIsActive',
+      focusTrapContainerId,
+      focusItem.activeElementId,
+      open,
+      containerType,
+      activeTrapGeoView
+    );
 
     // Don't activate if a modal is currently open (prevents competing FocusTraps)
-    if (focusItem.activeElementId && focusItem.activeElementId !== id) {
+    if (focusItem.activeElementId && focusItem.activeElementId !== focusTrapContainerId) {
       return false;
     }
 
     // For footer bar containers, activate focus trap when WCAG is enabled and this container is active
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      return activeTrapGeoView && id === focusItem.activeElementId;
+      return activeTrapGeoView && focusTrapContainerId === focusItem.activeElementId;
     }
     // For other containers, require activeTrapGeoView to be true
-    return (id === focusItem.activeElementId || open) && activeTrapGeoView;
-  }, [id, focusItem.activeElementId, open, containerType, activeTrapGeoView]);
+    return (focusTrapContainerId === focusItem.activeElementId || open) && activeTrapGeoView;
+  }, [focusTrapContainerId, focusItem.activeElementId, open, containerType, activeTrapGeoView]);
 
   /**
    * Determines if the exit button should be shown.
@@ -125,13 +133,18 @@ export const FocusTrapContainer = memo(({
     return containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView;
   }, [containerType, activeTrapGeoView]);
 
-  const memoExitButtonStyles = useMemo(
-    () => ({
+  /**
+   * Builds the exit button styles, toggling visibility based on keyboard navigation state.
+   */
+  const memoExitButtonStyles = useMemo((): Record<string, unknown> => {
+    // Log
+    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - memoExitButtonStyles', activeTrapGeoView);
+
+    return {
       ...EXIT_BUTTON_STYLES,
       display: activeTrapGeoView ? 'block' : 'none',
-    }),
-    [activeTrapGeoView]
-  );
+    };
+  }, [activeTrapGeoView]);
 
   /**
    * Disables the focus trap when keyboard navigation is turned off.
@@ -150,14 +163,14 @@ export const FocusTrapContainer = memo(({
     // Log
     logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
 
-    if (id === focusItem.activeElementId) {
+    if (focusTrapContainerId === focusItem.activeElementId) {
       // SetTimeout with a delay of 0 to force the rendering
       setTimeout(() => {
         // Explicitly request focus indicator for keyboard users
         document.getElementById(exitBtnId)?.focus({ focusVisible: true });
       }, TIMEOUT.focusDelay);
     }
-  }, [focusItem, id, exitBtnId]);
+  }, [focusItem, focusTrapContainerId, exitBtnId]);
 
   /**
    * Auto-activates the focus trap when a footer panel transitions to open.
@@ -167,7 +180,7 @@ export const FocusTrapContainer = memo(({
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap', id, open);
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap', focusTrapContainerId, open);
 
     // Track whether this is an actual panel open transition
     const wasJustOpened = !prevOpenRef.current && open;
@@ -177,9 +190,9 @@ export const FocusTrapContainer = memo(({
     // (not when activeTrapGeoView toggles for already-open panels)
     if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && wasJustOpened) {
       // Auto-enable focus trap when footer panel opens
-      uiController.enableFocusTrap({ activeElementId: id, callbackElementId: id });
+      uiController.enableFocusTrap({ activeElementId: focusTrapContainerId, callbackElementId: focusTrapContainerId });
     }
-  }, [containerType, activeTrapGeoView, open, id, uiController]);
+  }, [containerType, activeTrapGeoView, open, focusTrapContainerId, uiController]);
 
   /**
    * Enables focus trap on focusin for already-open footer panels.
@@ -187,15 +200,20 @@ export const FocusTrapContainer = memo(({
   // TODO: WCAG - Still need to be fully fix
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap already open footer', open, id);
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap already open footer', open, focusTrapContainerId);
 
-    if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && open && id !== focusItem.activeElementId) {
-      const container = document.getElementById(id);
+    if (
+      containerType === CONTAINER_TYPE.FOOTER_BAR &&
+      activeTrapGeoView &&
+      open &&
+      focusTrapContainerId !== focusItem.activeElementId
+    ) {
+      const container = document.getElementById(focusTrapContainerId);
       if (container) {
         // Add focus listener directly to the container
         const handleContainerFocus = (): void => {
           // Use the same approach as tab selection - directly enable focus trap
-          uiController.enableFocusTrap({ activeElementId: id, callbackElementId: id });
+          uiController.enableFocusTrap({ activeElementId: focusTrapContainerId, callbackElementId: focusTrapContainerId });
         };
 
         container.addEventListener('focusin', handleContainerFocus);
@@ -207,7 +225,7 @@ export const FocusTrapContainer = memo(({
 
     // Always return a cleanup function or undefined
     return undefined;
-  }, [containerType, activeTrapGeoView, open, id, focusItem.activeElementId, uiController]);
+  }, [containerType, activeTrapGeoView, open, focusTrapContainerId, focusItem.activeElementId, uiController]);
 
   // disableAutoFocus: prevents MUI FocusTrap from auto-focusing first child. Without this, First item inside FocusTrap (<Box>) gets focus first.
   // disableRestoreFocus: to prevent fighting for focus between multiple FocusTraps
