@@ -36,7 +36,6 @@ export default function Draw(): JSX.Element {
 
   return (
     <IconButton
-      id="draw"
       aria-label={t('drawer.toggleDrawing')}
       tooltipPlacement="left"
       className={isDrawing ? 'highlighted active' : ''}

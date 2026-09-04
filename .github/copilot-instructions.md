@@ -1798,6 +1798,8 @@ When asked to **audit JSDoc comments for a folder or file**, follow these steps 
 
 ## Accessibility
 
+See [accessibility.md](../docs/app/accessibility.md) for the full feature overview, intentional interaction patterns, WCAG constraints/exceptions, and the accessibility code-review checklist.
+
 ### Required Patterns
 
 - **`aria-label` is required on `<IconButton>`** — enforced by the type system (custom wrapper makes it non-optional)

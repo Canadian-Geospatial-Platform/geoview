@@ -122,7 +122,11 @@ const NotificationItem = memo(
           </Box>
           {notification.message}
           {notification.count > 1 && (
-            <Box component="span" aria-label={t('appbar.repeatedNotificationTimes', { count: notification.count })}>
+            <Box
+              component="span"
+              sx={sxClasses.notificationsItemCount}
+              aria-label={t('appbar.repeatedNotificationTimes', { count: notification.count })}
+            >
               {notification.count}
             </Box>
           )}

@@ -33,13 +33,7 @@ export default function Download(): JSX.Element {
   };
 
   return (
-    <IconButton
-      id="download"
-      aria-label={t('drawer.downloadTooltip')}
-      tooltipPlacement="left"
-      onClick={handleDownload}
-      sx={memoSxClasses.navButton}
-    >
+    <IconButton aria-label={t('drawer.downloadTooltip')} tooltipPlacement="left" onClick={handleDownload} sx={memoSxClasses.navButton}>
       <DownloadIcon />
     </IconButton>
   );

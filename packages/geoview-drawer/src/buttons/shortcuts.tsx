@@ -36,7 +36,6 @@ export default function Shortcuts(): JSX.Element {
 
   return (
     <IconButton
-      id="shortcuts"
       aria-label={t('drawer.toggleShortcuts')}
       tooltipPlacement="left"
       className={areShortcutsEnabled ? 'highlighted active' : ''}

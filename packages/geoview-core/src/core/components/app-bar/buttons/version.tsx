@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
+import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
-import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
+import { GeoCaIcon, IconButton, Popper, CloseIcon, Typography, Box, Link, List, Paper } from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { GitHubIcon } from '@/ui/icons';
@@ -146,7 +146,7 @@ export default function Version(): JSX.Element {
           handleKeyDown={handleEscapeKey}
         >
           <FocusTrapContainer
-            id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`}
+            focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`}
             open={open && activeTrapGeoView}
             containerType={CONTAINER_TYPE.APP_BAR}
           >

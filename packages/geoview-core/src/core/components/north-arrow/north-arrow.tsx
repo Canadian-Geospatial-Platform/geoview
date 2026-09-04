@@ -51,6 +51,7 @@ export const NorthArrow = memo((): JSX.Element => {
   return (
     <Box
       ref={northArrowRef}
+      data-testid="north-arrow"
       sx={memoSxClasses.northArrowContainer}
       style={{
         transition: theme.transitions.create(['all', 'transform'], {
