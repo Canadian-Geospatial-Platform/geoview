@@ -10,6 +10,7 @@ import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-except
 import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
+import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -2289,6 +2290,46 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion GEOCORE CUSTOM CONFIG
+
+  // #region LAYER FUNCTIONS
+
+  /**
+   * Tests that zooming to the extent of a GeoJSON layer without features throws a NoBoundsError.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testZoomExtentWithoutFeatures(): Promise<Test<NoBoundsError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+
+    // Test
+    return this.testError(
+      `Test zoom to extent on GeoJSON with no features...`,
+      NoBoundsError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Call zoom to layer extent, it should throw a NoBoundsError
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  // #endregion LAYER FUNCTIONS
 
   // #region HELPERS
 

@@ -89,7 +89,7 @@ export abstract class AbstractTestSuite {
    * without modifying the main `onLaunchTestSuite` method. When the override returns
    * a non-resolving promise, the framework skips the main test suite.
    *
-   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
    *
    * @returns A promise that resolves immediately by default (no debug tests to run)
    */
