@@ -158,11 +158,6 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
         await GVAbstractTester.waitForReactIdle();
 
-        // Wait for the React UI to actually pick up on the store update
-        // GV The highlight only happens through a React render effect so we can't wait for a particular event
-        test.addStep(`Waiting on highlights to happen via react rendering...`);
-        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
-
         // Keep track of the store state
         const clickMarkerBefore = getStoreMapClickMarker(this.getMapId());
         const highlightedBefore = getStoreMapHighlightedFeatures(this.getMapId());
@@ -189,11 +184,6 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep(`Waiting on UI to refresh and the details panel to open (again)...`);
         await GVAbstractTester.waitForReactIdle();
 
-        // Wait for the React UI to actually pick up on the store update
-        // GV The highlight only happens through a React render effect so we can't wait for a particular event
-        test.addStep(`Waiting on highlights to happen via react rendering...`);
-        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
-
         // Keep track of the store state
         const highlighted2Before = getStoreMapHighlightedFeatures(this.getMapId());
 
@@ -204,11 +194,6 @@ export class DetailsTester extends GVAbstractTester {
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to close...`);
         await GVAbstractTester.waitForReactIdle();
-
-        // Wait for the React UI to actually pick up on the store update
-        // GV The highlight only happens through a React render effect so we can't wait for a particular event
-        test.addStep(`Waiting on highlights to be cleared via react rendering...`);
-        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length === 0);
 
         // Keep track of the store state
         const highlighted2After = getStoreMapHighlightedFeatures(this.getMapId());
