@@ -2294,6 +2294,56 @@ export class LayerTester extends GVAbstractTester {
   // #region LAYER FUNCTIONS
 
   /**
+   * Tests that zooming to the extent of a GeoJSON layer with one point feature succeeds.
+   *
+   * @returns A promise that resolves with the loaded GeoJSON layer
+   */
+  testZoomExtentWithOneFeature(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_SINGLE_POINT}`;
+
+    // Test
+    return this.test(
+      `Test zoom to extent on GeoJSON with only one point feature...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [
+          { id: GVAbstractTester.GEOJSON_SINGLE_POINT },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        const layer = await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        // Wait for the bounds to be processed
+        await layer.waitForBounds();
+
+        // Call zoom to layer extent, it should work
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Return the layer
+        return layer;
+      },
+      (test, result) => {
+        // Check the bounds on the layer
+        test.addStep('Reading the bounds on the layer...');
+        Test.assertIsDefined('bounds', result.getBounds());
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests that zooming to the extent of a GeoJSON layer without features throws a NoBoundsError.
    *
    * @returns A promise that resolves when the test completes
@@ -2306,7 +2356,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Test
     return this.testError(
-      `Test zoom to extent on GeoJSON with no features...`,
+      `Test zoom to extent on GeoJSON without features...`,
       NoBoundsError,
       async (test) => {
         // Creating the configuration
@@ -2322,6 +2372,58 @@ export class LayerTester extends GVAbstractTester {
         await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
       },
       undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that zooming to the extent of a featureless GeoJSON layer succeeds when an extent is configured.
+   *
+   * @returns A promise that resolves with the loaded GeoJSON layer
+   */
+  testZoomExtentWithoutFeaturesWithConfiguredExtent(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+
+    // Test
+    return this.test(
+      `Test zoom to extent on GeoJSON without features but a configured extent...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
+        // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
+        gvConfig.listOfLayerEntryConfig[0].getSource().extent = [
+          -87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075,
+        ];
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        const layer = await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        // Wait for the bounds to be processed
+        await layer.waitForBounds();
+
+        // Call zoom to layer extent, it should work
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Return the layer
+        return layer;
+      },
+      (test, result) => {
+        // Check the bounds on the layer
+        test.addStep('Reading the bounds on the layer...');
+        Test.assertIsDefined('bounds', result.getBounds());
+      },
       (test) => {
         // Redirect to helper to clean up and assert
         this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);

@@ -133,6 +133,49 @@
             }
           }
         ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3",
+        "geoviewLayerType": "GeoJSON",
+        "metadataAccessPath": "./datasets/geojson/metadata-blank.meta",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json",
+            "layerName": "Blank"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3X",
+        "geoviewLayerType": "GeoJSON",
+        "metadataAccessPath": "./datasets/geojson/metadata-blank.meta",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json",
+            "layerName": "Blank w/ extent in Ontario",
+            "source": {
+              "extent": [
+                -87.77486341686723,
+                51.62285357468582,
+                -84.57727128084842,
+                53.833354975551075
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR4",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "single_point.json",
+            "layerName": "Single feature (no meta)",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/single_point.json"
+            }
+          }
+        ]
       }
     ]
   },
