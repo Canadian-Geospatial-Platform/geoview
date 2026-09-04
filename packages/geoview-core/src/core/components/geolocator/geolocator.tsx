@@ -203,7 +203,11 @@ export function Geolocator(): JSX.Element {
       sx={{ ...memoSxClasses.root, visibility: isPanelOpen ? 'visible' : 'hidden' }}
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}
     >
-      <FocusTrapContainer open={isPanelOpen && activeTrapGeoView} id="geolocator-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
+      <FocusTrapContainer
+        open={isPanelOpen && activeTrapGeoView}
+        focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-focus-trap`}
+        containerType={CONTAINER_TYPE.APP_BAR}
+      >
         <Box sx={memoSxClasses.geolocator}>
           <Typography component="h2" sx={memoSxClasses.visuallyHidden}>
             {t('geolocator.panelTitle')}

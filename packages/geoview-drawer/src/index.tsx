@@ -151,7 +151,7 @@ class DrawerPlugin extends NavBarPlugin {
     // RESOLVED: Translation issues fixed - NavBar/AppBar components now translate aria-label and tooltip at render time
     // TO.DOCONT: Evaluate if dynamic button registration needs refactoring (UI reactivity to button creation events via handleNavApiAddButtonPanel)
     // TO.DOCONT: Consider cleanup of nav-bar, app-bar and footer-bar API's
-    return createDrawerButtons(this.getConfig());
+    return createDrawerButtons(this.mapViewer.mapId, this.getConfig());
   }
 }
 
