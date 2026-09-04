@@ -169,7 +169,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerConfig - The layer entry config to validate
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    const layerFound = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer);
+    // Resolve this layer's metadata, disambiguating WMS groups that share the same name at different nesting levels.
+    const layerFound = WMS.#findLayerMetadataForConfig(layerConfig, this.getMetadata()?.Capability.Layer);
+
     if (!layerFound) {
       // Add a layer load error
       this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -229,6 +231,12 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Init the layer metadata
     await WMS.initLayerMetadata(layerConfig, layerCapabilities, displayDateMode);
+
+    // If the layer advertised a defined CRS but it couldn't be resolved (deprecated/non-existent EPSG code), notify the user.
+    const definedCRS = layerCapabilities?.CRS?.[0];
+    if (definedCRS && !layerConfig.getMetadataProjection()) {
+      this.emitMessage('warning.layer.projectionNotValid', { layerName: layerConfig.getLayerNameCascade(), definedCRS }, 'warning');
+    }
 
     // If found
     if (layerCapabilities) {
@@ -762,10 +770,21 @@ export class WMS extends AbstractGeoViewRaster {
         layerConfig.initInitialSettingsBoundsFromMetadata(layerCapabilities.EX_GeographicBoundingBox.extent);
       }
 
-      // Read the first CRS from the list
+      // Read the first CRS from the list (the layer's defined/native CRS)
       // TODO: MINOR - do we want to have an array instead - just for WMS (other types don't work like this)?
       const firstCRS = layerCapabilities.CRS?.[0];
-      if (firstCRS) await layerConfig.initProjectionFromMetadata(firstCRS);
+      if (firstCRS) {
+        try {
+          await layerConfig.initProjectionFromMetadata(firstCRS);
+        } catch (error) {
+          // The layer's defined CRS is not a valid projection (e.g. deprecated EPSG:42304 with no proj4 definition).
+          // Log and continue so the layer isn't lost; it can still render when the map projection is supported.
+          logger.logWarning(
+            `Layer '${layerConfig.getLayerNameCascade()}': the defined CRS '${firstCRS}' is not a valid projection (EPSG code not found).`,
+            error
+          );
+        }
+      }
 
       // If there's a dimension
       if (layerCapabilities.Dimension) {
@@ -945,6 +964,85 @@ export class WMS extends AbstractGeoViewRaster {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Resolves a layer entry config's metadata from the WMS capabilities, disambiguating duplicate nested names.
+   *
+   * Chooses the lookup strategy automatically: when the layer id repeats in its own ancestor chain (WMS groups
+   * sharing the same name at different nesting levels, e.g. a 'canimage' group inside a 'canimage' group), it
+   * resolves by full path so a nested duplicate maps to the correct inner node instead of re-resolving to the
+   * outer one (which would recurse forever during validation). Otherwise it uses the lenient whole-tree lookup,
+   * which preserves existing behavior for all other services.
+   *
+   * @param layerConfig - The layer entry config to resolve metadata for
+   * @param rootCapabilityLayer - The root capability layer from the WMS metadata
+   * @returns The matching capability layer, or undefined when not found
+   */
+  static #findLayerMetadataForConfig(
+    layerConfig: ConfigBaseClass,
+    rootCapabilityLayer: TypeMetadataWMSCapabilityLayer | undefined
+  ): TypeMetadataWMSCapabilityLayer | undefined {
+    const layerIdPath = WMS.#buildLayerIdPath(layerConfig);
+    const hasDuplicateAncestorName = layerIdPath.filter((id) => id === layerConfig.layerId).length > 1;
+    return hasDuplicateAncestorName
+      ? WMS.#findLayerMetadataInCapabilityByPath(layerIdPath, rootCapabilityLayer)
+      : WMS.findLayerMetadataInCapability(layerConfig.layerId, rootCapabilityLayer);
+  }
+
+  /**
+   * Builds the chain of layerIds from the GeoView layer root down to (and including) the given layer config.
+   *
+   * Used to resolve WMS capability metadata by full path, so that duplicate layer names nested at different
+   * levels (allowed by the WMS spec, e.g. a 'canimage' group inside a 'canimage' group) resolve to the correct
+   * node instead of the first (outermost) name match.
+   *
+   * @param layerConfig - The layer entry config to build the path for
+   * @returns The ordered array of layerIds from the top-level group down to the given config
+   */
+  static #buildLayerIdPath(layerConfig: ConfigBaseClass): string[] {
+    const ids: string[] = [];
+    let current: ConfigBaseClass | undefined = layerConfig;
+    while (current) {
+      ids.unshift(current.layerId);
+      current = current.getParentLayerConfig();
+    }
+    return ids;
+  }
+
+  /**
+   * Resolves a WMS capability layer by following a path of layerIds, narrowing the search scope at each segment.
+   *
+   * Unlike {@link findLayerMetadataInCapability} (which returns the first name match anywhere in the tree), this
+   * disambiguates duplicate layer names nested at different levels: the first segment is matched against the whole
+   * tree, then each remaining segment is matched only within the previous match's subtree.
+   *
+   * @param layerIdPath - The ordered layerIds from the top-level group down to the target layer
+   * @param rootCapabilityLayer - The root capability layer from the WMS metadata
+   * @returns The matching capability layer, or undefined when not found
+   */
+  static #findLayerMetadataInCapabilityByPath(
+    layerIdPath: string[],
+    rootCapabilityLayer: TypeMetadataWMSCapabilityLayer | undefined
+  ): TypeMetadataWMSCapabilityLayer | undefined {
+    if (layerIdPath.length === 0) return undefined;
+
+    // First segment: search the whole capability tree for the top-level named layer
+    let scope = WMS.findLayerMetadataInCapability(layerIdPath[0], rootCapabilityLayer);
+
+    // Remaining segments: search only within the current scope's children so nested duplicates resolve correctly
+    for (let i = 1; i < layerIdPath.length; i++) {
+      if (!scope?.Layer) return undefined;
+      const children = Array.isArray(scope.Layer) ? scope.Layer : [scope.Layer];
+      let next: TypeMetadataWMSCapabilityLayer | undefined;
+      for (const child of children) {
+        next = WMS.findLayerMetadataInCapability(layerIdPath[i], child);
+        if (next) break;
+      }
+      scope = next;
+    }
+
+    return scope;
+  }
 
   /**
    * Creates a list of promises to fetch WMS metadata for a set of layer configurations.

@@ -80,52 +80,60 @@ export class UtilAddLayer {
   }
 
   /**
-   * Finds a layer or layer entry configuration by ID.
+   * Finds a layer or layer entry configuration by its full view path.
+   *
+   * Walks the tree segment by segment so that duplicate layer ids at different nesting levels
+   * (allowed by the WMS spec, e.g. a `canimage` group nested inside a `canimage` group) resolve to
+   * the correct node instead of always returning the first (outermost) match.
    *
    * @param layerTree - The layer tree to start searching from
-   * @param layerId - The layer ID or view ID to resolve
+   * @param layerPath - The full '/'-separated view path to resolve (e.g. 'canimage/canimage/canimage-030')
    * @returns The matching layer configuration or layer entry configuration, or undefined when not found
    */
-  static findLayerById(
+  static findLayerByPath(
     layerTree: TypeGeoviewLayerConfig | undefined,
-    layerId: string
+    layerPath: string
   ): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined {
     // If none
     if (!layerTree) return undefined;
 
-    // The target id
-    const targetId = layerId.split('/').pop();
+    // Split the view path into its id segments
+    const segments = layerPath.split('/').filter((segment) => segment !== '');
+    if (segments.length === 0) return undefined;
 
-    // If current
-    if (layerTree.geoviewLayerId === targetId) return layerTree;
+    // The current node whose children are searched, and the current children list
+    let currentNode: TypeGeoviewLayerConfig | TypeLayerEntryConfig = layerTree;
+    let currentChildren: TypeLayerEntryConfig[] | undefined = layerTree.listOfLayerEntryConfig;
+    let startIndex = 0;
 
-    // For each layer entries
-    for (const layer of layerTree.listOfLayerEntryConfig) {
-      const currentId = layer.layerId.split('/').pop();
-      if (currentId === targetId) {
-        return layer;
-      }
-
-      if (layer.listOfLayerEntryConfig) {
-        // Go recursive as it's actually a TypeGeoviewLayerConfig, not a TypeLayerEntryConfig
-        const found = UtilAddLayer.findLayerById(layer as unknown as TypeGeoviewLayerConfig, layerId);
-        if (found) return found;
-      }
+    // When the path begins with the root geoview layer id, consume it and start from the root's children
+    if (segments[0] === layerTree.geoviewLayerId) {
+      if (segments.length === 1) return layerTree;
+      startIndex = 1;
     }
 
-    // Not found
-    return undefined;
+    // Follow each remaining segment down the tree
+    for (let i = startIndex; i < segments.length; i++) {
+      const segment = segments[i];
+      const match: TypeLayerEntryConfig | undefined = currentChildren?.find((child) => child.layerId.split('/').pop() === segment);
+      if (!match) return undefined;
+      currentNode = match;
+      currentChildren = match.listOfLayerEntryConfig;
+    }
+
+    return currentNode;
   }
 
   /**
    * Finds a layer display name by ID.
    *
    * @param layerTree - The layer tree to start searching from
-   * @param layerId - The layer ID or view ID to resolve
+   * @param layerId - The layer ID or full view path to resolve
    * @returns The resolved layer name, or undefined when no matching layer is found
    */
   static findLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
-    const foundLayerEntry = UtilAddLayer.findLayerById(layerTree, layerId);
+    // Resolve by full path so duplicate ids at different depths return the correct node
+    const foundLayerEntry = UtilAddLayer.findLayerByPath(layerTree, layerId);
     // Using as ConfigClassOrType, because of the types confusion between class instance and regular object
     if (foundLayerEntry) return ConfigBaseClass.getClassOrTypeLayerName(foundLayerEntry);
     return undefined;
@@ -296,7 +304,7 @@ export class UtilAddLayer {
 
     const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
     const selectedLayers = layerIdsToAdd
-      .map((layerViewId) => ({ layerViewId, layerToAdd: UtilAddLayer.findLayerById(layerTree, layerViewId) }))
+      .map((layerViewId) => ({ layerViewId, layerToAdd: UtilAddLayer.findLayerByPath(layerTree, layerViewId) }))
       .filter(
         (selectedLayer): selectedLayer is { layerViewId: string; layerToAdd: TypeGeoviewLayerConfig | TypeLayerEntryConfig } =>
           !!selectedLayer.layerToAdd

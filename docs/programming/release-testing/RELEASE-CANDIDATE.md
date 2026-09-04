@@ -154,6 +154,8 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed broken layer in performance.json template demo (#3562)
 - Fixed creationDate field type in metadata (#3562)
 - Added precision slack on zoom-to-extent to compensate for minor floating-point precision issues (#3562)
+- Fixed WMS services with duplicate group `<Name>` values at different nesting levels (e.g. `canimage_en`: `canimage → canimage → canimage-030`) causing crashes — `RangeError: Maximum call stack size exceeded` in the Add Layer tree and an infinite loop on config-based add. Layer lookups now resolve by full view path instead of bare-id first-match (#3521)
+- Fixed WMS layers whose defined (native) CRS is a deprecated or non-existent EPSG code (e.g. `EPSG:42304`) killing layer creation — the invalid bounding-box/native CRS is now skipped so the layer still renders when the map projection is supported, and a `warning.layer.projectionNotValid` notification is shown to the user (#3521)
 
 ## Build & Dependencies
 

@@ -261,6 +261,14 @@ const isVisible =
 
 **Always use `getLayerNameCascade()` when you need a display name.** Use `getLayerName()` only when you specifically need to check if the entry has its own name set.
 
+**WMS duplicate `<Name>` at different nesting levels (issue #3521)** — The OGC WMS spec does NOT require `<Name>` to be unique across levels; a parent group and its child group can share the same name (e.g. `canimage_en`: `canimage → canimage → canimage-030`). `WMS.#buildLayerTree()` faithfully preserves this, producing sibling/descendant entries with identical `layerId`. Any downstream code that resolves a layer by **bare id first-match** will loop forever or resolve the wrong node. Rules learned:
+
+- **Never resolve a tree node by `layerId.split('/').pop()` first-match.** Walk the tree **segment-by-segment by full view path** instead. `UtilAddLayer.findLayerByPath(layerTree, viewPath)` replaced the buggy `findLayerById` in [add-layer-utils.ts](../packages/geoview-core/src/core/components/layers/left-panel/add-new-layer/add-layer-utils.ts); `findLayerNameById` and `buildGeoViewLayerConfig` must use it too.
+- **Add a `visited: Set<string>` cycle guard** on recursive tree walkers keyed by full view path (e.g. `populateLayerChildren` in add-layer-tree.tsx) as a defensive belt-and-suspenders on top of path-aware lookup.
+- **`AbstractMapViewerController.generateOrderedLayerPaths`** must build each node's exact path and deepen children by appending their `layerId` — do NOT collapse with an `endsWith(`/${layerId}`)` check, which merges `canimage/canimage` into a single `canimage` and produces duplicate/ambiguous ordered paths.
+- **`WMS.onValidateLayerEntryConfig` metadata resolution** is the config-side infinite-loop root: `findLayerMetadataInCapability` (bare-name recursive first-match) re-resolves a nested `canimage` to the OUTER `canimage`, so validation expands `canimage/canimage/canimage/...` forever. Fix: resolve by full id path (`#findLayerMetadataForConfig` → `#buildLayerIdPath` + `#findLayerMetadataInCapabilityByPath`, which narrows scope segment-by-segment), but **gate it on an actual duplicate-ancestor-name check** so all non-duplicate services keep the lenient whole-tree lookup.
+- **`utilLegendLayerByPathRec` (layer-state.ts) did NOT need changing.** Its hang was a _symptom_ of duplicate/ambiguous layer paths created upstream (ordered-path generation + config validation), not a defect in the legend walker. When an issue points at a crash site, verify whether it's the root or just where the bad data surfaces — fix the producer, not the symptom site.
+
 ### Layer Proxy Architecture
 
 **Per-instance proxy** — Each layer stores its own proxy URL on `AbstractBaseLayerEntryConfig`. There is NO shared mutable static for proxy configuration.
