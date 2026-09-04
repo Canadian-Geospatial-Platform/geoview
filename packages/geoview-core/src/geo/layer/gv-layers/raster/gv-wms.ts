@@ -52,6 +52,7 @@ import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import {
   LayerImageFailedNoImageError,
   LayerImageFailedToLoadHeightTooBigError,
+  LayerImageFailedToLoadProjectionNotValidError,
   LayerImageFailedToLoadWidthTooBigError,
   NoExtentError,
 } from '@/core/exceptions/geoview-exceptions';
@@ -182,6 +183,8 @@ export class GVWMS extends AbstractGVRaster {
    * The method currently checks for:
    * - Image size exceeding the service-defined `MaxWidth` or `MaxHeight`
    *   constraints (if available in service metadata).
+   * - A defined (native) CRS that resolves to a deprecated or non-existent
+   *   EPSG code and therefore can't be projected.
    * - An empty image response (zero width or height).
    * If none of the specific conditions are met, a generic image load error
    * message key is returned.
@@ -194,26 +197,34 @@ export class GVWMS extends AbstractGVRaster {
     const maxWidth = this.getLayerConfig().getServiceMetadata()?.Service.MaxWidth;
     const maxHeight = this.getLayerConfig().getServiceMetadata()?.Service.MaxHeight;
     const image = (event as unknown as ImageSourceEvent).image?.getImage();
+    // Use the currentSrc to get the actual image URL with parameters
+    const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
 
-    // Check for size limit exceeded
-    if (image && (!!maxWidth || !!maxHeight)) {
-      // Use the currentSrc to get the actual image URL with parameters
-      const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
-      if (imageSrc) {
-        // Check against max width allowed
+    if (imageSrc) {
+      // Check against max width allowed
+      if (maxWidth) {
         const width = Number(imageSrc.split('WIDTH=')[1]?.split('&')[0]);
-        if (maxWidth && width > maxWidth) {
-          return new LayerImageFailedToLoadWidthTooBigError(this.getLayerName(), width, maxWidth);
-        }
-
-        // Check against max height allowed
-        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
-        if (maxHeight && height > maxHeight) {
-          return new LayerImageFailedToLoadHeightTooBigError(this.getLayerName(), height, maxHeight);
-        }
+        if (width > maxWidth) return new LayerImageFailedToLoadWidthTooBigError(this.getLayerName(), width, maxWidth);
       }
-    } else if (image.height === 0 || image.width === 0) {
-      // No image returned, update the error code
+
+      // Check against max height allowed
+      if (maxHeight) {
+        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+        if (height > maxHeight) return new LayerImageFailedToLoadHeightTooBigError(this.getLayerName(), height, maxHeight);
+      }
+
+      // Check for a not-valid defined CRS. A WMS layer whose defined (native) CRS resolves to a deprecated or
+      // non-existent EPSG code (e.g. EPSG:42304) can't be projected, so its image requests fail with a generic
+      // decode/CORS error. Check the layer's own defined CRS validity here (not the full supported-CRS list) to
+      // report a clear, actionable message instead.
+      const definedCRS = this.getLayerConfig().getLayerMetadata()?.CRS?.[0];
+      if (definedCRS && !Projection.getProjectionFromCRS(definedCRS)) {
+        return new LayerImageFailedToLoadProjectionNotValidError(this.getLayerName(), definedCRS);
+      }
+    }
+
+    // No image returned
+    if (image && (image.height === 0 || image.width === 0)) {
       return new LayerImageFailedNoImageError(this.getLayerName());
     }
 
@@ -465,9 +476,21 @@ export class GVWMS extends AbstractGVRaster {
 
       // If read something
       if (metadataProj) {
-        const metadataProjConv = Projection.getProjectionFromStringOrNumber(metadataProj);
-        layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
-        layerBounds = GeoUtilities.validateExtentWhenDefined(layerBounds, projection.getCode());
+        try {
+          // Resolve the metadata bounding box projection. This can throw an InvalidProjectionError when the metadata
+          // advertises a bounding box in a CRS whose EPSG code is not registered in proj4/OpenLayers (an obscure or
+          // non-existent code). When that happens, skip the metadata bounds instead of failing the whole layer creation:
+          // the layer can still render using the map projection for its GetMap requests.
+          const metadataProjConv = Projection.getProjectionFromStringOrNumber(metadataProj);
+          layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
+          layerBounds = GeoUtilities.validateExtentWhenDefined(layerBounds, projection.getCode());
+        } catch (error) {
+          // The metadata bounding box CRS is not a valid projection (EPSG code not found). Log and continue without it.
+          logger.logWarning(
+            `Layer '${layerConfig.getLayerNameCascade()}': the metadata bounding box projection '${metadataProj}' is not a valid projection (EPSG code not found). Skipping the metadata bounds.`,
+            error
+          );
+        }
       }
     }
 
