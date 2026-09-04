@@ -708,6 +708,58 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests adding a WMS layer whose service nests groups sharing the same `<Name>` at different levels (issue #3521).
+   *
+   * The `canimage_en` service nests a `canimage` group inside a `canimage` group. Adding it by the top group id
+   * `canimage` must build unique deepened paths (`.../canimage/canimage/<leaf>`) and load without infinite-looping.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSDuplicateGroupNames(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.CANIMAGE_WMS_URL;
+    const groupPath = `${gvLayerId}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
+    const duplicateGroupPath = `${groupPath}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
+    const leafPath = `${duplicateGroupPath}/${GVAbstractTester.CANIMAGE_WMS_LEAF_ID}`;
+    const gvLayerName = 'CanImage';
+
+    // Test
+    return this.test(
+      `Test Adding CanImage WMS with duplicate nested group names on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration using the duplicate group id...');
+
+        // Create the config using the top-level duplicate group id 'canimage'
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.CANIMAGE_WMS_GROUP_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Reaching this deeply-nested leaf proves the duplicate 'canimage/canimage' path was built and loaded without hanging
+        return this.helperStepCheckLayerAtLayerPath(test, leafPath);
+      },
+      (test) => {
+        // Perform assertions
+        test.addStep('Verifying the duplicate nested group path was created...');
+
+        // The duplicate nested group path must exist (the core of issue #3521)
+        Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), duplicateGroupPath);
+
+        // The deeply-nested leaf must exist and have loaded
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), leafPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert (removing the outer group removes the whole subtree)
+        this.helperFinalizeStepRemoveLayerAndAssert(test, groupPath);
+      }
+    );
+  }
+
   // #endregion WMS
 
   // #region WMTS
