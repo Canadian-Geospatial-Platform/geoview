@@ -1704,6 +1704,18 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Checks whether an extent is defined and contains exactly four finite numeric coordinates.
+   *
+   * An extent is invalid when it is undefined, has a length other than four, or contains `NaN` or infinite coordinates.
+   *
+   * @param extent - The extent to validate
+   * @returns `true` when the extent is valid; otherwise, `false`
+   */
+  static isValidExtent(extent: Extent | undefined): boolean {
+    return (extent && extent.length === 4 && extent.every((coordinate) => Number.isFinite(coordinate))) ?? false;
+  }
+
+  /**
    * Checks validity of lat long, LCC, or Web Mercator extent and updates values if invalid.
    *
    * @param extent - The extent to validate

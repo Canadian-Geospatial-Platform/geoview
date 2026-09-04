@@ -834,6 +834,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly GEOJSON_METADATA_META_FILE: string = 'metadata.meta';
   static readonly GEOJSON_DATASET_ROOT: string = './datasets/geojson';
   static readonly GEOJSON_BLANK: string = 'blank.json';
+  static readonly GEOJSON_SINGLE_POINT: string = 'single_point.json';
   static readonly GEOJSON_POLYGONS: string = 'polygons.json';
   static readonly GEOJSON_GEOMETRY_COLLECTION: string = 'geometrycollection.json';
   static readonly GEOJSON_POLYGONS_ICON_LIST: Partial<TypeLegendItem>[] = [

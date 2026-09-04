@@ -62,7 +62,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testZoomExtentWithoutFeatures();
+    const pDevTest0 = this.#layerTester.testZoomExtentWithOneFeature();
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -74,10 +74,16 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Test zoom to extent of a layer with only 1 point feature
+    await this.#layerTester.testZoomExtentWithOneFeature();
+
     // Test zoom to extent of a layer without features
     await this.#layerTester.testZoomExtentWithoutFeatures();
 
+    // Test zoom to extent of a layer without features
+    await this.#layerTester.testZoomExtentWithoutFeaturesWithConfiguredExtent();
+
     // Done
-    return;
+    return Promise.resolve();
   }
 }
