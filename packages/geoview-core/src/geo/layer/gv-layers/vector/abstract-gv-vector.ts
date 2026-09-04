@@ -388,7 +388,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns A promise that resolves with the layer bounding box, or undefined if not available.
    * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitForLoadedStatus()`)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the features to be loaded, because this is a vector layer the features have to be loaded for the extent to be valid
     await this.waitForLoadedStatus();
@@ -397,9 +396,26 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // ?? undefined to coerce null → undefined because OL 10.9 changed getExtent() to return Extent | null
     let sourceExtent = this.getOLSource().getExtent() ?? undefined;
 
-    // If both found
+    // If the extent is invalid, clear it
+    if (!GeoUtilities.isValidExtent(sourceExtent)) {
+      sourceExtent = undefined;
+    }
+
+    // If no source extent
+    if (!sourceExtent) {
+      // Get extent from configuration
+      const layerConfigBounds = this.getLayerConfig().getSource().extent;
+
+      // If any extent from configuration
+      if (layerConfigBounds) {
+        // Use the extent from the layer configuration
+        sourceExtent = Projection.transformExtentFromProj(layerConfigBounds, Projection.getProjectionLonLat(), projection, stops);
+      }
+    }
+
+    // If extent is found, validate it
     if (sourceExtent) {
-      // Transform extent to given projection
+      // Validate the extent one last time
       sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 

@@ -264,7 +264,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       // TODO: REFACTOR IMPORTANT - In this spreading it should be like this so all properties of layerEntries are correctly passed to the GeoJSONLayerEntryConfig constructor.
       // TO.DOCONT: Here and in ALL OTHER createGeoviewLayerConfig for other layer types:
-      // TO.DOCONT:
+      // TO.DOCONT: Search id : 59026aa9
       // TO.DOCONT: const { id, ...layerEntryProps } = layerEntry;
       // TO.DOCONT: const layerEntryConfig = new GeoJSONLayerEntryConfig({
       // TO.DOCONT:   ...layerEntryProps,
