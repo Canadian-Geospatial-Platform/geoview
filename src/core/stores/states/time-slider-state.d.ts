@@ -258,6 +258,8 @@ export interface TypeTimeSliderValues {
     additionalLayerpaths?: string[];
     /** Animation delay in milliseconds between steps. */
     delay: number;
+    /** The initial slider handle values used as the reset target. */
+    defaultValues: number[];
     /** Optional description displayed in the time slider panel. */
     description?: string;
     /** Whether the time dimension uses discrete values rather than a continuous range. */

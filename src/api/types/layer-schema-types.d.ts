@@ -1,4 +1,4 @@
-import type { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { Extent, TypeDomain, TypeEsriFormatParameter, TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfig, AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { ConfigBaseClass, ConfigBaseClassProps, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -1044,7 +1044,7 @@ export type TypeLayerMetadataFields = {
     name: string;
     type: string;
     alias: string;
-    domain: codedValueType | rangeDomainType;
+    domain: TypeDomain;
 };
 export type TypeMetadataOGCFeature = {
     collections: TypeMetadataOGCFeatureCollection[];

@@ -38,6 +38,21 @@ export declare class TimeSliderController extends AbstractMapViewerController {
      */
     updateTimeSliderValues(layerPath: string, values: number[]): void;
     /**
+     * Resets the time slider values for a layer path to their registration defaults.
+     *
+     * @param layerPath - The layer path
+     */
+    resetValues(layerPath: string): void;
+    /**
+     * Constrains dual-handle values to keep one valid increment between the handles.
+     *
+     * @param layerPath - The layer path
+     * @param values - The proposed slider values
+     * @param activeThumb - The index of the thumb being moved
+     * @returns The constrained slider values
+     */
+    constrainValues(layerPath: string, values: number[], activeThumb: number): number[];
+    /**
      * Updates the filtering state for a layer path and re-applies the temporal filters.
      *
      * @param layerPath - The layer path

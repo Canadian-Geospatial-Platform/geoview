@@ -1,7 +1,7 @@
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import type { TypeFeatureInfoEntryPartial, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType, DisplayDateMode } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntryPartial, TypeStyleGeometry, TypeOutfieldsType, DisplayDateMode, TypeDomain } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -106,7 +106,7 @@ export declare class EsriUtilities {
      * @param fieldName - Field name for which we want to get the domain
      * @returns The domain of the field, or `null` if not found
      */
-    static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): codedValueType | rangeDomainType | undefined;
+    static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): TypeDomain | undefined;
 }
 export type RegisterLayerEntryConfigDelegate = (config: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | GroupLayerEntryConfig) => void;
 //# sourceMappingURL=esri-layer-common.d.ts.map

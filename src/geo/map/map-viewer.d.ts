@@ -179,13 +179,13 @@ export declare class MapViewer {
     /**
      * Returns the current display theme.
      *
-     * @returns The display theme
+     * @returns The display theme (geo.ca, canada.ca, light, or dark)
      */
     getDisplayTheme(): TypeDisplayTheme;
     /**
      * Set the display theme of the map.
      *
-     * @param displayTheme - The theme to use (geo.ca, light, dark)
+     * @param displayTheme - The theme to use (geo.ca, canada.ca, light, dark)
      */
     setTheme(displayTheme: TypeDisplayTheme): void;
     /**
@@ -430,6 +430,14 @@ export declare class MapViewer {
      */
     waitForMapReady(): Promise<MapBaseEvent>;
     /**
+     * Waits for the map ready zoomed event before resolving the promise.
+     *
+     * This function waits for the next onMapReadyZoomed event to be triggered.
+     *
+     * @returns A promise that resolves when the map ready zoomed event fires
+     */
+    waitForMapReadyZoomed(): Promise<MapBaseEvent>;
+    /**
      * Waits for the next map move-end event to be emitted.
      *
      * @returns A promise that resolves when the map move-end event fires
@@ -438,9 +446,9 @@ export declare class MapViewer {
     /**
      * Waits for the next rendercomplete event to be emitted.
      *
-     * Forces a synchronous frame via `map.renderSync()` so `rendercomplete` is guaranteed to fire,
-     * even when the map is idle. Without this, waiting on `rendercomplete` for an idle map hangs
-     * forever because OL does not schedule a frame unless something invalidates the view.
+     * If the map is attached, this forces a synchronous frame via `map.renderSync()` so idle maps
+     * still emit `rendercomplete`. If the map is detached, or if OpenLayers cannot render
+     * synchronously during teardown/recreate transitions, the promise resolves immediately.
      *
      * @returns A promise that resolves when the map render is complete
      */
@@ -578,7 +586,7 @@ export declare class MapViewer {
     /**
      * Gets if north pole is visible. This is not a perfect solution and is more a work around.
      *
-     * This approach is rotation-agnostic — it works regardless of the map's current rotation angle.
+     * This approach is rotation-agnostic - it works regardless of the map's current rotation angle.
      *
      * @returns True if the north pole is visible in the viewport, false otherwise
      */
@@ -715,6 +723,26 @@ export declare class MapViewer {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offMapReady(callback: MapReadyDelegate): void;
+    /**
+     * Returns a promise that resolves the next time the map ready zoomed event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when map ready zoomed fires
+     */
+    onceMapReadyZoomed(filter?: (event: MapBaseEvent) => boolean): Promise<MapBaseEvent>;
+    /**
+     * Registers a map ready zoomed event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapReadyZoomed(callback: MapReadyZoomedDelegate): MapReadyZoomedDelegate;
+    /**
+     * Unregisters a map ready zoomed event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapReadyZoomed(callback: MapReadyZoomedDelegate): void;
     /**
      * Registers a map layers processed event callback.
      *
@@ -980,6 +1008,10 @@ export type MapInitDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
  * Delegate for the map ready event handler function signature.
  */
 export type MapReadyDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
+/**
+ * Delegate for the map ready zoomed event handler function signature.
+ */
+export type MapReadyZoomedDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 /**
  * Delegate for the map layers processed event handler function signature.
  */

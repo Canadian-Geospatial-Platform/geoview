@@ -4,6 +4,7 @@ import type { Extent } from '@/api/types/map-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import type { AbstractBaseGVLayer, LayerBaseEvent, LayerNameChangedEvent, LayerOpacityChangedEvent, LayerVisibleChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVGroupLayer, type LayerGroupChildrenUpdatedEvent } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -151,6 +152,20 @@ export declare class LayerDomain {
      * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
     getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined;
+    /**
+     * Sets the visibility of all style items for a regular layer.
+     *
+     * This delegates the batch mutation to the underlying GV layer so item visibility updates,
+     * class-filter regeneration, and optional render waiting remain owned by the layer/domain side.
+     *
+     * @param layerPath - The layer path
+     * @param visible - Whether all style items should be visible
+     * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
+     * @returns A promise that resolves with the legend items whose visibility actually changed
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+     */
+    setAllLayerItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<TypeLegendItem[]>;
     /**
      * Waits for a layer entry config to be registered and returns it.
      *

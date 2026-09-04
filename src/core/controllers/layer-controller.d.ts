@@ -798,6 +798,21 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     waitForLayersLoaded(): Promise<number>;
     /**
+     * Waits for all map layers to reach the loaded status while periodically forcing OpenLayers render cycles.
+     *
+     * In background tabs, browsers throttle or pause `requestAnimationFrame` callbacks. This starves
+     * OpenLayers of render frames, which prevents:
+     * - Tile and image sources from requesting data (blocking layer loaded status transitions).
+     * - The `rendercomplete` event from firing (blocking any code that awaits full render completion).
+     *
+     * To work around this, the method calls `map.renderSync()` every 1 000 ms via `doUntilPromise`
+     * until the layers-loaded promise resolves. This keeps the OL rendering pipeline alive so layers
+     * can load regardless of tab visibility.
+     *
+     * @returns A promise that resolves with the number of layers that have reached the loaded status
+     */
+    waitForLayersLoadedForcingRenders(): Promise<number>;
+    /**
      * Starts bounds calculation and stores bounds as they get calculated.
      *
      * Uses a fire-and-forget pattern and handles completion or failure in promise handlers.

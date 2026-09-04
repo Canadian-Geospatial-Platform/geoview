@@ -7,7 +7,8 @@ import type { IGeoViewColors } from '@/ui/style/types';
  * to match GeoView's design system.
  *
  * @param geoViewColors - Optional color palette to generate theme from
+ * @param themeFont - Optional font family stack to apply to the generated theme
  * @returns Complete MUI ThemeOptions configuration
  */
-export declare const generateThemeOptions: (geoViewColors?: IGeoViewColors) => ThemeOptions;
+export declare const generateThemeOptions: (geoViewColors?: IGeoViewColors, themeFont?: string) => ThemeOptions;
 //# sourceMappingURL=themeOptionsGenerator.d.ts.map
