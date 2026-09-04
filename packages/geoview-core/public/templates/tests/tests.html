@@ -240,6 +240,7 @@
     <div id="group2-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3857)</button>
       <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3F-test')">Layer Functions</button>
     </div>
 
     <!-- Group 3: Map -->
@@ -332,6 +333,15 @@
       </button>
       <div class="panel">
         <div id="runAll-map3-results"></div>
+      </div>
+
+      <!-- Map 3F Results -->
+      <button id="collapsible-map3F" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 3F - Layer Functions</span>
+        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map3F-results"></div>
       </div>
 
       <!-- Group 3: Map -->
@@ -600,6 +610,56 @@
           'corePackagesConfig': [
             {
               'test-suite': { 'suites': ['suite-layer'] }
+            }
+          ],
+          'serviceUrls': {
+            'proxyUrl': 'https://proxy.app-dev.geo.ca'
+          }
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 3F -->
+    <div id="map3F-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT3F">2. Tests on map 3F (EPSG: 3857)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map3F"></div>
+      <br />
+      <div
+        id="map3F"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details',
+                'data-table'
+              ]
+            }
+          },
+          'corePackages': ['test-suite'],
+          'theme': 'geo.ca',
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-layer-functions'] }
             }
           ],
           'serviceUrls': {

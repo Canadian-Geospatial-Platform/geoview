@@ -14,9 +14,10 @@ import { TestSuiteRunningError } from './tests/core/exceptions';
 import type { GVAbstractTestSuite } from './tests/suites/abstract-gv-test-suite';
 import { GVTestSuiteCore } from './tests/suites/suite-core';
 import { GVTestSuiteConfig } from './tests/suites/suite-config';
-import { GVTestSuiteMapVaria } from './tests/suites/suite-map-varia';
+import { GVTestSuiteMapFunctions } from './tests/suites/suite-map-functions';
 import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
+import { GVTestSuiteLayerFunctions } from './tests/suites/suite-layer-functions';
 import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
 import { GVTestSuiteUI } from './tests/suites/suite-ui';
 import { GVTestSuiteDetails } from './tests/suites/suite-details';
@@ -107,10 +108,13 @@ class TestSuitePlugin extends AbstractPlugin {
         this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-map') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapVaria(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteMapFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-layer') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+      } else if (suite === 'suite-layer-functions') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteLayerFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-geochart') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer, this.controllerRegistry));
