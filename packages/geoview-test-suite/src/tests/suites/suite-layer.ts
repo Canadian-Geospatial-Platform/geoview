@@ -299,11 +299,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     await this.#layerTester.testAddGeoJSONWithGeometryCollection();
 
-    // If running heavy tests
-    if (this.getIsRunningHeavyTests()) {
-      // Test geocore group with defaultVisibility=false
-      await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
-    }
+    // Test geocore group with defaultVisibility=false
+    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
 
     // Done
     return;

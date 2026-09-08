@@ -37,7 +37,7 @@ export type TypeMapFeaturesInstance = {
 };
 
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
-export type Extent = Array<number>;
+export type Extent = Array<number>; // Array<number> instead of [number, number, number, number] to align with OpenLayers' implementation of Extent type
 
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
