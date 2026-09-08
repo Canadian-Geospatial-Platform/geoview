@@ -1,4 +1,5 @@
-import type { Theme } from '@mui/material';
+import { alpha } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
 /**
@@ -39,9 +40,12 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       marginRight: '7px',
       maxWidth: '18px',
     },
-    ':focus-visible': {
-      border: `2px solid ${theme.palette.common.black}`,
-      outline: 'none',
+    '&.Mui-focusVisible': {
+      outlineOffset: '-3px',
+      boxShadow: `inset 0 0 0 6px ${
+        theme.palette.geoViewColor?.focusIndicator.halo ??
+        (theme.palette.mode === 'dark' ? alpha(theme.palette.common.black, 0.8) : theme.palette.common.white)
+      }`,
     },
     transition: 'background-color 0.3s ease-in-out',
     '&:hover': {

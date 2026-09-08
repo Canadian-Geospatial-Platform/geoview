@@ -189,7 +189,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
 
         // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-        setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), FOCUS_DELAY);
+        setTimeout(() => {
+          // Explicitly request focus indicator for keyboard users
+          document.getElementById(`toplink-${focusTrapId}`)?.focus({ focusVisible: true });
+        }, FOCUS_DELAY);
         uiController.setCrosshairActive(false);
       },
       handleKeyDown: (evt: KeyboardEvent) => {
@@ -231,7 +234,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
       // Focus on the skip to main content link to skip app bar
-      setTimeout(() => document.getElementById(`main-map-${mapId}`)?.focus({ preventScroll: true }), FOCUS_DELAY);
+      setTimeout(() => {
+        // Explicitly request focus indicator for keyboard users (WCAG navigation)
+        document.getElementById(`main-map-${mapId}`)?.focus({ preventScroll: true, focusVisible: true });
+      }, FOCUS_DELAY);
     }
   }, [handleExit, mapId, uiController]);
 

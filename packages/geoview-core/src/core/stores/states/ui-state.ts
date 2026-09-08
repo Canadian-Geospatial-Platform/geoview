@@ -213,7 +213,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           if (id !== 'no-focus') {
             const element = document.getElementById(id);
             if (element) {
-              element.focus();
+              // Explicitly request focus indicator for keyboard users
+              element.focus({ focusVisible: true });
             }
           }
         });

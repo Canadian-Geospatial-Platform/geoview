@@ -102,7 +102,7 @@ export default function Version(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
+      <Box sx={{ padding: interaction === 'dynamic' ? '0' : '5px' }}>
         <IconButton
           id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`}
           aria-haspopup="dialog"

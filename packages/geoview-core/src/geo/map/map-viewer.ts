@@ -1921,6 +1921,9 @@ export class MapViewer {
     // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
     const mapHTMLElement = map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
+      // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
+      // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
+      // This enables scroll wheel zoom without showing the focus ring.
       mapHTMLElement.focus({ preventScroll: true });
 
       // Emit to the outside

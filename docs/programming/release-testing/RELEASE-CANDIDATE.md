@@ -209,6 +209,7 @@ _(WCAG fixes and improvements)_
 - Fixed time-slider reflow issues: panel header "time filtering" label now wraps for legibility at high zoom, simplified CSS consolidation (#3595)
 - Updated A11Y documentation: documented ESC key behavior in fullscreen mode and focus trap behavior when multiple panels auto-open simultaneously (#3490)
 - Improved about panel styling: replaced hard-coded values with theme tokens, consolidated CSS into about-panel-style.ts (#3477)
+- Implemented comprehensive focus indicator system with new `IGeoViewFocusIndicator` interface (outline + halo colors) in all themes, `getFocusIndicatorStyles()` helper for WCAG 2.1 SC 2.4.7 compliance, and consistent 3px outline width across all interactive components (#3236)
 
 ## Documentation & Cleanup
 

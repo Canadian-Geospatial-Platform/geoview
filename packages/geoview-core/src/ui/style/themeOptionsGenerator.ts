@@ -1,4 +1,5 @@
 import type { ThemeOptions } from '@mui/material';
+import type { CSSObject } from '@mui/system';
 import type { IGeoViewColors } from '@/ui/style/types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
@@ -16,15 +17,40 @@ function tooltipsPopperContainer(): Element | null {
   return document.fullscreenElement ?? document.body;
 }
 
+/** WCAG 2.1 SC 2.4.7 compliant focus indicator outline width. */
+export const FOCUS_OUTLINE_WIDTH = '3px';
+
+/** Focus indicator outline offset distance from element boundary. */
+export const FOCUS_OUTLINE_OFFSET = '2px';
+
+/** Focus indicator halo (box-shadow) size for enhanced visibility. */
+export const FOCUS_HALO_SIZE = '6px';
+
+/**
+ * WCAG-compliant focus indicator styles for keyboard navigation.
+ *
+ * Returns a CSSObject for use in MUI component styleOverrides.
+ * Component-level application is required because MUI's ButtonBase sets outline: 0
+ * with higher CSS specificity than CssBaseline global styles.
+ *
+ * @param geoViewColors - GeoView color palette for focus indicator colors
+ * @returns Focus indicator style object for .Mui-focusVisible selector
+ */
+export const getFocusIndicatorStyles = (geoViewColors: IGeoViewColors): CSSObject => ({
+  outline: `${FOCUS_OUTLINE_WIDTH} solid ${geoViewColors.focusIndicator.outline}`,
+  outlineOffset: FOCUS_OUTLINE_OFFSET,
+  boxShadow: `0 0 0 ${FOCUS_HALO_SIZE} ${geoViewColors.focusIndicator.halo}`,
+});
+
 /**
  * Generates button style overrides for all button variants.
+ *
+ * Note: Focus indicators are applied via MuiButtonBase (parent component) to avoid duplication.
  *
  * @param geoViewColors - GeoView color palette to derive button styles from
  * @returns Style override object for MUI Button component
  */
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
+const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
   '&.highlighted': {
     '&:hover, &:active, &.active': {
       backgroundColor: `${geoViewColors.primary.main}`,
@@ -350,6 +376,15 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             '&.unbordered': {
               borderStyle: 'none',
             },
+          },
+        },
+      },
+      MuiButtonBase: {
+        styleOverrides: {
+          root: {
+            // WCAG-compliant focus indicator for all ButtonBase descendants
+            // (Button, IconButton, Tab, MenuItem, Checkbox, Radio, Switch, Chip, ListItemButton, etc.)
+            '&.Mui-focusVisible': getFocusIndicatorStyles(geoViewColors),
           },
         },
       },
