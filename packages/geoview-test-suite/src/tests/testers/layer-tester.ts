@@ -1,6 +1,11 @@
 ﻿import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
+import type {
+  TypeMapFeaturesInstance,
+  TypeFeatureInfoResult,
+  codedValueType,
+  TypeFeatureInfoEntry,
+} from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
@@ -14,6 +19,7 @@ import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -2394,15 +2400,13 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test zoom to extent on GeoJSON without features but a configured extent...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
+
         // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
-        gvConfig.listOfLayerEntryConfig[0].getSource().extent = [
-          -87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075,
-        ];
+        const gvLayerConfig = gvConfig.listOfLayerEntryConfig[0];
+        gvLayerConfig.getSource().extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
 
         // Redirect to helper to add the layer to the map and wait
         await this.helperStepAddLayerOnMap(test, gvConfig);
@@ -2423,6 +2427,73 @@ export class LayerTester extends GVAbstractTester {
         // Check the bounds on the layer
         test.addStep('Reading the bounds on the layer...');
         Test.assertIsDefined('bounds', result.getBounds());
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that configured outfields do not prevent queried features from receiving geometry.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testConfiguredOutfieldsCanStillWorkWithGeometry(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    // Dummy names
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'gvLayerName';
+    const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
+    const clickCoordinate = [-86.395, 52.737];
+
+    return this.test(
+      `Test zoom to feature even when geometry not set in outfields configuration...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(
+          gvLayerId,
+          gvLayerName,
+          GVAbstractTester.TOP_PROJECTS_900A_URL_MAP_SERVER,
+          false,
+          [
+            {
+              id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID,
+              layerName: GVAbstractTester.TOP_PROJECTS_900A_LAYER_NAME,
+            },
+          ]
+        );
+
+        // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
+        const gvLayerConfig = gvConfig.listOfLayerEntryConfig[0] as EsriDynamicLayerEntryConfig;
+        gvLayerConfig.getSource().featureInfo ??= {};
+        gvLayerConfig.getSource().featureInfo!.outfields = GVAbstractTester.TOP_PROJECTS_900A_OUTFIELDS;
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+
+        // Perform a map click using the feature info layer set
+        const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
+
+        // Wait on the promise of the query for the layer path in question
+        const promiseResult = await queryResults[layerPath].promiseResult;
+
+        // Wait on the promise of geometries (EsriDynamic particularity)
+        await promiseResult?.promiseGeometries;
+
+        // Now return the results, now that we're sure the geometries were also gathered
+        return promiseResult?.results;
+      },
+      (test, result) => {
+        // Check if the feature has a valid extent property
+        test.addStep('Checking if the feature has a valid extent property...');
+        const feature = result?.[0];
+        Test.assertIsDefined('feature', feature);
+        Test.assertIsDefined('feature.extent', feature.extent);
       },
       (test) => {
         // Redirect to helper to clean up and assert

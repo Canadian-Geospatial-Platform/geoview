@@ -41,7 +41,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Test layer functions`;
+    return `Tests layer controller functions and feature-query behavior:<br/>
+      <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
+      <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>`;
   }
 
   /**
@@ -50,7 +52,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
    */
   override getTestsTotalFinal(): number {
-    return 1;
+    return 4;
   }
 
   /**
@@ -62,7 +64,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testZoomExtentWithOneFeature();
+    const pDevTest0 = this.#layerTester.testConfiguredOutfieldsCanStillWorkWithGeometry();
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -82,6 +84,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test zoom to extent of a layer without features
     await this.#layerTester.testZoomExtentWithoutFeaturesWithConfiguredExtent();
+
+    // Test zoom to feature when no geometry field in outfields
+    await this.#layerTester.testConfiguredOutfieldsCanStillWorkWithGeometry();
 
     // Done
     return Promise.resolve();
