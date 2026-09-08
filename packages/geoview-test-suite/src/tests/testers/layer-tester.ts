@@ -1,5 +1,6 @@
 ﻿import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { TestSkippedError } from '../core/exceptions';
 import type {
   TypeMapFeaturesInstance,
   TypeFeatureInfoResult,
@@ -2119,7 +2120,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeocoreWithGroupDefaultVisibilityFalse(): Promise<Test<void>> {
+  testAddGeocoreWithGroupDefaultVisibilityFalse(isRunningHeavyTests: boolean): Promise<Test<void>> {
     const gvLayerId = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID;
     const gvLayerPath = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH;
     const gvLayerPathWithGroupVisibilityFalse = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE;
@@ -2128,6 +2129,11 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding layer with group layer defaultVisibility to false...`,
       async (test) => {
+        // If we're not running the heavy tests actually, skip it
+        if (!isRunningHeavyTests) {
+          throw new TestSkippedError('Not running the heavy tests');
+        }
+
         // Creating the configuration
         test.addStep('Adding the geocore layer on the map via UUID...');
 
