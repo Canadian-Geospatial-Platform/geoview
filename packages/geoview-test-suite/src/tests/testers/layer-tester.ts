@@ -2436,11 +2436,13 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that configured outfields do not prevent queried features from receiving geometry.
+   * Tests that feature-info queries still populate feature geometry when configured outfields omit geometry fields.
+   *
+   * The queried feature must retain an extent so zoom-to-feature workflows keep working with restricted outfield configs.
    *
    * @returns A promise that resolves when the test completes
    */
-  testConfiguredOutfieldsCanStillWorkWithGeometry(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+  testFeatureHasGeometryWhenOutfieldsHasNoGeometryField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
@@ -2448,7 +2450,7 @@ export class LayerTester extends GVAbstractTester {
     const clickCoordinate = [-86.395, 52.737];
 
     return this.test(
-      `Test zoom to feature even when geometry not set in outfields configuration...`,
+      `Test feature has geometry even when outfields configuration has no geometry field...`,
       async (test) => {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
