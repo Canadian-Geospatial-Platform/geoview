@@ -138,6 +138,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     if (isRunningSequentially) await pLayerWMSBadUrl;
 
     // Test WMS duplicate nested group names (issue #3521)
+    // TODO: Move this call to the layer-functions suite
     const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
     if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
 

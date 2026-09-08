@@ -267,7 +267,6 @@ const isVisible =
 - **Add a `visited: Set<string>` cycle guard** on recursive tree walkers keyed by full view path (e.g. `populateLayerChildren` in add-layer-tree.tsx) as a defensive belt-and-suspenders on top of path-aware lookup.
 - **`AbstractMapViewerController.generateOrderedLayerPaths`** must build each node's exact path and deepen children by appending their `layerId` — do NOT collapse with an `endsWith(`/${layerId}`)` check, which merges `canimage/canimage` into a single `canimage` and produces duplicate/ambiguous ordered paths.
 - **`WMS.onValidateLayerEntryConfig` metadata resolution** is the config-side infinite-loop root: `findLayerMetadataInCapability` (bare-name recursive first-match) re-resolves a nested `canimage` to the OUTER `canimage`, so validation expands `canimage/canimage/canimage/...` forever. Fix: resolve by full id path (`#findLayerMetadataForConfig` → `#buildLayerIdPath` + `#findLayerMetadataInCapabilityByPath`, which narrows scope segment-by-segment), but **gate it on an actual duplicate-ancestor-name check** so all non-duplicate services keep the lenient whole-tree lookup.
-- **`utilLegendLayerByPathRec` (layer-state.ts) did NOT need changing.** Its hang was a _symptom_ of duplicate/ambiguous layer paths created upstream (ordered-path generation + config validation), not a defect in the legend walker. When an issue points at a crash site, verify whether it's the root or just where the bad data surfaces — fix the producer, not the symptom site.
 
 ### Layer Proxy Architecture
 
@@ -519,6 +518,36 @@ const text = await Fetch.fetchTextPermissive(url);
 ```
 
 **Exception — Web Workers**: Worker scripts cannot import the `Fetch` class (it breaks the build). Use `fetchWithTimeout` from `@/core/utils/fetch-worker-helper` instead — a lightweight worker-safe equivalent.
+
+### Error Handling — Never Silently Swallow Errors
+
+**Do not catch an error, log it, and move on unless you have narrowed to the specific expected error type.** A broad `catch` that suppresses everything hides real bugs (network failures, type errors, logic errors) that should surface and be trapped somewhere up the stack.
+
+Rule: in a `catch` block, **re-throw anything that is not the specific error you intended to handle.** Guard with `instanceof` and `throw error` for the rest.
+
+```typescript
+// ❌ Bad: swallows ALL errors — a genuine bug is hidden as a warning
+try {
+  const proj = Projection.getProjectionFromStringOrNumber(metadataProj);
+  bounds = Projection.transformExtentFromProj(extent, proj, projection, stops);
+} catch (error) {
+  logger.logWarning('Could not compute bounds', error);
+}
+
+// ✅ Good: handle only the expected case, propagate the rest
+try {
+  const proj = Projection.getProjectionFromStringOrNumber(metadataProj);
+  bounds = Projection.transformExtentFromProj(extent, proj, projection, stops);
+} catch (error) {
+  // Only the invalid-projection case is expected & recoverable here; anything else is a real error.
+  if (!(error instanceof InvalidProjectionError)) throw error;
+  logger.logWarning(`Projection '${metadataProj}' is not valid (EPSG not found). Skipping.`, error);
+}
+```
+
+- Reserve broad `catch (error) { log }` for true best-effort boundaries where **any** failure is genuinely non-fatal (and say so in a comment) — e.g. optional legend/style enrichment.
+- For abort handling, use the existing `GeoViewError.throwIfAborted(error)` pattern (re-throws aborts, swallows the rest during format fallback).
+- Update the method's `@throws` JSDoc to list the error types that now propagate.
 
 ### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
