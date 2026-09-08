@@ -1,4 +1,4 @@
-import type { SxProps } from 'geoview-core/ui/style/types';
+import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -37,7 +37,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // State
   const [mode, setMode] = useState<BrowseMode>('browse');
@@ -93,6 +93,28 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     setSelectedCollection(null);
     setSearchResult(null);
   }, []);
+
+  /**
+   * Handles clicking a browse/search mode tab.
+   */
+  const handleModeClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+    },
+    [handleModeChange]
+  );
+
+  /**
+   * Handles keyboard activation for browse/search mode tabs.
+   */
+  const handleModeKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+    },
+    [handleModeChange]
+  );
 
   /**
    * Handles clicking on a collection card to view its details.
@@ -298,12 +320,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       return (
         <>
           {isLoading && (
-            <Box sx={sxClasses.loading}>
+            <Box sx={memoSxClasses.loading}>
               <Typography>{t('stacBrowser.loading')}</Typography>
             </Box>
           )}
           {!isLoading && searchResult.features.length === 0 && (
-            <Box sx={sxClasses.noResults}>
+            <Box sx={memoSxClasses.noResults}>
               <Typography>{t('stacBrowser.noResults')}</Typography>
             </Box>
           )}
@@ -327,7 +349,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     // Search panel — search mode
     if (mode === 'search') {
       return (
-        <Box sx={sxClasses.panelContent}>
+        <Box sx={memoSxClasses.panelContent}>
           <StacFilterPanel config={config} onSearch={handleSearch} mapId={mapId} />
         </Box>
       );
@@ -336,43 +358,41 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     // Default: collections list — browse mode
     if (collections.length === 0) {
       return (
-        <Box sx={sxClasses.loading}>
+        <Box sx={memoSxClasses.loading}>
           <Typography>{t('stacBrowser.loading')}</Typography>
         </Box>
       );
     }
 
     return (
-      <Box sx={sxClasses.panelContent}>
+      <Box sx={memoSxClasses.panelContent}>
         <StacCollectionList collections={collections} onCollectionClick={handleCollectionClick} />
       </Box>
     );
   };
 
   return (
-    <Box sx={sxClasses.mainContainer}>
+    <Box sx={memoSxClasses.mainContainer}>
       {/* Mode toggle — Browse / Search (hide when in item-detail) */}
       {view !== 'item-detail' && (
-        <Box sx={sxClasses.modeToggle}>
+        <Box sx={memoSxClasses.modeToggle}>
           <Box
-            sx={[sxClasses.modeButton, mode === 'browse' && sxClasses.modeButtonActive] as SxProps}
-            onClick={(): void => handleModeChange('browse')}
+            sx={[memoSxClasses.modeButton, mode === 'browse' && memoSxClasses.modeButtonActive] as SxProps}
+            data-mode="browse"
+            onClick={handleModeClick}
             role="tab"
             tabIndex={0}
-            onKeyDown={(e: React.KeyboardEvent): void => {
-              if (e.key === 'Enter' || e.key === ' ') handleModeChange('browse');
-            }}
+            onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.browse')}
           </Box>
           <Box
-            sx={[sxClasses.modeButton, mode === 'search' && sxClasses.modeButtonActive] as SxProps}
-            onClick={(): void => handleModeChange('search')}
+            sx={[memoSxClasses.modeButton, mode === 'search' && memoSxClasses.modeButtonActive] as SxProps}
+            data-mode="search"
+            onClick={handleModeClick}
             role="tab"
             tabIndex={0}
-            onKeyDown={(e: React.KeyboardEvent): void => {
-              if (e.key === 'Enter' || e.key === ' ') handleModeChange('search');
-            }}
+            onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.search')}
           </Box>

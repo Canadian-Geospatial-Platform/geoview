@@ -186,7 +186,7 @@ export const FeatureRow = memo(
       stringValues = [String(value)];
     }
 
-    // TODO: Check - Solidify this logic. I'm adding an attempt to guess the value content is a list of images before proceeding with
+    // TODO: MINOR - Solidify this logic. I'm adding an attempt to guess the value content is a list of images before proceeding with
     // TO.DOCONT: the logic with the ';' here. It's rough, but it's an improvement. Originally it was not checking at all what the
     // TO.DOCONT: content was and was doing it on everything, including html content and such!
     // If the value contains an array of images

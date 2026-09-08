@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
@@ -151,18 +151,17 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
   const layerController = useLayerController();
 
   // State
-  const [previewPromises, setPreviewPromises] = useState<Map<string, Promise<string>>>(new Map());
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
+  /**
+   * Builds preview image promises for the available raster functions.
+   */
+  const memoPreviewPromises = useMemo((): Map<string, Promise<string>> => {
     // Log
-    logger.logTraceUseEffect('RASTER FUNCTION PANEL - Layer Raster Function Infos sync', rasterFunctionInfos);
+    logger.logTraceUseMemo('RASTER FUNCTION PANEL - memoPreviewPromises', layerPath, rasterFunctionInfos);
 
-    if (rasterFunctionInfos.length > 0) {
-      // TODO: CHECK - Verify if that's the intent here? - Use a hook?
-      const promises = layerController.getLayerRasterFunctionPreviews(layerPath);
-      setPreviewPromises(promises);
-    }
+    if (rasterFunctionInfos.length === 0) return new Map<string, Promise<string>>();
+    return layerController.getLayerRasterFunctionPreviews(layerPath);
   }, [layerPath, rasterFunctionInfos, layerController]);
 
   const handleSelect = useCallback(
@@ -207,7 +206,7 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
               key={info.name}
               info={info}
               isSelected={currentRasterFunction === info.name}
-              previewPromise={previewPromises.get(info.name)}
+              previewPromise={memoPreviewPromises.get(info.name)}
               onSelect={handleSelect}
             />
           ))}

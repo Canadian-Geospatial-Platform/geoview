@@ -279,7 +279,7 @@ export function ExportModal(): JSX.Element {
   /**
    * Handles closing the export modal.
    */
-  const handleCloseModal = useCallback(() => {
+  const handleCloseModal = useCallback((): void => {
     uiController.disableFocusTrap();
 
     // Clear preview content so skeleton shows on next open

@@ -1,5 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import {
@@ -49,13 +50,16 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const controller = useFilterPanelController();
 
   const theme = ui.useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
 
   // Hook the filter state for this layer from the store
   const mapId = useStoreGeoViewMapId();
   const filterState = useStoreFilterPanelLayerFilterState(layer.layerPath);
   const isCollapsed = useStoreFilterPanelLayerCollapsed(layer.layerPath);
+
+  // Indicate if there are filters
+  const hasFilter = Object.keys(filterState).length > 0;
 
   // Get config values (static)
   const layerConfig = getStoreFilterPanelLayerConfig(mapId, layer.layerPath);
@@ -70,9 +74,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Determine if this layer is ready for filtering
   const layerIsReady = layerStatus === 'processed' || layerStatus === 'loaded';
-
-  // Check if any filters are currently applied for this layer
-  const hasFilter = useMemo(() => Object.keys(filterState).length > 0, [filterState]);
 
   /**
    * Memoized header styles based on collapsed state.
@@ -105,7 +106,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Auto-applies filters when the layer becomes ready or when filter state changes.
    */
   useEffect((): void => {
-    logger.logTraceUseEffect('LAYER FILTER SECTION - Auto-apply filters', layerIsReady);
+    logger.logTraceUseEffect('LAYER FILTER SECTION - Auto-apply filters', layer.layerPath, layerIsReady, filterState);
 
     // Only auto-apply if enabled and layer is ready
     if (!layerIsReady) return;
@@ -278,7 +279,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               </Typography>
             </Box>
           ) : (
-            layer.attributes.map((attr) => renderFilterControl(attr))
+            layer.attributes.map(renderFilterControl)
           )}
         </Box>
       </Collapse>
