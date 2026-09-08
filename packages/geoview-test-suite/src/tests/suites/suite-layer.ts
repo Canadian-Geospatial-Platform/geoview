@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
    */
   override getTestsTotalFinal(): number {
-    return 41;
+    return 43;
   }
 
   /**
@@ -136,6 +136,11 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
     if (isRunningSequentially) await pLayerWMSBadUrl;
+
+    // Test WMS duplicate nested group names (issue #3521)
+    // TODO: Move this call to the layer-functions suite
+    const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
+    if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
 
     // Test adding layer
     const pLayerWFSWithGeometCurrentConditions = this.#layerTester.testAddWFSLayerWithWithGeometCurrentConditions();
@@ -254,6 +259,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSDatacubeRingFireHalifax,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
+      pLayerWMSDuplicateGroupNames,
       pLayerWFSWithGeometCurrentConditions,
       pLayerWFSBadUrl,
       pLayerWFSOkayUrlNoCap,

@@ -125,6 +125,17 @@
               'listOfLayerEntryConfig': []
             },
             {
+              'geoviewLayerId':'canimage_dupid',
+              'geoviewLayerName':'Can Image',
+              'metadataAccessPath':'https://maps.geogratis.gc.ca/wms/canimage_en',
+              'geoviewLayerType':'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                    'layerId':'canimage'
+                }
+              ]
+            },
+            {
               'geoviewLayerId': 'nfi-group-with-slash',
               'geoviewLayerName': 'Nfi Plot Test Slash',
               'metadataAccessPath': 'https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS',
@@ -212,6 +223,9 @@
         </li>
         <li>
           <strong>Nfi Plot Test Slash</strong> - WMS layer with slashes in layerId path, testing group entries with slash-separated IDs
+        </li>
+        <li>
+          <strong>Can Image</strong> - WMS layer with potential duplicate `<Name>` at different nesting levels - Issue #3521
         </li>
       </ul>
     </div>

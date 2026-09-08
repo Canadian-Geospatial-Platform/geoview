@@ -261,6 +261,13 @@ const isVisible =
 
 **Always use `getLayerNameCascade()` when you need a display name.** Use `getLayerName()` only when you specifically need to check if the entry has its own name set.
 
+**WMS duplicate `<Name>` at different nesting levels (issue #3521)** — The OGC WMS spec does NOT require `<Name>` to be unique across levels; a parent group and its child group can share the same name (e.g. `canimage_en`: `canimage → canimage → canimage-030`). `WMS.#buildLayerTree()` faithfully preserves this, producing sibling/descendant entries with identical `layerId`. Any downstream code that resolves a layer by **bare id first-match** will loop forever or resolve the wrong node. Rules learned:
+
+- **Never resolve a tree node by `layerId.split('/').pop()` first-match.** Walk the tree **segment-by-segment by full view path** instead. `UtilAddLayer.findLayerByPath(layerTree, viewPath)` replaced the buggy `findLayerById` in [add-layer-utils.ts](../packages/geoview-core/src/core/components/layers/left-panel/add-new-layer/add-layer-utils.ts); `findLayerNameById` and `buildGeoViewLayerConfig` must use it too.
+- **Add a `visited: Set<string>` cycle guard** on recursive tree walkers keyed by full view path (e.g. `populateLayerChildren` in add-layer-tree.tsx) as a defensive belt-and-suspenders on top of path-aware lookup.
+- **`AbstractMapViewerController.generateOrderedLayerPaths`** must build each node's exact path and deepen children by appending their `layerId` — do NOT collapse with an `endsWith(`/${layerId}`)` check, which merges `canimage/canimage` into a single `canimage` and produces duplicate/ambiguous ordered paths.
+- **`WMS.onValidateLayerEntryConfig` metadata resolution** is the config-side infinite-loop root: `findLayerMetadataInCapability` (bare-name recursive first-match) re-resolves a nested `canimage` to the OUTER `canimage`, so validation expands `canimage/canimage/canimage/...` forever. Fix: resolve by full id path (`#findLayerMetadataForConfig` → `#buildLayerIdPath` + `#findLayerMetadataInCapabilityByPath`, which narrows scope segment-by-segment), but **gate it on an actual duplicate-ancestor-name check** so all non-duplicate services keep the lenient whole-tree lookup.
+
 ### Layer Proxy Architecture
 
 **Per-instance proxy** — Each layer stores its own proxy URL on `AbstractBaseLayerEntryConfig`. There is NO shared mutable static for proxy configuration.
@@ -511,6 +518,36 @@ const text = await Fetch.fetchTextPermissive(url);
 ```
 
 **Exception — Web Workers**: Worker scripts cannot import the `Fetch` class (it breaks the build). Use `fetchWithTimeout` from `@/core/utils/fetch-worker-helper` instead — a lightweight worker-safe equivalent.
+
+### Error Handling — Never Silently Swallow Errors
+
+**Do not catch an error, log it, and move on unless you have narrowed to the specific expected error type.** A broad `catch` that suppresses everything hides real bugs (network failures, type errors, logic errors) that should surface and be trapped somewhere up the stack.
+
+Rule: in a `catch` block, **re-throw anything that is not the specific error you intended to handle.** Guard with `instanceof` and `throw error` for the rest.
+
+```typescript
+// ❌ Bad: swallows ALL errors — a genuine bug is hidden as a warning
+try {
+  const proj = Projection.getProjectionFromStringOrNumber(metadataProj);
+  bounds = Projection.transformExtentFromProj(extent, proj, projection, stops);
+} catch (error) {
+  logger.logWarning('Could not compute bounds', error);
+}
+
+// ✅ Good: handle only the expected case, propagate the rest
+try {
+  const proj = Projection.getProjectionFromStringOrNumber(metadataProj);
+  bounds = Projection.transformExtentFromProj(extent, proj, projection, stops);
+} catch (error) {
+  // Only the invalid-projection case is expected & recoverable here; anything else is a real error.
+  if (!(error instanceof InvalidProjectionError)) throw error;
+  logger.logWarning(`Projection '${metadataProj}' is not valid (EPSG not found). Skipping.`, error);
+}
+```
+
+- Reserve broad `catch (error) { log }` for true best-effort boundaries where **any** failure is genuinely non-fatal (and say so in a comment) — e.g. optional legend/style enrichment.
+- For abort handling, use the existing `GeoViewError.throwIfAborted(error)` pattern (re-throws aborts, swallows the rest during format fallback).
+- Update the method's `@throws` JSDoc to list the error types that now propagate.
 
 ### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
@@ -1332,7 +1369,7 @@ The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSet
 > 11. Removed TODO/NOTE comments — **never delete** existing TODO/NOTE comments during cleanup
 > 12. Missing `#region Handlers` / `#endregion` around handler groups
 > 13. Missing `memo` justification in component JSDoc when `memo()` is used
-> 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls
+> 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()` (including heavy-conditional calls gated by `getIsRunningHeavyTests()`); exclude only debug-only and commented-out calls
 
 ### Logging
 
@@ -2541,7 +2578,7 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 }
 ```
 
-Every concrete test suite must implement `getTestsTotalFinal()`. Set its return value to the exact number of tester `testXXXX()` and `testErrorXXXX()` calls made by the full `onLaunchTestSuite()` method. Count each call once, regardless of whether it runs sequentially or inside `Promise.all()`. Do not count calls that exist only in `onLaunchTestSuiteDEBUG()`. When reviewing a suite, compare the returned number directly with those calls and flag any mismatch.
+Every concrete test suite must implement `getTestsTotalFinal()`. Set its return value to the exact number of tester `testXXXX()` and `testErrorXXXX()` calls made by the full `onLaunchTestSuite()` method. Count each call once, regardless of whether it runs sequentially, inside `Promise.all()`, or inside a conditional block such as `if (this.getIsRunningHeavyTests())` — heavy tests count because they are gated by a runtime toggle, not removed from the suite. Do not count calls that exist only in `onLaunchTestSuiteDEBUG()` or that are commented out. This number must be **equal** to the `suite-layer` (and every other suite) count in [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md) and the suite's summary count in [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) — not merely incremented in lockstep. When reviewing a suite, compare the returned number directly with those calls and flag any mismatch.
 
 3. **Register in `index.tsx`** — Add import + else-if branch
 
@@ -2582,7 +2619,9 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
 9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
-10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`; exclude debug-only calls and update the count whenever the pipeline changes
+10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`, **including** heavy-conditional calls gated by `getIsRunningHeavyTests()` (they are toggle-gated, not removed); exclude only debug-only and commented-out calls, and update the count whenever the pipeline changes
+11. **Update the automated-suite checklist** — Each time you add/remove a test, also update [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md): bump the affected suite's `Tests` count (remember `suite-layer` is listed twice — LCC and WM — so a single new layer test is +1 to each row and +2 to the **Total**) and recompute the **Total** row. When adding a layer test, the four counts that must move together — and must all be **equal** to the same call count — are: the TS `getTestsTotalFinal()`, `test-catalog.md` summary, both `00-automated-suite.md` suite-layer rows, and the `00-automated-suite.md` Total.
+12. **Re-audit ALL suites every time an automated test changes** — Adding, removing, or renaming any automated test requires a full audit of **every** suite (not just the one you touched), because the three count sources drift independently. For each of the 12 suites, verify `getTestsTotalFinal()` equals the actual `testXXXX()` / `testErrorXXXX()` call count in its `onLaunchTestSuite()` (include heavy-conditional calls, exclude debug-only and commented-out), then reconcile all three sources so they agree: the suite's `getTestsTotalFinal()`, the suite's `test-catalog.md` summary row, and the suite's `00-automated-suite.md` row(s). Also verify each doc's own **Total** equals the sum of its rows (`00-automated-suite.md` counts `suite-layer` twice for LCC + WM; `test-catalog.md` counts it once). Fix any drift you find, even in suites you did not modify.
 
 ### Gotchas & Pitfalls
 

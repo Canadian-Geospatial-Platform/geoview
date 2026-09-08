@@ -71,21 +71,21 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 ### Summary
 
-| Group             | Suite              | Tester(s)                                                                                       | Test Count | Execution                   |
-| ----------------- | ------------------ | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`       | `CoreTester`                                                                                    | 14         | Parallel                    |
-| 1. Core / Utility | `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
-| 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
-| 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 16         | Complex mixed               |
-| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 39         | Fully sequential            |
-| 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
-| 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 12         | Guarded sequential          |
-| 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 2          | Guarded sequential          |
-| 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
+| Group             | Suite               | Tester(s)                                                                                       | Test Count | Execution                   |
+| ----------------- | ------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
+| 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
+| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
+| 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
+| 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
+| 3. Map            | `suite-map-varia`   | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 39         | Fully sequential            |
+| 4. Components     | `suite-ui`          | `UITester`                                                                                      | 1          | Parallel                    |
+| 4. Components     | `suite-details`     | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
+| 4. Components     | `suite-data-table`  | `DataTableTester`                                                                               | 12         | Guarded sequential          |
+| 5. Packages       | `suite-geochart`    | `GeochartTester`                                                                                | 2          | Guarded sequential          |
+| 5. Packages       | `suite-swiper`      | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                    |                                                                                                 | **229**    |                             |
+| **Total**         |                     |                                                                                                 | **229**    |                             |
 
 ---
 
@@ -392,7 +392,8 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 10  | `testAddWMSLayerWithOWSMundialis`       | test      | Test Adding WMS Mundialis on map...                                                  |
 | 11  | `testAddWMSLayerWithDatacubeMSI`        | test      | Test Adding WMS Datacube MSI on map...                                               |
 | 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
-| 13  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
+| 13  | `testAddWMSDuplicateGroupNames`         | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)            |
+| 14  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
 #### 2.1.5 WFS — Lifecycle
 
@@ -762,7 +763,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-time-slider` · **File:** `tests/suites/suite-time-slider.ts` · **Tester:** `TimeSliderTester` (`tests/testers/time-slider-tester.ts`)
 **Execution:** Sequential · **Guard:** `time-slider` must be in `footerBar.tabs.core` and time-slider controller must exist
 
-| #   | Method                | Type | Description                                                                              |
-| --- | --------------------- | ---- | ---------------------------------------------------------------------------------------- |
-| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                             |
-| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges...      |
+| #   | Method                | Type | Description                                                                         |
+| --- | --------------------- | ---- | ----------------------------------------------------------------------------------- |
+| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                        |
+| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges... |
