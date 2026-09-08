@@ -1,5 +1,6 @@
 import type { API } from 'geoview-core/api/api';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { LayerTester } from '../testers/layer-tester';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -64,7 +65,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testConfiguredOutfieldsCanStillWorkWithGeometry();
+    const pDevTest0 = this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -85,8 +86,11 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test zoom to extent of a layer without features
     await this.#layerTester.testZoomExtentWithoutFeaturesWithConfiguredExtent();
 
-    // Test zoom to feature when no geometry field in outfields
-    await this.#layerTester.testConfiguredOutfieldsCanStillWorkWithGeometry();
+    // Make sure the map is reset in its initial extent after the zooms
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+
+    // Test feature query behavior when no geometry field in outfields
+    await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
 
     // Done
     return Promise.resolve();
