@@ -5,6 +5,8 @@ export type TypeAppVersion = {
     minor: number;
     patch: number;
     timestamp: string;
+    /** Optional build suffix (e.g. 'dev.a1b2c3d') appended for development builds; empty for release builds. */
+    suffix?: string;
 };
 /**
  * Version button and popover panel displaying app version, build date, and links.

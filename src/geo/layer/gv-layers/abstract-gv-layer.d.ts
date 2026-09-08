@@ -13,7 +13,7 @@ import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/ras
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings, TypeFeatureInfoResult, codedValueType, rangeDomainType, TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings, TypeFeatureInfoResult, TypeDisplayLanguage, TypeFieldEntry, TypeDomain } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields, TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -306,6 +306,19 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
      */
     setStyleItemVisibility(item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void>;
+    /**
+     * Updates the visibility of all style items on the layer and triggers a single re-render.
+     *
+     * This method walks the layer style configuration directly, updates every unique legend item
+     * visibility in one batch, refreshes the class filter once, and optionally waits for the next
+     * render cycle. It intentionally does not emit per-item visibility events because callers use
+     * the returned changed items list to synchronize UI/store state as a single batch.
+     *
+     * @param visible - Whether all style items should be visible
+     * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
+     * @returns A promise that resolves with the legend items whose visibility actually changed
+     */
+    setAllStyleItemsVisibility(visible: boolean, waitForRender: boolean): Promise<TypeLegendItem[]>;
     /**
      * Builds and returns a filter expression derived from the layer's style configuration.
      *
@@ -772,10 +785,10 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @returns The processed field value: a formatted date for date fields, the decoded
      * name for coded-value domains, or the raw value otherwise.
      */
-    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: codedValueType | rangeDomainType | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
+    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
 }
 /** Callback signature used to extract and format the value of a single feature field. */
-export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: codedValueType | rangeDomainType | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
+export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
 /** Event payload emitted when the layer style changes. */
 export interface StyleChangedEvent extends LayerBaseEvent {
     /** The newly applied layer style. */

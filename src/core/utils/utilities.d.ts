@@ -411,6 +411,13 @@ export declare function stringify(str: unknown): unknown | string;
  */
 export declare function doTimeout(timeout: number): DelayJob;
 /**
+ * Formats a duration in milliseconds into a compact human-readable string.
+ *
+ * @param durationMs - The duration in milliseconds to format
+ * @returns A formatted string such as "150ms", "2.500s", "3m 05s", or "1h 03m 05s"
+ */
+export declare function formatDuration(durationMs: number): string;
+/**
  * Awaits for a specified duration before resolving.
  *
  * @param timeout - The number of milliseconds to wait for
