@@ -444,7 +444,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
             return <UseHtmlToReact htmlContent={sanitized} omitWrappers />;
           }
           return sanitized;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.logError('Error rendering HTML content:', error);
         }
       }

@@ -235,7 +235,7 @@ export class GeoPackageReader {
         const [tableName, sld] = stmt.get();
         if (sld) styleSlds[tableName as string] = sld;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(error);
     }
 

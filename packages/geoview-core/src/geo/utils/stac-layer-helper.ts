@@ -37,7 +37,7 @@ export abstract class StacLayerHelper {
       let palette: RGBA[] | undefined;
       try {
         palette = await extractGeotiffColorMap(geotiffUrl);
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError(
           `StacLayerHelper.addGeoTiffLayer - Could not extract colormap (falling back to default rendering): ${geotiffUrl}`,
           error
@@ -84,7 +84,7 @@ export abstract class StacLayerHelper {
       map.addLayer(layer);
 
       return layer;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`StacLayerHelper.addGeoTiffLayer - Failed to add GeoTIFF layer: ${geotiffUrl}`, error);
       return null;
     }
@@ -100,7 +100,7 @@ export abstract class StacLayerHelper {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type not statically available
       map.removeLayer(layer as any);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('StacLayerHelper.removeStacLayer - Failed to remove STAC layer', error);
     }
   }

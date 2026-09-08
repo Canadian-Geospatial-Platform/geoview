@@ -158,7 +158,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       if (colorMap) {
         layerConfig.setEmbeddedColorMap(colorMap);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logWarning(`Failed to extract color map for layer ${layerConfig.layerPath}`, error);
     }
 

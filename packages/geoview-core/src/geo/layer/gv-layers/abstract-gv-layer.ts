@@ -2335,7 +2335,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
         // Context exists, proceed with original rendering
         return originalRenderFunction.apply(this, args);
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError('Vector layer rendering error:', error);
 
         // Attempt recovery by requesting a new frame

@@ -77,7 +77,7 @@ function getShareUrl(
 
     // Return the query string
     return params.length > 0 ? `?${params.join('&')}` : '';
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logError('Error generating share URL:', error);
     return '';
   }

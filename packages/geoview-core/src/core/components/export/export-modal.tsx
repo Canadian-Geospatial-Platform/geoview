@@ -175,7 +175,7 @@ export function ExportModal(): JSX.Element {
       });
       setPngPreviewUrls([pngUrl]);
       URL.revokeObjectURL(pngUrl);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(error);
     } finally {
       setIsMapLoading(false);
@@ -230,7 +230,7 @@ export function ExportModal(): JSX.Element {
         exportFile(imageUrl, filename, exportFormat);
         URL.revokeObjectURL(imageUrl);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
     } finally {
       setIsMapExporting(false);

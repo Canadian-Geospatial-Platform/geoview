@@ -622,7 +622,7 @@ export class GVEsriImage extends AbstractGVRaster {
           const result = await Fetch.fetchBlobImage(previewUrl);
           this.#rasterFunctionPreviewCache.set(info.name, result);
           return result;
-        } catch (error) {
+        } catch (error: unknown) {
           logger.logWarning(`Failed to fetch preview for raster function ${info.name}`, error);
           throw error;
         }
