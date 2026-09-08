@@ -32,8 +32,6 @@ import { Projection } from '@/geo/utils/projection';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
   // The style identifier to use for this WMTS layer, will use "default" if not specified.
   wmtsStyle?: string;
-  // The service extent to use when building the tile grid without metadata (e.g. [minX, minY, maxX, maxY]).
-  extent?: [number, number, number, number];
   // The number of resolution levels (zoom levels) to generate when building the tile grid without metadata.
   resolutionLevels?: number;
 }
