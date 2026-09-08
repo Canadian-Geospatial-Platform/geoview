@@ -711,7 +711,7 @@ export class EsriUtilities {
 
       // If there's a parent config
       if (parentLayerConfig && parentServiceMetadata) {
-        // TODO: These set calls should actually probably happen with a recursion check on the parents, not just the first parent up
+        // TODO: INVESTIGATE - These set calls should actually probably happen with a recursion check on the parents, not just the first parent up
         // Find the parent layer metadata by looking for the layer whose subLayerIds contains this layer's id
         const parentLayerMetadata = layerConfig.getParentMetadata(parentServiceMetadata);
         parentLayerConfig.initInitialSettingsStatesVisibleFromMetadata(parentLayerMetadata?.defaultVisibility);
