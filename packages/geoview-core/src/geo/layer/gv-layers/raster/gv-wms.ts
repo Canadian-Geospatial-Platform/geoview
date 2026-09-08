@@ -54,6 +54,7 @@ import {
   LayerImageFailedToLoadHeightTooBigError,
   LayerImageFailedToLoadProjectionNotValidError,
   LayerImageFailedToLoadWidthTooBigError,
+  InvalidProjectionError,
   NoExtentError,
 } from '@/core/exceptions/geoview-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
@@ -485,6 +486,9 @@ export class GVWMS extends AbstractGVRaster {
           layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
           layerBounds = GeoUtilities.validateExtentWhenDefined(layerBounds, projection.getCode());
         } catch (error) {
+          // A non-projection error is unexpected here; only swallow the invalid-projection case and rethrow the rest.
+          if (!(error instanceof InvalidProjectionError)) throw error;
+
           // The metadata bounding box CRS is not a valid projection (EPSG code not found). Log and continue without it.
           logger.logWarning(
             `Layer '${layerConfig.getLayerNameCascade()}': the metadata bounding box projection '${metadataProj}' is not a valid projection (EPSG code not found). Skipping the metadata bounds.`,
