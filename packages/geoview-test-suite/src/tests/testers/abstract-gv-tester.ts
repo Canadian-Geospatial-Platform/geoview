@@ -185,6 +185,42 @@ export abstract class GVAbstractTester extends AbstractTester {
     },
   ];
 
+  /** Top Projects 900A */
+  static readonly TOP_PROJECTS_900A_URL_MAP_SERVER: string =
+    'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer';
+  static readonly TOP_PROJECTS_900A_LAYER_ID: string = '0';
+  static readonly TOP_PROJECTS_900A_LAYER_NAME: string = 'Top Projects';
+  static readonly TOP_PROJECTS_900A_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'project_name',
+      alias: 'Project Name',
+      type: 'string',
+    },
+    {
+      name: 'province_en',
+      alias: 'Province',
+      type: 'string',
+    },
+    {
+      name: 'commodity_group_en',
+      alias: 'Commodity Group',
+      type: 'string',
+      summary: false,
+    },
+    {
+      name: 'longitude',
+      alias: 'Longitude',
+      type: 'number',
+      summary: false,
+    },
+    {
+      name: 'latitude',
+      alias: 'Latitude',
+      type: 'number',
+      summary: false,
+    },
+  ];
+
   /** Geocore UUID with group layers having defaultVisibility set to false */
   static readonly GEOCORE_MARINE_FISHERIES_UUID = '44ef4d33-20b7-45fc-974c-d73a0a8fbae8';
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID + '/0';
