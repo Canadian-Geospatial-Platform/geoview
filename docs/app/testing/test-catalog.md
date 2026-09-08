@@ -74,7 +74,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | Group             | Suite               | Tester(s)                                                                                       | Test Count | Execution                   |
 | ----------------- | ------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
 | 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
-| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 33         | Parallel                    |
+| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
 | 3. Map            | `suite-map-varia`   | `MapTester`                                                                                     | 16         | Complex mixed               |
