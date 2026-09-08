@@ -628,8 +628,8 @@ export class WFS extends AbstractGeoViewVector {
    * Accepts custom parse functions so callers can plug in their own fetch+parse pipeline.
    *
    * @param layerConfig - The WFS layer entry configuration
-   * @param parseFnJSON - A function that receives a URL and parses the response as JSON
-   * @param parseFnFallback - A function that receives a URL and parses the response as text (used when JSON format is unavailable or fails)
+   * @param queryFnJSON - A function that receives a URL and queries the response as JSON
+   * @param queryFnFallback - A function that receives a URL and queries the response as text (used when JSON format is unavailable or fails)
    * @param bboxExtent - Optional bbox extent string (e.g., 'minx,miny,maxx,maxy,EPSG:3978')
    * @param outfields - Optional list of fields to return (propertyName parameter)
    * @param filter - Optional OGC XML filter string
