@@ -33,7 +33,7 @@ export class StacApiService {
     try {
       const response = await Fetch.fetchJson<{ collections: StacCollection[] }>(`${this.#stacUrl}/collections`);
       return response.collections || [];
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('StacApiService.fetchCollections - Failed to fetch collections', error);
       return [];
     }
@@ -60,7 +60,7 @@ export class StacApiService {
         body: JSON.stringify(body),
       });
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('StacApiService.searchItems - Failed to search items', error);
       return { type: 'FeatureCollection', features: [] };
     }
@@ -75,7 +75,7 @@ export class StacApiService {
   static async fetchItem(itemUrl: string): Promise<StacItem | null> {
     try {
       return await Fetch.fetchJson<StacItem>(itemUrl);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('StacApiService.fetchItem - Failed to fetch item', error);
       return null;
     }
@@ -90,7 +90,7 @@ export class StacApiService {
   static async fetchSearchNextPage(nextUrl: string): Promise<StacSearchResult> {
     try {
       return await Fetch.fetchJson<StacSearchResult>(nextUrl);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('StacApiService.fetchSearchNextPage - Failed to fetch next page', error);
       return { type: 'FeatureCollection', features: [] };
     }
@@ -108,7 +108,7 @@ export class StacApiService {
     try {
       const url = nextUrl ?? `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/items${limit ? `?limit=${limit}` : ''}`;
       return await Fetch.fetchJson<StacItemsResponse>(url);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError(`StacApiService.fetchCollectionItems - Failed to fetch items for collection ${collectionId}`, error);
       return { type: 'FeatureCollection', features: [] };
     }

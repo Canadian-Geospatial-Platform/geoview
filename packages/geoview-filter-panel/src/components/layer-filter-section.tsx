@@ -147,7 +147,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         });
 
         setFieldValues(values);
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError(`Error ensuring layer queried for ${layer.layerPath}:`, error);
         // Set empty values on error so loading state clears
         const emptyValues: Record<string, (string | number)[]> = {};

@@ -143,7 +143,7 @@ export class ExportUtilities {
       const height = (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
 
       return { width, height };
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Failed to extract PNG dimensions', error);
       return null;
     }
@@ -832,7 +832,7 @@ export class ExportUtilities {
   static #safeToDataURL(canvas: HTMLCanvasElement, displayLanguage: TypeDisplayLanguage): string {
     try {
       return canvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logWarning('Canvas is tainted by cross-origin tiles. Map image will be blank in the export.', error);
 
       // Create a fallback canvas with a message explaining why the map is not visible
@@ -1036,7 +1036,7 @@ export class ExportUtilities {
             strokeWidth: path.getAttribute('stroke-width'),
           }));
         }
-      } catch (error) {
+      } catch (error: unknown) {
         // Log error and continue
         logger.logError(error);
       }

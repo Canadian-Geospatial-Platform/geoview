@@ -968,7 +968,7 @@ export function enhanceLinksAccessibility(html: string, announcementText: string
     });
 
     return doc.body.innerHTML;
-  } catch (error) {
+  } catch (error: unknown) {
     logger.logWarning('Failed to enhance links accessibility', error);
     return html;
   }
