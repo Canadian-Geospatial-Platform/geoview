@@ -1241,7 +1241,7 @@ export abstract class GeoUtilities {
         dataProjection,
         hadInvalidGeometries: false,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       if (features && typeof features === 'object' && 'features' in features) {
         try {
           const cleanedFeatures = this.#cleanEsriGeometries(features);

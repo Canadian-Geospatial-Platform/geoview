@@ -186,7 +186,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
           }
 
           setView('search-results');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.logError('STAC-BROWSER - Search failed:', error);
         } finally {
           setIsLoading(false);

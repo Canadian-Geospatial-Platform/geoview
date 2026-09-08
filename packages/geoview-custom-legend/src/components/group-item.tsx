@@ -107,7 +107,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
         try {
           // Toggle the visibility
           layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
-        } catch (error) {
+        } catch (error: unknown) {
           // Log
           logger.logWarning(`Failed to toggle visibility for layer at path ${layerPath}:`, error);
         }
