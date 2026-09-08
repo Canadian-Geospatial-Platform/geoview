@@ -30,8 +30,6 @@ import {
   getStoreLayerMosaicRule,
   getStoreLayerHighlightedLayer,
   getStoreLayerLegendLayerByPath,
-  getStoreLayerMaxScale,
-  getStoreLayerMinScale,
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerOrderedLayerPaths,
   setStoreLayerAllMapLayerCollapsed,
@@ -103,7 +101,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION, type GVFitOptions } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -772,9 +770,8 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
    *
-   * Reads the layer's min/max scale from the store and converts them to OL fit constraints
-   * (maxZoom from maxScale, minResolution from minScale) so the resulting zoom does not exceed
-   * the layer's visibility boundaries.
+   * Uses the layer's buffered effective scale boundaries so the resulting zoom remains inside
+   * the layer's visibility range without landing exactly on service threshold values.
    *
    * @param layerPath - The layer path used to look up scale limits
    * @param extent - The extent to zoom to (in current map projection)
@@ -783,22 +780,53 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    */
   zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
-    // Read the min/max scales from the store for the corresponding layer path
-    const layerMaxScale = getStoreLayerMaxScale(this.getMapId(), layerPath);
-    const layerMinScale = getStoreLayerMinScale(this.getMapId(), layerPath);
+    // Compute buffered min/max scale constraints from the layer config.
+    const { maxScaleZoomAt, minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(
+      this.getMapViewer(),
+      this.getLayerEntryConfig(layerPath)
+    );
 
     // Compute zoom constraints from the layer's scale range so we don't zoom beyond the layer's visible range
-    const theFitOptions: GVFitOptions = fitOptions ?? {};
-    if (layerMaxScale) {
-      const maxZoomFromScale = this.getControllersRegistry().mapController.getZoomFromScale(layerMaxScale);
-      if (maxZoomFromScale !== undefined) {
-        theFitOptions.maxZoom = Math.min(theFitOptions.maxZoom ?? maxZoomFromScale, maxZoomFromScale);
+    const theFitOptions: GVFitOptions = { ...(fitOptions ?? {}) };
+    if (maxScaleZoomAt) {
+      const minResolution = this.getControllersRegistry().mapController.getResolutionFromScale(maxScaleZoomAt);
+      if (minResolution !== undefined) {
+        theFitOptions.minResolution = Math.max(theFitOptions.minResolution ?? minResolution, minResolution);
       }
     }
-    if (layerMinScale) {
-      const minResolution = this.getControllersRegistry().mapController.getResolutionFromScale(layerMinScale);
-      if (minResolution !== undefined) {
-        theFitOptions.minResolution = Math.floor(minResolution * 100) / 100;
+
+    const mapSize = this.getMapViewer().map.getSize();
+    const maxResolution = minScaleZoomAt ? this.getControllersRegistry().mapController.getResolutionFromScale(minScaleZoomAt) : undefined;
+    if (mapSize && maxResolution) {
+      const [width, height] = mapSize;
+      const percentPadding = theFitOptions.percentPadding ?? OL_ZOOM_PERCENT_PADDING;
+      const padding = theFitOptions.padding ?? [
+        Math.round(height * percentPadding[1]),
+        Math.round(width * percentPadding[0]),
+        Math.round(height * percentPadding[1]),
+        Math.round(width * percentPadding[0]),
+      ];
+      const paddedSize: [number, number] = [Math.max(1, width - padding[1] - padding[3]), Math.max(1, height - padding[0] - padding[2])];
+      const fitResolution = this.getMapViewer().getView().getResolutionForExtent(extent, paddedSize);
+
+      if (fitResolution > maxResolution) {
+        const center = getCenter(extent);
+        const duration = useAnimation ? (theFitOptions.duration ?? OL_ZOOM_DURATION) : 0;
+        return new Promise<void>((resolve) => {
+          this.getMapViewer()
+            .getView()
+            .animate({ center, resolution: maxResolution, duration }, (complete) => {
+              this.getMapViewer()
+                .waitForRender()
+                .then(() => {
+                  theFitOptions.callback?.(complete);
+                  resolve();
+                })
+                .catch((error: unknown) => {
+                  logger.logPromiseFailed('waitForRender in zoomToExtentRestricted maxResolution clamp', error);
+                });
+            });
+        });
       }
     }
 
