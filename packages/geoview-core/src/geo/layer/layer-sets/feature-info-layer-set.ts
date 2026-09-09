@@ -309,10 +309,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       querySet[layerPath].queryStatus = 'processed';
       // eslint-disable-next-line no-param-reassign
       querySet[layerPath].features = arrayOfRecords;
+      // eslint-disable-next-line no-param-reassign
+      querySet[layerPath].featuresHaveGeometry = !promiseResult.promiseGeometries;
 
       // Only propagate to the store if this query has not been superseded
       if (!this.#abortController.signal.aborted) {
-        setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, !promiseResult.promiseGeometries);
+        setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, querySet[layerPath].featuresHaveGeometry);
       }
 
       // Callback about it
