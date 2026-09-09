@@ -713,7 +713,7 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = ConfigTester.AIRBORNE_RADIOACTIVITY_WMS_URL;
+    const metadataAccessPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_URL;
     const layerName = 'Airborne Radioactivity';
 
     // Test
@@ -736,7 +736,7 @@ export class ConfigTester extends GVAbstractTester {
           metadataAccessPath,
           [
             {
-              id: ConfigTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID,
+              id: GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID,
               layerName,
             },
           ],
@@ -750,7 +750,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], OgcWmsLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], ConfigTester.AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS);
       }
     );
   }

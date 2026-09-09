@@ -43,8 +43,10 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests layer controller functions and feature-query behavior:<br/>
+      <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
-      <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>`;
+      <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
+      <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>`;
   }
 
   /**
@@ -53,7 +55,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 4;
+    return 7;
   }
 
   /**
@@ -65,7 +67,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
+    const pDevTest0 = this.#layerTester.testQueryWMSLayerForWFSFeaturesAirborne(this.getIsRunningOnVPN());
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -99,9 +101,11 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test feature query behavior when no geometry field in outfields
     await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
 
-    // TODO: TESTS - ADD test about outfield summary false from top projects
+    // Test WMS query via associated WFS layer (Cities)
+    await this.#layerTester.testQueryWMSLayerForWFSFeaturesCities();
 
-    // TODO: TESTS - ADD tests about getFeatureInfo from WMS with WFS attached and various output format mime types!!
+    // Test WMS query via associated WFS layer (Airborne)
+    await this.#layerTester.testQueryWMSLayerForWFSFeaturesAirborne(this.getIsRunningOnVPN());
 
     // Resolve when all parallel tests are done
     return Promise.all([pLayerWMSDuplicateGroupNames]);
