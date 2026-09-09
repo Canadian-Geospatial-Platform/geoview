@@ -246,7 +246,7 @@ function FocusAwareTooltipCell({ cellId, title, children }: FocusAwareTooltipCel
  * @param props - Properties defined in DataTableProps interface
  * @returns The data table element
  */
-function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: DataTableProps): JSX.Element {
+function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, onRendered }: DataTableProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-table');
 
@@ -1340,6 +1340,18 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     }
     prevGlobalFilterRef.current = globalFilter ?? '';
   }, [globalFilter]);
+
+  /**
+   * Signals the parent once the table has (re)rendered so it can clear any loading overlay.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - onRendered');
+
+    onRendered?.();
+    // Runs after every commit on purpose: the first commit for a large layer lands only once the heavy render is done,
+    // and re-selecting an already-mounted layer must also clear the overlay.
+  });
 
   return (
     <FocusStoreContext.Provider value={focusStoreRef.current}>
