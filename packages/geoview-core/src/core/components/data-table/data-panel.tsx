@@ -25,7 +25,7 @@ import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { CONTAINER_TYPE, LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -52,7 +52,10 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const theme = useTheme();
 
   const dataTableRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // The layer whose data table is being (re)built; drives the loading indicator until the table signals it has rendered
+  const [pendingLayerPath, setPendingLayerPath] = useState<string | undefined>(undefined);
+  // Gates mounting the (heavy) table until AFTER the skeleton has painted, so the loading indicator is actually visible
+  const [tableMounted, setTableMounted] = useState(false);
 
   const mapId = useStoreGeoViewMapId();
   const mapExtent = useStoreMapExtent();
@@ -122,11 +125,59 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry): void => {
+      // Trigger the loading state synchronously on click. Vector layers have no real query (features are already
+      // downloaded), so this is the only signal that starts the visual indicator for the table build.
+      setPendingLayerPath(_layer.layerPath);
+      setTableMounted(false);
       dataTableController.setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call triggerGetAllFeatureInfo()
-      setIsLoading(true);
     },
     [dataTableController]
   );
+
+  /**
+   * Clears the loading state once the selected layer's data table has finished rendering.
+   */
+  const handleTableRendered = useCallback((): void => {
+    setPendingLayerPath(undefined);
+  }, []);
+
+  /**
+   * Mounts the (heavy) table only after the skeleton has painted.
+   *
+   * The table build is synchronous and blocks the main thread; mounting it in the same commit as the loading state
+   * prevents the skeleton from ever painting. Deferring the mount by a frame lets the skeleton paint first and stay
+   * on screen (the browser keeps the last paint) while the table builds.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - defer table mount', pendingLayerPath, tableMounted);
+
+    if (!pendingLayerPath || tableMounted) return undefined;
+
+    let rafInner = 0;
+    const rafOuter = requestAnimationFrame(() => {
+      rafInner = requestAnimationFrame(() => setTableMounted(true));
+    });
+    return () => {
+      cancelAnimationFrame(rafOuter);
+      if (rafInner) cancelAnimationFrame(rafInner);
+    };
+  }, [pendingLayerPath, tableMounted]);
+
+  /**
+   * Clears the loading state when a layer resolves without producing a table (empty result or error).
+   *
+   * The table's onRendered callback never fires in that case, so this stops the indicator from getting stuck.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - clear pending on empty result', pendingLayerPath);
+
+    if (!pendingLayerPath) return;
+    const status = queryStatuses[pendingLayerPath];
+    const hasNoTable = !memoOrderedLayerData.find((layer) => layer.layerPath === pendingLayerPath)?.features?.length;
+    if ((status === LAYER_STATUS.PROCESSED || status === LAYER_STATUS.ERROR) && hasNoTable) setPendingLayerPath(undefined);
+  }, [pendingLayerPath, queryStatuses, memoOrderedLayerData]);
 
   /**
    * Checks if map filtering is active for a given layer.
@@ -218,19 +269,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [selectedLayerPath, memoOrderedLayerData]);
 
   /**
-   * Clears the loading state after a timeout.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
-
-    const clearLoading = setTimeout(() => {
-      setIsLoading(false);
-    }, TIMEOUT.dataPanelLoading);
-    return () => clearTimeout(clearLoading);
-  }, [isLoading, selectedLayerPath]);
-
-  /**
    * Unmounts the footer bar data table when the tab changes.
    */
   useEffect(() => {
@@ -280,30 +318,34 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         const isLayerAvailable = visibleInRangeLayers.includes(selectedLayerPath);
 
         if (isLayerAvailable) {
-          setIsLoading(true);
-          layerSetController
-            .triggerGetAllFeatureInfo(selectedLayerPath, true)
-            .catch((error: unknown) => {
-              // Log error
-              logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
-            })
-            .finally(() => {
-              setIsLoading(false);
-            });
+          layerSetController.triggerGetAllFeatureInfo(selectedLayerPath, true).catch((error: unknown) => {
+            // Log error
+            logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
+          });
         }
       }
     }
   }, [selectedLayerPath, visibleInRangeLayers, layerSetController, mapId]);
 
   /**
-   * Checks if any layer query status is processing.
+   * Checks if the selected layer's data table is still being prepared.
+   *
+   * True from the moment a layer is selected until its query resolves (processed/error). This covers the whole
+   * first-creation window where the layer is becoming available, the query is processing, or features are arriving.
    */
-  const memoIsLayerQueryStatusProcessing = useMemo(() => {
+  const memoIsSelectedLayerPreparing = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
+    logger.logTraceUseMemo('DATA-PANEL - isSelectedLayerPreparing', selectedLayerPath, queryStatuses);
 
-    return () => !!memoOrderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
-  }, [memoOrderedLayerData]);
+    return (): boolean => {
+      if (!selectedLayerPath) return false;
+      const status = queryStatuses[selectedLayerPath];
+      // Resolved states: nothing left to wait for
+      if (status === LAYER_STATUS.PROCESSED || status === LAYER_STATUS.ERROR) return false;
+      // Still preparing when its features have not been resolved yet
+      return !memoOrderedLayerData.find((layer) => layer.layerPath === selectedLayerPath)?.features;
+    };
+  }, [selectedLayerPath, queryStatuses, memoOrderedLayerData]);
 
   /**
    * Renders the right panel content based on table data and layer loading status.
@@ -313,7 +355,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * @returns The content element, or null when no data to show
    */
   const renderContent = (): JSX.Element | null => {
-    if (isLoading || memoIsLayerQueryStatusProcessing()) {
+    // Show the skeleton while the selected layer isn't resolved yet, or while the clicked layer's table hasn't been
+    // deferred-mounted yet (so the skeleton paints before the heavy build).
+    if (memoIsSelectedLayerPreparing() || (pendingLayerPath === selectedLayerPath && !tableMounted)) {
       return <DataSkeleton />;
     }
     if (!memoIsLayerDisabled() && memoIsSelectedLayerHasFeatures()) {
@@ -333,6 +377,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
                     layerPath={data.layerPath}
                     containerType={containerType}
                     unfilteredFeaturesCount={unfilteredFeaturesCount}
+                    onRendered={handleTableRendered}
                   />
                 </Box>
               );
@@ -355,7 +400,11 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       ...layer,
       layerName: layerNames[layer.layerPath],
       layerStatus: layerStatuses[layer.layerPath],
-      queryStatus: queryStatuses[layer.layerPath],
+      // Show the selected layer's loading state for the whole first-creation window (store queryStatus lags or stays 'processed' for cached features)
+      queryStatus:
+        pendingLayerPath === layer.layerPath || (memoIsSelectedLayerPreparing() && layer.layerPath === selectedLayerPath)
+          ? LAYER_STATUS.PROCESSING
+          : queryStatuses[layer.layerPath],
       layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
@@ -370,9 +419,12 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     isMapFilteredSelectedForLayer,
     layerNames,
     layerStatuses,
+    memoIsSelectedLayerPreparing,
+    pendingLayerPath,
     queryStatuses,
     mapId,
     memoOrderedLayerData,
+    selectedLayerPath,
     theme.palette.geoViewColor?.grey.main,
   ]);
 

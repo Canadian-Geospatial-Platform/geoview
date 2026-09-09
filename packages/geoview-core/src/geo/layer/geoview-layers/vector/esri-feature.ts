@@ -24,8 +24,11 @@ import {
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError } from '@/core/exceptions/core-exceptions';
+import { formatError, NetworkError, RequestTimeoutError, ResponseContentError, ResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { AsyncSemaphore } from '@/core/utils/async-semaphore';
+import { delay } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
@@ -37,6 +40,15 @@ export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
  * A class to add an EsriFeature layer.
  */
 export class EsriFeature extends AbstractGeoViewVector {
+  /** Maximum number of paged chunk requests fetched concurrently (mirrors the ESRI worker concurrency cap). */
+  static readonly #MAX_CONCURRENT_CHUNK_REQUESTS = Math.min(10, (navigator.hardwareConcurrency || 4) * 2);
+
+  /** Maximum number of attempts (initial try plus retries) for a single chunk request. */
+  static readonly #MAX_CHUNK_FETCH_ATTEMPTS = 4;
+
+  /** Base backoff delay in milliseconds between chunk retries, doubled on each attempt. */
+  static readonly #CHUNK_RETRY_BASE_DELAY_MS = 1000;
+
   /**
    * Constructs an EsriFeature Layer configuration processor.
    *
@@ -383,11 +395,17 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Fetches features from ESRI Feature services with query and feature limits.
    *
+   * Chunk requests are throttled to a maximum concurrency and each chunk is retried with exponential backoff on
+   * transient failures (server HTTP 5xx, ESRI embedded query error, network error, timeout). Bursting every page at
+   * once makes the ArcGIS server return load-induced `500 | Error performing query operation` responses on large
+   * layers; throttling and retrying let the layer load reliably on the first attempt instead of being dropped.
+   *
    * @param url - The base url for the service
    * @param featureCount - The number of features in the layer
    * @param maxRecordCount - Optional max features per query from the service
    * @param featureLimit - Optional maximum number of features to fetch per query
    * @returns A promise that resolves to an array of the response text for the features
+   * @throws {ResponseContentError} When a chunk keeps failing after all attempts (propagated from `fetchEsriJson()`)
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
@@ -396,17 +414,60 @@ export class EsriFeature extends AbstractGeoViewVector {
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 
     // GV: Web worker does not improve the performance of this fetching
-    // Create array of url's to call
+    // Create array of url's to call, one per feature page
     const urlArray: string[] = [];
     for (let i = 0; i < featureCount; i += featureFetchLimit) {
       urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
     }
 
-    // Get array of all the promises
-    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJson(featureUrl));
+    // Cap concurrent chunk requests; firing all pages at once makes the server return transient 500s under load
+    const semaphore = new AsyncSemaphore(EsriFeature.#MAX_CONCURRENT_CHUNK_REQUESTS);
+
+    // Fetch each chunk under the concurrency cap, retrying transient failures with backoff
+    const promises = urlArray.map((featureUrl) => semaphore.withLock(() => EsriFeature.#fetchEsriChunkWithRetry(featureUrl)));
 
     // Return the all promise
     return Promise.all(promises);
+  }
+
+  /**
+   * Fetches a single ESRI feature chunk, retrying transient failures with exponential backoff.
+   *
+   * @param url - The chunk query url
+   * @param attempt - The current attempt number (1-based)
+   * @returns A promise that resolves to the chunk response
+   * @throws {ResponseContentError} When the chunk keeps failing after all attempts (propagated from `fetchEsriJson()`)
+   */
+  static async #fetchEsriChunkWithRetry(url: string, attempt = 1): Promise<unknown> {
+    try {
+      return await Fetch.fetchEsriJson(url);
+    } catch (error) {
+      // Give up when out of attempts or when the error is not a transient server/network failure
+      if (attempt >= EsriFeature.#MAX_CHUNK_FETCH_ATTEMPTS || !EsriFeature.#isTransientEsriError(error)) throw error;
+
+      // Back off (1s, 2s, 4s, …) to let the server recover / warm its cache before retrying
+      logger.logWarning(`ESRI feature chunk request failed (attempt ${attempt}), retrying...`, error);
+      await delay(EsriFeature.#CHUNK_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      return EsriFeature.#fetchEsriChunkWithRetry(url, attempt + 1);
+    }
+  }
+
+  /**
+   * Determines whether a chunk request error is transient and worth retrying.
+   *
+   * Deliberate cancellations (aborts) are never retried; server content/HTTP errors, network errors and timeouts are
+   * treated as transient because they are typically load-induced for large geometry queries.
+   *
+   * @param error - The error thrown by the chunk request
+   * @returns Whether the error is transient
+   */
+  static #isTransientEsriError(error: unknown): boolean {
+    return (
+      error instanceof ResponseContentError ||
+      error instanceof ResponseError ||
+      error instanceof NetworkError ||
+      error instanceof RequestTimeoutError
+    );
   }
 
   // #endregion STATIC METHODS

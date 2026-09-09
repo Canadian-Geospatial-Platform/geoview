@@ -306,9 +306,11 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
           )}
         </ListItemButton>
       </Tooltip>
-      {layerStatus === 'loading' && (
+      {(layerStatus === 'loading' || queryStatus === 'processing') && (
         <Box component="span" sx={memoSxClasses.progressBar}>
-          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })} />
+          <ProgressBar
+            aria-label={queryStatus === 'processing' ? t('layers.querying') : t('layers.status.layerLoadingDescriptive', { layerName })}
+          />
         </Box>
       )}
     </ListItem>
