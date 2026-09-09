@@ -56,7 +56,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
    */
   override getTestsTotalFinal(): number {
-    return 12;
+    return 13;
   }
 
   /**
@@ -98,6 +98,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 598);
     await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable(DataTableTester.GEOPACKAGE_EMPTY_FIELD_LAYER_PATH);
     await this.#dataTableTester.testMapFilteredRecordDefault(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testSetMapFilteredRecordFalse(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testGlobalFilterRecord(DataTableTester.GEOJSON_LAYER_PATH, 'Ontario');

@@ -40,11 +40,11 @@ rush serve
 | 7   | `suite-map-config`              | 39      | [ ] Pass |
 | 8   | `suite-ui`                      | 1       | [ ] Pass |
 | 9   | `suite-details`                 | 6       | [ ] Pass |
-| 10  | `suite-data-table`              | 12      | [ ] Pass |
+| 10  | `suite-data-table`              | 13      | [ ] Pass |
 | 11  | `suite-geochart`                | 2       | [ ] Pass |
 | 12  | `suite-swiper`                  | 2       | [ ] Pass |
 | 13  | `suite-time-slider`             | 2       | [ ] Pass |
-|     | **Total**                       | **272** |          |
+|     | **Total**                       | **273** |          |
 
 ## What to Do if a Suite Fails
 

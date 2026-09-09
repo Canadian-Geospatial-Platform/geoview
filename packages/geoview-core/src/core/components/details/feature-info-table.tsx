@@ -278,8 +278,10 @@ export const FeatureInfoTable = memo(({ layerPath, featureInfoList, containerTyp
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
 
-  // Remove last item who is the internal geoviewID field
-  if (featureInfoList.length > 0 && featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
+  // Remove the internal geoviewID field and any unnamed/blank field (an empty alias produces a label-less row)
+  for (let i = featureInfoList.length - 1; i >= 0; i--) {
+    if (featureInfoList[i].alias === 'geoviewID' || !featureInfoList[i].alias.trim()) featureInfoList.splice(i, 1);
+  }
 
   return (
     <>

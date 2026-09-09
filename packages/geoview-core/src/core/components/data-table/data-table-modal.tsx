@@ -129,8 +129,8 @@ export default function DataTableModal(): JSX.Element {
     const columnList = [] as MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[];
 
     entries.forEach(([key, value]) => {
-      // Do not show internal geoviewID field
-      if (value?.alias !== 'geoviewID')
+      // Skip the internal geoviewID field and any malformed column with a blank key (MRT rejects a falsy id with accessorFn)
+      if (value?.alias !== 'geoviewID' && key.trim())
         columnList.push({
           id: key,
           accessorFn: (row) => {

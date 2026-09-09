@@ -15,6 +15,9 @@ export class DataTableTester extends GVAbstractTester {
   /** The GeoJSON layer path used for data table tests. */
   static readonly GEOJSON_LAYER_PATH = 'geojsonLYR5/polygons.json';
 
+  /** The GeoPackage layer path whose table contains an empty/blank field name (a column named ''). */
+  static readonly GEOPACKAGE_EMPTY_FIELD_LAYER_PATH = 'railwaysEmptyField/carto_fer_debarcadere';
+
   /**
    * Returns the name of the Tester.
    *
@@ -66,6 +69,37 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsDefined('layerSettings', result);
         Test.assertIsDefined('columnVisibilityRecord', result.columnVisibilityRecord);
         Test.assertIsEqual(result.columnVisibilityRecord.geoviewID, false);
+      }
+    );
+  }
+
+  /**
+   * Tests that a layer with an empty/blank field name renders the data table without crashing.
+   *
+   * A column with an empty id and an accessorFn crashes Material React Table ("Columns require an id when using an
+   * accessorFn"). GeoPackage preserves a blank-named column verbatim, so opening its data table exercises the crash
+   * path. The test passes when the data table is created (its table element renders) for the layer.
+   *
+   * @param layerPath - The layer path whose table contains an empty-named field
+   * @returns A promise resolving when the test completes
+   */
+  testEmptyFieldNameDoesNotCrashDataTable(layerPath: string): Promise<Test<boolean>> {
+    return this.test(
+      'Test empty field name renders the data table without crashing...',
+      async (test) => {
+        // Open the data table tab and wait; this queries the layer and builds+renders the MRT columns
+        await this.#helperOpenDataTableAndWait(test, layerPath);
+
+        // Wait for the table element to render; MRT throws during render if a column has an empty id + accessorFn
+        test.addStep('Waiting for the data table to be created...');
+        const table = await GVAbstractTester.waitForDomElement(`#${this.getMapId()} .data-table-container table`);
+
+        // The table was created (rendered) for the layer
+        return !!table;
+      },
+      (test, result) => {
+        test.addStep('Verifying the data table was created without crashing...');
+        Test.assertIsEqual(result, true);
       }
     );
   }
