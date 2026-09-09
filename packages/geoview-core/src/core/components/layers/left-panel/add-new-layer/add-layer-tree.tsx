@@ -99,18 +99,30 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
     /**
      * Recursively populates the result array with layer IDs.
+     *
+     * @param origLayerId - The layer id of the current node
+     * @param parentViewId - The parent's full view path, or undefined at the root
+     * @param visited - The set of already-visited view paths used to guard against duplicate-name recursion
      */
-    function populateLayerChildren(origLayerId: string, parentViewId: string | undefined): void {
+    function populateLayerChildren(origLayerId: string, parentViewId: string | undefined, visited: Set<string>): void {
       const viewLayerId = `${parentViewId ?? ''}${parentViewId ? '/' : ''}${origLayerId}`;
+
+      // Guard against WMS groups sharing the same name at different nesting levels, which would
+      // otherwise recurse forever (e.g. a 'canimage' group nested inside a 'canimage' group).
+      if (visited.has(viewLayerId)) return;
+      visited.add(viewLayerId);
+
       result.push(viewLayerId);
-      const layerDetails = UtilAddLayer.findLayerById(layerTree, origLayerId);
+
+      // Resolve by full path (not bare id) so duplicate ids at different depths return the correct node
+      const layerDetails = UtilAddLayer.findLayerByPath(layerTree, viewLayerId);
 
       const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;
       });
 
       childLayerIds?.forEach((childLayerId) => {
-        populateLayerChildren(childLayerId, viewLayerId);
+        populateLayerChildren(childLayerId, viewLayerId, visited);
       });
     }
 
@@ -120,7 +132,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     if (layerTokens.length > 0) {
       parentLayerId = layerTokens.join('/');
     }
-    if (origLayerId) populateLayerChildren(origLayerId, parentLayerId);
+    if (origLayerId) populateLayerChildren(origLayerId, parentLayerId, new Set());
 
     return [...new Set(result)].sort();
   };

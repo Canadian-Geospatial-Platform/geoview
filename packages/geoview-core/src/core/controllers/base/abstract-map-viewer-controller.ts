@@ -104,15 +104,15 @@ export class AbstractMapViewerController extends AbstractController {
   static generateOrderedLayerPaths(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): string[] {
     const layerPaths: string[] = [];
 
-    const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
-      const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
-
-      layerPaths.push(subLayerPath);
-      if (layerEntryConfig.listOfLayerEntryConfig?.length) {
-        layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
-          addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
-        });
-      }
+    // Adds the given layer entry's exact path, then recurses into its children by appending each child's
+    // layerId. Using the node's full path directly (rather than an endsWith check) keeps WMS groups that share
+    // the same name at different nesting levels (e.g. a 'canimage' group inside a 'canimage' group) as unique,
+    // correctly-deepened paths instead of collapsing them into duplicates.
+    const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, currentLayerPath: string): void => {
+      layerPaths.push(currentLayerPath);
+      layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
+        addSubLayerPathToLayerOrder(subLayerEntryConfig, `${currentLayerPath}/${subLayerEntryConfig.layerId}`);
+      });
     };
 
     // TODO: REFACTOR listOfLayerEntryConfig types - This function has issues with the expected types and what it's truly doing.
@@ -130,7 +130,7 @@ export class AbstractMapViewerController extends AbstractController {
 
         layerPaths.push(layerPath);
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
+          addSubLayerPathToLayerOrder(layerEntryConfig, `${layerPath}/${layerEntryConfig.layerId}`);
         });
       } else {
         // GV: Use geoviewLayerId instead of layerEntryConfig.layerPath because for duplicate geocore layers,
@@ -138,7 +138,7 @@ export class AbstractMapViewerController extends AbstractController {
         // GV: layerPath property. Using geoviewLayerId ensures the suffix is included in the ordered layer path.
         const layerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0];
         if (layerEntryConfig) {
-          addSubLayerPathToLayerOrder(layerEntryConfig, geoviewLayerConfig.geoviewLayerId);
+          addSubLayerPathToLayerOrder(layerEntryConfig, `${geoviewLayerConfig.geoviewLayerId}/${layerEntryConfig.layerId}`);
         }
       }
     } else {

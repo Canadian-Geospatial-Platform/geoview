@@ -74,7 +74,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | Group             | Suite               | Tester(s)                                                                                       | Test Count | Execution                   |
 | ----------------- | ------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
 | 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
-| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 33         | Parallel                    |
+| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
 | 3. Map            | `suite-map-varia`   | `MapTester`                                                                                     | 16         | Complex mixed               |
@@ -392,7 +392,8 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 10  | `testAddWMSLayerWithOWSMundialis`       | test      | Test Adding WMS Mundialis on map...                                                  |
 | 11  | `testAddWMSLayerWithDatacubeMSI`        | test      | Test Adding WMS Datacube MSI on map...                                               |
 | 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
-| 13  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
+| 13  | `testAddWMSDuplicateGroupNames`         | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)            |
+| 14  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
 #### 2.1.5 WFS — Lifecycle
 

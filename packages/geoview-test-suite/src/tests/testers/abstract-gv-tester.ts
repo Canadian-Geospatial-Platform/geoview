@@ -798,6 +798,11 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly NONNA_WMS_URL: string = 'https://nonna-geoserver.data.chs-shc.ca/geoserver/wms';
   static readonly NONNA_WMS_LAYER_ID: string = 'nonna:NONNA 10';
 
+  /** WMS — CanImage service where a parent 'canimage' group nests a child 'canimage' group sharing the same <Name> (issue #3521 duplicate nested group names) */
+  static readonly CANIMAGE_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/canimage_en';
+  static readonly CANIMAGE_WMS_GROUP_ID: string = 'canimage';
+  static readonly CANIMAGE_WMS_LEAF_ID: string = 'canimage.natural-colour.overview8';
+
   /** WFS — Belgium Meteo service (CORS blocked, triggers proxy fallback) */
   static readonly BELGIUM_WFS_URL: string = 'https://opendata.meteo.be/service/aws/ows';
 

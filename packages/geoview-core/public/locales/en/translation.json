@@ -235,6 +235,7 @@
     "errorImageLoadSizeLimitExceededWidth": "The image requested for layer '{{layerName}}' exceeds the maximum width allowed by the server ({{requestedWidth}}px > {{maxWidth}}px).",
     "errorImageLoadSizeLimitExceededHeight": "The image requested for layer '{{layerName}}' exceeds the maximum height allowed by the server ({{requestedHeight}}px > {{maxHeight}}px).",
     "errorImageLoadNoImageReturned": "No image was returned from the server for layer '{{layerName}}'.",
+    "errorImageLoadProjectionNotValid": "The layer '{{layerName}}' could not be displayed: its defined projection '{{definedCRS}}' is not a valid projection (EPSG code not found).",
     "errorTileLoad": "An error occurred with a tile for layer '{{layerName}}'.",
     "errorNoLastQueryToPerform": "No last query to perform.",
     "errorProj": "Projection '{{projectionCode}}' invalid.",
@@ -580,6 +581,7 @@
       "basemapLayerCreationError": "Error creating {{basemapType}} basemap.",
       "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
       "layerCRSNotSupported": "The spatial reference of the map '{{mapProj}}' is not officially supported by the layer '{{layerName}}'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",
+      "projectionNotValid": "The layer '{{layerName}}' declares a projection '{{definedCRS}}' that could not be resolved (EPSG code not found). The layer may still display if the map projection is supported.",
       "invalidGeometry": "The '{{layerName}}' layer contains features with invalid geometries that will not show on the map.",
       "slowCoordinateInfo": "The coordinate info for the clicked coordinates is taking longer than expected to fetch..."
     },
