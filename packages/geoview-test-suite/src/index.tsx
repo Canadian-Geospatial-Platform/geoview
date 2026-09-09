@@ -201,7 +201,7 @@ class TestSuitePlugin extends AbstractPlugin {
    *
    * @returns A promise that resolves once all test suites have completed
    */
-  async launchTestSuites(): Promise<void[]> {
+  async launchTestSuites(): Promise<unknown[]> {
     // Make sure no test suite is currently running
     if (this.getTestsRunning() > 0) throw new TestSuiteRunningError();
 
@@ -209,15 +209,15 @@ class TestSuitePlugin extends AbstractPlugin {
     this.resetTestSuites();
 
     // Launch each suite in order because they share the same map viewer.
-    const launchResults: void[] = [];
+    const launchResults: unknown[] = [];
     for (const testSuite of this.testSuites) {
       // Launch the test suite and wait
       // eslint-disable-next-line no-await-in-loop
-      await testSuite.launchTestSuite();
+      const suiteResult = await testSuite.launchTestSuite();
+      launchResults.push(suiteResult);
 
       // Increment the completed suites for each successful launch.
       this.#suitesCompleted++;
-      launchResults.push(undefined);
     }
 
     // Emit once all test suites have completed launching.

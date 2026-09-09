@@ -780,17 +780,18 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    */
   zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
-    // Compute buffered min/max scale constraints from the layer config.
+    // Resolve the effective, buffered scale limits so zooming remains within the layer's usable visibility range.
     const { maxScaleZoomAt, minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(
       this.getMapViewer(),
       this.getLayerEntryConfig(layerPath)
     );
 
-    // Compute zoom constraints from the layer's scale range so we don't zoom beyond the layer's visible range
+    // Convert the scale limits to resolutions because OpenLayers applies fit constraints in resolution units.
     const theFitOptions: GVFitOptions = { ...(fitOptions ?? {}) };
     if (maxScaleZoomAt) {
       const minResolution = this.getControllersRegistry().mapController.getResolutionFromScale(maxScaleZoomAt);
       if (minResolution !== undefined) {
+        // Keep both caller and layer constraints, choosing the more restrictive minimum resolution.
         theFitOptions.minResolution = Math.max(theFitOptions.minResolution ?? minResolution, minResolution);
       }
     }
@@ -798,6 +799,7 @@ export class LayerController extends AbstractMapViewerController {
     const mapSize = this.getMapViewer().map.getSize();
     const maxResolution = minScaleZoomAt ? this.getControllersRegistry().mapController.getResolutionFromScale(minScaleZoomAt) : undefined;
     if (mapSize && maxResolution) {
+      // Reproduce the fit padding when deciding whether the requested extent would exceed the zoomed-out limit.
       const [width, height] = mapSize;
       const percentPadding = theFitOptions.percentPadding ?? OL_ZOOM_PERCENT_PADDING;
       const padding = theFitOptions.padding ?? [
@@ -810,12 +812,14 @@ export class LayerController extends AbstractMapViewerController {
       const fitResolution = this.getMapViewer().getView().getResolutionForExtent(extent, paddedSize);
 
       if (fitResolution > maxResolution) {
+        // A normal fit would zoom out too far, so animate directly to the maximum allowed resolution instead.
         const center = getCenter(extent);
         const duration = useAnimation ? (theFitOptions.duration ?? OL_ZOOM_DURATION) : 0;
         return new Promise<void>((resolve) => {
           this.getMapViewer()
             .getView()
             .animate({ center, resolution: maxResolution, duration }, (complete) => {
+              // Wait for the render after the view animation so callers observe a fully applied map state.
               this.getMapViewer()
                 .waitForRender()
                 .then(() => {

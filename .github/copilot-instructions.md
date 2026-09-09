@@ -1958,6 +1958,7 @@ packages/geoview-test-suite/src/
     │   ├── suite-core.ts                # Date/utility tests
     │   ├── suite-config.ts              # Layer config validation tests
     │   ├── suite-layer.ts               # Layer add/remove/legend tests
+    │   ├── suite-layer-functions.ts     # Layer controller and feature-query tests
     │   ├── suite-map.ts                 # Map zoom/projection/basemap/UI tests
     │   ├── suite-map-config.ts          # Map config creation/destruction tests
     │   ├── suite-geochart.ts            # Geochart plugin tests
