@@ -264,7 +264,7 @@ export class API {
     // Delete the map
     await this.deleteMapViewer(mapId, false);
 
-    // TODO: There is still a problem with bad config schema value and layers loading... should be refactor when config is done
+    // Recreate the map from config
     return this.createMapFromConfigFast(mapId, JSON.stringify(config), height);
   }
 

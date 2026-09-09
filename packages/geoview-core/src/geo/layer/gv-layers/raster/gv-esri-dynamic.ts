@@ -55,8 +55,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
   constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(olSource, layerConfig);
 
-    // TODO: Performance - Do we need worker pool or one worker per layer is enough. If a worker is already working we should terminate it
-    // TO.DOCONT: and use the abort controller to cancel the fetch and start a new one. So every esriDynamic layer has it's own worker.
     // Setup the worker pool
     this.#fetchWorkerPool = new FetchEsriWorkerPool();
     this.#fetchWorkerPool
@@ -289,10 +287,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Fetch the features with worker
-    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig, layerFilters.getInitialFilter());
+    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig, layerFilters.getInitialFilter(), abortController);
 
     // If was aborted
-    // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
     if (abortController?.signal.aborted) {
       // Raise error
       throw new RequestAbortedError(abortController.signal);
@@ -470,7 +467,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
         whereClause,
         true,
         mapProjNumber,
-        maxAllowableOffset
+        maxAllowableOffset,
+        abortController
       );
 
       // Assign a promise that resolves to true once geometries are fetched
@@ -585,12 +583,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Query all features with a web worker
    *
    * @param layerConfig - The layer config
+   * @param whereClause - Optional where clause to filter
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the esri response for query
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   #fetchAllFeatureInfoWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
-    whereClause: string | undefined
+    whereClause: string | undefined,
+    abortController?: AbortController
   ): Promise<EsriFeaturesJsonResponse> {
     // Build the base URL and tweak with the proxy if necessary
     const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerConfig.layerId}`;
@@ -608,7 +609,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
+    return this.#fetchWorkerPool.process(params, abortController?.signal) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**
@@ -619,6 +620,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param queryGeometry - Whether to include geometry in the query
    * @param projection - The spatial reference ID for the output
    * @param maxAllowableOffset - The maximum allowable offset for geometry simplification
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the esri response for query
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
@@ -628,7 +630,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     whereClause: string | undefined,
     queryGeometry: boolean,
     projection: number,
-    maxAllowableOffset: number
+    maxAllowableOffset: number,
+    abortController?: AbortController
   ): Promise<EsriFeaturesJsonResponse> {
     // Build the base URL and tweak with the proxy if necessary
     const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerConfig.layerId}`;
@@ -646,7 +649,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     };
 
     // Launch
-    return this.#fetchWorkerPool.process(params) as Promise<EsriFeaturesJsonResponse>;
+    return this.#fetchWorkerPool.process(params, abortController?.signal) as Promise<EsriFeaturesJsonResponse>;
   }
 
   /**

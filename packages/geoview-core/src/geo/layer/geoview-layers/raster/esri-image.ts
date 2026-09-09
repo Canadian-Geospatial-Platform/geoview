@@ -225,6 +225,8 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Recursively map layer entries
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       return new EsriImageLayerEntryConfig({
         geoviewLayerConfig: geoviewLayerConfig,
         layerId: `${layerEntry.index || layerEntry.id}`,
