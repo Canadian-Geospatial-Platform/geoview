@@ -71,21 +71,21 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 ### Summary
 
-| Group             | Suite              | Tester(s)                                                                                       | Test Count | Execution                   |
-| ----------------- | ------------------ | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`       | `CoreTester`                                                                                    | 14         | Parallel                    |
-| 1. Core / Utility | `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
-| 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
-| 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 16         | Complex mixed               |
-| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 39         | Fully sequential            |
-| 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
-| 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 12         | Guarded sequential          |
-| 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 2          | Guarded sequential          |
-| 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
+| Group             | Suite               | Tester(s)                                                                                       | Test Count | Execution                   |
+| ----------------- | ------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
+| 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
+| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 33         | Parallel                    |
+| 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
+| 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
+| 3. Map            | `suite-map-varia`   | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 39         | Fully sequential            |
+| 4. Components     | `suite-ui`          | `UITester`                                                                                      | 1          | Parallel                    |
+| 4. Components     | `suite-details`     | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
+| 4. Components     | `suite-data-table`  | `DataTableTester`                                                                               | 13         | Guarded sequential          |
+| 5. Packages       | `suite-geochart`    | `GeochartTester`                                                                                | 2          | Guarded sequential          |
+| 5. Packages       | `suite-swiper`      | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                    |                                                                                                 | **229**    |                             |
+| **Total**         |                     |                                                                                                 | **229**    |                             |
 
 ---
 
@@ -705,20 +705,21 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-data-table` · **File:** `tests/suites/suite-data-table.ts` · **Tester:** `DataTableTester` (`tests/testers/data-table-tester.ts`)
 **Execution:** Sequential · **Guard:** `data-table` must be in `footerBar.tabs.core`
 
-| #   | Method                                             | Type | Description                                                   |
-| --- | -------------------------------------------------- | ---- | ------------------------------------------------------------- |
-| 1   | `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for GeoJSON layer...   |
-| 2   | `testRowCountMatchesStore`                         | test | Test row count matches allFeaturesDataArray length...         |
-| 3   | `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                    |
-| 4   | `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                  |
-| 5   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                    |
-| 6   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                    |
-| 7   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...              |
-| 8   | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                |
-| 9   | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                   |
-| 10  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer... |
-| 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...   |
-| 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table... |
+| #   | Method                                             | Type | Description                                                                      |
+| --- | -------------------------------------------------- | ---- | -------------------------------------------------------------------------------- |
+| 1   | `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for GeoJSON layer...                      |
+| 2   | `testRowCountMatchesStore`                         | test | Test row count matches allFeaturesDataArray length...                            |
+| 3   | `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                                       |
+| 4   | `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                     |
+| 5   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                       |
+| 6   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                       |
+| 7   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                 |
+| 8   | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                   |
+| 9   | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                      |
+| 10  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |
+| 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                      |
+| 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
+| 13  | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
 
 ---
 
@@ -762,7 +763,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-time-slider` · **File:** `tests/suites/suite-time-slider.ts` · **Tester:** `TimeSliderTester` (`tests/testers/time-slider-tester.ts`)
 **Execution:** Sequential · **Guard:** `time-slider` must be in `footerBar.tabs.core` and time-slider controller must exist
 
-| #   | Method                | Type | Description                                                                              |
-| --- | --------------------- | ---- | ---------------------------------------------------------------------------------------- |
-| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                             |
-| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges...      |
+| #   | Method                | Type | Description                                                                         |
+| --- | --------------------- | ---- | ----------------------------------------------------------------------------------- |
+| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                        |
+| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges... |

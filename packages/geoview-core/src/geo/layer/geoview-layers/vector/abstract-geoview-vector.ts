@@ -246,24 +246,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
       // Loop
       headers.forEach((header, index) => {
-        // If not excluded
-        if (!excludedHeaders.includes(header)) {
-          // Skip complex fields
-          if (firstRow[index] && typeof firstRow[index] === 'object' && !Array.isArray(firstRow[index])) {
-            logger.logWarning(`Skipping field '${header}' as it is a complex field`);
-            return;
-          }
+        // Skip excluded headers and unnamed/blank fields; an empty name yields a column with a falsy id, which MRT rejects
+        if (excludedHeaders.includes(header) || !header.trim()) return;
 
-          let type = 'string' as TypeOutfieldsType;
-          if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
-
-          const newOutfield: TypeOutfields = {
-            name: header,
-            alias: header,
-            type: type,
-          };
-          outfields!.push(newOutfield);
+        // Skip complex fields
+        if (firstRow[index] && typeof firstRow[index] === 'object' && !Array.isArray(firstRow[index])) {
+          logger.logWarning(`Skipping field '${header}' as it is a complex field`);
+          return;
         }
+
+        let type = 'string' as TypeOutfieldsType;
+        if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
+
+        const newOutfield: TypeOutfields = {
+          name: header,
+          alias: header,
+          type: type,
+        };
+        outfields!.push(newOutfield);
       });
 
       // Set it

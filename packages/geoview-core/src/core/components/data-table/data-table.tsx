@@ -596,6 +596,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<DataTableRow>[];
     entries.forEach(([key, value]) => {
+      // Skip malformed columns with a blank key; MRT throws "Columns require an id when using an accessorFn" for a falsy id
+      if (!key.trim()) return;
+
       // Get the filter config
       const filterConfig = getFilterConfig(value.dataType);
 
