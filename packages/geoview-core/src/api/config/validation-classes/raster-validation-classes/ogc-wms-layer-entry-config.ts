@@ -350,8 +350,17 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @returns The WFS styles layer id
    */
-  getWfsStylesLayerId(): string {
+  getWfsLayerId(): string {
     return this.layerEntryProps.wfsLayerId || this.layerId;
+  }
+
+  /**
+   * Sets the WFS layer ID associated with this WMS layer entry configuration.
+   *
+   * @param wfsLayerId - The WFS layer ID to set for this WMS layer entry configuration
+   */
+  setWfsLayerId(wfsLayerId: string): void {
+    this.layerEntryProps.wfsLayerId = wfsLayerId;
   }
 
   /**
@@ -397,7 +406,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       `Temporary WFS layer config for the WMS layer '${this.getLayerNameCascade()}'`,
       url,
       configProxyUrl,
-      [{ id: this.getWfsStylesLayerId() || this.layerId, wmsLayerId: this.layerId }],
+      [{ id: this.getWfsLayerId(), wmsLayerId: this.layerId }],
       false,
       'all',
       false // Don't fetch styles from the WMS, we already are working with the WMS, we only want the vector information, prevents a "loop"
