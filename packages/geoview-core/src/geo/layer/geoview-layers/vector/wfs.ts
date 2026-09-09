@@ -360,6 +360,8 @@ export class WFS extends AbstractGeoViewVector {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       const props = {
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,

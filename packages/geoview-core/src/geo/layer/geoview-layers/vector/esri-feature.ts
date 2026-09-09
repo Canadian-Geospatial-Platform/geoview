@@ -347,6 +347,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     }));
 
     geoviewLayerConfig.listOfLayerEntryConfig = enrichedEntries.map((layerEntry) => {
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.index || layerEntry.id}`,

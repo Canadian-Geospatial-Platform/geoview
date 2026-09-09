@@ -299,6 +299,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         });
       }
 
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       // Create entry config
       const layerEntryConfig: EsriDynamicLayerEntryConfigProps = {
         geoviewLayerConfig,
