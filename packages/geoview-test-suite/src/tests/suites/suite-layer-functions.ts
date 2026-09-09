@@ -99,6 +99,10 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test feature query behavior when no geometry field in outfields
     await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
 
+    // TODO: TESTS - ADD test about outfield summary false from top projects
+
+    // TODO: TESTS - ADD tests about getFeatureInfo from WMS with WFS attached and various output format mime types!!
+
     // Resolve when all parallel tests are done
     return Promise.all([pLayerWMSDuplicateGroupNames]);
   }
