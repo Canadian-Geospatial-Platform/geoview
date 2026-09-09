@@ -77,7 +77,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
-| 3. Map            | `suite-map-varia`   | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map`         | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 39         | Fully sequential            |
 | 4. Components     | `suite-ui`          | `UITester`                                                                                      | 1          | Parallel                    |
 | 4. Components     | `suite-details`     | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
@@ -496,7 +496,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-**Suite:** `suite-map` · **File:** `tests/suites/suite-map-varia.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
+**Suite:** `suite-map` · **File:** `tests/suites/suite-map.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
 **Execution:** Complex mixed — sequential `await` for state-modifying tests · **Guard:** None
 
 | #   | Method                                 | Type | Description                                                            |

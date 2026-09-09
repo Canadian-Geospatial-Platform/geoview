@@ -20,15 +20,15 @@ These tests from the release plan are already covered by the existing test suite
 
 | Release Plan Item                  | Existing Test                                                          |
 | ---------------------------------- | ---------------------------------------------------------------------- |
-| North arrow rotation (LCC)         | `suite-map-varia` → `testNorthArrowRotationLCC`                        |
-| Projection switch                  | `suite-map-varia` → `testSwitchProjectionAndExtent`                    |
-| Map zoom                           | `suite-map-varia` → `testMapZoom`                                      |
-| Zoom to extent                     | `suite-map-varia` → `testZoomToExtent`                                 |
-| Basemap create/switch              | `suite-map-varia` → `testCreateAndSetBasemap`                          |
-| Language switch                    | `suite-map-varia` → `testSetLanguage`                                  |
-| Footer/app bar tabs                | `suite-map-varia` → `testFooterBarSelectTab`, `testAppBarSelectTab`    |
-| Non-queryable layer not in details | `suite-map-varia` → `testNonQueryableLayerNotInDetails`                |
-| Hoverable state                    | `suite-map-varia` → `testLayerHoverableState`                          |
+| North arrow rotation (LCC)         | `suite-map` → `testNorthArrowRotationLCC`                              |
+| Projection switch                  | `suite-map` → `testSwitchProjectionAndExtent`                          |
+| Map zoom                           | `suite-map` → `testMapZoom`                                            |
+| Zoom to extent                     | `suite-map` → `testZoomToExtent`                                       |
+| Basemap create/switch              | `suite-map` → `testCreateAndSetBasemap`                                |
+| Language switch                    | `suite-map` → `testSetLanguage`                                        |
+| Footer/app bar tabs                | `suite-map` → `testFooterBarSelectTab`, `testAppBarSelectTab`          |
+| Non-queryable layer not in details | `suite-map` → `testNonQueryableLayerNotInDetails`                      |
+| Hoverable state                    | `suite-map` → `testLayerHoverableState`                                |
 | Overview map show/hide on zoom     | `suite-map-config` → `testOverviewMapHideOnZoom`                       |
 | Overview map + projection          | `suite-map-config` → `testOverviewMapHideOnZoomWithReprojection`       |
 | Overview map present/absent        | `suite-map-config` → `testOverviewMapPresent`, `testOverviewMapAbsent` |
@@ -49,7 +49,7 @@ These tests from the release plan are already covered by the existing test suite
 
 ## Recommended New Automated Tests
 
-### Map & Projection (suite-map-varia / suite-map-config)
+### Map & Projection (suite-map / suite-map-config)
 
 | #   | Test                                                                                                                                 | Priority | Notes                                                            |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------- |
@@ -83,7 +83,7 @@ These tests from the release plan are already covered by the existing test suite
 | 18  | **Add duplicate layer rejected** — Add same UUID twice, verify rejection                                 | P2       | Check for error/rejection response     |
 | 19  | **Layer name resolution** — Verify `getLayerNameCascade()` returns non-empty for all layers              | P2       | Iterate loaded layers, check name      |
 
-### Data Table (suite-map-varia or new suite)
+### Data Table (suite-map or new suite)
 
 | #   | Test                                                                                         | Priority | Notes                                  |
 | --- | -------------------------------------------------------------------------------------------- | -------- | -------------------------------------- |
@@ -91,14 +91,14 @@ These tests from the release plan are already covered by the existing test suite
 | 21  | **Data table column filter** — Apply filter, verify `rowsFilteredRecord` count               | P2       | Apply filter via API, check store      |
 | 22  | **Table reflects class filter** — Toggle classes, verify table row count changes             | P2       | Combine layer visibility + table check |
 
-### Time Slider (suite-map-varia or new suite)
+### Time Slider (suite-map or new suite)
 
 | #   | Test                                                                                                | Priority | Notes                             |
 | --- | --------------------------------------------------------------------------------------------------- | -------- | --------------------------------- |
 | 23  | **Time slider auto-creation from geocore** — Load geocore with time metadata, verify slider creates | P1       | Check `timeSliderLayers` in store |
 | 24  | **Time filter store update** — Move slider, verify `sliderFilters` in store updates                 | P2       | Programmatic slider value change  |
 
-### Highlight & Opacity (suite-map-varia)
+### Highlight & Opacity (suite-map)
 
 | #   | Test                                                                                            | Priority | Notes                               |
 | --- | ----------------------------------------------------------------------------------------------- | -------- | ----------------------------------- |
@@ -121,7 +121,7 @@ These tests from the release plan are already covered by the existing test suite
 | 31  | **XYZ Tiles layer load (success)** — Add XYZ tile layer, verify tiles render                 | P2       | Only error config tested currently                  |
 | 32  | **Shapefile layer load** — Add zipped shapefile, verify features render                      | P2       | ZIP-based unique load path                          |
 
-### Share & Notifications (suite-map-varia or new suite)
+### Share & Notifications (suite-map or new suite)
 
 | #   | Test                                                                                                     | Priority | Notes                                |
 | --- | -------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------ |
@@ -153,16 +153,16 @@ These tests from the release plan are already covered by the existing test suite
 | 43  | **Zoom via API** — Call `mapController.zoomMap()`, verify store zoom changes                            | P1       | Already partially covered; explicit pre/post store check           |
 | 44  | **Home button zoom/center** — Pan/zoom away, call `zoomToInitialExtent()`, verify store matches initial | P1       | Store zoom + center comparison                                     |
 | 45  | **Rotation via API** — Call `mapController.rotate(45)`, verify store rotation = 45                      | P1       | Store-based check                                                  |
-| 46  | **Projection via API** — Call `mapController.setProjection(3857)`, verify store projection = 3857       | P1       | Already covered in suite-map-varia; confirm store value            |
+| 46  | **Projection via API** — Call `mapController.setProjection(3857)`, verify store projection = 3857       | P1       | Already covered in suite-map; confirm store value                   |
 
-### Projection & Rotation Store Checks (suite-map-varia)
+### Projection & Rotation Store Checks (suite-map)
 
 | #   | Test                                                                                               | Priority | Notes                                           |
 | --- | -------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- |
 | 47  | **3 projections load** — Create maps in 3978, 3857, 3573, verify store projection matches for each | P1       | `createMapFromConfigFast` × 3, store check each |
 | 48  | **Rotation reset to 0** — Rotate, reset, verify store rotation = 0                                 | P1       | `rotate(45)` → `rotate(0)` → store check        |
 
-### Legend Controls (suite-map-varia or new suite)
+### Legend Controls (suite-map or new suite)
 
 | #   | Test                                                                                                              | Priority | Notes                                                          |
 | --- | ----------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
@@ -177,7 +177,7 @@ These tests from the release plan are already covered by the existing test suite
 | 57  | **Toggle all style classes off** — Toggle all classes off, verify filter excludes all and count shows "0 of x"    | P1       | Store filter check + DOM count text                            |
 | 58  | **Toggle all style classes on** — Toggle all back on, verify filter is cleared and count shows "x of x"           | P1       | Store filter check + DOM count text                            |
 
-### Layers Panel (suite-layer or suite-map-varia)
+### Layers Panel (suite-layer or suite-map)
 
 | #   | Test                                                                                                                           | Priority | Notes                                                                           |
 | --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------- |
@@ -201,12 +201,12 @@ These tests from the release plan are already covered by the existing test suite
 | 75  | **inVisibleRange store check** — Zoom in/out of layer's range, verify `isInVisibleRange()` returns correct boolean             | P1       | `setMapZoomLevel()` + `isInVisibleRange()` check                                |
 | 76  | **Vector tile projection warning** — Switch projection with vector tile layer loaded, verify notification emitted              | P1       | Notification store check after `setProjection()`                                |
 
-### Details Panel (suite-details or suite-map-varia)
+### Details Panel (suite-details or suite-map)
 
 | #   | Test                                                                                                                                       | Priority | Notes                                                                      |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------- |
 | 79  | ~~**Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map~~                         | P1       | ✅ Done — `testClearAllHighlights` in `suite-details`                      |
-| 80  | ~~**Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results~~                         | P1       | ✅ Done — Already in suite-map-varia (`testNonQueryableLayerNotInDetails`) |
+| 80  | ~~**Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results~~                         | P1       | ✅ Done — Already in suite-map (`testNonQueryableLayerNotInDetails`) |
 | 81  | ~~**Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes~~                                             | P2       | ✅ Done — `testZoomToFeature` in `suite-details`                           |
 | 82  | ~~**nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value~~                       | P2       | ✅ Done — `testNameFieldAsLabel` in `suite-details`                        |
 | 117 | ~~**Summary false hides field** — Query a layer with `outfields[].summary: false`, verify field excluded from result features' fieldInfo~~ | P1       | ✅ Done — `testSummaryFalseHidesField` in `suite-details`                  |
@@ -234,7 +234,7 @@ These tests from the release plan are already covered by the existing test suite
 | 94  | ~~**Initial view vs home view** — Load 27-view-settings config, verify initial zoom = 7 (Ottawa), call `zoomToInitialExtent()`, verify zoom changes to 4 (Canada)~~ | ✅ Done  | Automated: `MapConfigTester.testViewSettingsInitialViewVsHomeView()`         |
 | 95  | ~~**Home button navigates to homeView** — After `zoomToInitialExtent()`, verify store center ≈ `[-95, 60]` (homeView coordinates)~~                                 | ✅ Done  | Automated: `MapConfigTester.testViewSettingsHomeButtonNavigatesToHomeView()` |
 
-### Projection Interactions (suite-map-varia)
+### Projection Interactions (suite-map)
 
 | #   | Test                                                                                                                           | Priority | Notes                                                    |
 | --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------- |

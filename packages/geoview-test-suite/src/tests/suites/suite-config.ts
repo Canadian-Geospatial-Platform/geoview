@@ -242,7 +242,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     const pSettingsCascadeToSublayers = this.#configTester.testSettingsCascadeToSublayers();
     if (isRunningSequentially) await pSettingsCascadeToSublayers;
 
-    // Resolve when all
+    // Resolve when all parallel tests are done
     return Promise.all([
       pInitEsriDynamicHistoFlood,
       pInitEsriDynamicCESI,

@@ -137,11 +137,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
     if (isRunningSequentially) await pLayerWMSBadUrl;
 
-    // Test WMS duplicate nested group names (issue #3521)
-    // TODO: Move this call to the layer-functions suite
-    const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
-    if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
-
     // Test adding layer
     const pLayerWFSWithGeometCurrentConditions = this.#layerTester.testAddWFSLayerWithWithGeometCurrentConditions();
     if (isRunningSequentially) await pLayerWFSWithGeometCurrentConditions;
@@ -259,7 +254,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSDatacubeRingFireHalifax,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
-      pLayerWMSDuplicateGroupNames,
       pLayerWFSWithGeometCurrentConditions,
       pLayerWFSBadUrl,
       pLayerWFSOkayUrlNoCap,
