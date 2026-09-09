@@ -36,7 +36,7 @@ rush serve
 | 3   | `suite-utilities`               | 53      | [ ] Pass |
 | 4   | `suite-layer` (LCC — EPSG:3978) | 43      | [ ] Pass |
 | 5   | `suite-layer` (WM — EPSG:3857)  | 43      | [ ] Pass |
-| 6   | `suite-map-varia`               | 16      | [ ] Pass |
+| 6   | `suite-map`                     | 16      | [ ] Pass |
 | 7   | `suite-map-config`              | 39      | [ ] Pass |
 | 8   | `suite-ui`                      | 1       | [ ] Pass |
 | 9   | `suite-details`                 | 6       | [ ] Pass |

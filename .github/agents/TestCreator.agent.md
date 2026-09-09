@@ -88,7 +88,7 @@ Before creating any test, classify it into one of the groups and categories belo
 
 | Category            | Tester Class      | Suite Class        | Execution Pattern  | Map Required?          |
 | ------------------- | ----------------- | ------------------ | ------------------ | ---------------------- |
-| **Map Interaction** | `MapTester`       | `suite-map-varia`  | Sequential `await` | Yes                    |
+| **Map Interaction** | `MapTester`       | `suite-map`        | Sequential `await` | Yes                    |
 | **Map Config**      | `MapConfigTester` | `suite-map-config` | Sequential `await` | Yes (creates new maps) |
 
 ### Group 4 — Component Panels (footer bar tabs, app bar features)
@@ -746,7 +746,7 @@ packages/geoview-test-suite/src/
     │   ├── suite-layer.ts                 # Layer lifecycle + queries
     │   │
     │   │  # Group 3 — Map
-    │   ├── suite-map-varia.ts             # Map interactions
+    │   ├── suite-map.ts                   # Map interactions
     │   ├── suite-map-config.ts            # Map config overrides
     │   │
     │   │  # Group 4 — Component Panels
