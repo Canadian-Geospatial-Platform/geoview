@@ -1960,7 +1960,7 @@ packages/geoview-test-suite/src/
     │   ├── suite-core.ts                # Date/utility tests
     │   ├── suite-config.ts              # Layer config validation tests
     │   ├── suite-layer.ts               # Layer add/remove/legend tests
-    │   ├── suite-map-varia.ts           # Map zoom/projection/basemap/UI tests
+    │   ├── suite-map.ts                 # Map zoom/projection/basemap/UI tests
     │   ├── suite-map-config.ts          # Map config creation/destruction tests
     │   ├── suite-geochart.ts            # Geochart plugin tests
     │   ├── suite-details.ts             # Details panel tests
@@ -2408,7 +2408,7 @@ testMyLayerConfigValidation(): Promise<Test<TypeGeoviewLayerConfig>> {
 **Steps:**
 
 1. **Add test method** to `MapTester`
-2. **Register in Suite** (`suite-map-varia.ts` → `onLaunchTestSuite` — use **sequential `await`** if test depends on map state)
+2. **Register in Suite** (`suite-map.ts` → `onLaunchTestSuite` — use **sequential `await`** if test depends on map state)
 
 **Key pattern:** Controllers are the preferred public API for map operations. MapViewer provides low-level OpenLayers access for cases where immediate (non-animated) manipulation is needed. This is a **transitional architecture** — MapViewer will eventually become internal. Tests that modify shared map state must run **sequentially** via `await`.
 
@@ -2445,7 +2445,7 @@ testMyMapInteraction(): Promise<Test<SomeResultType>> {
 }
 ```
 
-**Wiring (sequential in suite-map-varia.ts):**
+**Wiring (sequential in suite-map.ts):**
 
 ```typescript
 protected override async onLaunchTestSuite(): Promise<unknown> {
@@ -2679,7 +2679,7 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 | ------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
 | `Promise.all()` (fully parallel)                              | Independent tests, no shared state       | `suite-config`, `suite-ui`            |
 | Mixed: parallel `await Promise.all()` then sequential `await` | Some tests modify map state (zoom, etc.) | `suite-layer`                         |
-| Sequential `await` + final `Promise.all()`                    | All tests modify shared map state        | `suite-map-varia`, `suite-map-config` |
+| Sequential `await` + final `Promise.all()`                    | All tests modify shared map state        | `suite-map`, `suite-map-config` |
 | `onCanExecuteTestSuite()` guard                               | Suite requires specific plugin/feature   | `suite-geochart`, `suite-details`     |
 
 ## Key Files to Reference

@@ -77,6 +77,13 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Keep if running sequentially
+    const isRunningSequentially = this.getIsRunningSequentially();
+
+    // Test WMS duplicate nested group names (issue #3521)
+    const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
+    if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
+
     // Test zoom to extent of a layer with only 1 point feature
     await this.#layerTester.testZoomExtentWithOneFeature();
 
@@ -92,7 +99,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test feature query behavior when no geometry field in outfields
     await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
 
-    // Done
-    return Promise.resolve();
+    // Resolve when all parallel tests are done
+    return Promise.all([pLayerWMSDuplicateGroupNames]);
   }
 }

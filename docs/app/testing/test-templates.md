@@ -20,7 +20,8 @@ Before writing a test, classify it into one of these groups:
 | Category            | Tester Class         | Suite Class          | Execution Pattern               |
 | ------------------- | -------------------- | -------------------- | ------------------------------- |
 | **Layer Lifecycle** | `LayerTester`        | `suite-layer`        | Mixed parallel + sequential     |
-| **Layer Query**     | `LayerTester`        | `suite-layer`        | Sequential (changes zoom)       |
+| **Layer Functions** | `LayerTester`        | `suite-layer-functions` | Mixed parallel + sequential     |
+| **Layer Query**     | `LayerTester`        | `suite-layer-functions` | Sequential (changes zoom)       |
 | **Legend**          | `LegendTester` (new) | `suite-legend` (new) | Guarded (`legend` tab required) |
 
 ### Group 3 — Map (state, projection, interaction)

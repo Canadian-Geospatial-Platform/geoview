@@ -19,7 +19,7 @@ packages/geoview-test-suite/src/
     │   ├── suite-core.ts               # Date/utility tests
     │   ├── suite-config.ts             # Layer config validation
     │   ├── suite-layer.ts              # Layer add/remove/legend/query
-    │   ├── suite-map-varia.ts          # Map zoom/projection/basemap
+    │   ├── suite-map.ts                # Map zoom/projection/basemap
     │   ├── suite-map-config.ts         # Map config creation/destruction
     │   ├── suite-geochart.ts           # Geochart plugin tests
     │   ├── suite-details.ts            # Details panel tests

@@ -128,7 +128,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
     if (isRunningSequentially) await pFetchJsonProxyBadUrl;
 
-    // Resolve when all
+    // Resolve when all parallel tests are done
     return Promise.all([
       pSimplePingValid,
       pSimplePingXyz,
