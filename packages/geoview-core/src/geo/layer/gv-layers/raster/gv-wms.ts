@@ -1167,7 +1167,7 @@ export class GVWMS extends AbstractGVRaster {
     // Parse the features
     const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
-      wfsLayerConfig.layerPath,
+      wmsLayerConfig.layerPath,
       wfsLayerConfig.getSchemaTag(),
       nameField,
       wfsLayerConfig.getOutfields(),
