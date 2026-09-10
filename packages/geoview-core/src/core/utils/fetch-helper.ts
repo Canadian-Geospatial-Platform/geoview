@@ -251,6 +251,13 @@ export abstract class Fetch {
       throw new ResponseContentError(`Content contained unexpected XML data instead of image (${url}).`);
     }
 
+    // GV Some services (notably ArcGIS) answer a failed image request with a 200 carrying a JSON error body.
+    // GV Without this guard it would be encoded into a valid-looking data URL that renders as a blank image.
+    if (blob.type === 'application/json' || blob.type === 'text/json') {
+      // Throw an error
+      throw new ResponseContentError(`Content contained unexpected JSON data instead of image (${url}).`);
+    }
+
     // Read the image file
     return new Promise((resolve, reject) => {
       const reader = new FileReader();

@@ -48,16 +48,49 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Resolves the preview image for this raster function.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect(`RASTER FUNCTION ITEM - image preview - ${info.name}`, previewPromise);
 
-    if (!previewPromise) return;
+    // No promise means no preview could be built at all, e.g. the service exposes no extent to export from
+    if (!previewPromise) {
+      setPreviewSrc(null);
+      setLoading(false);
+      return undefined;
+    }
+
+    // Discard a settlement arriving after the promise was replaced, otherwise a stale rejection
+    // can wipe out an image that a newer promise already resolved successfully
+    let cancelled = false;
+    setLoading(true);
+
     previewPromise
-      .then(setPreviewSrc)
-      .catch(() => setPreviewSrc(null))
-      .finally(() => setLoading(false));
+      .then((src) => {
+        if (!cancelled) setPreviewSrc(src);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewSrc(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [info.name, previewPromise]);
+
+  /**
+   * Handles a preview that decoded to something that isn't a renderable image.
+   */
+  const handlePreviewError = useCallback((): void => {
+    // ArcGIS answers a failed exportImage with a 200 carrying a JSON error body, which survives the
+    // blob fetch and becomes a valid-looking data URL, so only the <img> can tell us it isn't an image
+    setPreviewSrc(null);
+  }, []);
 
   const renderIcon = (): JSX.Element => {
     if (loading) {
@@ -81,7 +114,7 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
     if (previewSrc) {
       return (
         <Box sx={sxClasses.rasterFunctionPreviewImageContainer}>
-          <Box component="img" src={previewSrc} alt={info.name} sx={sxClasses.rasterFunctionPreviewImage} />
+          <Box component="img" src={previewSrc} alt={info.name} onError={handlePreviewError} sx={sxClasses.rasterFunctionPreviewImage} />
         </Box>
       );
     }
