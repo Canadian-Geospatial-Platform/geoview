@@ -38,7 +38,6 @@ export default function Redo(): JSX.Element {
 
   return (
     <IconButton
-      id="undo"
       aria-label={t('drawer.undoTooltip')}
       tooltipPlacement="left"
       onClick={handleUndo}

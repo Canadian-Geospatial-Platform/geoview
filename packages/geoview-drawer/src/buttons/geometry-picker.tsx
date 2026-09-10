@@ -36,6 +36,9 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   const { fillColor, strokeColor, strokeWidth } = useStoreDrawerStyle();
   const drawerController = useDrawerController();
 
+  /**
+   * Applies the current drawing style to the point icon SVG.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('POINT ICON - Icon style sync', IconComponent, fillColor, strokeColor, strokeWidth);
 
@@ -253,7 +256,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Point') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-point"
             type="textWithIcon"
             startIcon={<PointIcon IconComponent={PlaceIcon} />}
             aria-label={t('drawer.point')}
@@ -271,7 +273,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Text') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-text"
             type="textWithIcon"
             startIcon={<TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />}
             aria-label={t('drawer.text')}
@@ -289,7 +290,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('LineString') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-linestring"
             type="textWithIcon"
             startIcon={<ShowChartIcon sx={{ color: memoIconStyle.stroke }} />}
             aria-label={t('drawer.linestring')}
@@ -307,7 +307,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Polygon') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-polygon"
             type="textWithIcon"
             startIcon={<HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.polygon')}
@@ -325,7 +324,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Rectangle') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-rectangle"
             type="textWithIcon"
             startIcon={<RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.rectangle')}
@@ -343,7 +341,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Circle') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-circle"
             type="textWithIcon"
             startIcon={<CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.circle')}
@@ -361,7 +358,6 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       {geomTypes?.includes('Star') && (
         <ListItem sx={memoListStyles.listItem}>
           <Button
-            id="button-star"
             type="textWithIcon"
             startIcon={<StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.star')}

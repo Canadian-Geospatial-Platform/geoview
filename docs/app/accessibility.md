@@ -100,6 +100,28 @@ This mutual exclusion pattern balances WCAG requirements with multi-panel workfl
 
 This is intentional architectural behaviour, not a bug.
 
+### 3. Mouse Movement Can Disrupt WCAG Mode
+
+**Behavior:**
+
+In keyboard navigation (WCAG) mode, mouse movement or placement can cause unexpected behavior that is difficult to reproduce. For example:
+
+- Some buttons may become unresponsive.
+- Pressing certain buttons may not trigger the expected action.
+- Focus traps, which intentionally restrict where you can tab to, may not function as intended.
+
+To avoid these issues:
+
+- Before tabbing into the viewer to enter keyboard navigation (WCAG) mode, move your mouse away from the browser window.
+- Avoid moving your mouse after enabling keyboard navigation mode.
+- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+
+**Rationale:**
+
+This is a deliberate WCAG-compliance safeguard — if the user's real interaction mode is the mouse, WCAG/keyboard mode should not be silently forced on them.
+
+This is intentional architectural behaviour, not a bug.
+
 ---
 
 ## 003. Best Practices

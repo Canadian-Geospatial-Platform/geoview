@@ -20,10 +20,11 @@ import Shortcuts from './buttons/shortcuts';
 /**
  * Creates all drawer button configurations for the NavBar.
  *
+ * @param mapId - The map identifier, used to keep button ids unique across map instances
  * @param config - The drawer configuration
  * @returns The button configurations for the drawer bar
  */
-export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
+export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
   const { createElement } = cgpv.reactUtilities.react;
 
@@ -35,7 +36,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create draw button
   buttonConfigs.draw = {
     buttonProps: {
-      id: 'drawer-draw',
       'aria-label': 'drawer.toggleDrawing',
       tooltipPlacement: 'left',
       children: createElement(Draw),
@@ -49,7 +49,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create geometry picker button / panel
   buttonConfigs.geometryPicker = {
     buttonProps: {
-      id: 'drawer-geometry-picker',
       'aria-label': 'drawer.geometryPickerPanel',
       tooltipPlacement: 'left',
       children: createElement(GeometryPickerButton),
@@ -67,7 +66,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create style button
   buttonConfigs.style = {
     buttonProps: {
-      id: 'drawer-style',
+      id: `${mapId}-drawer-style`, // Looked up via querySelector in drawer-controller.ts openStyleMenu()
       'aria-label': 'drawer.style',
       tooltipPlacement: 'left',
       children: createElement(StyleButton),
@@ -86,7 +85,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create edit button
   buttonConfigs.edit = {
     buttonProps: {
-      id: 'drawer-edit',
       'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
       children: createElement(Edit),
@@ -98,7 +96,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create shortcuts button
   buttonConfigs.shortcuts = {
     buttonProps: {
-      id: 'drawer-shortcuts',
       'aria-label': 'drawer.shortcutsTooltip',
       tooltipPlacement: 'left',
       children: createElement(Shortcuts),
@@ -110,7 +107,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create snapping button
   buttonConfigs.snap = {
     buttonProps: {
-      id: 'drawer-snap',
       'aria-label': 'drawer.toggleSnapping',
       tooltipPlacement: 'left',
       children: createElement(Snapping),
@@ -122,7 +118,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create show measure button
   buttonConfigs.measure = {
     buttonProps: {
-      id: 'drawer-measure',
       'aria-label': 'drawer.toggleMeasurements',
       tooltipPlacement: 'left',
       children: createElement(Measurements),
@@ -134,7 +129,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create undo button
   buttonConfigs.undo = {
     buttonProps: {
-      id: 'drawer-undo',
       'aria-label': 'drawer.undoTooltip',
       tooltipPlacement: 'left',
       children: createElement(Undo),
@@ -146,7 +140,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create redo button
   buttonConfigs.redo = {
     buttonProps: {
-      id: 'drawer-redo',
       'aria-label': 'drawer.redoTooltip',
       tooltipPlacement: 'left',
       children: createElement(Redo),
@@ -158,7 +151,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create download button
   buttonConfigs.download = {
     buttonProps: {
-      id: 'drawer-download',
       'aria-label': 'drawer.downloadTooltip',
       tooltipPlacement: 'left',
       children: createElement(Download),
@@ -170,7 +162,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create upload button
   buttonConfigs.upload = {
     buttonProps: {
-      id: 'drawer-upload',
       'aria-label': 'drawer.uploadTooltip',
       tooltipPlacement: 'left',
       children: createElement(Upload),
@@ -182,7 +173,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   // Create clear button
   buttonConfigs.clear = {
     buttonProps: {
-      id: 'drawer-clear',
       'aria-label': 'drawer.clearTooltip',
       tooltipPlacement: 'left',
       children: createElement(Clear),

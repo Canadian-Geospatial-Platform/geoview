@@ -10,7 +10,7 @@ import { SvgIcon } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function GeoCaIcon(): any {
   return (
-    <svg width="500" height="200" id="a" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="1100 0 1000 1010">
+    <svg width="500" height="200" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="1100 0 1000 1010">
       <g>
         <path
           d="m492.3,73.3h-11.2c-1.3-16.9-8.8-32.5-21.2-44.1-12.5-11.6-28.7-18-45.8-18-5.3,0-10.6.6-15.7,1.8-.6-3.9-2.1-7.4-4.4-10.4,6.5-1.7,13.2-2.6,20-2.6,19.9,0,38.9,7.5,53.4,21,14.5,13.5,23.3,31.7,24.8,51.4l.1.9Z"

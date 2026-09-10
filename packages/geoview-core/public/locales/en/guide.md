@@ -115,6 +115,12 @@ This map is not fully compliant with Web Content Accessibility Guidelines (WCAG)
 - Opening panels triggers focus traps to speed up navigation, with Esc closing panels and returning focus to the triggering element.
 - In full-screen mode, the Esc key will exit full-screen rather than close any panels that have been opened.
 
+Mouse movement or placement can cause unexpected behaviour with keyboard navigation mode. To avoid this:
+
+- Before tabbing into the viewer to enter keyboard navigation (WCAG) mode, move your mouse away from the browser window.
+- Avoid moving your mouse after enabling keyboard navigation mode.
+- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+
 ### Screen Reader Users
 
 - Semantic landmarks are provided for each major app section to enable quick navigation.
@@ -270,18 +276,18 @@ _The tools displayed may vary depending on how the map is configured._
 
 _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, such as **Legend**, **Layers**, **Data Table** or **Details**. **Legend** and **Details** opened from the Side Bar are displayed on the map, in a condensed 'mobile' view (single column). The same tool opened from a tab in the Footer Bar is displayed below the map in a fully expanded view._
 
-| Symbol                                                                                                                | Name          | Description                                                                              |
-| --------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="An icon representing the Geolocator function" />     | Geolocator    | Click the geolocator icon and an input field for search keywords will appear on the map. |
-| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="An icon representing the Legend function" />               | Legend        | Legend of map icons (_see Footer Bar section for help_).                                 |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Layers function" />             | Layers        | Tools to interact with layers (_see Footer Bar section for help_).                       |
-| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" alt="An icon representing the Details function" />             | Details       | Details for selected features (_see Footer Bar section for help_).                       |
-| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="An icon representing the Data function" />              | Data          | Table of all features (_see Footer Bar section for help_).                               |
+| Symbol                                                                                                                | Name          | Description                                                                               |
+| --------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="An icon representing the Geolocator function" />     | Geolocator    | Click the geolocator icon and an input field for search keywords will appear on the map.  |
+| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="An icon representing the Legend function" />               | Legend        | Legend of map icons (_see Footer Bar section for help_).                                  |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Layers function" />             | Layers        | Tools to interact with layers (_see Footer Bar section for help_).                        |
+| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" alt="An icon representing the Details function" />             | Details       | Details for selected features (_see Footer Bar section for help_).                        |
+| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="An icon representing the Data function" />              | Data          | Table of all features (_see Footer Bar section for help_).                                |
 | Filter Panel                                                                                                          | Filter Panel  | Filter map layers by attribute values using select, multiselect, range, and date filters. |
-| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" alt="An icon representing the Guide function" />                 | Guide         | Help guide.                                                                              |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="An icon representing the Download function" />             | Download      | Download the map as PNG, JPEG, or PDF. Disabled while layers are loading.                |
-| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" alt="An icon representing the Notifications function" /> | Notifications | Display messages and notifications for the map.                                          |
-| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" alt="An icon representing the About Geoview function" />         | About Geoview | Display information about Geoview viewer.                                                |
+| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" alt="An icon representing the Guide function" />                 | Guide         | Help guide.                                                                               |
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="An icon representing the Download function" />             | Download      | Download the map as PNG, JPEG, or PDF. Disabled while layers are loading.                 |
+| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" alt="An icon representing the Notifications function" /> | Notifications | Display messages and notifications for the map.                                           |
+| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" alt="An icon representing the About Geoview function" />         | About Geoview | Display information about Geoview viewer.                                                 |
 
 =2!geolocator=
 
