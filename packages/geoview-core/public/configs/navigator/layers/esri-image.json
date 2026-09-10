@@ -76,6 +76,17 @@
             "layerName": "Counties"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR0",
+        "geoviewLayerName": "Landcover",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/imagery_images/rest/services/NRCan/canada_landcover_2000_2011/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "canada_landcover_2000_2011"
+          }
+        ]
       }
     ]
   },
