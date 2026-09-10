@@ -1,4 +1,5 @@
-import { useState, Fragment, useMemo, isValidElement } from 'react';
+import { useState, useRef, Fragment, useMemo, isValidElement } from 'react';
+import type { RefObject } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -89,6 +90,22 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   // State
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Refs to the expand/collapse button per group, used to restore focus after toggling (MUI re-render drops it)
+  const expandButtonRefsMap = useRef<Record<string, RefObject<HTMLButtonElement | null>>>({});
+
+  /**
+   * Gets (creating if needed) the stable ref for a group's expand/collapse button.
+   *
+   * @param groupName - The name of the group
+   * @returns The ref object for the group's expand/collapse button
+   */
+  function getExpandButtonRef(groupName: string): RefObject<HTMLButtonElement | null> {
+    if (!expandButtonRefsMap.current[groupName]) {
+      expandButtonRefsMap.current[groupName] = { current: null };
+    }
+    return expandButtonRefsMap.current[groupName];
+  }
 
   /**
    * Derives button panel groups from config and the NavBar API registry.
@@ -240,6 +257,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
         }
         return newSet;
       });
+
+      // Restore focus after MUI's re-render drops it
+      requestAnimationFrame(() => getExpandButtonRef(groupName).current?.focus());
     };
 
     return (
@@ -262,6 +282,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
             {needsExpansion && columnIndex === columns.length - 1 && (
               <IconButton
                 key={`expand-${groupName}`}
+                iconRef={getExpandButtonRef(groupName)}
                 aria-label={
                   isExpanded
                     ? t('mapnav.collapseGroup', { groupName: groupDisplayName })

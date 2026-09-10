@@ -1,6 +1,7 @@
 import type { Theme } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
-import { visuallyHidden } from '@/ui/style/default';
+import { visuallyHidden, geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets custom sx classes for the slider component.
@@ -29,10 +30,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
       },
       '&.Mui-focusVisible': {
-        boxShadow: `
-    0 0 0 2px ${theme.palette.common.white},
-    0 0 0 4px ${theme.palette.common.black}
-  `,
+        ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
       },
       '&.Mui-active': {
         width: 30,
