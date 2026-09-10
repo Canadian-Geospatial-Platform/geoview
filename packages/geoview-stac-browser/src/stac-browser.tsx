@@ -99,7 +99,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleModeClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
-      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      if (event.currentTarget.dataset.mode) {
+        handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      }
     },
     [handleModeChange]
   );
@@ -111,7 +113,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      if (event.currentTarget.dataset.mode) {
+        handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      }
     },
     [handleModeChange]
   );
