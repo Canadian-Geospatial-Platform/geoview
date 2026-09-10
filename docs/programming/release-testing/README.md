@@ -72,7 +72,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen               | 15 min       | 31 (0/12/19)         |
 | 8   | [08-layers.md](08-layers.md)                                   | Layer panel, add (URL/file), all types, settings       | 55 min       | 126 (1/23/102)       |
 | 9   | [09-styles.md](09-styles.md)                                   | Style rendering, visual variables, feature labels      | 10 min       | 15 (0/0/15)          |
-| 10  | [10-details.md](10-details.md)                                 | Details panel, highlighting, navigation, summary       | 15 min       | 24 (6/0/18)          |
+| 10  | [10-details.md](10-details.md)                                 | Details panel, highlighting, navigation, summary       | 15 min       | 25 (6/0/19)          |
 | 11  | [11-data-table.md](11-data-table.md)                           | Data table, filtering, columns, density, export        | 20 min       | 41 (2/8/31)          |
 | 12  | [12-view-settings.md](12-view-settings.md)                     | Zoom constraints, extent override, rotation disabled   | 10 min       | 16 (4/2/10)          |
 | 13  | [13-projection.md](13-projection.md)                           | Geometry, table, north pole on projection switch       | 10 min       | 10 (1/0/9)           |
