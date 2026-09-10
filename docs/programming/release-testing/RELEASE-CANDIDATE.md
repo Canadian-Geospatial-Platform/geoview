@@ -163,6 +163,7 @@ _(Fixes discovered or applied during this cycle)_
 - Improved WMS extent/feature-query fallback handling so WFS-derived output is parsed across multiple response formats instead of assuming only JSON, matching the broader `fetchWithFormatFallback()` behavior used elsewhere.
 - Corrected `FeatureInfoLayerSet` public result mapping so callers receive feature-info results with the associated `layerPath` while internal status bookkeeping remains separate and stable.
 - Added regression coverage for geometry availability when a layer config excludes the geometry field from `outFields`, and for zoom-to-extent behavior on empty, single-feature, and many-feature scenarios.
+- Fixed viewer freeze when querying details for an ESRI Dynamic feature whose geometry is pathologically complex (e.g. a huge polygon with thousands of holes near the Labrador Sea in the CNFASAR Priority Place service): highlighting the feature forced OpenLayers to re-rasterize thousands of ring subpaths on every animation frame, blocking the main thread — which also starved the ESRI image-load callbacks and tripped the `warning.layer.slowRender` warning. `FeatureHighlight.highlightFeature` now counts the geometry's vertices and, above 50000, skips highlighting and shows a `warning.layer.geometryTooComplexToHighlight` notification (once per feature) instead of freezing; zoom-to-feature-extent still works since it uses the feature extent (#3162)
 
 ## Build & Dependencies
 
