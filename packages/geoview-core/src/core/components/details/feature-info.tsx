@@ -29,6 +29,7 @@ import {
 } from '@/core/stores/states/layer-state';
 import { useDetailsController, useGeoChartControllerIfExists, useLayerController } from '@/core/controllers/use-controllers';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {
@@ -44,8 +45,10 @@ interface FeatureHeaderProps {
   iconSrc: string | undefined;
   /** The feature name. */
   name: string;
-  /** Whether the feature has geometry. */
-  hasGeometry: boolean;
+  /** Whether the feature geometry can be highlighted (present and not too complex to render). */
+  canHighlight: boolean;
+  /** Whether the feature has an extent to zoom to. */
+  hasExtent: boolean;
   /** Whether the feature has a geochart. */
   hasGeochart: boolean;
   /** Whether the feature is checked. */
@@ -85,7 +88,17 @@ const PAPER_STYLES = {
  * @returns The feature header component
  */
 const FeatureHeader = memo(
-  ({ iconSrc, name, hasGeometry, hasGeochart, checked, onCheckChange, onZoomIn, onGeochart }: FeatureHeaderProps): JSX.Element => {
+  ({
+    iconSrc,
+    name,
+    canHighlight,
+    hasExtent,
+    hasGeochart,
+    checked,
+    onCheckChange,
+    onZoomIn,
+    onGeochart,
+  }: FeatureHeaderProps): JSX.Element => {
     // Log
     logger.logTraceRender('components/details/feature-info > FeatureHeader');
 
@@ -161,7 +174,7 @@ const FeatureHeader = memo(
           <IconButton
             aria-label={t('details.keepFeatureSelected')}
             tooltipPlacement="top"
-            aria-disabled={!hasGeometry}
+            aria-disabled={!canHighlight}
             onClick={handleChecked}
             className="buttonOutline"
             size="small"
@@ -173,7 +186,7 @@ const FeatureHeader = memo(
             color="primary"
             aria-label={t('details.zoomTo')}
             tooltipPlacement="top"
-            aria-disabled={!hasGeometry}
+            aria-disabled={!hasExtent}
             onClick={onZoomIn}
             className="buttonOutline"
             size="small"
@@ -249,8 +262,11 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     return (value as string) ?? 'No name / Sans nom';
   }, [displayDateFormat, displayDateTimezone, feature.fieldInfo, feature.nameField, language, layerDateTemporalMode]);
 
-  /** Whether the feature has a geometry. */
-  const featureHasGeometry = !!feature.geometry;
+  /** Whether the feature geometry can be highlighted (present and not too complex to render). */
+  const featureCanHighlight = GeometryApi.canRenderGeometry(feature.geometry);
+
+  /** Whether the feature has an extent to zoom to. */
+  const featureHasExtent = !!feature.extent;
 
   /**
    * Memoizes the feature info list.
@@ -290,6 +306,9 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     (checkedState: boolean): void => {
       // If feature is checked
       if (checkedState) {
+        // Skip features whose geometry is too complex to highlight
+        if (!GeometryApi.canRenderGeometry(feature.geometry)) return;
+
         // Add
         detailsController.addCheckedFeature(feature);
       } else {
@@ -306,9 +325,11 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const handleZoomIn = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
+
+      // Skip when there is no extent to zoom to
       if (!feature?.extent) return;
 
-      // Zoom to extent and highlight the feature
+      // Zoom to the feature extent and highlight the feature (highlight is skipped for geometries too complex to render)
       layerController.zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
@@ -347,7 +368,8 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       <FeatureHeader
         iconSrc={feature.featureIcon}
         name={memoFeatureName}
-        hasGeometry={featureHasGeometry}
+        canHighlight={featureCanHighlight}
+        hasExtent={featureHasExtent}
         hasGeochart={memoHasGeochart}
         checked={checked}
         onCheckChange={handleFeatureChecked}
