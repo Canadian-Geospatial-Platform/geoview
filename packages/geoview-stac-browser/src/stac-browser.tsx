@@ -40,7 +40,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // State
-  const [mode, setMode] = useState<BrowseMode>('browse');
+  const [mode, setMode] = useState<BrowseMode | string>('browse');
   const [view, setView] = useState<PanelView>('collections');
   const [collections, setCollections] = useState<StacCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<StacCollection | null>(null);
@@ -81,7 +81,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   /**
    * Handles switching between browse and search modes.
    */
-  const handleModeChange = useCallback((newMode: BrowseMode): void => {
+  const handleModeChange = useCallback((newMode: BrowseMode | string): void => {
     setMode(newMode);
     if (newMode === 'browse') {
       setView('collections');
@@ -99,7 +99,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleModeClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
-      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      if (event.currentTarget.dataset.mode) {
+        handleModeChange(event.currentTarget.dataset.mode);
+      }
     },
     [handleModeChange]
   );
@@ -111,7 +113,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      handleModeChange(event.currentTarget.dataset.mode as BrowseMode);
+      if (event.currentTarget.dataset.mode) {
+        handleModeChange(event.currentTarget.dataset.mode);
+      }
     },
     [handleModeChange]
   );
