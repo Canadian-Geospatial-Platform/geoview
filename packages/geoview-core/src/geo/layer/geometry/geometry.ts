@@ -3,7 +3,7 @@ import Feature from 'ol/Feature';
 import type { Options as VectorSourceOptions } from 'ol/source/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Geometry as OLGeometry } from 'ol/geom';
-import { Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon, MultiPoint } from 'ol/geom';
+import { Circle, LineString, MultiLineString, Point, Polygon, MultiPolygon, MultiPoint, SimpleGeometry, GeometryCollection } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import { Fill, Stroke, Style, Icon } from 'ol/style';
 import type { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
@@ -34,6 +34,9 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...).
  */
 export class GeometryApi {
+  /** Maximum number of coordinates a geometry may contain before it is considered too complex to render every frame. */
+  static readonly MAX_RENDERABLE_COORDINATES = 50000;
+
   /** Reference on the map viewer */
   #mapViewer: MapViewer;
 
@@ -922,6 +925,38 @@ export class GeometryApi {
       coordinates[0][0].length > 0 &&
       Array.isArray(coordinates[0][0][0])
     );
+  }
+
+  /**
+   * Counts the number of coordinates (vertices) in a geometry, recursing into geometry collections.
+   *
+   * @param geometry - The geometry to measure
+   * @returns The number of coordinates the geometry contains
+   */
+  static getCoordinateCount(geometry: OLGeometry): number {
+    if (geometry instanceof SimpleGeometry) {
+      const flatCoordinates = geometry.getFlatCoordinates();
+      const stride = geometry.getStride();
+      return stride > 0 ? flatCoordinates.length / stride : 0;
+    }
+
+    if (geometry instanceof GeometryCollection) {
+      return geometry.getGeometriesArray().reduce((total, geom) => total + GeometryApi.getCoordinateCount(geom), 0);
+    }
+
+    return 0;
+  }
+
+  /**
+   * Determines whether a geometry is simple enough to render or highlight on every animation frame without freezing
+   * the UI. Geometries above `GeometryApi.MAX_RENDERABLE_COORDINATES` coordinates (e.g. a polygon with thousands of
+   * holes) are considered too complex.
+   *
+   * @param geometry - The geometry to check
+   * @returns True when the geometry can be rendered, false when it is too complex or undefined
+   */
+  static canRenderGeometry(geometry: OLGeometry | undefined): boolean {
+    return !!geometry && GeometryApi.getCoordinateCount(geometry) <= GeometryApi.MAX_RENDERABLE_COORDINATES;
   }
 }
 
