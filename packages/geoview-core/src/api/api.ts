@@ -72,8 +72,8 @@ export class API {
    * Initiates the event and projection objects.
    */
   constructor() {
-    // apply focus to element when keyboard navigation is use
-    API.#manageKeyboardFocus(this);
+    // Activate/deactivate the map crosshair as keyboard focus enters/leaves the map element
+    API.#manageMapCrosshairOnFocus(this);
   }
 
   /**
@@ -362,26 +362,12 @@ export class API {
   // #region STATIC METHODS
 
   /**
-   * LEGACY: Applies the .keyboard-focused class to any element receiving Tab focus within .geoview-map containers.
+   * Activates the map crosshair when keyboard Tab focus lands on the map element and deactivates it otherwise.
    *
-   * This custom JavaScript-based focus management is being phased out in favor of native :focus-visible
-   * and MUI's .Mui-focusVisible classes. The .keyboard-focused class is applied to ANY element that receives
-   * Tab focus (buttons, inputs, map element, etc.), while crosshair activation is separate logic that only
-   * triggers for the specific map element ({mapId}-mapTargetElement).
-   *
-   * Code from: https://github.com/MaxMaeder/keyboardFocus.js
-   *
-   * @deprecated Being replaced by native :focus-visible / MUI .Mui-focusVisible; remove per issue #3607
-   *
-   * TODO issue #3607: Remove this method when migration to :focus-visible is complete.
+   * Crosshair activation only triggers for the specific map element ({mapId}-mapTargetElement); tabbing to any
+   * other element within a .geoview-map container deactivates it.
    */
-  static #manageKeyboardFocus(apiInstance: API): void {
-    // Remove the 'keyboard-focused' class from any elements that have it
-    function removeFocusedClass(): void {
-      const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
-      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
-    }
-
+  static #manageMapCrosshairOnFocus(apiInstance: API): void {
     // Add event listener for when tab pressed
     document.addEventListener('keyup', (event: KeyboardEvent) => {
       if (event.key !== 'Tab') return;
@@ -391,10 +377,6 @@ export class API {
       const activeEl = document.activeElement;
 
       if (elements.some((element) => element.contains(activeEl))) {
-        // Remove class on previous element then add the 'keyboard-focused' class to the currently focused element
-        removeFocusedClass();
-        activeEl?.classList.toggle('keyboard-focused');
-
         // Check if the focus element is a map and set store value for crosshair
         const mapId =
           activeEl?.closest('.geoview-shell') !== null
@@ -416,10 +398,6 @@ export class API {
         }
       }
     });
-
-    // Remove the class when the user interacts with the page with their mouse, or when the page looses focus
-    document.addEventListener('click', removeFocusedClass);
-    document.addEventListener('focusout', removeFocusedClass);
   }
 
   // #endregion STATIC METHODS

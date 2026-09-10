@@ -1859,6 +1859,16 @@ const handleToggleKeyDown = useCallback(
 - `role="checkbox"` with `aria-checked` for toggle-visibility buttons
 - `role="search"` on `<form>` elements containing search inputs
 
+### Focus Indicator System (WCAG 2.1 SC 2.4.7)
+
+Focus indicators are generated centrally in `packages/geoview-core/src/ui/style/themeOptionsGenerator.ts` — never hand-roll a `boxShadow`/`outline` focus style on a component.
+
+- **`getFocusIndicatorStyles(geoViewColors)`** — Outline + halo (`boxShadow`) combo applied globally to `.Mui-focusVisible` on all `ButtonBase` descendants (Button, IconButton, Tab, MenuItem, Checkbox, Radio, Switch, Chip, ListItemButton) and to the Slider thumb.
+- **`getFormControlFocusIndicatorStyles(geoViewColors)`** — Reuses `getFocusIndicatorStyles` but drops the halo (`boxShadow: 'none'`), since `InputBase`-derived controls (TextField, Select, Autocomplete, date-pickers) already render their own border/underline.
+- **`.geoview-keyboard-active` scoping** — Form-control focus styles are scoped to `.geoview-keyboard-active &:has(:focus-visible)` instead of a bare `:focus-visible` selector, because `:focus-visible` alone still matches text inputs on mouse click. `Shell` (`shell.tsx`) toggles `geoview-keyboard-active` / `geoview-keyboard-inactive` on the map root based on `activeTrapGeoView`, so mouse users never see the outline while keyboard users always do.
+- **Do not reintroduce JS-managed focus-tracking classes** (e.g. the removed `.keyboard-focused`, formerly set by `API.#manageKeyboardFocus`) — focus styling relies entirely on native `:focus-visible`/MUI `.Mui-focusVisible` now. `API.#manageMapCrosshairOnFocus` (the method that replaced it) only activates the map crosshair on Tab focus; it does not manage generic focus styling.
+- Per-component overrides (e.g. tighter `outlineOffset` for dense `MenuItem`/`Checkbox` rows, or dropping the halo) should still call `getFocusIndicatorStyles`/`getFormControlFocusIndicatorStyles` and spread the result, only overriding the specific properties that differ.
+
 ### Snackbar & Notification Panel (WCAG)
 
 **Rule:** Every message displayed in the snackbar **must** also be added to the notification panel. The reverse is not required — a notification can exist without a snackbar.

@@ -230,6 +230,11 @@ _(WCAG fixes and improvements)_
 - Fixed the count styling next to duplicated notification items in the notifications panel (#3622)
 - Enforced unique, `mapId`-scoped DOM element IDs across the viewer to prevent duplicate-ID conflicts with multiple map instances: removed unused IDs from drawer buttons, crosshair, and the `GeoCaIcon`/north-arrow decorative paths; `mapId`-scoped the remaining drawer button, north-arrow group (`NorthArrowIcon` now takes a `mapId` prop), export button, and keyboard-navigation (WCAG) modal button IDs; and refactored `FocusTrapContainer`'s ambiguous `id` prop into a clearly-named, `mapId`-scoped `focusTrapContainerId` across all 4 call sites (panel, geolocator, version, tab-panel) (#3220)
 - Fixed a focus-trap loop when a map/crosshair click opened the Details panel while `details` was configured in **both** the footer bar and the app bar — two MUI focus traps competed for focus. `openDetailsPanelOnMapClick` now opens details in the footer only when the footer hosts it (preferring footer, matching `useNavigateToTab`), so a single focus trap is ever active (#3221)
+- Removed the legacy `.keyboard-focused` class-tracking JS/CSS in favor of native `:focus-visible`/MUI `.Mui-focusVisible`; crosshair activation logic renamed from `#manageKeyboardFocus` to `#manageMapCrosshairOnFocus` (#3607)
+- Added keyboard-only focus indicators for MUI form controls (TextField, Select, Autocomplete, date-pickers) via a new `getFormControlFocusIndicatorStyles` helper, scoped to a React-managed `.geoview-keyboard-active` class on the shell so mouse clicks never trigger the outline (`:focus-visible` alone leaks on text inputs); unified the Slider thumb focus ring to the shared `getFocusIndicatorStyles` helper (#3630)
+- Fixed lightbox prev/next navigation buttons losing keyboard focus at the first/last slide by using `aria-disabled` instead of the native `disabled` attribute, restoring vendor CSS button styling (#3637)
+- Fixed the nav bar "Expand Drawing tools group" icon button losing keyboard focus after being pressed in WCAG mode (#3630)
+- Fixed an empty `<ul>` element appearing in the generated legend layer container HTML (#3630)
 
 ## Documentation & Cleanup
 
@@ -248,6 +253,7 @@ _(Doc updates, demo cleanup, code organization)_
 - Clearer static-image-errors.json template (#3562)
 - Improved HTML descriptions of all test suites (#3562)
 - Documented the map-scoped DOM access rules: new best-practices §18 (wrappers vs. the root store hook/getter, the ban on direct `document.*`, and the legitimate-exception pattern), cross-links in using-store.md and test-templates.md, and a summary note in copilot-instructions.md (#3221)
+- Migrated Add Layer and Focus Trap inline `sx` styles to external `add-new-layer-style.ts` / `containers-style.ts` files (#3630)
 
 ## Test Plan Changes
 
