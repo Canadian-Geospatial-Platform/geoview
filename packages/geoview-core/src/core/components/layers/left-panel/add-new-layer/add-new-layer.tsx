@@ -1,5 +1,5 @@
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -53,14 +53,8 @@ import {
   useLayerCreatorController,
   useUIController,
 } from '@/core/controllers/use-controllers';
-
-/** Style classes for button groups. */
-const sxClasses = {
-  buttonGroup: {
-    paddingTop: 12,
-    gap: 6,
-  },
-};
+import type { SxStyles } from '@/ui/style/types';
+import { getSxClasses } from '@/core/components/layers/left-panel/add-new-layer/add-new-layer-style';
 
 /** Layer entry type constants from the schema. */
 const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
@@ -107,6 +101,11 @@ function FileUploadSection({
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const uiController = useUIController();
+
+  // Style
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [localDisplayURL, setLocalDisplayURL] = useState<string>(displayURL);
@@ -223,21 +222,7 @@ function FileUploadSection({
       onDragLeave={handleDragLeave}
     >
       {drag && (
-        <Box
-          ref={dragPopover}
-          style={{
-            backgroundColor: 'rgba(128,128,128,.95)',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            textAlign: 'center',
-            color: 'black',
-            fontSize: 24,
-          }}
-        >
+        <Box ref={dragPopover} sx={memoSxClasses.dragOverlay}>
           <h3>{t('layers.dropzone')}</h3>
         </Box>
       )}
@@ -255,7 +240,6 @@ function FileUploadSection({
         fullWidth
         variant="outlined"
         size="small"
-        sx={{ width: '100%' }}
         type="text"
         onClick={handleOpenFileInput}
         className="buttonOutlineFilled"
@@ -270,7 +254,7 @@ function FileUploadSection({
         <small>{t('layers.drop')}</small>
       </p>
       <TextField
-        sx={{ width: '100%' }}
+        fullWidth
         label={disabledLayerTypes.includes(GEOCORE as TypeInitialGeoviewLayerType) ? t('layers.urlNoGeocore') : t('layers.url')}
         variant="standard"
         value={localDisplayURL}
@@ -279,29 +263,6 @@ function FileUploadSection({
         multiline
         error={urlError}
         helperText={urlError ? urlErrorMessage : undefined}
-        slotProps={{
-          inputLabel: {
-            sx: {
-              color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
-              '&.Mui-focused': {
-                color: theme.palette.geoViewColor?.primary.main, // Primary color when focused
-              },
-            },
-          },
-          input: {
-            sx: {
-              '&:focus-visible': {
-                outline: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-                outlineOffset: '2px',
-              },
-              '& textarea:focus-visible': {
-                // MUI adds a 2px border to the bottom of the input parent on focus.
-                // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
-                border: 'none !important',
-              },
-            },
-          },
-        }}
       />
     </Box>
   );
@@ -346,9 +307,15 @@ function NavButtons({
   logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer > NavButtons');
 
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+
+  // Style
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   return (
-    <ButtonGroup sx={sxClasses.buttonGroup}>
+    <ButtonGroup sx={memoSxClasses.buttonGroup}>
       {isLoading ? (
         <IconButton sx={{ width: '80px' }} size="small" className="buttonOutlineFilled" disabled aria-label={t('layers.stepOneLoading')}>
           <CircularProgressBase size="20px" />
@@ -392,6 +359,11 @@ export function AddNewLayer(): JSX.Element {
   // Hook
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  // Style
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOTIFF, KML, WMS, WMTS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
     CONST_LAYER_TYPES;
@@ -1100,15 +1072,11 @@ export function AddNewLayer(): JSX.Element {
   // #endregion USE EFFECTS
 
   return (
-    <Paper sx={{ padding: '20px', gap: '8' }}>
+    <Paper sx={memoSxClasses.paper}>
       <Stepper
         activeStep={activeStep}
         orientation="vertical"
-        sx={{
-          '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
-            color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
-          },
-        }}
+        sx={memoSxClasses.stepper}
         steps={[
           {
             stepLabel: {
@@ -1206,6 +1174,7 @@ export function AddNewLayer(): JSX.Element {
                   {/* Show TextField if only one or no layer entries */}
                   {isSingle ? (
                     <TextField
+                      fullWidth
                       label={t('layers.name')}
                       variant="standard"
                       value={layerName}
@@ -1217,15 +1186,7 @@ export function AddNewLayer(): JSX.Element {
                     />
                   ) : (
                     layerTree && (
-                      <Box
-                        ref={layerSelectionTreeContainerRef}
-                        sx={{
-                          // Targets the inner content wrapper when the main item or root receives native JS focus
-                          '& .MuiTreeItem-root:focus > .MuiTreeItem-content, & .MuiTreeItem-root:focus-within > .MuiTreeItem-content': {
-                            backgroundColor: theme.palette.action.hover,
-                          },
-                        }}
-                      >
+                      <Box ref={layerSelectionTreeContainerRef} sx={memoSxClasses.layerTreeContainer}>
                         <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
                       </Box>
                     )
@@ -1255,7 +1216,7 @@ export function AddNewLayer(): JSX.Element {
                   children: (
                     <>
                       <TextField
-                        sx={{ width: '100%' }}
+                        fullWidth
                         label={t('layers.name')}
                         variant="standard"
                         value={layerName}

@@ -20,6 +20,13 @@ export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
       zIndex: theme.zIndex.focusDialog,
       overflow: 'hidden',
     },
+    modalButton: {
+      width: 'initial',
+      textTransform: 'none',
+      '&:focus-visible': {
+        boxShadow: 'none',
+      },
+    },
   };
 };
 

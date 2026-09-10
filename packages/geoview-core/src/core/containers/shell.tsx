@@ -439,7 +439,14 @@ export function Shell(props: ShellProps): JSX.Element {
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box ref={shellRef} id={`${mapViewer.mapId}-shell`} sx={memoSxClasses.shell} className="geoview-shell" tabIndex={-1}>
+        <Box
+          ref={shellRef}
+          id={`${mapViewer.mapId}-shell`}
+          sx={memoSxClasses.shell}
+          // geoview-keyboard-active scopes keyboard-only focus outlines (form controls) to GeoView's keyboard-navigation mode
+          className={`geoview-shell${activeTrapGeoView ? ' geoview-keyboard-active' : ' geoview-keyboard-inactive'}`}
+          tabIndex={-1}
+        >
           {/* Map loading */}
           <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={!mapLoaded}>
             <CircularProgress isLoaded={mapLoaded} />

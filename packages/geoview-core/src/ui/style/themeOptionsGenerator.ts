@@ -43,6 +43,20 @@ export const getFocusIndicatorStyles = (geoViewColors: IGeoViewColors): CSSObjec
 });
 
 /**
+ * WCAG-compliant focus indicator styles for InputBase-derived form controls.
+ *
+ * Reuses getFocusIndicatorStyles' outline but drops the box-shadow halo, since form controls
+ * render their own border/underline and the halo was visually redundant.
+ *
+ * @param geoViewColors - GeoView color palette for focus indicator colors
+ * @returns Focus indicator style object (no halo) for use with :has(:focus-visible) on the input root
+ */
+export const getFormControlFocusIndicatorStyles = (geoViewColors: IGeoViewColors): CSSObject => ({
+  ...getFocusIndicatorStyles(geoViewColors),
+  boxShadow: 'none',
+});
+
+/**
  * Generates button style overrides for all button variants.
  *
  * Note: Focus indicators are applied via MuiButtonBase (parent component) to avoid duplication.
@@ -385,6 +399,18 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             // WCAG-compliant focus indicator for all ButtonBase descendants
             // (Button, IconButton, Tab, MenuItem, Checkbox, Radio, Switch, Chip, ListItemButton, etc.)
             '&.Mui-focusVisible': getFocusIndicatorStyles(geoViewColors),
+            // Custom focus indicator for MenuItem within ButtonBase
+            '&.MuiMenuItem-root.Mui-focusVisible': {
+              ...getFocusIndicatorStyles(geoViewColors),
+              outlineOffset: '-3px', // sit inside the item
+              boxShadow: 'none', // drop the halo for dense menu rows
+            },
+            // Checkbox root is small — tighten the outline instead of the default offset
+            '&.MuiCheckbox-root.Mui-focusVisible': {
+              ...getFocusIndicatorStyles(geoViewColors),
+              outlineOffset: '-6px', // sit inside the item
+              boxShadow: 'none', // drop the halo for dense menu rows
+            },
           },
         },
       },
@@ -531,6 +557,20 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               WebkitAppearance: 'none',
               appearance: 'none',
             },
+            // Keyboard-only focus indicator for InputBase-derived controls (TextField, Select, Autocomplete, date-pickers).
+            // Scoped to .geoview-keyboard-active (GeoView keyboard-navigation mode) because :focus-visible alone still
+            // matches text inputs on mouse click; .geoview-keyboard-active ensures mouse users never see the outline.
+            '.geoview-keyboard-active &:has(:focus-visible)': {
+              ...getFormControlFocusIndicatorStyles(geoViewColors),
+              outlineOffset: '0',
+            },
+            // Standard-variant focus underline is the root's own ::after, not the input's — suppress it on keyboard focus
+            '.geoview-keyboard-active &:has(:focus-visible)::after': {
+              border: 'none',
+            },
+            '.geoview-keyboard-active &:has(:focus-visible)::before': {
+              border: 'none',
+            },
           },
         },
       },
@@ -539,6 +579,10 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           root: {
             color: geoViewColors.textColor.light[200], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
             opacity: 1,
+            // Keep the focused label the same as the root color instead of MUI's default primary.main
+            '&.Mui-focused': {
+              color: geoViewColors.textColor.light[200],
+            },
           },
         },
       },
