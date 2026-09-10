@@ -2,7 +2,8 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import Feature from 'ol/Feature';
-import { GeometryCollection, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
+import { GeometryCollection, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, SimpleGeometry } from 'ol/geom';
+import type Geometry from 'ol/geom/Geometry';
 import type { Extent } from 'ol/extent';
 import { getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
@@ -16,6 +17,13 @@ import { TIMEOUT } from '@/core/utils/constant';
 import type { MapController } from '@/core/controllers/map-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
+
+/**
+ * Maximum number of coordinates a geometry may contain before highlighting falls back to warning the user.
+ * Beyond this, re-rendering the full geometry on every animation frame freezes the UI (e.g. an ESRI feature
+ * whose polygon has thousands of holes/rings).
+ */
+const MAX_HIGHLIGHT_GEOMETRY_COORDINATES = 50000;
 
 /**
  * A class to handle highlighting of features.
@@ -51,6 +59,9 @@ export class FeatureHighlight {
 
   /** The ID's of currently highlighted features */
   #highlightedFeatureIds: string[] = [];
+
+  /** The ID's of features already warned about being too complex to highlight, to avoid repeating the notification. */
+  #complexGeometryWarnedIds: Set<string> = new Set();
 
   /** Timeout of the bounding box highlight */
   #bboxTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -232,12 +243,46 @@ export class FeatureHighlight {
   }
 
   /**
+   * Counts the number of coordinates (vertices) in a geometry, recursing into geometry collections.
+   *
+   * @param geometry - Geometry to measure
+   * @returns The number of coordinates the geometry contains
+   */
+  #getGeometryCoordinateCount(geometry: Geometry): number {
+    if (geometry instanceof SimpleGeometry) {
+      const flatCoordinates = geometry.getFlatCoordinates();
+      const stride = geometry.getStride();
+      return stride > 0 ? flatCoordinates.length / stride : 0;
+    }
+
+    if (geometry instanceof GeometryCollection) {
+      return geometry.getGeometriesArray().reduce((total, geom) => total + this.#getGeometryCoordinateCount(geom), 0);
+    }
+
+    return 0;
+  }
+
+  /**
    * Highlights a feature with a plain overlay.
+   *
+   * Pathologically complex geometries (more than `MAX_HIGHLIGHT_GEOMETRY_COORDINATES` coordinates, e.g. an ESRI feature
+   * whose polygon has thousands of holes) are not highlighted, because re-rendering them every frame freezes the UI.
+   * The user is notified once per such feature.
    *
    * @param feature - Feature to highlight
    */
   highlightFeature(feature: TypeFeatureInfoEntry): void {
     const { geometry } = feature;
+
+    // Skip geometries too complex to render every frame without freezing the UI, and warn the user once per feature
+    if (geometry && this.#getGeometryCoordinateCount(geometry) > MAX_HIGHLIGHT_GEOMETRY_COORDINATES) {
+      if (feature.uid && !this.#complexGeometryWarnedIds.has(feature.uid)) {
+        this.#complexGeometryWarnedIds.add(feature.uid);
+        this.mapViewer.notifications.showWarning('warning.layer.geometryTooComplexToHighlight');
+      }
+      return;
+    }
+
     const highlightedCount = this.#highlightGeometry(geometry, feature.uid!);
 
     if (!highlightedCount && feature.extent) {
