@@ -40,8 +40,10 @@ export class GVEsriImage extends AbstractGVRaster {
   /** The currently active raster function id */
   #rasterFunction?: string;
 
-  /** The cache of image previews for the different raster functions */
-  #rasterFunctionPreviewCache = new Map<string, string>();
+  /** The cache of image preview promises for the different raster functions, keyed by raster function name.
+   *  Stores the promise itself (not just the resolved value) so a fetch already in flight is reused instead
+   *  of being duplicated when getRasterFunctionPreviews() is called again before it settles. */
+  #rasterFunctionPreviewCache = new Map<string, Promise<string>>();
 
   /** The currently active mosaic rule */
   #mosaicRule?: TypeMosaicRule;
@@ -274,108 +276,17 @@ export class GVEsriImage extends AbstractGVRaster {
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
-    // Get map projection number
-    const mapView = map.getView();
-    const mapProjection = mapView.getProjection();
-    const mapProjNumber = parseInt(mapProjection.getCode()?.split(':')[1] || '', 10);
-
-    // Transform lonlat to map projection for the geometry parameter
-    const mapCoordinate = Projection.transformFromLonLat(lonlat, mapProjection);
-
-    // Build geometry parameter
-    const geometryParam = encodeURIComponent(
-      JSON.stringify({
-        spatialReference: { wkid: mapProjNumber },
-        x: mapCoordinate[0],
-        y: mapCoordinate[1],
-      })
-    );
-
-    // Build pixel size parameter (use map resolution)
-    const resolution = mapView.getResolution() || 1;
-    const pixelSizeParam = encodeURIComponent(
-      JSON.stringify({
-        spatialReference: { wkid: mapProjNumber },
-        x: resolution,
-        y: resolution,
-      })
-    );
-
-    // Get source parameters for time and mosaic rule
-    const sourceParams = this.getOLSource().getParams();
-
-    // Build time parameter if available from source
-    const timeParam = sourceParams?.TIME ? `&TIME=${this.getOLSource().getParams().TIME}` : '';
-
-    // Build rendering rules parameter if raster function is active
-    let renderingRulesParam = '';
-    if (this.#rasterFunction) {
-      renderingRulesParam = `&renderingRules=${encodeURIComponent(JSON.stringify([{ rasterFunction: this.#rasterFunction }]))}`;
-    }
-
-    // Build mosaic rule parameter if available from source (critical for processedValues)
-    let mosaicRuleParam = '';
-    if (sourceParams?.mosaicRule) {
-      mosaicRuleParam = `&mosaicRule=${encodeURIComponent(JSON.stringify(this.#mosaicRule))}`;
-    }
-
-    // Construct the identify URL
-    const identifyUrl =
-      `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}identify?f=json` +
-      `&geometryType=esriGeometryPoint` +
-      `&geometry=${geometryParam}` +
-      `${renderingRulesParam}` +
-      `${mosaicRuleParam}` +
-      `&pixelSize=${pixelSizeParam}` +
-      `&returnGeometry=${queryGeometry}` +
-      `&returnCatalogItems=true` +
-      `&returnPixelValues=true` +
-      `&maxItemCount=1` +
-      `${timeParam}` +
-      `&processAsMultidimensional=false`;
-
     // Fetch the identify response
-    const identifyJsonResponse = await Fetch.fetchEsriJson<EsriImageIdentifyJsonResponse>(identifyUrl);
+    const identifyJsonResponse = await this.#fetchIdentifyResponse(map, lonlat, queryGeometry);
 
     // If no pixel value returned
     if (identifyJsonResponse.value === undefined || identifyJsonResponse.value === null || identifyJsonResponse.value === 'NoData') {
       return featureInfoResult;
     }
 
-    // Build feature properties starting with pixel-specific fields
-    const properties: Record<string, unknown> = {
-      // Put pixel value first so it appears at top of details
-      PixelValue: identifyJsonResponse.value,
-      PixelName: identifyJsonResponse.name || 'Pixel',
-    };
-
-    // Determine the legend class index from processedValues
-    let classIndex: number | undefined;
-    if (identifyJsonResponse.processedValues?.[0] !== undefined && identifyJsonResponse.processedValues[0] !== 'NoData') {
-      classIndex = parseInt(String(identifyJsonResponse.processedValues[0]), 10);
-      properties.ProcessedValue = identifyJsonResponse.processedValues[0];
-    }
-
-    // Add catalog item attributes if available
-    if (identifyJsonResponse.catalogItems?.features?.[0]?.attributes) {
-      const catalogAttributes = identifyJsonResponse.catalogItems.features[0].attributes;
-      Object.assign(properties, catalogAttributes);
-    }
-
-    // Create geometry if available and requested
-    let geometry: Geometry | undefined;
-    if (queryGeometry && identifyJsonResponse.location) {
-      const locationGeom = identifyJsonResponse.location;
-      geometry = GeometryApi.createGeometryFromType('Point', [locationGeom.x, locationGeom.y]);
-    }
-
-    // Create a feature with the properties
-    const feature = new Feature({ ...properties, geometry });
-    feature.set('classIndex', classIndex);
-
     // Format and return the result
     featureInfoResult.results = this.formatFeatureInfoResult(
-      [feature],
+      [this.#createFeatureFromIdentifyResponse(identifyJsonResponse, queryGeometry)],
       layerConfig,
       language,
       true,
@@ -606,9 +517,11 @@ export class GVEsriImage extends AbstractGVRaster {
     const bbox = bounds.join(',');
 
     rasterFunctionInfos.forEach((info) => {
-      // Check cache first
-      if (this.#rasterFunctionPreviewCache.has(info.name)) {
-        promises.set(info.name, Promise.resolve(this.#rasterFunctionPreviewCache.get(info.name)!));
+      // Reuse the pending or already-resolved promise so a re-render never fires a second concurrent
+      // request for the same raster function while the first one is still in flight
+      const existing = this.#rasterFunctionPreviewCache.get(info.name);
+      if (existing) {
+        promises.set(info.name, existing);
         return;
       }
 
@@ -617,17 +530,16 @@ export class GVEsriImage extends AbstractGVRaster {
         try {
           const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction: info.name }));
           const previewUrl = `${baseUrl}exportImage?bbox=${bbox}&size=${size},${size}&f=image&renderingRule=${renderingRule}`;
-
-          // Cache the result
-          const result = await Fetch.fetchBlobImage(previewUrl);
-          this.#rasterFunctionPreviewCache.set(info.name, result);
-          return result;
+          return await Fetch.fetchBlobImage(previewUrl, { cache: 'no-store' });
         } catch (error: unknown) {
+          // Drop the cache entry so a later call can retry instead of being stuck with a failed promise forever
+          this.#rasterFunctionPreviewCache.delete(info.name);
           logger.logWarning(`Failed to fetch preview for raster function ${info.name}`, error);
           throw error;
         }
       })();
 
+      this.#rasterFunctionPreviewCache.set(info.name, promise);
       promises.set(info.name, promise);
     });
 
@@ -666,6 +578,150 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   // #endregion METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Builds the identify URL for the given coordinate and rendering rule fragment.
+   *
+   * @param map - The Map providing the projection and resolution used by the query
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query
+   * @param renderingParam - The encoded rendering rule query string fragment, empty when no raster function is active
+   * @returns The identify URL
+   */
+  #buildIdentifyUrl(map: OLMap, lonlat: Coordinate, queryGeometry: boolean, renderingParam: string): string {
+    const layerConfig = this.getLayerConfig();
+
+    // Get map projection number
+    const mapView = map.getView();
+    const mapProjection = mapView.getProjection();
+    const mapProjNumber = parseInt(mapProjection.getCode()?.split(':')[1] || '', 10);
+
+    // Transform lonlat to map projection for the geometry parameter
+    const mapCoordinate = Projection.transformFromLonLat(lonlat, mapProjection);
+
+    // Build geometry parameter
+    const geometryParam = encodeURIComponent(
+      JSON.stringify({
+        spatialReference: { wkid: mapProjNumber },
+        x: mapCoordinate[0],
+        y: mapCoordinate[1],
+      })
+    );
+
+    // Build pixel size parameter (use map resolution)
+    const resolution = mapView.getResolution() || 1;
+    const pixelSizeParam = encodeURIComponent(
+      JSON.stringify({
+        spatialReference: { wkid: mapProjNumber },
+        x: resolution,
+        y: resolution,
+      })
+    );
+
+    // Get source parameters for time and mosaic rule
+    const sourceParams = this.getOLSource().getParams();
+
+    // Build time parameter if available from source
+    const timeParam = sourceParams?.TIME ? `&TIME=${sourceParams.TIME}` : '';
+
+    // Build mosaic rule parameter if available from source (critical for processedValues)
+    const mosaicRuleParam = sourceParams?.mosaicRule ? `&mosaicRule=${encodeURIComponent(JSON.stringify(this.#mosaicRule))}` : '';
+
+    return (
+      `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}identify?f=json` +
+      `&geometryType=esriGeometryPoint` +
+      `&geometry=${geometryParam}` +
+      `${renderingParam}` +
+      `${mosaicRuleParam}` +
+      `&pixelSize=${pixelSizeParam}` +
+      `&returnGeometry=${queryGeometry}` +
+      `&returnCatalogItems=true` +
+      `&returnPixelValues=true` +
+      `&maxItemCount=1` +
+      `${timeParam}` +
+      `&processAsMultidimensional=false`
+    );
+  }
+
+  /**
+   * Fetches the identify response for the given coordinate.
+   *
+   * When a raster function is active, the plural `renderingRules` form is attempted first and the singular
+   * `renderingRule` form is used as a fallback, because support for either form varies by service.
+   *
+   * @param map - The Map providing the projection and resolution used by the query
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query
+   * @returns A promise that resolves with the identify response
+   * @throws {Error} When the identify request fails and the rendering rule fallback doesn't apply or also fails
+   */
+  async #fetchIdentifyResponse(map: OLMap, lonlat: Coordinate, queryGeometry: boolean): Promise<EsriImageIdentifyJsonResponse> {
+    // Without a raster function both rendering rule forms produce the same URL, so there's nothing to fall back on
+    if (!this.#rasterFunction) {
+      return Fetch.fetchEsriJson<EsriImageIdentifyJsonResponse>(this.#buildIdentifyUrl(map, lonlat, queryGeometry, ''));
+    }
+
+    // GV For some services renderingRules is supported, some others it's renderingRule and some it's both.. no clear way to know before trying the calls
+    const renderingRulesParam = `&renderingRules=${encodeURIComponent(JSON.stringify([{ rasterFunction: this.#rasterFunction }]))}`;
+
+    try {
+      const url = this.#buildIdentifyUrl(map, lonlat, queryGeometry, renderingRulesParam);
+      return await Fetch.fetchEsriJson<EsriImageIdentifyJsonResponse>(url);
+    } catch (error: unknown) {
+      const { layerPath } = this.getLayerConfig();
+      logger.logWarning(`Identify using 'renderingRules' failed for ${layerPath}, retrying with 'renderingRule'`, error);
+
+      const renderingRuleParam = `&renderingRule=${encodeURIComponent(JSON.stringify({ rasterFunction: this.#rasterFunction }))}`;
+      const url = this.#buildIdentifyUrl(map, lonlat, queryGeometry, renderingRuleParam);
+      return Fetch.fetchEsriJson<EsriImageIdentifyJsonResponse>(url);
+    }
+  }
+
+  /**
+   * Creates the feature holding the pixel, class and catalog information returned by an identify response.
+   *
+   * @param identifyJsonResponse - The identify response to read the information from
+   * @param queryGeometry - Whether the returned location should be attached as the feature geometry
+   * @returns The feature holding the identify information
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #createFeatureFromIdentifyResponse(identifyJsonResponse: EsriImageIdentifyJsonResponse, queryGeometry: boolean): Feature {
+    // Build feature properties starting with pixel-specific fields
+    const properties: Record<string, unknown> = {
+      // Put pixel value first so it appears at top of details
+      PixelValue: identifyJsonResponse.value,
+      PixelName: identifyJsonResponse.name || 'Pixel',
+    };
+
+    // Determine the legend class index from processedValues
+    let classIndex: number | undefined;
+    if (identifyJsonResponse.processedValues?.[0] !== undefined && identifyJsonResponse.processedValues[0] !== 'NoData') {
+      classIndex = parseInt(String(identifyJsonResponse.processedValues[0]), 10);
+      properties.ProcessedValue = identifyJsonResponse.processedValues[0];
+    }
+
+    // Add catalog item attributes if available
+    if (identifyJsonResponse.catalogItems?.features?.[0]?.attributes) {
+      const catalogAttributes = identifyJsonResponse.catalogItems.features[0].attributes;
+      Object.assign(properties, catalogAttributes);
+    }
+
+    // Create geometry if available and requested
+    let geometry: Geometry | undefined;
+    if (queryGeometry && identifyJsonResponse.location) {
+      const locationGeom = identifyJsonResponse.location;
+      geometry = GeometryApi.createGeometryFromType('Point', [locationGeom.x, locationGeom.y]);
+    }
+
+    // Create a feature with the properties
+    const feature = new Feature({ ...properties, geometry });
+    feature.set('classIndex', classIndex);
+    return feature;
+  }
+
+  // #endregion PRIVATE METHODS
 
   // #region EVENTS
 

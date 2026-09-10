@@ -258,6 +258,12 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     const styles = this.getStyles();
     if (styles && styles.length > 0) {
+      // Prioritize a layer style named default if any
+      const defaultStyleIndex = styles.findIndex((style) => style.toLowerCase() === 'default');
+      if (defaultStyleIndex !== -1) {
+        return styles[defaultStyleIndex];
+      }
+
       // Return the first one
       return styles[0];
     }
