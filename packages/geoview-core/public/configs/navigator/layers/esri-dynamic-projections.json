@@ -49,11 +49,11 @@
       },
       {
         "geoviewLayerId": "unemployed-ol",
-        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/CNFASAR/CNFASAR_PriorityPlace/MapServer/",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1",
+            "layerId": "0",
             "layerName": "(OL) Canada Nat.",
             "source": {
               "forceServiceProjection": true
@@ -63,11 +63,11 @@
       },
       {
         "geoviewLayerId": "unemployed-server",
-        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/CNFASAR/CNFASAR_PriorityPlace/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1",
+            "layerId": "0",
             "layerName": "(Server) Canada Nat. 3857"
           }
         ]

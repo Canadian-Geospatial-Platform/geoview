@@ -583,6 +583,7 @@
       "layerCRSNotSupported": "La référence spatiale de la carte '{{mapProj}}' n'est pas officiellement supportée par la couche '{{layerName}}'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",
       "projectionNotValid": "La couche '{{layerName}}' déclare une projection '{{definedCRS}}' qui n'a pas pu être résolue (code EPSG introuvable). La couche pourrait tout de même s'afficher si la projection de la carte est supportée.",
       "invalidGeometry": "La couche '{{layerName}}' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte.",
+      "geometryTooComplexToHighlight": "L'entité sélectionnée comporte trop de sommets pour être mise en évidence sur la carte.",
       "slowCoordinateInfo": "Les informations de coordonnées pour le point cliqué prennent plus de temps que prévu à être récupérées..."
     },
     "schema": {
