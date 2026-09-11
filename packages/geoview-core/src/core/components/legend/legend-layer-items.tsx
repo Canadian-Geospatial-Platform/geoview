@@ -13,6 +13,7 @@ import {
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -189,10 +190,10 @@ export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Elemen
   useEffect(() => {
     logger.logTraceUseEffect('LEGEND-LAYER-ITEMS - keep focus on toggled layer', items);
     if (lastToggledRef.current) {
-      document.getElementById(lastToggledRef.current)?.focus();
+      getGVElementByFullId(mapId, lastToggledRef.current)?.focus();
       lastToggledRef.current = null;
     }
-  }, [items]); // Re-run when items change
+  }, [items, mapId]); // Re-run when items change
 
   // Early returns
   if (!items?.length) return null;

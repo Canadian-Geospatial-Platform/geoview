@@ -75,6 +75,8 @@ export default function FeatureDetailModal(): JSX.Element {
       onClose={() => {
         // Don't close the modal if the LightBox is open
         // The LightBox will handle its own close and focus restoration
+        // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+        // eslint-disable-next-line no-restricted-syntax
         const lightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT);
         if (!lightboxOpen) {
           uiController.disableFocusTrap();

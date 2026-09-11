@@ -40,6 +40,7 @@ import { logger } from '@/core/utils/logger';
 import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -175,12 +176,12 @@ export function SingleLayer({
     logger.logTraceUseEffect('SINGLE-LAYER - scroll list item into view', layerIsSelected, layerId);
 
     if (layerIsSelected && layerId) {
-      const listItem = document.getElementById(layerId);
+      const listItem = getGVElementByFullId(mapId, layerListItemButtonId);
       if (listItem) {
         scrollListItemIntoView(listItem);
       }
     }
-  }, [layerIsSelected, layerId]);
+  }, [layerIsSelected, layerId, layerListItemButtonId, mapId]);
 
   // Check if any descendant layer is selected — layer paths are hierarchical so startsWith works
   const layerChildIsSelected = displayState === 'view' && !!selectedLayerPath && selectedLayerPath.startsWith(`${layerPath}/`);
@@ -799,18 +800,18 @@ export function SingleLayer({
       if (layerStatus === 'loaded') {
         // Successful reload - focus the main layer button
         requestAnimationFrame(() => {
-          document.getElementById(layerListItemButtonId)?.focus();
+          getGVElementByFullId(mapId, layerListItemButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       } else if (layerStatus === 'error') {
         // Failed reload - focus the reload button for retry
         requestAnimationFrame(() => {
-          document.getElementById(reloadButtonId)?.focus();
+          getGVElementByFullId(mapId, reloadButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       }
     }
-  }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId]);
+  }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId, mapId]);
 
   /**
    * WCAG  - Tracks layer status changes for screen reader announcements.

@@ -107,7 +107,7 @@ export default [
       'no-useless-constructor': 'off',
       '@typescript-eslint/no-useless-constructor': 'error',
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ["warn", { "args": "all", "argsIgnorePattern": "^_|^event$|^sender$" }],
+      '@typescript-eslint/no-unused-vars': ['warn', { args: 'all', argsIgnorePattern: '^_|^event$|^sender$' }],
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',
       'no-use-before-define': 'off',
@@ -141,7 +141,7 @@ export default [
         1,
         {
           allowExpressions: true,
-          allowTypedFunctionExpressions: true
+          allowTypedFunctionExpressions: true,
         },
       ],
 
@@ -200,6 +200,16 @@ export default [
           selector: ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
           message: 'Use # prefix for private instead',
         },
+        {
+          selector: "CallExpression[callee.object.name='document'][callee.property.name='getElementById']",
+          message:
+            'Do not use document.getElementById directly. Use getGVElementById(mapId, suffix) / getGVElementByFullId(mapId, fullId) / getGVRootElement(mapId) from @/core/utils/dom-helper, or the useGVElementById() hook. This keeps DOM ids map-scoped and avoids cross-map collisions.',
+        },
+        {
+          selector: "CallExpression[callee.object.name='document'][callee.property.name=/^querySelector(All)?$/]",
+          message:
+            'Do not use document.querySelector(All) directly. Use queryGVSelector(mapId, selector) / queryGVSelectorAll(mapId, selector) from @/core/utils/dom-helper. This keeps DOM queries map-scoped and avoids cross-map collisions.',
+        },
       ],
 
       // Prettier rules
@@ -209,6 +219,14 @@ export default [
           endOfLine: 'auto',
         },
       ],
+    },
+  },
+
+  // The dom-helper module is the single place allowed to touch document.* directly — it IS the wrapper.
+  {
+    files: ['**/core/utils/dom-helper.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
 

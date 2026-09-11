@@ -123,7 +123,9 @@ Inside a controller, access other controllers through `this.getControllersRegist
 
 ```ts
 // Inside a controller method
-this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(layerPath);
+this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(
+  layerPath,
+);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
@@ -153,4 +155,5 @@ this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndAppl
 ## See Also
 
 - **[Best Practices](best-practices.md)** - Coding standards
+- **[Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access)** - When to use the DOM wrappers vs. the `useStoreAppGeoviewHTMLElement` / `getStoreAppGeoviewHTMLElement` root accessors, and the ban on direct `document.*`
 - **[Event Helper](event-helper.md)** - Delegate event system

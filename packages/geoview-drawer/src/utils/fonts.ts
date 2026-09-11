@@ -35,6 +35,8 @@ export const DEFAULT_FONT = SYSTEM_FONTS[0].value;
  * @param fontName - The name of the Google Font to load
  */
 export function loadGoogleFont(fontName: string): void {
+  // The font stylesheet <link> lives in <head>, not inside any map — a global query is required.
+  // eslint-disable-next-line no-restricted-syntax
   const existingLink = document.querySelector(`link[href*="${fontName.replace(' ', '+')}"]`);
   if (existingLink) return;
 

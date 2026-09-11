@@ -35,6 +35,7 @@ import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { getSxClasses } from './notifications-style';
@@ -301,7 +302,7 @@ const Notifications = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = document.getElementById(`shell-${mapId}`);
+  const mapElem = getGVElementById(mapId, 'shell');
 
   // Element IDs for accessibility and focus management
   const dialogId = `${mapId}-notification-dialog`;

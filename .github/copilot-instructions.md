@@ -169,7 +169,7 @@ cgpv.init();
 | Concept            | CSS Class / ID              | Contains                                                                        | Keyboard Focus                                   |
 | ------------------ | --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
 | **GeoView Viewer** | `.geoview-map` wrapper div  | The shell: app bar, footer bar, nav bar, map element, notifications, focus trap | Always focusable (contains focusable controls)   |
-| **Map element**    | `#mapTargetElement-{mapId}` | The OpenLayers canvas container (`.mapContainer` class)                         | `tabIndex=0` (dynamic) or `tabIndex=-1` (static) |
+| **Map element**    | `#{mapId}-mapTargetElement` | The OpenLayers canvas container (`.mapContainer` class)                         | `tabIndex=0` (dynamic) or `tabIndex=-1` (static) |
 
 **Static mode (`interaction: 'static'`):**
 
@@ -191,7 +191,7 @@ cgpv.init();
 
 **Crosshair activation flow:**
 
-1. `Ctrl+M` (global shortcut) → focuses `#mapTargetElement-{mapId}` → calls `uiController.setCrosshairActive(true)`
+1. `Ctrl+M` (global shortcut) → focuses `#{mapId}-mapTargetElement` → calls `uiController.setCrosshairActive(true)`
 2. Only works when `mapInteraction !== 'static'`
 3. Does NOT toggle — only activates. Deactivation happens via mouse click (focus leaves map element) or `Ctrl+Q` (exit focus trap).
 4. **Escape key does nothing** while crosshair is active — it does NOT deactivate the crosshair.
@@ -531,6 +531,24 @@ const text = await Fetch.fetchTextPermissive(url);
 
 **Exception — Web Workers**: Worker scripts cannot import the `Fetch` class (it breaks the build). Use `fetchWithTimeout` from `@/core/utils/fetch-worker-helper` instead — a lightweight worker-safe equivalent.
 
+### Map-scoped DOM access (`dom-helper` wrappers)
+
+- **NEVER use raw `document.getElementById` / `document.querySelector` / `document.querySelectorAll`** in geoview-core — an ESLint `no-restricted-syntax` rule flags them. Multiple maps can share a page, so every DOM id must be map-scoped (`${mapId}-suffix`, generic→specific) and every lookup restricted to one map's subtree.
+- Use the wrappers from `@/core/utils/dom-helper`:
+
+| Need                        | Helper                                                                     |
+| --------------------------- | -------------------------------------------------------------------------- |
+| Build a canonical id        | `buildGVElementId(mapId, suffix)` → `${mapId}-suffix`                      |
+| Descendant by suffix        | `getGVElementById(mapId, suffix)`                                          |
+| Descendant by full id       | `getGVElementByFullId(mapId, fullId)`                                      |
+| Map root element (live DOM) | `getGVRootElement(mapId)`                                                  |
+| Scoped CSS query            | `queryGVSelector(mapId, selector)` / `queryGVSelectorAll(mapId, selector)` |
+
+- **TSX descendant lookup (reactive):** use the `useGVElementById()` hook from `@/core/stores/states/app-state`.
+- **Root element:** use `useStoreAppGeoviewHTMLElement()` (hook) or `getStoreAppGeoviewHTMLElement(mapId)` (getter) — these return a store value, not a raw query, so they are allowed. Rule of thumb: **root element → store hook/getter; specific descendant by id → dom-helper wrapper.**
+- **Legitimate exceptions** (`<script>` tags, the single lightbox overlay, caller-provided external divs, mapId-less `@/ui` components like `slider`/`popover`, the fullscreen-portaled guide scoped via `[data-map-id]`) keep `document.*` with a one-line `// eslint-disable-next-line no-restricted-syntax` + justification. `getElementsByClassName`/`getElementsByTagName` are not flagged but should still be root-scoped when map-specific.
+- Full guidance: [best-practices.md §18](../docs/programming/best-practices.md).
+
 ### Error Handling — Never Silently Swallow Errors
 
 **Do not catch an error, log it, and move on unless you have narrowed to the specific expected error type.** A broad `catch` that suppresses everything hides real bugs (network failures, type errors, logic errors) that should surface and be trapped somewhere up the stack.
@@ -543,7 +561,7 @@ try {
   const proj = Projection.getProjectionFromStringOrNumber(metadataProj);
   bounds = Projection.transformExtentFromProj(extent, proj, projection, stops);
 } catch (error) {
-  logger.logWarning('Could not compute bounds', error);
+  logger.logWarning("Could not compute bounds", error);
 }
 
 // ✅ Good: handle only the expected case, propagate the rest
@@ -553,7 +571,10 @@ try {
 } catch (error) {
   // Only the invalid-projection case is expected & recoverable here; anything else is a real error.
   if (!(error instanceof InvalidProjectionError)) throw error;
-  logger.logWarning(`Projection '${metadataProj}' is not valid (EPSG not found). Skipping.`, error);
+  logger.logWarning(
+    `Projection '${metadataProj}' is not valid (EPSG not found). Skipping.`,
+    error,
+  );
 }
 ```
 
@@ -2676,12 +2697,12 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 
 ### Test Execution Patterns Reference
 
-| Pattern                                                       | When to Use                              | Example Suite                         |
-| ------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
-| `Promise.all()` (fully parallel)                              | Independent tests, no shared state       | `suite-config`, `suite-ui`            |
-| Mixed: parallel `await Promise.all()` then sequential `await` | Some tests modify map state (zoom, etc.) | `suite-layer`                         |
-| Sequential `await` + final `Promise.all()`                    | All tests modify shared map state        | `suite-map`, `suite-map-config` |
-| `onCanExecuteTestSuite()` guard                               | Suite requires specific plugin/feature   | `suite-geochart`, `suite-details`     |
+| Pattern                                                       | When to Use                              | Example Suite                     |
+| ------------------------------------------------------------- | ---------------------------------------- | --------------------------------- |
+| `Promise.all()` (fully parallel)                              | Independent tests, no shared state       | `suite-config`, `suite-ui`        |
+| Mixed: parallel `await Promise.all()` then sequential `await` | Some tests modify map state (zoom, etc.) | `suite-layer`                     |
+| Sequential `await` + final `Promise.all()`                    | All tests modify shared map state        | `suite-map`, `suite-map-config`   |
+| `onCanExecuteTestSuite()` guard                               | Suite requires specific plugin/feature   | `suite-geochart`, `suite-details` |
 
 ## Key Files to Reference
 

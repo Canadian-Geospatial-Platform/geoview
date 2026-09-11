@@ -10,6 +10,7 @@ import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { useUIController } from '@/core/controllers/use-controllers';
 
 /**
@@ -36,7 +37,7 @@ export default function Fullscreen(): JSX.Element {
    * Toggles between fullscreen and window mode.
    */
   function handleSetFullscreen(): void {
-    const element = document.getElementById(`shell-${mapId}`);
+    const element = getGVElementById(mapId, 'shell');
     if (element) {
       uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
     }

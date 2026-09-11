@@ -227,7 +227,9 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
 
     // Find the guidebox-container (scoped when not fullscreen, global when fullscreen due to Portal)
     const guideboxContainer = isFullScreen
-      ? document.querySelector(`.guidebox-container[data-map-id="${mapId}"]`)
+      ? // Map-scoped via data-map-id; must be global because the guide is portaled out of the map root in fullscreen.
+        // eslint-disable-next-line no-restricted-syntax
+        document.querySelector(`.guidebox-container[data-map-id="${mapId}"]`)
       : rootRef.current?.querySelector('.guidebox-container');
 
     if (!guideboxContainer) {

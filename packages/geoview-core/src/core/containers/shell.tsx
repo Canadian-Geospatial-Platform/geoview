@@ -38,6 +38,7 @@ import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import { getGVElementById, getGVRootElement } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -237,13 +238,13 @@ export function Shell(props: ShellProps): JSX.Element {
   /**
    * Handles skip link navigation by focusing the target element.
    */
-  const handleSkipLinkClick = useCallback((targetId: string): void => {
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
+  const handleSkipLinkClick = useCallback(
+    (suffix: string): void => {
       // Explicitly request focus indicator for keyboard users (WCAG 2.4.1 skip links)
-      targetElement.focus({ focusVisible: true });
-    }
-  }, []);
+      getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+    },
+    [mapId]
+  );
 
   /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.
@@ -254,15 +255,15 @@ export function Shell(props: ShellProps): JSX.Element {
     // Intentionally use plain focus() without focusVisible: true because the crosshair itself
     // serves as the visual indicator for keyboard navigation mode. The focus ring is redundant
     // when the crosshair is active and would create visual noise.
-    document.getElementById(`mapTargetElement-${mapId}`)?.focus();
+    getGVElementById(mapId, 'mapTargetElement')?.focus();
   }, [mapId, uiController]);
 
   /**
    * Handles navigation from the top skip link to the bottom skip link.
    */
   const handleSkipToBottomLink = useCallback((): void => {
-    handleSkipLinkClick(`bottomlink-${mapViewer.mapId}`);
-  }, [handleSkipLinkClick, mapViewer.mapId]);
+    handleSkipLinkClick('bottomlink');
+  }, [handleSkipLinkClick]);
 
   /**
    * Handles navigation from the main-content skip link to the map.
@@ -279,8 +280,8 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles navigation from the bottom skip link to the top skip link.
    */
   const handleSkipToTopLink = useCallback((): void => {
-    handleSkipLinkClick(`toplink-${mapViewer.mapId}`);
-  }, [handleSkipLinkClick, mapViewer.mapId]);
+    handleSkipLinkClick('toplink');
+  }, [handleSkipLinkClick]);
 
   // #endregion HANDLERS
 
@@ -381,8 +382,8 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     // Wait for both footer elements because the measured element depends on whether the panel is open.
-    const footerContainer = document.getElementById(`${mapId}-tabsContainer`);
-    const footerHeader = document.getElementById(`${mapId}-footerbar-header`);
+    const footerContainer = getGVElementById(mapId, 'tabsContainer');
+    const footerHeader = getGVElementById(mapId, 'footerbar-header');
     if (!footerHeader || !footerContainer) {
       setCollapsedFooterHeight(0);
       return undefined;
@@ -429,8 +430,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={`toplink-${mapViewer.mapId}`}
-        href={`#bottomlink-${mapViewer.mapId}`}
+        id={`${mapViewer.mapId}-toplink`}
+        href={`#${mapViewer.mapId}-bottomlink`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -438,7 +439,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={memoSxClasses.shell} className="geoview-shell" tabIndex={-1}>
+        <Box ref={shellRef} id={`${mapViewer.mapId}-shell`} sx={memoSxClasses.shell} className="geoview-shell" tabIndex={-1}>
           {/* Map loading */}
           <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={!mapLoaded}>
             <CircularProgress isLoaded={mapLoaded} />
@@ -454,8 +455,8 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {interaction === 'dynamic' && (
             <Link
-              id={`main-map-${mapViewer.mapId}`}
-              href={`#main-map-${mapViewer.mapId}`}
+              id={`${mapViewer.mapId}-main-map`}
+              href={`#${mapViewer.mapId}-main-map`}
               tabIndex={0}
               sx={{ ...memoSxClasses.skip, top: '0px' }}
               onClick={handleSkipToMap}
@@ -464,7 +465,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Link>
           )}
 
-          <Box id={`map-${mapViewer.mapId}`} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+          <Box id={`${mapViewer.mapId}-map`} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={memoSxClasses.mapContainer}>
               <Map viewer={mapViewer} />
@@ -482,13 +483,7 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
-            <Modal
-              key={modalId}
-              modalId={modalId}
-              open={modalOpen}
-              modalProps={modalProps}
-              container={document.querySelector(`#${mapViewer.mapId}`) || undefined}
-            />
+            <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={getGVRootElement(mapViewer.mapId)} />
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
@@ -503,8 +498,8 @@ export function Shell(props: ShellProps): JSX.Element {
         </Box>
       </FocusTrap>
       <Link
-        id={`bottomlink-${mapViewer.mapId}`}
-        href={`#toplink-${mapViewer.mapId}`}
+        id={`${mapViewer.mapId}-bottomlink`}
+        href={`#${mapViewer.mapId}-toplink`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}
