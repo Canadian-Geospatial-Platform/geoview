@@ -169,6 +169,12 @@ export abstract class DateMgt {
   /** Regex used to spot a timezone inside a date input. */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
+  /** Regex used to spot the OGC 'current' keyword as a standalone segment of a time dimension value. */
+  static readonly #REGEX_CURRENT_KEYWORD = /^current$/i;
+
+  /** Regex used to detect a time component ('T...') in an OGC date segment. */
+  static readonly #REGEX_HAS_TIME_COMPONENT = /T/i;
+
   /** Array of time tokens used for parsing and identifying time components in dates. */
   static readonly #TIME_TOKENS = ['H', 'HH', 'h', 'hh', 'k', 'kk', 'm', 'mm', 's', 'ss', 'S', 'SS', 'SSS', 'A', 'a', 'X', 'x'];
 
@@ -916,6 +922,9 @@ export abstract class DateMgt {
   /**
    * Create a range of date object from OGC time dimension following ISO 8601.
    *
+   * The OGC `current` keyword (e.g. `2027-07-01/current`) is substituted with today's date/time,
+   * formatted to match the sibling date in the value, before the range type is determined.
+   *
    * @param ogcTimeDimensionValues - OGC time dimension values
    * @returns Array of date from the dimension
    * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
@@ -924,17 +933,17 @@ export abstract class DateMgt {
   static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
     let rangeItems: RangeItems = { type: 'none', range: [] };
 
+    // Resolve the 'current' keyword, if any, to today's date/time before classifying the range
+    const resolvedValues = this.#substituteCurrentKeyword(ogcTimeDimensionValues);
+
     // find what type of dimension it is:
     //    discrete = 1696, 1701, 1734, 1741
     //    relative = 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
     //    absolute = 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
     // and create the range object
-    if (isDiscreteRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'discrete', range: ogcTimeDimensionValues.replace(/\s/g, '').split(',') };
-    else if (isRelativeRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'relative', range: this.#createRelativeInterval(ogcTimeDimensionValues) };
-    else if (isAbsoluteRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(ogcTimeDimensionValues) };
+    if (isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
+    else if (isRelativeRange(resolvedValues)) rangeItems = { type: 'relative', range: this.#createRelativeInterval(resolvedValues) };
+    else if (isAbsoluteRange(resolvedValues)) rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(resolvedValues) };
 
     // Check if dimension is valid
     if (rangeItems.range.length === 0) throw new InvalidTimeDimensionError(ogcTimeDimensionValues);
@@ -1002,6 +1011,28 @@ export abstract class DateMgt {
 
     // Trust dayjs to use the TZ from the input
     return dayjs(date, formats, strict);
+  }
+
+  /**
+   * Substitutes the OGC `current` keyword (e.g. `2027-07-01/current`) with today's date/time.
+   *
+   * The replacement is formatted to match the shape (date-only vs date-time) of the other,
+   * non-`current` segment(s) found in the value, so the resulting string keeps a consistent format.
+   *
+   * @param ogcTimeDimensionValues - The raw OGC time dimension value, possibly containing 'current'
+   * @returns The value with every 'current' segment replaced by today's date/time, unchanged if none found
+   */
+  static #substituteCurrentKeyword(ogcTimeDimensionValues: string): string {
+    const segments = ogcTimeDimensionValues.split('/');
+    if (!segments.some((segment) => this.#REGEX_CURRENT_KEYWORD.test(segment.trim()))) return ogcTimeDimensionValues;
+
+    // Mirror the format of the first real date found, defaulting to a date-time format when none is found
+    const referenceSegment = segments.find((segment) => !this.#REGEX_CURRENT_KEYWORD.test(segment.trim()));
+    const hasTimeComponent = referenceSegment ? this.#REGEX_HAS_TIME_COMPONENT.test(referenceSegment) : true;
+    const format = hasTimeComponent ? `${this.ISO_DATETIME_FORMAT_SECONDS}[Z]` : this.ISO_DATE_FORMAT;
+    const now = dayjs.utc().format(format);
+
+    return segments.map((segment) => (this.#REGEX_CURRENT_KEYWORD.test(segment.trim()) ? now : segment)).join('/');
   }
 
   /**
