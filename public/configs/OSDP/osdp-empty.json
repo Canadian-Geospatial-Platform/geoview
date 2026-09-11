@@ -1,0 +1,67 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978,
+      "initialView": {
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
+      },
+      "homeView": {
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
+      }
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider",
+        "geochart"
+      ]
+    }
+  },
+  "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
+  "theme": "geo.ca"
+}

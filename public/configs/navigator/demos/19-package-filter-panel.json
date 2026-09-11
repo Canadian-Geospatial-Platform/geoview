@@ -1,0 +1,153 @@
+{
+  "configMeta": {
+    "description": "Filter Panel package configuration with two layers and multiple attributes for filtering for each of the filter types (select, multiselect, range, date). The filter panel is open by default in this demo."
+  },
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "layerIds": []
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": "Top 100 exploration projects in Canada",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "details",
+        "filter-panel"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "light",
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "isOpen": true,
+        "title": "Custom Filter Panel Title",
+        "layers": [
+          {
+            "layerPath": "esriFeatureLYR4/0",
+            "filterName": "Top 100 exploration projects in Canada",
+            "enabled": true,
+            "collapsible": true,
+            "defaultCollapsed": true,
+            "attributes": [
+              {
+                "fieldName": "province_en",
+                "displayLabel": "Province / Territory",
+                "filterType": "multiselect",
+                "enabled": true
+              },
+              {
+                "fieldName": "commodity_group_en",
+                "displayLabel": "Commodity Group",
+                "filterType": "select",
+                "enabled": true
+              },
+              {
+                "fieldName": "longitude",
+                "displayLabel": "Longitude",
+                "filterType": "range",
+                "enabled": true,
+                "rangeStep": 0.1,
+                "defaultValues": {
+                  "min": -100,
+                  "max": -60
+                }
+              }
+            ]
+          },
+          {
+            "layerPath": "historical-flood/0",
+            "enabled": true,
+            "collapsible": false,
+            "attributes": [
+              {
+                "fieldName": "flood_cause",
+                "displayLabel": "Flood Cause",
+                "filterType": "select",
+                "enabled": true,
+                "defaultValues": "heavy rain"
+              },
+              {
+                "fieldName": "season",
+                "displayLabel": "Season",
+                "filterType": "multiselect",
+                "enabled": true,
+                "filterMissingDomainValues": true,
+                "defaultValues": [
+                  "spring",
+                  "summer"
+                ],
+                "domain": [
+                  {
+                    "value": "spring",
+                    "label": "Spring"
+                  },
+                  {
+                    "value": "summer",
+                    "label": "Summer"
+                  },
+                  {
+                    "value": "autumn",
+                    "label": "Autumn"
+                  },
+                  {
+                    "value": "winter",
+                    "label": "Winter"
+                  }
+                ]
+              },
+              {
+                "fieldName": "start_date",
+                "displayLabel": "Start Date",
+                "filterType": "date",
+                "enabled": true,
+                "defaultValues": {
+                  "start": "1847-09-01",
+                  "end": "2007-08-20"
+                },
+                "dateStep": "year"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

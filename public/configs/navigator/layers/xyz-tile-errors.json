@@ -1,0 +1,91 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "xyzTilesLYR2",
+        "geoviewLayerName": "Error layerId",
+        "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blueMarbleERROR",
+            "layerName": "GNOSIS Blue Marble",
+            "source": {
+              "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesNatEarth",
+        "geoviewLayerName": "Natural Earth",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "natEarth",
+            "source": {
+              "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "World Topo Map"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

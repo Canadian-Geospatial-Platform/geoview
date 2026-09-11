@@ -1,0 +1,138 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "environmental_dosimetry_en",
+        "geoviewLayerName": "Environmental Dosimetry",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/environmental_dosimetry_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "station_location_range",
+        "geoviewLayerName": "Station Location Range",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/environmental_dosimetry_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "environmental_dosimetry_en/1",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Station"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/environmental_dosimetry_en/MapServer/3",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "Station",
+                    "prefix": "'",
+                    "valueFrom": "Station",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "ShippingDate_DateExpedition"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                },
+                "ticksRule": "data",
+                "type": "time",
+                "property": "ShippingDate_DateExpedition",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "linear",
+                "property": "Dose_RateShipReceive_TauxExpeditionReçut_mSvday",
+                "label": "Dosimeter Dose Rate (mSv/day)",
+                "tooltipSuffix": "mSv/day"
+              },
+              "borderWidth": 1
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": true
+              },
+              "stepsSwitcher": true,
+              "description": "",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

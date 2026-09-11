@@ -1,0 +1,241 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": {
+                  "maxZoom": 8,
+                  "states": { "visible": false }
+                },
+                "minScale": 10000000
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points",
+                "initialSettings": { "maxZoom": 8 },
+                "minScale": 10000000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvLYR1",
+        "geoviewLayerName": "NPRI",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
+            "layerName": "CSV - NPRI Water Media Group 2022",
+            "initialSettings": { "maxZoom": 8 },
+            "source": {
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
+              "separator": ","
+            },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriDynamicLYR1",
+        "geoviewLayerName": "Temporal_Test_Bed_en",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "4",
+            "layerName": "Esri Dynamic - Water Quality",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Esri Feature - Historical Flood Events",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR2",
+        "geoviewLayerName": "Max Temp",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "annual_crop_inventory_2022",
+            "layerName": "ESRI Image - Crop Inventory 2022",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "GeoCore - Canada Commemorative Map",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR2",
+        "geoviewLayerName": "Current Conditions",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ec-msc:CURRENT_CONDITIONS",
+            "layerName": "WFS - Current Conditions",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "staticLYR10",
+        "geoviewLayerName": "Static Image",
+        "geoviewLayerType": "imageStatic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "napl-ring-of-fire-1954",
+            "layerName": "Static Image",
+            "initialSettings": { "maxZoom": 8 },
+            "source": {
+              "dataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
+              "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
+              "projection": 4326
+            },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "OGCFeature - Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": "OGC WMS - Permanent Snow",
+            "initialSettings": { "maxZoom": 8 },
+            "source": {
+              "wmsStyle": "msi-binary",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": []
+                  }
+                ]
+              }
+            },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "World_Topo_Map",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "XYZTiles - World Topo Map",
+            "initialSettings": { "maxZoom": 8 },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "vectorTilesLYR1",
+        "geoviewLayerName": "new basemap",
+        "geoviewLayerType": "vectorTiles",
+        "metadataAccessPath": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "CBMT_CBCT_3978_V_OSM",
+            "layerName": "Vector Tile - CBCT",
+            "initialSettings": { "maxZoom": 8 },
+            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json",
+            "minScale": 10000000
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}
