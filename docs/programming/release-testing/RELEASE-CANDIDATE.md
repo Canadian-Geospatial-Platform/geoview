@@ -87,6 +87,7 @@ _(Internal code patterns, MUI props, build tooling — does NOT affect external 
 - MUI v7→v9: `PopperProps` replaced by `slotProps.popper` in MuiTooltip theme config (#3545)
 - MUI v7→v9: Inline system props (padding, direction, fontSize, visibility) moved to `sx={{}}` (#3545)
 - MUI v7→v9: 3 icon renames (`*Outline` → `*Outlined` suffix), Tabs `ScrollButtonComponent` removed (#3545)
+- DOM id convention: several viewer element IDs were flipped from `suffix-${mapId}` to the canonical `${mapId}-suffix` format — `shell-${mapId}`→`${mapId}-shell`, `map-${mapId}`→`${mapId}-map`, `main-map-${mapId}`→`${mapId}-main-map`, `mapTargetElement-${mapId}`→`${mapId}-mapTargetElement`, `toplink-/bottomlink-${mapId}`→`${mapId}-toplink`/`${mapId}-bottomlink`. Plugins, tests, or CSS that query these element IDs directly must update (in-repo swiper and test-suite already updated) (#3221)
 
 ## New Features
 
@@ -163,8 +164,9 @@ _(Fixes discovered or applied during this cycle)_
 - Improved WMS extent/feature-query fallback handling so WFS-derived output is parsed across multiple response formats instead of assuming only JSON, matching the broader `fetchWithFormatFallback()` behavior used elsewhere.
 - Corrected `FeatureInfoLayerSet` public result mapping so callers receive feature-info results with the associated `layerPath` while internal status bookkeeping remains separate and stable.
 - Added regression coverage for geometry availability when a layer config excludes the geometry field from `outFields`, and for zoom-to-extent behavior on empty, single-feature, and many-feature scenarios.
-- Fixed viewer freeze when querying details for an ESRI Dynamic feature whose geometry is pathologically complex (e.g. a huge polygon with thousands of holes near the Labrador Sea in the CNFASAR Priority Place service): highlighting the feature forced OpenLayers to re-rasterize thousands of ring subpaths on every animation frame, blocking the main thread — which also starved the ESRI image-load callbacks and tripped the `warning.layer.slowRender` warning. `FeatureHighlight.highlightFeature` now counts the geometry's vertices and, above 50000, skips highlighting and shows a `warning.layer.geometryTooComplexToHighlight` notification (once per feature) instead of freezing; zoom-to-feature-extent still works since it uses the feature extent (#3162)
 - Fixed viewer freeze when querying details for an ESRI Dynamic feature whose geometry is pathologically complex (e.g. a multipolygon with thousands of holes spanning the whole layer extent, like the CNFASAR Priority Place service near the Labrador Sea): highlighting the feature forced OpenLayers to re-rasterize thousands of ring subpaths on every animation frame, blocking the main thread — which also starved the ESRI image-load callbacks and tripped the `warning.layer.slowRender` warning. Geometries above `GeometryApi.MAX_RENDERABLE_COORDINATES` (50000 vertices) are now considered too complex: `FeatureHighlight.highlightFeature` skips rendering them and shows a `warning.layer.geometryTooComplexToHighlight` notification (once per feature). Zoom-to-feature stays enabled in both the details panel and the data table (it uses the feature extent), and only the details keep-highlight button is disabled for such features (via `GeometryApi.canRenderGeometry`) (#3162)
+- Fixed guide search on multi-map pages navigating/scrolling the first map's guide instead of the current map's (it used a global `document.querySelectorAll`); navigation is now scoped to the current map's `.guidebox-container[data-map-id]` and targets the visible guide box so scroll also works while the guide is fullscreen (#3221)
+- Fixed the selected layer not scrolling into view in the Layers panel: the effect targeted a bare, non-`mapId`-scoped element id that no element actually used; it now scrolls the real list-item element (`${mapId}-${containerType}-layers-${layerPath}`) (#3221)
 
 ## Build & Dependencies
 
@@ -199,6 +201,7 @@ _(Optimizations, refactors, structural changes)_
 - New `onceEventPromise` timeout parameter for creating one-shot event listeners that auto-reject after a deadline (#3562)
 - New `RUN_DEBUG_ONLY` flag in test-suite package for isolating individual test execution during development (#3562)
 - Enforced type safety in style files: replaced `theme: any` with `theme: Theme`, replaced return type `: any` with `: SxStyles`, removed `@typescript-eslint/no-explicit-any` suppressions across all packages (geoview-core, about-panel, aoi-panel, custom-legend, filter-panel, stac-browser, swiper, time-slider)
+- Added map-scoped DOM access helpers in `@/core/utils/dom-helper` (`buildGVElementId`, `getGVElementById`, `getGVElementByFullId`, `getGVRootElement`, `queryGVSelector`/`queryGVSelectorAll`) plus the `useGVElementById` hook, and migrated every in-repo `document.getElementById`/`querySelector` lookup to them so DOM ids are always `mapId`-scoped and queries are restricted to a single map's subtree; added an ESLint `no-restricted-syntax` guard (warning-level, wrapper file exempt) banning direct `document.getElementById`/`querySelector`/`querySelectorAll`, with justified inline exceptions for genuinely global lookups (script tags, the lightbox singleton overlay, mapId-less UI components, body-portaled elements) (#3221)
 
 ## Accessibility (WCAG)
 
@@ -224,6 +227,7 @@ _(WCAG fixes and improvements)_
 - Fixed the footer panel close button breaking the focus trap when viewing the guide (#3618)
 - Fixed the count styling next to duplicated notification items in the notifications panel (#3622)
 - Enforced unique, `mapId`-scoped DOM element IDs across the viewer to prevent duplicate-ID conflicts with multiple map instances: removed unused IDs from drawer buttons, crosshair, and the `GeoCaIcon`/north-arrow decorative paths; `mapId`-scoped the remaining drawer button, north-arrow group (`NorthArrowIcon` now takes a `mapId` prop), export button, and keyboard-navigation (WCAG) modal button IDs; and refactored `FocusTrapContainer`'s ambiguous `id` prop into a clearly-named, `mapId`-scoped `focusTrapContainerId` across all 4 call sites (panel, geolocator, version, tab-panel) (#3220)
+- Fixed a focus-trap loop when a map/crosshair click opened the Details panel while `details` was configured in **both** the footer bar and the app bar — two MUI focus traps competed for focus. `openDetailsPanelOnMapClick` now opens details in the footer only when the footer hosts it (preferring footer, matching `useNavigateToTab`), so a single focus trap is ever active (#3221)
 
 ## Documentation & Cleanup
 
@@ -241,6 +245,7 @@ _(Doc updates, demo cleanup, code organization)_
 - Improved add-new-layer component to resolve ESLint warning about `react/no-unstable-nested-components` (#3562)
 - Clearer static-image-errors.json template (#3562)
 - Improved HTML descriptions of all test suites (#3562)
+- Documented the map-scoped DOM access rules: new best-practices §18 (wrappers vs. the root store hook/getter, the ban on direct `document.*`, and the legitimate-exception pattern), cross-links in using-store.md and test-templates.md, and a summary note in copilot-instructions.md (#3221)
 
 ## Test Plan Changes
 

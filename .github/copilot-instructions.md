@@ -169,7 +169,7 @@ cgpv.init();
 | Concept            | CSS Class / ID              | Contains                                                                        | Keyboard Focus                                   |
 | ------------------ | --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
 | **GeoView Viewer** | `.geoview-map` wrapper div  | The shell: app bar, footer bar, nav bar, map element, notifications, focus trap | Always focusable (contains focusable controls)   |
-| **Map element**    | `#mapTargetElement-{mapId}` | The OpenLayers canvas container (`.mapContainer` class)                         | `tabIndex=0` (dynamic) or `tabIndex=-1` (static) |
+| **Map element**    | `#{mapId}-mapTargetElement` | The OpenLayers canvas container (`.mapContainer` class)                         | `tabIndex=0` (dynamic) or `tabIndex=-1` (static) |
 
 **Static mode (`interaction: 'static'`):**
 
@@ -191,7 +191,7 @@ cgpv.init();
 
 **Crosshair activation flow:**
 
-1. `Ctrl+M` (global shortcut) → focuses `#mapTargetElement-{mapId}` → calls `uiController.setCrosshairActive(true)`
+1. `Ctrl+M` (global shortcut) → focuses `#{mapId}-mapTargetElement` → calls `uiController.setCrosshairActive(true)`
 2. Only works when `mapInteraction !== 'static'`
 3. Does NOT toggle — only activates. Deactivation happens via mouse click (focus leaves map element) or `Ctrl+Q` (exit focus trap).
 4. **Escape key does nothing** while crosshair is active — it does NOT deactivate the crosshair.
