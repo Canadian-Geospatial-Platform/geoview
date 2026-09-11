@@ -1,0 +1,264 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "landcover-xml-group",
+        "geoviewLayerName": "Landcover XML",
+        "metadataAccessPath": "./datasets/landcover_groupe.xml",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes"
+          },
+          {
+            "layerId": "landcover_2015_19classes"
+          },
+          {
+            "layerId": "landcover_2020_19classes"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "lancover-direct",
+        "geoviewLayerName": "Landcover Direct",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "landcover_2015_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "landcover_2020_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-group-explicit",
+        "geoviewLayerName": "Landcover VRT Grp Explicit",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "landcover_2015_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "landcover_2020_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-root",
+        "geoviewLayerName": "Landcover VRT Root",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_test",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-2010-2020",
+        "geoviewLayerName": "Landcover VRT 2010-2020",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010-2020",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-group",
+        "geoviewLayerName": "Landcover VRT Grp Dynamic",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_groupe",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-group-2010",
+        "geoviewLayerName": "Landcover VRT 2010",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-group-2015",
+        "geoviewLayerName": "Landcover VRT 2015",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2015_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "landcover-vrt-group-2020",
+        "geoviewLayerName": "Landcover VRT 2020",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2020_19classes",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  },
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": [
+              "landcover-xml-group/base-group/landcover_2010_19classes",
+              "landcover-xml-group/base-group/landcover_2015_19classes",
+              "landcover-xml-group/base-group/landcover_2020_19classes"
+            ],
+            "title": "Land Cover Slider",
+            "filtering": true,
+            "timeDimension": {
+              "default": [
+                "2010-07-01T00:00:00Z"
+              ],
+              "nearestValues": "discrete",
+              "rangeItems": {
+                "type": "",
+                "range": [
+                  "2010-07-01T00:00:00Z",
+                  "2015-07-01T00:00:00Z",
+                  "2020-07-01T00:00:00Z"
+                ]
+              },
+              "singleHandle": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
