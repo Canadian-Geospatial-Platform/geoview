@@ -949,7 +949,9 @@ export class GeometryApi {
 
   /**
    * Determines whether a geometry is simple enough to render or highlight on every animation frame without freezing
-   * the UI. Geometries above `GeometryApi.MAX_RENDERABLE_COORDINATES` coordinates (e.g. a polygon with thousands of
+   * the UI.
+   *
+   * Geometries above `GeometryApi.MAX_RENDERABLE_COORDINATES` coordinates (e.g. a polygon with thousands of
    * holes) are considered too complex.
    *
    * @param geometry - The geometry to check
