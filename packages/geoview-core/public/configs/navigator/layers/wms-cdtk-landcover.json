@@ -11,18 +11,33 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "landcover-xml-group",
-        "geoviewLayerName": "Landcover XML",
-        "metadataAccessPath": "./datasets/landcover_groupe.xml",
+        "geoviewLayerName": "Landcover 2010-2020 (XML)",
+        "metadataAccessPath": "./datasets/wms/landcover_groupe.xml",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "landcover_2010_19classes"
+            "layerId": "landcover_2010_19classes",
+            "initialSettings": {
+              "controls": {
+                "visibility": false
+              }
+            }
           },
           {
-            "layerId": "landcover_2015_19classes"
+            "layerId": "landcover_2015_19classes",
+            "initialSettings": {
+              "controls": {
+                "visibility": false
+              }
+            }
           },
           {
-            "layerId": "landcover_2020_19classes"
+            "layerId": "landcover_2020_19classes",
+            "initialSettings": {
+              "controls": {
+                "visibility": false
+              }
+            }
           }
         ]
       },
