@@ -583,6 +583,10 @@
               }
             }
           }
+        },
+        {
+          "layerId": "single_point.json",
+          "layerName": "Single Point Feature"
         }
       ]
     }

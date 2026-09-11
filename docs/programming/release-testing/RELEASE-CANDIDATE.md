@@ -159,6 +159,10 @@ _(Fixes discovered or applied during this cycle)_
 - Added precision slack on zoom-to-extent to compensate for minor floating-point precision issues (#3562)
 - Fixed WMS services with duplicate group `<Name>` values at different nesting levels (e.g. `canimage_en`: `canimage → canimage → canimage-030`) causing crashes — `RangeError: Maximum call stack size exceeded` in the Add Layer tree and an infinite loop on config-based add. Layer lookups now resolve by full view path instead of bare-id first-match (#3521)
 - Fixed WMS layers whose defined (native) CRS is a deprecated or non-existent EPSG code (e.g. `EPSG:42304`) killing layer creation — the invalid bounding-box/native CRS is now skipped so the layer still renders when the map projection is supported, and a `warning.layer.projectionNotValid` notification is shown to the user (#3521)
+- Fixed `zoomToExtentRestricted()` to respect effective min/max scale visibility boundaries without preventing valid close-range zooms — the previous logic interpreted the layer min scale too aggressively and blocked otherwise valid zoom-in operations.
+- Improved WMS extent/feature-query fallback handling so WFS-derived output is parsed across multiple response formats instead of assuming only JSON, matching the broader `fetchWithFormatFallback()` behavior used elsewhere.
+- Corrected `FeatureInfoLayerSet` public result mapping so callers receive feature-info results with the associated `layerPath` while internal status bookkeeping remains separate and stable.
+- Added regression coverage for geometry availability when a layer config excludes the geometry field from `outFields`, and for zoom-to-extent behavior on empty, single-feature, and many-feature scenarios.
 
 ## Build & Dependencies
 
@@ -265,6 +269,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
 - Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
 - Added automated `suite-layer` test `testAddWMSDuplicateGroupNames` (LayerTester) guarding issue #3521 — loads the `canimage_en` WMS by its duplicate top group id, asserts the nested `canimage/canimage` path is built and a deep leaf loads without infinite-looping (`suite-layer` total 41 → 43: +1 for the new test and +1 for correctly counting the heavy-conditional test that was previously excluded)
+- Added regression tests covering the feature-info geometry fallback when `outFields` omits the geometry column, and `zoomToExtent` behavior for empty, single-feature, and many-feature layer cases.
 
 ## Config Schema Changes
 

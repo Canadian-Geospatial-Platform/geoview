@@ -14,9 +14,10 @@ import { TestSuiteRunningError } from './tests/core/exceptions';
 import type { GVAbstractTestSuite } from './tests/suites/abstract-gv-test-suite';
 import { GVTestSuiteCore } from './tests/suites/suite-core';
 import { GVTestSuiteConfig } from './tests/suites/suite-config';
-import { GVTestSuiteMapVaria } from './tests/suites/suite-map-varia';
+import { GVTestSuiteMapFunctions } from './tests/suites/suite-map-functions';
 import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
+import { GVTestSuiteLayerFunctions } from './tests/suites/suite-layer-functions';
 import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
 import { GVTestSuiteUI } from './tests/suites/suite-ui';
 import { GVTestSuiteDetails } from './tests/suites/suite-details';
@@ -107,10 +108,13 @@ class TestSuitePlugin extends AbstractPlugin {
         this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-map') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapVaria(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteMapFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-layer') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+      } else if (suite === 'suite-layer-functions') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteLayerFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-geochart') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer, this.controllerRegistry));
@@ -191,41 +195,38 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Launches all test suites and waits for them to settle.
+   * Launches all test suites sequentially and waits for them to settle.
    *
-   * This method resets the completed suite counter, launches each suite, then awaits
-   * all launch promises so completion and error reporting happen in one consolidated path.
+   * Test suites share the same map viewer, so they must not overlap while mutating layers, map state, or map configuration.
    *
-   * @returns A promise that resolves once all test suites have completed.
+   * @returns A promise that resolves once all test suites have completed
    */
-  launchTestSuites(): Promise<void[]> {
+  async launchTestSuites(): Promise<unknown[]> {
     // Make sure no test suite is currently running
     if (this.getTestsRunning() > 0) throw new TestSuiteRunningError();
 
     // Reset the test suites
     this.resetTestSuites();
 
-    // Build suite launch promises first, then await them together.
-    const launchPromises = this.testSuites.map(async (testSuite) => {
+    // Launch each suite in order because they share the same map viewer.
+    const launchResults: unknown[] = [];
+    for (const testSuite of this.testSuites) {
       // Launch the test suite and wait
-      await testSuite.launchTestSuite();
+      // eslint-disable-next-line no-await-in-loop
+      const suiteResult = await testSuite.launchTestSuite();
+      launchResults.push(suiteResult);
 
       // Increment the completed suites for each successful launch.
       this.#suitesCompleted++;
-    });
-
-    // Combine the promises into 1
-    const launchSuitesPromise = Promise.all(launchPromises);
+    }
 
     // Emit once all test suites have completed launching.
-    void launchSuitesPromise.then(() => {
-      this.#emitTestSuitesCompleted({
-        testSuites: this.testSuites,
-      });
+    this.#emitTestSuitesCompleted({
+      testSuites: this.testSuites,
     });
 
     // Return the promise
-    return launchSuitesPromise;
+    return launchResults;
   }
 
   /**

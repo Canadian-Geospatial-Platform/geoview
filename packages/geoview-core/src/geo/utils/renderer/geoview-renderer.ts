@@ -1389,7 +1389,7 @@ export abstract class GeoviewRenderer {
 
     let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
-      const { fillStyle } = settings; // TODO: ? refactor - introduce by moving to config map schema type
+      const { fillStyle } = settings;
       if (geometry !== undefined) {
         style = this.#processFillStyle[fillStyle](settings, geometry);
       } else {
@@ -1815,7 +1815,7 @@ export abstract class GeoviewRenderer {
 
       // Return the result (can be string, number, or boolean)
       return result !== undefined && result !== null ? result : null;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logWarning('Failed to evaluate Arcade expression:', expression, error);
       return null;
     }
@@ -1866,7 +1866,7 @@ export abstract class GeoviewRenderer {
       const result = new Function(`return ${evaluableExpression}`)();
 
       return typeof result === 'number' && !Number.isNaN(result) ? result : null;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logWarning('Failed to evaluate expression:', expression, error);
       return null;
     }

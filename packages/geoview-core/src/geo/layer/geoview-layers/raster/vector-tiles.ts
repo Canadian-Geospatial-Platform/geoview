@@ -271,6 +271,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       const layerEntryConfig = new VectorTilesLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,

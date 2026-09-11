@@ -1149,6 +1149,8 @@ export class WMS extends AbstractGeoViewRaster {
       return groupLayer;
     }
 
+    // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
     // Leaf layer
     const layerEntryConfig: OgcWmsLayerEntryConfigProps = {
       geoviewLayerConfig,

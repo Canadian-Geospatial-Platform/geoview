@@ -1241,7 +1241,7 @@ export abstract class GeoUtilities {
         dataProjection,
         hadInvalidGeometries: false,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       if (features && typeof features === 'object' && 'features' in features) {
         try {
           const cleanedFeatures = this.#cleanEsriGeometries(features);
@@ -1701,6 +1701,18 @@ export abstract class GeoUtilities {
     }
     const extent: Extent = [minx, miny, maxx, maxy];
     return extent;
+  }
+
+  /**
+   * Checks whether an extent is defined and contains exactly four finite numeric coordinates.
+   *
+   * An extent is invalid when it is undefined, has a length other than four, or contains `NaN` or infinite coordinates.
+   *
+   * @param extent - The extent to validate
+   * @returns `true` when the extent is valid; otherwise, `false`
+   */
+  static isValidExtent(extent: Extent | undefined): boolean {
+    return (extent && extent.length === 4 && extent.every((coordinate) => Number.isFinite(coordinate))) ?? false;
   }
 
   /**

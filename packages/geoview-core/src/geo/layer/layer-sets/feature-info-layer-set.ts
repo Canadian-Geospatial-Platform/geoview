@@ -1,7 +1,7 @@
 ﻿import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
@@ -141,7 +141,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processing', undefined, false);
 
         // Process query and handle results
-        return this.#queryLayerAndProcess(layerPath, lonLatCoordinate, querySet, callbackWhenFirstQueryStarted);
+        querySet[layerPath].promiseResult = this.#queryLayerAndProcess(
+          layerPath,
+          lonLatCoordinate,
+          querySet,
+          callbackWhenFirstQueryStarted
+        );
+
+        // Return the promise
+        return querySet[layerPath].promiseResult;
       });
 
     // Await for the promises to settle
@@ -198,13 +206,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @param querySet - The result set to update with the query results
    * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing
+   * @returns A promise that resolves with the layer's feature info result, or undefined when the query fails
    */
   async #queryLayerAndProcess(
     layerPath: string,
     lonLatCoordinate: Coordinate,
     querySet: TypeFeatureInfoResultSet,
     callbackWhenFirstQueryStarted?: () => void
-  ): Promise<void> {
+  ): Promise<TypeFeatureInfoResult | undefined> {
     // Get the layer associated with the layer path
     const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
@@ -300,14 +309,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       querySet[layerPath].queryStatus = 'processed';
       // eslint-disable-next-line no-param-reassign
       querySet[layerPath].features = arrayOfRecords;
+      // eslint-disable-next-line no-param-reassign
+      querySet[layerPath].featuresHaveGeometry = !promiseResult.promiseGeometries;
 
       // Only propagate to the store if this query has not been superseded
       if (!this.#abortController.signal.aborted) {
-        setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, !promiseResult.promiseGeometries);
+        setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, querySet[layerPath].featuresHaveGeometry);
       }
 
       // Callback about it
       callbackWhenFirstQueryStarted?.();
+
+      // Return the promise of a result
+      return promiseResult;
     } catch (error: unknown) {
       // If aborted
       if (error instanceof RequestAbortedError || this.#abortController.signal.aborted) {
@@ -325,6 +339,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
       }
     }
+
+    // Nothing, replaced or failed
+    return undefined;
   }
 
   // #endregion PRIVATE METHODS
@@ -339,6 +356,18 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   #emitQueryEnded(event: QueryEndedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onQueryEndedHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time the query ended event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+   * @returns A promise that resolves with the event payload when query ended fires and passes the filter
+   */
+  onceQueryEnded(filter?: (event: QueryEndedEvent) => boolean, timeout?: number): Promise<QueryEndedEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onQueryEndedHandlers, filter, timeout);
   }
 
   /**

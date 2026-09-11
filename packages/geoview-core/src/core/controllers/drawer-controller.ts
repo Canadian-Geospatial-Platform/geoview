@@ -1007,7 +1007,7 @@ export class DrawerController extends AbstractMapViewerController {
       // For LineString, Polygon, append the coordinate
       drawInstance.appendCoordinates([coordinate]);
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logError('Failed to add coordinate to drawing', error);
       // Clear pending coordinate on error
       this.#clearPendingMarker();
@@ -1892,7 +1892,7 @@ export class DrawerController extends AbstractMapViewerController {
           type: 'add',
           features: newFeatures,
         });
-      } catch (error) {
+      } catch (error: unknown) {
         logger.logError('Error loading GeoJSON:', error);
       }
     };

@@ -421,8 +421,7 @@ export class ConfigApi {
     const styles = parseXMLToJson<TypeStylesWMS>(xmlContent);
 
     // Redirect
-    // TODO: Send the geometry type to reflect the special case scenario, if we want that (experimental)
-    return WfsRenderer.buildLayerStyleInfo(styles, undefined);
+    return WfsRenderer.buildLayerStyleInfo(styles, 'Polygon');
   }
 
   /**

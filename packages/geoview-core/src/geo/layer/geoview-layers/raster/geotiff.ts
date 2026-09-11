@@ -158,7 +158,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       if (colorMap) {
         layerConfig.setEmbeddedColorMap(colorMap);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       logger.logWarning(`Failed to extract color map for layer ${layerConfig.layerPath}`, error);
     }
 
@@ -264,8 +264,10 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       isTimeAware,
       listOfLayerEntryConfig: [],
     };
-    if (layerEntries.length)
+    if (layerEntries.length) {
       geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+        // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
         const layerEntryConfig = new GeoTIFFLayerEntryConfig({
           geoviewLayerConfig,
           layerId: `${layerEntry.id}`,
@@ -273,7 +275,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         });
         return layerEntryConfig;
       });
-    else
+    } else {
       geoviewLayerConfig.listOfLayerEntryConfig = [
         new GeoTIFFLayerEntryConfig({
           geoviewLayerConfig,
@@ -283,6 +285,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           layerName: geoviewLayerName,
         }),
       ];
+    }
 
     // Return it
     return geoviewLayerConfig;

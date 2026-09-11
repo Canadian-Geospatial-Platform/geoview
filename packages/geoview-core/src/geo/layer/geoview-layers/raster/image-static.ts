@@ -179,6 +179,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
       if (!layerEntry.source || !layerEntry.source.extent) throw new LayerMissingSourceExtentError();
       if (!layerEntry.source.projection) throw new LayerMissingSourceProjectionError();
 
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+
       // Create the entry
       const layerEntryConfig = new ImageStaticLayerEntryConfig({
         geoviewLayerConfig,

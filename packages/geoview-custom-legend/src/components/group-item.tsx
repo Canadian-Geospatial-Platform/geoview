@@ -41,7 +41,7 @@ function collectLayerPaths(children: TypeLegendItem[]): string[] {
 /**
  * Renders a group item with collapsible children.
  *
- * @param props - Component props
+ * @param props - Properties defined in GroupItemProps interface
  * @returns The rendered group, or undefined if the item is not a group
  */
 export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.Element | undefined {
@@ -76,7 +76,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   const groupTitleId = useId();
 
   // Collect all layer paths from children
-  const memoLayerPaths = useMemo(() => {
+  const memoLayerPaths = useMemo<string[]>((): string[] => {
     logger.logTraceUseMemo('GROUP-ITEM - memoLayerPaths', item.children);
     return collectLayerPaths(item.children);
   }, [item.children]);
@@ -107,7 +107,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
         try {
           // Toggle the visibility
           layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
-        } catch (error) {
+        } catch (error: unknown) {
           // Log
           logger.logWarning(`Failed to toggle visibility for layer at path ${layerPath}:`, error);
         }

@@ -51,9 +51,9 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
   }
 
   /**
-   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * Gets the number of active tests launched by the full suite.
    *
-   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
     return 6;
@@ -77,11 +77,12 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
   /**
    * Overrides the debug hook for running a subset of tests during development.
    *
-   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
     return Promise.resolve();
   }
 
@@ -92,14 +93,11 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Details with polygons (visibility toggling)
-    const pGeochartPolygons = this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
+    await this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
       'geojsonLYR5/polygons.json',
       GVAbstractTester.ONTARIO_CENTER_LONLAT,
       GVAbstractTester.ALBERTA_CENTER_LONLAT
     );
-
-    // Wait for the test with polygons to complete
-    await pGeochartPolygons;
 
     // Test clear all highlights
     await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);

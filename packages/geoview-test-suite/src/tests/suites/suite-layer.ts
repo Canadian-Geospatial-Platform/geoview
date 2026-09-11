@@ -53,18 +53,18 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   }
 
   /**
-   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * Gets the number of active tests launched by the full suite.
    *
-   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 43;
+    return 42;
   }
 
   /**
    * Overrides the debug hook for running a subset of tests during development.
    *
-   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
    *
    * @returns A promise that resolves when the debug tests are completed
    */
@@ -136,11 +136,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
     if (isRunningSequentially) await pLayerWMSBadUrl;
-
-    // Test WMS duplicate nested group names (issue #3521)
-    // TODO: Move this call to the layer-functions suite
-    const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
-    if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
 
     // Test adding layer
     const pLayerWFSWithGeometCurrentConditions = this.#layerTester.testAddWFSLayerWithWithGeometCurrentConditions();
@@ -259,7 +254,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSDatacubeRingFireHalifax,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
-      pLayerWMSDuplicateGroupNames,
       pLayerWFSWithGeometCurrentConditions,
       pLayerWFSBadUrl,
       pLayerWFSOkayUrlNoCap,
@@ -299,11 +293,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     await this.#layerTester.testAddGeoJSONWithGeometryCollection();
 
-    // If running heavy tests
-    if (this.getIsRunningHeavyTests()) {
-      // Test geocore group with defaultVisibility=false
-      await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
-    }
+    // Test geocore group with defaultVisibility=false
+    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
 
     // Done
     return;

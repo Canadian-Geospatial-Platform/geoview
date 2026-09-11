@@ -44,9 +44,9 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
   }
 
   /**
-   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * Gets the number of active tests launched by the full suite.
    *
-   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
     return 2;

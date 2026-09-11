@@ -12,7 +12,7 @@ import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
@@ -527,6 +527,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {NetworkError} When a network issue happened
+   * @throws {LayerInvalidFeatureInfoFormatWFSError} When no WFS output format produces usable results (propagated from `WFS.fetchWithFormatFallback()`)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
@@ -549,34 +550,15 @@ export class GVWMS extends AbstractGVRaster {
     // Wrap the ogc filter request
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
-    // Get the supported info formats
-    const featureInfoFormat = wfsLayerConfig.getSupportedFormats(MIME_TYPE_FORMAT_JSON); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
-
-    // If one of those contain application/json, use that format to get features
-    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes(MIME_TYPE_FORMAT_JSON));
-
-    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
-
-    // Format the url
-    const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
-      wfsLayerConfig.getMetadataAccessPath()!,
-      wfsLayerConfig.layerId,
-      wfsLayerConfig.getVersionOrDefault(),
-      outputFormat,
+    // Fetch and parse features using the WFS format fallback strategy.
+    const parsedFeatures = await WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
+      wfsLayerConfig,
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, 'en'),
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, 'en'),
+      undefined,
       [],
       xmlFilterReady,
       outProjection.getCode()
-    );
-
-    // Tweak url with the proxy if necessary (hard to test this, because the dev proxy isn't accessible through the VPN, but wfsLayerConfig.getIsUsingProxy() should return true if wmsLayerConfig.getIsUsingProxy() is true)
-    const url = wfsLayerConfig.getUrlWithProxyWhenNeeded(urlWithOutputJson);
-
-    // Fetch and parse features
-    const parsedFeatures = await GVWMS.fetchAndParseFeaturesFromWFSUrl(
-      url,
-      wmsLayerConfig,
-      wfsLayerConfig,
-      'en' // Language isn't necessary here as we're interested in the features extent
     );
 
     // For each feature
@@ -584,7 +566,7 @@ export class GVWMS extends AbstractGVRaster {
     parsedFeatures.results.forEach((feature) => {
       // If calculatedExtent has not been defined, set it to extent
       if (!calculatedExtent) calculatedExtent = feature.extent;
-      else GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
+      else calculatedExtent = GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
     });
 
     // If we have an extent, return it
@@ -787,8 +769,8 @@ export class GVWMS extends AbstractGVRaster {
     // Use the generic format fallback strategy with our own parse pipeline
     return WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
       wfsLayerConfig,
-      (url) => GVWMS.fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
-      (url) => GVWMS.fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
       undefined,
       fieldsToReturn,
       xmlFilterReady,
@@ -1083,6 +1065,10 @@ export class GVWMS extends AbstractGVRaster {
     }
   }
 
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
+
   /**
    * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
    * parses the response into OpenLayers features, and converts them into GeoView
@@ -1110,7 +1096,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchAndParseFeaturesFromWFSUrl(
+  static async #fetchAndParseFeaturesFromWFSUrl(
     urlWithOutputJson: string,
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
@@ -1122,8 +1108,55 @@ export class GVWMS extends AbstractGVRaster {
 
     // Read the features
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
-    const { features } = sourceFeaturesInfo;
     // ? Ignore the data projection of the WFS, because we don't want to confuse it with the data projection of the WMS
+
+    // Return the parsed result
+    return GVWMS.#formatFeatureInfoResultFromWFSFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+  }
+
+  /**
+   * Fetches feature data from a WFS GetFeature request URL and parses XML/GML fallback formats.
+   *
+   * @param urlWithOutputFormat - The full WFS GetFeature request URL
+   * @param wmsLayerConfig - The associated WMS layer configuration
+   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and date formatting
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+   * @param abortController - Optional {@link AbortController} used to cancel the fetch request
+   * @returns A promise that resolves with the feature info result
+   */
+  static async #fetchAndParseFeaturesFromWFSTextUrl(
+    urlWithOutputFormat: string,
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    wfsLayerConfig: OgcWfsLayerEntryConfig,
+    language: TypeDisplayLanguage,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoResult> {
+    // Call the GetFeature
+    const responseData = await Fetch.fetchText(urlWithOutputFormat, { signal: abortController?.signal });
+
+    // Read the features
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWFS(responseData, wfsLayerConfig.getVersionOrDefault(), undefined);
+
+    // Return the parsed result
+    return GVWMS.#formatFeatureInfoResultFromWFSFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+  }
+
+  /**
+   * Formats OpenLayers features returned from WFS into a WMS feature info result.
+   *
+   * @param sourceFeaturesInfo - The parsed OpenLayers features and source projection information
+   * @param wmsLayerConfig - The associated WMS layer configuration
+   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and date formatting
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+   * @returns The formatted feature info result
+   */
+  static #formatFeatureInfoResultFromWFSFeatures(
+    sourceFeaturesInfo: SourceFeaturesInfo,
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    wfsLayerConfig: OgcWfsLayerEntryConfig,
+    language: TypeDisplayLanguage
+  ): TypeFeatureInfoResult {
+    const { features } = sourceFeaturesInfo;
 
     // Find the best name field and validate its existance at the same time when one was initially configured
     const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
@@ -1134,7 +1167,7 @@ export class GVWMS extends AbstractGVRaster {
     // Parse the features
     const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
-      wfsLayerConfig.layerPath,
+      wmsLayerConfig.layerPath,
       wfsLayerConfig.getSchemaTag(),
       nameField,
       wfsLayerConfig.getOutfields(),
@@ -1151,10 +1184,6 @@ export class GVWMS extends AbstractGVRaster {
     // Return the results
     return { results };
   }
-
-  // #endregion STATIC PUBLIC METHODS
-
-  // #region STATIC PRIVATE METHODS
 
   /**
    * Retrieves feature information from a WMS layer using the `application/json` or `application/geojson` info format.

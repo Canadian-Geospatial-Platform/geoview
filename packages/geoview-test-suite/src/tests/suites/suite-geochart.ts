@@ -49,9 +49,9 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
   }
 
   /**
-   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * Gets the number of active tests launched by the full suite.
    *
-   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
     return 2;
@@ -77,7 +77,7 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
   /**
    * Overrides the debug hook for running a subset of tests during development.
    *
-   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
    *
    * @returns A promise that resolves when the debug tests are completed
    */

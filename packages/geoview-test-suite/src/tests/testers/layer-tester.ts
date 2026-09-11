@@ -1,18 +1,27 @@
 ﻿import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
+import { TestSkippedError } from '../core/exceptions';
+import type {
+  TypeMapFeaturesInstance,
+  TypeFeatureInfoResult,
+  codedValueType,
+  TypeFeatureInfoEntry,
+} from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/feature-info-state';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
+import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -61,10 +70,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding Esri Dynamic Histo Flood Events on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
         ]);
@@ -194,10 +201,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding Esri Dynamic with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
         ]);
@@ -233,10 +238,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding Esri Feature Forest Industry on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID },
         ]);
@@ -280,10 +283,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding Esri Feature with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID },
         ]);
@@ -315,10 +316,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding 'Yukon Low head' on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID },
         ]);
@@ -403,10 +402,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding Esri Image USA on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriImage.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           {
             id: GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES,
@@ -496,10 +493,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Mundialis on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
           { id: GVAbstractTester.OWS_MUNDIALIS_LAYER_ID },
         ]);
@@ -538,10 +533,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Datacube MSI on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(
           gvLayerId,
           gvLayerName,
@@ -586,10 +579,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Datacube Ring of Fire XML Halifax on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(
           gvLayerId,
           gvLayerName,
@@ -634,10 +625,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Nonna on map (proxy fallback)...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
           { id: GVAbstractTester.NONNA_WMS_LAYER_ID },
         ]);
@@ -683,10 +672,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding WMS with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(
           gvLayerId,
           gvLayerName,
@@ -729,10 +716,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding CanImage WMS with duplicate nested group names on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration using the duplicate group id...');
-
         // Create the config using the top-level duplicate group id 'canimage'
+        test.addStep('Creating the GeoView Layer Configuration using the duplicate group id...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
           { id: GVAbstractTester.CANIMAGE_WMS_GROUP_ID },
         ]);
@@ -780,10 +765,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMTS World Timezones on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMTS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           {
             id: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
@@ -829,10 +812,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding WMTS with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMTS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           {
             id: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
@@ -871,10 +852,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding XYZ Tiles OSM on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = XYZTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, undefined, false, [
           {
             id: GVAbstractTester.XYZ_TILES_OSM_LAYER_ID,
@@ -922,10 +901,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding XYZ Tiles with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = XYZTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.XYZ_TILES_OSM_LAYER_ID },
         ]);
@@ -1020,10 +997,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding Vector Tiles with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
         ]);
@@ -1059,10 +1034,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WFS with Geomet Current Conditions layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WFS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, 'all', [
           { id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID },
         ]);
@@ -1106,10 +1079,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding WFS with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WFS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, 'all', [
           { id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID },
         ]);
@@ -1145,10 +1116,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding WFS with okay url no capabilities...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WFS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, 'all', [
           { id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID },
         ]);
@@ -1184,10 +1153,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding GeoJSON with Metadata layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOJSON_POLYGONS },
         ]);
@@ -1229,10 +1196,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding GeoJSON GeometryCollection layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION },
         ]);
@@ -1277,10 +1242,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding GeoJSON with bad url...`,
       LayerStatusErrorError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOJSON_POLYGONS },
         ]);
@@ -1319,10 +1282,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding GeoTIFF Datacube Vegetation on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoTIFF.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOTIFF_VEGETATION_FILE },
         ]);
@@ -1368,10 +1329,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding GeoTIFF with bad url...`,
       LayerStatusErrorError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoTIFF.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOTIFF_VEGETATION_FILE },
         ]);
@@ -1410,10 +1369,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding a CSV with Station List layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = CSV.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.CSV_STATION_LIST_FILE },
         ]);
@@ -1459,10 +1416,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding CSV with bad url...`,
       LayerStatusErrorError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = CSV.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.CSV_STATION_LIST_FILE },
         ]);
@@ -1501,10 +1456,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding an OGC Feature with Pygeoapi layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = OgcFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES },
         ]);
@@ -1554,10 +1507,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding OGC Feature with bad url...`,
       LayerServiceMetadataUnableToFetchError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = OgcFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES },
         ]);
@@ -1593,10 +1544,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding a WKB with South Africa layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1640,10 +1589,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding WKB with bad url...`,
       LayerStatusErrorError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1680,10 +1627,8 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding a KML with Tornado layer on map...`,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1727,10 +1672,8 @@ export class LayerTester extends GVAbstractTester {
       `Test Adding KML with bad url...`,
       LayerStatusErrorError,
       async (test) => {
-        // Creating the configuration
-        test.addStep('Creating the GeoView Layer Configuration...');
-
         // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1826,6 +1769,7 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding Esri Dynamic Water Network and checking domain field...`,
       async (test) => {
+        // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
@@ -1889,6 +1833,7 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding Esri Feature Water Network and checking domain field...`,
       async (test) => {
+        // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
@@ -1953,6 +1898,7 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Esri Dynamic Water Network domain field query value translation...`,
       async (test) => {
+        // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
@@ -2036,6 +1982,7 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Esri Feature Water Network domain field query value translation...`,
       async (test) => {
+        // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
@@ -2112,7 +2059,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeocoreWithGroupDefaultVisibilityFalse(): Promise<Test<void>> {
+  testAddGeocoreWithGroupDefaultVisibilityFalse(isRunningHeavyTests: boolean): Promise<Test<void>> {
     const gvLayerId = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID;
     const gvLayerPath = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH;
     const gvLayerPathWithGroupVisibilityFalse = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE;
@@ -2121,6 +2068,11 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding layer with group layer defaultVisibility to false...`,
       async (test) => {
+        // If we're not running the heavy tests actually, skip it
+        if (!isRunningHeavyTests) {
+          throw new TestSkippedError('Not running the heavy tests');
+        }
+
         // Creating the configuration
         test.addStep('Adding the geocore layer on the map via UUID...');
 
@@ -2153,8 +2105,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(storeLayer?.visible, false);
       },
       (test) => {
-        // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
+        // If the test was running
+        if (isRunningHeavyTests) {
+          // Redirect to helper to clean up and assert
+          this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
+        }
       }
     );
   }
@@ -2289,6 +2244,345 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion GEOCORE CUSTOM CONFIG
+
+  // #region LAYER FUNCTIONS
+
+  /**
+   * Tests that zooming to the extent of a GeoJSON layer with one point feature succeeds.
+   *
+   * @returns A promise that resolves with the loaded GeoJSON layer
+   */
+  testZoomExtentWithOneFeature(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_SINGLE_POINT}`;
+
+    // Test
+    return this.test(
+      `Test zoom to extent on GeoJSON with only one point feature...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [
+          { id: GVAbstractTester.GEOJSON_SINGLE_POINT },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        const layer = await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        // Wait for the bounds to be processed
+        await layer.waitForBounds();
+
+        // Call zoom to layer extent, it should work
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Return the layer
+        return layer;
+      },
+      (test, result) => {
+        // Check the bounds on the layer
+        test.addStep('Reading the bounds on the layer...');
+        Test.assertIsDefined('bounds', result.getBounds());
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that zooming to the extent of a GeoJSON layer without features throws a NoBoundsError.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testZoomExtentWithoutFeatures(): Promise<Test<NoBoundsError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+
+    // Test
+    return this.testError(
+      `Test zoom to extent on GeoJSON without features...`,
+      NoBoundsError,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Call zoom to layer extent, it should throw a NoBoundsError
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that zooming to the extent of a featureless GeoJSON layer succeeds when an extent is configured.
+   *
+   * @returns A promise that resolves with the loaded GeoJSON layer
+   */
+  testZoomExtentWithoutFeaturesWithConfiguredExtent(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+
+    // Test
+    return this.test(
+      `Test zoom to extent on GeoJSON without features but a configured extent...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
+
+        // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
+        const gvLayerConfig = gvConfig.listOfLayerEntryConfig[0];
+        gvLayerConfig.getSource().extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        const layer = await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        // Wait for the bounds to be processed
+        await layer.waitForBounds();
+
+        // Call zoom to layer extent, it should work
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Return the layer
+        return layer;
+      },
+      (test, result) => {
+        // Check the bounds on the layer
+        test.addStep('Reading the bounds on the layer...');
+        Test.assertIsDefined('bounds', result.getBounds());
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that feature-info queries still populate feature geometry when configured outfields omit geometry fields.
+   *
+   * The queried feature must retain an extent so zoom-to-feature workflows keep working with restricted outfield configs.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testFeatureHasGeometryWhenOutfieldsHasNoGeometryField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    // Dummy names
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'gvLayerName';
+    const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
+    const clickCoordinate = [-86.395, 52.737];
+
+    return this.test(
+      `Test feature has geometry even when outfields configuration has no geometry field...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(
+          gvLayerId,
+          gvLayerName,
+          GVAbstractTester.TOP_PROJECTS_900A_URL_MAP_SERVER,
+          false,
+          [
+            {
+              id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID,
+              layerName: GVAbstractTester.TOP_PROJECTS_900A_LAYER_NAME,
+            },
+          ]
+        );
+
+        // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
+        const gvLayerConfig = gvConfig.listOfLayerEntryConfig[0] as EsriDynamicLayerEntryConfig;
+        gvLayerConfig.getSource().featureInfo ??= {};
+        gvLayerConfig.getSource().featureInfo!.outfields = GVAbstractTester.TOP_PROJECTS_900A_OUTFIELDS;
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+
+        // Perform a map click using the feature info layer set
+        const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
+
+        // Wait on the promise of the query for the layer path in question
+        const promiseResult = await queryResults[layerPath].promiseResult;
+
+        // Wait on the promise of geometries (EsriDynamic particularity)
+        await promiseResult?.promiseGeometries;
+
+        // Now return the results, now that we're sure the geometries were also gathered
+        return promiseResult?.results;
+      },
+      (test, result) => {
+        // Check if the feature has a valid extent property
+        test.addStep('Checking if the feature has a valid extent property...');
+        const feature = result?.[0];
+        Test.assertIsDefined('feature', feature);
+        Test.assertIsDefined('feature.extent', feature.extent);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests querying a WMS layer through its associated WFS service for a city feature.
+   *
+   * The test configures the WMS layer with its corresponding WFS layer identifier,
+   * performs a map query at a known Quebec coordinate, and verifies that the returned
+   * feature result includes both feature data and geometry.
+   *
+   * @returns A promise that resolves with the WMS feature-query test result
+   */
+  testQueryWMSLayerForWFSFeaturesCities(): Promise<Test<TypeFeatureInfoResultSet>> {
+    // Dummy names
+    const gvLayerId = 'gvLayerId';
+    const layerName = 'Cities';
+    const layerPath = `${gvLayerId}/${GVAbstractTester.CITIES_WMS_LAYER_ID}`;
+    const clickCoordinate = [-71.35, 46.7]; // Quebec
+
+    return this.test(
+      `Test WMS query at lon/lat via associated WFS service ${layerName}...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, undefined, GVAbstractTester.CITIES_WMS_URL, undefined, false, [
+          {
+            id: GVAbstractTester.CITIES_WMS_LAYER_ID,
+            layerName,
+          },
+        ]);
+
+        // TODO: No need to do this if the function call above is fixed, Search id : 59026aa9
+        const gvLayerConfig = gvConfig.listOfLayerEntryConfig[0];
+        gvLayerConfig.setWfsLayerId(GVAbstractTester.CITIES_WFS_LAYER_ID);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+
+        // Perform a map click using the feature info layer set
+        const queryResult = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
+
+        // Return the query result
+        return queryResult;
+      },
+      (test, result) => {
+        // Get the result for the layer in question
+        const resultCities = result[layerPath];
+
+        // Check if the feature has a valid extent property
+        test.addStep('Checking for results in the query...');
+        Test.assertIsDefined('resultCities', resultCities);
+        Test.assertIsArrayLengthMinimal(resultCities.features, 1);
+        Test.assertIsDefined('resultCities.features[0]', resultCities.features?.[0]);
+        Test.assertIsDefined('resultCities.features[0].geometry', resultCities.features?.[0].geometry);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests querying the airborne radioactivity WMS layer through its associated WFS service.
+   *
+   * The test is skipped when the test environment is not connected to the required VPN.
+   * When the VPN is available, it adds the WMS layer, queries a known Quebec coordinate,
+   * and verifies the feature-query response shape.
+   *
+   * @param isRunningOnVPN - Whether the test environment can access the VPN-only service
+   * @returns A promise that resolves with the WMS feature-query test result
+   */
+  testQueryWMSLayerForWFSFeaturesAirborne(isRunningOnVPN: boolean): Promise<Test<TypeFeatureInfoResultSet>> {
+    // Dummy names
+    const gvLayerId = 'gvLayerId';
+    const metadataAccessPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_URL;
+    const layerName = 'Airborne Radioactivity';
+    const layerPath = `${gvLayerId}/${GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID}`;
+    const clickCoordinate = [-71.35, 46.7]; // Quebec
+
+    // Test
+    return this.test(
+      `Test WMS query at lon/lat via associated WFS service ${layerName}...`,
+      async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, undefined, metadataAccessPath, undefined, false, [
+          {
+            id: GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID,
+            layerName,
+          },
+        ]);
+
+        // This layer is only visible within range, zoom in a bit
+        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+
+        // Perform a map click using the feature info layer set
+        const queryResult = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
+
+        // Return the query result
+        return queryResult;
+      },
+      (test, result) => {
+        // Get the result for the layer in question
+        const resultAirborne = result[layerPath];
+
+        // Check if the feature has a valid extent property
+        test.addStep('Checking for results in the query...');
+        Test.assertIsDefined('resultAirborne', resultAirborne);
+        Test.assertIsArrayLengthMinimal(resultAirborne.features, 1);
+        Test.assertIsDefined('resultAirborne.features[0]', resultAirborne.features?.[0]);
+        Test.assertIsDefined('resultAirborne.features[0].geometry', resultAirborne.features?.[0].geometry);
+      },
+      (test) => {
+        // If the test was running
+        if (isRunningOnVPN) {
+          // Redirect to helper to clean up and assert
+          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        }
+      }
+    );
+  }
+
+  // #endregion LAYER FUNCTIONS
 
   // #region HELPERS
 

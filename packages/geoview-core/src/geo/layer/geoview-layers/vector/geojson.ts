@@ -262,6 +262,14 @@ export class GeoJSON extends AbstractGeoViewVector {
       listOfLayerEntryConfig: [],
     };
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      // TODO: REFACTOR IMPORTANT - This spreading should be rewritten like explained in GeoJSON file. Search id : 59026aa9
+      // TO.DOCONT: const { id, ...layerEntryProps } = layerEntry;
+      // TO.DOCONT: const layerEntryConfig = new GeoJSONLayerEntryConfig({
+      // TO.DOCONT:   ...layerEntryProps,
+      // TO.DOCONT:   geoviewLayerConfig,
+      // TO.DOCONT:   layerId: `${id}`,
+      // TO.DOCONT: });
+
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,

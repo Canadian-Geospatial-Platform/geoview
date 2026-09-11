@@ -8,7 +8,7 @@ import type { ControllerRegistry } from 'geoview-core/core/controllers/base/cont
 /**
  * The GeoView Test Suite.
  */
-export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
+export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
   /** The Map Tester used in this Test Suite */
   #mapTester: MapTester;
 
@@ -33,7 +33,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
    * @returns The name of the Test Suite
    */
   override getName(): string {
-    return 'Map Varia Test Suite';
+    return 'Map Functions Test Suite';
   }
 
   /**
@@ -54,9 +54,9 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
   }
 
   /**
-   * Gets the total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * Gets the number of active tests launched by the full suite.
    *
-   * @returns The total number of tests including those that are planned but not yet in the pipeline nor executed.
+   * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
     return 16;
@@ -65,7 +65,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
   /**
    * Overrides the debug hook for running a subset of tests during development.
    *
-   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
    *
    * @returns A promise that resolves when the debug tests are completed
    */
@@ -79,17 +79,11 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // #region STATE CHECK
-
     // Test the map state
     const pmapState = this.#mapTester.testInitialMapState();
 
     // Wait until this test finishes before starting manipulating the map
     await pmapState;
-
-    // #endregion STATE CHECK
-
-    // #region PROMISES SYNCH ZOOMING
 
     // Test the zoom
     const pZoom = this.#mapTester.testMapZoom(7);
@@ -136,10 +130,6 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Make sure the map is reset in its initial extent after the zooms
     await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
-    // #endregion PROMISES SYNCH ZOOMING
-
-    // #region PROMISES SYNCH SELECTED TABS
-
     // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest, even testDetailsLayerSelectionPersistence for example
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
 
@@ -161,10 +151,6 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait until the selected tab test finishes before continuing manipulating the map
     await pFooterBarCreateTab;
 
-    // #endregion PROMISES SYNCH SELECTED TABS
-
-    // #region PROMISES SYNCH HOVERABLE/QUERYABLE
-
     // Test set language
     const pSetLanguage = this.#mapTester.testSetLanguage();
 
@@ -180,10 +166,6 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait on all the tests of queryable/hoverable before continuing manipulating the map, those all happen in parallel
     await Promise.all([pNonQueryableLayerNotInDetails, pLayerHoverableState]);
 
-    // #endregion PROMISES SYNCH HOVERABLE/QUERYABLE
-
-    // #region PROMISES DETAILS PANEL
-
     // Test details layer selection persistence, this test manipulates the map state too much as should run independently
     const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence(
       'geojsonLYR5/polygons.json',
@@ -194,8 +176,6 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // Wait on details layer selection persistence which manipulates the map state a lot and should run independently
     await pDetailsLayerSelectionPersistence;
-
-    // #endregion PROMISES DETAILS PANEL
 
     // Resolve when all
     return Promise.all([
