@@ -13,6 +13,7 @@ import { type TypeHighlightColors, type TypeFeatureInfoEntry, DEFAULT_HIGHLIGHT_
 import { logger } from '@/core/utils/logger';
 import { getStoreMapFeatureHighlightColor } from '@/core/stores/states/map-state';
 import { TIMEOUT } from '@/core/utils/constant';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { MapController } from '@/core/controllers/map-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
@@ -51,6 +52,9 @@ export class FeatureHighlight {
 
   /** The ID's of currently highlighted features */
   #highlightedFeatureIds: string[] = [];
+
+  /** The ID's of features already warned about being too complex to highlight, to avoid repeating the notification. */
+  #complexGeometryWarnedIds: Set<string> = new Set();
 
   /** Timeout of the bounding box highlight */
   #bboxTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -234,10 +238,23 @@ export class FeatureHighlight {
   /**
    * Highlights a feature with a plain overlay.
    *
+   * Pathologically complex geometries (e.g. an ESRI feature whose polygon has thousands of holes) are not highlighted,
+   * because re-rendering them every frame freezes the UI. The user is notified once per such feature.
+   *
    * @param feature - Feature to highlight
    */
   highlightFeature(feature: TypeFeatureInfoEntry): void {
     const { geometry } = feature;
+
+    // Skip geometries too complex to render every frame without freezing the UI, and warn the user once per feature
+    if (geometry && !GeometryApi.canRenderGeometry(geometry)) {
+      if (feature.uid && !this.#complexGeometryWarnedIds.has(feature.uid)) {
+        this.#complexGeometryWarnedIds.add(feature.uid);
+        this.mapViewer.notifications.showWarning('warning.layer.geometryTooComplexToHighlight');
+      }
+      return;
+    }
+
     const highlightedCount = this.#highlightGeometry(geometry, feature.uid!);
 
     if (!highlightedCount && feature.extent) {
