@@ -311,6 +311,7 @@ const config = {
         { from: './public/datasets/shapefiles', to: 'datasets/shapefiles' },
         { from: './public/datasets/geopackages', to: 'datasets/geopackages' },
         { from: './public/datasets/kml-files', to: 'datasets/kml-files' },
+        { from: './public/datasets/wms', to: 'datasets/wms' },
         { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
