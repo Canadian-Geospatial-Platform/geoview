@@ -124,7 +124,7 @@ export function Map(props: MapProps): JSX.Element {
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
     <Box
-      id={`mapTargetElement-${mapId}`}
+      id={`${mapId}-mapTargetElement`}
       ref={mapElement}
       sx={memoSxClasses.mapContainer}
       tabIndex={mapInteraction === 'static' ? -1 : 0}

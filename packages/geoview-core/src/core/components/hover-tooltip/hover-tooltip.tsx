@@ -7,7 +7,8 @@ import { Box, BrowserNotSupportedIcon } from '@/ui';
 import { useStoreMapHoverFeatureInfo, useStoreMapIsMouseInsideMap, useStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
@@ -42,7 +43,7 @@ export const HoverTooltip = memo((): JSX.Element | null => {
   const mapId = useStoreGeoViewMapId();
   const hoverFeatureInfo = useStoreMapHoverFeatureInfo();
   const isMouseouseInMap = useStoreMapIsMouseInsideMap();
-  const mapElem = useStoreAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+  const mapElem = getGVElementById(mapId, 'mapTargetElement') as HTMLElement;
   const language = useStoreAppDisplayLanguage();
   const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
   const displayDateFormats = useStoreLayerDisplayDateFormatSet();

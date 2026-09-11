@@ -402,8 +402,15 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
       );
 
       setTimeout(() => {
+        // Scope to THIS map's guide box (data-map-id makes it unique even when portaled in fullscreen).
+        // Two boxes can coexist while fullscreen is open (inline + portaled dialog); use the visible one.
+        // eslint-disable-next-line no-restricted-syntax
+        const guideContainers = Array.from(document.querySelectorAll<HTMLElement>(`.guidebox-container[data-map-id="${mapId}"]`));
+        const guideContainer = guideContainers.find((el) => el.getClientRects().length > 0) ?? guideContainers[0];
+        if (!guideContainer) return;
+
         // Ensure the section is expanded/visible
-        const sectionElements = document.querySelectorAll('[data-section-index]');
+        const sectionElements = guideContainer.querySelectorAll('[data-section-index]');
         const targetSection = Array.from(sectionElements).find(
           (el) => el.getAttribute('data-section-index') === match.sectionIndex.toString()
         );
@@ -419,14 +426,14 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
         // Wait a bit more for potential expansion animation
         setTimeout(() => {
           // For all matches, scroll to the highlighted text
-          const currentMatchElement = document.querySelector('.current-match');
+          const currentMatchElement = guideContainer.querySelector('.current-match');
           if (currentMatchElement) {
             currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, TIMEOUT.guideSearchVisibility);
       }, TIMEOUT.guideSearchSectionExpand);
     },
-    [allMatches, onSectionChange, t]
+    [allMatches, onSectionChange, t, mapId]
   );
 
   /**

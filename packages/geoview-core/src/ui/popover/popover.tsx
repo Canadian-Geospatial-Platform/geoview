@@ -82,6 +82,8 @@ function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
       // Wait the transition period then focus the close button when popover opens
       delay(theme.transitions.duration.shortest)
         .then(() => {
+          // MUI renders the close icon in a portal; this UI wrapper has no mapId context.
+          // eslint-disable-next-line no-restricted-syntax
           const closeButton = document.querySelector('[data-testid="CloseIcon"]')?.closest('button') as HTMLButtonElement;
           if (closeButton) {
             closeButton.focus();

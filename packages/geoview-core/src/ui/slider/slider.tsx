@@ -284,6 +284,8 @@ function SliderUI(props: SliderProps): JSX.Element {
    */
   const hideExcessMarks = useCallback((): void => {
     // Get slider container
+    // Generic UI slider; containerId is caller-provided and this component has no mapId context.
+    // eslint-disable-next-line no-restricted-syntax
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -325,6 +327,8 @@ function SliderUI(props: SliderProps): JSX.Element {
    */
   const removeLabelOverlap = useCallback((): void => {
     // get slider container
+    // Generic UI slider; containerId is caller-provided and this component has no mapId context.
+    // eslint-disable-next-line no-restricted-syntax
     const container = document.getElementById(containerId);
     if (!container) return;
 

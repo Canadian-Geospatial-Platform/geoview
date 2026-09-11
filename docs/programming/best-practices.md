@@ -268,6 +268,7 @@ When a function calls another function that throws and does **not** catch the er
 ```
 
 **Rules:**
+
 - If the caller catches and handles the error (e.g., logs it, returns a fallback), do **not** add `@throws`
 - If the caller wraps the error into a new error type, document the new type only
 - If the callee has no `@throws` documentation, check its implementation and document what it actually throws
@@ -565,3 +566,87 @@ onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQ
 - Priority levels (HIGH/MEDIUM/ENHANCEMENT)
 
 **For comprehensive WCAG 2.1 Level AA guidance, see [accessibility.md](app/accessibility.md).**
+
+## <a id="dom-access"></a>18- Map-scoped DOM access (no direct `document.*`)
+
+Multiple GeoView maps can live on the same HTML page. Every DOM id must therefore be **map-scoped**, and every DOM lookup must be **restricted to a single map's subtree** so it never resolves an element that belongs to a different map. To enforce this, direct `document.getElementById` / `document.querySelector` / `document.querySelectorAll` calls are **banned** in `geoview-core` and flagged by an ESLint `no-restricted-syntax` rule. Use the helpers below instead.
+
+### The `${mapId}-suffix` id convention
+
+DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Build ids through the helper so the convention lives in one place:
+
+```ts
+import { buildGVElementId } from "@/core/utils/dom-helper";
+
+const id = buildGVElementId(mapId, "shell"); // → "map1-shell"
+```
+
+### The wrappers (`@/core/utils/dom-helper`)
+
+All wrappers scope the lookup to the map's root element. When the root is not mounted yet, they fall back to a global lookup **and log a warning** (a global lookup is not map-scoped and can hit another map).
+
+| Helper                             | Use for                                                    | Returns                    |
+| ---------------------------------- | ---------------------------------------------------------- | -------------------------- |
+| `buildGVElementId(mapId, suffix)`  | Creating a canonical `${mapId}-suffix` id                  | `string`                   |
+| `getGVElementById(mapId, suffix)`  | Finding a descendant by its map-relative **suffix**        | `HTMLElement \| undefined` |
+| `getGVElementByFullId(mapId, id)`  | Finding a descendant when you already hold the **full** id | `HTMLElement \| undefined` |
+| `getGVRootElement(mapId)`          | Getting the map's **root** element (live DOM)              | `HTMLElement \| undefined` |
+| `queryGVSelector(mapId, selector)` | A CSS selector scoped inside the map                       | `Element \| undefined`     |
+| `queryGVSelectorAll(mapId, sel)`   | A CSS selector (all matches) scoped inside the map         | `Element[]`                |
+
+```ts
+// ❌ Bad: global, collides across maps, banned by ESLint
+const el = document.getElementById(`${mapId}-shell`);
+const tab = document.querySelector('[role="tab"][aria-selected="true"]');
+
+// ✅ Good: map-scoped wrappers
+import {
+  getGVElementById,
+  getGVElementByFullId,
+  queryGVSelector,
+} from "@/core/utils/dom-helper";
+
+const el = getGVElementById(mapId, "shell"); // suffix → builds "map1-shell", scoped
+const btn = getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
+const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
+```
+
+### TSX: the `useGVElementById` hook
+
+In React components, prefer the reactive hook, which is backed by the store's root element (`useStoreAppGeoviewHTMLElement`). It returns a stable `(suffix) => HTMLElement | undefined` function:
+
+```tsx
+import { useGVElementById } from "@/core/stores/states/app-state";
+
+const getElementById = useGVElementById();
+// ...later, in an effect/handler:
+getElementById("footerbar-header")?.focus();
+```
+
+### Root element vs. specific descendant — which API?
+
+This is the key decision:
+
+| You need…                                                                                               | Use                                                                                                |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **The root element itself** (attach a listener to the whole map, measure it, use as a portal container) | `useStoreAppGeoviewHTMLElement()` (TSX hook) or `getStoreAppGeoviewHTMLElement(mapId)` (TS getter) |
+| The root element in a non-React one-shot, from the **live DOM**                                         | `getGVRootElement(mapId)`                                                                          |
+| A **specific descendant by id**, imperatively (effects, handlers, controllers, utils, plugins)          | `getGVElementById(mapId, suffix)` / `getGVElementByFullId(mapId, fullId)`                          |
+| A **specific descendant by id**, reactively in TSX                                                      | `useGVElementById()`                                                                               |
+| A **CSS selector** scoped to one map                                                                    | `queryGVSelector(mapId, selector)` / `queryGVSelectorAll(mapId, selector)`                         |
+
+**Why the store getter/hook is fine for the root but not for descendant lookups:** the store getter/hook returns the map's root element (a legitimate store value, not a raw DOM query, so it is not banned). For a **descendant**, hand-rolling `useStoreAppGeoviewHTMLElement().querySelector('#' + CSS.escape(...))` re-implements the id-building, escaping, scoping, and fallback at every call site — exactly the duplication the wrappers remove.
+
+**`getGVRootElement` vs `getStoreAppGeoviewHTMLElement`:** the wrapper reads the **live DOM** (`document.getElementById(mapId)`) each call — robust during init/teardown; the store getter returns a **cached** reference (which is the placeholder `<div>` until config is applied). Use the store getter/hook when you want the React-tracked root (and no null handling); use `getGVRootElement` for imperative one-shots that must reflect the current DOM.
+
+### Legitimate exceptions (keep `document.*`, add a disable)
+
+A few lookups are genuinely **not** a single map's descendant. Keep the raw `document.*` call and add a one-line `// eslint-disable-next-line no-restricted-syntax` with a short justification:
+
+- **`<script>` tags** in `<head>` (plugin loading) — not inside any map.
+- **The lightbox singleton overlay** (`.yarl__root`) — only one is open page-wide at a time.
+- **Caller-provided external divs** (e.g. `createMapFromConfig(divId, …)`) — not necessarily a GeoView root.
+- **Generic `@/ui` components** (`slider`, `popover`) that receive a `containerId` prop and have **no** `mapId`.
+- **The fullscreen-portaled guide**, which is map-scoped via `[data-map-id="${mapId}"]` but must be queried globally because the portal moves it out of the map root.
+
+> Note: `document.getElementsByClassName` / `getElementsByTagName` are **not** flagged by the rule, but still scope them to a map's root (e.g. `getGVRootElement(mapId)?.getElementsByClassName(...)`) whenever the result should be map-specific.

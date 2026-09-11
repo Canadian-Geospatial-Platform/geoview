@@ -10,6 +10,7 @@ import type { SwipeOrientation } from 'geoview-core/core/stores/states/swiper-st
 import { useStoreSwiperLayerPaths, useStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { delay } from 'geoview-core/core/utils/utilities';
+import { getGVElementById } from 'geoview-core/core/utils/dom-helper';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { debounce } from 'geoview-core/core/utils/debounce';
 import { useStoreMapSize } from 'geoview-core/core/stores/states/map-state';
@@ -397,7 +398,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     const handleFocusIn = (): void => {
       // Set listener for the focus in on swiper bar when on WCAG mode
-      if (document.getElementById(`shell-${viewer.mapId}`)!.classList.contains('map-focus-trap')) {
+      if (getGVElementById(viewer.mapId, 'shell')!.classList.contains('map-focus-trap')) {
         theSwiper?.addEventListener('keydown', updateSwiper);
       }
     };

@@ -43,7 +43,6 @@ import {
   useStoreUIAppBarPanelIds,
 } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi } from '@/core/components';
@@ -55,6 +54,7 @@ import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
+import { getGVElementById, getGVElementByFullId } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -113,7 +113,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const uiController = useUIController();
   const mapController = useMapController();
 
-  const geoviewElement = useStoreAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
+  const geoviewElement = getGVElementById(mapId, 'mapTargetElement') as HTMLElement;
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
@@ -267,13 +267,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (isFocusTrapped) {
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          document.getElementById(getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
+          getGVElementByFullId(mapId, getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
         }, TIMEOUT.dataPanelLoading);
       }
 
       uiController.setActiveAppBarTab(buttonId, false, false);
     },
-    [uiController, isFocusTrapped, getButtonElementId]
+    [uiController, isFocusTrapped, getButtonElementId, mapId]
   );
 
   /**
@@ -361,7 +361,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     if (!isOpen && tabId) {
       const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`;
-      const buttonElement = document.getElementById(buttonElementId);
+      const buttonElement = getGVElementByFullId(mapId, buttonElementId);
       if (buttonElement) {
         buttonElement.focus();
       } else {
@@ -686,6 +686,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               onKeyDown={(event: KeyboardEvent) => {
                 // Early exit if lightbox is handling ESC
                 if (event.key === 'Escape') {
+                  // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+                  // eslint-disable-next-line no-restricted-syntax
                   const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
                   if (isLightboxOpen) {
                     return;

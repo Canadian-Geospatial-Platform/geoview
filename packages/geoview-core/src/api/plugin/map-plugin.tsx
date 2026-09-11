@@ -1,5 +1,6 @@
 import type { Root } from 'react-dom/client';
 import { StoreContext } from '@/core/app-start';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { AbstractPlugin } from './abstract-plugin';
 
 /**
@@ -27,7 +28,7 @@ export abstract class MapPlugin extends AbstractPlugin {
     // create the swiper container and insert it after top link
     const el = document.createElement('div');
     el.setAttribute('id', `${this.mapViewer.mapId}-${this.pluginId}`);
-    const mapElement = document.getElementById(`mapTargetElement-${this.mapViewer.mapId}`);
+    const mapElement = getGVElementById(this.mapViewer.mapId, 'mapTargetElement');
     mapElement?.prepend(el);
 
     // create the swiper component and render

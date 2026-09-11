@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useStore } from 'zustand';
 
 import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
@@ -8,6 +9,7 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
+import { getGVRootElement } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -129,7 +131,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage!) ? geoviewConfig.displayLanguage! : 'en';
-      const geoviewHTMLElement = document.getElementById(get().mapId)!;
+      const geoviewHTMLElement = getGVRootElement(get().mapId)!;
       set({
         appState: {
           ...get().appState,
@@ -452,6 +454,22 @@ export const getStoreAppGeoviewHTMLElement = (mapId: string): HTMLElement => get
 export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 
 /**
+ * Hook that returns a map-scoped element lookup for the current map.
+ *
+ * The returned function resolves an element by its map-relative suffix (without the `${mapId}-`
+ * prefix) inside the current map's root element, so lookups never collide across maps on the page.
+ *
+ * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
+ */
+export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
+  const root = useStoreAppGeoviewHTMLElement();
+  return useCallback(
+    (suffix: string): HTMLElement | undefined => root?.querySelector<HTMLElement>(`#${CSS.escape(`${root.id}-${suffix}`)}`) ?? undefined,
+    [root]
+  );
+};
+
+/**
  * Gets the map container height for the given map.
  *
  * @param mapId - The map identifier.
@@ -515,14 +533,14 @@ export const useStoreAppShowUnsymbolizedFeatures = (): boolean =>
 /**
  * Hook that returns the shell container HTML element for the current map.
  *
- * Queries the DOM for the element whose id starts with `shell-{mapId}`.
+ * Queries the DOM for the map's `${mapId}-shell` element within the root GeoView element.
  *
  * @returns The shell container element.
  */
 export const useStoreAppShellContainer = (): HTMLElement => {
   const geoviewElement = useStoreAppGeoviewHTMLElement();
   const mapId = useStore(useGeoViewStore(), (state) => state.mapId);
-  return geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+  return geoviewElement.querySelector(`#${CSS.escape(`${mapId}-shell`)}`) as HTMLElement;
 };
 
 /**

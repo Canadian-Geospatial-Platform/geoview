@@ -6,6 +6,7 @@ import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
+import { getGVRootElement } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
@@ -147,7 +148,7 @@ export class API {
     }
 
     // Get the div container
-    const divContainer = document.getElementById(mapId) || undefined;
+    const divContainer = getGVRootElement(mapId);
 
     // Delete the map
     await this.getMapViewer(mapId).delete();
@@ -198,6 +199,8 @@ export class API {
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
   async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, waitOnMapReady = true): Promise<MapViewer> {
     // Get the map div
+    // divId is a caller-provided target div, not necessarily a GeoView map root.
+    // eslint-disable-next-line no-restricted-syntax
     const mapDiv = document.getElementById(divId);
     if (!mapDiv) throw new InitDivNotExistError(divId);
 
@@ -342,7 +345,7 @@ export class API {
    * This custom JavaScript-based focus management is being phased out in favor of native :focus-visible
    * and MUI's .Mui-focusVisible classes. The .keyboard-focused class is applied to ANY element that receives
    * Tab focus (buttons, inputs, map element, etc.), while crosshair activation is separate logic that only
-   * triggers for the specific map element (mapTargetElement-{mapId}).
+   * triggers for the specific map element ({mapId}-mapTargetElement).
    *
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    *
@@ -372,10 +375,15 @@ export class API {
 
         // Check if the focus element is a map and set store value for crosshair
         const mapId =
-          activeEl?.closest('.geoview-shell') !== null ? activeEl?.closest('.geoview-shell')!.getAttribute('id')?.split('-')[1] : undefined;
+          activeEl?.closest('.geoview-shell') !== null
+            ? activeEl
+                ?.closest('.geoview-shell')!
+                .getAttribute('id')
+                ?.replace(/-shell$/, '')
+            : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === `mapTargetElement-${mapId}`;
+          const mapFocus = activeEl?.getAttribute('id') === `${mapId}-mapTargetElement`;
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);

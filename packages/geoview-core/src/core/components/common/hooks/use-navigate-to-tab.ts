@@ -5,6 +5,7 @@ import {
   useStoreUIAppbarComponents,
 } from '@/core/stores/states/ui-state';
 import { scrollIfNotVisible } from '@/core/utils/utilities';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
@@ -60,9 +61,9 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
           }
 
           // Scroll the footer into view
-          const footer = document.querySelector(`#${mapId}-tabsContainer`);
+          const footer = getGVElementById(mapId, 'tabsContainer');
           if (footer) {
-            scrollIfNotVisible(footer as HTMLElement, 'start');
+            scrollIfNotVisible(footer, 'start');
           }
         }, delay);
       } else if (hasAppBarTab) {

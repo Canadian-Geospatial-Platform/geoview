@@ -6,6 +6,8 @@ import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } fr
 import { useStoreLayerDeletionStartTime } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
 interface UndoButtonProps {
@@ -69,6 +71,9 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
+  // Store
+  const mapId = useStoreGeoViewMapId();
+
   // Refs for buttons to manage focus
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const undoButtonRef = useRef<HTMLButtonElement>(null);
@@ -102,7 +107,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
         if (deleted && focusTargetIdAfterDelete) {
           const targetId = focusTargetIdAfterDelete;
           requestAnimationFrame(() => {
-            document.getElementById(targetId)?.focus();
+            getGVElementByFullId(mapId, targetId)?.focus();
           });
         }
       })

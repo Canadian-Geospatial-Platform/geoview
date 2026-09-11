@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
 
 import type { ButtonPanelType } from './app-bar';
 
@@ -75,7 +76,7 @@ export const helpClosePanelById = (
   helpOpenClosePanelByIdState(buttonId, setterCallback, false);
 
   const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}-panel-btn`;
-  const buttonElement = document.getElementById(buttonElementId);
+  const buttonElement = getGVElementByFullId(mapId, buttonElementId);
   if (buttonElement) {
     // Explicitly request focus indicator for keyboard users
     buttonElement.focus({ focusVisible: true });

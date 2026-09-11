@@ -13,6 +13,7 @@ import { FocusTrapContainer } from '@/core/components/common/focus-trap-containe
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './version-style';
 
@@ -62,7 +63,7 @@ export default function Version(): JSX.Element {
   const uiController = useUIController();
 
   // Get container
-  const mapElem = document.getElementById(`shell-${mapId}`);
+  const mapElem = getGVElementById(mapId, 'shell');
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
