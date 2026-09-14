@@ -151,12 +151,11 @@ export class DetailsTester extends GVAbstractTester {
         await this.getControllersRegistry().layerController.waitForLayersLoaded();
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        test.addStep('Simulating map click to trigger highlight on all queryable layers...');
-        this.getMapViewer().simulateMapClick(lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
-        await GVAbstractTester.waitForReactIdle();
+        await this.waitForAppbarTabSelected('details');
 
         // Keep track of the store state
         const clickMarkerBefore = getStoreMapClickMarker(this.getMapId());
@@ -177,39 +176,23 @@ export class DetailsTester extends GVAbstractTester {
         const clickMarkerAfter = getStoreMapClickMarker(this.getMapId());
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        test.addStep('Simulating map click to trigger highlight again...');
-        this.getMapViewer().simulateMapClick(lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
 
         // Wait for the React UI to actually pick up on the store update
-        test.addStep(`Waiting on UI to refresh and the details panel to open (again)...`);
-        await GVAbstractTester.waitForReactIdle();
+        test.addStep(`Waiting on UI to refresh and the details panel to open (should already be open in fact)...`);
+        await this.waitForAppbarTabSelected('details');
 
         // Keep track of the store state
         const highlighted2Before = getStoreMapHighlightedFeatures(this.getMapId());
 
         // Close the details panel which will remove the highlight
-        test.addStep('Closing details app bar panel...');
-        this.getControllersRegistry().uiController.setActiveAppBarTab('details', false, false);
-
-        // Wait for the React UI to actually pick up on the store update
-        test.addStep(`Waiting on UI to refresh and the details panel to close...`);
-        await GVAbstractTester.waitForReactIdle();
+        await this.toggleAppbarTab(test, 'details', false);
 
         // Keep track of the store state
         const highlighted2After = getStoreMapHighlightedFeatures(this.getMapId());
 
         // Reshowing the details panel which will re-add the highlight
-        test.addStep('Reopening details app bar panel...');
-        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
-
-        // Wait for the React UI to actually pick up on the store update
-        test.addStep(`Waiting on UI to refresh and the details panel to reopen...`);
-        await GVAbstractTester.waitForReactIdle();
-
-        // Wait for the React UI to actually pick up on the store update
-        // GV The highlight only happens through a React render effect so we can't wait for a particular event
-        test.addStep(`Waiting on highlights to happen via react rendering...`);
-        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
+        await this.toggleAppbarTab(test, 'details', true);
 
         // Keep track of the store state
         const highlighted3After = getStoreMapHighlightedFeatures(this.getMapId());
