@@ -139,7 +139,7 @@ export class GeochartTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathRemove);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathRemove);
       }
     );
   }

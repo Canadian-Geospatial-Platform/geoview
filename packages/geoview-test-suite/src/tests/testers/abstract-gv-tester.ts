@@ -1148,7 +1148,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapViewer - The map viewer instance from which the layer is removed
    * @param layerPath - The unique path or ID of the layer to be removed
    */
-  helperFinalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
+  finalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
     Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
@@ -1170,7 +1170,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param clickCoordinates - The longitude and latitude coordinates to click
    * @returns A promise that resolves after the query and batched store propagation complete
    */
-  async helperSimulateMapClickWaitForStoreUpdate(test: Test, clickCoordinates: Coordinate): Promise<void> {
+  async simulateMapClickWaitForBatchedQuery(test: Test, clickCoordinates: Coordinate): Promise<void> {
     // Simulate map click
     test.addStep(`Simulating map click on all queryable layers for coordinate [${clickCoordinates.join(', ')}]...`);
     const promiseMapclick = this.getMapViewer().simulateMapClick(clickCoordinates);
@@ -1180,40 +1180,97 @@ export abstract class GVAbstractTester extends AbstractTester {
     await promiseMapclick.promiseQueryBatched;
   }
 
-  // #region STATIC METHODS
+  /**
+   * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
+   *
+   * @param test - The test instance used to record each step
+   * @param tabId - The app bar tab identifier
+   * @param open - Whether to open or close the app bar tab
+   * @returns A promise that resolves when the app bar tab reaches the requested state
+   */
+  async toggleAppbarTab(test: Test, tabId: string, open: boolean): Promise<void> {
+    if (open) {
+      // Opening app bar tab
+      test.addStep(`Opening ${tabId} app bar panel...`);
+      this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, true, false);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to open...`);
+      await this.waitForAppbarTabSelected(tabId);
+    } else {
+      test.addStep(`Closing ${tabId} app bar panel...`);
+      this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, false, false);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to close...`);
+      await this.waitForAppbarTabNotSelected(tabId);
+    }
+  }
 
   /**
-   * Waits for a footer tab to receive the selected class.
+   * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
    *
-   * @param mapId - The map identifier
-   * @param tabId - The footer tab identifier
-   * @returns A promise that resolves with the selected footer tab element
+   * @param test - The test instance used to record each step
+   * @param tabId - The app bar tab identifier
+   * @param open - Whether to open or close the app bar tab
+   * @returns A promise that resolves when the app bar tab reaches the requested state
    */
-  static waitForFooterTabSelected(mapId: string, tabId: string): Promise<Element> {
-    return this.waitForClass(`#${mapId}-tab-${tabId}.Mui-selected`);
+  async toggleFooterbarTab(test: Test, tabId: string, open: boolean): Promise<void> {
+    if (open) {
+      // Opening app bar tab
+      test.addStep(`Opening ${tabId} footer bar panel...`);
+      this.getControllersRegistry().uiController.setActiveFooterBarTab(tabId);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to open...`);
+      await this.waitForFooterTabSelected(tabId);
+    } else {
+      test.addStep(`Closing ${tabId} footer bar panel...`);
+      this.getControllersRegistry().uiController.setActiveFooterBarTab(undefined);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to close...`);
+      await this.waitForFooterTabNotSelected(tabId);
+    }
   }
 
   /**
    * Waits for an app bar tab button to receive the active class.
    *
-   * @param mapId - The map identifier
    * @param tabId - The app bar tab identifier
    * @returns A promise that resolves with the active app bar tab button element
    */
-  static waitForAppbarTabSelected(mapId: string, tabId: string): Promise<Element> {
-    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn.active`);
+  waitForAppbarTabSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn.active`);
   }
 
   /**
    * Waits for an app bar tab button to no longer have the active class.
    *
-   * @param mapId - The map identifier
    * @param tabId - The app bar tab identifier
    * @returns A promise that resolves with the inactive app bar tab button element
    */
-  static waitForAppbarTabNotSelected(mapId: string, tabId: string): Promise<Element> {
-    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn:not(.active)`);
+  waitForAppbarTabNotSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn:not(.active)`);
   }
 
-  // #endregion STATIC METHODS
+  /**
+   * Waits for a footer tab to receive the selected class.
+   *
+   * @param tabId - The footer tab identifier
+   * @returns A promise that resolves with the selected footer tab element
+   */
+  waitForFooterTabSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}.Mui-selected`);
+  }
+
+  /**
+   * Waits for a footer tab to no longer have the selected class.
+   *
+   * @param tabId - The footer tab identifier
+   * @returns A promise that resolves with the inactive footer tab element
+   */
+  waitForFooterTabNotSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}:not(.Mui-selected)`);
+  }
 }

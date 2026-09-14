@@ -326,11 +326,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test footer bar select tab',
-      (test) => {
+      async (test) => {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getControllersRegistry().uiController.setActiveFooterBarTab(targetTab);
+        await this.toggleFooterbarTab(test, targetTab, true);
 
         return targetTab;
       },
@@ -352,11 +352,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test app bar select tab',
-      (test) => {
+      async (test) => {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getControllersRegistry().uiController.setActiveAppBarTab(targetTab, true, true);
+        await this.toggleAppbarTab(test, targetTab, true);
 
         return targetTab;
       },
@@ -837,7 +837,7 @@ export class MapTester extends GVAbstractTester {
       'Test details layer selection persistence across map clicks',
       async (test) => {
         // Simulate a map click at first location
-        await this.helperSimulateMapClickWaitForStoreUpdate(test, clickCoordinates1);
+        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates1);
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
@@ -852,7 +852,7 @@ export class MapTester extends GVAbstractTester {
         this.getControllersRegistry().detailsController.setSelectedLayerPath(altLayerPath);
 
         // Simulate a map click at second location
-        await this.helperSimulateMapClickWaitForStoreUpdate(test, clickCoordinates2);
+        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates2);
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');
