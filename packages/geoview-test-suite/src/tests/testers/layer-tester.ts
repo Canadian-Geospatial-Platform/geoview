@@ -113,7 +113,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -199,7 +199,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -281,7 +281,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -359,7 +359,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -403,7 +403,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -454,7 +454,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -536,7 +536,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -582,7 +582,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -628,7 +628,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -667,7 +667,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -764,7 +764,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert (removing the outer group removes the whole subtree)
-        this.helperFinalizeStepRemoveLayerAndAssert(test, groupPath);
+        this.finalizeStepRemoveLayerAndAssert(test, groupPath);
       }
     );
   }
@@ -810,7 +810,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -899,7 +899,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -984,7 +984,7 @@ export class LayerTester extends GVAbstractTester {
         },
         (test) => {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         }
       );
     }
@@ -1077,7 +1077,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1199,7 +1199,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1238,7 +1238,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1325,7 +1325,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1412,7 +1412,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1505,7 +1505,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1585,7 +1585,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1668,7 +1668,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1837,7 +1837,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1901,7 +1901,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1985,7 +1985,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2068,7 +2068,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2132,7 +2132,7 @@ export class LayerTester extends GVAbstractTester {
         // If the test was running
         if (isRunningHeavyTests) {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, gvLayerPath);
         }
       }
     );
@@ -2294,7 +2294,7 @@ export class LayerTester extends GVAbstractTester {
           .layerController.getGeoviewLayerPaths()
           .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
         Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+        if (cleanupLayerPath) this.finalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
       }
     );
   }
@@ -2341,7 +2341,7 @@ export class LayerTester extends GVAbstractTester {
           .layerController.getGeoviewLayerPaths()
           .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
         Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+        if (cleanupLayerPath) this.finalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
       }
     );
   }
@@ -2393,7 +2393,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2427,7 +2427,7 @@ export class LayerTester extends GVAbstractTester {
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2477,7 +2477,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2546,7 +2546,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2755,7 +2755,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2826,7 +2826,7 @@ export class LayerTester extends GVAbstractTester {
         // If the test was running
         if (isRunningOnVPN) {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         }
       }
     );
