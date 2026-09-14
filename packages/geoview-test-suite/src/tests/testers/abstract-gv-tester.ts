@@ -1114,7 +1114,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapConfig - The map configuration object (will be JSON-stringified)
    * @returns A promise that resolves with the newly created MapViewer
    */
-  async replaceMap<T>(test: Test<T>, mapId: string, mapConfig: unknown): Promise<MapViewer> {
+  async replaceMap(test: Test, mapId: string, mapConfig: unknown): Promise<MapViewer> {
     // Delete current map
     test.addStep('Deleting current map...');
     await this.getApi().deleteMapViewer(mapId, false);
@@ -1148,7 +1148,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapViewer - The map viewer instance from which the layer is removed
    * @param layerPath - The unique path or ID of the layer to be removed
    */
-  helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, layerPath: string): void {
+  helperFinalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
     Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
@@ -1162,4 +1162,58 @@ export abstract class GVAbstractTester extends AbstractTester {
     const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
     Test.assertIsUndefined('legendLayer', legendLayer);
   }
+
+  /**
+   * Simulates a map click and waits for the batched query results to propagate to the store.
+   *
+   * @param test - The test instance used to record each step
+   * @param clickCoordinates - The longitude and latitude coordinates to click
+   * @returns A promise that resolves after the query and batched store propagation complete
+   */
+  async helperSimulateMapClickWaitForStoreUpdate(test: Test, clickCoordinates: Coordinate): Promise<void> {
+    // Simulate map click
+    test.addStep(`Simulating map click on all queryable layers for coordinate [${clickCoordinates.join(', ')}]...`);
+    const promiseMapclick = this.getMapViewer().simulateMapClick(clickCoordinates);
+
+    // Wait for batched query
+    test.addStep(`Waiting on the query to complete and get in the store...`);
+    await promiseMapclick.promiseQueryBatched;
+  }
+
+  // #region STATIC METHODS
+
+  /**
+   * Waits for a footer tab to receive the selected class.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The footer tab identifier
+   * @returns A promise that resolves with the selected footer tab element
+   */
+  static waitForFooterTabSelected(mapId: string, tabId: string): Promise<Element> {
+    return this.waitForClass(`#${mapId}-tab-${tabId}.Mui-selected`);
+  }
+
+  /**
+   * Waits for an app bar tab button to receive the active class.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns A promise that resolves with the active app bar tab button element
+   */
+  static waitForAppbarTabSelected(mapId: string, tabId: string): Promise<Element> {
+    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn.active`);
+  }
+
+  /**
+   * Waits for an app bar tab button to no longer have the active class.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns A promise that resolves with the inactive app bar tab button element
+   */
+  static waitForAppbarTabNotSelected(mapId: string, tabId: string): Promise<Element> {
+    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn:not(.active)`);
+  }
+
+  // #endregion STATIC METHODS
 }
