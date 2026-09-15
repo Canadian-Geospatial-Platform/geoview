@@ -91,7 +91,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pSimplePingXyz401 = this.#coreTester.testSimplePingXyzTileUrlUnauthorized();
     if (isRunningSequentially) await pSimplePingXyz401;
 
-    // Test validateAndPingUrlOGC (OGC-aware)
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
     if (isRunningSequentially) await pPingInvalidFormat;
 
@@ -104,7 +103,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
     if (isRunningSequentially) await pGeometryCollectionLegendStyles;
 
-    // Test GeoUtilities service metadata functions
     const pWmsMetadata = this.#coreTester.testProxyGetWMSServiceMetadata();
     if (isRunningSequentially) await pWmsMetadata;
 
@@ -123,7 +121,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pWmtsMetadataBadUrl = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
     if (isRunningSequentially) await pWmtsMetadataBadUrl;
 
-    // Test GeoUtilities fetch with proxy fallback
     // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
     if (isRunningSequentially) await pFetchJsonProxyBadUrl;
