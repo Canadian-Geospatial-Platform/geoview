@@ -9,7 +9,7 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { buildGVElementId, getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -464,7 +464,10 @@ export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoV
 export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
   const root = useStoreAppGeoviewHTMLElement();
   return useCallback(
-    (suffix: string): HTMLElement | undefined => root?.querySelector<HTMLElement>(`#${CSS.escape(`${root.id}-${suffix}`)}`) ?? undefined,
+    (suffix: string): HTMLElement | undefined => {
+      const fullId = buildGVElementId(root.id, suffix);
+      return root.querySelector<HTMLElement>(`#${CSS.escape(fullId)}`) ?? undefined;
+    },
     [root]
   );
 };
