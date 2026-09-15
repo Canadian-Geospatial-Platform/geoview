@@ -12,7 +12,6 @@ import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { TestSkippedError } from '../core/exceptions';
 
 /**
  * Main Core testing class.
@@ -314,17 +313,9 @@ export class CoreTester extends GVAbstractTester {
    */
   testProxyGetWMSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMSCapabilities>>> {
     return this.test(
-      `Test GeoUtilities.getWMSServiceMetadata with Nonna WMS (proxy fallback)...`,
+      `Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...`,
       (test) => {
-        // Actually, the nonna service now supports CORS so we can't run this test anymore, needs to be replaced with another WMS service that requires a proxy.
-        throw new TestSkippedError(
-          'The Nonna WMS service now supports CORS, test skipped. This test needs to be replaced with another WMS service that requires a proxy.'
-        );
-
-        // TODO: TEST - Replace the Nonna WMS service with a new WMS service that requires a proxy.
-        //  Leaving the code below commented-out to reactivate when a new WMS service that requires a proxy is available.
-        // eslint-disable-next-line no-unreachable
-        const url = GVAbstractTester.NONNA_WMS_URL;
+        const url = GVAbstractTester.FOREST_BURN_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
         return GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
