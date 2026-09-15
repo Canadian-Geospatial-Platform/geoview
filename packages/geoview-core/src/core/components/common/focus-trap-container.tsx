@@ -9,6 +9,7 @@ import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/s
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { doTimeout } from '@/core/utils/utilities';
+import { getGVElementByFullId, queryGVSelector } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -92,7 +93,7 @@ export const FocusTrapContainer = memo(({
           if (result !== 'timeout') return;
 
           // Only attempt a direct id lookup when the caller opted in via restoreFocusElementId
-          const target = restoreFocusElementId ? document.getElementById(restoreFocusElementId) : undefined;
+          const target = restoreFocusElementId ? getGVElementByFullId(mapId, restoreFocusElementId) : undefined;
           if (target) {
             target.focus();
           } else {
@@ -102,7 +103,7 @@ export const FocusTrapContainer = memo(({
                 restoreFocusElementId
               );
             }
-            document.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus();
+            queryGVSelector<HTMLElement>(mapId, '[role="tab"][aria-selected="true"]')?.focus();
           }
         })
         .catch((error) => {
@@ -111,7 +112,7 @@ export const FocusTrapContainer = memo(({
     } else {
       uiController.disableFocusTrap(focusTrapContainerId);
     }
-  }, [uiController, focusTrapContainerId, restoreFocusElementId, containerType]);
+  }, [uiController, focusTrapContainerId, restoreFocusElementId, containerType, mapId]);
 
   /**
    * Cancels a pending restore-focus job on unmount.
@@ -206,7 +207,7 @@ export const FocusTrapContainer = memo(({
         .then((result) => {
           if (result === 'timeout') {
             // Explicitly request focus indicator for keyboard users
-            document.getElementById(exitBtnId)?.focus({ focusVisible: true });
+            getGVElementByFullId(mapId, exitBtnId)?.focus({ focusVisible: true });
           }
         })
         .catch((error) => {
@@ -218,7 +219,7 @@ export const FocusTrapContainer = memo(({
     return () => {
       delayJob?.cancel();
     };
-  }, [focusItem, focusTrapContainerId, exitBtnId]);
+  }, [focusItem, focusTrapContainerId, exitBtnId, mapId]);
 
   /**
    * Auto-activates the focus trap when a footer panel transitions to open.
@@ -256,7 +257,7 @@ export const FocusTrapContainer = memo(({
       open &&
       focusTrapContainerId !== focusItem.activeElementId
     ) {
-      const container = document.getElementById(focusTrapContainerId);
+      const container = getGVElementByFullId(mapId, focusTrapContainerId);
       if (container) {
         // Add focus listener directly to the container
         const handleContainerFocus = (): void => {
@@ -273,7 +274,7 @@ export const FocusTrapContainer = memo(({
 
     // Always return a cleanup function or undefined
     return undefined;
-  }, [containerType, activeTrapGeoView, open, focusTrapContainerId, focusItem.activeElementId, uiController]);
+  }, [containerType, activeTrapGeoView, open, focusTrapContainerId, focusItem.activeElementId, uiController, mapId]);
 
   // disableAutoFocus: prevents MUI FocusTrap from auto-focusing first child. Without this, First item inside FocusTrap (<Box>) gets focus first.
   // disableRestoreFocus: to prevent fighting for focus between multiple FocusTraps

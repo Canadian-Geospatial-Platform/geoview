@@ -6,7 +6,7 @@ Hold viewer specific css not inside theme
  * LEGACY: The .keyboard-focused class is applied by JavaScript (api.ts #manageKeyboardFocus)
  * to ANY element that receives Tab focus within a .geoview-map container (not just the map 
  * element). Crosshair activation is separate logic that only triggers when the specific map
- * element (mapTargetElement-{mapId}) receives focus.
+ * element ({mapId}-mapTargetElement) receives focus.
  * 
  * This CSS rule targets the outer map container shell element, but the JavaScript actually
  * applies the class to the focused element itself, making this selector currently ineffective

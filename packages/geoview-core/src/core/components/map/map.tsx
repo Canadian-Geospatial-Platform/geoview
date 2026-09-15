@@ -24,6 +24,7 @@ import { logger } from '@/core/utils/logger';
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useUIController } from '@/core/controllers/use-controllers';
+import { buildGVElementId, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 
 /** Props for the Map component. */
 type MapProps = {
@@ -124,7 +125,7 @@ export function Map(props: MapProps): JSX.Element {
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
     <Box
-      id={`mapTargetElement-${mapId}`}
+      id={buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget)}
       ref={mapElement}
       sx={memoSxClasses.mapContainer}
       tabIndex={mapInteraction === 'static' ? -1 : 0}

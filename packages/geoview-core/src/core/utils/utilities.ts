@@ -880,6 +880,8 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  * @returns the React root element
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement): Root {
+  // targetDivId is a caller-provided mount point, not necessarily a GeoView map root.
+  // eslint-disable-next-line no-restricted-syntax
   const root = createRoot(document.getElementById(targetDivId)!);
   root.render(component);
   return root;
@@ -1695,6 +1697,8 @@ export function handleEscapeKey(key: string, cb?: () => void, callbackId?: strin
   if (key === 'Escape') {
     if (isFocusTrapped && callbackId) {
       setTimeout(() => {
+        // callbackId is a caller-provided full id; this shared util has no mapId context.
+        // eslint-disable-next-line no-restricted-syntax
         document.getElementById(callbackId ?? '')?.focus();
       }, TIMEOUT.dataPanelLoading);
     }

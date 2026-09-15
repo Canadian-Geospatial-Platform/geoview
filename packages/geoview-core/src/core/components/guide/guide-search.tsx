@@ -15,6 +15,7 @@ import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { getGVGuidebox } from '@/core/utils/dom-helper';
 import { getSxClasses } from './guide-style';
 
 /** Props for the GuideSearch component. */
@@ -402,8 +403,12 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
       );
 
       setTimeout(() => {
+        // Use the visible guide box for this map (inline + portaled copies can coexist in fullscreen).
+        const guideContainer = getGVGuidebox(mapId);
+        if (!guideContainer) return;
+
         // Ensure the section is expanded/visible
-        const sectionElements = document.querySelectorAll('[data-section-index]');
+        const sectionElements = guideContainer.querySelectorAll('[data-section-index]');
         const targetSection = Array.from(sectionElements).find(
           (el) => el.getAttribute('data-section-index') === match.sectionIndex.toString()
         );
@@ -419,14 +424,14 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
         // Wait a bit more for potential expansion animation
         setTimeout(() => {
           // For all matches, scroll to the highlighted text
-          const currentMatchElement = document.querySelector('.current-match');
+          const currentMatchElement = guideContainer.querySelector('.current-match');
           if (currentMatchElement) {
             currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, TIMEOUT.guideSearchVisibility);
       }, TIMEOUT.guideSearchSectionExpand);
     },
-    [allMatches, onSectionChange, t]
+    [allMatches, onSectionChange, t, mapId]
   );
 
   /**

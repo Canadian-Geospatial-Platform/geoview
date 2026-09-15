@@ -15,6 +15,8 @@ export abstract class Plugin {
    */
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
+      // Script tags live in <head>, not inside a map — a global lookup is required.
+      // eslint-disable-next-line no-restricted-syntax
       const existingScript = document.querySelector(`script#${pluginId}`);
 
       if (!existingScript) {

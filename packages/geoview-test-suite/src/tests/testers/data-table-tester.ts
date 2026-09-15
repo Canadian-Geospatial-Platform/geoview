@@ -7,6 +7,7 @@ import {
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
+import { getGVRootElement, queryGVSelectorAll } from 'geoview-core/core/utils/dom-helper';
 
 /**
  * Main Data Table testing class.
@@ -190,7 +191,7 @@ export class DataTableTester extends GVAbstractTester {
         // When disabled, the MUI Switch input element has the 'disabled' attribute
         test.addStep('Checking DOM for disabled filter-map switch...');
         const mapId = this.getMapId();
-        const switchInputs = document.querySelectorAll(`#${mapId} .MuiSwitch-input`);
+        const switchInputs = queryGVSelectorAll(mapId, '.MuiSwitch-input');
         let isFilterMapDisabled = false;
         switchInputs.forEach((input) => {
           if ((input as HTMLInputElement).disabled) {
@@ -347,7 +348,7 @@ export class DataTableTester extends GVAbstractTester {
         // Check DOM — FilterDataToExtent IS rendered for vector layers
         test.addStep('Checking DOM for presence of filter-by-extent switch...');
         const mapId = this.getMapId();
-        const mapContainer = document.getElementById(mapId);
+        const mapContainer = getGVRootElement(mapId);
         const allSwitchLabels = mapContainer?.querySelectorAll('.MuiFormControlLabel-root') ?? [];
         let filterByExtentFound = false;
         allSwitchLabels.forEach((label) => {
@@ -381,7 +382,7 @@ export class DataTableTester extends GVAbstractTester {
         // The component uses the label t('dataTable.filterDataToExtent') — look for its absence
         test.addStep('Checking DOM for absence of filter-by-extent switch...');
         const mapId = this.getMapId();
-        const mapContainer = document.getElementById(mapId);
+        const mapContainer = getGVRootElement(mapId);
         const allSwitchLabels = mapContainer?.querySelectorAll('.MuiFormControlLabel-root') ?? [];
         let filterByExtentFound = false;
         allSwitchLabels.forEach((label) => {

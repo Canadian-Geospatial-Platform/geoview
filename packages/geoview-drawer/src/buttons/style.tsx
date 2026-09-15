@@ -233,6 +233,9 @@ export function StylePanel(): JSX.Element {
 
     const addCloseButtons = (): void => {
       // Find all color picker popovers
+      // MuiColorInput renders its popover in a portal on document.body, outside any map's subtree,
+      // so a map-scoped wrapper cannot reach it — a global query is required here.
+      // eslint-disable-next-line no-restricted-syntax
       const popovers = document.querySelectorAll('.MuiColorInput-PopoverBody');
 
       popovers.forEach((popover) => {

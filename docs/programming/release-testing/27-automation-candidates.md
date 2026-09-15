@@ -147,13 +147,13 @@ These tests from the release plan are already covered by the existing test suite
 
 ### Navbar DOM Checks (suite-map-config or suite-ui)
 
-| #   | Test                                                                                                    | Priority | Notes                                                              |
-| --- | ------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------ |
-| 42  | **Navbar button presence** — Load config, check DOM for each expected button element                    | P1       | Query `document.querySelector` for button class/id per button type |
-| 43  | **Zoom via API** — Call `mapController.zoomMap()`, verify store zoom changes                            | P1       | Already partially covered; explicit pre/post store check           |
-| 44  | **Home button zoom/center** — Pan/zoom away, call `zoomToInitialExtent()`, verify store matches initial | P1       | Store zoom + center comparison                                     |
-| 45  | **Rotation via API** — Call `mapController.rotate(45)`, verify store rotation = 45                      | P1       | Store-based check                                                  |
-| 46  | **Projection via API** — Call `mapController.setProjection(3857)`, verify store projection = 3857       | P1       | Already covered in suite-map; confirm store value                   |
+| #   | Test                                                                                                    | Priority | Notes                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| 42  | **Navbar button presence** — Load config, check DOM for each expected button element                    | P1       | Query `queryGVSelector(mapId, …)` / `getGVElementById(mapId, …)` for button class/id per button type |
+| 43  | **Zoom via API** — Call `mapController.zoomMap()`, verify store zoom changes                            | P1       | Already partially covered; explicit pre/post store check                                             |
+| 44  | **Home button zoom/center** — Pan/zoom away, call `zoomToInitialExtent()`, verify store matches initial | P1       | Store zoom + center comparison                                                                       |
+| 45  | **Rotation via API** — Call `mapController.rotate(45)`, verify store rotation = 45                      | P1       | Store-based check                                                                                    |
+| 46  | **Projection via API** — Call `mapController.setProjection(3857)`, verify store projection = 3857       | P1       | Already covered in suite-map; confirm store value                                                    |
 
 ### Projection & Rotation Store Checks (suite-map)
 
@@ -203,14 +203,14 @@ These tests from the release plan are already covered by the existing test suite
 
 ### Details Panel (suite-details or suite-map)
 
-| #   | Test                                                                                                                                       | Priority | Notes                                                                      |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------- |
-| 79  | ~~**Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map~~                         | P1       | ✅ Done — `testClearAllHighlights` in `suite-details`                      |
+| #   | Test                                                                                                                                       | Priority | Notes                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------- |
+| 79  | ~~**Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map~~                         | P1       | ✅ Done — `testClearAllHighlights` in `suite-details`                |
 | 80  | ~~**Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results~~                         | P1       | ✅ Done — Already in suite-map (`testNonQueryableLayerNotInDetails`) |
-| 81  | ~~**Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes~~                                             | P2       | ✅ Done — `testZoomToFeature` in `suite-details`                           |
-| 82  | ~~**nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value~~                       | P2       | ✅ Done — `testNameFieldAsLabel` in `suite-details`                        |
-| 117 | ~~**Summary false hides field** — Query a layer with `outfields[].summary: false`, verify field excluded from result features' fieldInfo~~ | P1       | ✅ Done — `testSummaryFalseHidesField` in `suite-details`                  |
-| 118 | ~~**Field alias renames field** — Query a layer with `outfields[].alias`, verify field label uses alias instead of raw name~~              | P1       | ✅ Done — `testFieldAliasRenamesField` in `suite-details`                  |
+| 81  | ~~**Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes~~                                             | P2       | ✅ Done — `testZoomToFeature` in `suite-details`                     |
+| 82  | ~~**nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value~~                       | P2       | ✅ Done — `testNameFieldAsLabel` in `suite-details`                  |
+| 117 | ~~**Summary false hides field** — Query a layer with `outfields[].summary: false`, verify field excluded from result features' fieldInfo~~ | P1       | ✅ Done — `testSummaryFalseHidesField` in `suite-details`            |
+| 118 | ~~**Field alias renames field** — Query a layer with `outfields[].alias`, verify field label uses alias instead of raw name~~              | P1       | ✅ Done — `testFieldAliasRenamesField` in `suite-details`            |
 
 ### Data Table (suite-data-table)
 

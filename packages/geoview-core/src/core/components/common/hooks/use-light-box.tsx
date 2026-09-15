@@ -3,6 +3,8 @@ import { Box } from '@/ui';
 import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -41,6 +43,7 @@ function BaseLightBoxComponent({
   logger.logTraceRender('components/common/hooks/use-light-box (BaseLightBoxComponent)');
 
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const mapId = useStoreGeoViewMapId();
 
   /**
    * Handles when the user changes slides in the lightbox.
@@ -61,7 +64,7 @@ function BaseLightBoxComponent({
     if (!activeTrapGeoView) return;
 
     setTimeout(() => {
-      const element = document.getElementById(returnFocusId);
+      const element = getGVElementByFullId(mapId, returnFocusId);
       if (element) {
         // Explicitly request focus indicator for keyboard users
         element.focus({ focusVisible: true });
@@ -69,7 +72,7 @@ function BaseLightBoxComponent({
         logger.logWarning(`LightBox focus restoration failed: element "${returnFocusId}" not found`);
       }
     }, TIMEOUT.focusDelayLightbox);
-  }, [activeTrapGeoView, returnFocusId, onExit]);
+  }, [activeTrapGeoView, returnFocusId, onExit, mapId]);
 
   if (!isLightBoxOpen) return <Box />;
 

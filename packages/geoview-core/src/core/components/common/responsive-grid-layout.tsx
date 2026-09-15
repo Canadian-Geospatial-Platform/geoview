@@ -21,6 +21,7 @@ import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -278,6 +279,8 @@ const ResponsiveGridLayout = forwardRef(
       }
 
       // Check if lightbox is open - if so, don't close sub panel (lightbox will handle its own ESC)
+      // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+      // eslint-disable-next-line no-restricted-syntax
       const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
       if (isLightboxOpen) {
         return;
@@ -336,7 +339,7 @@ const ResponsiveGridLayout = forwardRef(
       if (isGuideOpen) {
         // Use RAF for next frame
         requestAnimationFrame(() => {
-          document.getElementById(`${mapId}-${containerType}-guide-close-btn`)?.focus();
+          getGVElementById(mapId, `${containerType}-guide-close-btn`)?.focus();
         });
       }
     }, [isGuideOpen, mapId, containerType]);
@@ -390,6 +393,8 @@ const ResponsiveGridLayout = forwardRef(
      */
     const handleFullScreenClose = useCallback((event?: {}, reason?: 'escapeKeyDown' | 'backdropClick'): void => {
       if (reason === 'escapeKeyDown') {
+        // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+        // eslint-disable-next-line no-restricted-syntax
         const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
         if (isLightboxOpen) {
           return;

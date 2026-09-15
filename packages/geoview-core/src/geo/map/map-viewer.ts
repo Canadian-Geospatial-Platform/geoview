@@ -72,6 +72,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import { getGVElementById } from '@/core/utils/dom-helper';
 import { debounce } from '@/core/utils/debounce';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -1549,7 +1550,7 @@ export class MapViewer {
    * @returns The map container HTML element, if found
    */
   getHTMLElementMapContainer(): HTMLElement | undefined {
-    return document.getElementById(`map-${this.mapId}`) ?? undefined;
+    return getGVElementById(this.mapId, 'map');
   }
 
   /**
@@ -1558,7 +1559,7 @@ export class MapViewer {
    * @returns The scale control bar metric HTML element, if found
    */
   getHTMLElementScaleControlBarMetric(): HTMLElement | undefined {
-    return document.getElementById(`${this.mapId}-scaleControlBarMetric`) ?? undefined;
+    return getGVElementById(this.mapId, 'scaleControlBarMetric');
   }
 
   /**
@@ -1567,7 +1568,7 @@ export class MapViewer {
    * @returns The scale control bar imperial HTML element, if found
    */
   getHTMLElementScaleControlBarImperial(): HTMLElement | undefined {
-    return document.getElementById(`${this.mapId}-scaleControlBarImperial`) ?? undefined;
+    return getGVElementById(this.mapId, 'scaleControlBarImperial');
   }
 
   /**
@@ -1576,7 +1577,7 @@ export class MapViewer {
    * @returns The north pole marker HTML element, if found
    */
   getHTMLElementNorthPole(): HTMLElement | undefined {
-    return document.getElementById(`${this.mapId}-northpole`) ?? undefined;
+    return getGVElementById(this.mapId, 'northpole');
   }
 
   /**
@@ -1585,7 +1586,7 @@ export class MapViewer {
    * @returns The click marker HTML element, if found
    */
   getHTMLElementClickMarker(): HTMLElement | undefined {
-    return document.getElementById(`${this.mapId}-clickmarker`) ?? undefined;
+    return getGVElementById(this.mapId, 'clickmarker');
   }
 
   /**
@@ -1594,7 +1595,7 @@ export class MapViewer {
    * @returns The map info bar HTML element, if found
    */
   getHTMLElementMapInfo(): HTMLElement | undefined {
-    return document.getElementById(`${this.mapId}-mapInfo`) ?? undefined;
+    return getGVElementById(this.mapId, 'mapInfo');
   }
 
   /**

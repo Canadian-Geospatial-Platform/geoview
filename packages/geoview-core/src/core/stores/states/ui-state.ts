@@ -7,6 +7,7 @@ import type {
   TypeValidNavBarProps,
 } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGVElementByFullId } from '@/core/utils/dom-helper';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
@@ -211,7 +212,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         requestAnimationFrame(() => {
           // Don't focus if 'no-focus' is passed
           if (id !== 'no-focus') {
-            const element = document.getElementById(id);
+            const element = getGVElementByFullId(get().mapId, id);
             if (element) {
               // Explicitly request focus indicator for keyboard users
               element.focus({ focusVisible: true });

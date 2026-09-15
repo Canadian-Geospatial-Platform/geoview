@@ -19,6 +19,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
+import { getGVGuidebox } from '@/core/utils/dom-helper';
 import { getSxClasses } from './guide-style';
 import { GuideSearch } from './guide-search';
 import type { SxStyles } from '@/ui/style/types';
@@ -225,10 +226,8 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
   useEffect(() => {
     logger.logTraceUseEffect('GUIDE - anchor link navigation and scroll reset', selectedLayerPath, guideItemIndex, isFullScreen);
 
-    // Find the guidebox-container (scoped when not fullscreen, global when fullscreen due to Portal)
-    const guideboxContainer = isFullScreen
-      ? document.querySelector(`.guidebox-container[data-map-id="${mapId}"]`)
-      : rootRef.current?.querySelector('.guidebox-container');
+    // Find the guidebox-container (visible copy; portaled out of the map root in fullscreen)
+    const guideboxContainer = getGVGuidebox(mapId);
 
     if (!guideboxContainer) {
       return;

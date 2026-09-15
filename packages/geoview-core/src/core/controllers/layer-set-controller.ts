@@ -270,20 +270,23 @@ export class LayerSetController extends AbstractMapViewerController {
    * Switches the open panel to the details tab when a map click occurs.
    *
    * If the current footer-bar tab is neither 'details' nor 'geochart', the footer bar
-   * switches to 'details'. Also opens the app-bar details tab with focus trap when available.
+   * switches to 'details'. When the footer does not host details, the app-bar details tab
+   * is opened instead. Only one details panel is activated so two focus traps never compete
+   * (which caused a focus-trap loop in crosshair/WCAG mode when details was in both bars).
    */
   openDetailsPanelOnMapClick(): void {
-    // Show details panel as soon as there is a click on the map
-    // If the current tab is not 'details' nor 'geochart', switch to details
-    if (
-      getStoreUIActiveFooterBarTab(this.getMapId()) === undefined ||
-      (!['details', 'geochart'].includes(getStoreUIActiveFooterBarTab(this.getMapId()).tabId) &&
-        getStoreUIFooterBarComponents(this.getMapId()).includes('details'))
-    ) {
-      this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
-    }
-    // Open details appbar tab when user clicked on map layer.
-    if (getStoreUIAppBarComponents(this.getMapId()).includes('details')) {
+    const hasFooterDetails = getStoreUIFooterBarComponents(this.getMapId()).includes('details');
+
+    // Prefer the footer details tab when both bars host details (matches useNavigateToTab behavior).
+    if (hasFooterDetails) {
+      // Show details panel as soon as there is a click on the map
+      // If the current tab is not 'details' nor 'geochart', switch to details
+      const activeFooterBarTab = getStoreUIActiveFooterBarTab(this.getMapId());
+      if (activeFooterBarTab === undefined || !['details', 'geochart'].includes(activeFooterBarTab.tabId)) {
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
+      }
+    } else if (getStoreUIAppBarComponents(this.getMapId()).includes('details')) {
+      // Open details appbar tab only when the footer does not also host details.
       this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, true);
     }
   }

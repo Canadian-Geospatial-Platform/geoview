@@ -10,9 +10,11 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
+import { getGVShellElement } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
 /** Slide definition for the lightbox. */
 export interface LightBoxSlides {
@@ -65,6 +67,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const shellContainer = useStoreAppShellContainer();
 
   /**
    * Syncs internal open state when the prop changes.
@@ -78,7 +81,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
    * Manages inert attribute on shell children when the lightbox opens or closes.
    */
   useEffect(() => {
-    const shellElement = document.getElementById(`shell-${mapId}`);
+    const shellElement = getGVShellElement(mapId);
     if (!shellElement) return;
 
     if (activeTrapGeoView && isOpen) {
@@ -115,6 +118,8 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key !== 'Tab') return;
 
+      // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+      // eslint-disable-next-line no-restricted-syntax
       const lightboxRoot = document.querySelector(LIGHTBOX_SELECTORS.ROOT);
       if (!lightboxRoot) return;
 
@@ -150,7 +155,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
       styles={{
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
       }}
-      portal={{ root: document.getElementById(`shell-${mapId}`) }}
+      portal={{ root: shellContainer }}
       open={isOpen}
       close={() => setIsOpen(false)}
       slides={slides}
@@ -164,6 +169,8 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
       labels={labels}
       on={{
         entered: () => {
+          // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+          // eslint-disable-next-line no-restricted-syntax
           const toolbar = document.querySelector(LIGHTBOX_SELECTORS.ROOT)?.querySelector(LIGHTBOX_SELECTORS.TOOLBAR);
           const lastButton = toolbar?.querySelector('button:last-of-type') as HTMLButtonElement | null;
           lastButton?.focus();

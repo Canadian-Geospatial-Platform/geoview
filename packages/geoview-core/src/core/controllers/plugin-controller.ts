@@ -5,6 +5,7 @@ import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { getScriptAndAssetURL, whenThisThen } from '@/core/utils/utilities';
+import { getGVRootElement } from '@/core/utils/dom-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PluginError } from '@/core/exceptions/geoview-exceptions';
@@ -193,7 +194,7 @@ export class PluginController extends AbstractMapViewerController {
        * for custom config for loaded core packages on the same path of the map config.
        * If none exists then load the default config
        */
-      const configUrl = document.getElementById(mapViewer.mapId)?.getAttribute('data-config-url');
+      const configUrl = getGVRootElement(mapViewer.mapId)?.getAttribute('data-config-url');
 
       // Check if there is a corePackageConfig for the plugin
       const configObj = mapViewer.getCorePackageConfig(pluginId);
@@ -300,6 +301,8 @@ export class PluginController extends AbstractMapViewerController {
    */
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
+      // Script tags live in <head>, not inside a map — a global lookup is required.
+      // eslint-disable-next-line no-restricted-syntax
       const existingScript = document.querySelector(`script#${pluginId}`);
 
       if (!existingScript) {
