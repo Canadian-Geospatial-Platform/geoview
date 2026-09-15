@@ -859,6 +859,10 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly VLIZ_BE_WMS_URL: string = 'https://geo.vliz.be/geoserver/wms?REQUEST=GetCapabilities&SERVICE=WMS';
   static readonly VLIZ_BE_WMSLAYER_ID: string = 'EMODPACE:EMOD-PACE_VD_2019_01_st_09';
 
+  /** WMS - Forest Burn service (CORS blocked, triggers proxy fallback) */
+  static readonly FOREST_BURN_WMS_URL: string = 'https://opendata.nfis.org/mapserver/cgi-bin/wms_change.cgi';
+  static readonly FOREST_BURN_WMS_LAYER_ID: string = 'CA_Forest_Burn_Probability_baseline_1991-2020';
+
   /** WFS — Belgium Meteo service (CORS blocked, triggers proxy fallback) */
   static readonly BELGIUM_WFS_URL: string = 'https://opendata.meteo.be/service/aws/ows';
 
