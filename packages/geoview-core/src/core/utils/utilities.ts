@@ -446,6 +446,37 @@ export function getScriptAndAssetURL(): string {
 }
 
 /**
+ * Sorts items by a display name with default first and numeric names in ascending order.
+ *
+ * The original array is not mutated. Names matching `default` are sorted first, numeric names are sorted by their
+ * numeric value, and all remaining names are sorted alphabetically.
+ *
+ * @param items - The items to sort
+ * @param getName - Callback that returns the item name used for sorting
+ * @returns A sorted copy of the items
+ */
+export function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[] {
+  return [...items].sort((itemA, itemB): number => {
+    const nameA = getName(itemA).trim();
+    const nameB = getName(itemB).trim();
+    const isNameADefault = nameA.toLowerCase() === 'default';
+    const isNameBDefault = nameB.toLowerCase() === 'default';
+
+    if (isNameADefault || isNameBDefault) return isNameADefault ? -1 : 1;
+
+    const numberA = Number(nameA);
+    const numberB = Number(nameB);
+    const isNameANumber = nameA !== '' && Number.isFinite(numberA);
+    const isNameBNumber = nameB !== '' && Number.isFinite(numberB);
+
+    if (isNameANumber && isNameBNumber) return numberA - numberB;
+    if (isNameANumber || isNameBNumber) return isNameANumber ? -1 : 1;
+
+    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base', numeric: true });
+  });
+}
+
+/**
  * Generates a unique id of the specified length.
  *
  * @param length - Number of characters to return
