@@ -853,6 +853,12 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly CANIMAGE_WMS_GROUP_ID: string = 'canimage';
   static readonly CANIMAGE_WMS_LEAF_ID: string = 'canimage.natural-colour.overview8';
 
+  static readonly CBMT_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/CBMT?REQUEST=GetCapabilities&SERVICE=WMS';
+  static readonly CBMT_WMS_LAYER_ID: string = 'National';
+
+  static readonly VLIZ_BE_WMS_URL: string = 'https://geo.vliz.be/geoserver/wms?REQUEST=GetCapabilities&SERVICE=WMS';
+  static readonly VLIZ_BE_WMSLAYER_ID: string = 'EMODPACE:EMOD-PACE_VD_2019_01_st_09';
+
   /** WFS — Belgium Meteo service (CORS blocked, triggers proxy fallback) */
   static readonly BELGIUM_WFS_URL: string = 'https://opendata.meteo.be/service/aws/ows';
 

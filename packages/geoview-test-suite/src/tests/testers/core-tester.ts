@@ -1,17 +1,18 @@
-﻿import type { PingResult } from 'geoview-core/core/utils/utilities';
-import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
-import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
+﻿import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
 import type {
   TypeMetadataWMSCapabilities,
   TypeMetadataWFSCapabilities,
   TypeMetadataWMTSCapabilities,
 } from 'geoview-core/api/types/layer-schema-types';
+import type { PingResult } from 'geoview-core/core/utils/utilities';
+import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
+import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/utilities';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
+import { TestSkippedError } from '../core/exceptions';
 
 /**
  * Main Core testing class.
@@ -315,6 +316,14 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test GeoUtilities.getWMSServiceMetadata with Nonna WMS (proxy fallback)...`,
       (test) => {
+        // Actually, the nonna service now supports CORS so we can't run this test anymore, needs to be replaced with another WMS service that requires a proxy.
+        throw new TestSkippedError(
+          'The Nonna WMS service now supports CORS, test skipped. This test needs to be replaced with another WMS service that requires a proxy.'
+        );
+
+        // TODO: TEST - Replace the Nonna WMS service with a new WMS service that requires a proxy.
+        //  Leaving the code below commented-out to reactivate when a new WMS service that requires a proxy is available.
+        // eslint-disable-next-line no-unreachable
         const url = GVAbstractTester.NONNA_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
         return GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);

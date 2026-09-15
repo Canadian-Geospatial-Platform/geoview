@@ -1553,7 +1553,6 @@ export class MapController extends AbstractMapViewerController {
 
     // On map center coord change, hide click marker
     if (centerChanged) {
-      logger.logDebug('Marking icon handleMapMoveEnd...');
       this.clickMarkerIconHide();
     }
   }
