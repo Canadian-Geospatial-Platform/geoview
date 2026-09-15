@@ -79,13 +79,13 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`         | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 39         | Fully sequential            |
-| 4. Components     | `suite-ui`          | `UITester`                                                                                      | 1          | Parallel                    |
+| 4. Components     | `suite-ui`          | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`     | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`  | `DataTableTester`                                                                               | 13         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`    | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`      | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                     |                                                                                                 | **229**    |                             |
+| **Total**         |                     |                                                                                                 | **230**    |                             |
 
 ---
 
@@ -675,9 +675,10 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-ui` · **File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
 **Execution:** Fully parallel (`Promise.all`) · **Guard:** None
 
-| #   | Method                           | Type | Description                                     |
-| --- | -------------------------------- | ---- | ----------------------------------------------- |
-| 1   | `testGuideDetailsPanelTopAnchor` | test | Test Details Panel - Select and Find Top Anchor |
+| #   | Method                           | Type | Description                                            |
+| --- | -------------------------------- | ---- | ------------------------------------------------------ |
+| 1   | `testGuideDetailsPanelTopAnchor` | test | Test Details Panel - Select and Find Top Anchor        |
+| 2   | `testControllerGetFooterHeight`  | test | Test UIController.getFooterHeight (non-React consumer) |
 
 ---
 

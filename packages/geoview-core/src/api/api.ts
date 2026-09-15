@@ -6,7 +6,18 @@ import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { getGVRootElement } from '@/core/utils/dom-helper';
+import {
+  GV_DOM_SUFFIX,
+  buildGVElementId,
+  getGVElementById,
+  getGVElementByFullId,
+  getGVGuidebox,
+  getGVMapTargetElement,
+  getGVRootElement,
+  getGVShellElement,
+  queryGVSelector,
+  queryGVSelectorAll,
+} from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
@@ -38,6 +49,17 @@ export class API {
     geo: GeoUtilities,
     projection: Projection,
     date: DateMgt,
+    dom: {
+      buildGVElementId,
+      getGVRootElement,
+      getGVElementById,
+      getGVElementByFullId,
+      getGVMapTargetElement,
+      getGVShellElement,
+      getGVGuidebox,
+      queryGVSelector,
+      queryGVSelectorAll,
+    },
   };
 
   /** List of available maps */
@@ -383,7 +405,7 @@ export class API {
             : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === `${mapId}-mapTargetElement`;
+          const mapFocus = activeEl?.getAttribute('id') === buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);

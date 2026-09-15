@@ -10,7 +10,7 @@ import { getFocusTrapSxClasses } from './containers-style';
 import type { SxStyles } from '@/ui/style/types';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { doTimeout } from '@/core/utils/utilities';
-import { getGVElementById, getGVRootElement } from '@/core/utils/dom-helper';
+import { getGVElementById, getGVMapTargetElement, getGVRootElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -61,7 +61,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Get container and fullscreen state
   const geoviewElement = useStoreAppGeoviewHTMLElement();
-  const mapElementStore = getGVElementById(mapId, 'mapTargetElement') as HTMLElement;
+  const mapElementStore = getGVMapTargetElement(mapId) as HTMLElement;
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener

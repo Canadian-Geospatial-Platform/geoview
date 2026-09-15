@@ -9,7 +9,7 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { getGVRootElement } from '@/core/utils/dom-helper';
+import { getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -533,14 +533,26 @@ export const useStoreAppShowUnsymbolizedFeatures = (): boolean =>
 /**
  * Hook that returns the shell container HTML element for the current map.
  *
- * Queries the DOM for the map's `${mapId}-shell` element within the root GeoView element.
+ * Delegates to `useGVElementById` so the shell is resolved through the single reactive-lookup path
+ * (map-scoped query anchored on the reactively-stored root element), rather than a hand-written query.
  *
  * @returns The shell container element.
  */
 export const useStoreAppShellContainer = (): HTMLElement => {
-  const geoviewElement = useStoreAppGeoviewHTMLElement();
-  const mapId = useStore(useGeoViewStore(), (state) => state.mapId);
-  return geoviewElement.querySelector(`#${CSS.escape(`${mapId}-shell`)}`) as HTMLElement;
+  return useGVElementById()(GV_DOM_SUFFIX.shell) as HTMLElement;
+};
+
+/**
+ * Hook that returns the OpenLayers map target element for the current map.
+ *
+ * Reactive counterpart to `getGVMapTargetElement`: resolved through the reactive-lookup path so a component
+ * re-renders once the element is mounted. Use this for render-time needs; use `getGVMapTargetElement(mapId)`
+ * for imperative access in effects, handlers, controllers, or non-React code.
+ *
+ * @returns The map target element, or undefined when the map is not yet mounted.
+ */
+export const useStoreAppMapTargetElement = (): HTMLElement | undefined => {
+  return useGVElementById()(GV_DOM_SUFFIX.mapTarget);
 };
 
 /**

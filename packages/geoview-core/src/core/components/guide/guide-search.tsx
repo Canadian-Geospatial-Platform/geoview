@@ -15,6 +15,7 @@ import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { getGVGuidebox } from '@/core/utils/dom-helper';
 import { getSxClasses } from './guide-style';
 
 /** Props for the GuideSearch component. */
@@ -402,11 +403,8 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
       );
 
       setTimeout(() => {
-        // Scope to THIS map's guide box (data-map-id makes it unique even when portaled in fullscreen).
-        // Two boxes can coexist while fullscreen is open (inline + portaled dialog); use the visible one.
-        // eslint-disable-next-line no-restricted-syntax
-        const guideContainers = Array.from(document.querySelectorAll<HTMLElement>(`.guidebox-container[data-map-id="${mapId}"]`));
-        const guideContainer = guideContainers.find((el) => el.getClientRects().length > 0) ?? guideContainers[0];
+        // Use the visible guide box for this map (inline + portaled copies can coexist in fullscreen).
+        const guideContainer = getGVGuidebox(mapId);
         if (!guideContainer) return;
 
         // Ensure the section is expanded/visible

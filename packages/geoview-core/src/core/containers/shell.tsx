@@ -38,7 +38,7 @@ import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
-import { getGVElementById, getGVRootElement } from '@/core/utils/dom-helper';
+import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -255,7 +255,7 @@ export function Shell(props: ShellProps): JSX.Element {
     // Intentionally use plain focus() without focusVisible: true because the crosshair itself
     // serves as the visual indicator for keyboard navigation mode. The focus ring is redundant
     // when the crosshair is active and would create visual noise.
-    getGVElementById(mapId, 'mapTargetElement')?.focus();
+    getGVMapTargetElement(mapId)?.focus();
   }, [mapId, uiController]);
 
   /**
@@ -430,8 +430,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={`${mapViewer.mapId}-toplink`}
-        href={`#${mapViewer.mapId}-bottomlink`}
+        id={buildGVElementId(mapViewer.mapId, 'toplink')}
+        href={`#${buildGVElementId(mapViewer.mapId, 'bottomlink')}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -455,8 +455,8 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {interaction === 'dynamic' && (
             <Link
-              id={`${mapViewer.mapId}-main-map`}
-              href={`#${mapViewer.mapId}-main-map`}
+              id={buildGVElementId(mapViewer.mapId, 'main-map')}
+              href={`#${buildGVElementId(mapViewer.mapId, 'main-map')}`}
               tabIndex={0}
               sx={{ ...memoSxClasses.skip, top: '0px' }}
               onClick={handleSkipToMap}
@@ -465,7 +465,12 @@ export function Shell(props: ShellProps): JSX.Element {
             </Link>
           )}
 
-          <Box id={`${mapViewer.mapId}-map`} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+          <Box
+            id={buildGVElementId(mapViewer.mapId, 'map')}
+            sx={memoSxClasses.mapShellContainer}
+            className="mapContainer"
+            ref={mapShellContainerRef}
+          >
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={memoSxClasses.mapContainer}>
               <Map viewer={mapViewer} />
@@ -498,8 +503,8 @@ export function Shell(props: ShellProps): JSX.Element {
         </Box>
       </FocusTrap>
       <Link
-        id={`${mapViewer.mapId}-bottomlink`}
-        href={`#${mapViewer.mapId}-toplink`}
+        id={buildGVElementId(mapViewer.mapId, 'bottomlink')}
+        href={`#${buildGVElementId(mapViewer.mapId, 'toplink')}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}

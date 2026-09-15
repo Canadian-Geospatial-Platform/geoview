@@ -68,4 +68,29 @@ export class UITester extends GVAbstractTester {
       }
     );
   }
+
+  /**
+   * Test that a non-React consumer can read the footer height through the UI controller.
+   *
+   * Proves the combined store + DOM getter (`getFooterHeight`) is reachable via the controller registry from
+   * non-React code and returns a CSS length string.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testControllerGetFooterHeight(): Promise<Test<string>> {
+    return this.test(
+      'Test UIController.getFooterHeight (non-React consumer)',
+      (test) => {
+        // Call the controller getter through the registry — the non-React access path
+        test.addStep('Calling getFooterHeight via the controller registry (non-React path)...');
+        return this.getControllersRegistry().uiController.getFooterHeight();
+      },
+      (test, result) => {
+        test.addStep('Verifying a CSS length string was returned...');
+        Test.assertIsDefined('footerHeight', result);
+        // Fallback path yields `${appHeight}px`; a consumer attribute could yield a % value
+        Test.assertIsEqual(/(px|%)$/.test(result), true);
+      }
+    );
+  }
 }

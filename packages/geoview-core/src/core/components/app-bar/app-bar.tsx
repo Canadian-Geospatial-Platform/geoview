@@ -54,7 +54,7 @@ import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
-import { getGVElementById, getGVElementByFullId } from '@/core/utils/dom-helper';
+import { getGVElementByFullId, getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -113,7 +113,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const uiController = useUIController();
   const mapController = useMapController();
 
-  const geoviewElement = getGVElementById(mapId, 'mapTargetElement') as HTMLElement;
+  const geoviewElement = getGVMapTargetElement(mapId) as HTMLElement;
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;

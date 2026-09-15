@@ -11,7 +11,7 @@ import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/st
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { getGVElementById } from '@/core/utils/dom-helper';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { getSxClasses } from './attribution-style';
 
 /**
@@ -48,7 +48,7 @@ export const Attribution = memo((): JSX.Element => {
   const mapAttribution = useStoreMapAttribution();
 
   // Get container
-  const mapElem = getGVElementById(mapId, 'shell');
+  const mapElem = useStoreAppShellContainer();
 
   // Set color for type of interaction (dynamic vs static)
   const iconButtonColor =

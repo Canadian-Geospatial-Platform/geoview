@@ -29,13 +29,12 @@ import {
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreAppNotifications } from '@/core/stores/states/app-state';
+import { useStoreAppNotifications, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { getGVElementById } from '@/core/utils/dom-helper';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { getSxClasses } from './notifications-style';
@@ -302,7 +301,7 @@ const Notifications = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = getGVElementById(mapId, 'shell');
+  const mapElem = useStoreAppShellContainer();
 
   // Element IDs for accessibility and focus management
   const dialogId = `${mapId}-notification-dialog`;

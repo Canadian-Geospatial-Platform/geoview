@@ -10,10 +10,11 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { getGVElementById } from '@/core/utils/dom-helper';
+import { getGVShellElement } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
 /** Slide definition for the lightbox. */
 export interface LightBoxSlides {
@@ -66,6 +67,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const shellContainer = useStoreAppShellContainer();
 
   /**
    * Syncs internal open state when the prop changes.
@@ -79,7 +81,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
    * Manages inert attribute on shell children when the lightbox opens or closes.
    */
   useEffect(() => {
-    const shellElement = getGVElementById(mapId, 'shell');
+    const shellElement = getGVShellElement(mapId);
     if (!shellElement) return;
 
     if (activeTrapGeoView && isOpen) {
@@ -153,7 +155,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
       styles={{
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
       }}
-      portal={{ root: getGVElementById(mapId, 'shell') }}
+      portal={{ root: shellContainer }}
       open={isOpen}
       close={() => setIsOpen(false)}
       slides={slides}

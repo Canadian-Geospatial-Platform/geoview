@@ -596,7 +596,7 @@ All wrappers scope the lookup to the map's root element. When the root is not mo
 
 ```ts
 // ❌ Bad: global, collides across maps, banned by ESLint
-const el = document.getElementById(`${mapId}-shell`);
+const el = document.getElementById(`${mapId}-appBar`);
 const tab = document.querySelector('[role="tab"][aria-selected="true"]');
 
 // ✅ Good: map-scoped wrappers
@@ -606,7 +606,7 @@ import {
   queryGVSelector,
 } from "@/core/utils/dom-helper";
 
-const el = getGVElementById(mapId, "shell"); // suffix → builds "map1-shell", scoped
+const el = getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
 const btn = getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
 const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 ```
@@ -638,6 +638,21 @@ This is the key decision:
 **Why the store getter/hook is fine for the root but not for descendant lookups:** the store getter/hook returns the map's root element (a legitimate store value, not a raw DOM query, so it is not banned). For a **descendant**, hand-rolling `useStoreAppGeoviewHTMLElement().querySelector('#' + CSS.escape(...))` re-implements the id-building, escaping, scoping, and fallback at every call site — exactly the duplication the wrappers remove.
 
 **`getGVRootElement` vs `getStoreAppGeoviewHTMLElement`:** the wrapper reads the **live DOM** (`document.getElementById(mapId)`) each call — robust during init/teardown; the store getter returns a **cached** reference (which is the placeholder `<div>` until config is applied). Use the store getter/hook when you want the React-tracked root (and no null handling); use `getGVRootElement` for imperative one-shots that must reflect the current DOM.
+
+### Store hook vs. dom-helper: reactive vs. imperative
+
+A common question is "now that the dom-helper does the same map-scoped lookup, why keep the root cached in the store at all?" The answer: **the store does not cache a faster lookup — it caches a _reactive anchor_.** Only the **root** element is stored (`appState.geoviewHTMLElement`); the descendant hooks (`useGVElementById`, `useStoreAppShellContainer`) still do a live scoped query — they just anchor it on that reactive root. The store provides two things the dom-helper does not:
+
+1. **Reactivity (the main reason).** The stored root starts as a throwaway placeholder `<div>` and is assigned the real element **once** at startup. That `set()` **re-renders every subscriber**, which is exactly what makes a descendant hook re-run and finally resolve (e.g. `#map1-shell`). A `getGVRootElement(mapId)` called in a render body returns `undefined` on the early renders and **never triggers a re-render** when the element later mounts — there is no subscription.
+2. **Render-safety / purity.** Reading the store in render is pure and concurrent-safe. Calling `document.getElementById` (or `getGVRootElement`) **in the render body** is a DOM read during render — impure and unsafe under concurrent React. It is perfectly fine inside an event handler, `useEffect`, controller, or util, but not in render.
+
+So they are **layered, not competing** — the store even populates itself _using_ the dom-helper (`getGVRootElement`). Pick by moment of use:
+
+| Moment of use                                                                                                                                      | Use                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **During render** — portal `container`, focus-trap container, a prop, or the component must **re-render** when the element appears                 | **store hook** (`useStoreAppGeoviewHTMLElement`, `useStoreAppShellContainer`, `useGVElementById`) |
+| **At the moment of an action** — click/keydown handler, `useEffect` body, controller method, scroll-into-view (element is guaranteed present then) | **dom-helper** (`getGVElementById`, `queryGVSelector`, `getGVRootElement`)                        |
+| **Non-React `.ts`** — controllers, layer code (no hooks available)                                                                                 | **dom-helper**                                                                                    |
 
 ### Legitimate exceptions (keep `document.*`, add a disable)
 

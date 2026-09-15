@@ -12,7 +12,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getSxClasses } from './resize-footer-panel-style';
 import { useStoreUIFooterPanelResizeValue, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
-import { getGVElementById } from '@/core/utils/dom-helper';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -72,7 +72,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = getGVElementById(mapId, 'shell');
+  const mapElem = useStoreAppShellContainer();
 
   // Element IDs for accessibility and focus management
   const closeButtonId = `${mapId}-resize-close-button`;

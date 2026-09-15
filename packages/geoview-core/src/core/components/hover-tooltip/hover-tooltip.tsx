@@ -8,7 +8,7 @@ import { useStoreMapHoverFeatureInfo, useStoreMapIsMouseInsideMap, useStoreMapPo
 import { getSxClasses } from './hover-tooltip-styles';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
-import { getGVElementById } from '@/core/utils/dom-helper';
+import { getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
@@ -43,7 +43,7 @@ export const HoverTooltip = memo((): JSX.Element | null => {
   const mapId = useStoreGeoViewMapId();
   const hoverFeatureInfo = useStoreMapHoverFeatureInfo();
   const isMouseouseInMap = useStoreMapIsMouseInsideMap();
-  const mapElem = getGVElementById(mapId, 'mapTargetElement') as HTMLElement;
+  const mapElem = getGVMapTargetElement(mapId) as HTMLElement;
   const language = useStoreAppDisplayLanguage();
   const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
   const displayDateFormats = useStoreLayerDisplayDateFormatSet();

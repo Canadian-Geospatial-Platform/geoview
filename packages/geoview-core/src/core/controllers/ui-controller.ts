@@ -28,6 +28,7 @@ import {
 import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
+  getStoreAppHeight,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -39,6 +40,7 @@ import {
   setStoreAppFullScreenActive,
   setStoreAppGuide,
 } from '@/core/stores/states/app-state';
+import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
 import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -566,6 +568,19 @@ export class UIController extends AbstractMapViewerController {
   getMapGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
     // Return the store value
     return getStoreMapGeolocatorSearchArea(this.getMapId());
+  }
+
+  /**
+   * Gets the effective footer height for the map.
+   *
+   * Prefers a consumer-provided `data-footer-height` attribute on the root element, falling back to the store's
+   * app height. Combines a DOM read with a store value, so it lives on the controller rather than in `dom-helper`
+   * (which must stay store-free). Callable from non-React code via `mapViewer.controllers.uiController`.
+   *
+   * @returns The footer height as a CSS length string (e.g. '600px')
+   */
+  getFooterHeight(): string {
+    return getGVRootDataAttribute(this.getMapId(), 'data-footer-height') ?? `${getStoreAppHeight(this.getMapId())}px`;
   }
 
   // #endregion PUBLIC METHODS

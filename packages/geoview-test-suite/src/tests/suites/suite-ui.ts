@@ -51,7 +51,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 1;
+    return 2;
   }
 
   /**
@@ -63,7 +63,10 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
     // Test details panel guide and Top anchor
     const pDetailsPanel = this.#uiTester.testGuideDetailsPanelTopAnchor();
 
+    // Test the UIController.getFooterHeight getter from a non-React consumer (controller registry)
+    const pFooterHeight = this.#uiTester.testControllerGetFooterHeight();
+
     // Resolve when all tests are done
-    return Promise.all([pDetailsPanel]);
+    return Promise.all([pDetailsPanel, pFooterHeight]);
   }
 }

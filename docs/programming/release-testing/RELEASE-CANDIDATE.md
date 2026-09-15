@@ -110,6 +110,7 @@ _(User-facing features added or enabled)_
 - New `waitForLayerQueryToFinish` timeout parameter on `AllFeatureInfoLayerSet` (#3562)
 - Development builds (local `rush serve` / `rush build-dev` and the gh-pages develop preview) now show a `-dev.<shortHash>` suffix in the app bar Version popover (e.g. `v.2.3.0-dev.a1b2c3d`) so users can distinguish them from official releases, which stay clean (`v.2.3.0`) (#3610)
 - Added built-in `canada.ca` display theme with Government of Canada-inspired colors and typography (#3609)
+- New `cgpv.api.utilities.dom` public surface exposing the map-scoped DOM helpers (`buildGVElementId`, `getGVRootElement`, `getGVElementById`, `getGVElementByFullId`, `getGVMapTargetElement`, `getGVShellElement`, `getGVGuidebox`, `queryGVSelector`/`queryGVSelectorAll`) so plugins and framework consumers can resolve map-scoped elements without deep-importing internal modules (#3221)
 
 ## Bug Fixes
 
@@ -202,6 +203,7 @@ _(Optimizations, refactors, structural changes)_
 - New `RUN_DEBUG_ONLY` flag in test-suite package for isolating individual test execution during development (#3562)
 - Enforced type safety in style files: replaced `theme: any` with `theme: Theme`, replaced return type `: any` with `: SxStyles`, removed `@typescript-eslint/no-explicit-any` suppressions across all packages (geoview-core, about-panel, aoi-panel, custom-legend, filter-panel, stac-browser, swiper, time-slider)
 - Added map-scoped DOM access helpers in `@/core/utils/dom-helper` (`buildGVElementId`, `getGVElementById`, `getGVElementByFullId`, `getGVRootElement`, `queryGVSelector`/`queryGVSelectorAll`) plus the `useGVElementById` hook, and migrated every in-repo `document.getElementById`/`querySelector` lookup to them so DOM ids are always `mapId`-scoped and queries are restricted to a single map's subtree; added an ESLint `no-restricted-syntax` guard (warning-level, wrapper file exempt) banning direct `document.getElementById`/`querySelector`/`querySelectorAll`, with justified inline exceptions for genuinely global lookups (script tags, the lightbox singleton overlay, mapId-less UI components, body-portaled elements) (#3221)
+- Extended the map-scoped DOM helpers with named landmark getters (`getGVMapTargetElement`, `getGVShellElement`, `getGVGuidebox`) plus a `GV_DOM_SUFFIX` constant as the single source of truth for landmark id suffixes, and a reactive `useStoreAppMapTargetElement` hook; `useStoreAppShellContainer` now delegates to `useGVElementById`, and the guide's fullscreen-portaled guidebox lookup (previously duplicated across `guide.tsx`/`guide-search.tsx`) is centralized in `getGVGuidebox`. Documented the reactive-hook-vs-imperative-getter rule in best-practices §18 (#3221)
 
 ## Accessibility (WCAG)
 
@@ -277,6 +279,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
 - Added automated `suite-layer` test `testAddWMSDuplicateGroupNames` (LayerTester) guarding issue #3521 — loads the `canimage_en` WMS by its duplicate top group id, asserts the nested `canimage/canimage` path is built and a deep leaf loads without infinite-looping (`suite-layer` total 41 → 43: +1 for the new test and +1 for correctly counting the heavy-conditional test that was previously excluded)
 - Added regression tests covering the feature-info geometry fallback when `outFields` omits the geometry column, and `zoomToExtent` behavior for empty, single-feature, and many-feature layer cases.
+- Added automated `suite-ui` test `testControllerGetFooterHeight` (UITester) proving a non-React consumer can reach the combined store+DOM getter `UIController.getFooterHeight()` via the controller registry (`suite-ui` 1 → 2; `00-automated-suite` total 273 → 274; `test-catalog` declared total 229 → 230). Introduced `getGVRootDataAttribute` (dom-helper, DOM half) and `UIController.getFooterHeight()` (combines the consumer `data-footer-height` attribute with the store `appHeight` fallback); footer-bar now reads the attribute via `getGVRootDataAttribute` while keeping the reactive `useStoreAppHeight` hook (#3221)
 
 ## Config Schema Changes
 
@@ -288,8 +291,8 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 906   |
-| Automated (A) | 60     | 62    |
+| Total tests   | 901    | 907   |
+| Automated (A) | 60     | 63    |
 | Candidate (C) | 169    | 169   |
 | Manual (M)    | 672    | 675   |
 
