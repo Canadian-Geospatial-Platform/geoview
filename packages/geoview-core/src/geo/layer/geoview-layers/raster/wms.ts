@@ -13,7 +13,7 @@ import type {
 } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode, TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { OgcWmsLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -628,8 +628,6 @@ export class WMS extends AbstractGeoViewRaster {
       // eslint-disable-next-line no-param-reassign, camelcase
       layer.EX_GeographicBoundingBox ??= parentLayer.EX_GeographicBoundingBox;
       // eslint-disable-next-line no-param-reassign
-      layer.Dimension ??= parentLayer.Dimension;
-      // eslint-disable-next-line no-param-reassign
       layer.Attribution ??= parentLayer.Attribution;
 
       // Flag if the layer is actually part of particular case of a QGIS group dimension (e.g. CDTK landcover)
@@ -807,23 +805,40 @@ export class WMS extends AbstractGeoViewRaster {
 
         try {
           // Read the time dimension on the layer (if any)
-          let timeDimension = layerCapabilities.Dimension?.find((dimension) => dimension.name?.toLowerCase() === 'time');
+          const layerTimeDimensionMeta = layerCapabilities.Dimension?.find((dimension) => dimension.name?.toLowerCase() === 'time');
+          let layerTimeDimension: TimeDimension | undefined;
+          if (layerTimeDimensionMeta) {
+            // Try to create the time dimension value
+            layerTimeDimension = DateMgt.createDimensionFromOGC(
+              layerTimeDimensionMeta,
+              displayDateMode,
+              layerCapabilities.IsQGISGroupDimension
+            );
 
-          // If the layer is part of a QGIS group dimension, the parent layer is the layer with the real dimension information.
-          // The sublayers only have a discret date value of what they represent
-          if (layerCapabilities.IsQGISGroupDimension) {
-            timeDimension = layerCapabilities.ParentLayer?.Dimension?.find((dimension) => dimension.name?.toLowerCase() === 'time');
+            // Set the time dimension on the layer config itself
+            layerConfig.setTimeDimension(layerTimeDimension);
           }
 
-          // Try to create the time dimension value
-          const layerTimeDimension = DateMgt.createDimensionFromOGC(
-            timeDimension!,
-            displayDateMode,
-            layerCapabilities.IsQGISGroupDimension
+          // Read the time dimension on the group layer (if any)
+          const groupTimeDimensionMeta = layerCapabilities.ParentLayer?.Dimension?.find(
+            (dimension) => dimension.name?.toLowerCase() === 'time'
           );
+          let groupTimeDimension: TimeDimension | undefined;
+          if (groupTimeDimensionMeta) {
+            groupTimeDimension = DateMgt.createDimensionFromOGC(
+              groupTimeDimensionMeta,
+              displayDateMode,
+              layerCapabilities.IsQGISGroupDimension
+            );
 
-          // Set the time dimension
-          layerConfig.setTimeDimension(layerTimeDimension);
+            // Set the time dimension on the group layer config itself
+            layerConfig.getParentLayerConfig()?.setTimeDimension(groupTimeDimension);
+
+            // Set the time dimension on the child layer if it doesn't already have one, because it should have one in this case - so we get what we can
+            if (!layerTimeDimension) {
+              layerConfig.setTimeDimension(groupTimeDimension);
+            }
+          }
         } catch (error: unknown) {
           // Log and continue
           logger.logError(error);
