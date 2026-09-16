@@ -71,6 +71,9 @@ export abstract class ConfigBaseClass {
   /** It is used internally to distinguish layer groups derived from the metadata. */
   #isMetadataLayerGroup: boolean;
 
+  /** The time dimension information. */
+  #timeDimension?: TimeDimension;
+
   /** Callback delegates for the layer status changed event */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
@@ -480,6 +483,37 @@ export abstract class ConfigBaseClass {
    */
   getInitialSettingsClassName(): string | undefined {
     return this.layerEntryProps.initialSettings?.className;
+  }
+
+  /**
+   * Gets the temporal dimension, if any, that is associated to the layer.
+   *
+   * @returns The temporal dimension, or undefined if not set
+   */
+  getTimeDimension(): TimeDimension | undefined {
+    return this.#timeDimension;
+  }
+
+  /**
+   * Sets the temporal dimension that is associated to the layer.
+   *
+   * @param timeDimension - The temporal dimension
+   */
+  setTimeDimension(timeDimension: TimeDimension): void {
+    this.#timeDimension = timeDimension;
+  }
+
+  /**
+   * Gets the time dimension inherited from the parent group when available.
+   *
+   * If the current layer belongs to a group that exposes a time dimension,
+   * that parent value is used as the effective dimension for the layer.
+   * Otherwise, the layer's own time dimension is returned.
+   *
+   * @returns The effective time dimension from the parent group or the layer itself
+   */
+  getTimeDimensionFavoringGroup(): TimeDimension | undefined {
+    return this.getParentLayerConfig()?.getTimeDimension() ?? this.getTimeDimension();
   }
 
   /**

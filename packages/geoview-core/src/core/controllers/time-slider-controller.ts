@@ -69,7 +69,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (!isStoreTimeSliderInitialized(this.getMapId())) return;
 
     // Try to get the temporal dimension from the layer's metadata
-    let layerTimeDimension = layer.getTimeDimension();
+    let layerTimeDimension = layer.getTimeDimensionFavoringGroup();
 
     // If the config provides a timeDimension, overlay it on the metadata-derived one except for the field property
     if (timesliderConfig?.timeDimension) {

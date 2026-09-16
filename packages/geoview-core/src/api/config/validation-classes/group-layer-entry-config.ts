@@ -2,8 +2,6 @@ import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/l
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { TimeDimension } from '@/core/utils/date-mgt';
 
 export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
@@ -143,29 +141,6 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    */
   getFirstChild(): ConfigBaseClass | undefined {
     return this.listOfLayerEntryConfig[0];
-  }
-
-  /**
-   * Gets the time dimension from the first descendant configuration that provides one.
-   *
-   * When the first child is another group, this method recursively follows that group's first child. It does not inspect
-   * sibling configurations.
-   *
-   * @returns The first descendant time dimension, or `undefined` when no first-child path provides one
-   */
-  getTimeDimensionOfFirstChild(): TimeDimension | undefined {
-    const firstChild = this.getFirstChild();
-    if (firstChild instanceof AbstractBaseLayerEntryConfig) {
-      // Return the time dimension
-      return firstChild.getTimeDimension();
-    }
-    if (firstChild instanceof GroupLayerEntryConfig) {
-      // Recursive call
-      return firstChild.getTimeDimensionOfFirstChild();
-    }
-
-    // None
-    return undefined;
   }
 
   // #endregion PUBLIC METHDOS

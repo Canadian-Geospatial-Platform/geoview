@@ -7,7 +7,6 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -388,9 +387,6 @@ export class LayerSetController extends AbstractMapViewerController {
     layerConfig: ConfigBaseClass,
     layer: AbstractBaseGVLayer | undefined
   ): number {
-    // Cast the layer config
-    const layerConfigCasted = layerConfig as GroupLayerEntryConfig;
-
     // Get the layer name
     const layerName = LayerSetController.#getLayerName(layer, layerConfig);
 
@@ -439,12 +435,8 @@ export class LayerSetController extends AbstractMapViewerController {
     // eslint-disable-next-line no-param-reassign
     existingEntries[entryIndex].visible = visible;
 
-    // If the layer is part of a QGIS Group dimensions
-    const timeDimensionOfChild = layerConfigCasted.getTimeDimensionOfFirstChild();
-    if (timeDimensionOfChild?.isQGISGroupDimension) {
-      // eslint-disable-next-line no-param-reassign
-      existingEntries[entryIndex].timeDimension = timeDimensionOfChild;
-    }
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex].timeDimension = layerConfig.getTimeDimension();
 
     return entryIndex;
   }
