@@ -486,6 +486,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 33  | `testEsriDynamicDomainFieldQueryValue` | test | Test Esri Dynamic Water Network domain field query value translation... |
 | 34  | `testEsriFeatureDomainFieldQueryValue` | test | Test Esri Feature Water Network domain field query value translation... |
 
+#### 2.1.15 Group Layer Visibility
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                | Type | Description                                                                                        |
+| --- | ------------------------------------- | ---- | -------------------------------------------------------------------------------------------------- |
+| 35  | `testSetLayerVisibleIncludingParents` | test | Test hidden-by-parent child and setLayerVisibleIncludingParents parent crawl (hidden/available)... |
+
 ---
 
 ## 3. Map

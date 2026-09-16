@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 42;
+    return 43;
   }
 
   /**
@@ -295,6 +295,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
     // Test geocore group with defaultVisibility=false
     await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
+
+    // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
+    await this.#layerTester.testSetLayerVisibleIncludingParents();
 
     // Done
     return;
