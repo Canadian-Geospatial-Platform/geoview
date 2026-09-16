@@ -79,7 +79,8 @@
     "fullscreen",
     "home",
     "location",
-    "basemap-select"
+    "basemap-select",
+    "measure"
   ],
   "appBar": {
     "tabs": {

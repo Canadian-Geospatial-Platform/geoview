@@ -111,6 +111,7 @@ _(User-facing features added or enabled)_
 - Development builds (local `rush serve` / `rush build-dev` and the gh-pages develop preview) now show a `-dev.<shortHash>` suffix in the app bar Version popover (e.g. `v.2.3.0-dev.a1b2c3d`) so users can distinguish them from official releases, which stay clean (`v.2.3.0`) (#3610)
 - Added built-in `canada.ca` display theme with Government of Canada-inspired colors and typography (#3609)
 - New `cgpv.api.utilities.dom` public surface exposing the map-scoped DOM helpers (`buildGVElementId`, `getGVRootElement`, `getGVElementById`, `getGVElementByFullId`, `getGVMapTargetElement`, `getGVShellElement`, `getGVGuidebox`, `queryGVSelector`/`queryGVSelectorAll`) so plugins and framework consumers can resolve map-scoped elements without deep-importing internal modules (#3221)
+- Layers hidden on the map now stay listed in the data table, details, geochart, and time slider panels under a separate **Hidden layers** section (greyed/italic, non-interactive) with an inline eye toggle to restore visibility directly from the list, so a table/chart/slider for a hidden layer stays discoverable without opening the Layers panel. Includes a new `LayerController.setLayerVisibleIncludingParents()` that crawls parent groups (a child hidden only because its group is hidden becomes visible again) and a new `useStoreLayerInVisibleRangeSet()` store selector; out-of-scale-range filtering, the Legend, and the Layers panel are unchanged (#3635)
 
 ## Bug Fixes
 
@@ -235,6 +236,7 @@ _(WCAG fixes and improvements)_
 - Fixed lightbox prev/next navigation buttons losing keyboard focus at the first/last slide by using `aria-disabled` instead of the native `disabled` attribute, restoring vendor CSS button styling (#3637)
 - Fixed the nav bar "Expand Drawing tools group" icon button losing keyboard focus after being pressed in WCAG mode (#3630)
 - Fixed an empty `<ul>` element appearing in the generated legend layer container HTML (#3630)
+- Hidden-layers panel lists render as two separate semantic lists ("Available layers" / "Hidden layers") with `aria-labelledby` headings and an `aria-live` region announcing when a layer moves between lists; hidden rows are non-interactive (`tabIndex=-1`, no click/keydown handlers) with the eye toggle as the sole control, and focus is restored by stable id after a layer is re-enabled (the item re-mounts when moving between the two lists) (#3635)
 
 ## Documentation & Cleanup
 
@@ -254,6 +256,7 @@ _(Doc updates, demo cleanup, code organization)_
 - Improved HTML descriptions of all test suites (#3562)
 - Documented the map-scoped DOM access rules: new best-practices §18 (wrappers vs. the root store hook/getter, the ban on direct `document.*`, and the legitimate-exception pattern), cross-links in using-store.md and test-templates.md, and a summary note in copilot-instructions.md (#3221)
 - Migrated Add Layer and Focus Trap inline `sx` styles to external `add-new-layer-style.ts` / `containers-style.ts` files (#3630)
+- Documented the "Hidden layers" section + inline eye toggle in the guide (en/fr) across the Details, Data Table, Time Slider, and Chart panels; added a "Hidden Layers in Component Panel Lists" subsection to copilot-instructions.md capturing the composite `layerHiddenSet` vs `inVisibleRangeSet` split, `setLayerVisibleIncludingParents`, clear-selection-on-hide, and the two-list/remount focus patterns (#3635)
 
 ## Test Plan Changes
 

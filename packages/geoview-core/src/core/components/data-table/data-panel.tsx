@@ -14,6 +14,7 @@ import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-st
 import { useStoreMapExtent } from '@/core/stores/states/map-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
+  useStoreLayerInVisibleRangeSet,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
@@ -74,12 +75,16 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerStatuses = useStoreLayerStatusSet();
   const queryStatuses = useStoreDataTableQueryStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
+  const inVisibleRangeSet = useStoreLayerInVisibleRangeSet();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
 
   /**
    * Orders the layers by visible layer order.
+   *
+   * Keeps visibility-toggle-hidden layers (they render disabled under the "Hidden layers" section)
+   * while still excluding out-of-scale-range layers.
    */
   const memoOrderedLayerData = useMemo(() => {
     // Log
@@ -87,8 +92,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
 
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
-      .filter((layer) => layer !== undefined && !layerHiddenSet[layer.layerPath]);
-  }, [mappedLayerData, visibleInRangeLayers, layerHiddenSet]);
+      .filter((layer) => layer !== undefined && inVisibleRangeSet[layer.layerPath] !== false);
+  }, [mappedLayerData, visibleInRangeLayers, inVisibleRangeSet]);
 
   /**
    * Applies filtering to the ordered layer data features.
@@ -298,6 +303,19 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [dataTableController, activeAppBarTab, appBarComponents]);
 
   /**
+   * Clears the selection when the active layer becomes hidden on the map so the table returns to the guide.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - clear selection when hidden', selectedLayerPath, layerHiddenSet);
+
+    // Only react to visibility-driven hiding (not out-of-scale-range)
+    if (selectedLayerPath && layerHiddenSet[selectedLayerPath] && inVisibleRangeSet[selectedLayerPath] !== false) {
+      dataTableController.setSelectedLayerPath('');
+    }
+  }, [dataTableController, selectedLayerPath, layerHiddenSet, inVisibleRangeSet]);
+
+  /**
    * Triggers feature info query on first load of the selected layer.
    *
    * TODO: Occasionally, setting the default selected layer can have unexpected behaviours.
@@ -408,6 +426,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
+      isHidden: layerHiddenSet[layer.layerPath],
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
         <FilterAltIcon sx={{ color: theme.palette.geoViewColor?.grey.main, verticalAlign: 'middle' }} />
       ),
@@ -417,6 +436,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     getFeaturesOfLayer,
     getLayerTooltip,
     isMapFilteredSelectedForLayer,
+    layerHiddenSet,
     layerNames,
     layerStatuses,
     memoIsSelectedLayerPreparing,

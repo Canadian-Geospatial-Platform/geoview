@@ -53,6 +53,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       boxShadow: 'none',
     },
   },
+  listItemButtonHidden: {
+    // Hidden rows are not a control (only the eye toggle acts); keep them looking non-clickable
+    cursor: 'default',
+    '&:hover': {
+      backgroundColor: 'inherit',
+    },
+  },
   listPrimaryText: {
     minWidth: '0',
     marginTop: '0.5rem',
@@ -134,6 +141,39 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   zoomButton: {
     height: 40,
     width: 40,
+  },
+  listSectionHeader: {
+    display: 'block',
+    paddingTop: '0.75rem',
+    paddingBottom: '0.25rem',
+    paddingLeft: '16px',
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    color: theme.palette.text.primary,
+  },
+  showHiddenLayerButton: {
+    position: 'absolute',
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    // Keep the eye toggle looking actionable (not greyed like the disabled item) so users know they can restore visibility
+    color: theme.palette.geoViewColor?.primary.main,
+    '&:hover': {
+      color: theme.palette.geoViewColor?.primary.dark[200],
+      backgroundColor: theme.palette.geoViewColor?.primary.lighten(0.9, 0.3),
+    },
+  },
+  listPrimaryTextHidden: {
+    paddingRight: '2.5rem',
+    // Match the Layers panel "not visible" symbology: greyed + italic text
+    '& .layerTitle': {
+      color: theme.palette.grey[700],
+      fontStyle: 'italic',
+    },
+    '& > div > p': {
+      fontStyle: 'italic',
+    },
   },
   containerBox: {
     width: '100%',

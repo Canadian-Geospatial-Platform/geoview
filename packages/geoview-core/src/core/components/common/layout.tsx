@@ -33,6 +33,8 @@ interface LayoutProps {
   titleFullscreen: string;
   hideEnlargeBtn?: boolean;
   toggleMode?: boolean;
+  /** Compact mode for the collapsed app-bar icon view: hides the list section headings and the "no layers" instructions item. */
+  compact?: boolean;
 }
 
 /** Styles for the layer title in the right panel header. */
@@ -78,6 +80,7 @@ const Layout = forwardRef(
       titleFullscreen,
       hideEnlargeBtn,
       toggleMode = false,
+      compact = false,
     }: LayoutProps,
     ref: Ref<LayoutExposedMethods>
   ) => {
@@ -124,8 +127,15 @@ const Layout = forwardRef(
     const memoLayerList = useMemo((): JSX.Element => {
       logger.logTraceUseMemo('LAYOUT - memoLayerList', selectedLayerPath, handleLayerChange, layerList);
 
-      return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
-    }, [selectedLayerPath, handleLayerChange, layerList]);
+      return (
+        <LayerList
+          selectedLayerPath={selectedLayerPath}
+          onListItemClick={handleLayerChange}
+          layerList={layerList}
+          compact={compact}
+        />
+      );
+    }, [selectedLayerPath, handleLayerChange, layerList, compact]);
 
     /**
      * Memoized layer title component for the right panel header.
