@@ -99,6 +99,8 @@ export type TimeDimensionESRI = {
 /** Utility functions */
 /** Discrete is when the values are all written down specifically with comma separator */
 const isDiscreteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split(',').length > 1;
+/** Discrete is when the values are all written down specifically with comma separator */
+const isDiscreteSingleValue = (ogcTimeDimension: string): boolean => !(ogcTimeDimension.includes(',') || ogcTimeDimension.includes('/'));
 /** Absolute is start/end/interval */
 const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 3;
 /** Relative is start/end without intervals */
@@ -910,6 +912,15 @@ export abstract class DateMgt {
       defaultValues = [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]];
     }
 
+    // By default, is valid if there's an actual range of dates in the time dimension
+    let isValid = rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1];
+
+    // If the dimension is part of a QGIS group, the sub layer will not necessarily have a range, probably more a single value or none at all
+    if (isQGISGroupDimension) {
+      isValid = true;
+    }
+
+    // Return the time dimension
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
       default: defaultValues,
@@ -921,7 +932,7 @@ export abstract class DateMgt {
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,
       serviceDateTemporalMode: guessedInfo?.serviceDateTemporalMode,
-      isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
+      isValid: isValid,
       isQGISGroupDimension,
     };
 
@@ -953,6 +964,7 @@ export abstract class DateMgt {
     if (isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
     else if (isRelativeRange(resolvedValues)) rangeItems = { type: 'relative', range: this.#createRelativeInterval(resolvedValues) };
     else if (isAbsoluteRange(resolvedValues)) rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(resolvedValues) };
+    else if (isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues] };
 
     // Check if dimension is valid
     if (rangeItems.range.length === 0) throw new InvalidTimeDimensionError(ogcTimeDimensionValues);
