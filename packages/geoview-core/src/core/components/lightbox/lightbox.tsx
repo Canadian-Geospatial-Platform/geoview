@@ -1,14 +1,16 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '@mui/material/styles';
+
 import type { ViewCallbackProps } from 'yet-another-react-lightbox';
-import Lightbox from 'yet-another-react-lightbox';
+import Lightbox, { useController, useNavigationState, cssClass, ELEMENT_BUTTON } from 'yet-another-react-lightbox';
 import Download from 'yet-another-react-lightbox/plugins/download';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import 'yet-another-react-lightbox/styles.css';
 
-import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
+import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip, IconButton } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { getGVShellElement } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -44,7 +46,65 @@ export interface LightboxProps {
 const LIGHTBOX_CONSTANTS = {
   FADE_DURATION: 250,
   SWIPE_DURATION: 500,
+  Z_INDEX: 2000,
 } as const;
+
+/** Props for the LightboxNavButton component. */
+interface LightboxNavButtonProps {
+  /** The navigation direction the button controls. */
+  direction: 'prev' | 'next';
+}
+
+/**
+ * Renders the lightbox Previous/Next navigation button.
+ *
+ * Fully replaces the library's default navigation button (render.buttonPrev/buttonNext take over
+ * its rendering entirely, including its CSS class) so aria-disabled can be used instead of the
+ * native disabled attribute, keeping keyboard focus on the button at the first/last slide.
+ *
+ * @param props - Properties defined in LightboxNavButtonProps interface
+ * @returns The navigation button element
+ */
+function LightboxNavButton({ direction }: LightboxNavButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/lightbox/lightbox > LightboxNavButton');
+
+  const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const { prev, next } = useController();
+  const { prevDisabled, nextDisabled } = useNavigationState();
+  const isDisabled = direction === 'prev' ? prevDisabled : nextDisabled;
+  const label = direction === 'prev' ? t('lightbox.previous') : t('lightbox.next');
+
+  /**
+   * Handles when the user activates the navigation button.
+   */
+  const handleClick = useCallback((): void => {
+    // Guard - the library already no-ops at the boundary, kept for the aria-disabled convention
+    if (isDisabled) return;
+    (direction === 'prev' ? prev : next)();
+  }, [direction, isDisabled, prev, next]);
+
+  return (
+    <IconButton
+      disableRipple
+      className={`${cssClass(ELEMENT_BUTTON)} ${cssClass(`navigation_${direction}`)}`}
+      aria-label={label}
+      aria-disabled={isDisabled}
+      tooltip={label}
+      tooltipPlacement="top"
+      onClick={handleClick}
+      sx={{
+        '&[aria-disabled="true"]': {
+          opacity: theme.palette.action.disabledOpacity,
+          cursor: 'not-allowed',
+        },
+      }}
+    >
+      {direction === 'prev' ? <ArrowLeftIcon /> : <ArrowRightIcon />}
+    </IconButton>
+  );
+}
 
 /**
  * Creates the lightbox image viewer component.
@@ -153,6 +213,8 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
   return (
     <Lightbox
       styles={{
+        // Keep the lightbox above all shell UI so it stays focus-trapped and unobstructed
+        root: { zIndex: LIGHTBOX_CONSTANTS.Z_INDEX },
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
       }}
       portal={{ root: shellContainer }}
@@ -179,21 +241,11 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
         view: (props: ViewCallbackProps) => onSlideChange?.(props.index),
       }}
       render={{
-        buttonPrev: slides.length <= 1 ? () => null : undefined,
-        buttonNext: slides.length <= 1 ? () => null : undefined,
+        buttonPrev: slides.length <= 1 ? () => null : () => <LightboxNavButton direction="prev" />,
+        buttonNext: slides.length <= 1 ? () => null : () => <LightboxNavButton direction="next" />,
         iconClose: () => (
           <Tooltip title={labels.Close} placement="top">
             <CloseIcon />
-          </Tooltip>
-        ),
-        iconNext: () => (
-          <Tooltip title={labels.Next} placement="top">
-            <ArrowRightIcon />
-          </Tooltip>
-        ),
-        iconPrev: () => (
-          <Tooltip title={labels.Previous} placement="top">
-            <ArrowLeftIcon />
           </Tooltip>
         ),
         iconDownload: () => (

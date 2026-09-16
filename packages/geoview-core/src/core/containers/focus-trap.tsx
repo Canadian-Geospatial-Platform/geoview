@@ -26,11 +26,6 @@ interface FocusTrapProps {
 
 /** Delay in milliseconds before focusing an element after DOM updates. */
 const FOCUS_DELAY = 0;
-/** Default styles for modal action buttons. */
-const MODAL_BUTTON_STYLES = {
-  width: 'initial',
-  textTransform: 'none',
-} as const;
 
 /**
  * Creates a dialog component to explain to keyboard user how to trigger and remove FocusTrap.
@@ -380,18 +375,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       contentModal={<UseHtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
       actions={
         <>
-          <Button id={`${focusTrapId}-enable-focus`} autoFocus onClick={handleEnable} type="text" sx={MODAL_BUTTON_STYLES}>
+          <Button id={`${focusTrapId}-enable-focus`} autoFocus onClick={handleEnable} type="text" sx={memoSxClasses.modalButton}>
             {t('keyboardnav.focusdialog.button.enable')}
           </Button>
-          <Button
-            id={`${focusTrapId}-skip-focus`}
-            onClick={handleSkip}
-            type="text"
-            sx={{
-              width: 'initial',
-              textTransform: 'none',
-            }}
-          >
+          <Button id={`${focusTrapId}-skip-focus`} onClick={handleSkip} type="text" sx={memoSxClasses.modalButton}>
             {t('keyboardnav.focusdialog.button.skip')}
           </Button>
         </>

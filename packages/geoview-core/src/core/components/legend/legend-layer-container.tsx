@@ -148,13 +148,14 @@ export const CollapsibleContent = memo(
           timeout="auto"
           unmountOnExit
         >
-          <List>
-            {hasChildren &&
-              layerChildPaths.map((childPath) => (
+          {hasChildren && (
+            <List>
+              {layerChildPaths.map((childPath) => (
                 <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
               ))}
-          </List>
-          {<ItemsList items={layerItems || []} layerPath={layerPath} />}
+            </List>
+          )}
+          <ItemsList items={layerItems || []} layerPath={layerPath} />
         </Collapse>
       );
     }
