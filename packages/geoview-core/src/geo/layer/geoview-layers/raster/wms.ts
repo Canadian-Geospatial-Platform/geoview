@@ -834,10 +834,11 @@ export class WMS extends AbstractGeoViewRaster {
             // Set the time dimension on the group layer config itself
             layerConfig.getParentLayerConfig()?.setTimeDimension(groupTimeDimension);
 
-            // Set the time dimension on the child layer if it doesn't already have one, because it should have one in this case - so we get what we can
-            if (!layerTimeDimension) {
-              layerConfig.setTimeDimension(groupTimeDimension);
-            }
+            // TODO: ALEX - CHECK THIS BY EDITING THE XML FILE AND REMOVING THE Dimension ON THE SUB LAYERS
+            // // Set the time dimension on the child layer if it doesn't already have one, because it should have one in this case - so we get what we can
+            // if (!layerTimeDimension) {
+            //   layerConfig.setTimeDimension(groupTimeDimension);
+            // }
           }
         } catch (error: unknown) {
           // Log and continue
