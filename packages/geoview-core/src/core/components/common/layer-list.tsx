@@ -70,6 +70,8 @@ interface LayerListProps {
   onListItemClick: (layer: LayerListEntry) => void;
   /** Compact mode for the collapsed app-bar icon view: hides the section headings and the "no layers" instructions item. */
   compact?: boolean;
+  /** Omits the available-layers heading for non-layer lists such as Guide topics. */
+  hideAvailableHeading?: boolean;
 }
 
 /** Properties for the LayerListItem component. */
@@ -409,9 +411,11 @@ LayerListItem.displayName = 'LayerListItem';
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
  */
-export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick, compact }: LayerListProps): JSX.Element => {
+export const LayerList = memo((props: LayerListProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerList');
+
+  const { layerList, selectedLayerPath, onListItemClick, compact, hideAvailableHeading } = props;
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -498,13 +502,12 @@ export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick, 
         {announcement}
       </Box>
 
-      {/* Always label the visible list (except in the compact icon view where headings would clutter the narrow column) */}
-      {!compact && (
+      {!compact && !hideAvailableHeading && (
         <Typography id={availableHeadingId} sx={memoSxClasses.listSectionHeader} component="p">
           {t('layers.availableLayersSection')}
         </Typography>
       )}
-      <List sx={memoSxClasses.list} aria-labelledby={compact ? undefined : availableHeadingId}>
+      <List sx={memoSxClasses.list} aria-labelledby={compact || hideAvailableHeading ? undefined : availableHeadingId}>
         {memoGroupedLayers.availableLayers.map(renderLayerListItem)}
         {!memoGroupedLayers.availableLayers.length && !compact && (
           <LayerListItem

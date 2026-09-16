@@ -35,6 +35,8 @@ interface LayoutProps {
   toggleMode?: boolean;
   /** Compact mode for the collapsed app-bar icon view: hides the list section headings and the "no layers" instructions item. */
   compact?: boolean;
+  /** Omits the available-layers heading for non-layer lists such as Guide topics. */
+  hideAvailableHeading?: boolean;
 }
 
 /** Styles for the layer title in the right panel header. */
@@ -81,6 +83,7 @@ const Layout = forwardRef(
       hideEnlargeBtn,
       toggleMode = false,
       compact = false,
+      hideAvailableHeading = false,
     }: LayoutProps,
     ref: Ref<LayoutExposedMethods>
   ) => {
@@ -133,9 +136,10 @@ const Layout = forwardRef(
           onListItemClick={handleLayerChange}
           layerList={layerList}
           compact={compact}
+          hideAvailableHeading={hideAvailableHeading}
         />
       );
-    }, [selectedLayerPath, handleLayerChange, layerList, compact]);
+    }, [selectedLayerPath, handleLayerChange, layerList, compact, hideAvailableHeading]);
 
     /**
      * Memoized layer title component for the right panel header.
@@ -149,7 +153,7 @@ const Layout = forwardRef(
         theme.palette.geoViewFontSize?.lg,
         toggleMode
       );
-      
+
       if (!layerName) return null; // Don't render when no layer selected
 
       // clamping code copied from https://tailwindcss.com/docs/line-clamp
