@@ -396,6 +396,11 @@ export class TimeSliderController extends AbstractMapViewerController {
     const additionalLayerpaths =
       isMainLayerPath && timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.slice(1) : undefined;
 
+    debugger;
+    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+      // Handle QGIS Group Dimension specific logic here
+    }
+
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
     const outfields = layerConfig.getOutfields();

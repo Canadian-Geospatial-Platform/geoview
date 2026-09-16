@@ -599,6 +599,10 @@ export class WMS extends AbstractGeoViewRaster {
    */
   #processMetadataInheritance(layer: TypeMetadataWMSCapabilityLayer | undefined, parentLayer?: TypeMetadataWMSCapabilityLayer): void {
     if (layer && parentLayer) {
+      // Set the parent layer reference for potential use in inheritance
+      // eslint-disable-next-line no-param-reassign
+      layer.ParentLayer ??= parentLayer;
+
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
       // eslint-disable-next-line no-param-reassign
       if (!layer['@attributes']) layer['@attributes'] = {};
@@ -628,6 +632,10 @@ export class WMS extends AbstractGeoViewRaster {
       // eslint-disable-next-line no-param-reassign
       layer.Attribution ??= parentLayer.Attribution;
 
+      // Flag if the layer is actually part of particular case of a QGIS group dimension (e.g. CDTK landcover)
+      // eslint-disable-next-line no-param-reassign
+      layer.IsQGISGroupDimension = !!parentLayer.Dimension;
+
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
       if (parentLayer.Style) {
@@ -651,7 +659,12 @@ export class WMS extends AbstractGeoViewRaster {
         }
       }
     }
-    if (layer?.Layer !== undefined) layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
+
+    // Process inheritance
+    if (layer?.Layer) {
+      // Loop on the sub-layers
+      layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
+    }
   }
 
   // #endregion PRIVATE METHODS
@@ -786,26 +799,34 @@ export class WMS extends AbstractGeoViewRaster {
         }
       }
 
-      // If there's a dimension
-      if (layerCapabilities.Dimension) {
+      // If there's a dimension or a QGIS group dimension
+      if (layerCapabilities.Dimension || layerCapabilities.IsQGISGroupDimension) {
         // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name?.toLowerCase() === 'time');
+        try {
+          // Read the time dimension on the layer (if any)
+          let timeDimension = layerCapabilities.Dimension?.find((dimension) => dimension.name?.toLowerCase() === 'time');
 
-        // If a temporal dimension was found
-        if (timeDimension) {
-          try {
-            // Try to create the time dimension value
-            const layerTimeDimension = DateMgt.createDimensionFromOGC(timeDimension, displayDateMode);
-
-            // Set the time dimension
-            layerConfig.setTimeDimension(layerTimeDimension);
-          } catch (error: unknown) {
-            // Log and continue
-            logger.logError(error);
+          // If the layer is part of a QGIS group dimension, the parent layer is the layer with the real dimension information.
+          // The sublayers only have a discret date value of what they represent
+          if (layerCapabilities.IsQGISGroupDimension) {
+            timeDimension = layerCapabilities.ParentLayer?.Dimension?.find((dimension) => dimension.name?.toLowerCase() === 'time');
           }
+
+          // Try to create the time dimension value
+          const layerTimeDimension = DateMgt.createDimensionFromOGC(
+            timeDimension!,
+            displayDateMode,
+            layerCapabilities.IsQGISGroupDimension
+          );
+
+          // Set the time dimension
+          layerConfig.setTimeDimension(layerTimeDimension);
+        } catch (error: unknown) {
+          // Log and continue
+          logger.logError(error);
         }
       }
     }

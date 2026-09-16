@@ -13,12 +13,13 @@ import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/cor
 import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import { useStoreDataTableFilter } from '@/core/stores/states/data-table-state';
 import {
+  useStoreLayerBounds,
+  useStoreLayerBounds4326,
+  useStoreLayerDataProjectionCode,
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateFormatShort,
   useStoreLayerDisplayDateTimezone,
-  useStoreLayerBounds,
-  useStoreLayerBounds4326,
   useStoreLayerEntryType,
   useStoreLayerFilter,
   useStoreLayerFilterClass,
@@ -30,7 +31,6 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
-  useStoreLayerDataProjectionCode,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -221,6 +221,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {layerTimeDimension?.rangeItems?.range?.[0] && (
               <Box>{`Min/Max: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
             )}
+            <Box>{`${t('layers.layerIsQGISGroupDimension')}: ${layerTimeDimension?.isQGISGroupDimension}`}</Box>
           </Box>
         </Box>
       )}

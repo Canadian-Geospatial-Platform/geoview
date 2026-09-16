@@ -301,6 +301,7 @@
     "layerDisplayDateTimezone": "Fuseau horaire: ",
     "layerTimeDimension": "Dimension temporelle (curseur temporel): ",
     "layerTimeDimensionField": "Champ",
+    "layerIsQGISGroupDimension": "Fait partie d'une dimension de groupe QGIS",
     "layerServiceProjection": "Projection du service",
     "layerServiceProjectionAndMore": "et plus",
     "layerHoverable": "Information au survol de la souris",
