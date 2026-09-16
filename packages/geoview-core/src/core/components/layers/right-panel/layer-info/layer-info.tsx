@@ -223,10 +223,10 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             )}
             {layerTimeDimension?.rangeItems?.range?.[0] && (
               <>
-                {layerTimeDimension.rangeItems.type === 'discrete' && (
+                {layerTimeDimension.rangeItems.type === 'discrete' && !layerTimeDimension.rangeItems.period && (
                   <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${layerTimeDimension.rangeItems.range.join(', ')}`}</Box>
                 )}
-                {layerTimeDimension.rangeItems.type !== 'discrete' && (
+                {(layerTimeDimension.rangeItems.type !== 'discrete' || layerTimeDimension.rangeItems.period) && (
                   <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
                 )}
               </>
@@ -255,10 +255,10 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             )}
             {timeSliderDimension?.range?.[0] && (
               <>
-                {timeSliderDimension.discreteValues && (
+                {timeSliderDimension.discreteValues && !layerTimeDimension?.rangeItems.period && (
                   <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${timeSliderDimension.range.join(', ')}`}</Box>
                 )}
-                {!timeSliderDimension.discreteValues && (
+                {(!timeSliderDimension.discreteValues || layerTimeDimension?.rangeItems.period) && (
                   <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
                 )}
               </>
