@@ -59,6 +59,7 @@ export type ManipulateType = dayjs.ManipulateType;
 type RangeItems = {
   type: string;
   range: string[];
+  period: boolean;
 };
 
 /** Type used to define the GeoView OGC time dimension. */
@@ -951,7 +952,7 @@ export abstract class DateMgt {
    * @throws {InvalidDateError} When input has invalid dates
    */
   static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
-    let rangeItems: RangeItems = { type: 'none', range: [] };
+    let rangeItems: RangeItems = { type: 'none', range: [], period: false };
 
     // Resolve the 'current' keyword, if any, to today's date/time before classifying the range
     const resolvedValues = this.#substituteCurrentKeyword(ogcTimeDimensionValues);
@@ -961,10 +962,13 @@ export abstract class DateMgt {
     //    relative = 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
     //    absolute = 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
     // and create the range object
-    if (isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
-    else if (isRelativeRange(resolvedValues)) rangeItems = { type: 'relative', range: this.#createRelativeInterval(resolvedValues) };
-    else if (isAbsoluteRange(resolvedValues)) rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(resolvedValues) };
-    else if (isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues] };
+    if (isDiscreteRange(resolvedValues))
+      rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(','), period: false };
+    else if (isRelativeRange(resolvedValues))
+      rangeItems = { type: 'relative', range: this.#createRelativeInterval(resolvedValues), period: true };
+    else if (isAbsoluteRange(resolvedValues))
+      rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(resolvedValues), period: true };
+    else if (isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues], period: false };
 
     // Check if dimension is valid
     if (rangeItems.range.length === 0) throw new InvalidTimeDimensionError(ogcTimeDimensionValues);

@@ -526,7 +526,7 @@ export class LayerSetController extends AbstractMapViewerController {
     // If layer is regular (not group and not undefined!)
     if (layer instanceof AbstractGVLayer) {
       // Store the time dimension if any
-      legendLayerEntry.timeDimension = layer.getTimeDimension();
+      legendLayerEntry.timeDimension = layerConfigCasted.getTimeDimension();
 
       // Store the layer filter
       legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
