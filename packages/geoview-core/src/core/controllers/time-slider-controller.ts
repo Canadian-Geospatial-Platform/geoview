@@ -384,7 +384,13 @@ export class TimeSliderController extends AbstractMapViewerController {
     const nearestValues = configTimeDimension?.nearestValues ?? layerTimeDimensionInfo?.nearestValues;
 
     // Check if the time slider info is associated with another time slider
-    const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
+    let isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
+
+    // If the layer is part of a QGIS Group Dimension
+    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+      // The main layer path is the first layer path in the siblings
+      isMainLayerPath = layerConfig.getFirstSiblingLayerPath() === layerConfig.layerPath;
+    }
 
     // Only use the field from the config if this is the main layer of the slider
     let field = isMainLayerPath && configTimeDimension?.field ? configTimeDimension?.field : layerTimeDimensionInfo.field;
@@ -393,12 +399,14 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (timesliderConfig?.fields && index) field = timesliderConfig.fields[index];
 
     // Paths of layers tied to this time slider, if any
-    const additionalLayerpaths =
+    let additionalLayerpaths =
       isMainLayerPath && timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.slice(1) : undefined;
 
-    debugger;
-    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+    // If the layer is part of a QGIS Group Dimension and is main layer path
+    if (layerTimeDimensionInfo?.isQGISGroupDimension && isMainLayerPath) {
       // Handle QGIS Group Dimension specific logic here
+      // The time-slider should have all the other layer paths siblings into the additionalLayerPaths
+      additionalLayerpaths = layerConfig.getSiblingsLayerPaths(false);
     }
 
     // If the field type has an alias, use that as a label
@@ -421,6 +429,13 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (defaultDates?.length) initialValues = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
     const values = TimeSliderController.#constrainValues(initialValues, 1, nearestValues === 'discrete', timeStampRange, step, minAndMax);
 
+    // The title of the time-slider configuration
+    let title = timesliderConfig?.title;
+    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+      title = layerConfig.getParentLayerConfig()?.getLayerName();
+    }
+
+    // Return the final time slider configuration object
     return {
       additionalLayerpaths,
       delay: timesliderConfig?.delay || 1000,
@@ -441,7 +456,7 @@ export class TimeSliderController extends AbstractMapViewerController {
       reversed: timesliderConfig?.reversed,
       singleHandle,
       step,
-      title: timesliderConfig?.title,
+      title,
       values,
     };
   }

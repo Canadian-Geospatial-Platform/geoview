@@ -218,10 +218,20 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {layerDateTemporalMode && <Box>{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
             {layerDisplayDateTimezone && <Box>{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
             {layerTimeDimension?.field && <Box>{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
-            {layerTimeDimension?.rangeItems?.range?.[0] && (
-              <Box>{`Min/Max: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+            {layerTimeDimension?.rangeItems?.type && (
+              <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems?.type}`}</Box>
             )}
-            <Box>{`${t('layers.layerIsQGISGroupDimension')}: ${layerTimeDimension?.isQGISGroupDimension}`}</Box>
+            {layerTimeDimension?.rangeItems?.range?.[0] && (
+              <>
+                {layerTimeDimension.rangeItems.type === 'discrete' && (
+                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${layerTimeDimension.rangeItems.range.join(', ')}`}</Box>
+                )}
+                {layerTimeDimension.rangeItems.type !== 'discrete' && (
+                  <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+                )}
+              </>
+            )}
+            <Box>{`${t('layers.layerIsQGISGroupDimension')}: ${layerTimeDimension?.isQGISGroupDimension ?? false}`}</Box>
           </Box>
         </Box>
       )}
@@ -244,7 +254,14 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
             )}
             {timeSliderDimension?.range?.[0] && (
-              <Box>{`Min/Max: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
+              <>
+                {timeSliderDimension.discreteValues && (
+                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${timeSliderDimension.range.join(', ')}`}</Box>
+                )}
+                {!timeSliderDimension.discreteValues && (
+                  <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
+                )}
+              </>
             )}
           </Box>
         </Box>
