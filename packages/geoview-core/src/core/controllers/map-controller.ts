@@ -2027,6 +2027,7 @@ export class MapController extends AbstractMapViewerController {
           serviceDateTemporalMode,
           displayDateTimezone,
           field,
+          singleHandle,
         } = timeSliderLayers[layerPath];
 
         if (isMainLayerPath) {
@@ -2043,7 +2044,7 @@ export class MapController extends AbstractMapViewerController {
               type: '',
               range,
             },
-            singleHandle: values.length === 1,
+            singleHandle,
             isValid: true,
           };
 

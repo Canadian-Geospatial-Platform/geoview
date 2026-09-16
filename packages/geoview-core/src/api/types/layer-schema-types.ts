@@ -906,6 +906,7 @@ export type TypeMetadataWMSCapabilityLayer = {
   Name?: string;
   Title?: string;
   Layer?: TypeMetadataWMSCapabilityLayer[];
+  ParentLayer?: TypeMetadataWMSCapabilityLayer;
   Abstract?: string;
   BoundingBox?: TypeMetadataWMSCapabilityLayerBBox[];
   EX_GeographicBoundingBox?: TypeMetadataWMSCapabilityLayerEXGeographicBBox;
@@ -914,6 +915,7 @@ export type TypeMetadataWMSCapabilityLayer = {
   CRS?: string[];
   Style?: TypeMetadataWMSCapabilityLayerStyle[];
   Dimension?: TypeMetadataWMSCapabilityLayerDimension[];
+  IsQGISGroupDimension?: boolean;
   Attribution?: TypeMetadataWMSCapabilityLayerAttribution;
 
   '@attributes': {
