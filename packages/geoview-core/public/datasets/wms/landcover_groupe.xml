@@ -803,7 +803,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       </LegendURL>
      </Style>
     </Layer>
-    <Dimension name="time" default="2010-07-01T12:00:00" units="ISO8601">2010-07-01T12:00:00,2015-07-01T12:00:00,2020-07-01T12:00:00</Dimension>
+    <Dimension units="ISO8601" name="TIME">2010-07-01,2015-07-01,2020-07-01</Dimension>
     <Extent name="time">2010-07-01/2025-06-30</Extent>
    </Layer>
   </Layer>

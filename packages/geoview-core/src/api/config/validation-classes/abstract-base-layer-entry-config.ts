@@ -851,6 +851,29 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     return this.onGetGeometryType();
   }
 
+  /**
+   * Gets the layer paths of this entry's siblings in its parent group.
+   *
+   * @param includeOwn - Whether to include this entry's own layer path (defaults to `true`)
+   * @returns The sibling layer paths, or an empty array when this entry has no parent group
+   */
+  getSiblingsLayerPaths(includeOwn = true): string[] {
+    return (
+      this.getParentLayerConfig()
+        ?.listOfLayerEntryConfig.map((entry: ConfigBaseClass) => entry.layerPath)
+        .filter((entry: string) => includeOwn || entry !== this.layerPath) ?? []
+    );
+  }
+
+  /**
+   * Gets the first layer path from this entry's sibling list.
+   *
+   * @returns The first sibling layer path, or `undefined` when no sibling path is available
+   */
+  getFirstSiblingLayerPath(): string | undefined {
+    return this.getSiblingsLayerPaths()[0];
+  }
+
   // #endregion METHODS
 
   // #region STATIC METHODS

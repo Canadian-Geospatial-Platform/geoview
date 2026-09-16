@@ -74,6 +74,7 @@ export type TimeDimension = {
   serviceDateTemporalMode?: TemporalMode;
   displayDateTimezone?: TimeIANA;
   isValid: boolean;
+  isQGISGroupDimension?: boolean;
 };
 
 /** Guessed time information inferred from service date formats or time dimensions. */
@@ -881,13 +882,20 @@ export abstract class DateMgt {
    */
   static createDimensionFromOGC(
     ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string,
-    displayDateMode: DisplayDateMode | undefined
+    displayDateMode: DisplayDateMode | undefined,
+    isQGISGroupDimension: boolean | undefined
   ): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(ogcTimeDimension);
     const rangeItems = this.createRangeOGC(dimensionObject.values);
 
     // Guess the display time information
     const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
+
+    // If the dimension is part of a QGIS group, ensure it has a default value
+    if (isQGISGroupDimension) {
+      // The time dimension should have 1 default value (and only 1, discrete)
+      dimensionObject.default ??= rangeItems.range[0];
+    }
 
     // Determine the slider handle count from OGC metadata signals:
     // 1. default attribute present → single-element array [default] → 1 thumb (definitive signal)
@@ -914,6 +922,7 @@ export abstract class DateMgt {
       displayDateTimezone: guessedInfo?.displayDateTimezone,
       serviceDateTemporalMode: guessedInfo?.serviceDateTemporalMode,
       isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
+      isQGISGroupDimension,
     };
 
     return timeDimension;
