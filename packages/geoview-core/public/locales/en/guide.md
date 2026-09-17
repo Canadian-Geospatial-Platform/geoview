@@ -608,6 +608,8 @@ The **Details** tab has two sections: a layer list on the left and feature detai
 5. If the feature has proper geometry, it will be highlighted on the map
 6. When making a new query, the previously selected layer will remain selected if features are found
 
+_Layers that are hidden on the map stay in the list under a **Hidden layers** heading, shown greyed and in italics. Select the eye icon <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the Eye not visible function" /> next to a hidden layer to make it visible again; it then moves back up to the available list._
+
 ### Clear All Highlights
 
 The clear all higlights button <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="An icon representing the Clear highlights function" /> is located in the upper right corner above the layer list. Click this button to remove all feature highlights from the map.
@@ -654,6 +656,8 @@ Click on a layer and the number of available features is displayed below the lay
 - If you switch to another tab during the process, you will need to reselect the layer when returning to the tab _Data Table_ to view the results.
 
 The **Data Table** tab has two sections. The layers are listed on the left and the layer data on the right. Click on a layer to show the layer data in the table on the right.
+
+_Layers that are hidden on the map stay in the list under a **Hidden layers** heading, shown greyed and in italics. Select the eye icon <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the Eye not visible function" /> next to a hidden layer to make it visible again; it then moves back up to the available list._
 
 ### Data Table Controls
 
@@ -736,6 +740,8 @@ _**Note: Click on a layer to display its Time Slider information in the right se
 
 The **Time Slider** tab on the Footer Bar has two sections. Layers with a time dimension are listed in the left section.
 
+_Layers that are hidden on the map stay in the list under a **Hidden layers** heading, shown greyed and in italics. Select the eye icon <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the Eye not visible function" /> next to a hidden layer to make it visible again; it then moves back up to the available list._
+
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
 The **Time filtering** switch controls whether the time slider filters the data.
@@ -760,6 +766,8 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
 The **Chart** tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
+
+_Layers that are hidden on the map stay in the list under a **Hidden layers** heading, shown greyed and in italics. Select the eye icon <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the Eye not visible function" /> next to a hidden layer to make it visible again; it then moves back up to the available list._
 
 The **Feature** dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 

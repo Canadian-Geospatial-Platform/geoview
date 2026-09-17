@@ -8,6 +8,7 @@ import { Box } from 'geoview-core/ui';
 import { useStoreMapClickCoordinates } from 'geoview-core/core/stores/states/map-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
+  useStoreLayerInVisibleRangeSet,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
@@ -54,6 +55,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const mapClickCoordinates = useStoreMapClickCoordinates();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
+  const inVisibleRangeSet = useStoreLayerInVisibleRangeSet();
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
   const storeArrayOfLayerData = useStoreGeochartLayerDataArrayBatch();
@@ -165,7 +167,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layers list
     return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
-      const layer = storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath && !layerHiddenSet[layerData.layerPath]);
+      // Keep visibility-toggle-hidden layers (rendered disabled under the "Hidden layers" section); exclude out-of-range layers
+      const layer = storeArrayOfLayerData.find(
+        (layerData) => layerData.layerPath === layerPath && inVisibleRangeSet[layerData.layerPath] !== false
+      );
 
       if (layer && memoConfigObj[layer.layerPath]) {
         acc.push({
@@ -177,12 +182,23 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerFeatures: getNumFeaturesLabel(layer),
           tooltip: `${layerNames[layer.layerPath] ?? ''}, ${getNumFeaturesLabel(layer)}`,
           layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
+          isHidden: layerHiddenSet[layer.layerPath],
         });
       }
 
       return acc;
     }, []);
-  }, [storeArrayOfLayerData, visibleInRangeLayers, memoConfigObj, layerNames, layerStatuses, layerHiddenSet, getNumFeaturesLabel, mapId]);
+  }, [
+    storeArrayOfLayerData,
+    visibleInRangeLayers,
+    memoConfigObj,
+    layerNames,
+    layerStatuses,
+    layerHiddenSet,
+    inVisibleRangeSet,
+    getNumFeaturesLabel,
+    mapId,
+  ]);
 
   /** Memoizes the selected layer for the LayerList component. */
   const memoLayerSelectedItem = useMemo(() => {
@@ -215,6 +231,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // If selected layer path is not empty launch the checker to try to maintain the selection on the correct selected layer
     if (selectedLayerPath) {
+      // If the selected layer became hidden on the map, clear the selection so its chart isn't shown for a hidden layer
+      if (memoLayerSelectedItem?.isHidden) {
+        geoChartController.setSelectedLayerPath('');
+        return;
+      }
+
       // Redirect to the keep selected layer path logic
       checkSelectedLayerPathList(
         (lyrPath) => geoChartController.setLayerDataArrayBatchLayerPathBypass(lyrPath),
@@ -234,7 +256,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // If nothing was previously selected at all
     if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length) {
-      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures && !layer.isHidden);
       // Select the first layer that has features
       geoChartController.setSelectedLayerPath(selectedLayer?.layerPath ?? '');
     }

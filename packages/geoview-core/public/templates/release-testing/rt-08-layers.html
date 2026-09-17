@@ -322,6 +322,25 @@
         }"
       ></div>
 
+      <!-- Map 11: Shared hidden-layer list regression config -->
+      <h5>Map 11 — Available / Hidden Layer Lists</h5>
+      <p>
+        Details, Data Table, Chart, and Time Slider in the footer. Airborne stations are nested under "Airborne chart group";
+        hide the parent, then use the child's inline eye to restore ancestor visibility. Query a visible station before checking Details or Chart.
+      </p>
+      <p>
+        The custom "Progression and Perimeters of Fires and Floods" slider controls fire_progression/0, fire_perimeters/1,
+        floods_canada/1, and historical-flood/0. Keep time filtering off: the slider must stay Available while any backing layer is visible,
+        move to Hidden only when all four are hidden, and restore all four with one eye click.
+        Inspect the actual panel lists, not only the Layers panel or store flags. Wait for loading and queries to finish before testing.
+      </p>
+      <div
+        id="map11"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./configs/navigator/demos/08-hidden-layer-lists.json"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
@@ -342,6 +361,8 @@
       <pre id="map9CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 10 — Configuration Snippet</button>
       <pre id="map10CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 11 — Configuration Snippet</button>
+      <pre id="map11CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>

@@ -1028,6 +1028,23 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
+   * Makes a layer visible on the map, enabling any hidden parent groups so the layer actually renders.
+   *
+   * A child layer's own visibility has no visible effect while an ancestor group is hidden, so this walks
+   * up the parent chain and turns each hidden ancestor visible before showing the layer itself.
+   *
+   * @param layerPath - The path of the layer to make visible
+   * @throws {LayerNotFoundError} When the layer cannot be found at the given path (propagated from `getGeoviewLayer()`)
+   */
+  setLayerVisibleIncludingParents(layerPath: string): void {
+    // Get the layer
+    const gvLayer = this.getGeoviewLayer(layerPath);
+
+    // Redirect to the layer, which enables hidden ancestor groups so the child isn't masked by a hidden parent
+    gvLayer.setVisibleIncludingParents();
+  }
+
+  /**
    * Sets or toggles the visibility of a specific layer within a map.
    *
    * If the layer exists at the provided layer path for the given map, the method delegates

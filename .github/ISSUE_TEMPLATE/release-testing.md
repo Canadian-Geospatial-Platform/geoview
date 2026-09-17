@@ -111,10 +111,11 @@ labels: ["testing", "release"]
 
 ## 08 — Layers
 
-- [ ] [Left Panel — Layer List](../docs/programming/release-testing/08-layers.md#left-panel--layer-list) (16 tests)
-- [ ] [Add Layer](../docs/programming/release-testing/08-layers.md#add-layer) (37 tests)
-- [ ] [Right Panel — Layer Info & Settings](../docs/programming/release-testing/08-layers.md#right-panel--layer-info--settings) (46 tests)
-- [ ] [Layer Type Configs](../docs/programming/release-testing/08-layers.md#layer-type-configs) (27 tests)
+- [ ] [Left Panel — Layer List](../../docs/programming/release-testing/08-layers.md#left-panel--layer-list) (16 tests)
+- [ ] [Hidden Layers in Component Panels](../../docs/programming/release-testing/08-layers.md#hidden-layers-in-component-panels) (7 tests)
+- [ ] [Add Layer](../../docs/programming/release-testing/08-layers.md#add-layer) (37 tests)
+- [ ] [Right Panel — Layer Info & Settings](../../docs/programming/release-testing/08-layers.md#right-panel--layer-info--settings) (46 tests)
+- [ ] [Layer Type Configs](../../docs/programming/release-testing/08-layers.md#layer-type-configs) (27 tests)
 
 ## 09 — Styles
 
@@ -128,13 +129,13 @@ labels: ["testing", "release"]
 
 - [ ] [Basic Queries](../docs/programming/release-testing/10-details.md#basic-queries) (3 tests)
 - [ ] [Layer Query Status](../docs/programming/release-testing/10-details.md#layer-query-status) (2 tests)
-- [ ] [Highlighting](../docs/programming/release-testing/10-details.md#highlighting) (3 tests)
+- [ ] [Highlighting](../../docs/programming/release-testing/10-details.md#highlighting) (5 tests)
 - [ ] [Active Layer Selection](../docs/programming/release-testing/10-details.md#active-layer-selection) (2 tests)
 - [ ] [Lightbox Images](../docs/programming/release-testing/10-details.md#lightbox-images) (2 tests)
 - [ ] [Hover Tooltip](../docs/programming/release-testing/10-details.md#hover-tooltip) (4 tests)
 - [ ] [Non-Queryable Layer](../docs/programming/release-testing/10-details.md#non-queryable-layer) (1 test)
 - [ ] [Feature Navigation](../docs/programming/release-testing/10-details.md#feature-navigation) (3 tests)
-- [ ] [Summary & Out Fields](../docs/programming/release-testing/10-details.md#summary--out-fields) (3 tests)
+- [ ] [Summary & Out Fields](../../docs/programming/release-testing/10-details.md#summary--out-fields) (4 tests)
 
 ## 11 — Data Table
 
@@ -247,7 +248,7 @@ labels: ["testing", "release"]
 - [ ] [Sublayer Removal](../docs/programming/release-testing/18-global-settings.md#sublayer-removal) (2 tests)
 - [ ] [Highlight Layer](../docs/programming/release-testing/18-global-settings.md#highlight-layer) (1 test)
 - [ ] [Disabled Layer Types](../docs/programming/release-testing/18-global-settings.md#disabled-layer-types) (1 test)
-- [ ] [Theme](../docs/programming/release-testing/18-global-settings.md#theme) (3 tests)
+- [ ] [Theme](../../docs/programming/release-testing/18-global-settings.md#theme) (4 tests)
 - [ ] [Highlight Color](../docs/programming/release-testing/18-global-settings.md#highlight-color) (2 tests)
 - [ ] [Service URLs Override](../docs/programming/release-testing/18-global-settings.md#service-urls-override) (3 tests)
 - [ ] [Date Display Mode](../docs/programming/release-testing/18-global-settings.md#date-display-mode) (3 tests)

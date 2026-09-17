@@ -10,6 +10,7 @@ import {
   useStoreLayerDateTemporalModeSet,
   useStoreLayerDisplayDateFormatSet,
   useStoreLayerDisplayDateTimezoneSet,
+  useStoreLayerInVisibleRangeSet,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
@@ -51,6 +52,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const displayLanguage = useStoreAppDisplayLanguage();
   const { t } = useTranslation<string>();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
+  const inVisibleRangeSet = useStoreLayerInVisibleRangeSet();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
@@ -157,30 +159,17 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           return false;
         }
 
-        // Check if main layer is hidden (includes out of scale check)
-        const mainLayerHidden = layerHiddenSet[layer.layerPath];
-
-        // For custom time slider with additional layers, check if any additional layer is visible
-        if (layer.timeSliderLayerInfo.additionalLayerpaths && layer.timeSliderLayerInfo.additionalLayerpaths.length > 0) {
-          const hasVisibleAdditionalLayer = layer.timeSliderLayerInfo.additionalLayerpaths.some((layerPath) => !layerHiddenSet[layerPath]);
-
-          // Show if main layer is visible OR any additional layer is visible
-          if (mainLayerHidden && !hasVisibleAdditionalLayer) {
-            return false;
-          }
-        } else {
-          // No additional layers, just check main layer
-          if (mainLayerHidden) {
-            return false;
-          }
-        }
-
         // Check if layer is in error
         if (layerStatuses[layer.layerPath] === 'error') {
           return false;
         }
 
-        return true;
+        // Collect every layer path backing this time slider entry (main + any additional layers)
+        const relatedLayerPaths = [layer.layerPath, ...(layer.timeSliderLayerInfo.additionalLayerpaths ?? [])];
+
+        // Keep out-of-scale-range entries filtered out: exclude only when every related layer is out of range
+        const anyInRange = relatedLayerPaths.some((layerPath) => inVisibleRangeSet[layerPath] !== false);
+        return anyInRange;
       })
       .map((layer) => {
         const additionalNames = layer.timeSliderLayerInfo.additionalLayerpaths
@@ -191,6 +180,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
         const combinedAdditionalNames = additionalNames ? `, ${additionalNames.join(', ')}` : '';
         const layerName = layer.timeSliderLayerInfo.title || `${layerNames[layer.layerPath]}${combinedAdditionalNames}` || '';
+
+        // The entry is hidden only when every related layer is hidden on the map (an untracked layer, e.g. one
+        // not shown in the legend, counts as hidden so a custom time slider collapses once all its layers are off)
+        const relatedLayerPaths = [layer.layerPath, ...(layer.timeSliderLayerInfo.additionalLayerpaths ?? [])];
+        const isHidden = relatedLayerPaths.every((relatedPath) => layerHiddenSet[relatedPath] !== false);
+
         return {
           layerName,
           layerPath: layer.layerPath,
@@ -199,19 +194,36 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerStatus: 'loaded',
           queryStatus: 'processed',
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
+          isHidden,
+          relatedLayerPaths,
         } satisfies LayerListEntry;
       });
-  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, layerStatuses, layerNames, layerHiddenSet, displayLanguage, mapId]);
+  }, [
+    timeSliderLayers,
+    visibleInRangeLayers,
+    getFilterInfo,
+    layerStatuses,
+    layerNames,
+    layerHiddenSet,
+    inVisibleRangeSet,
+    displayLanguage,
+    mapId,
+  ]);
 
   /**
-   * Unselects the layer if it's removed from the visibility array.
+   * Unselects the layer when it leaves the list or becomes hidden so the right panel returns to the guide.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER-PANEL - check selected layer visibility');
 
-    if (selectedLayerPath && !memoLayersList.some((layer) => layer.layerPath === selectedLayerPath)) {
-      // Selected layer is no longer in the visible layers list, unselect it
+    if (!selectedLayerPath) return;
+
+    const selectedEntry = memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
+
+    // Clear the selection when the active layer is gone (out of range) or now hidden; renderContent then returns
+    // null and the shared layout auto-shows the guide (consistent with the details, geochart and data-table panels)
+    if (!selectedEntry || selectedEntry.isHidden) {
       timeSliderController.setSelectedLayerPathTimeSlider('');
     }
   }, [timeSliderController, selectedLayerPath, memoLayersList]);

@@ -606,6 +606,8 @@ L'onglet **Détails** se divise en deux sections : une liste de couches à gauch
 5. Si l'élément possède une géométrie appropriée, il sera mis en surbrillance sur la carte
 6. Lors d'une nouvelle requête, la couche précédemment sélectionnée restera sélectionnée si des éléments sont trouvés
 
+_Les couches masquées sur la carte demeurent dans la liste sous un titre **Couches cachées**, affichées en gris et en italique. Sélectionnez l'icône d'œil <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction Œil non visible" /> à côté d'une couche cachée pour la rendre à nouveau visible; elle remonte alors vers la liste des couches disponibles._
+
 ### Effacer toutes les surbrillances
 
 Le bouton <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="Une icône représentant la fonction Effacer les surbrillances" /> permet d'affacer toutes les surbrillances. Il est situé dans le coin supérieur droit au-dessus de la liste des couches. Cliquez sur ce bouton pour supprimer toutes les surbrillances d'éléments de la carte.
@@ -652,6 +654,8 @@ Si vous cliquez sur une couche, le nombre d’éléments accessibles s’affiche
 - Si vous passez à un autre onglet pendant le processus, vous devrez resélectionner la couche lorsque vous reviendrez à l'onglet _Données_ pour afficher les résultats.
 
 L’onglet **Données** se divise en deux sections. La liste des couches se trouve à gauche, et les données des couches, à droite. Cliquez sur une couche pour en voir les données dans le tableau de droite.
+
+_Les couches masquées sur la carte demeurent dans la liste sous un titre **Couches cachées**, affichées en gris et en italique. Sélectionnez l'icône d'œil <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction Œil non visible" /> à côté d'une couche cachée pour la rendre à nouveau visible; elle remonte alors vers la liste des couches disponibles._
 
 ### Commandes de l’onglet Données
 
@@ -734,6 +738,8 @@ _**N.B. : Cliquez sur une couche pour afficher son curseur temporel dans la sect
 
 L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
+_Les couches masquées sur la carte demeurent dans la liste sous un titre **Couches cachées**, affichées en gris et en italique. Sélectionnez l'icône d'œil <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction Œil non visible" /> à côté d'une couche cachée pour la rendre à nouveau visible; elle remonte alors vers la liste des couches disponibles._
+
 L'interrupteur **Filtrage temporel** contrôle si le curseur temporel filtre les données.
 
 - Lorsqu'il est activé, seules les données correspondant à la date sélectionnée sont affichées.
@@ -758,6 +764,8 @@ Le champ visé par le filtre s’affiche en bas à gauche de la section du curse
 _**N.B. : Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
 
 L’onglet **Graphique** dans le pied de page se divise en deux sections. La liste des couches comportant un graphique se trouve dans la section de gauche. Sélectionnez un élément sur la carte pour en voir le graphique dans la section de droite.
+
+_Les couches masquées sur la carte demeurent dans la liste sous un titre **Couches cachées**, affichées en gris et en italique. Sélectionnez l'icône d'œil <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction Œil non visible" /> à côté d'une couche cachée pour la rendre à nouveau visible; elle remonte alors vers la liste des couches disponibles._
 
 Le menu déroulant **Élément** (en haut à gauche de la section du graphique) permet également de sélectionner un élément. Il s’agit d’une fonction pratique lorsque plusieurs éléments sont rapprochés sur la carte et qu’il est difficile de sélectionner celui voulu.
 

@@ -494,11 +494,13 @@ const ResponsiveGridLayout = forwardRef(
     const renderCloseButton = (): JSX.Element | null => {
       // Check conditions for hiding the button
 
-      // Default condition for mobile or toggle mode
-      let shouldShowCloseButton = (toggleMode && hasContent) || (isMobile && isRightPanelVisible);
+      // Default condition for mobile or toggle mode.
+      // In toggle mode (app bar) the close button is the only way back to the left list, so show it whenever the right
+      // panel is open, even without feature content (e.g. while the guide is showing).
+      let shouldShowCloseButton = (toggleMode && isRightPanelVisible) || (isMobile && isRightPanelVisible);
 
       // In WCAG mode, show close button when there is content
-      if (isFocusTrap) {
+      if (isFocusTrap && !toggleMode) {
         shouldShowCloseButton = hasContent && isRightPanelVisible;
       } else if (isMobile) {
         shouldShowCloseButton = isRightPanelVisible;

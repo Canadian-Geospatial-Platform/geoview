@@ -1,9 +1,22 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useMemo, useState, useRef, useEffect, useId } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { Badge, Box, List, ListItem, ListItemButton, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
+import {
+  Badge,
+  Box,
+  List,
+  ListItem,
+  ListItemButton,
+  Tooltip,
+  Typography,
+  ProgressBar,
+  LocationSearchingIcon,
+  IconButton,
+  VisibilityOffOutlinedIcon,
+} from '@/ui';
 
+import type { SxProps } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
 
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
@@ -13,6 +26,7 @@ import { LayerIcon } from './layer-icon';
 import { useStoreLayerName, useStoreLayerStatus } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {
@@ -40,6 +54,10 @@ export interface LayerListEntry {
   layerUniqueId?: string;
   /** Whether the layer item is disabled. */
   isDisabled?: boolean;
+  /** Whether the layer is hidden on the map (visibility toggled off); rendered disabled under the "Hidden layers" section with an inline eye toggle. */
+  isHidden?: boolean;
+  /** Layer paths to make visible when the inline eye toggle is clicked (defaults to `[layerPath]`); used to re-enable every layer backing a multi-layer entry such as a custom time slider. */
+  relatedLayerPaths?: string[];
 }
 
 /** Properties for the LayerList component. */
@@ -50,6 +68,10 @@ interface LayerListProps {
   selectedLayerPath: string | undefined;
   /** Callback invoked when a layer item is clicked. */
   onListItemClick: (layer: LayerListEntry) => void;
+  /** Compact mode for the collapsed app-bar icon view: hides the section headings and the "no layers" instructions item. */
+  compact?: boolean;
+  /** Omits the available-layers heading for non-layer lists such as Guide topics. */
+  hideAvailableHeading?: boolean;
 }
 
 /** Properties for the LayerListItem component. */
@@ -81,6 +103,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const layerController = useLayerController();
 
   /**
    * Builds the sx classes for the layer list item component.
@@ -91,7 +114,20 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   }, [theme]);
 
   // Deconstruct the layer object into immutable variables to be used by this component and its hooks
-  const { layerPath, layerName: propLayerName, layerStatus: propLayerStatus, tooltip, layerFeatures, queryStatus, numOffeatures, mapFilteredIcon, isDisabled: propIsDisabled, content } = layer;
+  const {
+    layerPath,
+    layerName: propLayerName,
+    layerStatus: propLayerStatus,
+    tooltip,
+    layerFeatures,
+    queryStatus,
+    numOffeatures,
+    mapFilteredIcon,
+    isDisabled: propIsDisabled,
+    isHidden,
+    relatedLayerPaths,
+    content,
+  } = layer;
 
   // Store
   const layerStatus = useStoreLayerStatus(layerPath) ?? propLayerStatus;
@@ -116,8 +152,10 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   const isLoading = queryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
   const isLayerCoordinateInfo = layerPath === LAYER_PATH_COORDINATE_INFO;
 
-  // Default disabled state
-  let isDisabled = isLoading || propIsDisabled || numOffeatures === 0;
+  // Default disabled state - hidden layers are NOT disabled (they are enabled but hidden; the "Hidden layers"
+  // heading and the eye toggle convey that state). The 0-feature rule only greys non-hidden layers, so hidden
+  // rows stay full-contrast and consistent across panels regardless of their (irrelevant) selected-feature count.
+  let isDisabled = isLoading || propIsDisabled || (!isHidden && numOffeatures === 0);
 
   // If it's the layer coordinate info, it's never disabled, because it always at least have the clicked map coordinates information.
   // However, if "coordinateInfoEnabled" is true, and no map click has been done,the layer coord info will show zero-ed out coordinates in the UI.
@@ -190,18 +228,43 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   }, [memoLayerStatusText, mapFilteredIcon]);
 
   /**
-   * Handles layer selection with keyboard (Enter or Spacebar).
+   * Handles the inline eye toggle (and the whole hidden row) that re-enables the hidden layer's map visibility.
+   *
+   * Re-enables every layer backing the entry (e.g. all layers of a custom time slider), not just the main path,
+   * and crawls up each layer's parent groups so a child hidden only because its group is hidden becomes visible.
+   * Selects the layer afterwards so its content opens in the right panel and focus follows the selection (WCAG).
+   */
+  const handleShowLayer = useCallback((): void => {
+    const pathsToShow = relatedLayerPaths?.length ? relatedLayerPaths : [layerPath];
+    pathsToShow.forEach((path) => layerController.setLayerVisibleIncludingParents(path));
+
+    // Only select when the layer has content to show (undefined feature count means panels without a feature concept,
+    // e.g. time slider); selecting a feature-less layer would replace the guide with an empty right panel.
+    if (numOffeatures !== 0) {
+      onListItemClick(layer);
+    }
+  }, [layerController, layerPath, relatedLayerPaths, onListItemClick, layer, numOffeatures]);
+
+  /**
+   * Handles the item click for a visible layer (hidden rows are non-interactive; only their eye toggle acts).
+   */
+  const handleItemClick = useCallback((): void => {
+    onListItemClick(layer);
+  }, [onListItemClick, layer]);
+
+  /**
+   * Handles item activation with the keyboard (Enter or Spacebar).
    */
   const handleLayerKeyDown = useCallback(
-    (event: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
+    (event: React.KeyboardEvent): void => {
       if ((event.key === 'Enter' || event.key === ' ') && !isDisabled && !isLoading) {
-        onListItemClick(selectedLayer);
+        handleItemClick();
         // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,
         // to avoid this we have do prevent default so that it doesn't propagate to the parent elements.
         event.preventDefault();
       }
     },
-    [isDisabled, isLoading, onListItemClick]
+    [isDisabled, isLoading, handleItemClick]
   );
 
   // #endregion Handlers
@@ -272,11 +335,13 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
         <ListItemButton
           id={id}
           component="button"
-          sx={memoSxClasses.listItemButton}
-          onKeyDown={(e) => handleLayerKeyDown(e, layer)}
-          onClick={() => onListItemClick(layer)}
+          sx={[memoSxClasses.listItemButton, !!isHidden && memoSxClasses.listItemButtonHidden] as SxProps}
+          onKeyDown={isHidden ? undefined : handleLayerKeyDown}
+          onClick={isHidden ? undefined : handleItemClick}
           selected={isSelected}
           disabled={isDisabled}
+          disableRipple={isHidden}
+          tabIndex={isHidden ? -1 : undefined}
           aria-current={isSelected ? true : undefined}
         >
           {layerPath === LAYER_PATH_COORDINATE_INFO ? (
@@ -284,7 +349,12 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
           ) : (
             layerPath && !content && <LayerIcon layerPath={layerPath} />
           )}
-          <Box component="span" sx={memoSxClasses.listPrimaryText} className="layerInfo">
+          {/* Reserve right space for the inline eye toggle so the wrapped layer name doesn't run under it */}
+          <Box
+            component="span"
+            sx={[memoSxClasses.listPrimaryText, !!isHidden && memoSxClasses.listPrimaryTextHidden] as SxProps}
+            className="layerInfo"
+          >
             <Typography component="span" className="layerTitle" noWrap={!isDisabled}>
               {layerName}
             </Typography>
@@ -306,6 +376,18 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
           )}
         </ListItemButton>
       </Tooltip>
+      {isHidden && (
+        <IconButton
+          edge="end"
+          size="small"
+          sx={memoSxClasses.showHiddenLayerButton}
+          aria-label={t('layers.showLayer', { name: layerName })}
+          tooltip={t('layers.showLayer', { name: layerName })}
+          onClick={handleShowLayer}
+        >
+          <VisibilityOffOutlinedIcon />
+        </IconButton>
+      )}
       {(layerStatus === 'loading' || queryStatus === 'processing') && (
         <Box component="span" sx={memoSxClasses.progressBar}>
           <ProgressBar
@@ -329,13 +411,23 @@ LayerListItem.displayName = 'LayerListItem';
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
  */
-export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element => {
+export const LayerList = memo((props: LayerListProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerList');
+
+  const { layerList, selectedLayerPath, onListItemClick, compact, hideAvailableHeading } = props;
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  // Unique ids so each list can be labelled by its own heading (WCAG - aria-labelledby)
+  const availableHeadingId = useId();
+  const hiddenHeadingId = useId();
+
+  // WCAG - live-region message announcing when a layer moves between the available and hidden lists
+  const [announcement, setAnnouncement] = useState<string>('');
+  const prevHiddenPathsRef = useRef<Set<string> | undefined>(undefined);
 
   /**
    * Builds the sx classes for the layer list component.
@@ -345,40 +437,107 @@ export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick }
     return getSxClasses(theme);
   }, [theme]);
 
+  /**
+   * Splits the layer list into available and hidden groups while preserving order within each group.
+   */
+  const memoGroupedLayers = useMemo((): { availableLayers: LayerListEntry[]; hiddenLayers: LayerListEntry[] } => {
+    logger.logTraceUseMemo('LAYER-LIST - LayerList - memoGroupedLayers', layerList);
+    return {
+      availableLayers: layerList.filter((layer) => !layer.isHidden),
+      hiddenLayers: layerList.filter((layer) => layer.isHidden),
+    };
+  }, [layerList]);
+
+  const hasHiddenLayers = !!memoGroupedLayers.hiddenLayers.length;
+
+  /**
+   * Renders a single layer list item.
+   *
+   * @param layer - The layer entry to render
+   * @returns The layer list item element
+   */
+  const renderLayerListItem = useCallback(
+    (layer: LayerListEntry): JSX.Element => (
+      <LayerListItem
+        id={`${layer?.layerUniqueId ?? ''}`}
+        key={layer.layerPath}
+        // Reason:- (layer?.numOffeatures ?? 1) > 0
+        // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
+        // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
+        isSelected={
+          ((layer?.numOffeatures ?? 1) > 0 || layer.layerPath === LAYER_PATH_COORDINATE_INFO) && layer.layerPath === selectedLayerPath
+        }
+        layer={layer}
+        onListItemClick={onListItemClick}
+      />
+    ),
+    [selectedLayerPath, onListItemClick]
+  );
+
+  /**
+   * WCAG - announces to screen readers when a layer moves between the available and hidden lists.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('LAYER-LIST - LayerList - announce list moves', memoGroupedLayers.hiddenLayers.length);
+
+    const currentHiddenPaths = new Set(memoGroupedLayers.hiddenLayers.map((layer) => layer.layerPath));
+    const prevHiddenPaths = prevHiddenPathsRef.current;
+
+    // Skip the first render (no previous snapshot to compare against)
+    if (prevHiddenPaths) {
+      const movedToHidden = memoGroupedLayers.hiddenLayers.find((layer) => !prevHiddenPaths.has(layer.layerPath));
+      const movedToAvailable = memoGroupedLayers.availableLayers.find((layer) => prevHiddenPaths.has(layer.layerPath));
+
+      if (movedToHidden) setAnnouncement(t('layers.layerMovedToHidden', { name: movedToHidden.layerName }));
+      else if (movedToAvailable) setAnnouncement(t('layers.layerMovedToAvailable', { name: movedToAvailable.layerName }));
+    }
+
+    prevHiddenPathsRef.current = currentHiddenPaths;
+  }, [memoGroupedLayers, t]);
+
   return (
-    <List sx={memoSxClasses.list}>
-      {!!layerList.length &&
-        layerList.map((layer) => (
+    <Box sx={{ width: '100%' }}>
+      {/* WCAG - ARIA live region announcing when a layer moves between the two lists */}
+      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </Box>
+
+      {!compact && !hideAvailableHeading && (
+        <Typography id={availableHeadingId} sx={memoSxClasses.listSectionHeader} component="p">
+          {t('layers.availableLayersSection')}
+        </Typography>
+      )}
+      <List sx={memoSxClasses.list} aria-labelledby={compact || hideAvailableHeading ? undefined : availableHeadingId}>
+        {memoGroupedLayers.availableLayers.map(renderLayerListItem)}
+        {!memoGroupedLayers.availableLayers.length && !compact && (
           <LayerListItem
-            id={`${layer?.layerUniqueId ?? ''}`}
-            key={layer.layerPath}
-            // Reason:- (layer?.numOffeatures ?? 1) > 0
-            // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
-            // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-            isSelected={
-              ((layer?.numOffeatures ?? 1) > 0 || layer.layerPath === LAYER_PATH_COORDINATE_INFO) && layer.layerPath === selectedLayerPath
-            }
-            layer={layer}
+            id="dummyPath"
+            key="dummyPath"
+            isSelected={false}
+            layer={{
+              layerPath: '',
+              layerName: t('layers.instructionsNoLayersTitle'),
+              layerFeatures: t('layers.instructionsNoLayersBody'),
+              layerStatus: 'processed',
+              queryStatus: 'processed',
+              numOffeatures: 0, // Just so it's disabled.
+            }}
             onListItemClick={onListItemClick}
           />
-        ))}
-      {!layerList.length && (
-        <LayerListItem
-          id="dummyPath"
-          key="dummyPath"
-          isSelected={false}
-          layer={{
-            layerPath: '',
-            layerName: t('layers.instructionsNoLayersTitle'),
-            layerFeatures: t('layers.instructionsNoLayersBody'),
-            layerStatus: 'processed',
-            queryStatus: 'processed',
-            numOffeatures: 0, // Just so it's disabled.
-          }}
-          onListItemClick={onListItemClick}
-        />
+        )}
+      </List>
+
+      {hasHiddenLayers && (
+        <>
+          <Typography id={hiddenHeadingId} sx={memoSxClasses.listSectionHeader} component="p">
+            {t('layers.hiddenLayersSection')}
+          </Typography>
+          <List sx={memoSxClasses.list} aria-labelledby={hiddenHeadingId}>
+            {memoGroupedLayers.hiddenLayers.map(renderLayerListItem)}
+          </List>
+        </>
       )}
-    </List>
+    </Box>
   );
 });
 LayerList.displayName = 'LayerList';

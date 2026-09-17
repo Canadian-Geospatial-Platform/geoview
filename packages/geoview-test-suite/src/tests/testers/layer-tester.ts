@@ -9,7 +9,11 @@ import type {
 } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import {
+  getStoreLayerLegendLayerByPath,
+  getStoreLayerIsHiddenOnMap,
+  getStoreLayerInVisibleRangeLayerPaths,
+} from 'geoview-core/core/stores/states/layer-state';
 import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/feature-info-state';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { generateId } from 'geoview-core/core/utils/utilities';
@@ -35,6 +39,24 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
+
+/** Result captured by the parent-crawl visibility test at each stage. */
+type ParentCrawlVisibilityResult = {
+  /** State snapshot taken after the parent group has been hidden. */
+  afterHide: {
+    groupVisible: boolean;
+    childOwnVisible: boolean;
+    childEffectiveVisible: boolean;
+    childHidden: boolean;
+    childInRange: boolean;
+  };
+  /** State snapshot taken after setLayerVisibleIncludingParents walked the parents. */
+  afterShow: {
+    groupVisible: boolean;
+    childEffectiveVisible: boolean;
+    childHidden: boolean;
+  };
+};
 
 /**
  * Main Layer testing class.
@@ -2110,6 +2132,85 @@ export class LayerTester extends GVAbstractTester {
           // Redirect to helper to clean up and assert
           this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
         }
+      }
+    );
+  }
+
+  /**
+   * Tests that a child layer hidden only because its parent group is hidden is flagged hidden on the map (so it would
+   * appear in the panels' "Hidden layers" section) while staying in scale range, and that walking the parent chain
+   * with setLayerVisibleIncludingParents makes it visible again (moving it back to the available list).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSetLayerVisibleIncludingParents(): Promise<Test<ParentCrawlVisibilityResult>> {
+    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
+    const groupPath = 'geojsonLYR1/point-feature-group';
+    const childPath = `${groupPath}/points_1.json`;
+
+    // Test
+    return this.test(
+      `Test hidden-by-parent child and setLayerVisibleIncludingParents parent crawl...`,
+      async (test) => {
+        // Add the group layer with its visible child
+        test.addStep('Adding the GeoJSON group layer with a visible child...');
+        await this.helperStepAddLayerOnMap(test, layerConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, childPath);
+
+        const { layerController } = this.getControllersRegistry();
+        const groupLayer = layerController.getGeoviewLayerIfExists(groupPath);
+        const childLayer = layerController.getGeoviewLayerIfExists(childPath);
+        Test.assertIsDefined('groupLayer', groupLayer);
+        Test.assertIsDefined('childLayer', childLayer);
+
+        // Make sure both start visible
+        test.addStep('Ensuring the group and child start visible...');
+        layerController.setOrToggleLayerVisibility(groupPath, true);
+        layerController.setOrToggleLayerVisibility(childPath, true);
+
+        // Hide the parent group only (the child keeps its own visibility but is masked by the hidden group)
+        test.addStep('Hiding the parent group...');
+        layerController.setOrToggleLayerVisibility(groupPath, false);
+
+        const afterHide = {
+          groupVisible: groupLayer.getVisible(),
+          childOwnVisible: childLayer.getVisible(),
+          childEffectiveVisible: childLayer.getVisibleIncludingParents(),
+          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), childPath),
+          childInRange: getStoreLayerInVisibleRangeLayerPaths(this.getMapId()).includes(childPath),
+        };
+
+        // Walk the parent chain to make the hidden child visible again (what the inline eye toggle does)
+        test.addStep('Calling setLayerVisibleIncludingParents on the hidden child...');
+        layerController.setLayerVisibleIncludingParents(childPath);
+
+        const afterShow = {
+          groupVisible: groupLayer.getVisible(),
+          childEffectiveVisible: childLayer.getVisibleIncludingParents(),
+          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), childPath),
+        };
+
+        return { afterHide, afterShow };
+      },
+      (test, result) => {
+        // While the parent group is hidden, the child is masked but keeps its own visibility (it would show in the
+        // "Hidden layers" section) and stays in scale range (so it is NOT filtered out as out-of-range)
+        test.addStep('Verifying the child is hidden by its parent while staying in range...');
+        Test.assertIsEqual(result.afterHide.groupVisible, false);
+        Test.assertIsEqual(result.afterHide.childOwnVisible, true);
+        Test.assertIsEqual(result.afterHide.childEffectiveVisible, false);
+        Test.assertIsEqual(result.afterHide.childHidden, true);
+        Test.assertIsEqual(result.afterHide.childInRange, true);
+
+        // After the parent crawl, both the group and the child are visible again (child moves back to the available list)
+        test.addStep('Verifying the parent crawl restored the child visibility...');
+        Test.assertIsEqual(result.afterShow.groupVisible, true);
+        Test.assertIsEqual(result.afterShow.childEffectiveVisible, true);
+        Test.assertIsEqual(result.afterShow.childHidden, false);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, groupPath);
       }
     );
   }

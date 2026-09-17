@@ -327,6 +327,7 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
           }
           layerList={memoLayersList}
           onLayerListClicked={handleGuideItemClick}
+          hideAvailableHeading
           aria-label={ariaLabel}
         >
           <Box sx={memoSxClasses.rightPanelContainer} className="guidebox-container" data-map-id={mapId}>

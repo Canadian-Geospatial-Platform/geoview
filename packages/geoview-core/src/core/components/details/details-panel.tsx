@@ -19,6 +19,7 @@ import {
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
   useStoreLayerQueryableByPaths,
+  useStoreLayerInVisibleRangeSet,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerIsParentHiddenOnMapSet,
   useStoreLayerAllVisibleAndInRangeLayers,
@@ -98,6 +99,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const layerStatuses = useStoreLayerStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
   const layerParentHiddenSet = useStoreLayerIsParentHiddenOnMapSet();
+  const inVisibleRangeSet = useStoreLayerInVisibleRangeSet();
   const uiController = useUIController();
   const mapController = useMapController();
   const detailsController = useDetailsController();
@@ -111,6 +113,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
   const layoutRef = useRef<LayoutExposedMethods>(null);
+  // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
+  const userDismissedGuideRef = useRef<boolean>(false);
   const prevButtonRef = useRef<HTMLButtonElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -217,12 +221,17 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerData);
 
+    // In the app bar, the left panel collapses to an icon-only column when the right feature panel is open;
+    // the "Hidden layers" section would overlap those icons, so hidden layers are dropped in that view.
+    const suppressHiddenLayers = containerType === CONTAINER_TYPE.APP_BAR && isRightPanelVisible;
+
     // Set the layers list (filter: visible - visible in range and isQueryable)
     const layerListEntries = visibleInRangeLayers
       .map((layerPath) => arrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer && !layerHiddenSet[layer.layerPath])
+      .filter((layer) => layer && inVisibleRangeSet[layer.layerPath] !== false)
       .filter((layer) => layer && queryableByLayerPath[layer.layerPath])
-      .map((layer) => ({
+      .filter((layer) => layer && !(suppressHiddenLayers && layerHiddenSet[layer.layerPath]))
+      .map((layer): LayerListEntry => ({
         layerPath: layer!.layerPath,
         layerName: layerNames[layer!.layerPath] ?? '',
         layerStatus: layerStatuses[layer!.layerPath],
@@ -231,6 +240,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         layerFeatures: getNumFeaturesLabel(layer!.features?.length ?? 0),
         tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer!.layerPath ?? ''}`,
+        isHidden: layerHiddenSet[layer!.layerPath],
       }));
 
     // Merge in-range and out-of-range layers while preserving order from arrayOfLayerData
@@ -242,7 +252,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         (layer.features?.length ?? 0) > 0 &&
         !existingLayerPaths.has(layer.layerPath) &&
         layer.layerPath !== LAYER_PATH_COORDINATE_INFO &&
-        !layerParentHiddenSet[layer.layerPath]
+        !layerParentHiddenSet[layer.layerPath] &&
+        // Don't re-add a visibility-hidden layer that the app-bar icon view intentionally suppressed
+        !(suppressHiddenLayers && layerHiddenSet[layer.layerPath])
       ) {
         layerListEntries.push({
           layerPath: layer.layerPath,
@@ -303,9 +315,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     layerStatuses,
     layerHiddenSet,
     layerParentHiddenSet,
+    inVisibleRangeSet,
     getNumFeaturesLabel,
     mapId,
     orderedLayers,
+    containerType,
+    isRightPanelVisible,
     t,
   ]);
 
@@ -501,6 +516,24 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailsController, memoLayersListBatched, selectedLayerPath]);
 
+  /**
+   * Clears the selection when the active layer becomes hidden on the map so the right panel stops showing its features.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - clear selection when hidden', selectedLayerPath, layerHiddenSet);
+
+    // Only react to visibility-driven hiding (not out-of-scale-range), and ignore the coordinate-info entry
+    if (
+      selectedLayerPath &&
+      selectedLayerPath !== LAYER_PATH_COORDINATE_INFO &&
+      layerHiddenSet[selectedLayerPath] &&
+      inVisibleRangeSet[selectedLayerPath] !== false
+    ) {
+      detailsController.setSelectedLayerPath('');
+    }
+  }, [detailsController, selectedLayerPath, layerHiddenSet, inVisibleRangeSet]);
+
   // #endregion
 
   // #region EVENT HANDLERS SECTION
@@ -523,6 +556,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Removes the currently selected feature highlight (but keeps checked features).
    */
   const handleRightPanelClosed = useCallback((): void => {
+    // Remember the explicit close so the no-features guide effect doesn't immediately force the panel back open
+    userDismissedGuideRef.current = true;
+
     // Only remove the current selected feature highlight if it's not checked
     const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
     if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
@@ -762,6 +798,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       (containerType === CONTAINER_TYPE.FOOTER_BAR && footerBarTabId === TABS.DETAILS && footerBarIsOpen) ||
       (containerType === CONTAINER_TYPE.APP_BAR && appBarTabId === TABS.DETAILS && appBarIsOpen);
 
+    // Reset the dismissed flag when the panel is closed so re-opening details can auto-show the guide again
+    if (!isDetailsActive) {
+      userDismissedGuideRef.current = false;
+      return;
+    }
+
     // Only run when details is active
     if (isDetailsActive && arrayOfLayerDataBatch && arrayOfLayerDataBatch.length > 0) {
       // Check if all layers have no features (excluding coordinate-info)
@@ -769,11 +811,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         (layer) => layer.layerPath === LAYER_PATH_COORDINATE_INFO || !layer.features || layer.features.length === 0
       );
 
+      // Features are available again: allow the guide to auto-show on the next no-features state
+      if (!allLayersHaveNoFeatures) {
+        userDismissedGuideRef.current = false;
+      }
+
       // Check if we should clear the selected layer
       const shouldClearSelectedLayer = allLayersHaveNoFeatures && !coordinateInfoEnabled;
 
-      // If should clear the selected layer and queries are processed
-      if (shouldClearSelectedLayer && memoIsAllLayersQueryStatusProcessed) {
+      // If should clear the selected layer and queries are processed (skip when the user already closed the panel)
+      if (shouldClearSelectedLayer && memoIsAllLayersQueryStatusProcessed && !userDismissedGuideRef.current) {
         // Log
         logger.logDebug('DETAILS-PANEL - All layers have no features and coordinate info is disabled, showing right panel with guide');
 
@@ -904,6 +951,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       guideContentIds={[TABS.DETAILS]}
       hideEnlargeBtn={containerType === CONTAINER_TYPE.APP_BAR}
       toggleMode={containerType === CONTAINER_TYPE.APP_BAR}
+      compact={containerType === CONTAINER_TYPE.APP_BAR && isRightPanelVisible}
     >
       {renderContent()}
     </Layout>
