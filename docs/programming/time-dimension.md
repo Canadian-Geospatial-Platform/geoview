@@ -151,6 +151,7 @@ type TimeDimension = {
   serviceDateTemporalMode?: TemporalMode;
   displayDateTimezone?: TimeIANA;
   isValid: boolean; // Whether the dimension has a usable range
+  isGroupDimension?: boolean; // Whether the dimension comes from a WMS parent group
 };
 ```
 
@@ -160,10 +161,11 @@ type TimeDimension = {
 type RangeItems = {
   type: string; // 'discrete' | 'relative' | 'none'
   range: string[]; // Array of ISO 8601 date strings
+  durationInterval?: string; // Original ISO 8601 interval duration
 };
 ```
 
-Note: Absolute ranges are converted to discrete arrays during parsing, so `type` is `'discrete'` for both discrete and absolute inputs.
+Absolute ranges retain two aligned bounds in `range` and preserve their ISO 8601 period in `durationInterval`. Their normalized `type` remains `'discrete'`; consumers must not assume that every intermediate interval is materialized in `range`.
 
 ---
 
@@ -202,12 +204,21 @@ The OGC `values` string (and the ESRI-to-OGC converted string) follows three pos
 
 - `start` and `end` are ISO 8601 dates
 - `period` is an ISO 8601 duration (e.g., `P1Y`, `P1M`, `P1D`, `PT1H`)
-- GeoView expands this into a discrete array by iterating from start to end, adding the duration at each step
+- GeoView validates and aligns the interval by advancing from start toward end
+- The first and last aligned values are stored in `range`, while the period is preserved in `durationInterval`
 - Has a 10,000-iteration safety guard to prevent infinite loops from malformed durations
-- `nearestValues: 'discrete'` (the expanded array acts like discrete points)
+- `nearestValues: 'discrete'`; retaining `durationInterval` does not by itself materialize every intermediate slider value
 - `RangeItems.type = 'discrete'`
 
 **Use case:** Most common for WMS/ESRI — regular intervals over a date range (yearly, monthly, daily data).
+
+### OGC `current` Keyword
+
+Standalone `current` values are resolved once during metadata parsing using the current UTC date/time. For slash-separated intervals, the replacement follows the date-only or date-time shape of the other interval segment. It is not a live endpoint that updates after the layer has loaded.
+
+### Grouped WMS Dimensions
+
+For supported QGIS-style parent dimensions, a child layer can inherit the parent range and display metadata. The first direct sibling is registered as the main time-slider layer and the remaining direct siblings are added as filter targets. This synchronization applies to direct siblings; it does not imply recursive synchronization across arbitrary nested groups.
 
 ### Relative Range
 

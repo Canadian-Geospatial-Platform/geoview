@@ -171,7 +171,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box>
           {t('layers.layerTimeDimensionRangeDurationInterval')} (
           <a
-            href="https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm"
+            href="https://docs.digi.com//resources/documentation/digidocs/90001488-13/default.htm#reference/r_iso_8601_duration_format.htm"
             target="_blank"
             rel="noopener noreferrer"
           >
