@@ -843,6 +843,7 @@ export class WMS extends AbstractGeoViewRaster {
                 nearestValues: groupTimeDimension.nearestValues,
                 default: groupTimeDimension.default,
                 rangeItems: { type: 'discrete', range: [] },
+                isGroupDimension: groupTimeDimension.isGroupDimension,
               };
             }
 
