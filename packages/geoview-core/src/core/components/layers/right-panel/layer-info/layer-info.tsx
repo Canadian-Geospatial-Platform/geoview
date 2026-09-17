@@ -170,11 +170,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${rangeItems.range[0]} / ${rangeItems.range[rangeItems.range.length - 1]}`}</Box>
         <Box>
           {t('layers.layerTimeDimensionRangeDurationInterval')} (
-          <a
-            href="https://docs.digi.com//resources/documentation/digidocs/90001488-13/default.htm#reference/r_iso_8601_duration_format.htm"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={`${GeoUtilities.ISO_8601_REF_DIMENSION_INTERVAL}`} target="_blank" rel="noopener noreferrer">
             {t('layers.layerTimeDimensionRangeDurationIntervalSpec')}
           </a>
           ): {rangeItems.durationInterval}
