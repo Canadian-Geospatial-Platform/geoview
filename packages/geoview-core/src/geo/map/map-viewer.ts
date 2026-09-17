@@ -29,6 +29,8 @@ import type {
   TypeMapMouseInfo,
   TypeMapState,
   TypeMapViewSettings,
+  TypeValidAppBarCoreProps,
+  TypeValidFooterBarTabsCoreProps,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -1072,7 +1074,29 @@ export class MapViewer {
     this.getView().setMaxZoom(zoom);
   }
 
-  // #endregion
+  /**
+   * Checks whether an app bar tab is configured on the map viewer.
+   *
+   * @param tabId - The app bar tab identifier to find
+   * @returns Whether the app bar tab is configured
+   */
+  hasAppbarTab(tabId: TypeValidAppBarCoreProps): boolean {
+    const plugins = this.mapFeaturesConfig.appBar?.tabs?.core || [];
+    return plugins.includes(tabId);
+  }
+
+  /**
+   * Checks whether a footer bar tab is configured on the map viewer.
+   *
+   * @param tabId - The footer bar tab identifier to find
+   * @returns Whether the footer bar tab is configured
+   */
+  hasFooterbarTab(tabId: TypeValidFooterBarTabsCoreProps): boolean {
+    const plugins = this.mapFeaturesConfig.footerBar?.tabs?.core || [];
+    return plugins.includes(tabId);
+  }
+
+  // #endregion MAP STATES
 
   // #region MAP ACTIONS
 
