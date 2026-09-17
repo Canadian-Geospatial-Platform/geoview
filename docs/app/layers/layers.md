@@ -465,6 +465,12 @@ Raster layers use server-defined styles. For WMS, use the `wmsStyle` source prop
 }
 ```
 
+When multiple WMS styles are advertised by the service, they can be changed from Layer Settings. If `wmsStyle` is omitted, GeoView uses the service's default style when available and otherwise falls back to the first advertised style.
+
+ESRI Image layers expose advertised raster functions in Layer Settings. The configured `source.rasterFunction` takes precedence; when it is omitted, GeoView selects the first advertised function other than `None`.
+
+The Layer Info panel displays normalized temporal metadata when available, including the range type, explicit values or minimum/maximum bounds, the ISO 8601 duration interval, and whether the time dimension comes from a WMS group.
+
 ## Best Practices
 
 ### ✅ DO

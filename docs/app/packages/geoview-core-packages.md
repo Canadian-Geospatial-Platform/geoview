@@ -35,6 +35,7 @@ This document provides comprehensive API reference and configuration details for
 - Play/pause animation controls
 - Configurable time step for continuous mode
 - Temporal filtering synchronized across multiple layers
+- Automatic synchronization of direct sibling layers for supported grouped WMS time dimensions
 - Automatic timezone handling (UTC)
 
 **Dependencies:**
