@@ -306,6 +306,7 @@
     "layerTimeDimensionRangeTypeValues": "Range values",
     "layerTimeDimensionRangeTypeMinMax": "Min/Max",
     "layerTimeDimensionRangeDurationInterval": "Duration interval",
+    "layerTimeDimensionRangeDurationIntervalSpec": "ISO8601 spec.",
     "layerIsGroupDimension": "Part of a group dimension",
     "layerServiceProjection": "Service projection",
     "layerServiceProjectionAndMore": "and more",

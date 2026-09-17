@@ -16,28 +16,13 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "landcover_2010_19classes",
-            "initialSettings": {
-              "controls": {
-                "visibility": false
-              }
-            }
+            "layerId": "landcover_2010_19classes"
           },
           {
-            "layerId": "landcover_2015_19classes",
-            "initialSettings": {
-              "controls": {
-                "visibility": false
-              }
-            }
+            "layerId": "landcover_2015_19classes"
           },
           {
-            "layerId": "landcover_2020_19classes",
-            "initialSettings": {
-              "controls": {
-                "visibility": false
-              }
-            }
+            "layerId": "landcover_2020_19classes"
           }
         ]
       },
@@ -243,37 +228,5 @@
   "theme": "geo.ca",
   "serviceUrls": {
     "proxyUrl": "https://proxy.app-dev.geo.ca"
-  },
-  "corePackagesConfig": [
-    {
-      "time-slider": {
-        "sliders": [
-          {
-            "layerPaths": [
-              "landcover-xml-group/base-group/landcover_2010_19classes",
-              "landcover-xml-group/base-group/landcover_2015_19classes",
-              "landcover-xml-group/base-group/landcover_2020_19classes"
-            ],
-            "title": "Land Cover Slider",
-            "filtering": true,
-            "timeDimension": {
-              "default": [
-                "2010-07-01T00:00:00Z"
-              ],
-              "nearestValues": "discrete",
-              "rangeItems": {
-                "type": "",
-                "range": [
-                  "2010-07-01T00:00:00Z",
-                  "2015-07-01T00:00:00Z",
-                  "2020-07-01T00:00:00Z"
-                ]
-              },
-              "singleHandle": true
-            }
-          }
-        ]
-      }
-    }
-  ]
+  }
 }
