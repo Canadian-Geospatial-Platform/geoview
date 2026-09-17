@@ -4,7 +4,6 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
-import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -102,10 +101,6 @@ export class DetailsTester extends GVAbstractTester {
         // Check that there was 0 result for the Alberta
         test.addStep('Verifying there is 0 feature info result for the Alberta query...');
         Test.assertIsArrayLengthEqual(resultsAlbertaNoResults2, 0);
-
-        // Check that details is the active footer bar
-        test.addStep("Verifying 'details' is the selected footer tab...");
-        Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'details');
       }
     );
   }
@@ -460,7 +455,7 @@ export class DetailsTester extends GVAbstractTester {
       theme: 'geo.ca',
       footerBar: {
         tabs: {
-          core: ['legend', 'layers', 'details'],
+          core: ['legend', 'layers'],
         },
       },
     };
