@@ -7,6 +7,7 @@ import { Box, Divider, Typography } from '@/ui';
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';
 import { isLocalhost, isValidUUID } from '@/core/utils/utilities';
+import type { RangeItems } from '@/core/utils/date-mgt';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/states/app-state';
@@ -150,6 +151,38 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
     return name;
   }, [memoLocalizedLayerType, schemaTag, url, t]);
 
+  /**
+   * Renders temporal range values or minimum, maximum, and duration information.
+   *
+   * @param rangeItems - Temporal range information to render
+   * @param isDiscrete - Whether the range contains discrete values
+   * @returns The temporal range information, or null when the range is empty
+   */
+  const renderTemporalRangeInfo = (rangeItems: RangeItems, isDiscrete: boolean): JSX.Element | null => {
+    if (!rangeItems.range[0]) return null;
+
+    if (isDiscrete && !rangeItems.durationInterval) {
+      return <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${rangeItems.range.join(', ')}`}</Box>;
+    }
+
+    return (
+      <>
+        <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${rangeItems.range[0]} / ${rangeItems.range[rangeItems.range.length - 1]}`}</Box>
+        <Box>
+          {t('layers.layerTimeDimensionRangeDurationInterval')} (
+          <a
+            href="https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('layers.layerTimeDimensionRangeDurationIntervalSpec')}
+          </a>
+          ): {rangeItems.durationInterval}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Box sx={memoSxClasses.layerInfo}>
       <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
@@ -221,19 +254,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {layerTimeDimension?.rangeItems.type && (
               <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems.type}`}</Box>
             )}
-            {layerTimeDimension?.rangeItems.range?.[0] && (
-              <>
-                {layerTimeDimension.rangeItems.type === 'discrete' && !layerTimeDimension.rangeItems.durationInterval && (
-                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${layerTimeDimension.rangeItems.range.join(', ')}`}</Box>
-                )}
-                {(layerTimeDimension.rangeItems.type !== 'discrete' || layerTimeDimension.rangeItems.durationInterval) && (
-                  <>
-                    <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
-                    <Box>{`${t('layers.layerTimeDimensionRangeDurationInterval')}: ${layerTimeDimension.rangeItems.durationInterval}`}</Box>
-                  </>
-                )}
-              </>
-            )}
+            {layerTimeDimension &&
+              renderTemporalRangeInfo(layerTimeDimension.rangeItems, layerTimeDimension.rangeItems.type === 'discrete')}
             <Box>{`${t('layers.layerIsGroupDimension')}: ${layerTimeDimension?.isGroupDimension ?? false}`}</Box>
           </Box>
         </Box>
@@ -256,19 +278,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
               <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
             )}
-            {timeSliderDimension?.rangeItems.range?.[0] && (
-              <>
-                {timeSliderDimension.discreteValues && !layerTimeDimension?.rangeItems.durationInterval && (
-                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${timeSliderDimension.rangeItems.range.join(', ')}`}</Box>
-                )}
-                {(!timeSliderDimension.discreteValues || layerTimeDimension?.rangeItems.durationInterval) && (
-                  <>
-                    <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${timeSliderDimension.rangeItems.range[0]} / ${timeSliderDimension.rangeItems.range[timeSliderDimension.rangeItems.range.length - 1]}`}</Box>
-                    <Box>{`${t('layers.layerTimeDimensionRangeDurationInterval')}: ${timeSliderDimension.rangeItems.durationInterval}`}</Box>
-                  </>
-                )}
-              </>
-            )}
+            {renderTemporalRangeInfo(timeSliderDimension.rangeItems, timeSliderDimension.discreteValues)}
           </Box>
         </Box>
       )}
