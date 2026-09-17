@@ -192,6 +192,18 @@
             "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": "Landcover",
+        "metadataAccessPath": "./datasets/landcover_groupe.xml",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes",
+            "layerName": "Land Cover 2010"
+          }
+        ]
       }
     ]
   },

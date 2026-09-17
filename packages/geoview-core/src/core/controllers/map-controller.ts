@@ -2020,7 +2020,7 @@ export class MapController extends AbstractMapViewerController {
           values,
           delay: delayTimeSlider,
           filtering,
-          range,
+          rangeItems,
           discreteValues,
           displayDateFormat,
           displayDateFormatShort,
@@ -2040,10 +2040,7 @@ export class MapController extends AbstractMapViewerController {
             displayDateFormatShort,
             serviceDateTemporalMode,
             displayDateTimezone,
-            rangeItems: {
-              type: '',
-              range,
-            },
+            rangeItems,
             singleHandle,
             isValid: true,
           };

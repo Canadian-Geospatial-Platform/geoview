@@ -393,6 +393,7 @@ export class LayerSetController extends AbstractMapViewerController {
     const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
     const legendCollapsed = layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false; // default: false
     const visible = layerConfig.getInitialSettings()?.states?.visible ?? true; // default: true
+    const timeDimension = layerConfig.getTimeDimension();
 
     if (entryIndex === -1) {
       // Get if the layer is a child, use the gv layer if we can or use the layerConfig.getParent
@@ -416,6 +417,9 @@ export class LayerSetController extends AbstractMapViewerController {
         visible,
         inVisibleRange: true,
         legendCollapsed,
+        timeDimension,
+        displayDateFormat: timeDimension?.displayDateFormat,
+        displayDateFormatShort: timeDimension?.displayDateFormatShort,
         icons: [] as TypeLegendLayerItem[],
         items: [] as TypeLegendItem[],
         children: [] as TypeLegendLayer[],
@@ -436,7 +440,13 @@ export class LayerSetController extends AbstractMapViewerController {
     existingEntries[entryIndex].visible = visible;
 
     // eslint-disable-next-line no-param-reassign
-    existingEntries[entryIndex].timeDimension = layerConfig.getTimeDimension();
+    existingEntries[entryIndex].timeDimension = timeDimension;
+
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex].displayDateFormat = timeDimension?.displayDateFormat;
+
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex].displayDateFormatShort = timeDimension?.displayDateFormatShort;
 
     return entryIndex;
   }

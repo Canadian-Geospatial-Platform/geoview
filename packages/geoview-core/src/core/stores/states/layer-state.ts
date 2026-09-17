@@ -1611,11 +1611,17 @@ export const getStoreLayerDisplayDateFormat = (mapId: string, layerPath: string)
  */
 export const useStoreLayerDisplayDateFormat = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      getStoreAppDisplayDateFormatDefault(state.mapId).datetimeFormat
-    );
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get the default format
+    const defaultFormat = getStoreAppDisplayDateFormatDefault(state.mapId).datetimeFormat;
+
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the display date format for the requested layer, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<TypeDisplayDateFormat>((displayDateFormat, layer) => {
+      return layer.layerPath === layerPath ? (layer.displayDateFormat ?? defaultFormat) : displayDateFormat;
+    }, defaultFormat);
   });
 };
 
@@ -1658,12 +1664,17 @@ export const useStoreLayerDisplayDateFormatSet = (): Record<string, TypeDisplayD
  */
 export const useStoreLayerDisplayDateFormatShort = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormatShort ??
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      getStoreAppDisplayDateFormatDefault(state.mapId).dateFormat
-    );
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get the default format
+    const defaultFormat = getStoreAppDisplayDateFormatDefault(state.mapId).dateFormat;
+
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the short display date format for the requested layer, using the regular or default format when not defined
+    return Object.values(allLayers).reduce<TypeDisplayDateFormat>((displayDateFormat, layer) => {
+      return layer.layerPath === layerPath ? (layer.displayDateFormatShort ?? layer.displayDateFormat ?? defaultFormat) : displayDateFormat;
+    }, defaultFormat);
   });
 };
 

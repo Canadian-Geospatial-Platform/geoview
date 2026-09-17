@@ -136,7 +136,10 @@ export class TimeSliderTester extends GVAbstractTester {
       filtering: true,
       isMainLayerPath: true,
       minAndMax: TimeSliderTester.CONTINUOUS_MIN_AND_MAX,
-      range: ['1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z'],
+      rangeItems: {
+        type: 'discrete',
+        range: ['1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z'],
+      },
       singleHandle: false,
       values: [0, 1000],
     };
@@ -150,7 +153,10 @@ export class TimeSliderTester extends GVAbstractTester {
           defaultValues: [1000, 3000],
           discreteValues: true,
           minAndMax: [1000, 3000],
-          range: TimeSliderTester.DISCRETE_TIMESTAMPS.map((value) => new Date(value).toISOString()),
+          rangeItems: {
+            type: 'discrete',
+            range: TimeSliderTester.DISCRETE_TIMESTAMPS.map((value) => new Date(value).toISOString()),
+          },
           values: [1000, 3000],
         });
         addStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.CONTINUOUS_STEP_LAYER_PATH, {
