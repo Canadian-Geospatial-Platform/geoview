@@ -606,9 +606,10 @@ export class LayerDifferingFieldLengthsError extends LayerError {
    * Constructs a new LayerDifferingFieldLengthsError instance.
    *
    * @param layerPath - The path or identifier of the layer
+   * @param layerName - The layer name
    */
-  constructor(layerPath: string) {
-    super(layerPath, 'error.layer.differingFieldLengths', { layerPath });
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.differingFieldLengths', { layerNameOrPath: layerName || layerPath });
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerDifferingFieldLengthsError.prototype);

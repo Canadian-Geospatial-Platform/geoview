@@ -1272,13 +1272,13 @@ export class WMS extends AbstractGeoViewRaster {
    *  - Validates and forwards WFS `featureInfo` (including `outfields`) into the WMS config.
    *  - Attempts to generate a dynamic style for the WMS layer using WMS `GetStyles`,
    *    optionally inferring geometry type from WFS field metadata.
-   *  - Logs warnings if vectorial data or styles cannot be determined.
+   *  - Logs a debug note if vectorial data or styles cannot be determined.
    *
    * This helper method enables a WMS layer to benefit from vector-like capabilities by:
    *  - reading attribute structure from a WFS equivalent,
    *  - reusing the WFS `featureInfo` definition,
    *  - generating styles from WMS metadata when available.
-   * Failures during processing do not stop execution; they are logged as warnings.
+   * This is best-effort enrichment: failures do not stop execution and do not affect the WMS layer rendering, so they are logged as debug (not surfaced to the user as warnings).
    *
    * @param layerConfig - The WMS layer configuration being processed
    * @param configProxyUrl - Proxy URL to use when necessary
@@ -1323,12 +1323,13 @@ export class WMS extends AbstractGeoViewRaster {
             return await WMS.createLayerStyleFromWMS(tweakedUrl, layerConfig.getGeometryType());
           }
 
-          // Log
-          logger.logWarning(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
+          // Log (best-effort enrichment: the WMS still works, it just won't have WFS-derived vectorial styles)
+          logger.logDebug(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
         }
       } catch (error: unknown) {
-        // Log
-        logger.logWarning(`Failed to find a vectorial representation of the WMS ${layerConfig.layerPath}`, error);
+        // Best-effort enrichment boundary: deriving a WFS vectorial representation is optional (many WMS sublayers
+        // have no WFS equivalent), the WMS layer still renders, so this is a debug note rather than a user warning.
+        logger.logDebug(`Failed to find a vectorial representation of the WMS ${layerConfig.layerPath}`, error);
       }
     }
 

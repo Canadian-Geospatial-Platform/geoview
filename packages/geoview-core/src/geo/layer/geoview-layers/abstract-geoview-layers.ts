@@ -80,6 +80,9 @@ export abstract class AbstractGeoViewLayer {
   /** The interval between repeated metadata fetch warnings after the initial one has been shown. */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number = 20 * 1000; // 20 seconds
 
+  /** The geoview layer id of the internal, temporary WFS config a WMS layer derives to fetch its vector info (outfields/styles). */
+  static readonly INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID = 'wfsConfigForWms';
+
   /** The default display date mode used when generating default configurations */
   static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode = 'long';
 
@@ -1280,23 +1283,38 @@ export abstract class AbstractGeoViewLayer {
    * This helps notify users or the system of potential delays in loading metadata.
    */
   #startMetadataFetchWatcher(): void {
+    // The internal WFS config a WMS layer derives to fetch vector info is not user-relevant; keep its slow-metadata
+    // notice as a debug log so external devs and users aren't shown warnings about an internal fallback fetch.
+    const isInternalWfsForWms = this.getGeoviewLayerId() === AbstractGeoViewLayer.INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID;
+
+    // Notifies that the metadata fetch is slow: a debug log for the internal WFS-for-WMS fallback, a user warning otherwise
+    const notifySlowMetadata = (): void => {
+      if (isInternalWfsForWms) {
+        logger.logDebug(
+          `Metadata for the internal WFS-for-WMS config '${this.getGeoviewLayerId()}' is taking longer than expected to fetch (internal fallback, not shown to the user).`
+        );
+      } else {
+        this.emitMessage('warning.layer.metadataTakingLongTime', { layerName: this.getLayerEntryNameOrGeoviewLayerName() }, 'warning');
+      }
+    };
+
     delay(AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING).then(
       () => {
         // Check if the layer configs were all at least processed, we're done
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
-        // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', { layerName: this.getLayerEntryNameOrGeoviewLayerName() }, 'warning');
+        // Notify (warning for user-facing layers, debug for the internal WFS-for-WMS fallback)
+        notifySlowMetadata();
 
-        // Use doUntil to emit warnings until processing is complete
+        // Use doUntil to keep notifying until processing is complete
         doUntil(() => {
           // Check if the layer configs were all at least processed, we're done
           if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) {
             return true; // Stop the interval
           }
 
-          // Emit message
-          this.emitMessage('warning.layer.metadataTakingLongTime', { layerName: this.getLayerEntryNameOrGeoviewLayerName() }, 'warning');
+          // Notify again
+          notifySlowMetadata();
           return false; // Continue the interval
         }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL);
 

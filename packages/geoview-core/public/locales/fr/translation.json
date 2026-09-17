@@ -45,7 +45,8 @@
       "loadingMap": "Chargement de la carte",
       "mapLoaded": "Carte chargée",
       "processing": "Traitement en cours",
-      "processingComplete": "Traitement terminé"
+      "processingComplete": "Traitement terminé",
+      "loadingLayers": "Chargement des couches..."
     }
   },
   "mapnav": {
@@ -250,9 +251,9 @@
     "errorInvalidExtent": "Étendue invalide '{{extent}}'.",
     "errorNonreloadableLayer": "Cette couche ne peut être rechargée. Assurez-vous qu'elle a déjà été chargée au moins une fois.",
     "layerReloaded": "La couche '{{layerName}}' a été rechargée avec succès.",
-    "fetchProgress": "Téléchargement des données... Téléchargé {{processed}} de {{total}} enregistrements.",
-    "fetchDone": "Données téléchargées - {{total}} enregistrements.",
-    "fetchStart": "Téléchargement des données...",
+    "fetchProgress": "Téléchargement des données pour « {{layerName}} »... Téléchargé {{processed}} de {{total}} enregistrements.",
+    "fetchDone": "Données téléchargées pour « {{layerName}} » - {{total}} enregistrements.",
+    "fetchStart": "Téléchargement des données pour « {{layerName}} »...",
     "only": "seulement",
     "opacity": "Opacité (%)",
     "opacityMax": "Maximum du parent",
@@ -505,6 +506,8 @@
     "details": "DÉTAILS",
     "exportBtn": "Télécharger",
     "downloadAsGeoJSONMessage": "Télécharger GeoJSON {{message}}",
+    "downloadAsGeoJSONProgress": "Téléchargement du GeoJSON pour « {{layerName}} »...",
+    "downloadAsGeoJSONProcessing": "Téléchargement du GeoJSON pour « {{layerName}} »... {{count}} sur {{total}} élément(s)",
     "downloadAsGeoJSON": "Télécharger GeoJSON",
     "downloadAsCSV": "Télécharger CSV",
     "filterMap": "Filtrer la carte",
@@ -583,12 +586,16 @@
       "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
       "vectorTileUnsupportedProjection": "La tuile vectorielle '{{layerName}}' ne supporte pas la projection de la carte, envisagez de désactiver sa visibilité.",
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base {{basemapType}}.",
-      "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données.",
+      "kmlLayerWarning": "La couche KML '{{layerName}}' n'affichera pas les symboles appropriés dans les panneaux ni d'entrées dans le tableau de données.",
       "layerCRSNotSupported": "La référence spatiale de la carte '{{mapProj}}' n'est pas officiellement supportée par la couche '{{layerName}}'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",
       "projectionNotValid": "La couche '{{layerName}}' déclare une projection '{{definedCRS}}' qui n'a pas pu être résolue (code EPSG introuvable). La couche pourrait tout de même s'afficher si la projection de la carte est supportée.",
       "invalidGeometry": "La couche '{{layerName}}' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte.",
       "geometryTooComplexToHighlight": "L'entité sélectionnée comporte trop de sommets pour être mise en évidence sur la carte.",
-      "slowCoordinateInfo": "Les informations de coordonnées pour le point cliqué prennent plus de temps que prévu à être récupérées..."
+      "slowCoordinateInfo": "Les informations de coordonnées pour le point cliqué prennent plus de temps que prévu à être récupérées...",
+      "styleUrlNotApplied": "Le style de la couche '{{layerName}}' n'a pas pu être chargé. La couche est affichée avec le style par défaut."
+    },
+    "map": {
+      "invalidZoomExtent": "Impossible de zoomer, l'étendue fournie est invalide."
     },
     "schema": {
       "validationIssues": "Une erreur de configuration a été trouvée, vérifiez la console pour voir ce qui ne va pas."
@@ -600,9 +607,10 @@
       "overviewMapCreationError": "Erreur lors de la création de la couche de base de la carte d'aperçu."
     },
     "layer": {
-      "differingFieldLengths": "La longueur des champs fournis ne correspond pas pour la couche '{{layerPath}}'.",
+      "differingFieldLengths": "La longueur des champs fournis ne correspond pas pour la couche '{{layerNameOrPath}}'.",
       "layerConfigNotFound": "La configuration de la couche à l'emplacement '{{layerPath}}' est introuvable.",
       "layerNotFound": "La couche à l'emplacement '{{layerPath}}' est introuvable.",
+      "sourceNotLoaded": "Impossible de charger la source de données de la couche '{{layerName}}'.",
       "wfsConfigMissing": "La configuration de la couche vectorielle est manquante pour la couche à l'emplacement '{{layerPath}}'.",
       "wrongType": "La couche '{{layerNameOrPath}}' n'est pas du type attendu.",
       "statusWasError": "Le statut de la couche '{{layerNameOrId}}' était en 'erreur'.",
@@ -612,7 +620,7 @@
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités pour la couche '{{layerNameOrPath}}'.",
       "notQueryableLayer": "La couche '{{layerNameOrPath}}' n'est pas interrogeable.",
       "notAbleToQuery": "Impossible de téléchager les données pour '{{layerName}}'.",
-      "noWMSLegend": "Erreur lors de la récupération de la légende pour '{{layerName}}': '{{errorName}}'",
+      "noWMSLegend": "Erreur lors de la récupération de la légende pour '{{layerName}}': '{{errorName}}'.",
       "featureParsingError": "Impossible de lire les données d'entités pour la couche '{{layerNameOrId}}'.",
       "styleGeometryNotFound": "Le style pour la couche '{{layerName}}' et le type de géométrie '{{geomType}}' introuvable."
     },
@@ -625,9 +633,7 @@
       "mapWrongCall": "Div avec identifiant {{mapId}} a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
       "pluginError": "Une erreur majeure sur le Plugin '{{pluginId}}' sur la carte '{{mapId}}' est survenue.",
       "pluginConfigNotFound": "La configuration pour le Plugin '{{pluginId}}' sur la carte '{{mapId}}' au chemin d'accès '{{path}}' est introuvable.",
-      "pluginStateUninitialized": "L'état du Plugin '{{pluginId}}' sur la carte '{{mapId}}' n'est pas initialisé.",
-      "invalidZoomExtent": "Impossible de zoomer, l'étendue fournie est invalide.",
-      "loadingLayers": "Chargement des couches..."
+      "pluginStateUninitialized": "L'état du Plugin '{{pluginId}}' sur la carte '{{mapId}}' n'est pas initialisé."
     },
     "geocore": {
       "serviceFail": "Le service Geocore ne répond pas pour UUID '{{uuid}}'.",

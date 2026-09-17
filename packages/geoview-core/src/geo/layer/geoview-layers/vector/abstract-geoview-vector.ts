@@ -13,6 +13,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -196,6 +197,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Execute the fetch using the provided options and return the response text
     return Fetch.fetchText(url, fetchOptions);
+  }
+
+  /**
+   * Executes a source fetch for a vector layer and, on failure, throws a specific error naming the layer.
+   *
+   * Wraps any fetch error in a {@link LayerSourceFailedToLoadError} so a source that can't be loaded (e.g. an
+   * unreachable or missing URL) surfaces an actionable message instead of a generic layer error.
+   *
+   * @param layerConfig - The layer entry config the fetch is for
+   * @param fetcher - The function performing the actual fetch
+   * @returns A promise that resolves with the fetched data
+   * @throws {LayerSourceFailedToLoadError} When the fetch fails (the original error is preserved as the cause)
+   */
+  protected static async fetchSourceForLayer<T>(layerConfig: VectorLayerEntryConfig, fetcher: () => Promise<T>): Promise<T> {
+    try {
+      return await fetcher();
+    } catch (error: unknown) {
+      throw new LayerSourceFailedToLoadError(layerConfig.getLayerNameCascade(), formatError(error));
+    }
   }
 
   /**

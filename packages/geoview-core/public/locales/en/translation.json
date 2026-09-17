@@ -45,7 +45,8 @@
       "loadingMap": "Loading map",
       "mapLoaded": "Map loaded",
       "processing": "Processing",
-      "processingComplete": "Processing complete"
+      "processingComplete": "Processing complete",
+      "loadingLayers": "Loading layers..."
     }
   },
   "mapnav": {
@@ -250,9 +251,9 @@
     "errorInvalidExtent": "Invalid extent '{{extent}}'.",
     "errorNonreloadableLayer": "This layer cannot be reloaded. Make sure it was loaded at least once before.",
     "layerReloaded": "Layer '{{layerName}}' reloaded successfully.",
-    "fetchProgress": "Fetching data... Retrieved {{processed}} of {{total}} records.",
-    "fetchDone": "Data fetched - {{total}} records.",
-    "fetchStart": "Fetching data...",
+    "fetchProgress": "Fetching data for '{{layerName}}'... Retrieved {{processed}} of {{total}} records.",
+    "fetchDone": "Data fetched for '{{layerName}}' - {{total}} records.",
+    "fetchStart": "Fetching data for '{{layerName}}'...",
     "only": "only",
     "opacity": "Opacity (%)",
     "opacityMax": "Maximum from parent",
@@ -505,6 +506,8 @@
     "details": "DETAILS",
     "exportBtn": "Download",
     "downloadAsGeoJSONMessage": "Download GeoJSON {{message}}",
+    "downloadAsGeoJSONProgress": "Downloading GeoJSON for '{{layerName}}'...",
+    "downloadAsGeoJSONProcessing": "Downloading GeoJSON for '{{layerName}}'... {{count}} of {{total}} element(s)",
     "downloadAsGeoJSON": "Download GeoJSON",
     "downloadAsCSV": "Download CSV",
     "filterMap": "Filter map",
@@ -581,14 +584,18 @@
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '{{layerName}}' is taking longer than expected to fetch...",
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
-      "vectorTileUnsupportedProjection": "The vector tile {{layerName}} doesn't support the map projection, consider turning its visibility off.",
+      "vectorTileUnsupportedProjection": "The vector tile '{{layerName}}' doesn't support the map projection, consider turning its visibility off.",
       "basemapLayerCreationError": "Error creating {{basemapType}} basemap.",
-      "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
+      "kmlLayerWarning": "The KML layer '{{layerName}}' will not have proper symbols in the panels or entries in the data table.",
       "layerCRSNotSupported": "The spatial reference of the map '{{mapProj}}' is not officially supported by the layer '{{layerName}}'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",
       "projectionNotValid": "The layer '{{layerName}}' declares a projection '{{definedCRS}}' that could not be resolved (EPSG code not found). The layer may still display if the map projection is supported.",
       "invalidGeometry": "The '{{layerName}}' layer contains features with invalid geometries that will not show on the map.",
       "geometryTooComplexToHighlight": "The selected feature has too many vertices to be highlighted on the map.",
-      "slowCoordinateInfo": "The coordinate info for the clicked coordinates is taking longer than expected to fetch..."
+      "slowCoordinateInfo": "The coordinate info for the clicked coordinates is taking longer than expected to fetch...",
+      "styleUrlNotApplied": "The style for layer '{{layerName}}' could not be loaded. The layer is shown with default styling."
+    },
+    "map": {
+      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid."
     },
     "schema": {
       "validationIssues": "A configuration warning was found, check the console to see what is wrong."
@@ -600,9 +607,10 @@
       "overviewMapCreationError": "Error creating the overview map basemap."
     },
     "layer": {
-      "differingFieldLengths": "Length of provided fields do not match for layer '{{layerPath}}'.",
+      "differingFieldLengths": "Length of provided fields do not match for layer '{{layerNameOrPath}}'.",
       "layerConfigNotFound": "Layer Configuration at layer path '{{layerPath}}' not found.",
       "layerNotFound": "Layer at layer path '{{layerPath}}' not found.",
+      "sourceNotLoaded": "Unable to load the data source for layer '{{layerName}}'.",
       "wfsConfigMissing": "The vector layer configuration is missing for layer path '{{layerPath}}'.",
       "wrongType": "Layer '{{layerNameOrPath}}' isn't of the expected type.",
       "statusWasError": "Layer '{{layerNameOrId}}' status was 'error'.",
@@ -611,8 +619,8 @@
       "notSupportingDynamicLayers": "Layer '{{layerNameOrPath}}' does not technically support dynamic layers per its metadata.",
       "notAFeatureLayer": "Layer id not a Feature Layer for layer '{{layerNameOrPath}}'.",
       "notQueryableLayer": "Layer '{{layerNameOrPath}}' is not queryable.",
-      "notAbleToQuery": "Unable to download records for '{{layerName}}'",
-      "noWMSLegend": "Error fetching legend for '{{layerName}}': '{{errorName}}'",
+      "notAbleToQuery": "Unable to download records for '{{layerName}}'.",
+      "noWMSLegend": "Error fetching legend for '{{layerName}}': '{{errorName}}'.",
       "featureParsingError": "Unable to read feature data for layer '{{layerNameOrId}}'.",
       "styleGeometryNotFound": "The style for layer '{{layerName}}' and geometry type '{{geomType}}' could not be found."
     },
@@ -625,9 +633,7 @@
       "mapWrongCall": "Div with id {{mapId}} has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
       "pluginError": "A major error on Plugin '{{pluginId}}' on map '{{mapId}}' has happened.",
       "pluginConfigNotFound": "The Plugin configuration '{{pluginId}}' on map '{{mapId}}' at path '{{path}}' couldn't be found.",
-      "pluginStateUninitialized": "The Plugin state for '{{pluginId}}' on map '{{mapId}}' is uninitialized.",
-      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid.",
-      "loadingLayers": "Loading layers..."
+      "pluginStateUninitialized": "The Plugin state for '{{pluginId}}' on map '{{mapId}}' is uninitialized."
     },
     "geocore": {
       "serviceFail": "GeoCore service is unresponsive for UUID '{{uuid}}'.",

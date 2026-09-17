@@ -19,7 +19,8 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
 interface SldsInterface {
@@ -83,7 +84,11 @@ export class GeoPackageReader {
 
         // Read the GeoPackage
         // eslint-disable-next-line no-await-in-loop
-        const layersData = await GeoPackageReader.#getGeoPackageData(url, abortSignal);
+        const layersData = await GeoPackageReader.#getGeoPackageData(
+          url,
+          layerConfig.geoviewLayerName || layerConfig.geoviewLayerId,
+          abortSignal
+        );
 
         // Compile sublayer entry configs from the list of layer entry configs
         const listOfSubLayerEntryConfig: WkbLayerEntryConfig[] = [];
@@ -159,7 +164,11 @@ export class GeoPackageReader {
       }
     } else {
       // No layer entry configs, we are just attempting to load from the metadataAccessPath
-      const layersData = await GeoPackageReader.#getGeoPackageData(layerConfig.metadataAccessPath, abortSignal);
+      const layersData = await GeoPackageReader.#getGeoPackageData(
+        layerConfig.metadataAccessPath,
+        layerConfig.geoviewLayerName || layerConfig.geoviewLayerId,
+        abortSignal
+      );
       layersData.forEach((layerData) => {
         listOfLayerEntryConfig.push(
           new WkbLayerEntryConfig({
@@ -188,21 +197,30 @@ export class GeoPackageReader {
    * Fetches a GeoPackage and creates layer data from it.
    *
    * @param url - The URL of the GeoPackage
+   * @param layerName - The friendly layer name used for a source-load error message
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the layer data
+   * @throws {LayerSourceFailedToLoadError} When the GeoPackage source cannot be loaded from its access path
    */
-  static async #getGeoPackageData(url: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
-    // Load the GeoPackage and SqlJs at the same time
-    const promises = [
-      Fetch.fetchArrayBuffer(url, { signal: abortSignal }),
-      initSqlJs({
-        locateFile: () => `https://sql.js.org/dist/sql-wasm.wasm`,
-      }),
-    ];
-    const [arrayBufferResponse, SQL] = await Promise.all(promises);
+  static async #getGeoPackageData(url: string, layerName: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
+    // Kick off the SqlJs init in parallel with the GeoPackage fetch
+    const sqlPromise = initSqlJs({
+      locateFile: () => `https://sql.js.org/dist/sql-wasm.wasm`,
+    });
+
+    // Fetch the GeoPackage; surface a specific message if the source can't be loaded (e.g. unreachable/404)
+    let arrayBufferResponse: ArrayBuffer;
+    try {
+      arrayBufferResponse = await Fetch.fetchArrayBuffer(url, { signal: abortSignal });
+    } catch (error: unknown) {
+      throw new LayerSourceFailedToLoadError(layerName, formatError(error));
+    }
+
+    // Wait for SqlJs to be ready
+    const SQL = await sqlPromise;
 
     // Load GeoPackage into a database
-    const db = new (SQL as initSqlJs.SqlJsStatic).Database(new Uint8Array(arrayBufferResponse as ArrayBuffer));
+    const db = new SQL.Database(new Uint8Array(arrayBufferResponse));
 
     // Arrays to add feature information and style to
     const layersData: GeoPackageLayerData[] = [];
@@ -236,7 +254,8 @@ export class GeoPackageReader {
         if (sld) styleSlds[tableName as string] = sld;
       }
     } catch (error: unknown) {
-      logger.logError(error);
+      // The optional QGIS 'layer_styles' table is absent in most GeoPackages; not an error, styles fall back to defaults
+      logger.logDebug('GeoPackage has no optional layer_styles table, using default styling', error);
     }
 
     // Process each feature table

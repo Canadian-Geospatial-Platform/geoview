@@ -51,6 +51,8 @@ export type NotificationDetailsType = {
   description?: string;
   /** The number of times this notification has occurred. */
   count: number;
+  /** When true, duplicates group into one entry without incrementing its count (avoids inflating the unread badge for high-frequency updates). */
+  groupSingleCount?: boolean;
 };
 
 /** The type of notification severity. */

@@ -1227,7 +1227,7 @@ export class MapViewer {
       })
     ) {
       // Invalid extent
-      this.notifications.showWarning('error.map.invalidZoomExtent');
+      this.notifications.showWarning('warning.map.invalidZoomExtent');
       throw new InvalidExtentError(extent);
     }
 

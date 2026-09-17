@@ -1291,6 +1291,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param messageKey - The key used to lookup the localized message OR message
    * @param messageParams - Array of parameters to be interpolated into the localized message
    * @param messageType - The message type
+   * @param notificationMessageKey - Optional separate key for the notification panel; when set, the snackbar keeps the detailed `messageKey` while the panel groups this generic message
+   * @param notificationMessageParams - Optional parameters for the separate notification-panel message
    *
    * @example
    * this.emitMessage(
@@ -1299,8 +1301,14 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *   'error',
    * );
    */
-  protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType: SnackbarType = 'info'): void {
-    this.#emitLayerMessage({ messageKey, messageParams, messageType });
+  protected emitMessage(
+    messageKey: string,
+    messageParams: Record<string, unknown> | undefined,
+    messageType: SnackbarType = 'info',
+    notificationMessageKey?: string,
+    notificationMessageParams?: Record<string, unknown>
+  ): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType, notificationMessageKey, notificationMessageParams });
   }
 
   // #endregion PROTECTED METHODS
@@ -2737,6 +2745,12 @@ export interface LayerMessageEvent extends LayerBaseEvent {
 
   /** The severity / category of the message. */
   messageType: SnackbarType;
+
+  /** Optional separate i18n key for the notification panel; when set, the snackbar keeps the detailed `messageKey`. */
+  notificationMessageKey?: string;
+
+  /** Optional parameters interpolated into the separate notification-panel message. */
+  notificationMessageParams?: Record<string, unknown>;
 }
 
 /** Delegate for the {@link LayerMessageEvent} handler. */

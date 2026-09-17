@@ -812,7 +812,7 @@ export class LayerApi {
           // eslint-disable-next-line no-param-reassign
           outfield[fields] = fieldNames[index];
         });
-      else throw new LayerDifferingFieldLengthsError(layerPath);
+      else throw new LayerDifferingFieldLengthsError(layerPath, layerConfig.getLayerNameCascade());
     } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
   }
 
@@ -850,7 +850,7 @@ export class LayerApi {
 
         // Set new outfields
         layerConfig.setOutfields(newOutfields);
-      } else throw new LayerDifferingFieldLengthsError(layerPath);
+      } else throw new LayerDifferingFieldLengthsError(layerPath, layerConfig.getLayerNameCascade());
     } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
   }
 
