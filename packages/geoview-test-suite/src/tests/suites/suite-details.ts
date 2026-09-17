@@ -66,9 +66,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    */
   protected override onCanExecuteTestSuite(): Promise<boolean> {
     // Check if the geochart plugin is part of the corePackage on the testing map
-    const plugins = this.getMapViewer().mapFeaturesConfig.footerBar?.tabs?.core || [];
-    if (!plugins.includes('details'))
-      throw new TestSuiteCannotExecuteError('To run this Test Suite, the details tab has to be loaded in the footerBar tabs core array.');
+    if (!this.getMapViewer().hasAppbarTab('details'))
+      throw new TestSuiteCannotExecuteError('To run this Test Suite, the details tab has to be loaded in the appBar tabs core array.');
 
     // All good
     return Promise.resolve(true);
