@@ -281,11 +281,10 @@ export function deepMerge<S extends any, T extends any>(base: S, target: T): S &
  */
 export function shallowObjectEqual<T>(a: T, b: T): boolean {
   if (a === b) return true;
+  if (a === null || a === undefined || b === null || b === undefined) return false;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const aKeys = Object.keys(a as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bKeys = Object.keys(b as any);
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
 
   if (aKeys.length !== bKeys.length) return false;
 

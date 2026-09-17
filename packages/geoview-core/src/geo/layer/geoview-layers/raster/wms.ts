@@ -630,9 +630,9 @@ export class WMS extends AbstractGeoViewRaster {
       // eslint-disable-next-line no-param-reassign
       layer.Attribution ??= parentLayer.Attribution;
 
-      // Flag if the layer is actually part of particular case of a QGIS group dimension (e.g. CDTK landcover)
+      // Flag if the layer is actually part of particular case of a group dimension (e.g. CDTK landcover from QGIS)
       // eslint-disable-next-line no-param-reassign
-      layer.IsQGISGroupDimension = !!parentLayer.Dimension;
+      layer.IsGroupDimension = !!parentLayer.Dimension;
 
       // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
       // AuthorityURL inheritance is not implemented in the following code.
@@ -798,7 +798,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       // If there's a dimension or a QGIS group dimension
-      if (layerCapabilities.Dimension || layerCapabilities.IsQGISGroupDimension) {
+      if (layerCapabilities.Dimension || layerCapabilities.IsGroupDimension) {
         // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
@@ -812,7 +812,7 @@ export class WMS extends AbstractGeoViewRaster {
             layerTimeDimension = DateMgt.createDimensionFromOGC(
               layerTimeDimensionMeta,
               displayDateMode,
-              layerCapabilities.IsQGISGroupDimension
+              layerCapabilities.IsGroupDimension
             );
 
             // Set the time dimension on the layer config itself
@@ -828,17 +828,32 @@ export class WMS extends AbstractGeoViewRaster {
             groupTimeDimension = DateMgt.createDimensionFromOGC(
               groupTimeDimensionMeta,
               displayDateMode,
-              layerCapabilities.IsQGISGroupDimension
+              layerCapabilities.IsGroupDimension
             );
 
             // Set the time dimension on the group layer config itself
             layerConfig.getParentLayerConfig()?.setTimeDimension(groupTimeDimension);
 
-            // TODO: ALEX - CHECK THIS BY EDITING THE XML FILE AND REMOVING THE Dimension ON THE SUB LAYERS
-            // // Set the time dimension on the child layer if it doesn't already have one, because it should have one in this case - so we get what we can
-            // if (!layerTimeDimension) {
-            //   layerConfig.setTimeDimension(groupTimeDimension);
-            // }
+            // If there's no layer dimension on the layer itself, create a blank one using some of the group layer's time dimension
+            if (!layerTimeDimension) {
+              layerTimeDimension = {
+                field: groupTimeDimension.field,
+                singleHandle: groupTimeDimension.singleHandle,
+                isValid: groupTimeDimension.isValid,
+                nearestValues: groupTimeDimension.nearestValues,
+                default: groupTimeDimension.default,
+                rangeItems: { type: 'discrete', range: [] },
+              };
+            }
+
+            // Override the display date information using the information gathered in the group dimension because it's the group that truly know the complete duration
+            layerTimeDimension.displayDateFormat = groupTimeDimension.displayDateFormat;
+            layerTimeDimension.displayDateFormatShort = groupTimeDimension.displayDateFormatShort;
+            layerTimeDimension.serviceDateTemporalMode = groupTimeDimension.serviceDateTemporalMode;
+            layerTimeDimension.displayDateTimezone = groupTimeDimension.displayDateTimezone;
+
+            // Set the time dimension on the child layer
+            layerConfig.setTimeDimension(layerTimeDimension);
           }
         } catch (error: unknown) {
           // Log and continue

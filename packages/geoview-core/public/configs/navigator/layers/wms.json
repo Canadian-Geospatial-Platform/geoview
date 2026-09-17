@@ -224,18 +224,6 @@
         "listOfLayerEntryConfig": [
           { "layerId": "nonna:NONNA 10" }
         ]
-      },
-      {
-        "geoviewLayerId": "LYR1",
-        "geoviewLayerName": "Landcover",
-        "metadataAccessPath": "./datasets/landcover_groupe.xml",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2010_19classes",
-            "layerName": "Land Cover 2010"
-          }
-        ]
       }
     ]
   },

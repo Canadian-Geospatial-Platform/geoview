@@ -218,20 +218,23 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {layerDateTemporalMode && <Box>{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
             {layerDisplayDateTimezone && <Box>{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
             {layerTimeDimension?.field && <Box>{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
-            {layerTimeDimension?.rangeItems?.type && (
-              <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems?.type}`}</Box>
+            {layerTimeDimension?.rangeItems.type && (
+              <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems.type}`}</Box>
             )}
-            {layerTimeDimension?.rangeItems?.range?.[0] && (
+            {layerTimeDimension?.rangeItems.range?.[0] && (
               <>
-                {layerTimeDimension.rangeItems.type === 'discrete' && !layerTimeDimension.rangeItems.period && (
+                {layerTimeDimension.rangeItems.type === 'discrete' && !layerTimeDimension.rangeItems.durationInterval && (
                   <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${layerTimeDimension.rangeItems.range.join(', ')}`}</Box>
                 )}
-                {(layerTimeDimension.rangeItems.type !== 'discrete' || layerTimeDimension.rangeItems.period) && (
-                  <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+                {(layerTimeDimension.rangeItems.type !== 'discrete' || layerTimeDimension.rangeItems.durationInterval) && (
+                  <>
+                    <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+                    <Box>{`${t('layers.layerTimeDimensionRangeDurationInterval')}: ${layerTimeDimension.rangeItems.durationInterval}`}</Box>
+                  </>
                 )}
               </>
             )}
-            <Box>{`${t('layers.layerIsQGISGroupDimension')}: ${layerTimeDimension?.isQGISGroupDimension ?? false}`}</Box>
+            <Box>{`${t('layers.layerIsGroupDimension')}: ${layerTimeDimension?.isGroupDimension ?? false}`}</Box>
           </Box>
         </Box>
       )}
@@ -253,13 +256,16 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
               <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
             )}
-            {timeSliderDimension?.range?.[0] && (
+            {timeSliderDimension?.rangeItems.range?.[0] && (
               <>
-                {timeSliderDimension.discreteValues && !layerTimeDimension?.rangeItems.period && (
-                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${timeSliderDimension.range.join(', ')}`}</Box>
+                {timeSliderDimension.discreteValues && !layerTimeDimension?.rangeItems.durationInterval && (
+                  <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${timeSliderDimension.rangeItems.range.join(', ')}`}</Box>
                 )}
-                {(!timeSliderDimension.discreteValues || layerTimeDimension?.rangeItems.period) && (
-                  <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
+                {(!timeSliderDimension.discreteValues || layerTimeDimension?.rangeItems.durationInterval) && (
+                  <>
+                    <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${timeSliderDimension.rangeItems.range[0]} / ${timeSliderDimension.rangeItems.range[timeSliderDimension.rangeItems.range.length - 1]}`}</Box>
+                    <Box>{`${t('layers.layerTimeDimensionRangeDurationInterval')}: ${timeSliderDimension.rangeItems.durationInterval}`}</Box>
+                  </>
                 )}
               </>
             )}
