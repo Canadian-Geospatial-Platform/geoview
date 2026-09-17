@@ -414,7 +414,7 @@ L’onglet **Couches** comprend les vues suivantes :
 
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
-**Information importante**  
+**Information importante**
 Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction Œil désactivé" /> et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
 
 - En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
@@ -530,14 +530,19 @@ Si aucun filtre n'est actif, « Aucun » est affiché.
 
 Si la couche contient des données temporelles, cette section affiche :
 
-- Format d'affichage de la date
+- Format d'affichage de la date et format d'affichage court
 - Mode temporel
 - Fuseau horaire
-- Nom du champ de dimension temporelle et plage de dates min/max
+- Nom du champ de dimension temporelle
+- Type de plage normalisé
+- Valeurs explicites pour les dimensions discrètes, ou bornes minimale et maximale pour les dimensions définies par un intervalle
+- Intervalle de durée ISO 8601, lorsqu'il est fourni par le service, avec un lien vers la spécification du format
+- Indication précisant si la couche fait partie d'une dimension temporelle groupée
 
 **Dimension temporelle (Curseur Temporel)**
 
-Si la couche possède une configuration de Curseur Temporel, des détails temporels supplémentaires spécifiques au curseur sont affichés.
+Si la couche possède une configuration de Curseur Temporel, des détails temporels supplémentaires propres au curseur sont
+affichés, notamment son champ, ses paramètres d'affichage, ses valeurs ou bornes de plage et son intervalle de durée, lorsqu'il est disponible.
 
 #### Panneau des paramètres de la couche
 
