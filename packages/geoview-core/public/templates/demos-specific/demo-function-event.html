@@ -124,6 +124,14 @@
           <code>cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(false)</code>
         </li>
         <li>
+          <button class="btn btn-primary" id="Set-visible-including-parents">Set layer visible including parents</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerVisibleIncludingParents('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-visible-including-parents-gvlayer">Set layer visible including parents (GV layer)</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1').setVisibleIncludingParents()</code>
+        </li>
+        <li>
           <button class="btn btn-primary" id="Rename-layer">Rename Water Quantity layer</button><br />
           <code>cgpv.api.getMapViewer('map1').layer.setLayerName('uniqueValueId/1', 'Water Quantity')</code>
         </li>
@@ -590,6 +598,8 @@
       const toggleVisibilityButton = document.getElementById('Toggle-visibility');
       const setAllVisibleButton = document.getElementById('Set-all-visible');
       const setAllNotVisibleButton = document.getElementById('Set-all-not-visible');
+      const setVisibleIncludingParentsButton = document.getElementById('Set-visible-including-parents');
+      const setVisibleIncludingParentsGvLayerButton = document.getElementById('Set-visible-including-parents-gvlayer');
       const renameLayerButton = document.getElementById('Rename-layer');
       const placeMarkerButton = document.getElementById('Place-marker');
       const zoomExtentButton = document.getElementById('Zoom-extent');
@@ -750,6 +760,21 @@
       // add an event listener when a button is clicked
       setAllNotVisibleButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(false);
+      });
+
+      // Set Visible Including Parents Button (via LayerApi)========================================================================
+      // add an event listener when a button is clicked
+      setVisibleIncludingParentsButton.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerVisibleIncludingParents('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1');
+      });
+
+      // Set Visible Including Parents Button (via GV layer)========================================================================
+      // add an event listener when a button is clicked
+      setVisibleIncludingParentsGvLayerButton.addEventListener('click', () => {
+        cgpv.api
+          .getMapViewer(mapId)
+          .layer.getGeoviewLayer('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1')
+          .setVisibleIncludingParents();
       });
 
       // Rename Layer Button========================================================================================================

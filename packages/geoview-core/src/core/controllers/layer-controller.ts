@@ -1040,13 +1040,8 @@ export class LayerController extends AbstractMapViewerController {
     // Get the layer
     const gvLayer = this.getGeoviewLayer(layerPath);
 
-    // Enable each hidden ancestor group so the child isn't masked by a hidden parent
-    gvLayer.getParents().forEach((parent) => {
-      if (!parent.getVisible()) this.setOrToggleLayerVisibility(parent.getLayerPath(), true);
-    });
-
-    // Finally, make the layer itself visible
-    if (!gvLayer.getVisible()) this.setOrToggleLayerVisibility(layerPath, true);
+    // Redirect to the layer, which enables hidden ancestor groups so the child isn't masked by a hidden parent
+    gvLayer.setVisibleIncludingParents();
   }
 
   /**
