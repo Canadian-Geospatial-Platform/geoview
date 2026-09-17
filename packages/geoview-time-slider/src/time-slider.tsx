@@ -89,7 +89,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     description,
     discreteValues,
     step,
-    range,
+    rangeItems,
     minAndMax,
     filtering,
     singleHandle,
@@ -102,6 +102,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     displayDateTimezone: displayDateTimezoneFromStore,
     serviceDateTemporalMode: serviceDateTemporalModeFromStore,
   } = useStoreTimeSliderLayer(layerPath)!;
+  const { range } = rangeItems;
 
   const timeSliderController = useTimeSliderController();
 

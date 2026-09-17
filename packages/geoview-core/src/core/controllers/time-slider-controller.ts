@@ -158,7 +158,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
     if (!timeSliderValues) return values;
 
-    const timeStampRange = timeSliderValues.range.map((date) => DateMgt.convertToMilliseconds(date));
+    const timeStampRange = timeSliderValues.rangeItems.range.map((date) => DateMgt.convertToMilliseconds(date));
     return TimeSliderController.#constrainValues(
       values,
       activeThumb,
@@ -376,7 +376,8 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (!layerTimeDimensionInfo.rangeItems && (!configTimeDimension || !configTimeDimension.rangeItems)) return undefined;
 
     // Set defaults values from temporal dimension
-    const { range } = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
+    const rangeItems = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
+    const { range } = rangeItems;
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
     const singleHandle = configTimeDimension?.singleHandle ?? layerTimeDimensionInfo?.singleHandle ?? false;
@@ -386,8 +387,8 @@ export class TimeSliderController extends AbstractMapViewerController {
     // Check if the time slider info is associated with another time slider
     let isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
 
-    // If the layer is part of a QGIS Group Dimension
-    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+    // If the layer is part of a Group Dimension
+    if (layerTimeDimensionInfo?.isGroupDimension) {
       // The main layer path is the first layer path in the siblings
       isMainLayerPath = layerConfig.getFirstSiblingLayerPath() === layerConfig.layerPath;
     }
@@ -402,9 +403,8 @@ export class TimeSliderController extends AbstractMapViewerController {
     let additionalLayerpaths =
       isMainLayerPath && timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.slice(1) : undefined;
 
-    // If the layer is part of a QGIS Group Dimension and is main layer path
-    if (layerTimeDimensionInfo?.isQGISGroupDimension && isMainLayerPath) {
-      // Handle QGIS Group Dimension specific logic here
+    // If the layer is part of a Group Dimension and is main layer path
+    if (layerTimeDimensionInfo?.isGroupDimension && isMainLayerPath) {
       // The time-slider should have all the other layer paths siblings into the additionalLayerPaths
       additionalLayerpaths = layerConfig.getSiblingsLayerPaths(false);
     }
@@ -431,7 +431,7 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // The title of the time-slider configuration
     let title = timesliderConfig?.title;
-    if (layerTimeDimensionInfo?.isQGISGroupDimension) {
+    if (layerTimeDimensionInfo?.isGroupDimension) {
       title = layerConfig.getParentLayerConfig()?.getLayerName();
     }
 
@@ -452,7 +452,7 @@ export class TimeSliderController extends AbstractMapViewerController {
       isMainLayerPath,
       locked: timesliderConfig?.locked,
       minAndMax,
-      range,
+      rangeItems,
       reversed: timesliderConfig?.reversed,
       singleHandle,
       step,
@@ -597,9 +597,9 @@ export class TimeSliderController extends AbstractMapViewerController {
           filter = `${field} >= ${startDate} and ${field} <= ${endDate}`;
         } else if (timeSliderValues.discreteValues) {
           // Discrete mode (single handle)
-          const { range } = timeSliderValues;
+          const { rangeItems } = timeSliderValues;
 
-          const rangeMs = range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
+          const rangeMs = rangeItems.range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
 
           const nextIdx = rangeMs.findIndex((entry) => entry > values[0]);
 

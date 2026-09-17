@@ -2,8 +2,9 @@ import { useStore } from 'zustand';
 
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { RangeItems, TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACE DEFINITION
@@ -395,7 +396,18 @@ export const getStoreTimeSliderLayers = (mapId: string): TimeSliderLayerSet => {
 /** Hooks the full set of time-slider layers. Safe to call outside the TimeSlider plugin (optional chaining). */
 // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
 export const useStoreTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+  useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = state.timeSliderState?.timeSliderLayers;
+    if (!allLayers) return undefined;
+
+    // Return the object with all time slider layers keyed by layer path
+    return Object.entries(allLayers).reduce<TimeSliderLayerSet>((acc, [layerPath, timeSliderLayer]) => {
+      // eslint-disable-next-line no-param-reassign
+      acc[layerPath] = timeSliderLayer;
+      return acc;
+    }, {});
+  });
 
 /**
  * Gets the time-slider values for a specific layer path.
@@ -411,8 +423,19 @@ export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeT
 
 /** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
 // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
-export const useStoreTimeSliderLayer = (layerPath: string): TypeTimeSliderValues | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+export const useStoreTimeSliderLayer = (layerPath: string): TypeTimeSliderValues | undefined => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = state.timeSliderState?.timeSliderLayers;
+    if (!allLayers) return undefined;
+
+    // Return the requested time slider layer
+    return Object.entries(allLayers).reduce<TypeTimeSliderValues | undefined>((timeSliderLayerFound, [path, timeSliderLayer]) => {
+      return path === layerPath ? timeSliderLayer : timeSliderLayerFound;
+    }, undefined);
+  });
+};
 
 /**
  * Gets the currently selected layer path from the time slider.
@@ -725,8 +748,8 @@ export interface TypeTimeSliderValues {
   /** The minimum and maximum timestamp values for the slider range. */
   minAndMax: number[];
 
-  /** The array of date-range strings available for the slider. */
-  range: string[];
+  /** The range items available for the slider. */
+  rangeItems: RangeItems;
 
   /** Optional flag indicating the slider plays in reverse. */
   reversed?: boolean;

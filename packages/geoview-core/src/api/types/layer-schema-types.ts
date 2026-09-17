@@ -915,7 +915,7 @@ export type TypeMetadataWMSCapabilityLayer = {
   CRS?: string[];
   Style?: TypeMetadataWMSCapabilityLayerStyle[];
   Dimension?: TypeMetadataWMSCapabilityLayerDimension[];
-  IsQGISGroupDimension?: boolean;
+  IsGroupDimension?: boolean;
   Attribution?: TypeMetadataWMSCapabilityLayerAttribution;
 
   '@attributes': {

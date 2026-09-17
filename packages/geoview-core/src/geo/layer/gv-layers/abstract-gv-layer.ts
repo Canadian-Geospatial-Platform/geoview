@@ -773,7 +773,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   getTimeDimension(): TimeDimension | undefined {
     // If the layer is part of a QGIS group dimension, return the time dimension of the group
-    if (this.getLayerConfig().getTimeDimension()?.isQGISGroupDimension) {
+    if (this.getLayerConfig().getTimeDimension()?.isGroupDimension) {
       // Return the time dimension of the parent group
       return this.getLayerConfig().getTimeDimensionFavoringGroup();
     }
