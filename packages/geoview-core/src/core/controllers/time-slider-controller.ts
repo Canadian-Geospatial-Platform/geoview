@@ -432,6 +432,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     // The title of the time-slider configuration
     let title = timesliderConfig?.title;
     if (layerTimeDimensionInfo?.isGroupDimension) {
+      // For a time-slider that is part of a group dimension, use the parent layer's name as the title
       title = layerConfig.getParentLayerConfig()?.getLayerName();
     }
 
