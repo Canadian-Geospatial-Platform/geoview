@@ -1,0 +1,135 @@
+{
+  "configMeta": {
+    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, displayDateMode ISO and hideCoordinateInfoSwitch that removes coordinate info from the details panel. On the Major Projects Inventory layer, we will see no data records in the data table panel."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8",
+        "geoviewLayerType": "geoCore"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "Points & Icons",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1",
+                "initialSettings": {
+                  "controls": {
+                    "remove": true
+                  }
+                }
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    },
+    "selectedTab": "layers"
+  },
+  "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false,
+    "disabledLayerTypes": [
+      "geoCore",
+      "CSV",
+      "esriDynamic",
+      "esriFeature",
+      "esriImage",
+      "GeoJSON",
+      "GeoPackage",
+      "xyzTiles",
+      "ogcFeature",
+      "ogcWfs",
+      "ogcWms",
+      "imageStatic",
+      "vectorTiles"
+    ],
+    "showUnsymbolizedFeatures": false,
+    "showLayerHighlightLayerBbox": false,
+    "coordinateInfoEnabled": true,
+    "hideCoordinateInfoSwitch": true,
+    "displayDateMode": "iso"
+  },
+  "theme": "geo.ca"
+}

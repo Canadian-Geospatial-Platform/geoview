@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-03 Config - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>03 — Config Validation Tests</h4><p>Config parsing, duplicate UUIDs, error layers, wrong layer types, and default config behavior.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/03-config.md" target="_blank">03-config.md</a></p></div><h5>Map 1 — Duplicate Geocore UUIDs</h5><p>Same UUID appears twice. Both should appear in legend with unique paths.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"></div><div style="margin: 8px 0;"><button onclick="showPaths('map1')">Show Layer Paths</button><pre id="map1Paths" style="background: #f5f5f5; padding: 8px; margin-top: 4px; font-size: 12px; max-height: 150px; overflow: auto;"></pre></div><h5>Map 2 — Error Layers (wrong type, bad URL, bad sublayer ID)</h5><p>Contains: invalid geoviewLayerType, bad URL, and a valid service with a non-existing sublayer ID (partial loading). Notifications should appear for errors.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geocore',
+                'geoviewLayerId': 'wrong-type-test'
+              },
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'badUrlLayer',
+                'geoviewLayerName': 'Bad URL Layer',
+                'metadataAccessPath': 'https://badurl.example.com/wms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'nonexistent' }]
+              },
+              {
+                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerId': 'partialLoad',
+                'geoviewLayerName': 'CESI Partial (bad sublayer 999)',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '999' }]
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"></div><h5>Map 3 — Defaults (no footerBar, appBar, navBar in config)</h5><p>All config UI properties omitted — viewer applies defaults.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'theme': 'geo.ca'
+        }"></div><h5>Map 4 — Empty UI (footerBar: [], appBar: [], navBar: [])</h5><p>Explicit empty arrays — no tabs, no navbar buttons should render.</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': [],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible">Map 1 - Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 - Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 - Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 - Configuration Snippet</button><pre id="map4CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      function showPaths(mapId) {
+        const paths = cgpv.api.getMapViewer(mapId).getMapLayerOrderPaths();
+        document.getElementById(mapId + 'Paths').textContent = JSON.stringify(paths, null, 2);
+      }
+
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
+      });</script></body></html>
