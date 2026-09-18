@@ -157,7 +157,13 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      *
      * @returns The WFS styles layer id
      */
-    getWfsStylesLayerId(): string;
+    getWfsLayerId(): string;
+    /**
+     * Sets the WFS layer ID associated with this WMS layer entry configuration.
+     *
+     * @param wfsLayerId - The WFS layer ID to set for this WMS layer entry configuration
+     */
+    setWfsLayerId(wfsLayerId: string): void;
     /**
      * Gets the associated WFS layer configuration for this WMS layer.
      *

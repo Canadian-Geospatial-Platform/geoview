@@ -2,6 +2,7 @@ import { ConfigApi } from '@/api/config/config-api';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { Plugin } from '@/api/plugin/plugin';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { buildGVElementId, getGVElementById, getGVElementByFullId, getGVGuidebox, getGVMapTargetElement, getGVRootElement, getGVShellElement, queryGVSelector, queryGVSelectorAll } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -24,6 +25,17 @@ export declare class API {
         geo: typeof GeoUtilities;
         projection: typeof Projection;
         date: typeof DateMgt;
+        dom: {
+            buildGVElementId: typeof buildGVElementId;
+            getGVRootElement: typeof getGVRootElement;
+            getGVElementById: typeof getGVElementById;
+            getGVElementByFullId: typeof getGVElementByFullId;
+            getGVMapTargetElement: typeof getGVMapTargetElement;
+            getGVShellElement: typeof getGVShellElement;
+            getGVGuidebox: typeof getGVGuidebox;
+            queryGVSelector: typeof queryGVSelector;
+            queryGVSelectorAll: typeof queryGVSelectorAll;
+        };
     };
     /**
      * Initiates the event and projection objects.

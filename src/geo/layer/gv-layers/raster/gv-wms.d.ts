@@ -7,7 +7,6 @@ import type { Map as OLMap } from 'ol';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeLegend } from '@/api/types/layer-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -60,6 +59,8 @@ export declare class GVWMS extends AbstractGVRaster {
      * The method currently checks for:
      * - Image size exceeding the service-defined `MaxWidth` or `MaxHeight`
      *   constraints (if available in service metadata).
+     * - A defined (native) CRS that resolves to a deprecated or non-existent
+     *   EPSG code and therefore can't be projected.
      * - An empty image response (zero width or height).
      * If none of the specific conditions are met, a generic image load error
      * message key is returned.
@@ -141,6 +142,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {NetworkError} When a network issue happened
+     * @throws {LayerInvalidFeatureInfoFormatWFSError} When no WFS output format produces usable results (propagated from `WFS.fetchWithFormatFallback()`)
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
@@ -209,34 +211,6 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied
      */
     static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
-    /**
-     * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
-     * parses the response into OpenLayers features, and converts them into GeoView
-     * Feature Info entries with appropriate attribute formatting.
-     *
-     * This method:
-     * - Performs an HTTP request to a WFS GetFeature endpoint.
-     * - Parses the returned GeoJSON into OL features.
-     * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
-     * - Formats fields according to WFS metadata, including date parsing rules.
-     * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
-     *
-     * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
-     *   with GeoJSON (e.g., `outputFormat=application/json`)
-     * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
-     *   config are applied when formatting the Feature Info results
-     * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
-     *   date formatting
-     * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
-     * @param abortController - Optional {@link AbortController} used to cancel the fetch request
-     * @returns A promise that resolves with the feature info result
-     * @throws {ResponseError} When the response is not OK (non-2xx)
-     * @throws {ResponseEmptyError} When the JSON response is empty
-     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-     * @throws {NetworkError} When a network issue happened
-     */
-    static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Registers a WMS style changed event handler.
      *

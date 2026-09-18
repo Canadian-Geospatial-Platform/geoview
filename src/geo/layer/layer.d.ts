@@ -404,6 +404,16 @@ export declare class LayerApi {
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
     /**
+     * Makes a layer visible on the map, enabling any hidden parent groups so the layer actually renders.
+     *
+     * A child layer's own visibility has no visible effect while an ancestor group is hidden, so this walks
+     * up the parent chain and turns each hidden ancestor visible before showing the layer itself.
+     *
+     * @param layerPath - The path of the layer to make visible
+     * @throws {LayerNotFoundError} When the layer cannot be found at the given path
+     */
+    setLayerVisibleIncludingParents(layerPath: string): void;
+    /**
      * Waits for all layers to reach a given status.
      *
      * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')

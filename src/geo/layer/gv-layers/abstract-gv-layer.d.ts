@@ -512,6 +512,8 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param messageKey - The key used to lookup the localized message OR message
      * @param messageParams - Array of parameters to be interpolated into the localized message
      * @param messageType - The message type
+     * @param notificationMessageKey - Optional separate key for the notification panel; when set, the snackbar keeps the detailed `messageKey` while the panel groups this generic message
+     * @param notificationMessageParams - Optional parameters for the separate notification-panel message
      *
      * @example
      * this.emitMessage(
@@ -520,7 +522,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *   'error',
      * );
      */
-    protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType?: SnackbarType): void;
+    protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType?: SnackbarType, notificationMessageKey?: string, notificationMessageParams?: Record<string, unknown>): void;
     /**
      * Registers a legend querying event handler.
      *
@@ -839,6 +841,10 @@ export interface LayerMessageEvent extends LayerBaseEvent {
     messageParams: Record<string, unknown> | undefined;
     /** The severity / category of the message. */
     messageType: SnackbarType;
+    /** Optional separate i18n key for the notification panel; when set, the snackbar keeps the detailed `messageKey`. */
+    notificationMessageKey?: string;
+    /** Optional parameters interpolated into the separate notification-panel message. */
+    notificationMessageParams?: Record<string, unknown>;
 }
 /** Delegate for the {@link LayerMessageEvent} handler. */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;

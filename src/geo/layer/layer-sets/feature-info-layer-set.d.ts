@@ -71,6 +71,14 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      */
     getLastQueryLonLat(): Coordinate | undefined;
     /**
+     * Returns a promise that resolves the next time the query ended event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+     * @returns A promise that resolves with the event payload when query ended fires and passes the filter
+     */
+    onceQueryEnded(filter?: (event: QueryEndedEvent) => boolean, timeout?: number): Promise<QueryEndedEvent>;
+    /**
      * Registers a query ended event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted

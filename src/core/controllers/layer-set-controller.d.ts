@@ -110,7 +110,9 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * Switches the open panel to the details tab when a map click occurs.
      *
      * If the current footer-bar tab is neither 'details' nor 'geochart', the footer bar
-     * switches to 'details'. Also opens the app-bar details tab with focus trap when available.
+     * switches to 'details'. When the footer does not host details, the app-bar details tab
+     * is opened instead. Only one details panel is activated so two focus traps never compete
+     * (which caused a focus-trap loop in crosshair/WCAG mode when details was in both bars).
      */
     openDetailsPanelOnMapClick(): void;
     /**

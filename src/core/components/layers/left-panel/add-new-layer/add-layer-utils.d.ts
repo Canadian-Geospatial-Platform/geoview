@@ -24,18 +24,22 @@ export declare class UtilAddLayer {
      */
     static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]>;
     /**
-     * Finds a layer or layer entry configuration by ID.
+     * Finds a layer or layer entry configuration by its full view path.
+     *
+     * Walks the tree segment by segment so that duplicate layer ids at different nesting levels
+     * (allowed by the WMS spec, e.g. a `canimage` group nested inside a `canimage` group) resolve to
+     * the correct node instead of always returning the first (outermost) match.
      *
      * @param layerTree - The layer tree to start searching from
-     * @param layerId - The layer ID or view ID to resolve
+     * @param layerPath - The full '/'-separated view path to resolve (e.g. 'canimage/canimage/canimage-030')
      * @returns The matching layer configuration or layer entry configuration, or undefined when not found
      */
-    static findLayerById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined;
+    static findLayerByPath(layerTree: TypeGeoviewLayerConfig | undefined, layerPath: string): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined;
     /**
      * Finds a layer display name by ID.
      *
      * @param layerTree - The layer tree to start searching from
-     * @param layerId - The layer ID or view ID to resolve
+     * @param layerId - The layer ID or full view path to resolve
      * @returns The resolved layer name, or undefined when no matching layer is found
      */
     static findLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined;

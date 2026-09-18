@@ -7,14 +7,15 @@ import type { AbstractWorker } from './abstract-worker';
  * @template T - The type of worker being managed
  */
 export declare abstract class AbstractWorkerPool<T> {
+    #private;
     /** Array of worker instances in the pool. */
     protected workers: AbstractWorker<T>[];
     /** Set of currently busy workers. */
     protected busyWorkers: Set<AbstractWorker<T>>;
     /** Constructor function for creating new worker instances. */
-    protected WorkerClass: new () => AbstractWorker<T>;
+    protected readonly WorkerClass: new () => AbstractWorker<T>;
     /** Name identifier for the worker pool. */
-    protected name: string;
+    protected readonly name: string;
     /**
      * Creates an instance of AbstractWorkerPool.
      *
@@ -24,17 +25,33 @@ export declare abstract class AbstractWorkerPool<T> {
      */
     constructor(name: string, workerClass: new () => AbstractWorker<T>, numWorkers?: number);
     /**
-     * Initializes the specified number of workers in the pool.
+     * Initializes every worker in the pool.
      *
-     * @param numWorkers - Number of workers to create
+     * @param args - Arguments passed to each worker's initializer
+     * @returns A promise that resolves when all workers are initialized
      */
-    protected initializeWorkers(numWorkers: number): void;
+    init(...args: unknown[]): Promise<void>;
     /**
      * Gets an available worker from the pool.
      *
      * @returns The first non-busy worker, or undefined if all are busy
      */
     protected getAvailableWorker(): AbstractWorker<T> | undefined;
+    /**
+     * Runs an operation on an available worker and aborts the worker when the signal fires.
+     *
+     * An aborted worker is terminated and replaced because a worker cannot safely resume
+     * after its in-flight operation has been cancelled.
+     *
+     * @param operation - Operation to execute on the selected worker
+     * @param signal - Optional signal used to cancel the operation
+     * @returns A promise that resolves with the worker result
+     * @throws {Error} When no workers are available
+     * @throws {RequestAbortedError} When the operation is aborted
+     */
+    protected runWithWorker<TResult>(operation: (worker: AbstractWorker<T>) => Promise<TResult>, signal?: AbortSignal): Promise<TResult>;
+    /** Aborts every active operation in the pool. */
+    abort(): void;
     /**
      * Adds a message handler to all workers in the pool.
      *

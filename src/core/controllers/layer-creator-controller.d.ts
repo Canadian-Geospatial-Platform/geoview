@@ -78,8 +78,9 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      *
      * @param error - The error to log and show
      * @param geoviewLayerId - The Geoview layer id for which the error happened
+     * @param geoviewLayerName - Optional friendly layer name (as shown in the legend) used for the user-facing message
      */
-    showLayerError(error: unknown, geoviewLayerId: string): void;
+    showLayerError(error: unknown, geoviewLayerId: string, geoviewLayerName?: string): void;
     /**
      * Merges time-slider configurations from GeoCore into the map's corePackagesConfig.
      *

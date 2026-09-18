@@ -44,6 +44,9 @@ export declare class FeatureHighlight {
     /**
      * Highlights a feature with a plain overlay.
      *
+     * Pathologically complex geometries (e.g. an ESRI feature whose polygon has thousands of holes) are not highlighted,
+     * because re-rendering them every frame freezes the UI. The user is notified once per such feature.
+     *
      * @param feature - Feature to highlight
      */
     highlightFeature(feature: TypeFeatureInfoEntry): void;
