@@ -107,8 +107,10 @@ export class CSV extends AbstractGeoViewVector {
     // Cast it to proper type
     const layerConfigCSV = layerConfig as CsvLayerEntryConfig;
 
-    // Query
-    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
+    // Query; surface a specific message if the CSV source can't be loaded (e.g. unreachable/404)
+    const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
+      AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings)
+    );
 
     // The projection of the data if defined
     const dataProjection = layerConfigCSV.getSource().dataProjection ?? Projection.PROJECTION_NAMES.LONLAT; // default: 4326 to be able to project the csv data below;

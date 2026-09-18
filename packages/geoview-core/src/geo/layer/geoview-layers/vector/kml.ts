@@ -102,8 +102,10 @@ export class KML extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
-    // Query
-    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
+    // Query; surface a specific message if the KML source can't be loaded (e.g. unreachable/404)
+    const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
+      AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings)
+    );
 
     // Read the features
     return GeoUtilities.readFeaturesFromKML(responseData, readOptions.dataProjection, readOptions.featureProjection);

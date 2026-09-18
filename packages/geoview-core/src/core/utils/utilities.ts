@@ -330,16 +330,29 @@ export function shallowArrayEqual<T>(a: T[], b: T[]): boolean {
 /**
  * Returns proper language GeoView localized values from map i18n instance.
  *
+ * A GeoView message key is dot-namespaced with no spaces (e.g. `warning.layer.slowRender`). When the
+ * provided value does not match that shape it is treated as already-final raw text (for example a
+ * plugin-provided message) and returned verbatim, so callers passing literal strings don't trigger a
+ * misleading missing-key error. Values that do look like a key are still validated, logging an error
+ * when the key is missing so genuine typos are surfaced.
+ *
  * @param language - The language to get the message in
- * @param messageKey - The localize key to read the message from
+ * @param messageKey - The localize key to read the message from, or already-final raw text
  * @param params - Optional record of named parameters for i18next interpolation
- * @returns The translated message with values replaced
+ * @returns The translated message with values replaced, or the raw text when not a key
  */
 export function getLocalizedMessage(
   language: TypeDisplayLanguage,
   messageKey: string,
   params: Record<string, unknown> | undefined = undefined
 ): string {
+  // A GeoView i18n key is dot-namespaced with no spaces; anything else is treated as raw text
+  const looksLikeMessageKey = /^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)+$/.test(messageKey);
+  if (!looksLikeMessageKey) {
+    // Already-final raw text (e.g. plugin-provided message), return as-is
+    return messageKey;
+  }
+
   // Check if the message key exists, before translating it and log a warning when it doesn't exist
   if (!i18n.exists(messageKey, { lng: language })) {
     // Log error

@@ -7,6 +7,9 @@ import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-typ
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 import type { RGBA } from '@/core/utils/utilities';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -63,6 +66,25 @@ export class GVGeoTIFF extends AbstractGVTile {
   protected override getOLSource(): GeoTIFFSource {
     // Get source from OL
     return super.getOLSource() as GeoTIFFSource;
+  }
+
+  /**
+   * Overrides the generic tile-error decipher to surface a specific source-load message.
+   *
+   * A GeoTIFF (COG) failing means the whole source could not be read - not one tile of a tiled service -
+   * so this reports the access path that couldn't be loaded instead of a generic "a tile" error.
+   *
+   * @param event - The event which is being triggered
+   * @returns A LayerSourceFailedToLoadError naming the GeoTIFF access path
+   */
+  protected override onErrorDecipherError(event: Event): GeoViewError {
+    // Read the source error, if any, to keep as the dev-facing cause
+    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+    const sourceError = (this.getOLSource() as any).error_;
+    const cause = sourceError ? formatError(sourceError) : undefined;
+
+    // Surface a specific source-load error; the underlying error is kept as the cause for developers
+    return new LayerSourceFailedToLoadError(this.getLayerName(), cause);
   }
 
   /**

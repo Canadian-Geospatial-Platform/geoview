@@ -402,7 +402,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Initializes a WFS layer config
     const layerConfigs = await WFS.processGeoviewLayerConfig(
-      'wfsConfigForWms',
+      WMS.INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID,
       `Temporary WFS layer config for the WMS layer '${this.getLayerNameCascade()}'`,
       url,
       configProxyUrl,

@@ -7,6 +7,9 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
+import { logger } from '@/core/utils/logger';
 
 /** A class to generate a GeoView layer config from a shapefile. */
 export class ShapefileReader {
@@ -31,7 +34,14 @@ export class ShapefileReader {
     }
 
     // Get geojson from shapefile(s)
-    const geojson = await shp(shapefileURL);
+    let geojson;
+    try {
+      geojson = await shp(shapefileURL);
+    } catch (error) {
+      // shpjs throws a bare error when the shapefile files can't be downloaded (e.g. 404) or parsed;
+      // surface a specific, actionable message naming the layer and the access path.
+      throw new LayerSourceFailedToLoadError(layerConfig.geoviewLayerName || layerConfig.geoviewLayerId, formatError(error));
+    }
 
     // Create a GeoJSON GeoviewLayerConfig
     const geoviewLayerConfig = LayerGeoJSON.createGeoviewLayerConfig(
@@ -72,9 +82,20 @@ export class ShapefileReader {
         ? (layerConfig.listOfLayerEntryConfig[0] as ConfigAbstractBaseClassOrType)
         : undefined;
 
+      // The layer id comes from the shapefile inside the archive
+      const resolvedLayerId = geojson.fileName || filename || generateId();
+
+      // Warn when a configured layerId doesn't match the shapefile in the archive; it's ignored and the archive content is used
+      const configuredLayerId = layerConfig.listOfLayerEntryConfig?.[0]?.layerId;
+      if (configuredLayerId && configuredLayerId !== resolvedLayerId) {
+        logger.logWarning(
+          `Shapefile layer '${layerConfig.geoviewLayerName || layerConfig.geoviewLayerId}': configured layerId '${configuredLayerId}' was not found in the archive; using '${resolvedLayerId}' instead.`
+        );
+      }
+
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
-        layerId: geojson.fileName || filename || generateId(),
+        layerId: resolvedLayerId,
         layerName: layerConfig.geoviewLayerName || geojson.fileName,
         layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(passedLayerEntryConfig),
         initialSettings: ConfigBaseClass.getClassOrTypeInitialSettings(passedLayerEntryConfig),

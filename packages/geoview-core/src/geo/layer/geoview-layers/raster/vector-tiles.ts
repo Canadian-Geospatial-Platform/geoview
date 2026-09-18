@@ -190,6 +190,9 @@ export class VectorTiles extends AbstractGeoViewRaster {
       }).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
+
+        // Warn the user - the layer still renders, just with default styling instead of the configured style
+        this.emitMessage('warning.layer.styleUrlNotApplied', { layerName: layerConfig.getLayerNameCascade() }, 'warning');
       });
     }
 

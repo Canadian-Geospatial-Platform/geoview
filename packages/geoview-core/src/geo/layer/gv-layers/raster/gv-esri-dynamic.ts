@@ -671,16 +671,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
     switch (workerLog.level) {
       case 'info': {
         const { processed, total } = workerLog.message[1];
-        let messageKey: string;
-        if (processed === 0) {
-          messageKey = 'layers.fetchStart';
-        } else if (processed === total) {
-          messageKey = 'layers.fetchDone';
+        if (processed === total) {
+          // Skip the final message when nothing was fetched (avoids a misleading "0 records" notification)
+          if (total > 0) this.emitMessage('layers.fetchDone', { total, layerName: this.getLayerName() }, 'info');
         } else {
-          messageKey = 'layers.fetchProgress';
+          // Snackbar shows live progress (with count); notification panel gets a generic message so all progress
+          // updates regroup into a single entry (with a count) instead of flooding it with one entry per fetched chunk
+          this.emitMessage('layers.fetchProgress', { processed, total, layerName: this.getLayerName() }, 'info', 'layers.fetchStart', {
+            layerName: this.getLayerName(),
+          });
         }
-
-        this.emitMessage(messageKey, { processed, total }, 'info');
         break;
       }
       case 'error':

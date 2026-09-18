@@ -207,11 +207,10 @@ export class WKB extends AbstractGeoViewVector {
       sourceFeaturesInfo.features = subResults.map((r) => r.feature);
       sourceFeaturesInfo.dataProjection = subResults[subResults.length - 1].dataProjection;
     } else {
-      // Fallback to using default read method
-      sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWKB(
-        layerConfigWKB.getDataAccessPath(),
-        readOptions.dataProjection,
-        readOptions.featureProjection
+      // Fallback to using default read method; surface a specific message if the source can't be loaded (e.g. unreachable/404)
+      const dataAccessPath = layerConfigWKB.getDataAccessPath();
+      sourceFeaturesInfo = await AbstractGeoViewVector.fetchSourceForLayer(layerConfigWKB, () =>
+        GeoUtilities.readFeaturesFromWKB(dataAccessPath, readOptions.dataProjection, readOptions.featureProjection)
       );
     }
 

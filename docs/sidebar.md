@@ -63,6 +63,7 @@
   - [Adding Layer Types](programming/adding-layer-types.md)
   - [Event Helper](programming/event-helper.md)
   - [Logging](programming/logging.md)
+  - [Notifications](programming/notifications.md)
   - [Object Oriented](programming/object-oriented.md)
   - [Troubleshooting](programming/troubleshooting.md)
 

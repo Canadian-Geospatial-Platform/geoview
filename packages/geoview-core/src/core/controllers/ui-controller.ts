@@ -502,6 +502,30 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
+   * Displays a detailed INFO message in the snackbar while grouping a separate generic message in the notification panel.
+   *
+   * High-frequency progress updates (e.g. a large export) would otherwise flood the notification panel with one entry
+   * per update. The snackbar carries live detail (e.g. a count) while the panel regroups every update into a single entry.
+   *
+   * INFO-only by design: the grouped panel entry does not increment the unread badge, so warnings and errors must stay
+   * ungrouped via `addMessage('warning'/'error', …)` so each one is individually surfaced and counted.
+   *
+   * @param snackbarKey - The translation key shown in the snackbar (detailed)
+   * @param snackbarParams - Parameters for the snackbar message
+   * @param notificationKey - The translation key added to the notification panel (generic)
+   * @param notificationParams - Optional parameters for the notification-panel message
+   */
+  addInfoDetailedSnackbar(
+    snackbarKey: string,
+    snackbarParams: Record<string, unknown>,
+    notificationKey: string,
+    notificationParams: Record<string, unknown> = {}
+  ): void {
+    // Redirect to the MapViewer
+    this.getMapViewer().notifications.showInfoDetailedSnackbar(snackbarKey, snackbarParams, notificationKey, notificationParams);
+  }
+
+  /**
    * Adds a notification to the notification center.
    *
    * @param notification - The notification details to add

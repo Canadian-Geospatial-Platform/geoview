@@ -116,6 +116,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
@@ -2354,6 +2355,11 @@ export class LayerController extends AbstractMapViewerController {
       // Register the layer in the time-slider if it must
       this.getControllersRegistry().timeSliderController?.tryRegisterLayer(event.layer);
     }
+
+    // KML has no style/symbology; warn the user only once the KML layer has actually loaded
+    if (event.layer instanceof GVKML) {
+      this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', { layerName: event.layer.getLayerName() });
+    }
   }
 
   /**
@@ -2398,6 +2404,21 @@ export class LayerController extends AbstractMapViewerController {
     const { messageType } = layerMessageEvent.layerEvent;
     const { messageKey } = layerMessageEvent.layerEvent;
     const { messageParams } = layerMessageEvent.layerEvent;
+    const { notificationMessageKey } = layerMessageEvent.layerEvent;
+    const { notificationMessageParams } = layerMessageEvent.layerEvent;
+
+    // When a separate notification message is provided for an info progress update, show the detailed text in the
+    // snackbar but group a generic message in the notification panel (avoids flooding the panel with one entry per
+    // high-frequency update). This grouped path is info-only; warnings/errors fall through to the ungrouped show* below.
+    if (notificationMessageKey && messageType === 'info') {
+      this.getMapViewer().notifications.showInfoDetailedSnackbar(
+        messageKey,
+        messageParams ?? {},
+        notificationMessageKey,
+        notificationMessageParams
+      );
+      return;
+    }
 
     if (messageType === 'info') {
       this.getMapViewer().notifications.showMessage(messageKey, messageParams);

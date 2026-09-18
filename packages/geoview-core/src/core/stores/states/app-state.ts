@@ -676,8 +676,10 @@ export const addStoreAppNotification = async (mapId: string, notification: Notif
       notificationType: notification.notificationType,
       message: notification.message,
       count: 1,
+      groupSingleCount: notification.groupSingleCount,
     });
-  } else {
+  } else if (!existingNotif.groupSingleCount && !notification.groupSingleCount) {
+    // Skip incrementing for grouped single-count notifications (e.g. fetch progress) so they don't inflate the unread badge
     existingNotif.count += 1;
   }
 

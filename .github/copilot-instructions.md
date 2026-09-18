@@ -1903,6 +1903,13 @@ Focus indicators are generated centrally in `packages/geoview-core/src/ui/style/
 
 **Layer message event chain:** Layer classes emit messages via `emitMessage(messageKey, params, messageType)` → `LayerMessageEvent` (no `notification` field) → domain event → controller handler → `notifications.show*()` (always notifies). The `notification` opt-out was removed from this entire chain to enforce the WCAG rule architecturally.
 
+**Generic error (`error.generic`) is a LAST-RESORT FAILOVER — never rely on it.** The message "An error happened, contact us or view console for details." is produced by `notifications.showErrorGeneric()` and by `showErrorFromError(error)` when `error` is NOT a `GeoViewError`. It is intentionally vague and **misleading for end users** (it points them at a developer console) and should almost never be reached. Treat every appearance as a bug:
+
+- **Throw a typed `GeoViewError`** with a specific, translated `messageKey` (add the key to `public/locales/{en,fr}/translation.json` if needed) so the user gets an actionable message. `showErrorFromError` shows a `GeoViewError`'s `messageKey` directly and only falls through to the generic message for un-typed errors.
+- For third-party/system errors that can't be typed, **map them to a specific message key at the boundary** instead of letting them fall through.
+- Do NOT add new call sites that call `showErrorGeneric()` directly, and do NOT wrap-and-swallow errors into the generic path. The layer-add funnel `LayerCreatorController.showLayerError()` already wraps any un-typed error into a typed `LayerFailedToLoadError` (message `layers.errorNotLoaded`), so that pipeline no longer reaches `error.generic` — keep improving it by typing errors at their source instead.
+- See [notifications.md](../docs/programming/notifications.md#the-generic-error-message-last-resort-failover) for the full explanation and the message inventory.
+
 ## UI Component Styling & Theme Safety
 
 ### Theme Extension Optional Chaining Rule (Critical)

@@ -235,19 +235,19 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const chunks = [];
       let i = 0;
 
-      uiController.addMessage('info', 'dataTable.downloadAsGeoJSONMessage', {
-        message: `${t('general.started')}...`,
-      });
       for await (const chunk of jsonGenerator) {
         chunks.push(chunk);
         i++;
 
         // Update progress here
         const count = i * 100 < rows.length ? i * 100 : rows.length;
-        uiController.addMessage('info', 'general.processing', {
-          count: String(count),
-          total: String(rows.length),
-        });
+        // Detailed count in the snackbar; generic grouped message in the notification panel (avoids flooding it with one entry per chunk)
+        uiController.addInfoDetailedSnackbar(
+          'dataTable.downloadAsGeoJSONProcessing',
+          { count: String(count), total: String(rows.length), layerName },
+          'dataTable.downloadAsGeoJSONProgress',
+          { layerName }
+        );
       }
 
       const fullJson = chunks.join('');

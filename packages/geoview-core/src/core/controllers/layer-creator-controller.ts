@@ -5,7 +5,6 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import {
-  CONST_LAYER_TYPES,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsRCS,
@@ -39,7 +38,7 @@ import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError, LayerEntryConfigLayerIdMissingError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, LayerEntryConfigLayerIdMissingError, LayerFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
 import {
@@ -149,7 +148,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       },
       (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => {
         // Show the error(s)
-        this.showLayerError(error, mapConfigLayerEntry.geoviewLayerId);
+        this.showLayerError(error, mapConfigLayerEntry.geoviewLayerId, mapConfigLayerEntry.geoviewLayerName);
       }
     );
 
@@ -204,7 +203,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
           }
 
           // Show the error(s)
-          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+          this.showLayerError(error, geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
         }
       } else {
         // Depending on the error
@@ -370,7 +369,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       // GV This is the major catcher of many possible layer processing issues
 
       // Show the error(s).
-      this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+      this.showLayerError(error, geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
     });
 
     // Return the result
@@ -638,36 +637,49 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *
    * @param error - The error to log and show
    * @param geoviewLayerId - The Geoview layer id for which the error happened
+   * @param geoviewLayerName - Optional friendly layer name (as shown in the legend) used for the user-facing message
    */
-  showLayerError(error: unknown, geoviewLayerId: string): void {
+  showLayerError(error: unknown, geoviewLayerId: string, geoviewLayerName?: string): void {
     // If an aggregation error
     if (error instanceof AggregateError) {
       // For each errors
       error.errors.forEach((layerError) => {
         // Recursive call
-        this.showLayerError(layerError, geoviewLayerId);
+        this.showLayerError(layerError, geoviewLayerId, geoviewLayerName);
       });
     } else {
       // Cast the error
       const theError = formatError(error);
 
-      // Read the layer path if possible, more precise
+      // Read the layer path if possible, more precise. Resolve a friendly display name for the user message,
+      // preferring the provided name, then the config's cascaded name, then falling back to the id.
       let layerPathOrId = geoviewLayerId;
+      let displayName = geoviewLayerName || geoviewLayerId;
       if (theError instanceof LayerEntryConfigError) {
         layerPathOrId = theError.layerConfig.layerPath;
+        displayName = geoviewLayerName || theError.layerConfig.getLayerNameCascade();
+      }
+
+      // Ensure the user always gets a specific, translated message. If the error isn't already a typed
+      // GeoViewError, wrap it in a LayerFailedToLoadError (keeping the raw error as cause) so we avoid the
+      // misleading generic "contact us / view console" failover.
+      let errorToShow: GeoViewError;
+      if (theError instanceof GeoViewError) {
+        errorToShow = theError;
+      } else {
+        // Log the underlying error for developers, then surface a specific layer message to the user
+        logger.logError(theError);
+        errorToShow = new LayerFailedToLoadError(displayName, theError);
       }
 
       // Show error
-      this.getMapViewer().notifications.showErrorFromError(theError);
+      this.getMapViewer().notifications.showErrorFromError(errorToShow);
 
-      // If the Error is GeoViewError, it has a translation
-      let { message } = theError;
-      if (theError instanceof GeoViewError) {
-        message = theError.translateMessage(this.getMapViewer().getDisplayLanguage());
-      }
-
-      // Emit about it
-      this.#emitLayerConfigError({ layerPath: layerPathOrId, error: message });
+      // Emit about it using the translated message
+      this.#emitLayerConfigError({
+        layerPath: layerPathOrId,
+        error: errorToShow.translateMessage(this.getMapViewer().getDisplayLanguage()),
+      });
     }
   }
 
@@ -723,13 +735,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
         .createGeoViewLayers(this.#uiDomain.getDisplayDateMode(), this.getMapViewer().getProjection(), abortSignal)
         .then(() => {
           // Add the layer on the map
-          this.#addToMap(layerBeingAdded, geoviewLayerConfig);
+          this.#addToMap(layerBeingAdded);
 
           // If there were partial errors (some sub-layers failed but valid ones were added), report them
           const partialErrors = layerBeingAdded.getLayerLoadErrors();
           if (partialErrors.length > 0) {
             const error = partialErrors.length === 1 ? partialErrors[0] : new AggregateError(partialErrors);
-            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
           }
 
           // Resolve, done
@@ -1001,7 +1013,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *
    * @param geoviewLayer - The layer
    */
-  #addToMap(geoviewLayer: AbstractGeoViewLayer, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+  #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // If no root layer is set, forget about it
     if (!geoviewLayer.olRootLayer) return;
 
@@ -1012,10 +1024,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       // Log
       logger.logInfo(`GeoView Layer ${geoviewLayer.getGeoviewLayerId()} added to map ${this.getMapId()}`, geoviewLayer);
-
-      // GV: KML currently has no style or symbology associated with it, so we warn the user
-      if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
-        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning');
 
       // Set the layer z indices
       this.getControllersRegistry().layerController.setLayerZIndices();

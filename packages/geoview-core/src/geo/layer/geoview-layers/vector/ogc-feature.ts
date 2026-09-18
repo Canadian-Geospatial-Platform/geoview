@@ -226,8 +226,8 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Build the URL
     const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}collections/${layerConfig.layerId}/items`;
 
-    // Fetch with proxy fallback support
-    const responseData = await Fetch.fetchJson(url);
+    // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
+    const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () => Fetch.fetchJson(url));
 
     // Read the features
     return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);

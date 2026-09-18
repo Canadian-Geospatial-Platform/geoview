@@ -203,10 +203,9 @@ export class GeoJSON extends AbstractGeoViewVector {
       // As-is
       responseData = geojson;
     } else {
-      // Have to fetch it
-      responseData = await AbstractGeoViewVector.fetchJson(
-        layerConfigGeoJSON.getDataAccessPath(false),
-        layerConfigGeoJSON.getSource().postSettings
+      // Have to fetch it; surface a specific message if the source can't be loaded (e.g. unreachable/404)
+      responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfigGeoJSON, () =>
+        AbstractGeoViewVector.fetchJson(layerConfigGeoJSON.getDataAccessPath(false), layerConfigGeoJSON.getSource().postSettings)
       );
     }
 

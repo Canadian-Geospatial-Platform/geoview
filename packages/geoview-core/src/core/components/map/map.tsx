@@ -144,7 +144,7 @@ export function Map(props: MapProps): JSX.Element {
       )}
       {layersAreLoading && (
         <Box sx={{ ...memoSxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
-          <ProgressBar aria-label={t('error.map.loadingLayers')} />
+          <ProgressBar aria-label={t('map.status.loadingLayers')} />
         </Box>
       )}
     </Box>
