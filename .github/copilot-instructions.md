@@ -417,7 +417,7 @@ See [time-dimension.md](../docs/programming/time-dimension.md) for the full arch
 | **Absolute** | `start/end/period`              | `2002-09-01T00:00:00Z/2025-01-01T00:00:00Z/P1Y` | `'discrete'`    |
 | **Relative** | `start/end` or `start/duration` | `2026-05-27T11:12:00Z/PT10M`                    | `'continuous'`  |
 
-**Absolute interval representation** — Absolute intervals normalize to two aligned bounds in `range` and preserve the ISO 8601 period in `rangeItems.durationInterval`.
+**Absolute interval representation** — Absolute intervals expand every aligned value into `range` and preserve the ISO 8601 period in `rangeItems.durationInterval`.
 
 **Raster defaults** — A configured WMS style or ESRI Image raster function takes precedence. Without one, WMS prefers the advertised default style and otherwise the first style; ESRI Image uses the first advertised raster function other than `None`.
 

@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Configuration for WMS CDT Landcover layers. Landcover 2010-2020 (XML) reads the capabilities from the landcover_group.xml file. Landcover Direct reads the capabilities from the landcover_2010_15_20_en endpoint directly. Landcover VRT Grp Explicit reads the capabilities from the landcover_vrt_fr endpoint directly and explicitely lists the sub-layers to be added. Landcover VRT Root reads the capabilities from the landcover_vrt_fr endpoint directly and omits the sub-layers to be added so they are added on-the-fly as part of the group. Landcover VRT Grp Dynamic reads the capabilities from landcover_vrt_fr but and adds the landcover_group and the sub-layers are added on-the-fly as part of the group."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
@@ -107,22 +110,6 @@
         ]
       },
       {
-        "geoviewLayerId": "landcover-vrt-2010-2020",
-        "geoviewLayerName": "Landcover VRT 2010-2020",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2010-2020",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "landcover-vrt-group",
         "geoviewLayerName": "Landcover VRT Grp Dynamic",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
@@ -130,54 +117,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "landcover_groupe",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "landcover-vrt-group-2010",
-        "geoviewLayerName": "Landcover VRT 2010",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2010_19classes",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "landcover-vrt-group-2015",
-        "geoviewLayerName": "Landcover VRT 2015",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2015_19classes",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "landcover-vrt-group-2020",
-        "geoviewLayerName": "Landcover VRT 2020",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2020_19classes",
             "initialSettings": {
               "states": {
                 "visible": false
