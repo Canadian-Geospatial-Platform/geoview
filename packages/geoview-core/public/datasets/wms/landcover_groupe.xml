@@ -402,6 +402,7 @@
        <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
+     <Dimension units="ISO8601" name="TIME">2010-07-01</Dimension>
     </Layer>
     <Layer queryable="1">
      <Name>landcover_2015_19classes</Name>
@@ -803,6 +804,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
        <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2020_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
+     <Dimension units="ISO8601" name="TIME">2020-07-01</Dimension>
     </Layer>
     <Dimension units="ISO8601" name="TIME">2010-07-01,2015-07-01,2020-07-01</Dimension>
     <Extent name="time">2010-07-01/2025-06-30</Extent>

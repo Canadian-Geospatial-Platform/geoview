@@ -906,6 +906,7 @@ export type TypeMetadataWMSCapabilityLayer = {
   Name?: string;
   Title?: string;
   Layer?: TypeMetadataWMSCapabilityLayer[];
+  KeywordList?: TypeMetadataWMSServiceKeyword;
   ParentLayer?: TypeMetadataWMSCapabilityLayer;
   Abstract?: string;
   BoundingBox?: TypeMetadataWMSCapabilityLayerBBox[];
@@ -915,7 +916,6 @@ export type TypeMetadataWMSCapabilityLayer = {
   CRS?: string[];
   Style?: TypeMetadataWMSCapabilityLayerStyle[];
   Dimension?: TypeMetadataWMSCapabilityLayerDimension[];
-  IsGroupDimension?: boolean;
   Attribution?: TypeMetadataWMSCapabilityLayerAttribution;
 
   '@attributes': {

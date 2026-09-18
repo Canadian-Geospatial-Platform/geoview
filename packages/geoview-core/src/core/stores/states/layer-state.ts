@@ -902,6 +902,28 @@ export const getStoreLayerVisible = (mapId: string, layerPath: string): boolean 
 export const useStoreLayerVisible = createLayerSelectorHook('visible');
 
 /**
+ * Hook that returns a record of layer visibility flags for all layers.
+ *
+ * @returns A record of visibility flags keyed by layer path, defaulting to false
+ */
+export const useStoreLayerVisibleSet = (): Record<string, boolean> => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the object with the visibility flags for all layers, using false when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, boolean>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.visible ?? false;
+      }
+      return acc;
+    }, {});
+  });
+};
+
+/**
  * Returns the layer paths of all layers currently visible.
  *
  * @param mapId - The map identifier
