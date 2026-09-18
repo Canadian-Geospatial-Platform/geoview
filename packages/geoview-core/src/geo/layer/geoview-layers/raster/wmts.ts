@@ -322,10 +322,14 @@ export class WMTS extends AbstractGeoViewRaster {
     layerId: string,
     layerCapability: TypeMetadataWMTSCapabilities | undefined
   ): TypeMetadataWMTSLayer | undefined {
-    // Find the TileMatrixSet and Layer in the metadata that corresponds to the layer entry config
-    return layerCapability && Array.isArray(layerCapability?.Contents?.Layer)
-      ? layerCapability?.Contents?.Layer.find((layer) => layer['ows:Identifier'] === layerId)
-      : (layerCapability?.Contents?.Layer as TypeMetadataWMTSLayer | undefined);
+    // Find the Layer in the metadata that corresponds to the layer entry config
+    const layers = layerCapability?.Contents?.Layer;
+    if (Array.isArray(layers)) return layers.find((layer) => layer['ows:Identifier'] === layerId);
+
+    // Single-layer capabilities: only return it when its identifier matches the requested layerId, otherwise the
+    // configured layerId doesn't exist in the service (return undefined so the caller reports the error)
+    const singleLayer = layers;
+    return singleLayer && singleLayer['ows:Identifier'] === layerId ? singleLayer : undefined;
   }
 
   /**
@@ -356,10 +360,17 @@ export class WMTS extends AbstractGeoViewRaster {
       }
     }
 
-    const metadataTileMatrixFound: TypeWMTSTileMatrixSet | undefined =
-      metadata && Array.isArray(metadata?.Contents?.TileMatrixSet)
-        ? metadata?.Contents?.TileMatrixSet?.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier)
-        : (metadata?.Contents?.TileMatrixSet as TypeWMTSTileMatrixSet | undefined);
+    // Find the TileMatrixSet that corresponds to the (configured or derived) identifier. When the capabilities expose a
+    // single TileMatrixSet, still validate its identifier matches so an invalid configured tileMatrixSet is reported.
+    const tileMatrixSets = metadata?.Contents?.TileMatrixSet;
+    let metadataTileMatrixFound: TypeWMTSTileMatrixSet | undefined;
+    if (Array.isArray(tileMatrixSets)) {
+      metadataTileMatrixFound = tileMatrixSets.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier);
+    } else {
+      const singleTileMatrix = tileMatrixSets as TypeWMTSTileMatrixSet | undefined;
+      metadataTileMatrixFound =
+        singleTileMatrix && singleTileMatrix['ows:Identifier'] === tileMatrixIdentifier ? singleTileMatrix : undefined;
+    }
 
     // If not found
     if (!metadataTileMatrixFound || !metadataLayerFound) {
