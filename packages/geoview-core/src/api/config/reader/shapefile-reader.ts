@@ -7,7 +7,7 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { LayerSourceFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 

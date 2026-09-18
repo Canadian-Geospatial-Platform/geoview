@@ -20,7 +20,7 @@ import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerSourceFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { logger } from '@/core/utils/logger';
 
 interface SldsInterface {

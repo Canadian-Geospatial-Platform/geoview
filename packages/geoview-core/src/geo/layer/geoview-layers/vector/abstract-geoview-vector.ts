@@ -13,7 +13,7 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { LayerSourceFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';

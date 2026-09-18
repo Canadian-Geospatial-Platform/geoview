@@ -37,6 +37,27 @@ export class LayerError extends GeoViewError {
 }
 
 /**
+ * Error thrown when a Layer's data source cannot be loaded from its access path (e.g. an unreachable or missing URL).
+ */
+export class LayerSourceFailedToLoadError extends LayerError {
+  /**
+   * Creates an instance of LayerSourceFailedToLoadError.
+   *
+   * @param layerName - The layer name of the layer whose source failed to load
+   * @param cause - Optional inner cause of the error
+   */
+  constructor(layerName: string, cause?: Error) {
+    super(layerName, 'error.layer.sourceNotLoaded', { layerName }, { cause });
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerSourceFailedToLoadError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerSourceFailedToLoadError.prototype);
+  }
+}
+
+/**
  * Error thrown when a specified layer cannot be found.
  *
  * This error is typically raised when attempting to reference a layer that does not exist,

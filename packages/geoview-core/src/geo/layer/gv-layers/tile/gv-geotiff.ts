@@ -7,7 +7,8 @@ import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-typ
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { LayerSourceFailedToLoadError, type GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { RGBA } from '@/core/utils/utilities';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
