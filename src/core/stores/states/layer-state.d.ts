@@ -387,6 +387,15 @@ export declare const useStoreLayerIsParentHiddenOnMap: (layerPath: string) => bo
  */
 export declare const useStoreLayerIsParentHiddenOnMapSet: () => Record<string, boolean>;
 /**
+ * Selects the in-visible-range state for all layers.
+ *
+ * Component panels use this to keep out-of-scale-range layers filtered out while still showing
+ * visibility-toggle-hidden layers (which are in range) as a disabled "Hidden layers" group.
+ *
+ * @returns A record mapping each layer path to whether it is within its visible zoom range
+ */
+export declare const useStoreLayerInVisibleRangeSet: () => Record<string, boolean>;
+/**
  * Selects the visible layer paths derived from legendLayers.
  *
  * @returns The array of visible layer paths

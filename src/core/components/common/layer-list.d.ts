@@ -27,6 +27,10 @@ export interface LayerListEntry {
     layerUniqueId?: string;
     /** Whether the layer item is disabled. */
     isDisabled?: boolean;
+    /** Whether the layer is hidden on the map (visibility toggled off); rendered disabled under the "Hidden layers" section with an inline eye toggle. */
+    isHidden?: boolean;
+    /** Layer paths to make visible when the inline eye toggle is clicked (defaults to `[layerPath]`); used to re-enable every layer backing a multi-layer entry such as a custom time slider. */
+    relatedLayerPaths?: string[];
 }
 /** Properties for the LayerList component. */
 interface LayerListProps {
@@ -36,6 +40,10 @@ interface LayerListProps {
     selectedLayerPath: string | undefined;
     /** Callback invoked when a layer item is clicked. */
     onListItemClick: (layer: LayerListEntry) => void;
+    /** Compact mode for the collapsed app-bar icon view: hides the section headings and the "no layers" instructions item. */
+    compact?: boolean;
+    /** Omits the available-layers heading for non-layer lists such as Guide topics. */
+    hideAvailableHeading?: boolean;
 }
 /** Properties for the LayerListItem component. */
 interface LayerListItemProps {
@@ -70,6 +78,6 @@ export declare const LayerListItem: import("react").MemoExoticComponent<({ id, i
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
  */
-export declare const LayerList: import("react").MemoExoticComponent<({ layerList, selectedLayerPath, onListItemClick }: LayerListProps) => JSX.Element>;
+export declare const LayerList: import("react").MemoExoticComponent<(props: LayerListProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=layer-list.d.ts.map

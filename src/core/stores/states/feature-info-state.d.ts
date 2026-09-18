@@ -1,5 +1,5 @@
 import { type TypeSetStore, type TypeGetStore, type GeoviewStoreType } from '@/core/stores/geoview-store';
-import type { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeFieldEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
@@ -240,6 +240,8 @@ export type TypeFeatureInfoSetEntry = {
     queryStatus: TypeQueryStatus;
     /** The feature info entries returned by the query. */
     features?: TypeFeatureInfoEntry[];
+    /** Promise that results are coming for this entry. */
+    promiseResult?: Promise<TypeFeatureInfoResult | undefined>;
     /** Whether the features in this entry have associated geometry. */
     featuresHaveGeometry: boolean;
 };

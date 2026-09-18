@@ -11,7 +11,6 @@ import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
     wmtsStyle?: string;
-    extent?: [number, number, number, number];
     resolutionLevels?: number;
 }
 export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {

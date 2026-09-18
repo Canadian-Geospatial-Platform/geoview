@@ -33,7 +33,7 @@ export type TypeMapFeaturesInstance = {
     /** List of external packages. */
     externalPackages?: TypeExternalPackagesProps[];
 };
-/** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
+/** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`; kept as `Array<number>` to align with OpenLayers' Extent type. */
 export type Extent = Array<number>;
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
@@ -483,6 +483,7 @@ export type TypeOutfields = {
 };
 /** Supported field data types for outfields. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
+/** Domain metadata for an outfield; `null` is allowed because ESRI uses it in service responses. */
 export type TypeDomain = codedValueType | rangeDomainType | null;
 export type codedValueType = {
     type: 'codedValue';

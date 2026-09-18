@@ -385,6 +385,19 @@ export declare class LayerImageFailedToLoadHeightTooBigError extends GeoViewErro
     constructor(layerName: string, requestedHeight: number, maxHeight: number);
 }
 /**
+ * Error thrown when a Layer Image fails to load because the layer's defined (native) CRS is a deprecated or
+ * non-existent EPSG code that can't be resolved to a valid projection.
+ */
+export declare class LayerImageFailedToLoadProjectionNotValidError extends GeoViewError {
+    /**
+     * Creates an instance of LayerImageFailedToLoadProjectionNotValidError.
+     *
+     * @param layerName - The layer name of the layer image that failed to load
+     * @param definedCRS - The layer's defined CRS that is not a valid projection
+     */
+    constructor(layerName: string, definedCRS: string);
+}
+/**
  * Error thrown when a Layer Image fails to load on the map due to no image returned.
  */
 export declare class LayerImageFailedNoImageError extends GeoViewError {

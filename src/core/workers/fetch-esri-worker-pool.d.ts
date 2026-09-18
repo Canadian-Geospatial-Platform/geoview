@@ -15,19 +15,12 @@ export declare class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWor
      */
     constructor(numWorkers?: number);
     /**
-     * Initializes all workers in the pool.
-     *
-     * @returns A promise that resolves when all workers are initialized
-     * @throws {Error} When worker initialization fails
-     */
-    init(): Promise<void>;
-    /**
      * Processes an ESRI query using an available worker from the pool.
      *
      * @param params - Parameters for the ESRI query
      * @returns A promise that resolves to the query results
      * @throws {Error} When no workers are available or query processing fails
      */
-    process(params: QueryParams): Promise<unknown>;
+    process(params: QueryParams, signal?: AbortSignal): Promise<unknown>;
 }
 //# sourceMappingURL=fetch-esri-worker-pool.d.ts.map

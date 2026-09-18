@@ -27,5 +27,7 @@ export interface DataTableProps {
     layerPath: string;
     containerType: TypeContainerBox;
     unfilteredFeaturesCount: number;
+    /** Called after the table has (re)rendered, so the parent can clear its loading overlay. */
+    onRendered?: () => void;
 }
 //# sourceMappingURL=data-table-types.d.ts.map
