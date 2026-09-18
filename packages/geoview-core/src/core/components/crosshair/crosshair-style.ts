@@ -10,11 +10,11 @@ import type { SxStyles } from '@/ui/style/types';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   crosshairContainer: {
     position: 'absolute',
-    top: theme.spacing(0),
-    right: theme.spacing(0),
-    left: theme.spacing(0),
-    bottom: theme.spacing(0),
-    paddingBottom: theme.spacing(6),
+    top: 0,
+    right: 0,
+    left: 0,
+    bottom: 0,
+    paddingBottom: theme.spacing(1),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -23,14 +23,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   crosshairInfo: {
     position: 'absolute',
-    top: theme.spacing(0),
-    right: theme.spacing(0),
-    left: theme.spacing(0),
-    padding: theme.spacing(2, 1, 0, 1),
+    top: 0,
+    right: 0,
+    left: 0,
+    padding: `${theme.spacing(0.25)} ${theme.spacing(0.5)}`,
     backgroundColor: theme.palette.geoViewColor?.grey.lighten(0.1, 0.8),
-    '& span': {
-      paddingLeft: 70,
-    },
   },
   crosshairIcon: {
     width: theme.overrides.crosshairIcon.size.width,

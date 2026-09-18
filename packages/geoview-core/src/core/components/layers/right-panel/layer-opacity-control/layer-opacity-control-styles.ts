@@ -11,10 +11,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   layerOpacityControl: {
     display: 'flex',
     alignItems: 'center',
-    gap: '15px',
-    padding: '8px 20px 7px 15px',
+    gap: theme.spacing(2),
+    padding: theme.spacing(1, 2.5, 1, 2),
     marginLeft: 'auto',
-    width: '235px',
+    minWidth: '250px',
     backgroundColor: 'transparent',
     borderRadius: '10px',
     '& .MuiSlider-mark': {
@@ -30,13 +30,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: theme.palette.geoViewColor?.textColor.main,
     },
   },
-  controlHidden: {
-    color: theme.palette.grey[600],
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-  },
-  controlVisible: {
+  controlLabel: {
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
+  },
+  controlLabelHidden: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
   },
 });

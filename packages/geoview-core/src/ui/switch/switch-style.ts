@@ -14,10 +14,10 @@ import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
-    margin: '0 5px',
-    padding: '0 5px',
+    margin: theme.spacing(0, 0.5),
+    padding: theme.spacing(0, 0.5),
     borderRadius: '6px',
-    gap: '4px',
+    gap: theme.spacing(0.5),
     '&:has(.Mui-focusVisible)': {
       ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
     },

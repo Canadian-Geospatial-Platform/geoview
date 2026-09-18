@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
 
     // list item button
     '& .MuiListItemButton-root': {
-      padding: '0 2px 0 16px',
+      padding: theme.spacing(0, 0.25, 0, 2),
       height: '100%',
       '&:hover': {
         backgroundColor: 'transparent',
@@ -54,27 +54,23 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
 
     '& .layer-panel': {
-      '& .MuiListItemText-root': {
-        marginLeft: '12px',
-      },
-
       // styling right icons
       '& .rightIcons-container': {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'right',
         alignItems: 'center',
-        paddingRight: '6px',
+        paddingRight: theme.spacing(0.75),
 
         '& .MuiIconButton-root': {
-          margin: '0px 1px',
+          margin: theme.spacing(0, 0.125),
         },
       },
     },
 
     '& .MuiListItemIcon-root': {
       minWidth: '2.5rem',
-      marginRight: '5px',
+      marginRight: theme.spacing(0.75),
     },
     '& .MuiListItemText-root': {
       '> span': {
@@ -88,13 +84,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
   },
   listSubitem: {
-    padding: '0px',
-    marginLeft: '20px',
+    padding: theme.spacing(0),
+    marginLeft: theme.spacing(2.5),
     width: 'unset',
     boxSizing: 'border-box',
     '& .layerItemContainer': {
       backgroundColor: 'transparent',
-      marginBottom: '0px',
+      marginBottom: theme.spacing(0),
     },
   },
 });

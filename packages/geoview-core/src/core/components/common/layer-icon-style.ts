@@ -24,7 +24,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     position: 'absolute',
     left: -3,
     top: -3,
-    padding: 0,
+    padding: theme.spacing(0),
     borderRadius: 0,
     boxShadow: 2,
     transition: 'transform .3s ease-in-out',
@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 0,
+    padding: theme.spacing(0),
     borderRadius: 0,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
@@ -48,7 +48,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   maxIconImg: {
     maxWidth: 24,
     maxHeight: 24,
-    padding: 1,
+    padding: theme.spacing(0.125),
     height: 'auto !important', // Make sure the WMS image is not duplicated to fill the 100% height from parent
   },
   legendIcon: {
@@ -99,7 +99,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 0,
+    padding: theme.spacing(0),
     borderRadius: 0,
     boxShadow: 2,
     '&:focus': {

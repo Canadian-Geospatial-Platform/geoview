@@ -8,21 +8,21 @@ import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   container: {
-    padding: theme.spacing(11),
+    padding: theme.spacing(2),
     height: '100%',
     overflow: 'auto',
   },
   markdownContainer: {
     '& h1, & h2, & h3, & h4, & h5, & h6': {
-      marginTop: theme.spacing(11),
-      marginBottom: theme.spacing(7),
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1.25),
     },
     '& p': {
-      marginBottom: theme.spacing(11),
+      marginBottom: theme.spacing(2),
     },
     '& ul, & ol': {
-      paddingLeft: theme.spacing(11),
-      marginBottom: theme.spacing(11),
+      paddingLeft: theme.spacing(2),
+      marginBottom: theme.spacing(2),
     },
     '& a': {
       color: theme.palette.primary.main,
@@ -38,31 +38,29 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& code': {
       backgroundColor: theme.palette.action.hover,
-      padding: theme.spacing(0.5, 1),
       borderRadius: theme.shape.borderRadius,
       fontFamily: 'monospace',
     },
     '& pre': {
       backgroundColor: theme.palette.action.hover,
-      padding: theme.spacing(11),
+      padding: theme.spacing(2),
       borderRadius: theme.shape.borderRadius,
       overflow: 'auto',
       '& code': {
         backgroundColor: 'transparent',
-        padding: 0,
       },
     },
   },
   markdownItem: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(0.25),
   },
   defaultContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing(11),
+    gap: theme.spacing(2),
   },
   title: {
-    marginTop: theme.spacing(11),
+    marginTop: theme.spacing(2),
     fontSize: theme.palette.geoViewFontSize?.xl,
     fontWeight: theme.typography.fontWeightBold,
   },
@@ -70,7 +68,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing(11),
+    padding: theme.spacing(2),
     '& img': {
       display: 'block',
       maxWidth: '100%',
@@ -81,7 +79,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     lineHeight: theme.typography.body1.lineHeight,
   },
   linkContainer: {
-    marginTop: theme.spacing(11),
+    marginTop: theme.spacing(2),
   },
   loadingContainer: {
     display: 'flex',
@@ -90,6 +88,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: '200px',
   },
   errorContainer: {
-    padding: theme.spacing(11),
+    padding: theme.spacing(2),
   },
 });

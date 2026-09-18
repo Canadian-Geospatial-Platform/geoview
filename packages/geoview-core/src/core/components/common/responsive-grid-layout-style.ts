@@ -12,8 +12,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    padding: '16px 0',
-    gap: '10px',
+    padding: theme.spacing(2, 0),
+    gap: theme.spacing(1.25),
   },
   guideCloseBtn: {
     position: 'absolute',
@@ -43,17 +43,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   rightButtonsContainer: {
     alignSelf: 'end',
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[300],
-    display: 'flex',
-    flexDirection: 'row',
-    gap: '0.6rem',
-    borderTopLeftRadius: '0.5rem',
-    borderTopRightRadius: '0.5rem',
-    borderTop: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-    borderLeft: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-    borderRight: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
     '& .MuiButton-startIcon': {
       [theme.breakpoints.down('md')]: {
-        margin: 0,
+        margin: theme.spacing(0),
       },
     },
     '& .MuiButtonBase-root': {
@@ -93,17 +85,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .guideBox': {
       position: 'relative',
       color: `${theme.palette.geoViewColor?.grey.dark[800]}  !important`,
-      padding: '16px',
+      padding: theme.spacing(2),
       img: {
         maxWidth: '100%',
       },
       td: {
         width: 'auto',
-        paddingLeft: '15px',
+        paddingLeft: theme.spacing(2),
       },
       th: {
         textAlign: 'left',
-        paddingLeft: '15px',
+        paddingLeft: theme.spacing(2),
       },
       '& h4': {
         borderBottom: 'none',
@@ -120,18 +112,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .noSelection': {
       fontSize: theme.palette.geoViewFontSize?.md,
       fontWeight: '500',
-      padding: 10,
-    },
-    '& .guide-button-container': {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      border: 'none',
-      borderRadius: '0',
-    },
-    '& .guide-button-group': {
-      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-      borderBottom: 'none',
-      borderRadius: '8px 8px 0 0',
+      padding: theme.spacing(2),
     },
     '& .panel-content-container': {
       backgroundColor: theme.palette.geoViewColor?.white,
@@ -147,18 +128,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'hidden',
     height: '100%',
   },
+  guideButtonGroup: {
+    border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+    borderBottom: 'none',
+    borderRadius: '8px 8px 0 0',
+  },
   gridLeftMain: {
     height: '100%',
     overflowY: 'auto',
-    paddingTop: '30px', // To align left list with right panel box and leave room for focus indicator (below 30px right panel toolbar)
-    paddingBottom: '25px', // To ensure last item can be fully scrolled up to be fully visible
+    paddingTop: theme.spacing(3.75), // To align left list with right panel box and leave room for focus indicator (below 30px right panel toolbar)
+    paddingBottom: theme.spacing(3), // To ensure last item can be fully scrolled up to be fully visible (snapped from 25px)
     '&.MuiGrid-grid-xs-auto': {
       '& .layer-panel': {
         width: '52px',
       },
       '& .MuiListItemButton-root': {
         justifyContent: 'center',
-        padding: '0 8px',
+        padding: theme.spacing(0, 1),
         minHeight: '48px',
         '& .layer-count': {
           display: 'block',

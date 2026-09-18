@@ -171,7 +171,7 @@ export default function Share(): JSX.Element | null {
       <Dialog open={isModalOpen} onClose={handleCloseModal} aria-labelledby="share-dialog-title" maxWidth="sm" fullWidth>
         <DialogTitle id="share-dialog-title">{t('appbar.share')}</DialogTitle>
         <DialogContent dividers>
-          <Box sx={{ pt: 2, pb: 1 }}>
+          <Box>
             <TextField
               fullWidth
               value={shareUrl}
