@@ -56,24 +56,38 @@ const timeUnitsESRI = {
 export type ManipulateType = dayjs.ManipulateType;
 
 /** Type used to define the range values for an OGC time dimension. */
-type RangeItems = {
+export type RangeItems = {
   type: string;
   range: string[];
+  durationInterval?: string;
 };
 
-/** Type used to define the GeoView OGC time dimension. */
+/** Represents the normalized OGC time dimension metadata used by GeoView layers and time controls. */
 export type TimeDimension = {
+  /** Field name exposed by the service for the time dimension. */
   field: string;
+  /** Default values selected by the service, normalized to an array of ISO strings. */
   default: string[];
+  /** Optional unit symbol associated with the time values, such as `Y`, `M`, or `D`. */
   unitSymbol?: string;
+  /** Parsed range metadata for the normalized time values. */
   rangeItems: RangeItems;
+  /** Whether the time values are treated as discrete or continuous. */
   nearestValues: 'discrete' | 'continuous';
+  /** Whether the time control is configured for a single handle or a range selection. */
   singleHandle: boolean;
+  /** Display format used when rendering dates in the current locale. */
   displayDateFormat?: TypeDisplayDateFormat;
+  /** Short display format used when space is limited. */
   displayDateFormatShort?: TypeDisplayDateFormat;
+  /** Temporal interpretation applied to the values when formatting them. */
   serviceDateTemporalMode?: TemporalMode;
+  /** Timezone used for display and interpretation of the time values. */
   displayDateTimezone?: TimeIANA;
+  /** Whether the parsed time dimension is valid for use. */
   isValid: boolean;
+  /** Indicates if the time dimension is part of a group dimension. Notably useful for some QGIS-based services. */
+  isGroupDimension?: boolean;
 };
 
 /** Guessed time information inferred from service date formats or time dimensions. */
@@ -94,14 +108,6 @@ export type TimeDimensionESRI = {
   hasLiveData?: boolean;
   timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
-
-/** Utility functions */
-/** Discrete is when the values are all written down specifically with comma separator */
-const isDiscreteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split(',').length > 1;
-/** Absolute is start/end/interval */
-const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 3;
-/** Relative is start/end without intervals */
-const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 2;
 
 /**
  * Class used to handle date as ISO 8601.
@@ -169,6 +175,12 @@ export abstract class DateMgt {
   /** Regex used to spot a timezone inside a date input. */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
+  /** Regex used to spot the OGC 'current' keyword as a standalone segment of a time dimension value. */
+  static readonly #REGEX_CURRENT_KEYWORD = /^current$/i;
+
+  /** Regex used to detect a time component ('T...') in an OGC date segment. */
+  static readonly #REGEX_HAS_TIME_COMPONENT = /T/i;
+
   /** Array of time tokens used for parsing and identifying time components in dates. */
   static readonly #TIME_TOKENS = ['H', 'HH', 'h', 'hh', 'k', 'kk', 'm', 'mm', 's', 'ss', 'S', 'SS', 'SSS', 'A', 'a', 'X', 'x'];
 
@@ -201,6 +213,46 @@ export abstract class DateMgt {
   static DEFAULT_TEMPORAL_MODE: TemporalMode = 'calendar';
 
   // #region STATIC PUBLIC METHODS
+
+  /**
+   * Checks whether an OGC time dimension contains comma-separated discrete values.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents a discrete range
+   */
+  static isDiscreteRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split(',').length > 1;
+  }
+
+  /**
+   * Checks whether an OGC time dimension contains one discrete value.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents one discrete value
+   */
+  static isDiscreteSingleValue(ogcTimeDimension: string): boolean {
+    return !(ogcTimeDimension.includes(',') || ogcTimeDimension.includes('/'));
+  }
+
+  /**
+   * Checks whether an OGC time dimension is an absolute start/end/interval range.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents an absolute range
+   */
+  static isAbsoluteRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split('/').length === 3;
+  }
+
+  /**
+   * Checks whether an OGC time dimension is a relative two-part range.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents a relative range
+   */
+  static isRelativeRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split('/').length === 2;
+  }
 
   /**
    * Gets the default date and datetime formats based on the display date mode.
@@ -865,23 +917,36 @@ export abstract class DateMgt {
   }
 
   /**
-   * Create the Geoview time dimension from OGC dimension.
+   * Creates a normalized GeoView time-dimension model from an OGC WMS time dimension.
    *
-   * @param ogcTimeDimension - The OGC time dimension object or string
-   * @param displayDateMode - Optional display date mode
-   * @returns The Geoview time dimension
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-   * @throws {InvalidDateError} When input has invalid dates
+   * The method parses the raw OGC values with {@link DateMgt.createRangeOGC}, infers display formatting
+   * from the resulting range, and resolves the initial slider defaults from the service metadata.
+   * When the dimension belongs to a QGIS group, a synthetic default is injected so the control still
+   * behaves as a valid single-value selection even if the service omits a default.
+   *
+   * @param ogcTimeDimension - The OGC dimension object or its JSON string representation from the WMS capability document
+   * @param displayDateMode - Optional display date mode used to infer the presentation format
+   * @param isGroupDimension - Optional flag indicating whether this dimension belongs to a grouped layer definition
+   * @returns The normalized GeoView time dimension, including parsed range metadata and default selection values
+   * @throws {InvalidTimeDimensionError} When the OGC values cannot be parsed into a valid range or the duration is invalid
+   * @throws {InvalidDateError} When any parsed date is invalid
    */
   static createDimensionFromOGC(
     ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string,
-    displayDateMode: DisplayDateMode | undefined
+    displayDateMode: DisplayDateMode | undefined,
+    isGroupDimension: boolean | undefined
   ): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(ogcTimeDimension);
     const rangeItems = this.createRangeOGC(dimensionObject.values);
 
     // Guess the display time information
     const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
+
+    // If the dimension is part of a QGIS group, ensure it has a default value
+    if (isGroupDimension) {
+      // The time dimension should have 1 default value (and only 1, discrete)
+      dimensionObject.default ??= rangeItems.range[0];
+    }
 
     // Determine the slider handle count from OGC metadata signals:
     // 1. default attribute present → single-element array [default] → 1 thumb (definitive signal)
@@ -896,6 +961,15 @@ export abstract class DateMgt {
       defaultValues = [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]];
     }
 
+    // By default, is valid if there's an actual range of dates in the time dimension
+    let isValid = rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1];
+
+    // If the dimension is part of a QGIS group, the sub layer will not necessarily have a range, probably more a single value or none at all
+    if (isGroupDimension) {
+      isValid = true;
+    }
+
+    // Return the time dimension
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
       default: defaultValues,
@@ -907,34 +981,56 @@ export abstract class DateMgt {
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,
       serviceDateTemporalMode: guessedInfo?.serviceDateTemporalMode,
-      isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
+      isValid: isValid,
+      isGroupDimension,
     };
 
     return timeDimension;
   }
 
   /**
-   * Create a range of date object from OGC time dimension following ISO 8601.
+   * Creates a normalized range model for an OGC time dimension value.
    *
-   * @param ogcTimeDimensionValues - OGC time dimension values
-   * @returns Array of date from the dimension
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-   * @throws {InvalidDateError} When input has invalid dates
+   * This method resolves the `current` keyword before classifying the value, normalizes whitespace,
+   * and returns a structured {@link RangeItems} object whose `type` is one of `discrete`, `relative`,
+   * or `none`. Discrete values are split into a list of ISO strings, while relative and absolute
+   * intervals are expanded into bounded UTC start/end values with an optional duration payload.
+   *
+   * Supported shapes include comma-separated discrete dates, relative intervals such as
+   * `start/end` or `start/duration`, and absolute intervals such as `start/end/period`.
+   *
+   * @param ogcTimeDimensionValues - The raw OGC time dimension value from a WMS capability document
+   * @returns The normalized range metadata for the dimension, including the parsed `type`, `range`, and optional `durationInterval`
+   * @throws {InvalidTimeDimensionError} When the value cannot be parsed into a valid range, or the duration is invalid, non-positive, or would loop indefinitely
+   * @throws {InvalidDateError} When any parsed date is invalid
    */
   static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
     let rangeItems: RangeItems = { type: 'none', range: [] };
+
+    // Resolve the 'current' keyword, if any, to today's date/time before classifying the range
+    const resolvedValues = this.#substituteCurrentKeyword(ogcTimeDimensionValues);
 
     // find what type of dimension it is:
     //    discrete = 1696, 1701, 1734, 1741
     //    relative = 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
     //    absolute = 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
     // and create the range object
-    if (isDiscreteRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'discrete', range: ogcTimeDimensionValues.replace(/\s/g, '').split(',') };
-    else if (isRelativeRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'relative', range: this.#createRelativeInterval(ogcTimeDimensionValues) };
-    else if (isAbsoluteRange(ogcTimeDimensionValues))
-      rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(ogcTimeDimensionValues) };
+    if (this.isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
+    else if (this.isRelativeRange(resolvedValues)) {
+      const relativeInterval = this.#createRelativeInterval(resolvedValues);
+      rangeItems = {
+        type: 'relative',
+        range: [relativeInterval.min, relativeInterval.max],
+        durationInterval: relativeInterval.durationInterval,
+      };
+    } else if (this.isAbsoluteRange(resolvedValues)) {
+      const absoluteInterval = this.#createAbsoluteInterval(resolvedValues);
+      rangeItems = {
+        type: 'discrete',
+        range: absoluteInterval.range,
+        durationInterval: absoluteInterval.durationInterval,
+      };
+    } else if (this.isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues] };
 
     // Check if dimension is valid
     if (rangeItems.range.length === 0) throw new InvalidTimeDimensionError(ogcTimeDimensionValues);
@@ -1005,34 +1101,39 @@ export abstract class DateMgt {
   }
 
   /**
-   * Expands an absolute OGC time dimension interval into discrete UTC ISO date values.
+   * Substitutes the OGC `current` keyword (e.g. `2027-07-01/current`) with today's date/time.
    *
-   * Supported format:
-   *   `start/end/period`
-   * Example:
-   *   "2002-09-01T00:00:00Z/2002-09-03T00:00:00Z/P1D"
-   *   -> [
-   *       "2002-09-01T00:00:00.000Z",
-   *       "2002-09-02T00:00:00.000Z",
-   *       "2002-09-03T00:00:00.000Z"
-   *     ]
-   * Behavior:
-   * - Parses start and end as UTC instants.
-   * - Expands the interval by repeatedly adding the provided ISO-8601 duration.
-   * - The end value is included if it aligns with the step progression.
-   * - Duration increments are applied using calendar-safe logic
-   *   (see `#addDurationSafely`) to properly handle month and year periods.
-   * Safety:
-   * - A guard limit prevents infinite loops caused by malformed or
-   *   non-progressing durations.
+   * The replacement is formatted to match the shape (date-only vs date-time) of the other,
+   * non-`current` segment(s) found in the value, so the resulting string keeps a consistent format.
+   *
+   * @param ogcTimeDimensionValues - The raw OGC time dimension value, possibly containing 'current'
+   * @returns The value with every 'current' segment replaced by today's date/time, unchanged if none found
+   */
+  static #substituteCurrentKeyword(ogcTimeDimensionValues: string): string {
+    const segments = ogcTimeDimensionValues.split('/');
+    if (!segments.some((segment) => this.#REGEX_CURRENT_KEYWORD.test(segment.trim()))) return ogcTimeDimensionValues;
+
+    // Mirror the format of the first real date found, defaulting to a date-time format when none is found
+    const referenceSegment = segments.find((segment) => !this.#REGEX_CURRENT_KEYWORD.test(segment.trim()));
+    const hasTimeComponent = referenceSegment ? this.#REGEX_HAS_TIME_COMPONENT.test(referenceSegment) : true;
+    const format = hasTimeComponent ? `${this.ISO_DATETIME_FORMAT_SECONDS}[Z]` : this.ISO_DATE_FORMAT;
+    const now = dayjs.utc().format(format);
+
+    return segments.map((segment) => (this.#REGEX_CURRENT_KEYWORD.test(segment.trim()) ? now : segment)).join('/');
+  }
+
+  /**
+   * Expands an absolute OGC time dimension interval into its discrete UTC values.
+   *
+   * Parses `start/end/period`, includes each aligned value from start through end, and preserves the original ISO 8601 duration.
+   * A guard limit prevents infinite loops caused by malformed or non-progressing durations.
    *
    * @param ogcTimeDimension - An OGC absolute time dimension string in the form `start/end/period`
-   * @returns An array of UTC ISO-8601 strings representing each step from start to end (inclusive when aligned)
-   * @throws {InvalidTimeDimensionError} When input does not contain exactly three segments, or when duration is
-   *                                     invalid, or non-positive, or when an infinite loop is detected
+   * @returns The expanded UTC ISO values and original duration interval
+   * @throws {InvalidTimeDimensionError} When input does not contain exactly three segments, or when duration is invalid, non-positive, or causes an infinite loop
    * @throws {InvalidDateError} When input has invalid dates
    */
-  static #createAbsoluteInterval(ogcTimeDimension: string): string[] {
+  static #createAbsoluteInterval(ogcTimeDimension: string): { range: string[]; durationInterval: string } {
     const parts = ogcTimeDimension.split('/');
     if (parts.length !== 3) {
       throw new InvalidTimeDimensionError(ogcTimeDimension);
@@ -1057,13 +1158,10 @@ export abstract class DateMgt {
 
     const results: string[] = [];
     let current = start;
-
-    // Safety guard against infinite loops
     let guard = 0;
 
     while (current.isBefore(end) || current.isSame(end)) {
       results.push(current.toISOString());
-
       current = this.#addDurationSafely(current, step, periodStr);
 
       if (++guard > 10000) {
@@ -1071,7 +1169,10 @@ export abstract class DateMgt {
       }
     }
 
-    return results;
+    return {
+      range: results,
+      durationInterval: periodStr,
+    };
   }
 
   /**
@@ -1083,8 +1184,8 @@ export abstract class DateMgt {
    *   Example: `"2002-09-01T00:00:00Z/2022-12-01T00:00:00Z"`
    * - `start/duration`
    *   Example: `"2002-09-01T00:00:00Z/P1M"`
-   * The function always returns a tuple containing ISO-8601 UTC strings
-   * (`toISOString()`), inclusive of the computed end.
+   * The function always returns an object containing the computed UTC ISO
+   * start and end values (`toISOString()`), inclusive of the computed end.
    * Notes:
    * - All parsing is performed in UTC.
    * - If the second segment is a valid date, it is treated as the end date.
@@ -1096,12 +1197,12 @@ export abstract class DateMgt {
    * - Open-ended intervals (e.g. `"PT36H/PRESENT"`)
    *
    * @param ogcTimeDimension - A relative OGC time dimension string (`start/end` or `start/duration`)
-   * @returns A two-element array: `[startISO, endISO]`, both formatted as UTC ISO strings
+   * @returns An object with the UTC ISO start and end values of the interval
    * @throws {InvalidTimeDimensionError} When input does not contain exactly two segments, or when duration is
    *                                     invalid, or non-positive
    * @throws {InvalidDateError} When input has invalid dates
    */
-  static #createRelativeInterval(ogcTimeDimension: string): string[] {
+  static #createRelativeInterval(ogcTimeDimension: string): { min: string; max: string; durationInterval?: string } {
     const parts = ogcTimeDimension.split('/');
 
     if (parts.length !== 2) {
@@ -1118,7 +1219,7 @@ export abstract class DateMgt {
     // Case 1: start/end
     const endAsDate = dayjs.utc(secondPart);
     if (endAsDate.isValid()) {
-      return [start.toISOString(), endAsDate.toISOString()];
+      return { min: start.toISOString(), max: endAsDate.toISOString() };
     }
 
     // Case 2: start/duration
@@ -1129,7 +1230,7 @@ export abstract class DateMgt {
 
     const end = this.#addDurationSafely(start, duration, secondPart);
 
-    return [start.toISOString(), end.toISOString()];
+    return { min: start.toISOString(), max: end.toISOString(), durationInterval: secondPart };
   }
 
   /**

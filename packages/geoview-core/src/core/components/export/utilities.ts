@@ -738,7 +738,7 @@ export class ExportUtilities {
       // Check if layer has any meaningful legend content
       const hasVisibleItems = layer.items.some((item) => item.isVisible);
       const hasLayerIcons = layer.icons?.[0]?.iconImage && layer.icons[0].iconImage !== 'no data';
-      const hasTimeDimension = Boolean(timeSliderLayers?.[layer.layerPath]?.range?.length);
+      const hasTimeDimension = Boolean(timeSliderLayers?.[layer.layerPath]?.rangeItems.range?.length);
       const hasChildren = layer.children && layer.children.length > 0;
 
       // Pre-process children to check if any will be included (prevents empty parent headers)

@@ -416,7 +416,7 @@ The **Layers** tab has the following display state:
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
-**Important Information**  
+**Important Information**
 If a layer's visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the Eye disabled function" /> and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Zoom to visible scale icon" /> is visible, this means the layer is not visible at the current map zoom level.
 
 - Clicking the Zoom to Visible Scale button will adjust the map to the appropriate zoom level, making the layer visible.
@@ -532,14 +532,19 @@ If no filters are active, "None" is displayed.
 
 If the layer has time-based data, this section shows:
 
-- Display date format
+- Display date format and short display format
 - Temporal mode
 - Timezone
-- Time dimension field name and min/max date range
+- Time dimension field name
+- Normalized range type
+- Explicit range values for discrete dimensions, or minimum and maximum bounds for interval dimensions
+- ISO 8601 duration interval, when supplied by the service, with a link to the format specification
+- Whether the layer participates in a grouped time dimension
 
 **Temporal Dimension (Time Slider)**
 
-If the layer has a Time Slider configuration, additional temporal details specific to the slider are shown.
+If the layer has a Time Slider configuration, additional temporal details specific to the slider are shown, including its
+field, display settings, range values or bounds, and duration interval when available.
 
 #### Layer Settings Panel
 

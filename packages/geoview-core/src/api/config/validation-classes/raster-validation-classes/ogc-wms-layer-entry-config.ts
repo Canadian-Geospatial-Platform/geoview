@@ -15,7 +15,7 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
-import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { normalizeDatacubeAccessPath, sortByNameDefaultFirst } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -242,7 +242,11 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns The list of available style metadata objects, or `undefined` if none are defined
    */
   getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
-    return this.getLayerMetadata()?.Style;
+    const styles = this.getLayerMetadata()?.Style;
+    if (!styles) return undefined;
+
+    // Sort by the style names and return
+    return sortByNameDefaultFirst(styles, (style) => style.Name);
   }
 
   /**
@@ -258,6 +262,12 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     const styles = this.getStyles();
     if (styles && styles.length > 0) {
+      // Prioritize a layer style named default if any
+      const defaultStyleIndex = styles.findIndex((style) => style.toLowerCase() === 'default');
+      if (defaultStyleIndex !== -1) {
+        return styles[defaultStyleIndex];
+      }
+
       // Return the first one
       return styles[0];
     }

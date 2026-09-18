@@ -1,17 +1,17 @@
-﻿import type { PingResult } from 'geoview-core/core/utils/utilities';
-import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
-import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
+﻿import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
 import type {
   TypeMetadataWMSCapabilities,
   TypeMetadataWFSCapabilities,
   TypeMetadataWMTSCapabilities,
 } from 'geoview-core/api/types/layer-schema-types';
+import type { PingResult } from 'geoview-core/core/utils/utilities';
+import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
+import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/utilities';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
 
 /**
  * Main Core testing class.
@@ -313,9 +313,9 @@ export class CoreTester extends GVAbstractTester {
    */
   testProxyGetWMSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMSCapabilities>>> {
     return this.test(
-      `Test GeoUtilities.getWMSServiceMetadata with Nonna WMS (proxy fallback)...`,
+      `Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...`,
       (test) => {
-        const url = GVAbstractTester.NONNA_WMS_URL;
+        const url = GVAbstractTester.FOREST_BURN_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
         return GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },

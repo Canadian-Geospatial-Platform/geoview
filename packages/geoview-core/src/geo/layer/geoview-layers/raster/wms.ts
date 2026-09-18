@@ -10,10 +10,11 @@ import type {
   TypeMetadataWMSCapabilities,
   TypeMetadataWMSCapabilityLayer,
   TypeStylesWMS,
+  TypeMetadataWMSCapabilityLayerDimension,
 } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode, TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { OgcWmsLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -22,7 +23,13 @@ import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { formatError, PromiseRejectErrorWrapper, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import {
+  formatError,
+  InvalidDateError,
+  InvalidTimeDimensionError,
+  PromiseRejectErrorWrapper,
+  ResponseEmptyError,
+} from '@/core/exceptions/core-exceptions';
 import {
   LayerEntryConfigFieldsNotFoundError,
   LayerNoCapabilitiesError,
@@ -599,6 +606,10 @@ export class WMS extends AbstractGeoViewRaster {
    */
   #processMetadataInheritance(layer: TypeMetadataWMSCapabilityLayer | undefined, parentLayer?: TypeMetadataWMSCapabilityLayer): void {
     if (layer && parentLayer) {
+      // Set the parent layer reference for potential use in inheritance
+      // eslint-disable-next-line no-param-reassign
+      layer.ParentLayer ??= parentLayer;
+
       // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
       // eslint-disable-next-line no-param-reassign
       if (!layer['@attributes']) layer['@attributes'] = {};
@@ -623,8 +634,6 @@ export class WMS extends AbstractGeoViewRaster {
       layer.BoundingBox ??= parentLayer.BoundingBox;
       // eslint-disable-next-line no-param-reassign, camelcase
       layer.EX_GeographicBoundingBox ??= parentLayer.EX_GeographicBoundingBox;
-      // eslint-disable-next-line no-param-reassign
-      layer.Dimension ??= parentLayer.Dimension;
       // eslint-disable-next-line no-param-reassign
       layer.Attribution ??= parentLayer.Attribution;
 
@@ -651,7 +660,12 @@ export class WMS extends AbstractGeoViewRaster {
         }
       }
     }
-    if (layer?.Layer !== undefined) layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
+
+    // Process inheritance
+    if (layer?.Layer) {
+      // Loop on the sub-layers
+      layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
+    }
   }
 
   // #endregion PRIVATE METHODS
@@ -786,27 +800,55 @@ export class WMS extends AbstractGeoViewRaster {
         }
       }
 
-      // If there's a dimension
-      if (layerCapabilities.Dimension) {
-        // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
+      // Interpret the time dimensions of the metadata to determine if it's a special group-time-dimension (à la QGIS landcover) or not
+      const isGroupDimension = WMS.#interpretIsGroupDimension(layerCapabilities);
 
-        // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
+      // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
 
-        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name?.toLowerCase() === 'time');
+      // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        // If a temporal dimension was found
-        if (timeDimension) {
-          try {
-            // Try to create the time dimension value
-            const layerTimeDimension = DateMgt.createDimensionFromOGC(timeDimension, displayDateMode);
-
-            // Set the time dimension
-            layerConfig.setTimeDimension(layerTimeDimension);
-          } catch (error: unknown) {
-            // Log and continue
-            logger.logError(error);
-          }
+      try {
+        // Read the time dimension on the layer (if any)
+        let layerTimeDimension = WMS.parseTimeDimension(layerCapabilities.Dimension, displayDateMode, isGroupDimension);
+        if (layerTimeDimension) {
+          // Set the time dimension on the layer config itself
+          layerConfig.setTimeDimension(layerTimeDimension);
         }
+
+        // Read the time dimension on the group layer (if any)
+        const groupTimeDimension = WMS.parseTimeDimension(layerCapabilities.ParentLayer?.Dimension, displayDateMode, isGroupDimension);
+        if (groupTimeDimension) {
+          // Set the time dimension on the group layer config itself
+          layerConfig.getParentLayerConfig()?.setTimeDimension(groupTimeDimension);
+        }
+
+        // If there's a group time dimension and it's a special group dimension
+        if (groupTimeDimension && isGroupDimension) {
+          // If there's no layer dimension on the layer itself, create a blank one using some of the group layer's time dimension
+          if (!layerTimeDimension) {
+            layerTimeDimension = {
+              field: groupTimeDimension.field,
+              singleHandle: groupTimeDimension.singleHandle,
+              isValid: groupTimeDimension.isValid,
+              nearestValues: groupTimeDimension.nearestValues,
+              default: groupTimeDimension.default,
+              rangeItems: { type: 'discrete', range: [] },
+              isGroupDimension: groupTimeDimension.isGroupDimension,
+            };
+          }
+
+          // Override the display date information using the information gathered in the group dimension because it's the group that truly know the complete duration
+          layerTimeDimension.displayDateFormat = groupTimeDimension.displayDateFormat;
+          layerTimeDimension.displayDateFormatShort = groupTimeDimension.displayDateFormatShort;
+          layerTimeDimension.serviceDateTemporalMode = groupTimeDimension.serviceDateTemporalMode;
+          layerTimeDimension.displayDateTimezone = groupTimeDimension.displayDateTimezone;
+
+          // Set the time dimension on the child layer
+          layerConfig.setTimeDimension(layerTimeDimension);
+        }
+      } catch (error: unknown) {
+        // Log and continue
+        logger.logError(error);
       }
     }
   }
@@ -1335,6 +1377,107 @@ export class WMS extends AbstractGeoViewRaster {
 
     // None
     return undefined;
+  }
+
+  /**
+   * Parses the WMS time dimension metadata for a layer or group.
+   *
+   * It locates the `TIME` dimension entry in the metadata and converts the OGC-formatted values into
+   * GeoView's normalized `TimeDimension` structure, including any group-specific handling required for
+   * inherited or aggregate temporal metadata.
+   *
+   * @param metadataDimensions - The metadata dimensions declared by the WMS layer
+   * @param displayDateMode - The preferred display mode used when translating date values for the UI
+   * @param isGroupDimension - Whether the time dimension is a group-level temporal definition
+   * @returns The parsed time dimension, or `undefined` when the layer does not expose a `TIME` dimension
+   */
+  static parseTimeDimension(
+    metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined,
+    displayDateMode: DisplayDateMode | undefined,
+    isGroupDimension: boolean
+  ): TimeDimension | undefined {
+    // Read the time dimension on the layer (if any)
+    const layerTimeDimensionMeta = WMS.findTimeDimensionInDimensions(metadataDimensions);
+    if (layerTimeDimensionMeta) {
+      // Try to create the time dimension value
+      return DateMgt.createDimensionFromOGC(layerTimeDimensionMeta, displayDateMode, isGroupDimension);
+    }
+
+    // None
+    return undefined;
+  }
+
+  /**
+   * Finds the time dimension in WMS dimension metadata.
+   *
+   * @param metadataDimensions - Optional WMS dimension metadata to search
+   * @returns The time dimension metadata, or undefined when none is found
+   */
+  static findTimeDimensionInDimensions(
+    metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined
+  ): TypeMetadataWMSCapabilityLayerDimension | undefined {
+    return metadataDimensions?.find((dimension) => dimension.name?.toLowerCase() === 'time');
+  }
+
+  /**
+   * Determines whether a WMS layer is using a group-level temporal dimension.
+   *
+   * Some WMS services expose time ranges at the parent layer level and expect child layers to inherit
+   * that metadata for aggregated or grouped temporal controls. When a parent layer declares a `Dimension`,
+   * GeoView treats the child as part of a group dimension flow.
+   *
+   * @param layerCapabilities - The WMS layer metadata to inspect
+   * @returns `true` when the layer inherits a parent time dimension, otherwise `false`
+   */
+  static #interpretIsGroupDimension(layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined): boolean {
+    // Read the parent time dimension
+    const parentDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.ParentLayer?.Dimension);
+
+    // If there's a dimension on the parent
+    if (parentDimension) {
+      // If there's the special keyword on the group layer indicating a group dimension
+      if (layerCapabilities?.ParentLayer?.KeywordList?.Keyword.includes('cdtk-time-dimension')) {
+        // It's clear, we want group dimension on the layer
+        return true;
+      }
+
+      // Read the child dimension
+      const layerDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.Dimension);
+
+      // If the dimension on the parent is different than the dimension on the layer (the latter can also be undefined to be considered different)
+      if (layerDimension?.values !== parentDimension.values) {
+        if (!parentDimension.values) return false;
+
+        // Read the minimum and maximum dates advertised by the parent dimension
+        let parentRangeDates: number[];
+        try {
+          parentRangeDates = DateMgt.createRangeOGC(parentDimension.values).range.map((date) => DateMgt.convertToMilliseconds(date));
+        } catch (error: unknown) {
+          if (!(error instanceof InvalidDateError || error instanceof InvalidTimeDimensionError)) throw error;
+          return false;
+        }
+        const parentMinDate = Math.min(...parentRangeDates);
+        const parentMaxDate = Math.max(...parentRangeDates);
+
+        // All siblings must expose one date that falls within the parent dimension range
+        const allSiblingsHaveSingleValueInParentRange = layerCapabilities?.ParentLayer?.Layer?.every((siblingLayer) => {
+          const siblingDimension = WMS.findTimeDimensionInDimensions(siblingLayer?.Dimension);
+          if (!siblingDimension?.values || !DateMgt.isDiscreteSingleValue(siblingDimension.values)) return false;
+
+          const siblingDate = DateMgt.tryParseDate(siblingDimension.values.trim());
+          return !!siblingDate && siblingDate.getTime() >= parentMinDate && siblingDate.getTime() <= parentMaxDate;
+        });
+
+        // If any sibling doesn't meet the criteria, we don't consider it a group dimension
+        if (!allSiblingsHaveSingleValueInParentRange) return false;
+
+        // We consider it a group dimension, guess work..
+        return true;
+      }
+    }
+
+    // Not a special group dimension
+    return false;
   }
 
   // #endregion STATIC PRIVATE METHODS

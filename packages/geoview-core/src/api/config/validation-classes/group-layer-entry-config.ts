@@ -134,5 +134,14 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
     return getChildPaths([this]);
   }
 
+  /**
+   * Gets the first direct child configuration in this group.
+   *
+   * @returns The first child configuration, or `undefined` when the group has no children
+   */
+  getFirstChild(): ConfigBaseClass | undefined {
+    return this.listOfLayerEntryConfig[0];
+  }
+
   // #endregion PUBLIC METHDOS
 }

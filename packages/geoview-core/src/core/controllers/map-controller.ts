@@ -197,6 +197,9 @@ export class MapController extends AbstractMapViewerController {
   /** The bounded reference to the handle marker icon showed method */
   #boundedHandleMarkerIconShowed: MarkerIconShowedDelegate;
 
+  /** The map center recorded after the latest settled movement. */
+  #lastMapCenter?: Coordinate;
+
   /** Resolve callback for the pending projection change promise. */
   #projectionChangeResolve: (() => void) | undefined;
 
@@ -1529,17 +1532,29 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Handles the map move end event by updating the store with the new map center, zoom, rotation, and extent.
+   * Handles the map move end event by synchronizing map controls and tracking the settled center.
+   *
+   * The first event establishes the center baseline. Later events hide the click marker only when the center changes,
+   * preserving it when OpenLayers emits move-end solely because the map viewport was resized.
    *
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map move end event containing the new view information
    */
   #handleMapMoveEnd(sender: MapViewer, event: MapBaseEvent): void {
+    const currentCenter = sender.getView().getCenter();
+    const centerChanged =
+      currentCenter !== undefined &&
+      this.#lastMapCenter !== undefined &&
+      (currentCenter[0] !== this.#lastMapCenter[0] || currentCenter[1] !== this.#lastMapCenter[1]);
+    this.#lastMapCenter = currentCenter?.slice();
+
     // Update the map controls based on the original map state
     this.#updateMapControls();
 
     // On map center coord change, hide click marker
-    this.clickMarkerIconHide();
+    if (centerChanged) {
+      this.clickMarkerIconHide();
+    }
   }
 
   /**
@@ -2005,13 +2020,14 @@ export class MapController extends AbstractMapViewerController {
           values,
           delay: delayTimeSlider,
           filtering,
-          range,
+          rangeItems,
           discreteValues,
           displayDateFormat,
           displayDateFormatShort,
           serviceDateTemporalMode,
           displayDateTimezone,
           field,
+          singleHandle,
         } = timeSliderLayers[layerPath];
 
         if (isMainLayerPath) {
@@ -2024,11 +2040,8 @@ export class MapController extends AbstractMapViewerController {
             displayDateFormatShort,
             serviceDateTemporalMode,
             displayDateTimezone,
-            rangeItems: {
-              type: '',
-              range,
-            },
-            singleHandle: values.length === 1,
+            rangeItems,
+            singleHandle,
             isValid: true,
           };
 

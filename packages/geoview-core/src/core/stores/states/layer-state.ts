@@ -902,6 +902,28 @@ export const getStoreLayerVisible = (mapId: string, layerPath: string): boolean 
 export const useStoreLayerVisible = createLayerSelectorHook('visible');
 
 /**
+ * Hook that returns a record of layer visibility flags for all layers.
+ *
+ * @returns A record of visibility flags keyed by layer path, defaulting to false
+ */
+export const useStoreLayerVisibleSet = (): Record<string, boolean> => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the object with the visibility flags for all layers, using false when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, boolean>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.visible ?? false;
+      }
+      return acc;
+    }, {});
+  });
+};
+
+/**
  * Returns the layer paths of all layers currently visible.
  *
  * @param mapId - The map identifier
@@ -1611,11 +1633,17 @@ export const getStoreLayerDisplayDateFormat = (mapId: string, layerPath: string)
  */
 export const useStoreLayerDisplayDateFormat = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      getStoreAppDisplayDateFormatDefault(state.mapId).datetimeFormat
-    );
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get the default format
+    const defaultFormat = getStoreAppDisplayDateFormatDefault(state.mapId).datetimeFormat;
+
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the display date format for the requested layer, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<TypeDisplayDateFormat>((displayDateFormat, layer) => {
+      return layer.layerPath === layerPath ? (layer.displayDateFormat ?? defaultFormat) : displayDateFormat;
+    }, defaultFormat);
   });
 };
 
@@ -1658,12 +1686,17 @@ export const useStoreLayerDisplayDateFormatSet = (): Record<string, TypeDisplayD
  */
 export const useStoreLayerDisplayDateFormatShort = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    return (
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormatShort ??
-      utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      getStoreAppDisplayDateFormatDefault(state.mapId).dateFormat
-    );
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get the default format
+    const defaultFormat = getStoreAppDisplayDateFormatDefault(state.mapId).dateFormat;
+
+    // Get all layers
+    const allLayers = utilFindAllLayers(state.layerState.legendLayers);
+
+    // Return the short display date format for the requested layer, using the regular or default format when not defined
+    return Object.values(allLayers).reduce<TypeDisplayDateFormat>((displayDateFormat, layer) => {
+      return layer.layerPath === layerPath ? (layer.displayDateFormatShort ?? layer.displayDateFormat ?? defaultFormat) : displayDateFormat;
+    }, defaultFormat);
   });
 };
 

@@ -23,7 +23,6 @@ import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-sche
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
-import { useStoreLayerName, useStoreLayerStatus } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
@@ -116,8 +115,8 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   // Deconstruct the layer object into immutable variables to be used by this component and its hooks
   const {
     layerPath,
-    layerName: propLayerName,
-    layerStatus: propLayerStatus,
+    layerName,
+    layerStatus,
     tooltip,
     layerFeatures,
     queryStatus,
@@ -128,10 +127,6 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
     relatedLayerPaths,
     content,
   } = layer;
-
-  // Store
-  const layerStatus = useStoreLayerStatus(layerPath) ?? propLayerStatus;
-  const layerName = useStoreLayerName(layerPath) ?? propLayerName;
 
   // Internal state - WCAG accessibility for screen reader announcements
   const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
