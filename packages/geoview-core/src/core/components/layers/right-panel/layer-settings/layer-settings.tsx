@@ -104,7 +104,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
 
   return (
     <Box>
-      <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+      <Divider sx={sxClasses.sectionDivider} variant="middle" />
 
       {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerPath={layerPath} />}
       {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerPath={layerPath} />}

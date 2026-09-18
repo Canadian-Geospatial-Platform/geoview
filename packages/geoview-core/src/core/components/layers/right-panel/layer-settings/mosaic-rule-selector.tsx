@@ -140,16 +140,16 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
     <Box sx={sxClasses.settingsSection}>
       <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
         <CollectionsIcon fontSize="small" />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={sxClasses.settingsSectionHeaderText}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} noWrap>
+          <Typography variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
             {memoSelectionSummary}
           </Typography>
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
-      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <Collapse in={expanded} sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}>
+        <Box sx={sxClasses.settingsSectionContent}>
           <FormControl fullWidth>
             <Select
               value={currentMethod}
@@ -168,9 +168,9 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
               inputLabel={{ id: 'mosaic-operation-label' }}
             />
           </FormControl>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={sxClasses.settingsAscendingRow}>
             <Checkbox checked={currentAscending} onChange={handleChangeAscending} />
-            <Box component="span" sx={{ ml: 1 }}>
+            <Box component="span" sx={sxClasses.settingsAscendingLabel}>
               {t('layers.settings.ascending')}
             </Box>
           </Box>

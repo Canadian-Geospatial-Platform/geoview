@@ -9,7 +9,7 @@ import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   // Main container styles
   container: {
-    padding: '16px',
+    padding: theme.spacing(2),
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // List container for legend items
   legendList: {
-    paddingRight: '0.65rem',
+    paddingRight: theme.spacing(1.25),
   },
 
   // Individual legend list item
@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     alignItems: 'flex-start',
     '& .MuiCollapse-vertical': {
-      marginLeft: '6px',
+      marginLeft: theme.spacing(0.75),
     },
     '& .MuiListItemButton-root:hover': {
       backgroundColor: 'transparent',
@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     alignItems: 'flex-start',
     borderBottom: `1px solid ${theme.palette.geoViewColor?.grey.light[800]}`,
-    padding: '8px 4px',
+    padding: theme.spacing(1, 0.5),
   },
 
   // Header text styling
@@ -55,8 +55,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Group children container
   groupChildren: {
-    paddingLeft: '16px',
-    marginTop: 0,
+    paddingLeft: theme.spacing(2),
+    marginTop: theme.spacing(0),
     width: '100%',
   },
 
@@ -73,7 +73,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   groupItemButton: {
     display: 'flex',
     alignItems: 'center',
-    padding: '6px 4px',
+    padding: theme.spacing(0.75, 0.5),
     width: '100%',
   },
 
@@ -81,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   groupIcon: {
     border: '1px solid #515BA5',
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[800],
-    padding: '2px',
+    padding: theme.spacing(0.25),
     width: '24px',
     height: '24px',
     transform: 'scaleX(-1)', // Mirror to face right
@@ -92,7 +92,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   groupItemContent: {
-    margin: '6px 6px 6px 12px',
+    margin: theme.spacing(0.75, 0.75, 0.75, 1.5),
     display: 'flex',
     flexDirection: 'column',
     flex: '1 1 auto',
@@ -103,14 +103,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'block',
     color: '#393939',
     fontSize: '14px',
-    margin: '0px',
+    margin: theme.spacing(0),
   },
 
   // Group button row with smaller icons
   groupButtonRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: theme.spacing(0.5),
     '& .MuiSvgIcon-root': {
       fontSize: '1.25rem',
     },
@@ -130,11 +130,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   descriptionToggleRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: theme.spacing(0.5),
   },
 
   descriptionToggleButton: {
-    padding: '0 2px 0 0',
+    padding: theme.spacing(0, 0.25, 0, 0),
     minWidth: 'auto',
     fontSize: '0.75rem',
     fontStyle: 'italic',
@@ -157,15 +157,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontStyle: 'italic',
     fontWeight: 300,
     color: theme.palette.geoViewColor?.textColor.dark,
-    marginTop: '4px',
-    marginLeft: '16px',
+    marginTop: theme.spacing(0.5),
+    marginLeft: theme.spacing(2),
   },
 
   // Reset margins for description text (important for group descriptions)
   descriptionCollapse: {
-    marginLeft: '0 !important',
+    marginLeft: `${theme.spacing(0)} !important`,
     '& .MuiCollapse-vertical': {
-      marginLeft: '0 !important',
+      marginLeft: `${theme.spacing(0)} !important`,
     },
   },
 });

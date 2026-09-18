@@ -11,8 +11,17 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: string): SxStyles => ({
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
+  },
+  header: {
+    width: '100%',
+  },
   rightIcons: {
-    marginTop: 0,
+    marginTop: theme.spacing(0),
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -23,7 +32,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     flexGrow: 1,
     height: isMapFullScreen ? 'calc(100% - 56px)' : `calc(${appHeight} - 56px)`,
     overflow: 'hidden',
-    paddingTop: '0 !important',
+    paddingTop: `${theme.spacing(0)} !important`,
     width: '100%',
     '.tab-panel': {
       height: '100%',
@@ -33,11 +42,11 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
-    padding: '0.5rem 1.5rem',
-    margin: 0,
+    padding: theme.spacing(1, 3),
+    margin: theme.spacing(0),
     textTransform: 'capitalize',
     '.MuiTab-icon': {
-      marginRight: '7px',
+      marginRight: theme.spacing(1),
       maxWidth: '18px',
     },
     '&.Mui-focusVisible': {
@@ -53,15 +62,20 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       color: theme.palette.geoViewColor?.white,
     },
   },
+  tabsContainer: {
+    '.MuiTabScrollButton-root': {
+      width: '47px',
+    },
+  },
   mobileDropdown: {
-    marginLeft: '41px',
+    marginLeft: '47px',
     maxWidth: '200px',
-    padding: '8px 0',
+    padding: theme.spacing(1, 0),
     '& .MuiInputBase-root': {
       borderRadius: '4px',
     },
     '& .MuiSelect-select': {
-      padding: '8px 12px !important',
+      padding: `${theme.spacing(1, 1.5)} !important`,
     },
   },
 });

@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
     borderRadius: '5px',
     boxShadow: 2,
-    marginLeft: theme.spacing(6),
+    marginLeft: theme.spacing(1),
     '& a': {
       color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor?.primary.light[300],
       textDecoration: 'underline',
@@ -32,9 +32,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'space-between',
     minHeight: '48px',
     minWidth: 0,
-    padding: '4px 16px',
+    padding: theme.spacing(0.5, 2),
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
-    gap: '16px',
+    gap: theme.spacing(2),
   },
   versionsInfoTitle: {
     fontSize: theme.palette.geoViewFontSize?.default,
@@ -42,20 +42,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor?.textColor.main,
   },
   versionCloseButton: {
-    marginRight: '-8px',
+    marginRight: theme.spacing(-1),
   },
   versionInfoContent: {
-    padding: '16px',
-    gap: '5px',
-    display: 'flex',
-    flexDirection: 'column',
+    padding: theme.spacing(2),
   },
   versionList: {
     listStyle: 'none',
-    padding: 0,
-    margin: 0,
+    padding: theme.spacing(0),
+    margin: theme.spacing(0),
     '& li': {
-      margin: '0 0 5px 0',
+      margin: theme.spacing(0, 0, 0.75, 0),
     },
   },
   visuallyHidden,

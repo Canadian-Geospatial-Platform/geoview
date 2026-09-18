@@ -114,8 +114,8 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
       sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{ fontWeight: 600 }}>{style.Name}</Typography>
+      <Box sx={sxClasses.settingsCardText}>
+        <Typography sx={sxClasses.settingsCardTitle}>{style.Name}</Typography>
       </Box>
     </Box>
   );
@@ -173,17 +173,17 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
     <Box sx={sxClasses.settingsSection}>
       <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
         <PaletteIcon fontSize="small" />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={sxClasses.settingsSectionHeaderText}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectWmsStyle')}</Typography>
           {currentWmsStyle && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} noWrap>
+            <Typography variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
               {currentWmsStyle}
             </Typography>
           )}
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
-      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
+      <Collapse in={expanded} sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}>
         <Box sx={sxClasses.settingsCardList}>
           {memoWmsStyleArray.map((style) => (
             <WmsStyleItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />

@@ -23,8 +23,8 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
   return {
     navBarContainer: {
       position: 'absolute',
-      right: theme.spacing(6),
-      top: theme.spacing(6),
+      right: '8px',
+      top: '8px',
       bottom: NAV_BAR_BOTTOM_OFFSET,
       left: 'auto',
       width: 'auto',
@@ -34,12 +34,12 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'safe flex-end',
-      gap: theme.spacing(6),
+      gap: theme.spacing(1),
       alignItems: 'center',
       overflowY: 'auto',
-      padding: theme.spacing(2),
+      padding: theme.spacing(0.25),
       backgroundColor: 'transparent',
-      borderRadius: theme.spacing(5),
+      borderRadius: '6px',
       pointerEvents: 'all',
       scrollbarWidth: 'thin',
       scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
@@ -70,11 +70,11 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
     navBtnGroupColumns: {
       display: 'flex',
       flexDirection: 'row',
-      gap: theme.spacing(6),
+      gap: theme.spacing(1),
       alignItems: 'center',
     },
     navBtnGroup: {
-      borderRadius: theme.spacing(5),
+      borderRadius: '6px',
       backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
       overflow: 'clip',
       '& .MuiButtonGroup-grouped:not(:last-child)': {
@@ -149,7 +149,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       maxHeight: 'min(100vh, 500px)',
       display: 'flex',
       flexDirection: 'column',
-      marginRight: theme.spacing(6),
+      marginRight: theme.spacing(1),
     },
     popoverTitleContainer: {
       display: 'flex',
@@ -158,16 +158,16 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       width: '100%',
       minHeight: '48px',
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
-      padding: '4px 8px 4px 16px',
+      padding: theme.spacing(0.5, 1, 0.5, 2),
       flexShrink: 0,
-      gap: '8px',
+      gap: theme.spacing(1),
     },
     popoverTitleLabel: {
       fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
       fontWeight: '700',
       color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
       flexShrink: 1,
-      padding: 0,
+      padding: theme.spacing(0),
     },
     popoverTitleActions: {
       display: 'flex',
@@ -182,11 +182,11 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
       display: 'flex',
       alignItems: 'center',
-      padding: '4px 16px',
+      padding: theme.spacing(0.5, 2),
     },
     popoverContent: {
       '&.MuiDialogContent-root': {
-        padding: '16px 16px',
+        padding: theme.spacing(2, 2),
         flexGrow: 1 /* Forces this child to fill all remaining space */,
         minHeight: 0,
         overflowY: 'auto',
@@ -195,7 +195,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       },
     },
     listItem: {
-      marginBottom: '6px', // Create space for the focus indicator to be visible
+      marginBottom: theme.spacing(0.75), // Create space for the focus indicator to be visible
     },
     button: {
       justifyContent: 'flex-start',
@@ -216,12 +216,12 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
     rotationControlContainer: {
       width: '100%',
       maxWidth: '300px',
-      padding: `0 ${theme.spacing(11)}`,
+      padding: theme.spacing(0, 2),
     },
     rotationLabelBox: {
       display: 'flex',
       justifyContent: 'center',
-      paddingTop: theme.spacing(7),
+      paddingTop: theme.spacing(1.25),
       minWidth: 0,
     },
     rotationLabel: {
@@ -238,8 +238,8 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       justifyContent: 'center',
       flexDirection: 'column',
       alignItems: 'center',
-      marginTop: theme.spacing(7),
-      gap: 1,
+      marginTop: theme.spacing(1.25),
+      gap: '1px',
       [theme.breakpoints.up('sm')]: {
         flexDirection: 'row',
       },
@@ -249,6 +249,26 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       alignItems: 'center',
       justifyContent: 'center',
       transition: 'transform 0.3s ease-in-out',
+    },
+    measurementPanel: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing(1),
+    },
+    measurementToggleGroup: {
+      '& .MuiToggleButton-root': {
+        gap: theme.spacing(1), // Adds spacing between icon and text
+      },
+      '& .MuiToggleButton-root.Mui-selected': {
+        backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+        color: theme.palette.geoViewColor?.white ?? theme.palette.primary.contrastText,
+        '&:hover': {
+          backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,
+        },
+      },
+    },
+    measurementClearButton: {
+      alignSelf: 'center',
     },
   };
 };

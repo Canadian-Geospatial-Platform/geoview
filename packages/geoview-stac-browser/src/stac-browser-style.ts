@@ -173,6 +173,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     alignItems: 'center',
   },
+  containedInExtentCheckbox: {
+    marginLeft: theme.spacing(0.25),
+  },
   dateInput: {
     flex: 1,
     '& input': {
@@ -185,7 +188,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'auto',
   },
   detailSection: {
-    padding: '0 12px',
+    padding: theme.spacing(0, 1.5),
   },
 
   // Collection card styles
@@ -221,7 +224,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   keywordChip: {
     display: 'inline-block',
-    padding: '2px 8px',
+    padding: theme.spacing(0.25, 1),
     fontSize: '0.75rem',
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.geoViewColor?.textColor.main,
@@ -322,6 +325,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     gap: theme.spacing(0.5),
     flexShrink: 0,
+  },
+  assetBadgeRow: {
+    display: 'flex',
+    gap: theme.spacing(0.5),
+    flexWrap: 'wrap',
   },
   paginationBar: {
     display: 'flex',

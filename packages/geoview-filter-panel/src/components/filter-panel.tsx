@@ -89,7 +89,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
 
   if (!config) {
     return (
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 0.25 }}>
         <Typography color="error">{t('FilterPanel.noConfig')}</Typography>
       </Box>
     );
@@ -97,7 +97,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
 
   if (!filterPanelController) {
     return (
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 0.25 }}>
         <Typography color="error">{t('FilterPanel.noController')}</Typography>
       </Box>
     );

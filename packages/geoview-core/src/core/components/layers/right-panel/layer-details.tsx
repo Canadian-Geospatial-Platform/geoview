@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material';
 
 import { delay } from '@/core/utils/utilities';
 import {
@@ -109,7 +110,7 @@ const Sublayer = memo(({ layerPath }: SubLayerProps): JSX.Element => {
 
   // Return the ui
   return (
-    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+    <ListItem sx={sxClasses.sublayerListItem}>
       <FormControlLabel
         sx={sxClasses.formControlLabelFull}
         control={
@@ -123,17 +124,14 @@ const Sublayer = memo(({ layerPath }: SubLayerProps): JSX.Element => {
         label={
           <Box sx={sxClasses.checkboxLabelContent}>
             <LayerIcon layerPath={layerPath} />
-            <Box
-              component="span"
-              sx={{ ...sxClasses.tableIconLabel, ...((isError || layerHidden) && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
-            >
+            <Box component="span" sx={[sxClasses.tableIconLabel, (isError || layerHidden) && sxClasses.hiddenText] as SxProps}>
               {layerName}
             </Box>
           </Box>
         }
       />
       {childPaths && (
-        <Box sx={{ paddingLeft: '30px', width: '100%' }}>
+        <Box sx={sxClasses.sublayerChildrenContainer}>
           <List>
             {childPaths.map((childPath) => (
               <Sublayer key={childPath} layerPath={childPath} />
@@ -163,7 +161,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const hiddenStyle = { color: theme.palette.grey[600], fontStyle: 'italic' };
+  const hiddenStyle = sxClasses.hiddenText;
 
   const [contentVisible, setContentVisible] = useState(true);
   const [activeView, setActiveView] = useState<'details' | 'settings' | 'info'>('details');
@@ -471,8 +469,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // Build the label content with icon and text
     const labelContent = (
       <Box sx={sxClasses.checkboxLabelContent}>
-        {item.icon ? <Box component="img" alt="" src={item.icon} /> : <BrowserNotSupportedIcon sx={{ fontSize: '26px' }} />}
-        <Box component="span" sx={{ ...sxClasses.tableIconLabel, ...((layerHidden || !item.isVisible) && hiddenStyle) }}>
+        {item.icon ? <Box component="img" alt="" src={item.icon} /> : <BrowserNotSupportedIcon sx={sxClasses.itemImage} />}
+        <Box component="span" sx={[sxClasses.tableIconLabel, (layerHidden || !item.isVisible) && hiddenStyle] as SxProps}>
           {item.name}
         </Box>
       </Box>
@@ -480,7 +478,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
     // If not checkbox needed, just return the label content
     if (!canToggle) {
-      return <Box sx={{ ...sxClasses.formControlLabelFull, paddingLeft: '9px' }}>{labelContent}</Box>;
+      return <Box sx={[sxClasses.formControlLabelFull, sxClasses.itemLabelIndented] as SxProps}>{labelContent}</Box>;
     }
 
     return (
@@ -506,7 +504,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression) || isWMTS;
 
     const labelContent = (
-      <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+      <Box component="span" sx={[sxClasses.boldLabel, layerHidden && hiddenStyle] as SxProps}>
         {t('layers.toggleItemsVisibility')}
       </Box>
     );
@@ -538,7 +536,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (hasLayerLegendImage) {
       return (
         <Grid sx={sxClasses.itemsGrid}>
-          <Grid container sx={{ pt: 6, pb: 6 }}>
+          <Grid container sx={sxClasses.wmsImageContainer}>
             <Box component="img" alt="" src={layerIcons![0].iconImage!} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
@@ -555,19 +553,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // If we have any items
     if (hasLayerItemsAndStyle) {
       return (
-        <Grid
-          className="layer-details-panel"
-          container
-          spacing={0}
-          sx={{
-            ...sxClasses.itemsGrid,
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            justifyItems: 'stretch',
-          }}
-        >
+        <Grid className="layer-details-panel" container spacing={0} sx={[sxClasses.itemsGrid, sxClasses.itemsGridColumn] as SxProps}>
           {layerItems?.map((item) => (
-            <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>
+            <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={sxClasses.itemGridItem}>
               {renderItemCheckbox(item)}
             </Grid>
           ))}
@@ -757,11 +745,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const showDivider = detailsButton !== null || timeSliderButton !== null;
 
     return (
-      <Box
-        role="group"
-        sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}
-        aria-label={t('layers.layerControls')}
-      >
+      <Box role="group" sx={sxClasses.layerButtonsGroup} aria-label={t('layers.layerControls')}>
         {detailsButton}
         {timeSliderButton}
         {showDivider && <Box sx={sxClasses.verticalDivider} />}
@@ -798,30 +782,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          width: '100%',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
-        <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
-          <Typography component="h2" sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerName}>
+      <Box sx={sxClasses.headerRow}>
+        <Box sx={sxClasses.headerTitleContainer}>
+          <Typography component="h2" sx={[sxClasses.categoryTitle, layerHidden && hiddenStyle] as SxProps} title={layerName}>
             {layerName}
           </Typography>
-          {subTitle && (
-            <Typography
-              sx={{
-                fontSize: theme.palette.geoViewFontSize?.sm,
-                ...(layerHidden && hiddenStyle),
-              }}
-            >
-              {subTitle}
-            </Typography>
-          )}
+          {subTitle && <Typography sx={[sxClasses.subTitle, layerHidden && hiddenStyle] as SxProps}>{subTitle}</Typography>}
         </Box>
         {renderSettingsButton()}
         {renderInfoButton()}
@@ -833,7 +799,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
           {activeView === TABS.DETAILS && (
             <>
               {renderLayerButtons()}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
+              <Box sx={sxClasses.toggleRow}>
                 {layerItems && layerItems.length > 1 && renderHeaderCheckbox()}
                 {layerChildPaths && layerChildPaths.length > 0 && (
                   <FormControlLabel
@@ -841,7 +807,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                       <Checkbox color="primary" checked={allSublayersVisible} onChange={handleToggleAllVisibility} disabled={layerHidden} />
                     }
                     label={
-                      <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                      <Box component="span" sx={[sxClasses.boldLabel, layerHidden && hiddenStyle] as SxProps}>
                         {t('layers.toggleSublayersVisibility')}
                       </Box>
                     }
@@ -850,7 +816,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                 )}
                 {layerControls?.opacity !== false && <LayerOpacityControl layerPath={layerPath} />}
               </Box>
-              <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+              <Divider sx={sxClasses.sectionDivider} variant="middle" />
               {renderWMSImage()}
               <Box>
                 {renderItems()}
@@ -862,20 +828,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                   </List>
                 )}
               </Box>
-              <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+              <Divider sx={sxClasses.sectionDivider} variant="middle" />
               {layerAttribution &&
                 layerAttribution.map((attribution) => {
                   if (attribution) {
                     return (
-                      <Typography
-                        sx={{
-                          marginTop: '10px',
-                          color: theme.palette.geoViewColor?.textColor.light[200],
-                          fontSize: theme.palette.geoViewFontSize?.sm,
-                          textAlign: 'center',
-                        }}
-                        key={attribution}
-                      >
+                      <Typography sx={sxClasses.attributionText} key={attribution}>
                         {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                       </Typography>
                     );

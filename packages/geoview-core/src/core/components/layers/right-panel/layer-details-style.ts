@@ -15,17 +15,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.lg,
   },
   layerDetails: {
-    padding: '16px',
+    padding: theme.spacing(2),
   },
   itemsGrid: {
     width: '100%',
     '& .MuiGrid-container': {
-      '&:first-of-type': {
-        borderTop: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
-        borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
-      },
       '& .MuiGrid-item': {
-        padding: '3px 6px',
+        padding: theme.spacing(0.5, 0.75),
 
         '&:first-of-type': {
           width: '80px',
@@ -58,52 +54,52 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       width: '100%',
       '& a': {
         ...ellipsisOverflow,
-        marginLeft: '4px',
+        marginLeft: theme.spacing(0.5),
         flex: 1,
         minWidth: 0,
       },
     },
   },
   infoSection: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(0.25),
   },
   infoSectionTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.geoViewColor?.textColor.main,
-    marginBottom: theme.spacing(0.5),
+    marginBottom: theme.spacing(0.25),
   },
   infoSectionContent: {
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(0.25),
   },
   verticalDivider: {
     width: '1px',
     height: '30px',
     backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
-    // Absorb flex gap so divider spacing equals half a normal gap on each side (7.5px + 1px + 7.5px)
-    margin: '0 -7.5px',
+    // Absorb flex gap so the 1px divider plus its margins equal layerButtonsGroup's gap (theme.spacing(2))
+    margin: `0 calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
   },
   layerDetailsListGroup: {
     listStyleType: 'disc',
     listStylePosition: 'outside',
-    paddingLeft: '20px',
+    paddingLeft: theme.spacing(2.5),
   },
   layerDetailsListItem: {
     display: 'list-item',
-    paddingTop: '0px',
-    paddingBottom: '0px',
-    paddingLeft: '0px',
+    paddingTop: theme.spacing(0),
+    paddingBottom: theme.spacing(0),
+    paddingLeft: theme.spacing(0),
     '& .MuiListItemText-root': {
-      margin: 0,
+      margin: theme.spacing(0),
       '& .MuiTypography-root': {
         whiteSpace: 'normal',
       },
     },
   },
   formControlLabelFull: {
-    margin: 0,
+    margin: theme.spacing(0),
     width: '100%',
-    gap: '8px',
+    gap: theme.spacing(1),
     '& .MuiFormControlLabel-label': {
       width: '100%',
       flex: 1,
@@ -111,8 +107,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   formControlLabel: {
-    margin: 0,
-    gap: '8px',
+    margin: theme.spacing(0),
+    gap: theme.spacing(1),
     '& .MuiFormControlLabel-label': {
       flex: 1,
     },
@@ -121,6 +117,95 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   checkboxLabelContent: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: theme.spacing(1),
+  },
+
+  hiddenText: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
+  },
+
+  boldLabel: {
+    fontWeight: 'bold',
+  },
+
+  sublayerListItem: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+
+  sublayerChildrenContainer: {
+    paddingLeft: theme.spacing(3.75),
+    width: '100%',
+  },
+
+  headerRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+  },
+
+  headerTitleContainer: {
+    textAlign: 'left',
+    flex: 1,
+    minWidth: 0,
+  },
+
+  subTitle: {
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+
+  layerButtonsGroup: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+
+  toggleRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap-reverse',
+  },
+
+  sectionDivider: {
+    height: 'auto',
+    marginTop: theme.spacing(1.25),
+    marginBottom: theme.spacing(1.25),
+  },
+
+  attributionText: {
+    marginTop: theme.spacing(1.25),
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    textAlign: 'center',
+  },
+
+  itemImage: {
+    fontSize: '26px',
+  },
+
+  itemLabelIndented: {
+    paddingLeft: theme.spacing(1),
+  },
+
+  itemGridItem: {
+    marginBottom: theme.spacing(0.5),
+  },
+
+  wmsImageContainer: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
+
+  itemsGridColumn: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
 });

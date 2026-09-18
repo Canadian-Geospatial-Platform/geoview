@@ -215,11 +215,11 @@ export function CoordinateInfo(): JSX.Element {
           </ListItem>
 
           {/* {declination && (
-            <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+            <ListItem sx={memoSxClasses.coordinateInfoSection}>
+              <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
                 {t('details.declination')}
               </Typography>
-              <Box sx={{ ml: 2 }}>
+              <Box sx={memoSxClasses.coordinateInfoDeclinationContent}>
                 <Typography>{declination}</Typography>
               </Box>
             </ListItem>

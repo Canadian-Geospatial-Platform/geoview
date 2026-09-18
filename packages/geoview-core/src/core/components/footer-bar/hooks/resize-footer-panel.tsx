@@ -16,13 +16,6 @@ import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { TIMEOUT } from '@/core/utils/constant';
 
-/** Slider input styles for vertical orientation. */
-const SLIDER_STYLES = {
-  '& input[type="range"]': {
-    WebkitAppearance: 'slider-vertical',
-  },
-} as const;
-
 /** Available resize percentage values. */
 const RESIZE_VALUES = [35, 50, 100];
 
@@ -247,9 +240,10 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
                 <CloseIcon />
               </IconButton>
             </Box>
-            <Box sx={memoSxClasses.slider} onKeyDown={handleSliderKeyDown}>
+            <Box sx={memoSxClasses.sliderWrapper} onKeyDown={handleSliderKeyDown}>
               <Slider
-                sx={SLIDER_STYLES}
+                aria-label={t('footerBar.resizeAriaLabel')}
+                sx={memoSxClasses.slider}
                 orientation="vertical"
                 value={pendingValue ?? footerPanelResizeValue}
                 step={1}

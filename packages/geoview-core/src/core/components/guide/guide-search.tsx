@@ -588,12 +588,12 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
               ),
               endAdornment: searchTerm && (
                 <InputAdornment position="end">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={memoSxClasses.searchAdornmentContainer}>
                     {allMatches.length > 0 && (
                       <>
                         <Box
                           role="status"
-                          sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor?.textColor.light[200], whiteSpace: 'nowrap' }}
+                          sx={memoSxClasses.searchMatchCount}
                           aria-label={t('guide.searchMatchCountLabel', {
                             current: currentMatchIndex + 1,
                             total: allMatches.length,
@@ -602,6 +602,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           {currentMatchIndex + 1} of {allMatches.length}
                         </Box>
                         <IconButton
+                          sx={memoSxClasses.searchNavigationButton}
                           size="small"
                           aria-label={t('guide.previousMatch')}
                           className="buttonOutline"
@@ -609,9 +610,10 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
+                          <KeyboardArrowUpIcon sx={memoSxClasses.searchNavigationIcon} />
                         </IconButton>
                         <IconButton
+                          sx={memoSxClasses.searchNavigationButton}
                           size="small"
                           aria-label={t('guide.nextMatch')}
                           className="buttonOutline"
@@ -619,15 +621,12 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
+                          <KeyboardArrowDownIcon sx={memoSxClasses.searchNavigationIcon} />
                         </IconButton>
                       </>
                     )}
                     {searchTerm.trim().length >= 3 && allMatches.length === 0 && (
-                      <Box
-                        sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor?.textColor.light[200], whiteSpace: 'nowrap', mr: 1 }}
-                        role="status"
-                      >
+                      <Box sx={memoSxClasses.searchNoResults} role="status">
                         {t('guide.noResults')}
                       </Box>
                     )}
@@ -639,9 +638,9 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                       aria-label={t('general.clearSearch')}
                       onClick={handleClear}
                       onKeyDown={handleClearKeyDown}
-                      sx={{ ml: 1 }}
+                      sx={memoSxClasses.searchClearButton}
                     >
-                      <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
+                      <CloseIcon sx={memoSxClasses.searchClearIcon} />
                     </IconButton>
                   </Box>
                 </InputAdornment>
