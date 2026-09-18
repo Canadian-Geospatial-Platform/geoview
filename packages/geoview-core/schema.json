@@ -109,7 +109,7 @@
     "TypeValidFooterBarTabsCoreProps": {
       "description": "Valid values for the footerBar tabs core array.",
       "additionalProperties": false,
-      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart"]
+      "enum": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "guide"]
     },
     "TypeFooterBarTabsCustomProps": {
       "description": "Footer bar tabs custom definition.",
@@ -160,7 +160,7 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["", "legend", "layers", "details", "data-table", "time-slider", "geochart"],
+          "enum": ["", "legend", "layers", "details", "data-table", "time-slider", "geochart", "guide"],
           "description": "Footer tab to be selected at map load, it will expand the footer"
         },
         "selectedDataTableLayerPath": {

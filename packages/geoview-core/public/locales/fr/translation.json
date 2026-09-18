@@ -597,6 +597,9 @@
     "map": {
       "invalidZoomExtent": "Impossible de zoomer, l'étendue fournie est invalide."
     },
+    "config": {
+      "duplicatedPanels": "Le(s) panneau(x) '{{panels}}' ont été déclarés à la fois dans la barre d'application et dans la barre de pied de page; ils ont été retirés de la barre de pied de page afin de conserver une seule instance."
+    },
     "schema": {
       "validationIssues": "Une erreur de configuration a été trouvée, vérifiez la console pour voir ce qui ne va pas."
     }

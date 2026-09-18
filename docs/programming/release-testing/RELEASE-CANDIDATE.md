@@ -179,6 +179,7 @@ _(Fixes discovered or applied during this cycle)_
 - Corrected notification severity/namespace for two messages: "Unable to zoom, the provided extent is invalid" is now a warning (`warning.map.invalidZoomExtent`), and the layer-loading progress bar's aria-label moved out of the error namespace (`map.status.loadingLayers`) (#3388)
 - Shapefile layers now log a warning when a configured `layerId` doesn't match the shapefile inside the archive (previously silently ignored) (#3388)
 - `getLocalizedMessage` now returns plugin-provided raw text verbatim instead of logging a misleading "missing message key" error, so `notifications.showXxx`/`addNotificationXxx` accept literal strings from external devs (#3388)
+- Fixed the same panel being allowed in both `appBar.tabs.core` and `footerBar.tabs.core`, which produced two instances of the panel and caused UI bugs (e.g. competing focus traps when `details` was in both bars). `MapFeatureConfig` now detects panels declared in both bars after merge, keeps the app bar occurrence, drops the duplicates from the footer bar, and shows a single `warning.config.duplicatedPanels` notification naming the removed panels. Also fixed schema drift where the footer bar enum was missing `guide` (present in the TS type and defaults), which had been triggering a spurious generic schema warning (#3648)
 
 ## Build & Dependencies
 
@@ -309,15 +310,16 @@ _(Tests added, moved, removed, or reorganized)_
 _(Properties added, renamed, or with changed defaults)_
 
 - Added `canada.ca` as a valid `theme` configuration value; default remains `geo.ca` (#3609)
+- Added `guide` to the footer bar `tabs.core` and `selectedTab` enums in `schema.json` to match the TypeScript type and defaults (fixes schema drift; non-breaking, additive) (#3648)
 
 ## Updated Counts
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 913   |
-| Automated (A) | 60     | 60    |
+| Total tests   | 901    | 915   |
+| Automated (A) | 60     | 61    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 684   |
+| Manual (M)    | 672    | 685   |
 
 ## Notes for Release Notes Author
 

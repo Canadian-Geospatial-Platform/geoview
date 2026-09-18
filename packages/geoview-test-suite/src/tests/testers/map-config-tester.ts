@@ -307,6 +307,44 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Test that a panel declared in both appBar and footerBar is kept in the app bar and removed from the footer bar.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testDuplicatedPanelsRemovedFromFooter(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    // Test
+    return this.test(
+      'Test panels declared in both appBar and footerBar are removed from the footer bar',
+      async (test) => {
+        // Create the mapViewer with 'legend' and 'details' declared in BOTH bars
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
+          ['appBar', { tabs: { core: ['geolocator', 'legend', 'details'] } }],
+          ['footerBar', { tabs: { core: ['legend', 'layers', 'details', 'data-table'] } }],
+        ]);
+
+        return mapViewer;
+      },
+      (test) => {
+        // Verify the duplicated panels were removed from the footer bar
+        test.addStep('Verifying duplicated panels removed from footer bar...');
+        const footerBarTabs = getStoreUIFooterBarComponents(mapId);
+        Test.assertArrayExcludes(footerBarTabs, 'legend');
+        Test.assertArrayExcludes(footerBarTabs, 'details');
+        Test.assertArrayIncludes(footerBarTabs, 'layers');
+        Test.assertArrayIncludes(footerBarTabs, 'data-table');
+
+        // Verify the duplicated panels were kept in the app bar
+        test.addStep('Verifying duplicated panels kept in app bar...');
+        const appBarTabs = getStoreUIAppBarComponents(mapId);
+        Test.assertArrayIncludes(appBarTabs, 'legend');
+        Test.assertArrayIncludes(appBarTabs, 'details');
+      }
+    );
+  }
+
+  /**
    * Test that no navBar config value results in default navigation controls.
    *
    * @returns A promise that resolves when the test completes

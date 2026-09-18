@@ -246,6 +246,13 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
     mapViewer.notifications.showWarning('warning.schema.validationIssues');
   }
 
+  // If panels were declared in both bars, notify the user they were removed from the footer bar
+  if (configuration.duplicatedPanelsRemovedFromFooter?.length) {
+    mapViewer.notifications.showWarning('warning.config.duplicatedPanels', {
+      panels: configuration.duplicatedPanelsRemovedFromFooter.join(', '),
+    });
+  }
+
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
   reactRoots[mapId].render(<AppStart mapViewer={mapViewer} i18nLang={i18n} />);
 
