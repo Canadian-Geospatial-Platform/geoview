@@ -4,7 +4,7 @@ Config parsing, duplicate handling, and error layer behavior.
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-03-config.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-03-config.html) — Map 1 (duplicate UUIDs), Map 2 (error layers: wrong type + bad URL + bad sublayer ID with partial loading), Map 3 (defaults — omits UI), Map 4 (empty arrays, no navBar)
+> **Test page**: [rt-03-config.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-03-config.html) — Map 1 (duplicate UUIDs), Map 2 (error layers: wrong type + bad URL + bad sublayer ID with partial loading), Map 3 (defaults — omits UI), Map 4 (empty arrays, no navBar), Map 5 (duplicate panels across app bar and footer bar)
 
 ## Duplicate UUIDs
 
@@ -80,3 +80,12 @@ Test how the viewer handles missing or empty config properties.
 | Empty appBar tabs     | Empty array hides tabs        | 1. Check Map 4 (`appBar.tabs.core: []`)                | No app bar tabs appear (empty app bar)                                    | A    |
 | No navBar property    | Only default buttons shown    | 1. Check Map 3 (omits `navBar`)                        | Default buttons appear (zoom, rotation, fullscreen, home, basemap-select) | A    |
 | Empty navBar array    | Empty array hides all buttons | 1. Check Map 4 (`navBar: []`)                          | No navbar buttons appear                                                  | A    |
+
+## Duplicate Panels Across Bars
+
+When the same panel is declared in both `appBar.tabs.core` and `footerBar.tabs.core`, the viewer keeps the app bar occurrence and removes the duplicate from the footer bar (see issue #3648). Map 5 declares all overlapping panels (`legend`, `layers`, `details`, `data-table`, `guide`) in both bars.
+
+| Test                           | Description                                     | Steps                                      | Expected Result                                                                                                             | Auto |
+| ------------------------------ | ----------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Duplicates removed from footer | Overlapping panels kept in app bar only         | 1. Check Map 5 app bar and footer bar tabs | Overlapping panels appear only in the app bar; footer bar shows none of the duplicated panels                               | A    |
+| Single duplicate-panel warning | One specific warning, no generic schema warning | 1. On Map 5, open the notifications panel  | A single warning names the removed panels (`legend, layers, details, data-table, guide`); no generic schema warning appears | M    |

@@ -14,6 +14,7 @@ import type {
   TypeValidMapComponentProps,
   TypeValidNavBarProps,
   TypeExternalPackagesProps,
+  TypeValidFooterBarTabsCoreProps,
 } from '@/api/types/map-schema-types';
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
@@ -69,6 +70,9 @@ export class MapFeatureConfig {
   /** Indicates whether schema validation errors were detected during configuration parsing. */
   hasSchemaErrors = false;
 
+  /** Panels declared in both appBar and footerBar that were removed from the footer bar during validation. */
+  duplicatedPanelsRemovedFromFooter?: TypeValidFooterBarTabsCoreProps[];
+
   /** Metadata about the configuration file, including version and optional description. */
   configMeta?: TypeConfigMeta;
 
@@ -120,6 +124,21 @@ export class MapFeatureConfig {
     this.navBar = [...(userMapFeatureConfig.navBar ?? DEFAULT_MAP_FEATURE_CONFIG.navBar ?? [])];
     this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
     this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
+
+    // Reject panels declared in BOTH bars — a duplicated panel creates two instances and causes UI bugs (e.g. competing
+    // focus traps, see issue #3221). Keep the app bar occurrence and drop it from the footer bar to keep a single instance.
+    const appBarCore = (this.appBar?.tabs?.core ?? []) as string[];
+    const footerBarCore = this.footerBar?.tabs?.core ?? [];
+    const duplicatedPanels = footerBarCore.filter((tab) => appBarCore.includes(tab));
+    if (duplicatedPanels.length > 0 && this.footerBar?.tabs) {
+      const duplicatedList = duplicatedPanels.join(', ');
+      logger.logWarning(
+        `Panel(s) '${duplicatedList}' declared in both appBar and footerBar; dropping from footerBar to keep a single instance`
+      );
+      this.footerBar.tabs.core = footerBarCore.filter((tab) => !appBarCore.includes(tab));
+      this.duplicatedPanelsRemovedFromFooter = duplicatedPanels;
+    }
+
     this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];

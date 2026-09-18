@@ -123,21 +123,21 @@ When writing or editing map configuration JSON files, properties **must** follow
 
 **Root-level property order:**
 
-| Order | Property             | Required | Purpose                                    |
-| ----- | -------------------- | -------- | ------------------------------------------ |
-| 1     | `configMeta`         | No       | Config metadata (schema version)           |
-| 2     | `map`                | **Yes**  | Map definition (view, basemap, layers)     |
-| 3     | `components`         | No       | Map components (overview-map, north-arrow) |
-| 4     | `overviewMap`        | No       | Overview map settings                      |
-| 5     | `navBar`             | No       | Navigation bar controls                    |
-| 6     | `appBar`             | No       | Application bar tabs                       |
-| 7     | `footerBar`          | No       | Footer bar tabs                            |
-| 8     | `corePackages`       | No       | Core plugin packages to load               |
-| 9     | `globalSettings`     | No       | Universal map settings                     |
-| 10    | `serviceUrls`        | No       | Override service endpoints                 |
+| Order | Property             | Required | Purpose                                                |
+| ----- | -------------------- | -------- | ------------------------------------------------------ |
+| 1     | `configMeta`         | No       | Config metadata (schema version)                       |
+| 2     | `map`                | **Yes**  | Map definition (view, basemap, layers)                 |
+| 3     | `components`         | No       | Map components (overview-map, north-arrow)             |
+| 4     | `overviewMap`        | No       | Overview map settings                                  |
+| 5     | `navBar`             | No       | Navigation bar controls                                |
+| 6     | `appBar`             | No       | Application bar tabs                                   |
+| 7     | `footerBar`          | No       | Footer bar tabs                                        |
+| 8     | `corePackages`       | No       | Core plugin packages to load                           |
+| 9     | `globalSettings`     | No       | Universal map settings                                 |
+| 10    | `serviceUrls`        | No       | Override service endpoints                             |
 | 11    | `theme`              | No       | Display theme (`geo.ca`, `dark`, `light`, `canada.ca`) |
-| 12    | `corePackagesConfig` | No       | Configuration for core packages            |
-| 13    | `externalPackages`   | No       | External plugin packages                   |
+| 12    | `corePackagesConfig` | No       | Configuration for core packages                        |
+| 13    | `externalPackages`   | No       | External plugin packages                               |
 
 **`map` sub-property order:**
 
@@ -598,6 +598,8 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 
 > **Note:** The `"aoi-panel"` tab requires the **aoi-panel package** to be configured. See [Area of Interest Panel Package](#area-of-interest-aoi-panel-package) configuration.
 
+> **Note:** Several panels (`legend`, `layers`, `details`, `data-table`, `guide`) are valid in both `appBar` and `footerBar`. If the same panel is declared in **both** bars, the viewer keeps the **app bar** occurrence, removes the duplicate from the **footer bar**, and shows a warning naming the removed panel(s). Declare each panel in only one bar to avoid this.
+
 ---
 
 #### footerBar (Optional)
@@ -665,6 +667,8 @@ TypeFooterBarTabsCustomProps = {
 ```
 
 > **Note:** The `"time-slider"` and `"geochart"` tabs require their respective packages to be configured. See [Time Slider Package](#time-slider-package) and [GeoChart Package](#geochart-package) configuration.
+
+> **Note:** A panel declared in both `appBar.tabs.core` and `footerBar.tabs.core` is kept in the app bar and removed from the footer bar (with a warning). The overlapping panels are `legend`, `layers`, `details`, `data-table`, and `guide`.
 
 ---
 

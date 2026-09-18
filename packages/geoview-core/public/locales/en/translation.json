@@ -597,6 +597,9 @@
     "map": {
       "invalidZoomExtent": "Unable to zoom, the provided extent is invalid."
     },
+    "config": {
+      "duplicatedPanels": "The panel(s) '{{panels}}' were declared in both the app bar and the footer bar; they were removed from the footer bar to keep a single instance."
+    },
     "schema": {
       "validationIssues": "A configuration warning was found, check the console to see what is wrong."
     }
