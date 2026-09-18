@@ -2,11 +2,12 @@ import { memo, useCallback, useMemo, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@mui/material/styles';
+import { useTheme, type SxProps, type Theme } from '@mui/material/styles';
 
-import type { SxProps } from '@mui/material';
+import type { SxStyles } from '@/ui/style/types';
 
 import { Box } from '@/ui';
+import { getSxClasses } from './map-info-style';
 import { Attribution } from '@/core/components/attribution/attribution';
 import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
@@ -19,21 +20,6 @@ import { MAP_INFO_HEIGHT_COLLAPSED, MAP_INFO_HEIGHT_EXPANDED } from '@/core/util
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
-
-/** Base styles for the map info bar container. */
-const MAP_INFO_BASE_STYLES = {
-  display: 'flex',
-  gap: '6px',
-  alignItems: 'center',
-  position: 'absolute',
-  bottom: 0,
-  left: '48px',
-  right: 0,
-  px: '1rem',
-  overflowX: 'auto',
-  overflowY: 'hidden',
-  scrollbarWidth: 'thin',
-} as const;
 
 /** Props for the MapInfo component. */
 interface MapInfoProps {
@@ -80,36 +66,22 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   }, [expanded, mapController]);
 
   /**
-   * Computes the dynamic container styles for the map info bar.
+   * Computes the style classes for the map info bar.
    */
-  const memoContainerStyles = useMemo((): SxProps => {
-    logger.logTraceUseMemo('MAP-INFO - memoContainerStyles', expanded);
-    return {
-      ...MAP_INFO_BASE_STYLES,
-      scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
-      height: expanded ? MAP_INFO_HEIGHT_EXPANDED : MAP_INFO_HEIGHT_COLLAPSED,
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.divider}`,
-      color: theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.text.primary,
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
-      width: 'calc(100% - 48px)',
-      zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
-      boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200] ?? theme.palette.grey[300]}`,
-    };
-  }, [expanded, theme]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('MAP-INFO - memoSxClasses');
+    return getSxClasses(theme);
+  }, [theme]);
 
   /**
-   * Computes the static map container styles.
+   * Computes the container sx for the map info bar based on interaction mode and expanded state.
    */
-  const memoStaticContainerStyles = useMemo((): SxProps => {
-    logger.logTraceUseMemo('MAP-INFO - memoStaticContainerStyles');
-    return {
-      ...MAP_INFO_BASE_STYLES,
-      height: '50px',
-      background: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
-      width: 'fit-content',
-      borderRadius: '70px',
-    };
-  }, [theme]);
+  const memoContainerSx = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('MAP-INFO - memoContainerSx', interaction, expanded, memoSxClasses);
+    return interaction === 'dynamic'
+      ? { ...memoSxClasses.container, height: expanded ? MAP_INFO_HEIGHT_EXPANDED : MAP_INFO_HEIGHT_COLLAPSED }
+      : memoSxClasses.staticContainer;
+  }, [interaction, expanded, memoSxClasses]);
 
   // #region Handlers
 
@@ -126,17 +98,11 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   // #endregion Handlers
 
   return (
-    <Box
-      component="section"
-      aria-label={t('map.info')}
-      id={`${mapId}-mapInfo`}
-      sx={interaction === 'dynamic' ? memoContainerStyles : memoStaticContainerStyles}
-      onClick={onScrollShellIntoView}
-    >
+    <Box component="section" aria-label={t('map.info')} id={`${mapId}-mapInfo`} sx={memoContainerSx} onClick={onScrollShellIntoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' ? (
-        <Box sx={{ marginLeft: 'auto', marginRight: 'auto', display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <Box sx={memoSxClasses.mouseScaleControlsContainer}>
           <MousePosition expanded={expanded} />
           <Scale expanded={expanded} />
         </Box>

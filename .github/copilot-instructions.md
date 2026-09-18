@@ -2800,6 +2800,7 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 - [layerset-architecture.md](../docs/programming/layerset-architecture.md) - Layer data synchronization
 - [adding-layer-types.md](../docs/programming/adding-layer-types.md) - Extending layer support
 - [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
+- [styling-best-practices.md](../docs/programming/styling-best-practices.md) - CSS/styling conventions (spacing, theming)
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
 - [event-helper.md](../docs/programming/event-helper.md) - Delegate event system
 - [controller-architecture.md](../docs/programming/controller-architecture.md) - Controller design & domain integration

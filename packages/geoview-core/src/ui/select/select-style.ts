@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.text.primary,
     '& .MuiOutlinedInput-notchedOutline': {
       border: `1px solid ${theme.palette?.border?.primary}`,
-      padding: '0 12px 0 8px',
+      padding: theme.spacing(0, 1.5, 0, 1),
       '&[aria-hidden="true"]': {
         border: `1px solid ${theme.palette?.border?.primary}`,
       },
@@ -29,7 +29,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       background: theme.palette.geoViewColor?.primary.light,
     },
     '& .MuiSelect-select': {
-      padding: '16px 12px',
+      padding: theme.spacing(2, 1.5),
     },
     '& .MuiSvgIcon-root': {
       color: theme.palette.text.primary,

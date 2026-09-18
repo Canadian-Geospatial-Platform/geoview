@@ -21,22 +21,6 @@ interface LegendType {
   containerType: TypeContainerBox;
 }
 
-// Constant style outside of render (styles)
-const styles = {
-  noLayersContainer: {
-    padding: '2rem',
-    margin: '2rem',
-    width: '100%',
-    textAlign: 'center',
-    height: 'fit-content',
-  },
-  flexContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-} as const;
-
 // Constant style outside of render (responsive widths)
 const responsiveWidths = {
   full: { xs: '100%' },
@@ -48,9 +32,6 @@ const responsiveWidths = {
     xl: '25%',
   },
 } as const;
-
-/** Main container styles for the legend component. */
-const sxClassesMain = getSxClassesMain();
 
 /**
  * Creates the legend component.
@@ -67,6 +48,10 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('LEGEND - memoSxClasses', theme);
     return getSxClasses(theme);
+  }, [theme]);
+  const memoSxClassesMain = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND - memoSxClassesMain', theme);
+    return getSxClassesMain(theme);
   }, [theme]);
 
   // State
@@ -155,7 +140,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     logger.logTraceUseMemo('components/legend - noLayersContent');
 
     return (
-      <Box sx={styles.noLayersContainer}>
+      <Box sx={memoSxClasses.noLayersContainer}>
         <Typography variant="h3" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
@@ -209,16 +194,13 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         buttonRef={fullScreenBtnRef}
       />
 
-      <Box sx={sxClassesMain.legendWrapper}>
+      <Box sx={memoSxClassesMain.legendWrapper}>
         <Box sx={memoSxClasses.toggleBar}>
           <ToggleAll containerType={containerType} source="legend" />
           <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
         </Box>
-        <Box
-          sx={{ background: theme.palette.geoViewColor?.bgColor.main, ...sxClassesMain.container }}
-          id={`${mapId}-${containerType}-legendContainer`}
-        >
-          <Box sx={styles.flexContainer}>{memoContent}</Box>
+        <Box sx={memoSxClassesMain.container} id={`${mapId}-${containerType}-legendContainer`}>
+          <Box sx={memoSxClasses.flexContainer}>{memoContent}</Box>
         </Box>
       </Box>
     </>

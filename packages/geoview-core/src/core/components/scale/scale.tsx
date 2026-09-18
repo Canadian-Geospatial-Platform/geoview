@@ -6,10 +6,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { Radio, RadioGroup, FormControlLabel, CheckIcon, Tooltip, Box, Button } from '@/ui';
 
-import { getSxClasses } from './scale-style';
+import { getSxClasses, SCALE_BOX_STYLES, SCALE_RADIO_HIDDEN_STYLES, SCALE_FORM_CONTROL_LABEL_STYLES } from './scale-style';
 import type { SxStyles } from '@/ui/style/types';
-import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
-import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -36,9 +34,6 @@ const SCALE_MODES = {
   IMPERIAL: 1,
   NUMERIC: 2,
 } as const;
-
-/** Minimum width style for the scale container box. */
-const BOX_STYLES = { minWidth: 120 } as const;
 
 /**
  * Creates a scale component.
@@ -211,16 +206,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
         onKeyDown={handleRadioGroupKeyDown}
         onClick={handleRadioGroupClick}
         aria-label={t('mapnav.scale.selectFormat')}
-        sx={{
-          ...memoSxClasses.scaleExpandedContainer,
-          // Show focus ring when any child Radio has focus
-          '&:has(:focus-visible)': {
-            borderRadius: '4px',
-            ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
-            boxShadow: 'none',
-            outlineOffset: 0,
-          },
-        }}
+        sx={memoSxClasses.scaleExpandedContainer}
       >
         {memoScaleValues.map((value, index) => (
           <FormControlLabel
@@ -228,19 +214,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
             value={index}
             control={
               <Radio
-                sx={{
-                  // Hide the radio circle visually but keep it keyboard-accessible
-                  opacity: 0,
-                  width: 0,
-                  height: 0,
-                  padding: 0,
-                  margin: 0,
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  // Prevent any pointer interaction directly on the Radio
-                  pointerEvents: 'none',
-                }}
+                sx={SCALE_RADIO_HIDDEN_STYLES}
                 slotProps={{
                   input: {
                     'aria-label': `${value.label}${value.borderBottom ? ` ${t('mapnav.scale.graphicScale')}` : ''}`,
@@ -262,13 +236,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
                 {renderScaleLabel(index, false)}
               </Box>
             }
-            sx={{
-              margin: 0,
-              alignItems: 'center',
-              width: '100%',
-              cursor: 'pointer',
-              justifyContent: 'center',
-            }}
+            sx={SCALE_FORM_CONTROL_LABEL_STYLES}
           />
         ))}
       </RadioGroup>
@@ -289,7 +257,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
 
   return (
     <Tooltip title={t('mapnav.scale')} placement="top">
-      <Box sx={BOX_STYLES}>
+      <Box sx={SCALE_BOX_STYLES}>
         <Box id={`${mapId}-scaleControlBarMetric`} sx={memoSxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlBarImperial`} sx={memoSxClasses.scaleControl} />
 

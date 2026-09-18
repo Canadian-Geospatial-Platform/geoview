@@ -23,12 +23,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       height: '100%',
       backgroundColor: 'unset',
       border: 'unset',
-      paddingBottom: '0px',
+      paddingBottom: theme.spacing(0),
       '&>nav': {
         border: 'unset !important',
         '&>div>ul>li': {
           backgroundColor: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
-          padding: '0px',
+          padding: theme.spacing(0),
           borderRadius: '50%',
         },
         '&>div>ul>li::before': {
@@ -66,13 +66,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       height: '48px',
       width: '48px',
       alignContent: 'center',
-      padding: 0,
+      padding: theme.spacing(0),
       borderRadius: 0,
       backgroundColor: 'transparent',
       color: theme.palette.geoViewColor?.primary.main,
       transition: 'background-color 0.3s ease-in-out',
       '& span': {
-        margin: 0,
+        margin: theme.spacing(0),
       },
       '& .MuiSvgIcon-root': {
         height: 25,
@@ -94,8 +94,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   appBarSeparator: {
     position: 'relative',
-    marginTop: '0.5em',
-    paddingTop: '0.5em !important',
+    marginTop: theme.spacing(1),
+    paddingTop: theme.spacing(1),
     '&::before': {
       content: '""',
       position: 'absolute',

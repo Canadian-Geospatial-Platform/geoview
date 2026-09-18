@@ -1,5 +1,33 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+
+/** Minimum width style for the scale container box. */
+export const SCALE_BOX_STYLES = { minWidth: 120 } as const;
+
+/** Hides the radio circle visually but keeps it keyboard-accessible. */
+export const SCALE_RADIO_HIDDEN_STYLES = {
+  opacity: 0,
+  width: 0,
+  height: 0,
+  padding: 0,
+  margin: 0,
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  // Prevent any pointer interaction directly on the Radio
+  pointerEvents: 'none',
+} as const;
+
+/** Styles for the FormControlLabel wrapping each scale radio option. */
+export const SCALE_FORM_CONTROL_LABEL_STYLES = {
+  margin: 0,
+  alignItems: 'center',
+  width: '100%',
+  cursor: 'pointer',
+  justifyContent: 'center',
+} as const;
 
 /**
  * Gets custom sx classes for the scale.
@@ -23,15 +51,22 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   scaleContainerButton: {
     height: '100%',
     maxHeight: '40px',
-    paddingBlock: '2px',
+    paddingBlock: theme.spacing(0.25),
     '&.Mui-focusVisible': {
       outlineOffset: '0',
       boxShadow: 'none',
     },
   },
   scaleExpandedContainer: {
-    gap: theme.spacing(5),
-    padding: theme.spacing(0, 6),
+    gap: theme.spacing(0.75),
+    padding: theme.spacing(0, 1),
+    // Show focus ring when any child Radio has focus
+    '&:has(:focus-visible)': {
+      borderRadius: '4px',
+      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      boxShadow: 'none',
+      outlineOffset: 0,
+    },
   },
   scaleExpandedCheckmarkText: {
     display: 'flex',
@@ -81,7 +116,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   scaleCheckmark: {
-    paddingRight: 5,
+    paddingRight: theme.spacing(0.75),
     color: theme.palette.geoViewColor?.bgColor.light[800],
   },
 });

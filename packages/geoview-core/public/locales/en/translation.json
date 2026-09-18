@@ -568,6 +568,7 @@
   },
   "footerBar": {
     "resizeTooltip": "Resize",
+    "resizeAriaLabel": "Resize footer panel",
     "noTab": "No tab",
     "tabsLabel": "Footer panel tabs"
   },

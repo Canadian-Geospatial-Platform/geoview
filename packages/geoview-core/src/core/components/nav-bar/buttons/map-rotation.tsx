@@ -179,6 +179,7 @@ export default function MapRotation(): JSX.Element {
       <Box sx={memoSxClasses.rotationControlContainer}>
         <Box sx={memoSxClasses.rotationLabelBox}>
           <Typography
+            id={`${mapId}-rotation-label`}
             variant="body2"
             sx={memoSxClasses.rotationLabel}
             role="status"
@@ -189,6 +190,7 @@ export default function MapRotation(): JSX.Element {
           </Typography>
         </Box>
         <Slider
+          aria-labelledby={`${mapId}-rotation-label`}
           value={sliderRotationDegrees}
           onChange={handleSliderChange}
           onChangeCommitted={handleSliderChangeCommitted}

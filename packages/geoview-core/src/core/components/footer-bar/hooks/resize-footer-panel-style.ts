@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px',
+    padding: theme.spacing(1.25),
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
   },
   title: {
@@ -28,9 +28,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontWeight: '700',
     color: theme.palette.geoViewColor?.textColor.main,
   },
-  slider: {
-    height: 300,
-    padding: '1.5rem 0.5rem 1.5rem 3.5rem',
+  sliderWrapper: {
+    height: '300px',
+    padding: theme.spacing(3, 1, 3, 7),
     '& .MuiSlider-markLabel': {
       left: '33px',
       '&:nth-of-type(1)': {
@@ -40,6 +40,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         bottom: '98%',
         left: '30px',
       },
+    },
+  },
+  slider: {
+    '& input[type="range"]': {
+      WebkitAppearance: 'slider-vertical',
     },
   },
 });

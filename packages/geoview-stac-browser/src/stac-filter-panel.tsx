@@ -140,7 +140,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
             <FormControlLabel
               control={<Checkbox checked={containedInExtent} onChange={handleContainedInExtentChange} size="small" />}
               label={t('stacBrowser.containedInExtent')}
-              sx={{ marginLeft: theme.spacing(2) }}
+              sx={sxClasses.containedInExtentCheckbox}
             />
           )}
         </Box>

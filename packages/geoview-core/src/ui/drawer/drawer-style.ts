@@ -40,6 +40,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing(0, 1),
+    padding: theme.spacing(0),
   },
 });

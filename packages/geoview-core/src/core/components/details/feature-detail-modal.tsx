@@ -87,7 +87,7 @@ export default function FeatureDetailModal(): JSX.Element {
       width="90vw"
       contentModal={
         <>
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', pb: 10 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', pb: 2 }}>
             {feature.featureIcon ? (
               <Box component="img" alt="" src={feature.featureIcon} className="layer-icon" />
             ) : (

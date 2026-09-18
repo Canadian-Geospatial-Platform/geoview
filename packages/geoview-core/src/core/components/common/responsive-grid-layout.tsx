@@ -693,8 +693,8 @@ const ResponsiveGridLayout = forwardRef(
             className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
             onKeyDown={handlePanelKeyDown}
           >
-            <Box sx={memoSxClasses.rightButtonsContainer} className="guide-button-container">
-              <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')} className="guide-button-group">
+            <Box sx={memoSxClasses.rightButtonsContainer}>
+              <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')} sx={memoSxClasses.guideButtonGroup}>
                 {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
                 {!!guideContentIds?.length && renderGuideButton()}
                 {!isMapFullScreen && renderFullScreenButton()}

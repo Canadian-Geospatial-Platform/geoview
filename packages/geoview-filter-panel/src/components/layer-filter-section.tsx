@@ -271,7 +271,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
       </Box>
 
       <Collapse in={!isCollapsed}>
-        <Box sx={{ p: 1.5 }}>
+        <Box sx={{ p: 0.25 }}>
           {!layerIsReady ? (
             <Box sx={memoSxClasses.filterLayerLoading}>
               <Typography variant="body2" sx={memoSxClasses.filterLayerLoadingText}>

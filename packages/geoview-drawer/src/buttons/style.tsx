@@ -11,30 +11,54 @@ import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
 
-// Styles
-const sxClasses = {
+/**
+ * Builds the style panel's sx classes.
+ *
+ * @param theme - The MUI theme
+ * @returns The sx classes object
+ */
+const getSxClasses = (theme: Theme): SxStyles => ({
   listItem: {
-    mb: 8,
-    p: 0,
+    marginBottom: theme.spacing(1.5),
+    padding: theme.spacing(0),
     flexDirection: 'column',
     alignItems: 'flex-start',
   },
   label: {
-    mb: 1,
+    marginBottom: theme.spacing(0.25),
   },
   input: {
     width: '100%',
   },
   numberInput: {
     width: '100%',
-    padding: '8px',
+    padding: theme.spacing(1),
     border: '1px solid #ccc',
     borderRadius: '4px',
   },
-};
+  row: {
+    display: 'flex',
+    gap: theme.spacing(0.5),
+    width: '100%',
+  },
+  rowItem: {
+    flex: 1,
+  },
+  formattingRow: {
+    display: 'flex',
+    gap: theme.spacing(0.25),
+    width: '100%',
+  },
+  formatButton: {
+    width: 40,
+    height: 40,
+    borderRadius: '10%',
+  },
+});
 
 /**
  * Renders the style button icon.
@@ -58,11 +82,15 @@ export function StylePanel(): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useCallback, useEffect } = reactUtilities.react;
+  const { useCallback, useEffect, useMemo } = reactUtilities.react;
+  const { useTheme } = ui;
   const { t } = useTranslation<string>();
 
   // Components
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
+
+  const theme = useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get store values
   const style = useStoreDrawerStyle();
@@ -318,15 +346,15 @@ export function StylePanel(): JSX.Element {
       {/* Text-specific controls */}
       {currentGeomType === 'Text' && (
         <>
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Typography variant="subtitle2" sx={memoSxClasses.label}>
               {t('drawer.text')}
             </Typography>
-            <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" multiline />
+            <TextField value={style.text || ''} onChange={handleTextChange} sx={memoSxClasses.input} placeholder="Enter text" multiline />
           </ListItem>
 
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Typography variant="subtitle2" sx={memoSxClasses.label}>
               {t('drawer.textFont')}
             </Typography>
             <TextField
@@ -334,7 +362,7 @@ export function StylePanel(): JSX.Element {
               value={style.textFont || DEFAULT_FONT}
               onChange={handleFontChange}
               sx={{
-                ...sxClasses.input,
+                ...memoSxClasses.input,
                 '& .MuiNativeSelect-select': {
                   fontFamily: style.textFont || DEFAULT_FONT,
                 },
@@ -354,27 +382,27 @@ export function StylePanel(): JSX.Element {
           </ListItem>
 
           {/* Text Color and Size in one row */}
-          <ListItem sx={sxClasses.listItem}>
-            <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Box sx={memoSxClasses.row}>
+              <Box sx={memoSxClasses.rowItem}>
+                <Typography variant="subtitle2" sx={memoSxClasses.label}>
                   {t('drawer.textColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextColor}
                   onChange={handleTextColorChange}
                   onBlur={handleTextColorClose}
-                  sx={{ width: '100%' }}
+                  sx={memoSxClasses.input}
                 />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={sxClasses.label}>
+              <Box sx={memoSxClasses.rowItem}>
+                <Typography variant="subtitle2" sx={memoSxClasses.label}>
                   {t('drawer.textSize')}
                 </Typography>
                 <TextField
                   value={style.textSize || 14}
                   onChange={handleTextSizeChange}
-                  sx={{ width: '100%' }}
+                  sx={memoSxClasses.input}
                   slotProps={{
                     input: {
                       type: 'number',
@@ -387,27 +415,27 @@ export function StylePanel(): JSX.Element {
           </ListItem>
 
           {/* Halo Color and Size in one row */}
-          <ListItem sx={sxClasses.listItem}>
-            <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Box sx={memoSxClasses.row}>
+              <Box sx={memoSxClasses.rowItem}>
+                <Typography variant="subtitle2" sx={memoSxClasses.label}>
                   {t('drawer.textHaloColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextHaloColor}
                   onChange={handleTextHaloColorChange}
                   onBlur={handleTextHaloColorClose}
-                  sx={sxClasses.input}
+                  sx={memoSxClasses.input}
                 />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={sxClasses.label}>
+              <Box sx={memoSxClasses.rowItem}>
+                <Typography variant="subtitle2" sx={memoSxClasses.label}>
                   {t('drawer.textHaloWidth')}
                 </Typography>
                 <TextField
                   value={style.textHaloWidth}
                   onChange={handleTextHaloWidthChange}
-                  sx={sxClasses.input}
+                  sx={memoSxClasses.input}
                   slotProps={{
                     input: {
                       type: 'number',
@@ -418,17 +446,17 @@ export function StylePanel(): JSX.Element {
               </Box>
             </Box>
           </ListItem>
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Typography variant="subtitle2" sx={memoSxClasses.label}>
               {t('drawer.textFormatting')}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+            <Box sx={memoSxClasses.formattingRow}>
               <IconButton
                 aria-label={t('drawer.textBold')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleBold}
                 className={style.textBold ? 'highlighted active' : ''}
-                sx={{ width: 40, height: 40, borderRadius: '10%' }}
+                sx={memoSxClasses.formatButton}
               >
                 <FormatBoldIcon />
               </IconButton>
@@ -437,7 +465,7 @@ export function StylePanel(): JSX.Element {
                 tooltipPlacement="bottom"
                 onClick={handleToggleItalic}
                 className={style.textItalic ? 'highlighted active' : ''}
-                sx={{ width: 40, height: 40, borderRadius: '10%' }}
+                sx={memoSxClasses.formatButton}
               >
                 <FormatItalicIcon />
               </IconButton>
@@ -448,24 +476,24 @@ export function StylePanel(): JSX.Element {
 
       {/* Fill color - hide for LineString and Text */}
       {currentGeomType !== 'LineString' && currentGeomType !== 'Text' && (
-        <ListItem sx={sxClasses.listItem}>
-          <Typography variant="subtitle2" sx={sxClasses.label}>
+        <ListItem sx={memoSxClasses.listItem}>
+          <Typography variant="subtitle2" sx={memoSxClasses.label}>
             {t('drawer.fillColour')}
           </Typography>
-          <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={sxClasses.input} />
+          <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={memoSxClasses.input} />
         </ListItem>
       )}
 
       {/* Point-specific controls */}
       {currentGeomType === 'Point' && (
-        <ListItem sx={sxClasses.listItem}>
-          <Typography variant="subtitle2" sx={sxClasses.label}>
+        <ListItem sx={memoSxClasses.listItem}>
+          <Typography variant="subtitle2" sx={memoSxClasses.label}>
             {t('drawer.iconSize')}
           </Typography>
           <TextField
             value={style.iconSize || 24}
             onChange={handleIconSizeChange}
-            sx={sxClasses.input}
+            sx={memoSxClasses.input}
             slotProps={{
               input: {
                 type: 'number',
@@ -479,26 +507,26 @@ export function StylePanel(): JSX.Element {
       {/* Stroke controls - show for all except Text */}
       {currentGeomType !== 'Text' && (
         <>
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Typography variant="subtitle2" sx={memoSxClasses.label}>
               {t('drawer.strokeColour')}
             </Typography>
             <MuiColorInput
               value={localStrokeColor}
               onChange={handleStrokeColorChange}
               onBlur={handleStrokeColorClose}
-              sx={sxClasses.input}
+              sx={memoSxClasses.input}
             />
           </ListItem>
 
-          <ListItem sx={sxClasses.listItem}>
-            <Typography variant="subtitle2" sx={sxClasses.label}>
+          <ListItem sx={memoSxClasses.listItem}>
+            <Typography variant="subtitle2" sx={memoSxClasses.label}>
               {t('drawer.strokeWidth')}
             </Typography>
             <TextField
               value={style.strokeWidth}
               onChange={handleStrokeWidthChange}
-              sx={sxClasses.input}
+              sx={memoSxClasses.input}
               slotProps={{
                 input: {
                   type: 'number',

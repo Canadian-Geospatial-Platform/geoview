@@ -9,18 +9,12 @@ import { ellipsisOverflow } from '@/ui/style/default';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  dataPanel: { background: theme.palette.geoViewColor?.bgColor.main, paddingBottom: '1rem' },
-  gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
+  dataPanel: { background: theme.palette.geoViewColor?.bgColor.main, paddingBottom: theme.spacing(2) },
+  gridContainer: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
   selectedRows: {
-    transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-    fontWeight: 400,
     fontSize: theme.palette.geoViewFontSize?.sm,
-    linHeight: 1.43,
-    letterSpacing: '0.01071em',
-    display: 'flex',
-    margin: '0px',
-    padding: '6px',
-    alignItems: 'center',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0.75),
   },
   selectedRowsDirection: {
     display: 'flex',
@@ -36,7 +30,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderRadius: '6px',
     },
     '& .layer-icon': {
-      marginRight: '0 !important',
+      marginRight: theme.spacing(0),
     },
     '& .MuiFormHelperText-root': {
       color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
@@ -63,13 +57,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   tableHead: {
     '& th:nth-of-type(-n+3)': {
       justifyContent: 'center',
-      padding: '0px',
+      padding: theme.spacing(0),
     },
   },
   pinnedColumn: {
     justifyContent: 'center !important',
     textAlign: 'center',
-    padding: '4px 6px 3px 6px !important',
+    padding: theme.spacing(0.5, 0.75),
     '& > div': {
       justifyContent: 'center',
     },
@@ -88,10 +82,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize?.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
     '& .MuiBadge-root': {
-      marginLeft: '0.5rem',
+      marginLeft: theme.spacing(1),
       svg: {
-        marginTop: '0.25rem',
-        marginBottom: '0.25rem',
+        marginTop: theme.spacing(0.5),
+        marginBottom: theme.spacing(0.5),
       },
       '&.Mui-focusVisible': {
         backgroundColor: theme.palette.action.focus,
@@ -112,7 +106,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 0,
+        padding: theme.spacing(0),
       },
     },
     '& .MuiBadge-root >span': {
@@ -169,9 +163,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   toolbarContainer: {
     justifyContent: 'space-between',
     borderBottom: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(5),
+    padding: theme.spacing(0.75),
     display: 'flex',
-    gap: theme.spacing(6),
+    gap: theme.spacing(1),
     flexDirection: 'column',
   },
   toolbarRow: {
@@ -179,7 +173,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: theme.spacing(5),
+    gap: theme.spacing(0.75),
     '& > *': {
       flex: '0 1 auto', // Default: can shrink
       minWidth: 0, // Allow shrinking below content size
@@ -198,14 +192,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   toolbarControls: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(2), // Space between Switch and button group
+    gap: theme.spacing(0.25), // Space between Switch and button group
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
   toolbarButtonGroup: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(1), // Tighter spacing between buttons
+    gap: theme.spacing(0.25),
     '& .MuiIconButton-root': {
       '&.Mui-focusVisible': {
         outlineOffset: '-3px',
@@ -228,8 +222,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   lightboxButton: {
     height: '2.5rem',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
     textTransform: 'none',
     '&.Mui-focusVisible': {
       outlineOffset: '-3px',

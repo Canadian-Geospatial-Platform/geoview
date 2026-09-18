@@ -92,7 +92,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
               aria-label={getTooltipTitle(geoListItem)}
               sx={memoSxClassesList.geoListItemButton}
             >
-              <Grid container spacing={6} sx={memoSxClassesList.geoListItemGrid}>
+              <Grid container spacing={1} sx={memoSxClassesList.geoListItemGrid}>
                 {/* Location name + province (truncates when > 66% of row width) */}
                 <Grid size={{ xs: 12, sm: 8 }} sx={memoSxClassesList.geoListLocationCell}>
                   <Typography component="div" noWrap={isAboveSmBreakpoint}>
