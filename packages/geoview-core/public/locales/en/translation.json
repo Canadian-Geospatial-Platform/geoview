@@ -544,7 +544,8 @@
   "filterPanel": {
     "errorRegistrationTimeout": "Filter panel timeout error: Layer '{{layerName}}' took too long to register",
     "errorFilterPanelQuery": "Filter panel query error: Layer '{{layerName}}' failed to query",
-    "errorFilterPanelClear": "Filter panel clear error: Layer '{{layerName}}' failed to clear filters"
+    "errorFilterPanelClear": "Filter panel clear error: Layer '{{layerName}}' failed to clear filters",
+    "warningNoFilteredExtent": "No features currently match the active filters for layer '{{layerPath}}' - nothing to zoom to"
   },
   "guide": {
     "title": "Guide",
