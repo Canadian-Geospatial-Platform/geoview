@@ -65,6 +65,9 @@ interface MultiselectFilterProps {
  */
 const FilterCheckboxItem = memo(
   ({ value, isSelected, displayLabel, onCheckboxChange, sxClasses }: FilterCheckboxItemProps): JSX.Element => {
+    // Log
+    logger.logTraceRender('geoview-filter-panel/components/multiselect-filter > FilterCheckboxItem');
+
     const { cgpv } = window as TypeWindow;
     const { useCallback } = cgpv.reactUtilities.react;
     const { ui } = cgpv;
@@ -115,7 +118,13 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const { t } = useTranslation<string>();
   const controller = useFilterPanelController();
 
+  /**
+   * Filters the unique values by the current search string, when the attribute is searchable.
+   */
   const memoFilteredValues = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('MULTISELECT FILTER - memoFilteredValues', searchString);
+
     if (!attribute.searchable || !searchString.trim()) return uniqueValues;
 
     const filterString = searchString.trim().toLowerCase();
@@ -125,12 +134,12 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
     });
   }, [uniqueValues, searchString, attribute, controller, t]);
 
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      setSearchString(event.target.value);
-    },
-    [setSearchString]
-  );
+  /**
+   * Handles when the search input value changes.
+   */
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+    setSearchString(event.target.value);
+  }, []);
 
   /**
    * Handles when a checkbox value changes.
