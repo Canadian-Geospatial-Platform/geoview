@@ -104,14 +104,33 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useState, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Typography } = ui.elements;
+  const { Box, Typography, TextField } = ui.elements;
+
+  const [searchString, setSearchString] = useState('');
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const controller = useFilterPanelController();
+
+  const memoFilteredValues = useMemo(() => {
+    if (!attribute.searchable || !searchString.trim()) return uniqueValues;
+
+    const filterString = searchString.trim().toLowerCase();
+    return uniqueValues.filter((val) => {
+      const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
+      return displayLabel.toLowerCase().includes(filterString);
+    });
+  }, [uniqueValues, searchString, attribute, controller, t]);
+
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      setSearchString(event.target.value);
+    },
+    [setSearchString]
+  );
 
   /**
    * Handles when a checkbox value changes.
@@ -167,22 +186,42 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
       <Typography variant="body2" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
-      <Box sx={memoSxClasses.filterMultiselectContainer}>
-        {uniqueValues.map((val) => {
-          const isSelected = Array.isArray(value) && value.includes(val);
-          const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
-
-          return (
-            <FilterCheckboxItem
-              key={String(val)}
-              value={val}
-              isSelected={isSelected}
-              displayLabel={displayLabel}
-              onCheckboxChange={handleCheckboxChange}
-              sxClasses={memoSxClasses}
+      <Box sx={memoSxClasses.filterMultiselectWrapper}>
+        {attribute.searchable && (
+          <Box sx={memoSxClasses.filterMultiselectSearch}>
+            <TextField
+              value={searchString}
+              onChange={handleSearchChange}
+              placeholder={t('FilterPanel.searchPlaceholder')}
+              aria-label={t('FilterPanel.searchAriaLabel', { name: attribute.displayLabel })}
+              size="small"
+              fullWidth
+              variant="standard"
             />
-          );
-        })}
+          </Box>
+        )}
+        <Box sx={memoSxClasses.filterMultiselectContainer}>
+          {memoFilteredValues.length === 0 && (
+            <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+              {t('FilterPanel.noSearchResults')}
+            </Typography>
+          )}
+          {memoFilteredValues.map((val) => {
+            const isSelected = Array.isArray(value) && value.includes(val);
+            const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
+
+            return (
+              <FilterCheckboxItem
+                key={String(val)}
+                value={val}
+                isSelected={isSelected}
+                displayLabel={displayLabel}
+                onCheckboxChange={handleCheckboxChange}
+                sxClasses={memoSxClasses}
+              />
+            );
+          })}
+        </Box>
       </Box>
     </Box>
   );
