@@ -68,6 +68,8 @@ export interface TypeFilterAttribute {
   dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
   /** Optional step interval for range filters. Only applies when filterType is 'range'. */
   rangeStep?: number;
+  /** Optional flag indicating if the attribute is searchable. Multiselect only */
+  searchable?: boolean;
 }
 
 /** Filter type enumeration. */

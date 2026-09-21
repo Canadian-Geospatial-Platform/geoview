@@ -31,20 +31,34 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
 
-  // Multiselect checkbox container
-  filterMultiselectContainer: {
-    maxHeight: '200px',
-    overflowY: 'auto',
-    border: 1,
-    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
-    borderRadius: 1,
-    p: 0.5,
-  },
-
   // Multiselect checkbox item
   filterCheckboxItem: {
     display: 'block',
     ml: 0,
+  },
+
+  // Wrapper merging the search input and checkbox list into a single bordered box
+  filterMultiselectWrapper: {
+    border: 1,
+    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
+    borderRadius: 1,
+    overflow: 'hidden',
+  },
+
+  // Search row above the list — no border of its own, just the standard-variant underline
+  filterMultiselectSearch: {
+    px: 1,
+    pt: 0.5,
+    '& .MuiInput-input': {
+      pl: '0.5em',
+    },
+  },
+
+  // Multiselect checkbox list — border/radius now live on the wrapper, not here
+  filterMultiselectContainer: {
+    maxHeight: '200px',
+    overflowY: 'auto',
+    p: 0.5,
   },
 
   // Date range info text
