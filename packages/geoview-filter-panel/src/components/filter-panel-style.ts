@@ -110,6 +110,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(0.75),
   },
 
+  // Row wrapping the layer's action buttons (clear, zoom to filtered)
+  filterLayerActions: {
+    display: 'flex',
+    gap: 1,
+  },
+
   // Layer content area
   filterLayerContent: {
     flex: 1,
