@@ -34,6 +34,8 @@ export declare abstract class AbstractGeoViewLayer {
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
     /** The interval between repeated metadata fetch warnings after the initial one has been shown. */
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number;
+    /** The geoview layer id of the internal, temporary WFS config a WMS layer derives to fetch its vector info (outfields/styles). */
+    static readonly INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID = "wfsConfigForWms";
     /** The default display date mode used when generating default configurations */
     static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode;
     /** The default hit tolerance */

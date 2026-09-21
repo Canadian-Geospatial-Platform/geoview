@@ -73,6 +73,8 @@ export type TypeBaseSourceInitialConfig = {
     crossOrigin?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
+    /** The configured extent from the source. */
+    extent?: Extent;
 };
 /** Initial settings for tile image sources. */
 export interface TypeSourceTileInitialConfig extends TypeBaseSourceInitialConfig {
@@ -166,8 +168,6 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
 }
 export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
 export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitialConfig {
-    /** Image extent */
-    extent?: Extent;
 }
 export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
     /**

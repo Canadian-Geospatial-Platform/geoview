@@ -233,9 +233,8 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
      *
-     * Reads the layer's min/max scale from the store and converts them to OL fit constraints
-     * (maxZoom from maxScale, minResolution from minScale) so the resulting zoom does not exceed
-     * the layer's visibility boundaries.
+     * Uses the layer's buffered effective scale boundaries so the resulting zoom remains inside
+     * the layer's visibility range without landing exactly on service threshold values.
      *
      * @param layerPath - The layer path used to look up scale limits
      * @param extent - The extent to zoom to (in current map projection)
@@ -337,6 +336,16 @@ export declare class LayerController extends AbstractMapViewerController {
      * @throws {LayerNotFoundError} When the layer cannot be found at the given path
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Makes a layer visible on the map, enabling any hidden parent groups so the layer actually renders.
+     *
+     * A child layer's own visibility has no visible effect while an ancestor group is hidden, so this walks
+     * up the parent chain and turns each hidden ancestor visible before showing the layer itself.
+     *
+     * @param layerPath - The path of the layer to make visible
+     * @throws {LayerNotFoundError} When the layer cannot be found at the given path (propagated from `getGeoviewLayer()`)
+     */
+    setLayerVisibleIncludingParents(layerPath: string): void;
     /**
      * Sets or toggles the visibility of a specific layer within a map.
      *

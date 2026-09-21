@@ -70,6 +70,18 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     static fetchText(url: string, postSettings?: TypePostSettings): Promise<string>;
     /**
+     * Executes a source fetch for a vector layer and, on failure, throws a specific error naming the layer.
+     *
+     * Wraps any fetch error in a {@link LayerSourceFailedToLoadError} so a source that can't be loaded (e.g. an
+     * unreachable or missing URL) surfaces an actionable message instead of a generic layer error.
+     *
+     * @param layerConfig - The layer entry config the fetch is for
+     * @param fetcher - The function performing the actual fetch
+     * @returns A promise that resolves with the fetched data
+     * @throws {LayerSourceFailedToLoadError} When the fetch fails (the original error is preserved as the cause)
+     */
+    protected static fetchSourceForLayer<T>(layerConfig: VectorLayerEntryConfig, fetcher: () => Promise<T>): Promise<T>;
+    /**
      * Fetches json data from the given URL using settings defined in the vector source configuration.
      *
      * Supports both GET and POST requests depending on the presence of `postSettings`.

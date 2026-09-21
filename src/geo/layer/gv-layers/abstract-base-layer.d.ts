@@ -295,6 +295,13 @@ export declare abstract class AbstractBaseGVLayer {
      */
     setVisible(layerVisibility: boolean): void;
     /**
+     * Makes the layer visible, enabling any hidden parent groups so it actually renders.
+     *
+     * A layer's own visibility has no visible effect while an ancestor group is hidden, so this walks up
+     * the parent chain and turns each hidden ancestor group visible before showing this layer itself.
+     */
+    setVisibleIncludingParents(): void;
+    /**
      * Sets the z-index of the layer.
      *
      * @param zIndex - The z-index of the layer.

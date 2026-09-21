@@ -200,6 +200,21 @@ export declare class UIController extends AbstractMapViewerController {
      */
     addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>): void;
     /**
+     * Displays a detailed INFO message in the snackbar while grouping a separate generic message in the notification panel.
+     *
+     * High-frequency progress updates (e.g. a large export) would otherwise flood the notification panel with one entry
+     * per update. The snackbar carries live detail (e.g. a count) while the panel regroups every update into a single entry.
+     *
+     * INFO-only by design: the grouped panel entry does not increment the unread badge, so warnings and errors must stay
+     * ungrouped via `addMessage('warning'/'error', …)` so each one is individually surfaced and counted.
+     *
+     * @param snackbarKey - The translation key shown in the snackbar (detailed)
+     * @param snackbarParams - Parameters for the snackbar message
+     * @param notificationKey - The translation key added to the notification panel (generic)
+     * @param notificationParams - Optional parameters for the notification-panel message
+     */
+    addInfoDetailedSnackbar(snackbarKey: string, snackbarParams: Record<string, unknown>, notificationKey: string, notificationParams?: Record<string, unknown>): void;
+    /**
      * Adds a notification to the notification center.
      *
      * @param notification - The notification details to add
@@ -228,5 +243,15 @@ export declare class UIController extends AbstractMapViewerController {
         coords: Coordinate;
         bbox?: Extent;
     } | undefined;
+    /**
+     * Gets the effective footer height for the map.
+     *
+     * Prefers a consumer-provided `data-footer-height` attribute on the root element, falling back to the store's
+     * app height. Combines a DOM read with a store value, so it lives on the controller rather than in `dom-helper`
+     * (which must stay store-free). Callable from non-React code via `mapViewer.controllers.uiController`.
+     *
+     * @returns The footer height as a CSS length string (e.g. '600px')
+     */
+    getFooterHeight(): string;
 }
 //# sourceMappingURL=ui-controller.d.ts.map

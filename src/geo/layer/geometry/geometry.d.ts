@@ -22,6 +22,8 @@ interface FeatureCollection {
  */
 export declare class GeometryApi {
     #private;
+    /** Maximum number of coordinates a geometry may contain before it is considered too complex to render every frame. */
+    static readonly MAX_RENDERABLE_COORDINATES = 50000;
     /** All added geometries */
     geometries: Feature[];
     /** The default geometry group name */
@@ -292,6 +294,24 @@ export declare class GeometryApi {
      * @returns True when the coordinates represent a MultiPolygon
      */
     static isArrayOfArrayOfArrayOfCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][]): coordinates is Coordinate[][][];
+    /**
+     * Counts the number of coordinates (vertices) in a geometry, recursing into geometry collections.
+     *
+     * @param geometry - The geometry to measure
+     * @returns The number of coordinates the geometry contains
+     */
+    static getCoordinateCount(geometry: OLGeometry): number;
+    /**
+     * Determines whether a geometry is simple enough to render or highlight on every animation frame without freezing
+     * the UI.
+     *
+     * Geometries above `GeometryApi.MAX_RENDERABLE_COORDINATES` coordinates (e.g. a polygon with thousands of
+     * holes) are considered too complex.
+     *
+     * @param geometry - The geometry to check
+     * @returns True when the geometry can be rendered, false when it is too complex or undefined
+     */
+    static canRenderGeometry(geometry: OLGeometry | undefined): boolean;
 }
 /**
  * Define a delegate for the event handler function signature

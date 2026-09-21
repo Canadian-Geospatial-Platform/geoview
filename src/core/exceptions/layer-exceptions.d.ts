@@ -18,6 +18,18 @@ export declare class LayerError extends GeoViewError {
     constructor(layerPathOrId: string, messageKey: string, params?: Record<string, unknown>, options?: ErrorOptions);
 }
 /**
+ * Error thrown when a Layer's data source cannot be loaded from its access path (e.g. an unreachable or missing URL).
+ */
+export declare class LayerSourceFailedToLoadError extends LayerError {
+    /**
+     * Creates an instance of LayerSourceFailedToLoadError.
+     *
+     * @param layerName - The layer name of the layer whose source failed to load
+     * @param cause - Optional inner cause of the error
+     */
+    constructor(layerName: string, cause?: Error);
+}
+/**
  * Error thrown when a specified layer cannot be found.
  *
  * This error is typically raised when attempting to reference a layer that does not exist,
@@ -409,8 +421,9 @@ export declare class LayerDifferingFieldLengthsError extends LayerError {
      * Constructs a new LayerDifferingFieldLengthsError instance.
      *
      * @param layerPath - The path or identifier of the layer
+     * @param layerName - The layer name
      */
-    constructor(layerPath: string);
+    constructor(layerPath: string, layerName: string | undefined);
 }
 /**
  * Error thrown when the layer config WFS is missing for a given WMS layer.
