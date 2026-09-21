@@ -1601,6 +1601,8 @@ The panel gracefully handles:
 - Theme-aware UI (adapts to geo.ca, light, dark themes)
 - Auto-apply or manual apply modes
 - Reset individual filters or all filters at once
+- Optional search box for multiselect filters with long value lists
+- Zoom to the extent of features matching a layer's active filters
 - Integration with GeoView's LayerFilters system
 
 **Dependencies:**
@@ -1682,6 +1684,7 @@ type MultiselectFilterAttribute = {
   defaultValues?: Array<string | number> | null;
   domain?: Array<{ value: string | number; label: string }>;
   filterMissingDomainValues?: boolean;
+  searchable?: boolean;
 };
 
 type RangeFilterAttribute = {
@@ -1741,6 +1744,7 @@ type DateFilterAttribute = {
 - **defaultValues** (array | null): Initial array of selected values (e.g., `["value1", "value2"]`)
 - **domain** (array, optional): Same structure as select filter
 - **filterMissingDomainValues** (boolean, default: false): Same behavior as select filter
+- **searchable** (boolean, default: false): Shows a search box below the label to filter the checkbox list, useful for long value lists
 
 **Range filter properties:**
 
@@ -2120,6 +2124,7 @@ In this example:
 
 - Multiple-value checkbox list
 - "All" option to select/deselect all values
+- Optional search box (`searchable: true`) to filter the checkbox list, useful for long value lists
 - Default: all values selected
 
 ```json
@@ -2127,7 +2132,8 @@ In this example:
   "fieldName": "category",
   "displayLabel": "Category",
   "filterType": "multiselect",
-  "defaultValues": []
+  "defaultValues": [],
+  "searchable": true
 }
 ```
 
@@ -2168,6 +2174,7 @@ In this example:
 - **Field Names:** Must match actual field names in the layer schema
 - **Auto-Apply:** When `autoApply: true`, filters apply immediately on every change. When `false`, filters still apply automatically but may have a slight delay
 - **Reset:** Individual filters can be reset, or all filters can be reset at once using the reset button
+- **Zoom to Filtered:** Each layer section has a "Zoom to filtered" button (next to Clear) that zooms the map to the extent of features currently matching that layer's active filters. Disabled when no filters are active; shows a warning notification instead of an error if no feature currently matches
 - **Theme Integration:** UI automatically adapts to the map's theme (geo.ca, light, dark)
 - **Performance:** Range and date filters are optimized for large datasets
 
