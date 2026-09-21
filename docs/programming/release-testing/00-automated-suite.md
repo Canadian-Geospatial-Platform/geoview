@@ -43,8 +43,8 @@ rush serve
 | 10  | `suite-data-table`              | 13      | [ ] Pass |
 | 11  | `suite-geochart`                | 2       | [ ] Pass |
 | 12  | `suite-swiper`                  | 2       | [ ] Pass |
-| 13  | `suite-time-slider`             | 2       | [ ] Pass |
-|     | **Total**                       | **277** |          |
+| 13  | `suite-time-slider`             | 3       | [ ] Pass |
+|     | **Total**                       | **278** |          |
 
 ## What to Do if a Suite Fails
 
