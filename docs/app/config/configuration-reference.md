@@ -3175,6 +3175,7 @@ type DateFilterAttribute = {
   - **value** (required): The raw value from the layer (string or number)
   - **label** (required): The display label for this value
 - **filterMissingDomainValues** (optional): If true, filter out values not in domain (default: false)
+- **searchable** (optional, multiselect only): Shows a search box to filter the checkbox list by label (default: false)
 
 **Range filter-specific properties:**
 
