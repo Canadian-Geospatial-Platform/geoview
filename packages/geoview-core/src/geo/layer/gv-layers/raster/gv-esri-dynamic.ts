@@ -263,17 +263,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * Reuses the same combined filter (initial, class, data, panel, and time) that drives the `layerDefs` parameter
    * used to render the layer, so the returned extent matches what's currently visible on the map.
    *
-   * @param outProjection - The output projection for the extent.
-   * @returns A promise that resolves with the extent of the features matching the active filters.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {ResponseTypeError} When the response from the service is not an object.
-   * @throws {ResponseContentError} When the response actually contains an error within it.
-   * @throws {NetworkError} When a network issue happened.
-   * @throws {NoExtentError} When no feature on the service currently satisfies the active filters.
+   * @param outProjection - The output projection for the extent
+   * @returns A promise that resolves with the extent of the features matching the active filters
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {ResponseTypeError} When the response from the service is not an object
+   * @throws {ResponseContentError} When the response actually contains an error within it
+   * @throws {NetworkError} When a network issue happened
+   * @throws {NoExtentError} When no feature on the service currently satisfies the active filters
    */
   override async onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
     // Get url for service from layer entry config
