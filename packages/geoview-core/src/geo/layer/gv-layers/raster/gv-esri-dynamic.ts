@@ -31,7 +31,7 @@ import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-e
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
+import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
@@ -252,6 +252,45 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Fetch
     const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
     const { extent } = responseJson;
+
+    // Validate and return the extent
+    return GeoUtilities.validateExtent([extent.xmin, extent.ymin, extent.xmax, extent.ymax], outProjection.getCode());
+  }
+
+  /**
+   * Overrides the way an EsriDynamic layer computes the extent of the features matching its active filters.
+   *
+   * Reuses the same combined filter (initial, class, data, panel, and time) that drives the `layerDefs` parameter
+   * used to render the layer, so the returned extent matches what's currently visible on the map.
+   *
+   * @param outProjection - The output projection for the extent.
+   * @returns A promise that resolves with the extent of the features matching the active filters.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an object.
+   * @throws {ResponseContentError} When the response actually contains an error within it.
+   * @throws {NetworkError} When a network issue happened.
+   * @throws {NoExtentError} When no feature on the service currently satisfies the active filters.
+   */
+  override async onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
+    // Get url for service from layer entry config
+    const layerEntryConfig = this.getLayerConfig();
+
+    // Reuse the same combined filter that's currently applied to render the layer
+    const whereClause = this.getLayerFilters().getAllFilters() || '1=1';
+    const whereQueryClause = `&where=${encodeURIComponent(whereClause)}`;
+    const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
+    const queryUrl = `${layerEntryConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerEntryConfig.layerId}/query?${whereQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
+
+    // Fetch
+    const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);
+    const { extent } = responseJson;
+
+    // The service returns null coordinates when no feature matches the filter
+    if (!extent || typeof extent.xmin !== 'number') throw new NoExtentError(this.getLayerPath());
 
     // Validate and return the extent
     return GeoUtilities.validateExtent([extent.xmin, extent.ymin, extent.xmax, extent.ymax], outProjection.getCode());

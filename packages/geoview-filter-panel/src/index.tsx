@@ -64,6 +64,7 @@ class FilterPanelPlugin extends AppBarPlugin {
           nullValue: '(null)',
           available: 'Available',
           to: 'to',
+          zoomToFiltered: 'Zoom to filtered',
         },
       },
       fr: {
@@ -91,6 +92,7 @@ class FilterPanelPlugin extends AppBarPlugin {
           nullValue: '(nul)',
           available: 'Disponible',
           to: 'à',
+          zoomToFiltered: 'Zoomer sur les éléments filtrés',
         },
       },
     };

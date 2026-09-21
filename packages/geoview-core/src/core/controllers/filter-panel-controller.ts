@@ -20,7 +20,7 @@ import {
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
-import { LayerFilterPanelClearError, LayerFilterPanelQueryError } from '@/core/exceptions/geoview-exceptions';
+import { LayerFilterPanelClearError, LayerFilterPanelQueryError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 // #region TYPES (minimal config types for reading filter panel configuration)
 
@@ -231,6 +231,35 @@ export class FilterPanelController extends AbstractMapViewerController {
     Object.keys(filterState).forEach((layerPath) => {
       this.applyLayerFilter(layerPath);
     });
+  }
+
+  /**
+   * Zooms the map to the extent of the features currently matching a layer's active filters.
+   *
+   * When no feature currently satisfies the active filters, shows a warning notification
+   * instead of throwing, since this is an expected outcome of filtering rather than an error.
+   *
+   * @param layerPath - The layer path
+   * @returns A promise that resolves when the zoom animation is complete
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path (propagated from `getExtentFromFilteredFeatures()`)
+   * @throws {NotImplementedError} When the layer type doesn't support extent-from-filter (propagated from `getExtentFromFilteredFeatures()`)
+   */
+  async zoomToFilteredExtent(layerPath: string): Promise<void> {
+    let extent;
+    try {
+      // Get the extent of the features matching the layer's active filters
+      extent = await this.getControllersRegistry().layerController.getExtentFromFilteredFeatures(layerPath);
+    } catch (error: unknown) {
+      // No feature currently satisfies the active filters - expected when a filter excludes everything, not a bug
+      if (error instanceof NoExtentError) {
+        this.getMapViewer().notifications.showWarning('filterPanel.warningNoFilteredExtent', { layerPath });
+        return;
+      }
+      throw error;
+    }
+
+    // Zoom to it
+    await this.getControllersRegistry().mapController.zoomToExtent(extent);
   }
 
   /**
