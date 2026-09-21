@@ -30,8 +30,7 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "RADAR_1KM_RSNO",
-            "layerName": "Test Spatiotemporel"
+            "layerId": "RADAR_1KM_RSNO"
           }
         ]
       },
@@ -85,8 +84,7 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "Wireless Data Network 2013-2024"
+            "layerId": "0"
           }
         ],
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Wireless_Data_Network_Reseau_donnees_sans_fil/MapServer/"

@@ -109,16 +109,6 @@ export type TimeDimensionESRI = {
   timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
 
-/** Utility functions */
-/** Discrete is when the values are all written down specifically with comma separator */
-const isDiscreteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split(',').length > 1;
-/** Discrete is when the values are all written down specifically with comma separator */
-const isDiscreteSingleValue = (ogcTimeDimension: string): boolean => !(ogcTimeDimension.includes(',') || ogcTimeDimension.includes('/'));
-/** Absolute is start/end/interval */
-const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 3;
-/** Relative is start/end without intervals */
-const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 2;
-
 /**
  * Class used to handle date as ISO 8601.
  */
@@ -223,6 +213,46 @@ export abstract class DateMgt {
   static DEFAULT_TEMPORAL_MODE: TemporalMode = 'calendar';
 
   // #region STATIC PUBLIC METHODS
+
+  /**
+   * Checks whether an OGC time dimension contains comma-separated discrete values.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents a discrete range
+   */
+  static isDiscreteRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split(',').length > 1;
+  }
+
+  /**
+   * Checks whether an OGC time dimension contains one discrete value.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents one discrete value
+   */
+  static isDiscreteSingleValue(ogcTimeDimension: string): boolean {
+    return !(ogcTimeDimension.includes(',') || ogcTimeDimension.includes('/'));
+  }
+
+  /**
+   * Checks whether an OGC time dimension is an absolute start/end/interval range.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents an absolute range
+   */
+  static isAbsoluteRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split('/').length === 3;
+  }
+
+  /**
+   * Checks whether an OGC time dimension is a relative two-part range.
+   *
+   * @param ogcTimeDimension - The OGC time dimension value to check
+   * @returns Whether the value represents a relative range
+   */
+  static isRelativeRange(ogcTimeDimension: string): boolean {
+    return ogcTimeDimension.split('/').length === 2;
+  }
 
   /**
    * Gets the default date and datetime formats based on the display date mode.
@@ -985,22 +1015,22 @@ export abstract class DateMgt {
     //    relative = 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
     //    absolute = 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
     // and create the range object
-    if (isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
-    else if (isRelativeRange(resolvedValues)) {
+    if (this.isDiscreteRange(resolvedValues)) rangeItems = { type: 'discrete', range: resolvedValues.replace(/\s/g, '').split(',') };
+    else if (this.isRelativeRange(resolvedValues)) {
       const relativeInterval = this.#createRelativeInterval(resolvedValues);
       rangeItems = {
         type: 'relative',
         range: [relativeInterval.min, relativeInterval.max],
         durationInterval: relativeInterval.durationInterval,
       };
-    } else if (isAbsoluteRange(resolvedValues)) {
+    } else if (this.isAbsoluteRange(resolvedValues)) {
       const absoluteInterval = this.#createAbsoluteInterval(resolvedValues);
       rangeItems = {
         type: 'discrete',
-        range: [absoluteInterval.min, absoluteInterval.max],
+        range: absoluteInterval.range,
         durationInterval: absoluteInterval.durationInterval,
       };
-    } else if (isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues] };
+    } else if (this.isDiscreteSingleValue(resolvedValues)) rangeItems = { type: 'discrete', range: [resolvedValues] };
 
     // Check if dimension is valid
     if (rangeItems.range.length === 0) throw new InvalidTimeDimensionError(ogcTimeDimensionValues);
@@ -1093,27 +1123,17 @@ export abstract class DateMgt {
   }
 
   /**
-   * Expands an absolute OGC time dimension interval into its UTC start/end bounds.
+   * Expands an absolute OGC time dimension interval into its discrete UTC values.
    *
-   * Supported format:
-   *   `start/end/period`
-   * Example:
-   *   "2002-09-01T00:00:00Z/2002-09-03T00:00:00Z/P1D"
-   * Behavior:
-   * - Parses start and end as UTC instants.
-   * - Resolves the requested ISO-8601 duration to validate that the interval is positive.
-   * - Returns the interval bounds as an object with the computed UTC ISO start and end values.
-   * Safety:
-   * - A guard limit prevents infinite loops caused by malformed or
-   *   non-progressing durations.
+   * Parses `start/end/period`, includes each aligned value from start through end, and preserves the original ISO 8601 duration.
+   * A guard limit prevents infinite loops caused by malformed or non-progressing durations.
    *
    * @param ogcTimeDimension - An OGC absolute time dimension string in the form `start/end/period`
-   * @returns An object with the UTC ISO start and end values of the interval
-   * @throws {InvalidTimeDimensionError} When input does not contain exactly three segments, or when duration is
-   *                                     invalid, or non-positive, or when an infinite loop is detected
+   * @returns The expanded UTC ISO values and original duration interval
+   * @throws {InvalidTimeDimensionError} When input does not contain exactly three segments, or when duration is invalid, non-positive, or causes an infinite loop
    * @throws {InvalidDateError} When input has invalid dates
    */
-  static #createAbsoluteInterval(ogcTimeDimension: string): { min: string; max: string; durationInterval?: string } {
+  static #createAbsoluteInterval(ogcTimeDimension: string): { range: string[]; durationInterval: string } {
     const parts = ogcTimeDimension.split('/');
     if (parts.length !== 3) {
       throw new InvalidTimeDimensionError(ogcTimeDimension);
@@ -1150,8 +1170,7 @@ export abstract class DateMgt {
     }
 
     return {
-      min: results[0] ?? start.toISOString(),
-      max: results[results.length - 1] ?? end.toISOString(),
+      range: results,
       durationInterval: periodStr,
     };
   }

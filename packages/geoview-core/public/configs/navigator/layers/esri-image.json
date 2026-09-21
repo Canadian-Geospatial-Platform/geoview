@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "This configuration presents a series of Esri image services to test their functionalities."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
