@@ -376,8 +376,21 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (!layerTimeDimensionInfo.rangeItems && (!configTimeDimension || !configTimeDimension.rangeItems)) return undefined;
 
     // Set defaults values from temporal dimension
-    const rangeItems = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
-    const { range } = rangeItems;
+    let rangeItems = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
+    let { range } = rangeItems;
+
+    // If the time timension is a groupDimension
+    if (layerTimeDimensionInfo.isGroupDimension) {
+      // Get the siblings of the layer config
+      const siblings = layerConfig.getSiblings();
+
+      // Gather all dates exposed by the siblings of the layer
+      const siblingDates = new Set(siblings.flatMap((sibling) => sibling.getTimeDimension()?.rangeItems?.range ?? []));
+
+      // Keep only the dates also exposed by a sibling, preserving the range's original order for the min/max computation below
+      range = range.filter((date) => siblingDates.has(date));
+      rangeItems = { ...rangeItems, range };
+    }
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
     const singleHandle = configTimeDimension?.singleHandle ?? layerTimeDimensionInfo?.singleHandle ?? false;
@@ -433,7 +446,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     let title = timesliderConfig?.title;
     if (layerTimeDimensionInfo?.isGroupDimension) {
       // For a time-slider that is part of a group dimension, use the parent layer's name as the title
-      title = layerConfig.getParentLayerConfig()?.getLayerName();
+      title = layerConfig.getParentLayerConfig()?.getLayerNameCascade();
     }
 
     // Return the final time slider configuration object

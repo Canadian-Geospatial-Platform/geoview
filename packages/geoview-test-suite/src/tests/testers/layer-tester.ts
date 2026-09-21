@@ -634,6 +634,46 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests adding a WMS Layer whose service metadata is served as a local XML capability document.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSLayerLandcoverXML(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.LANDCOVER_XML_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID}`;
+    const gvLayerName = 'Landcover 2010-2020 (XML)';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Landcover on map from a local XML metadata document...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.LANDCOVER_XML_LAYER_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests adding a WMS layer from the Nonna service (CORS blocked, requires proxy fallback).
    *
    * @returns A promise that resolves when the test completes
