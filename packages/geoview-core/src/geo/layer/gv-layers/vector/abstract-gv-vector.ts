@@ -472,9 +472,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Vector features are always loaded client-side, so this evaluates each feature against the same
    * combined filter equation (initial, class, data, panel, and time) used to style/hide features on the map.
    *
-   * @param outProjection - The output projection for the extent.
-   * @returns A promise that resolves with the extent of the features matching the active filters.
-   * @throws {NoExtentError} When no loaded feature satisfies the active filters.
+   * @param outProjection - The output projection for the extent
+   * @returns A promise that resolves with the extent of the features matching the active filters
+   * @throws {NoExtentError} When no loaded feature satisfies the active filters
    */
   override onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
     // Get the OpenLayers source (not the configured source property)

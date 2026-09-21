@@ -1,3 +1,5 @@
+import type { Extent } from 'ol/extent';
+
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
@@ -245,7 +247,7 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @throws {NotImplementedError} When the layer type doesn't support extent-from-filter (propagated from `getExtentFromFilteredFeatures()`)
    */
   async zoomToFilteredExtent(layerPath: string): Promise<void> {
-    let extent;
+    let extent: Extent;
     try {
       // Get the extent of the features matching the layer's active filters
       extent = await this.getControllersRegistry().layerController.getExtentFromFilteredFeatures(layerPath);
