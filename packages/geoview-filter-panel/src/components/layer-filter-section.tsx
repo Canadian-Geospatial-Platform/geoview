@@ -46,7 +46,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const { useState, useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Typography, Collapse, Button, IconButton } = ui.elements;
-  const { ExpandMoreIcon, CloseIcon } = ui.elements;
+  const { ExpandMoreIcon, CloseIcon, ZoomInSearchIcon } = ui.elements;
   const controller = useFilterPanelController();
 
   const theme = ui.useTheme();
@@ -101,6 +101,16 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const handleToggle = useCallback((): void => {
     setStoreFilterPanelLayerCollapsed(mapId, layer.layerPath, !isCollapsed);
   }, [mapId, layer.layerPath, isCollapsed]);
+
+  /**
+   * Handles zooming to the extent of the features currently matching this layer's active filters.
+   */
+  const handleZoomToFiltered = useCallback((): void => {
+    controller.zoomToFilteredExtent(layer.layerPath).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in controller.zoomToFilteredExtent in layer-filter-section.handleZoomToFiltered', error);
+    });
+  }, [controller, layer.layerPath]);
 
   /**
    * Auto-applies filters when the layer becomes ready or when filter state changes.
@@ -257,17 +267,30 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             </IconButton>
           )}
         </Box>
-        <Button
-          type="text"
-          variant="outlined"
-          size="small"
-          startIcon={<CloseIcon />}
-          onClick={onClearLayer}
-          disabled={!hasFilter}
-          sx={memoSxClasses.filterLayerClearButton}
-        >
-          {t('FilterPanel.clear')}
-        </Button>
+        <Box sx={memoSxClasses.filterLayerActions}>
+          <Button
+            type="text"
+            variant="outlined"
+            size="small"
+            startIcon={<CloseIcon />}
+            onClick={onClearLayer}
+            disabled={!hasFilter}
+            sx={memoSxClasses.filterLayerClearButton}
+          >
+            {t('FilterPanel.clear')}
+          </Button>
+          <Button
+            type="text"
+            variant="outlined"
+            size="small"
+            startIcon={<ZoomInSearchIcon />}
+            onClick={handleZoomToFiltered}
+            disabled={!hasFilter}
+            sx={memoSxClasses.filterLayerClearButton}
+          >
+            {t('FilterPanel.zoomToFiltered')}
+          </Button>
+        </Box>
       </Box>
 
       <Collapse in={!isCollapsed}>

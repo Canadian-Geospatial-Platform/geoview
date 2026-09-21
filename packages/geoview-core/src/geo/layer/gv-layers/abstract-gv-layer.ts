@@ -243,6 +243,19 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Overridable function that gets the extent of the features currently matching the layer's active filters.
+   *
+   * @param outProjection - The output projection for the extent
+   * @returns A promise that resolves with the extent of the features matching the active filters
+   * @throws {NotImplementedError} When the function isn't overridden by the children class
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
+    // Crash on purpose
+    throw new NotImplementedError(`onGetExtentFromFilteredFeatures function not implemented for ${this.getLayerPath()}`);
+  }
+
+  /**
    * Overridable function returning the legend of the layer.
    *
    * Returns null when the layerPath specified is not found. If the style property
@@ -843,6 +856,18 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Redirect
     return this.onGetExtentFromFeatures(objectIds, outProjection, outfield);
+  }
+
+  /**
+   * Gets the extent of the features currently matching the layer's active filters.
+   *
+   * @param outProjection - The output projection for the extent
+   * @returns A promise that resolves to the extent of the features matching the active filters, if available
+   * @throws {NotImplementedError} When the subclass does not override `onGetExtentFromFilteredFeatures` (propagated from `onGetExtentFromFilteredFeatures()`)
+   */
+  getExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
+    // Redirect
+    return this.onGetExtentFromFilteredFeatures(outProjection);
   }
 
   /**

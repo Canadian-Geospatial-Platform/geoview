@@ -747,6 +747,20 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
+   * Gets the extent of the features currently matching a layer's active filters.
+   *
+   * @param layerPath - The layer path
+   * @returns A promise that resolves with the extent of the features matching the active filters
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {NotImplementedError} When the underlying layer type does not implement extent-from-filter (propagated from `getExtentFromFilteredFeatures()`)
+   */
+  getExtentFromFilteredFeatures(layerPath: string): Promise<Extent> {
+    // Get extent from filter calling the GV Layer method
+    return this.getGeoviewLayerRegular(layerPath).getExtentFromFilteredFeatures(this.getMapViewer().getProjection());
+  }
+
+  /**
    * Zooms to the full extent of a layer.
    *
    * @param layerPath - The path of the layer to zoom to

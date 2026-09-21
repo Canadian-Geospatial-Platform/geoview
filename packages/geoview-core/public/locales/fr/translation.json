@@ -544,7 +544,8 @@
   "filterPanel": {
     "errorRegistrationTimeout": "Erreur de délai d'attente du panneau de filtres : La couche '{{layerName}}' a mis trop de temps à s'enregistrer",
     "errorFilterPanelQuery": "Erreur de requête du panneau de filtres : La couche '{{layerName}}' n'a pas pu être interrogée",
-    "errorFilterPanelClear": "Erreur de nettoyage du panneau de filtres : La couche '{{layerName}}' n'a pas pu effacer les filtres"
+    "errorFilterPanelClear": "Erreur de nettoyage du panneau de filtres : La couche '{{layerName}}' n'a pas pu effacer les filtres",
+    "warningNoFilteredExtent": "Aucun élément ne correspond actuellement aux filtres actifs pour la couche '{{layerPath}}' - rien à zoomer"
   },
   "guide": {
     "title": "Guide",
