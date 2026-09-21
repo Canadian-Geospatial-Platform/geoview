@@ -165,7 +165,7 @@ type RangeItems = {
 };
 ```
 
-Absolute ranges retain two aligned bounds in `range` and preserve their ISO 8601 period in `durationInterval`. Their normalized `type` remains `'discrete'`; consumers must not assume that every intermediate interval is materialized in `range`.
+Absolute ranges expand every aligned value into `range` and preserve their ISO 8601 period in `durationInterval`. Their normalized `type` remains `'discrete'`.
 
 ---
 
@@ -205,9 +205,9 @@ The OGC `values` string (and the ESRI-to-OGC converted string) follows three pos
 - `start` and `end` are ISO 8601 dates
 - `period` is an ISO 8601 duration (e.g., `P1Y`, `P1M`, `P1D`, `PT1H`)
 - GeoView validates and aligns the interval by advancing from start toward end
-- The first and last aligned values are stored in `range`, while the period is preserved in `durationInterval`
+- Every aligned value from start through the last value at or before end is stored in `range`, while the period is preserved in `durationInterval`
 - Has a 10,000-iteration safety guard to prevent infinite loops from malformed durations
-- `nearestValues: 'discrete'`; retaining `durationInterval` does not by itself materialize every intermediate slider value
+- `nearestValues: 'discrete'`, so the slider can step through every expanded value
 - `RangeItems.type = 'discrete'`
 
 **Use case:** Most common for WMS/ESRI — regular intervals over a date range (yearly, monthly, daily data).

@@ -7,6 +7,7 @@ import {
   useStoreLayerDisplayDateFormatShort,
   useStoreLayerDisplayDateTimezone,
   useStoreLayerNameSet,
+  useStoreLayerVisibleSet,
 } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
@@ -124,10 +125,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // Get name from legend layers
   const names = useStoreLayerNameSet();
-  const name = names[layerPath];
-  const additionalNames = additionalLayerpaths?.map((additionalLayerPath) => names[additionalLayerPath]);
-  const combinedNames = additionalNames ? `${name}, ${additionalNames.join(', ')}` : name;
-  const displayTitle = title ? title : combinedNames;
+  const layerVisibilities = useStoreLayerVisibleSet();
 
   const layersAreLoading = useStoreLayerAreLayersLoading();
 
@@ -602,12 +600,51 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // #endregion
 
+  /**
+   * Renders a layer name with visibility-aware styling.
+   *
+   * @param nameLayerPath - The path of the layer whose name is rendered
+   * @param prefix - Optional text displayed before the layer name
+   * @returns The formatted layer name
+   */
+  const renderLayerName = (nameLayerPath: string, prefix = ''): JSX.Element => {
+    return (
+      <Box
+        component="span"
+        key={nameLayerPath}
+        sx={layerVisibilities[nameLayerPath] ? undefined : { color: theme.palette.grey[600], fontStyle: 'italic' }}
+      >
+        {`${prefix}${names[nameLayerPath]}`}
+      </Box>
+    );
+  };
+
+  /**
+   * Renders the configured title or primary layer name.
+   *
+   * @returns The time slider display title
+   */
+  const renderDisplayTitle = (): React.ReactNode => {
+    return title || names[layerPath];
+  };
+
+  /**
+   * Renders the primary and additional layer names.
+   *
+   * @returns The visibility-aware layer names
+   */
+  const renderLayerNames = (): React.ReactNode => {
+    return [layerPath, ...(additionalLayerpaths ?? [])].map((nameLayerPath, index) =>
+      renderLayerName(nameLayerPath, index > 0 ? ', ' : '')
+    );
+  };
+
   return (
     <Box onKeyDown={handleKeyDown} sx={memoSxClasses.containerPadding}>
       {/* Header with title and filter switch */}
       <Box sx={memoSxClasses.headerContainer}>
         <Typography id={sliderLabelId} component="h2" sx={memoSxClasses.panelTitle}>
-          {displayTitle}
+          {renderDisplayTitle()}
         </Typography>
         <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
           <Box component="span">
@@ -761,9 +798,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       </Box>
 
       {/* Description */}
-      {(description || additionalNames?.length) && (
+      {(description || additionalLayerpaths?.length) && (
         <Typography component="div" sx={memoSxClasses.descriptionText}>
-          {description || combinedNames}
+          {description || renderLayerNames()}
         </Typography>
       )}
     </Box>

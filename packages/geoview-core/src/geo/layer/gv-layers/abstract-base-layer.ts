@@ -452,6 +452,18 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
+   * Gets the sibling layers of this layer, i.e. the other layers sharing the same direct parent group.
+   *
+   * @param includeOwn - Optional, whether this layer itself is included in the returned array. Defaults to true
+   * @returns The sibling layers, or an empty array when this layer has no parent
+   */
+  getSiblings(includeOwn = true): AbstractBaseGVLayer[] {
+    const parent = this.getParent();
+    if (!parent) return [];
+    return parent.getLayers().filter((child) => includeOwn || child !== this);
+  }
+
+  /**
    * Gets the opacity of the layer (between 0 and 1).
    *
    * @returns The opacity of the layer.
