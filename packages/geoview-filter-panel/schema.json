@@ -180,6 +180,11 @@
             "filterMissingDomainValues": {
               "type": "boolean",
               "default": false
+            },
+            "searchable": {
+              "type": "boolean",
+              "description": "Enable search functionality for the multiselect filter",
+              "default": false
             }
           },
           "required": [

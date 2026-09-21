@@ -71,7 +71,8 @@
                 "fieldName": "province_en",
                 "displayLabel": "Province / Territory",
                 "filterType": "multiselect",
-                "enabled": true
+                "enabled": true,
+                "searchable": true
               },
               {
                 "fieldName": "commodity_group_en",
