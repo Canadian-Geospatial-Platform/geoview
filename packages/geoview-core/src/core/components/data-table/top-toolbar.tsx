@@ -19,8 +19,9 @@ import { useToolbarActionMessage } from './hooks/useToolbarActionMessage';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { SxStyles } from '@/ui/style/types';
-import { ClearFiltersIcon } from '@/ui/icons';
+import { ClearFiltersIcon, ZoomToFilteredExtentIcon } from '@/ui/icons';
 import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-state';
+import { useLayerController } from '@/core/controllers/use-controllers';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the TopToolbar component. */
@@ -88,6 +89,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
   const { sxClasses, layerPath, t, globalFilter, useTable, columns, data, table, unfilteredFeaturesCount } = props;
 
   const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
+  const layerController = useLayerController();
 
   // Get toolbar message
   const toolbarMessage = useToolbarActionMessage({
@@ -123,6 +125,24 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
       table.setGlobalFilter('');
     }
   }, [useTable, table]);
+
+  /**
+   * Handles zooming to the extent of the currently filtered rows, or the full layer extent when no filter is active.
+   */
+  const handleZoomToFilteredExtent = useCallback((): void => {
+    // Zoom to the currently filtered rows' extent, or the full layer extent when no filter is active
+    const zoomPromise = hasActiveFilters
+      ? layerController.zoomToFeaturesExtent(
+          layerPath,
+          (useTable?.getFilteredRowModel().rows ?? []).map((row) => row.original.gvFeature)
+        )
+      : layerController.zoomToLayerExtent(layerPath);
+
+    zoomPromise.catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in handleZoomToFilteredExtent in TopToolbar', error);
+    });
+  }, [hasActiveFilters, layerController, layerPath, useTable]);
 
   // #endregion
 
@@ -170,6 +190,15 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
               onClick={handleClearFilters}
             >
               <ClearFiltersIcon />
+            </IconButton>
+
+            <IconButton
+              className="buttonOutline"
+              aria-label={t('dataTable.zoomToFilteredExtent')}
+              color="primary"
+              onClick={handleZoomToFilteredExtent}
+            >
+              <ZoomToFilteredExtentIcon />
             </IconButton>
 
             {/* Override column pinning options */}
