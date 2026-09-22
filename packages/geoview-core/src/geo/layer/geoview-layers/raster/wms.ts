@@ -203,6 +203,15 @@ export class WMS extends AbstractGeoViewRaster {
       WMS.#createGroupLayerRec(layerConfigMapped, layerConfigGroup, (config: ConfigBaseClass) => {
         // Alert that we want to register an extra layer entry
         this.emitLayerEntryRegisterInit({ config });
+
+        // If correct config type, should be really..
+        if (config instanceof OgcWmsLayerEntryConfig) {
+          // Flag that the WMS layer id that was processed was a group
+          config.setAddedViaGroup(true);
+        } else {
+          // Log the warning
+          logger.logWarning('Expected an instance of OgcWmsLayerEntryConfig but received a different config type.');
+        }
       });
 
       // Validate the list
@@ -237,7 +246,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerCapabilities = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer)!;
 
     // Init the layer metadata
-    await WMS.initLayerMetadata(layerConfig, layerCapabilities, displayDateMode);
+    await WMS.initLayerMetadata(layerConfig, layerCapabilities, layerConfig.getAddedViaAGroup(), displayDateMode);
 
     // If the layer advertised a defined CRS but it couldn't be resolved (deprecated/non-existent EPSG code), notify the user.
     const definedCRS = layerCapabilities?.CRS?.[0];
@@ -757,11 +766,13 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The layer configuration to initialize
    * @param layerCapabilities - The WMS capabilities metadata for the specific layer
+   * @param wasAddedAsAGroup - Indicates whether the layer was added as part of a group initially in the config
    * @param displayDateMode - The display date mode to use when creating time dimensions
    */
   static async initLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,
     layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined,
+    wasAddedAsAGroup: boolean,
     displayDateMode: DisplayDateMode
   ): Promise<void> {
     // If found
@@ -806,7 +817,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       // Interpret the time dimensions of the metadata to determine if it's a special group-time-dimension (à la QGIS landcover) or not
-      const isGroupDimension = WMS.#interpretIsGroupDimension(layerCapabilities, true);
+      const isGroupDimension = WMS.#interpretIsGroupDimension(layerCapabilities, wasAddedAsAGroup, false);
 
       // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
 
@@ -1432,13 +1443,18 @@ export class WMS extends AbstractGeoViewRaster {
    * GeoView treats the child as part of a group dimension flow.
    *
    * @param layerCapabilities - The WMS layer metadata to inspect
+   * @param wasAddedAsAGroup - Indicates whether the layer was added as part of a group
    * @param allowMultipleDiscreteValues - When true, siblings exposing several comma-separated discrete dates are accepted (not just a single date), as long as every date falls within the parent's range
    * @returns `true` when the layer inherits a parent time dimension, otherwise `false`
    */
   static #interpretIsGroupDimension(
     layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined,
+    wasAddedAsAGroup: boolean,
     allowMultipleDiscreteValues = false
   ): boolean {
+    // Has to be added as a group to be considered a group-dimension
+    if (!wasAddedAsAGroup) return false;
+
     // Read the parent time dimension
     const parentDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.ParentLayer?.Dimension);
 

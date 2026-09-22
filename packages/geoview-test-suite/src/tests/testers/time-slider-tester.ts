@@ -222,10 +222,10 @@ export class TimeSliderTester extends GVAbstractTester {
    */
   testWMSLayerLandcoverGroupDimensionFlags(): Promise<Test<LandcoverGroupDimensionResult>> {
     const gvLayerId = generateId();
-    const groupPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID}`;
-    const year2010Path = `${groupPath}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID_2010}`;
-    const year2015Path = `${groupPath}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID_2015}`;
-    const year2020Path = `${groupPath}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID_2020}`;
+    const groupPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
+    const year2010Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010}`;
+    const year2015Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2015}`;
+    const year2020Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2020}`;
     const gvLayerName = 'Landcover 2010-2020 (XML)';
 
     return this.test(
@@ -233,8 +233,8 @@ export class TimeSliderTester extends GVAbstractTester {
       async (test) => {
         test.addStep('Creating the GeoView Layer Configuration...');
         // isTimeAware must be true so the layers get registered by TimeSliderController.tryRegisterLayer()
-        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, GVAbstractTester.LANDCOVER_XML_URL, undefined, true, [
-          { id: GVAbstractTester.LANDCOVER_XML_LAYER_ID },
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, GVAbstractTester.LANDCOVER_CDTK_URL, undefined, true, [
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID },
         ]);
 
         // Add the layer on the map

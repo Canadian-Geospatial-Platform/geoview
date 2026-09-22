@@ -130,8 +130,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     if (isRunningSequentially) await pLayerWMSDatacubeRingFireHalifax;
 
     // Test adding layer
-    const pLayerWMSLandcoverXML = this.#layerTester.testAddWMSLayerLandcoverXML();
-    if (isRunningSequentially) await pLayerWMSLandcoverXML;
+    const pLayerWMSLandcoverGroupDimension = this.#layerTester.testAddWMSLayerLandcoverGroupDimension();
+    if (isRunningSequentially) await pLayerWMSLandcoverGroupDimension;
 
     // Test adding layer
     const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
@@ -256,7 +256,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSOWSMundialis,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
-      pLayerWMSLandcoverXML,
+      pLayerWMSLandcoverGroupDimension,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
       pLayerWFSWithGeometCurrentConditions,

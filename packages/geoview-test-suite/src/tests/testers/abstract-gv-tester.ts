@@ -719,11 +719,11 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly DATACUBE_RING_FIRE_LAYER_ID_VICTORIA: string = 'victoria';
 
   /** Landcover group WMS served from a local XML capability document */
-  static readonly LANDCOVER_XML_URL: string = './datasets/wms/landcover_groupe.xml';
-  static readonly LANDCOVER_XML_LAYER_ID: string = 'landcover_groupe';
-  static readonly LANDCOVER_XML_LAYER_ID_2010: string = 'landcover_2010_19classes';
-  static readonly LANDCOVER_XML_LAYER_ID_2015: string = 'landcover_2015_19classes';
-  static readonly LANDCOVER_XML_LAYER_ID_2020: string = 'landcover_2020_19classes';
+  static readonly LANDCOVER_CDTK_URL: string = 'https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en';
+  static readonly LANDCOVER_CDTK_LAYER_GROUP_ID: string = 'landcover_groupe';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2010: string = 'landcover_2010_19classes';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2015: string = 'landcover_2015_19classes';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2020: string = 'landcover_2020_19classes';
 
   /** Cities (serves WMS and WFS) */
   static readonly CITIES_WMS_URL: string = 'https://demo.mapserver.org/cgi-bin/wms';

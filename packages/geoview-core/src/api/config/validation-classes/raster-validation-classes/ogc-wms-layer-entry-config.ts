@@ -33,6 +33,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** The supported styles */
   #styles: string[] | undefined;
 
+  /** Indicates whether the WMS layer was added as part of a group initially in the config */
+  #addedViaGroup = false;
+
   /**
    * Creates an instance of OgcWmsLayerEntryConfig.
    *
@@ -141,7 +144,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, fetchResult.data.Capability.Layer);
 
     // Init the layer metadata
-    await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+    await WMS.initLayerMetadata(this, layerCapabilities, this.getAddedViaAGroup(), displayDateMode);
   }
 
   // #endregion OVERRIDES
@@ -389,6 +392,24 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   setWfsLayerConfig(layerConfig: OgcWfsLayerEntryConfig): void {
     this.#wfsLayerConfig = layerConfig;
+  }
+
+  /**
+   * Gets whether the WMS layer was added as part of a group in the config.
+   *
+   * @returns True when the layer was added as part of a group
+   */
+  getAddedViaAGroup(): boolean {
+    return this.#addedViaGroup;
+  }
+
+  /**
+   * Sets whether the WMS layer was added as part of a group in the config.
+   *
+   * @param addedViaGroup - True when the layer was added as part of a group
+   */
+  setAddedViaGroup(addedViaGroup: boolean): void {
+    this.#addedViaGroup = addedViaGroup;
   }
 
   /**
