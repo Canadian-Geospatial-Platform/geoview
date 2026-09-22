@@ -24,6 +24,8 @@ import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/except
 import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
+import { GVWMS } from 'geoview-core/geo/layer/gv-layers/raster/gv-wms';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -637,11 +639,11 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerLandcoverXML(): Promise<Test<AbstractBaseGVLayer>> {
+  testAddWMSLayerLandcoverGroupDimension(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.LANDCOVER_XML_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_XML_LAYER_ID}`;
+    const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
     const gvLayerName = 'Landcover 2010-2020 (XML)';
 
     // Test
@@ -651,7 +653,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
-          { id: GVAbstractTester.LANDCOVER_XML_LAYER_ID },
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -660,10 +662,27 @@ export class LayerTester extends GVAbstractTester {
         // Find the layer and wait until its ready
         return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
-      (test) => {
+      (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+
+        // Validate the layer is a group layer
+        Test.assertIsInstance(result, GVGroupLayer);
+
+        // Validate the group layer has at least 1 child
+        Test.assertIsArrayLengthMinimal(result.getLayers(), 1);
+
+        // Get the first child
+        const firstChild = result.getLayers()[0];
+
+        // Validate the first child is a WMS layer
+        Test.assertIsInstance(firstChild, GVWMS);
+
+        // Validate the layer has the 'was added as group' flag set
+        test.addStep('Validating the layer is flagged as it was added via a group and time dimension is a group dimension');
+        Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), true);
+        Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, true);
       },
       (test) => {
         // Redirect to helper to clean up and assert

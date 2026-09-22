@@ -13,66 +13,20 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "landcover-xml-specific",
-        "geoviewLayerName": "Landcover 2010-2020 (XML)",
-        "metadataAccessPath": "./datasets/wms/landcover_groupe.xml",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2010_19classes"
-          },
-          {
-            "layerId": "landcover_2015_19classes"
-          },
-          {
-            "layerId": "landcover_2020_19classes"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "landcover-xml-group",
         "geoviewLayerName": "Landcover 2010-2020 Group (XML)",
-        "metadataAccessPath": "./datasets/wms/landcover_groupe.xml",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "landcover_groupe",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
+            "layerId": "landcover_groupe"
           }
         ]
       },
       {
-        "geoviewLayerId": "landcover-stripped-xml-specific",
-        "geoviewLayerName": "Landcover 2010, 2020 (XML)",
-        "metadataAccessPath": "./datasets/wms/landcover_groupe.xml",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover_2010_19classes",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          },
-          {
-            "layerId": "landcover_2020_19classes",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "lancover-direct",
-        "geoviewLayerName": "Landcover Old",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en",
+        "geoviewLayerId": "landcover-xml-distinct",
+        "geoviewLayerName": "Landcover 2010-2020 Distinct (XML)",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {

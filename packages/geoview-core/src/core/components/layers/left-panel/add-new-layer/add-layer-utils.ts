@@ -222,8 +222,10 @@ export class UtilAddLayer {
       removedLayerIds.push(...childLayerIdsToRemove);
     }
 
-    // If all sub layers are included, simply add the layer
-    if (allowCollapse && layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
+    // If all sub layers are included, simply add the layer using its group layerId so its sub-layers get
+    // exploded on-the-fly during layer creation, instead of listing each sub-layer explicitly
+    const collapsibleGroupLayerTypes: TypeInitialGeoviewLayerType[] = [CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_TYPES.WMS];
+    if (allowCollapse && collapsibleGroupLayerTypes.includes(layerType) && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
         // If there is only one layer, or a single group layer, use the provided name from the text field
