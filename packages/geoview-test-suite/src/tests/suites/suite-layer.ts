@@ -70,7 +70,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testAddWMTSWorldTimezones();
+    const pDevTest0 = this.#layerTester.testAddWMSLayerLandcoverGroupDimensionNegative();
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -132,6 +132,10 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerWMSLandcoverGroupDimension = this.#layerTester.testAddWMSLayerLandcoverGroupDimension();
     if (isRunningSequentially) await pLayerWMSLandcoverGroupDimension;
+
+    // Test adding layer
+    const pLayerWMSLandcoverGroupDimensionNegative = this.#layerTester.testAddWMSLayerLandcoverGroupDimensionNegative();
+    if (isRunningSequentially) await pLayerWMSLandcoverGroupDimensionNegative;
 
     // Test adding layer
     const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
@@ -257,6 +261,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
       pLayerWMSLandcoverGroupDimension,
+      pLayerWMSLandcoverGroupDimensionNegative,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
       pLayerWFSWithGeometCurrentConditions,
