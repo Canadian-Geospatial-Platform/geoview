@@ -513,6 +513,7 @@
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filtering map",
     "clearFilters": "Clear filters",
+    "zoomToFilteredExtent": "Zoom to filtered extent",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",
     "enlargeBtn": "Enlarge",
@@ -545,7 +546,7 @@
     "errorRegistrationTimeout": "Filter panel timeout error: Layer '{{layerName}}' took too long to register",
     "errorFilterPanelQuery": "Filter panel query error: Layer '{{layerName}}' failed to query",
     "errorFilterPanelClear": "Filter panel clear error: Layer '{{layerName}}' failed to clear filters",
-    "warningNoFilteredExtent": "No features currently match the active filters for layer '{{layerPath}}' - nothing to zoom to"
+    "warningNoFilteredExtent": "No features currently match the active filters for layer '{{layerName}}' - nothing to zoom to"
   },
   "guide": {
     "title": "Guide",

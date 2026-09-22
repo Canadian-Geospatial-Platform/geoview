@@ -100,7 +100,7 @@ import { doTimeout, doUntilPromise, isValidUUID, type DelayJob } from '@/core/ut
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
-import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
+import { NoBoundsError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 import { OL_ZOOM_DURATION, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -780,6 +780,49 @@ export class LayerController extends AbstractMapViewerController {
 
     // Failed
     throw new NoBoundsError(layerPath);
+  }
+
+  /**
+   * Zooms to the extent of an arbitrary set of feature info entries.
+   *
+   * Unions the extent already embedded in each entry when present, and falls back to looking up
+   * the extent by object id for entries that don't carry one (e.g. ESRI Dynamic rows).
+   *
+   * @param layerPath - The layer path
+   * @param features - The feature info entries to zoom to
+   * @returns A promise that resolves when the zoom animation is complete
+   * @throws {NotImplementedError} When the layer type does not implement extent-from-features (propagated from `getExtentFromFeatures()`)
+   * @throws {NoExtentError} When no extent could be determined from the provided features
+   */
+  async zoomToFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<void> {
+    let extent: Extent | undefined;
+    const objectIdsNeedingLookup: number[] = [];
+    let oidField: string | undefined;
+
+    features.forEach((feature) => {
+      if (feature.extent) {
+        extent = GeoUtilities.getExtentUnion(extent, feature.extent);
+        return;
+      }
+
+      // Determine the oid field once, from the first feature that has one
+      if (!oidField) oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      if (oidField && feature.fieldInfo[oidField]) {
+        objectIdsNeedingLookup.push(feature.fieldInfo[oidField]!.value as number);
+      }
+    });
+
+    // Look up the extent for features that didn't already carry one
+    if (objectIdsNeedingLookup.length > 0 && oidField) {
+      const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIdsNeedingLookup, oidField);
+      extent = GeoUtilities.getExtentUnion(extent, lookedUpExtent);
+    }
+
+    // If no extent could be determined
+    if (!extent) throw new NoExtentError(layerPath);
+
+    // Zoom to it
+    await this.getControllersRegistry().mapController.zoomToExtent(extent);
   }
 
   /**
