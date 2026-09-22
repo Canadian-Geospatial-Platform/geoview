@@ -254,7 +254,8 @@ export class FilterPanelController extends AbstractMapViewerController {
     } catch (error: unknown) {
       // No feature currently satisfies the active filters - expected when a filter excludes everything, not a bug
       if (error instanceof NoExtentError) {
-        this.getMapViewer().notifications.showWarning('filterPanel.warningNoFilteredExtent', { layerPath });
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
+        this.getMapViewer().notifications.showWarning('filterPanel.warningNoFilteredExtent', { layerName: layer?.getLayerName() });
         return;
       }
       throw error;
