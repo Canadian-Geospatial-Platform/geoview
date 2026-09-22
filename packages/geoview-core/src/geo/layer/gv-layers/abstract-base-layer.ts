@@ -89,6 +89,13 @@ export abstract class AbstractBaseGVLayer {
   protected abstract onRefresh(projection: OLProjection | undefined): void;
 
   /**
+   * Must override method to wait for the layer to be loaded at least once.
+   *
+   * @returns A promise that resolves once the layer has loaded at least once
+   */
+  protected abstract onWaitForLoadedOnce(): Promise<void>;
+
+  /**
    * Overridable method to set the opacity of the layer.
    *
    * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
@@ -218,12 +225,13 @@ export abstract class AbstractBaseGVLayer {
    *
    * @returns A promise that resolves with the bounds in the map projection, or undefined
    */
-  waitForBounds(): Promise<Extent | undefined> {
+  async waitForBounds(): Promise<Extent | undefined> {
     // If bounds are already initialized, resolve immediately
     if (this.#bounds !== undefined) return Promise.resolve(this.#bounds);
 
     // Wait for the bounds initialized event
-    return this.onceBoundsInitialized().then((event) => event.bounds);
+    const event = await this.onceBoundsInitialized();
+    return event.bounds;
   }
 
   /**
@@ -264,6 +272,19 @@ export abstract class AbstractBaseGVLayer {
   refresh(projection: OLProjection | undefined): void {
     // Redirect
     this.onRefresh(projection);
+  }
+
+  /**
+   * Waits for the layer to be loaded at least once by calling the overridable function 'onWaitForLoadedOnce'.
+   *
+   * When the layer is a GVLayer, resolves once that layer has loaded at least once.
+   * When the layer is a GVGroup, resolves once all its leaf layers have loaded at least once.
+   *
+   * @returns A promise that resolves once the layer has loaded at least once
+   */
+  waitForLoadedOnce(): Promise<void> {
+    // Redirect
+    return this.onWaitForLoadedOnce();
   }
 
   /**

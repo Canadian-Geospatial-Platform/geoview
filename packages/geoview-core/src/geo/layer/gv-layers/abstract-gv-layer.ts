@@ -228,6 +228,46 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Overrides the way to wait for the layer to be loaded at least once.
+   *
+   * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
+   * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
+   *
+   * @returns A promise that resolves once the layer has been loaded at least once
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
+   */
+  override onWaitForLoadedOnce(): Promise<void> {
+    // Sync check: already loaded once
+    if (this.loadedOnce) return Promise.resolve();
+
+    // Sync check: already in error
+    if (this.getLayerStatus() === 'error') {
+      return Promise.reject(new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName()));
+    }
+
+    // Subscribe to first-loaded and error events; the first to fire settles the promise.
+    // GV The handlers cross-reference each other to cross-unsubscribe, so they must be forward-declared.
+    return new Promise<void>((resolve, reject) => {
+      const loadedHandler: LayerBaseDelegate = (): void => {
+        this.offLayerFirstLoaded(loadedHandler);
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        this.offLayerError(errorHandler);
+        resolve();
+      };
+
+      const errorHandler: LayerErrorDelegate = (): void => {
+        this.offLayerFirstLoaded(loadedHandler);
+        this.offLayerError(errorHandler);
+        reject(new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName()));
+      };
+
+      // Hook on the first loaded and error events to resolve the promise in question
+      this.onLayerFirstLoaded(loadedHandler);
+      this.onLayerError(errorHandler);
+    });
+  }
+
+  /**
    * Overridable function that gets the extent of an array of features.
    *
    * @param objectIds - The IDs of the features to calculate the extent from
@@ -1114,46 +1154,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   waitForRender(): Promise<void> {
     return new Promise((resolve) => {
       this.getOLLayer().once('postrender', () => resolve());
-    });
-  }
-
-  /**
-   * Utility function allowing to wait for the layer to be loaded at least once.
-   *
-   * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
-   * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
-   *
-   * @returns A promise that resolves once the layer has been loaded at least once
-   * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
-   */
-  waitForLoadedOnce(): Promise<void> {
-    // Sync check: already loaded once
-    if (this.loadedOnce) return Promise.resolve();
-
-    // Sync check: already in error
-    if (this.getLayerStatus() === 'error') {
-      return Promise.reject(new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName()));
-    }
-
-    // Subscribe to first-loaded and error events; the first to fire settles the promise.
-    // GV The handlers cross-reference each other to cross-unsubscribe, so they must be forward-declared.
-    return new Promise<void>((resolve, reject) => {
-      const loadedHandler: LayerBaseDelegate = (): void => {
-        this.offLayerFirstLoaded(loadedHandler);
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        this.offLayerError(errorHandler);
-        resolve();
-      };
-
-      const errorHandler: LayerErrorDelegate = (): void => {
-        this.offLayerFirstLoaded(loadedHandler);
-        this.offLayerError(errorHandler);
-        reject(new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName()));
-      };
-
-      // Hook on the first loaded and error events to resolve the promise in question
-      this.onLayerFirstLoaded(loadedHandler);
-      this.onLayerError(errorHandler);
     });
   }
 
