@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 43;
+    return 44;
   }
 
   /**
@@ -298,6 +298,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
     // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
     await this.#layerTester.testSetLayerVisibleIncludingParents();
+
+    // Test ESRI Dynamic junction geometry pairs to its own OBJECTID (#3636) — changes zoom, resets to initial extent in finalize
+    await this.#layerTester.testEsriDynamicJunctionGeometryPairing();
 
     // Done
     return;

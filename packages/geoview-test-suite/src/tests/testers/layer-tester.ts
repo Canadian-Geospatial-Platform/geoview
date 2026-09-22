@@ -23,6 +23,7 @@ import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/except
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -2544,6 +2545,104 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that ESRI Dynamic identify pairs each returned feature's geometry to its own OBJECTID (issue #3636).
+   *
+   * At a shared boundary/junction, identify returns multiple coincident polygons while the separate geometry query
+   * returns them in OBJECTID order. A previous positional assignment gave each entry a neighbour's geometry, so the
+   * highlighted polygon didn't match the attributes shown in Details. This queries a known junction and asserts that
+   * each returned entry's geometry matches the ground-truth geometry independently fetched for that entry's own
+   * OBJECTID (extent centers within tolerance — far below inter-territory distances).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testEsriDynamicJunctionGeometryPairing(): Promise<Test<{ comparisons: { oid: number; distance: number }[] }>> {
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'GNWT Boundaries';
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GNWT_BOUNDARIES_LAYER_ID}`;
+    const junctionLonLat = GVAbstractTester.GNWT_BOUNDARIES_JUNCTION_LONLAT;
+
+    return this.test(
+      `Test ESRI Dynamic junction geometry pairs to its own OBJECTID...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(
+          gvLayerId,
+          gvLayerName,
+          GVAbstractTester.GNWT_BOUNDARIES_URL_MAP_SERVER,
+          false,
+          [{ id: GVAbstractTester.GNWT_BOUNDARIES_LAYER_ID }]
+        );
+
+        // Add the layer to the map and wait until it's ready
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+
+        // Use the map's non-zoomed home extent so the identify pixel tolerance sweeps a wide enough ground area to
+        // return all the coincident polygons meeting at the junction (a tight zoom returns only the closest 2)
+        test.addStep('Zooming to the initial (home) extent...');
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(false);
+
+        // Query exactly at the shared boundary/junction
+        test.addStep('Querying at the junction coordinate...');
+        const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(junctionLonLat);
+        const promiseResult = await queryResults[layerPath].promiseResult;
+
+        // Wait for geometries (EsriDynamic assigns them after the initial result via a separate query)
+        await promiseResult?.promiseGeometries;
+        const results = promiseResult?.results ?? [];
+
+        // Ground truth: fetch each returned OBJECTID's own geometry (in the map projection) and measure the distance
+        // between its extent center and the paired entry's extent center
+        test.addStep('Fetching ground-truth geometry per OBJECTID and measuring pairing...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath) as GVEsriDynamic;
+        const outSR = this.getMapViewer().getProjectionNumber();
+        const oidField = layer.getLayerConfig().getOutfieldsPKNameOrDefault('OBJECTID');
+
+        const comparisons = await Promise.all(
+          results.map(async (entry) => {
+            const oid = Number(String(entry.feature?.get(oidField) ?? entry.fieldInfo?.[oidField]?.value).replace(',', ''));
+
+            // Independently fetch this OBJECTID's true geometry in the same projection as the map
+            const truth = await layer.getRecordsByOIDs([oid], outSR);
+            const truthExtent = truth[0]?.geometry?.getExtent();
+            const entryExtent = entry.extent;
+
+            // Distance between extent centers (missing extents -> Infinity so the assertion fails loudly)
+            let distance = Number.POSITIVE_INFINITY;
+            if (truthExtent && entryExtent) {
+              const truthCenterX = (truthExtent[0] + truthExtent[2]) / 2;
+              const truthCenterY = (truthExtent[1] + truthExtent[3]) / 2;
+              const entryCenterX = (entryExtent[0] + entryExtent[2]) / 2;
+              const entryCenterY = (entryExtent[1] + entryExtent[3]) / 2;
+              distance = Math.hypot(entryCenterX - truthCenterX, entryCenterY - truthCenterY);
+            }
+            return { oid, distance };
+          })
+        );
+
+        return { comparisons };
+      },
+      (test, result) => {
+        // The junction must return multiple coincident features to exercise the pairing
+        test.addStep('Verifying the junction returned multiple coincident features...');
+        Test.assertIsArrayLengthMinimal(result.comparisons, 2);
+
+        // Each entry's paired geometry must belong to its own OBJECTID (center within tolerance of ground truth)
+        result.comparisons.forEach((comparison) => {
+          test.addStep(`Verifying geometry pairing for OBJECTID ${comparison.oid} (distance ${Math.round(comparison.distance)} m)...`);
+          Test.assertIsEqualWithinTolerance(comparison.distance, 0, GVAbstractTester.JUNCTION_PAIRING_TOLERANCE_METERS);
+        });
+      },
+      async (test) => {
+        // Restore the initial view then remove the layer
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(false);
         this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );

@@ -76,7 +76,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
 | 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 43         | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 44         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`         | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 40         | Fully sequential            |
 | 4. Components     | `suite-ui`          | `UITester`                                                                                      | 2          | Parallel                    |
@@ -493,6 +493,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | #   | Method                                | Type | Description                                                                                        |
 | --- | ------------------------------------- | ---- | -------------------------------------------------------------------------------------------------- |
 | 35  | `testSetLayerVisibleIncludingParents` | test | Test hidden-by-parent child and setLayerVisibleIncludingParents parent crawl (hidden/available)... |
+
+#### 2.1.16 ESRI Dynamic Junction Geometry Pairing
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                   | Type | Description                                                                                                        |
+| --- | ---------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| 36  | `testEsriDynamicJunctionGeometryPairing` | test | Test ESRI Dynamic junction: each returned feature's geometry pairs to its own OBJECTID, not a neighbour (#3636)... |
 
 ---
 
