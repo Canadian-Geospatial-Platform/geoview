@@ -635,7 +635,10 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests adding a WMS Layer whose service metadata is served as a local XML capability document.
+   * Tests that adding the WMS landcover group creates a group-dimension layer.
+   *
+   * The test verifies that the selected group expands into WMS child layers and that the first child is marked as
+   * having been added through a group with a group time dimension.
    *
    * @returns A promise that resolves when the test completes
    */
@@ -648,7 +651,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Test
     return this.test(
-      `Test Adding WMS Landcover on map from a local XML metadata document...`,
+      `Test Adding WMS Landcover pointing to a group layer with a group time dimension...`,
       async (test) => {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
@@ -687,6 +690,68 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Redirect to helper to clean up and assert
         this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that adding the WMS landcover sub-layers directly does not create a group dimension.
+   *
+   * The test verifies that directly selected sub-layers remain regular WMS layers and are not marked as having been
+   * added through a group.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSLayerLandcoverGroupDimensionNegative(): Promise<Test<AbstractBaseGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
+    const layerPathGroup = `${gvLayerId}/base-group`;
+    const gvLayerName = 'Landcover 2010-2020 (XML)';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Landcover pointing to sub-layers directly, negating the group time dimension...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010 },
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2015 },
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2020 },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPathGroup);
+      },
+      (test, result) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPathGroup);
+
+        // Validate the layer is a group layer
+        Test.assertIsInstance(result, GVGroupLayer);
+
+        // Validate the group layer has at least 1 child
+        Test.assertIsArrayLengthMinimal(result.getLayers(), 1);
+
+        // Get the first child
+        const firstChild = result.getLayers()[0];
+
+        // Validate the first child is a WMS layer
+        Test.assertIsInstance(firstChild, GVWMS);
+
+        // Validate the layer has the 'was added as group' flag set
+        test.addStep('Validating the layer is NOT flagged as it was added via a group and time dimension is NOT a group dimension');
+        Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), false);
+        Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, false);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -2705,7 +2770,7 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Restore the initial view then remove the layer
         await this.getControllersRegistry().mapController.zoomToInitialExtent(false);
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
