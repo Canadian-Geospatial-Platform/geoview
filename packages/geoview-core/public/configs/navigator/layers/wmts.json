@@ -72,11 +72,7 @@
         "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "tileMatrixSet": "default028mm"
-          },
-          {
-            "layerId": "2",
+            "layerId": "WorldTimeZones",
             "tileMatrixSet": "default028mm"
           }
         ]

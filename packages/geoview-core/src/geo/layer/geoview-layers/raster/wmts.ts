@@ -348,89 +348,38 @@ export class WMTS extends AbstractGeoViewRaster {
     // If no metadata (e.g. no metadataAccessPath was provided), skip metadata processing entirely
     if (!metadata) return;
 
-    // Find the TileMatrixSet and Layer in the metadata that corresponds to the layer entry config
+    // Find the Layer entry in the capabilities that corresponds to this layer entry config
     const metadataLayerFound = this.findLayerMetadataInCapability(layerConfig.layerId, metadata);
 
-    let tileMatrixIdentifier = layerConfig.tileMatrixSet;
-    if (!tileMatrixIdentifier && metadataLayerFound?.TileMatrixSetLink) {
-      if (Array.isArray(metadataLayerFound.TileMatrixSetLink)) {
-        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink[0].TileMatrixSet;
-      } else {
-        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink.TileMatrixSet;
-      }
-    }
+    // Resolve which TileMatrixSet identifier applies (configured, or derived from the layer's TileMatrixSetLink)
+    const tileMatrixIdentifier = WMTS.#resolveTileMatrixIdentifier(layerConfig, metadataLayerFound);
 
-    // Find the TileMatrixSet that corresponds to the (configured or derived) identifier. When the capabilities expose a
-    // single TileMatrixSet, still validate its identifier matches so an invalid configured tileMatrixSet is reported.
-    const tileMatrixSets = metadata?.Contents?.TileMatrixSet;
-    let metadataTileMatrixFound: TypeWMTSTileMatrixSet | undefined;
-    if (Array.isArray(tileMatrixSets)) {
-      metadataTileMatrixFound = tileMatrixSets.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier);
-    } else {
-      const singleTileMatrix = tileMatrixSets as TypeWMTSTileMatrixSet | undefined;
-      metadataTileMatrixFound =
-        singleTileMatrix && singleTileMatrix['ows:Identifier'] === tileMatrixIdentifier ? singleTileMatrix : undefined;
-    }
+    // Find the TileMatrixSet metadata matching that identifier
+    const metadataTileMatrixFound = WMTS.#findTileMatrixSetInCapability(metadata, tileMatrixIdentifier);
 
-    // If not found
+    // Both the Layer and its TileMatrixSet must be found in the capabilities
     if (!metadataTileMatrixFound || !metadataLayerFound) {
-      // Throw
       throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `TileMatrixSet/Layer`);
     }
 
-    // Check if there is a TileMatrixSetLink in the layer metadata that matches the tileMatrixSet of the layer entry config
+    // When the tileMatrixSet wasn't explicitly configured, validate the derived one is genuinely linked to the layer
     if (!layerConfig.tileMatrixSet) {
-      const layerMetadataTileMatrixSetLink: boolean = Array.isArray(metadataLayerFound.TileMatrixSetLink)
-        ? metadataLayerFound.TileMatrixSetLink.some((link) => link.TileMatrixSet === tileMatrixIdentifier)
-        : metadataLayerFound.TileMatrixSetLink.TileMatrixSet === tileMatrixIdentifier;
-
-      // If not found
-      if (!layerMetadataTileMatrixSetLink) {
-        // Throw
-        throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `TileMatrixSetLink`);
-      }
+      WMTS.#validateTileMatrixSetLink(layerConfig, metadataLayerFound, tileMatrixIdentifier);
     }
 
-    // If the layer entry config doesn't have a data access path, try to get it from the metadata's GetTile operation
+    // Derive the data access path from the capabilities' GetTile operation if not already configured
     if (!layerConfig.hasDataAccessPath()) {
-      const getTileOperation = metadata?.['ows:OperationsMetadata']?.['ows:Operation']?.find(
-        (operation) => operation['@attributes'].name === 'GetTile'
-      );
-
-      const tileLink = Array.isArray(getTileOperation?.['ows:DCP']['ows:HTTP']?.['ows:Get'])
-        ? getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.find(
-            (get) => get['ows:Constraint']?.['ows:AllowedValues']?.['ows:Value'] === 'KVP' // KVP encoding is default
-          )?.['@attributes']?.['xlink:href']
-        : getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.['@attributes']?.['xlink:href'];
-
-      // Set the data access path from the metadata if it wasn't already set and a link was found in the metadata
-      if (tileLink) {
-        layerConfig.setDataAccessPath(tileLink);
-      } else {
-        // Throw
-        throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `KVP GetTile`);
-      }
+      WMTS.#initDataAccessPathFromCapability(layerConfig, metadata);
     }
 
-    // If the metadata layer has a bounding box, set it as the initial bounds of the layer entry config
-    if (metadataLayerFound['ows:WGS84BoundingBox']) {
-      const lowerCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:LowerCorner'];
-      const upperCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:UpperCorner'];
-      const lowerCornerCoords = typeof lowerCorner === 'string' ? lowerCorner.split(' ').map(Number) : lowerCorner;
-      const upperCornerCoords = typeof upperCorner === 'string' ? upperCorner.split(' ').map(Number) : upperCorner;
-      layerConfig.initInitialSettingsBoundsFromMetadata([...lowerCornerCoords, ...upperCornerCoords] as [number, number, number, number]);
-    }
+    // Set the initial bounds from the capabilities' bounding box, if any
+    WMTS.#initBoundsFromCapability(layerConfig, metadataLayerFound);
 
-    // Extract the projection code from the TileMatrixSet's SupportedCRS.
-    let metadataProjectionCode = metadataTileMatrixFound['ows:SupportedCRS'].split(':').slice(-1)[0];
-    if (metadataProjectionCode === 'CRS84') metadataProjectionCode = '4326'; // CRS84 is equivalent to EPSG:4326
-
-    // Set the metadata projection on the layer config
-    await layerConfig.initProjectionFromMetadata(metadataProjectionCode);
+    // Set the metadata projection on the layer config, extracted from the TileMatrixSet's SupportedCRS
+    await layerConfig.initProjectionFromMetadata(WMTS.#extractProjectionCode(metadataTileMatrixFound));
 
     // Set the metadata on the layer config
-    const layerMetadata = { Layer: metadataLayerFound, TileMatrixSet: metadataTileMatrixFound };
-    layerConfig.setLayerMetadata(layerMetadata);
+    layerConfig.setLayerMetadata({ Layer: metadataLayerFound, TileMatrixSet: metadataTileMatrixFound });
   }
 
   /**
@@ -519,6 +468,131 @@ export class WMTS extends AbstractGeoViewRaster {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Resolves the TileMatrixSet identifier to use for a layer: the configured one if present, otherwise the
+   * one derived from the layer metadata's TileMatrixSetLink (first link when there are several).
+   *
+   * @param layerConfig - The layer entry configuration
+   * @param metadataLayerFound - The Layer metadata found in the capabilities, if any
+   * @returns The resolved TileMatrixSet identifier, or undefined when none could be determined
+   */
+  static #resolveTileMatrixIdentifier(
+    layerConfig: OgcWmtsLayerEntryConfig,
+    metadataLayerFound: TypeMetadataWMTSLayer | undefined
+  ): string | undefined {
+    // Configured value always wins
+    if (layerConfig.tileMatrixSet) return layerConfig.tileMatrixSet;
+
+    // Otherwise derive it from the layer's TileMatrixSetLink
+    if (!metadataLayerFound?.TileMatrixSetLink) return undefined;
+    return Array.isArray(metadataLayerFound.TileMatrixSetLink)
+      ? metadataLayerFound.TileMatrixSetLink[0].TileMatrixSet
+      : metadataLayerFound.TileMatrixSetLink.TileMatrixSet;
+  }
+
+  /**
+   * Finds the TileMatrixSet metadata matching the given identifier in the capabilities.
+   *
+   * When the capabilities expose a single TileMatrixSet, its identifier is still validated against
+   * `tileMatrixIdentifier` so that an invalid configured tileMatrixSet is correctly reported as not found.
+   *
+   * @param metadata - The WMTS capabilities metadata
+   * @param tileMatrixIdentifier - The TileMatrixSet identifier to look for
+   * @returns The matching TileMatrixSet metadata, or undefined when not found
+   */
+  static #findTileMatrixSetInCapability(
+    metadata: TypeMetadataWMTSCapabilities,
+    tileMatrixIdentifier: string | undefined
+  ): TypeWMTSTileMatrixSet | undefined {
+    const tileMatrixSets = metadata.Contents?.TileMatrixSet;
+
+    if (Array.isArray(tileMatrixSets)) {
+      return tileMatrixSets.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier);
+    }
+
+    const singleTileMatrix = tileMatrixSets as TypeWMTSTileMatrixSet | undefined;
+    return singleTileMatrix && singleTileMatrix['ows:Identifier'] === tileMatrixIdentifier ? singleTileMatrix : undefined;
+  }
+
+  /**
+   * Validates that the resolved TileMatrixSet identifier is genuinely linked to the layer in the capabilities.
+   *
+   * Only relevant when the tileMatrixSet wasn't explicitly configured (in which case the identifier was derived
+   * and trusted by construction).
+   *
+   * @param layerConfig - The layer entry configuration
+   * @param metadataLayerFound - The Layer metadata found in the capabilities
+   * @param tileMatrixIdentifier - The resolved TileMatrixSet identifier to validate
+   * @throws {LayerWMTSMetadataError} When no TileMatrixSetLink on the layer matches the identifier
+   */
+  static #validateTileMatrixSetLink(
+    layerConfig: OgcWmtsLayerEntryConfig,
+    metadataLayerFound: TypeMetadataWMTSLayer,
+    tileMatrixIdentifier: string | undefined
+  ): void {
+    const hasMatchingLink = Array.isArray(metadataLayerFound.TileMatrixSetLink)
+      ? metadataLayerFound.TileMatrixSetLink.some((link) => link.TileMatrixSet === tileMatrixIdentifier)
+      : metadataLayerFound.TileMatrixSetLink.TileMatrixSet === tileMatrixIdentifier;
+
+    if (!hasMatchingLink) {
+      throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `TileMatrixSetLink`);
+    }
+  }
+
+  /**
+   * Derives the data access path from the capabilities' GetTile operation (KVP encoding) and sets it on the layer config.
+   *
+   * @param layerConfig - The layer entry configuration to set the data access path on
+   * @param metadata - The WMTS capabilities metadata
+   * @throws {LayerWMTSMetadataError} When no KVP GetTile link could be found in the capabilities
+   */
+  static #initDataAccessPathFromCapability(layerConfig: OgcWmtsLayerEntryConfig, metadata: TypeMetadataWMTSCapabilities): void {
+    const getTileOperation = metadata['ows:OperationsMetadata']?.['ows:Operation']?.find(
+      (operation) => operation['@attributes'].name === 'GetTile'
+    );
+
+    const tileLink = Array.isArray(getTileOperation?.['ows:DCP']['ows:HTTP']?.['ows:Get'])
+      ? getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.find(
+          (get) => get['ows:Constraint']?.['ows:AllowedValues']?.['ows:Value'] === 'KVP' // KVP encoding is default
+        )?.['@attributes']?.['xlink:href']
+      : getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.['@attributes']?.['xlink:href'];
+
+    if (!tileLink) {
+      throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `KVP GetTile`);
+    }
+
+    layerConfig.setDataAccessPath(tileLink);
+  }
+
+  /**
+   * Sets the layer entry config's initial bounds from the capabilities' WGS84 bounding box, if present.
+   *
+   * @param layerConfig - The layer entry configuration to set the bounds on
+   * @param metadataLayerFound - The Layer metadata found in the capabilities
+   */
+  static #initBoundsFromCapability(layerConfig: OgcWmtsLayerEntryConfig, metadataLayerFound: TypeMetadataWMTSLayer): void {
+    const boundingBox = metadataLayerFound['ows:WGS84BoundingBox'];
+    if (!boundingBox) return;
+
+    const lowerCorner = boundingBox['ows:LowerCorner'];
+    const upperCorner = boundingBox['ows:UpperCorner'];
+    const lowerCornerCoords = typeof lowerCorner === 'string' ? lowerCorner.split(' ').map(Number) : lowerCorner;
+    const upperCornerCoords = typeof upperCorner === 'string' ? upperCorner.split(' ').map(Number) : upperCorner;
+    layerConfig.initInitialSettingsBoundsFromMetadata([...lowerCornerCoords, ...upperCornerCoords] as [number, number, number, number]);
+  }
+
+  /**
+   * Extracts the projection code from a TileMatrixSet's SupportedCRS, normalizing CRS84 to EPSG:4326.
+   *
+   * @param metadataTileMatrixFound - The TileMatrixSet metadata to read the SupportedCRS from
+   * @returns The extracted projection code
+   */
+  static #extractProjectionCode(metadataTileMatrixFound: TypeWMTSTileMatrixSet): string {
+    const projectionCode = metadataTileMatrixFound['ows:SupportedCRS'].split(':').slice(-1)[0];
+    // CRS84 is equivalent to EPSG:4326
+    return projectionCode === 'CRS84' ? '4326' : projectionCode;
+  }
 
   /**
    * Creates a WMTS source from metadata (TileMatrixSet and Layer info from GetCapabilities).
