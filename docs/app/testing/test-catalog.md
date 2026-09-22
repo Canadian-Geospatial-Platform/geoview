@@ -85,7 +85,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`    | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`      | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                     |                                                                                                 | **232**    |                             |
+| **Total**         |                     |                                                                                                 | **233**    |                             |
 
 ---
 
@@ -392,9 +392,10 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 10  | `testAddWMSLayerWithOWSMundialis`       | test      | Test Adding WMS Mundialis on map...                                                  |
 | 11  | `testAddWMSLayerWithDatacubeMSI`        | test      | Test Adding WMS Datacube MSI on map...                                               |
 | 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
-| 13  | `testAddWMSLayerLandcoverXML`           | test      | Test Adding WMS Landcover on map from a local XML metadata document...              |
-| 14  | `testAddWMSDuplicateGroupNames`         | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)            |
-| 15  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
+| 13  | `testAddWMSLayerLandcoverGroupDimension`         | test      | Test Adding WMS Landcover group with a group time dimension...                     |
+| 14  | `testAddWMSLayerLandcoverGroupDimensionNegative` | test      | Test Adding WMS Landcover sub-layers directly without a group time dimension...   |
+| 15  | `testAddWMSDuplicateGroupNames`                   | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)         |
+| 16  | `testAddWMSBadUrl`                                | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
 #### 2.1.5 WFS — Lifecycle
 
