@@ -11,7 +11,6 @@ import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/laye
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /** Values captured while testing time-slider reset behavior. */
 type TimeSliderResetResult = {
@@ -244,15 +243,10 @@ export class TimeSliderTester extends GVAbstractTester {
 
         // Wait for the group and its sub-layers to be registered and loaded
         test.addStep('Waiting for the group and its sub-layers to be registered and loaded...');
-        await this.getControllersRegistry().layerController.waitForLayerRegistered(groupPath);
-        const layers = await Promise.all(
-          [year2010Path, year2015Path, year2020Path].map((path) =>
-            this.getControllersRegistry().layerController.waitForLayerRegistered(path)
-          )
-        );
+        const groupLayer = await this.getControllersRegistry().layerController.waitForLayerRegistered(groupPath);
 
         // Wait for each layer to be loaded at least once
-        await Promise.all(layers.map((layer) => (layer as AbstractGVLayer).waitForLoadedOnce()));
+        await groupLayer.waitForLoadedOnce();
 
         // Wait for the legend to be queried for each sub-layer
         test.addStep('Waiting for the legend to be queried for each sub-layer...');
