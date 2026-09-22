@@ -226,6 +226,15 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID + '/0';
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH + '/4';
 
+  /** GNWT administrative boundaries (ESRI Dynamic) — adjacent polygons meet at shared junctions (issue #3636) */
+  static readonly GNWT_BOUNDARIES_URL_MAP_SERVER: string =
+    'https://www.apps.geomatics.gov.nt.ca/arcgis/rest/services/GNWT/Boundaries_LCC/MapServer/';
+  static readonly GNWT_BOUNDARIES_LAYER_ID: string = '0';
+  /** A known shared boundary/junction where several GNWT boundary polygons meet, in [lon, lat] */
+  static readonly GNWT_BOUNDARIES_JUNCTION_LONLAT: Coordinate = [-101.513948, 59.990713];
+  /** Tolerance (projection units / metres in EPSG:3978 and EPSG:3857) for matching a paired geometry to its own OBJECTID's ground-truth extent center */
+  static readonly JUNCTION_PAIRING_TOLERANCE_METERS: number = 50000;
+
   /** Historical Flood */
   static readonly HISTORICAL_FLOOD_URL_MAP_SERVER: string =
     'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer';

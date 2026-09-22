@@ -486,8 +486,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
       promiseGeometries
         .then((featuresJSON) => {
+          // ESRI `query` returns features in OBJECTID order, which differs from the identify order used to build
+          // featureInfoResult.results. Build an OBJECTID -> geometry lookup so we can pair each geometry to its own
+          // entry by OBJECTID instead of by array index (issue #3636 — highlight showed a neighbouring polygon).
+          const geometryByObjectId = new Map<string, Geometry | undefined>();
+
           // Loop on the features
-          featuresJSON.features.forEach((feat, index) => {
+          featuresJSON.features.forEach((feat) => {
             // If cancelled
             // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
             if (abortController?.signal.aborted) {
@@ -513,12 +518,21 @@ export class GVEsriDynamic extends AbstractGVRaster {
             // Create the geometry from the (first?) type
             const newGeom: Geometry | undefined = geomType ? GeometryApi.createGeometryFromType(geomType, coordinates) : undefined;
 
-            // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
-            // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
-            // We assume order of arrayOfFeatureInfoEntries is the same as featuresJSON.features as they are processed in the same order
-            const entry = featureInfoResult.results[index];
+            // Key the geometry by its OBJECTID (the query uses outFields=* so the OBJECTID is present in attributes)
+            geometryByObjectId.set(String(feat.attributes?.[oidField]).replace(',', ''), newGeom);
+          });
+
+          // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
+          // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
+          // Assign each geometry to the matching entry by OBJECTID, so the highlighted geometry always corresponds to the
+          // attributes shown in the Details panel — including when a single click returns multiple coincident features.
+          featureInfoResult.results.forEach((entry) => {
+            const entryObjectId = String(entry.feature?.get(oidField) ?? entry.fieldInfo?.[oidField]?.value).replace(',', '');
+            const newGeom = geometryByObjectId.get(entryObjectId);
             entry.feature?.setGeometry(newGeom);
+            // eslint-disable-next-line no-param-reassign
             entry.geometry = newGeom;
+            // eslint-disable-next-line no-param-reassign
             entry.extent = newGeom?.getExtent();
           });
         })

@@ -26,7 +26,7 @@
 
       <!-- Map 1: Multiple queryable layers for details panel -->
       <h5>Map 1 — Details Panel (Multiple Queryable Layers)</h5>
-      <p>Click on features to open details panel. Multiple overlapping layers for multi-feature query. Details in app bar.</p>
+      <p>Click on features to open details panel. Multiple overlapping layers for multi-feature query. Details in app bar. The GNWT Boundaries layer (ESRI Dynamic) provides shared boundaries/junctions for the highlight-matches-details test (#3636).</p>
 
       <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
         <button onclick="clearHighlights()">Clear All Highlights</button>
@@ -55,6 +55,13 @@
                 'geoviewLayerName': 'CESI — uniqueValue',
                 'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
                 'listOfLayerEntryConfig': [{ 'layerId': '1' }]
+              },
+              {
+                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerId': 'nwtBoundaries',
+                'geoviewLayerName': 'GNWT Boundaries',
+                'metadataAccessPath': 'https://www.apps.geomatics.gov.nt.ca/arcgis/rest/services/GNWT/Boundaries_LCC/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
               }
             ]
           },
