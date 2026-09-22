@@ -58,7 +58,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 39;
+    return 40;
   }
 
   /**
@@ -105,6 +105,10 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Test empty footerBar/appBar tabs has no footer or app bar
     const pEmptyFooterBarAppBar = this.#mapConfigTester.testEmptyFooterBarAppBarTabsHasNoFooter();
     await pEmptyFooterBarAppBar;
+
+    // Test panels declared in both appBar and footerBar are removed from the footer bar
+    const pDuplicatedPanelsRemovedFromFooter = this.#mapConfigTester.testDuplicatedPanelsRemovedFromFooter();
+    await pDuplicatedPanelsRemovedFromFooter;
 
     // Test navBar with null has defaults
     const pNoNavBarDefaults = this.#mapConfigTester.testNoNavBarHasDefaults();
@@ -238,6 +242,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pDataTableInAppBar,
       pNoFooterBarAppBarDefaults,
       pEmptyFooterBarAppBar,
+      pDuplicatedPanelsRemovedFromFooter,
       pNoNavBarDefaults,
       pEmptyNavBarZoomRotate,
       pInitialViewLayerIds,
