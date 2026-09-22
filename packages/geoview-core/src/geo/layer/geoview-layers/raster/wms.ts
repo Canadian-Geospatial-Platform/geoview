@@ -209,7 +209,7 @@ export class WMS extends AbstractGeoViewRaster {
           // Flag that the WMS layer id that was processed was a group
           config.setAddedViaGroup(true);
         } else {
-          // Log the warning
+          // Log a warning, shouldn't happen in normal scenarios
           logger.logWarning('Expected an instance of OgcWmsLayerEntryConfig but received a different config type.');
         }
       });

@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "Configuration for WMS CDT Landcover layers. Landcover 2010-2020 (XML) reads the capabilities from the landcover_groupe.xml file and explicitly lists the 3 sub-layers. Landcover 2010-2020 Group (XML) reads the same file but adds the landcover_groupe group directly, exploding its sub-layers on-the-fly. Landcover 2010, 2020 (XML) reads the same file but only shows 2 of the 3 sub-layers, demonstrating the time-slider adjusts to the 2 dates instead of 3. Landcover Old reads the capabilities from the landcover_2010_15_20_en endpoint directly."
+    "description": "Configuration for WMS CDT Landcover layers. Landcover 2010-2020 Group (XML) reads the capabilities from the landcover_groupe.xml file and adds the landcover_groupe group directly, exploding its sub-layers (2010, 2015, 2020) on-the-fly. Landcover 2010-2020 Distinct (XML) reads the same file but explicitly lists the 3 sub-layers, with each initially hidden."
   },
   "map": {
     "viewSettings": {
