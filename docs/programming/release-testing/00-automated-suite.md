@@ -34,8 +34,8 @@ rush serve
 | 1   | `suite-core`                    | 14      | [ ] Pass |
 | 2   | `suite-config`                  | 39      | [ ] Pass |
 | 3   | `suite-utilities`               | 53      | [ ] Pass |
-| 4   | `suite-layer` (LCC — EPSG:3978) | 43      | [ ] Pass |
-| 5   | `suite-layer` (WM — EPSG:3857)  | 43      | [ ] Pass |
+| 4   | `suite-layer` (LCC — EPSG:3978) | 44      | [ ] Pass |
+| 5   | `suite-layer` (WM — EPSG:3857)  | 44      | [ ] Pass |
 | 6   | `suite-map`                     | 16      | [ ] Pass |
 | 7   | `suite-map-config`              | 40      | [ ] Pass |
 | 8   | `suite-ui`                      | 2       | [ ] Pass |
@@ -44,7 +44,7 @@ rush serve
 | 11  | `suite-geochart`                | 2       | [ ] Pass |
 | 12  | `suite-swiper`                  | 2       | [ ] Pass |
 | 13  | `suite-time-slider`             | 2       | [ ] Pass |
-|     | **Total**                       | **275** |          |
+|     | **Total**                       | **277** |          |
 
 ## What to Do if a Suite Fails
 
