@@ -1807,7 +1807,7 @@ export class MapController extends AbstractMapViewerController {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo));
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo!);
+    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo);
 
     // Construct geoview layer config
     const newGeoviewLayerConfig: MapConfigLayerEntry =
@@ -1896,7 +1896,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo!);
+    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo);
 
     // Clone the source object
     let source;
@@ -1915,7 +1915,7 @@ export class MapController extends AbstractMapViewerController {
     if (source?.dataAccessPath && isGeocore && overrideGeocoreServiceNames !== true) source.dataAccessPath = undefined;
 
     const layerStyle =
-      legendLayerInfo!.styleConfig && (!isGeocore || overrideGeocoreServiceNames === true) ? legendLayerInfo!.styleConfig : undefined;
+      legendLayerInfo?.styleConfig && (!isGeocore || overrideGeocoreServiceNames === true) ? legendLayerInfo.styleConfig : undefined;
 
     const layerText = layerEntryConfig instanceof VectorLayerEntryConfig ? layerEntryConfig.getLayerText() : undefined;
 
@@ -2101,15 +2101,20 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param mapId - The map identifier
    * @param layerEntryConfig - Layer entry config for the layer
-   * @param legendLayerInfo - Legend layer info for the layer
+   * @param legendLayerInfo - Legend layer info for the layer; may be undefined if the layer's legend entry hasn't
+   * propagated to the store yet (e.g. a concurrent add/remove on the same map), in which case sensible defaults are used
    * @returns Initial settings object
    */
-  static #getInitialSettings(mapId: string, layerEntryConfig: ConfigBaseClass, legendLayerInfo: TypeLegendLayer): TypeLayerInitialSettings {
+  static #getInitialSettings(
+    mapId: string,
+    layerEntryConfig: ConfigBaseClass,
+    legendLayerInfo: TypeLegendLayer | undefined
+  ): TypeLayerInitialSettings {
     return {
       states: {
-        visible: legendLayerInfo.visible,
+        visible: legendLayerInfo?.visible ?? true,
         opacity: legendLayerInfo?.opacity ?? 1,
-        legendCollapsed: legendLayerInfo.legendCollapsed,
+        legendCollapsed: legendLayerInfo?.legendCollapsed ?? false,
         queryable: getStoreLayerQueryable(mapId, layerEntryConfig.layerPath),
         hoverable: getStoreLayerHoverable(mapId, layerEntryConfig.layerPath),
       },

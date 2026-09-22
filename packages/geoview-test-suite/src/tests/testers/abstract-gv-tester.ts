@@ -883,7 +883,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** WMTS — ArcGIS World Timezones sample service */
   static readonly WORLD_TIMEZONES_WMTS_URL: string =
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS';
-  static readonly WORLD_TIMEZONES_WMTS_URL_LAYER_ID: string = '0';
+  static readonly WORLD_TIMEZONES_WMTS_URL_LAYER_ID: string = 'WorldTimeZones';
   static readonly WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID: string = 'default028mm';
 
   // GV: Can't add the icon property here, because it's a randomly generated color depending on the layers processed on the map

@@ -70,7 +70,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
+    const pDevTest0 = this.#layerTester.testAddWMTSWorldTimezones();
 
     // Resolve when all
     return Promise.all([pDevTest0]);

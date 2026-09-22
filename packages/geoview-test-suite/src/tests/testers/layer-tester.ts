@@ -1765,6 +1765,7 @@ export class LayerTester extends GVAbstractTester {
   testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
     // The config
     const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
+    const layerPath = 'geojsonLYR1/point-feature-group';
 
     // Expected config
     const expectedResults = {
@@ -1779,6 +1780,9 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Add the layer to the map and get the AbstractGeoViewLayer
         await this.helperStepAddLayerOnMap(test, layerConfig);
+
+        // Wait for the layer to be loaded at least once
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
         // Return created map config
         return this.getControllersRegistry().mapController.createMapConfigFromMapState();
@@ -1807,7 +1811,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, 'geojsonLYR1/point-feature-group');
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
