@@ -96,8 +96,6 @@ export interface TypeFilterLayerConfig {
   layerName?: string;
   /** Whether filtering is enabled for this layer. */
   enabled: boolean;
-  /** Whether layer sections are collapsible. */
-  collapsible?: boolean;
   /** Default collapsed state for layer sections. */
   defaultCollapsed?: boolean;
   /** Array of filterable attributes. */
@@ -192,9 +190,8 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
       filterPanelConfig.layers.forEach((layer) => {
         if (!layer.enabled) return;
 
-        // If not collapsible, must be open (false). Otherwise use defaultCollapsed.
-        const collapsible = layer.collapsible ?? true;
-        initialCollapsedState[layer.layerPath] = collapsible ? (layer.defaultCollapsed ?? false) : false;
+        // Set the collapsed state based on the defaultCollapsed config.
+        initialCollapsedState[layer.layerPath] = layer.defaultCollapsed ?? false;
       });
 
       set({

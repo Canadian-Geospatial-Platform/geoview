@@ -47,6 +47,10 @@ interface MultiselectFilterProps {
   attribute: TypeFilterAttribute;
   /** Current filter value. */
   value: TypeFilterValue;
+  /** The name of the layer this filter belongs to. */
+  layerPath: string;
+  /** The display name of the filter. */
+  filterName: string | undefined;
   /** Callback when value changes. */
   onChange: (event: MultiselectFilterChangeEvent) => void;
   /** Unique values available for selection. */
@@ -103,7 +107,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/multiselect-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading } = props;
+  const { attribute, value, onChange, uniqueValues, loading, layerPath, filterName } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
@@ -167,7 +171,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   if (loading) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -180,7 +184,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   if (uniqueValues.length === 0) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -192,7 +196,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+      <Typography id={`multiselect-${layerPath}-${attribute.fieldName}-label`} variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
       <Box sx={memoSxClasses.filterMultiselectWrapper}>
@@ -202,14 +206,22 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
               value={searchString}
               onChange={handleSearchChange}
               placeholder={t('FilterPanel.searchPlaceholder')}
-              aria-label={t('FilterPanel.searchAriaLabel', { name: attribute.displayLabel })}
+              slotProps={{
+                htmlInput: {
+                  'aria-label': t('FilterPanel.searchAriaLabel', { attributeName: attribute.displayLabel, filterName: filterName }),
+                },
+              }}
               size="small"
               fullWidth
               variant="standard"
             />
           </Box>
         )}
-        <Box sx={memoSxClasses.filterMultiselectContainer}>
+        <Box
+          sx={memoSxClasses.filterMultiselectContainer}
+          role="group"
+          aria-labelledby={`multiselect-${layerPath}-${attribute.fieldName}-label`}
+        >
           {memoFilteredValues.length === 0 && (
             <Typography variant="body2" sx={memoSxClasses.filterLoading}>
               {t('FilterPanel.noSearchResults')}

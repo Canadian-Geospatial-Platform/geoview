@@ -62,7 +62,6 @@ Add the filter panel to your map configuration:
         ],
         "settings": {
           "title": "Filter Layers",
-          "collapsible": true,
           "defaultCollapsed": false,
           "showApplyButton": false,
           "showResetButton": true,
@@ -136,7 +135,6 @@ Date range selection
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `title` | string | "Filter Layers" | Panel title |
-| `collapsible` | boolean | true | Allow collapsing layer sections |
 | `defaultCollapsed` | boolean | false | Default collapsed state |
 | `showApplyButton` | boolean | false | Show apply button |
 | `showResetButton` | boolean | true | Show reset button |

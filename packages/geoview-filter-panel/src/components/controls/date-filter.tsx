@@ -182,7 +182,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   if (loading) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -195,7 +195,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   if (!memoBounds) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -207,7 +207,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+      <Typography variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
 
@@ -221,6 +221,10 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
           min={memoBounds.min}
           max={memoBounds.max}
           step={1}
+          getAriaLabel={(index: number) =>
+            t(index === 0 ? 'FilterPanel.dateMinValue' : 'FilterPanel.dateMaxValue', { attribute: attribute.displayLabel })
+          }
+          onValueDisplayAriaLabel={formatValue}
         />
       </Box>
 
