@@ -36,9 +36,6 @@ type SwiperRenderIsolationResult = {
  * Main Swiper testing class.
  */
 export class SwiperTester extends GVAbstractTester {
-  /** Maximum time to wait for swiper render handlers to attach or detach. */
-  static readonly SWIPER_RENDER_HANDLER_TIMEOUT = 10000;
-
   /** Higher-level WMS layer selector used to verify descendant path resolution. */
   static readonly SWIPER_WMS_ROOT_LAYER_PATH = 'swiperWms';
 
@@ -92,7 +89,7 @@ export class SwiperTester extends GVAbstractTester {
             (targetOLLayer.getListeners('prerender')?.length ?? 0) === targetPreRenderBaseline + 1 &&
             (targetOLLayer.getListeners('postrender')?.length ?? 0) === targetPostRenderBaseline + 1
           );
-        }, SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT);
+        });
 
         const targetPreRenderActive = targetOLLayer.getListeners('prerender')?.length ?? 0;
         const targetPostRenderActive = targetOLLayer.getListeners('postrender')?.length ?? 0;
@@ -112,7 +109,7 @@ export class SwiperTester extends GVAbstractTester {
             (targetOLLayer.getListeners('prerender')?.length ?? 0) === targetPreRenderBaseline &&
             (targetOLLayer.getListeners('postrender')?.length ?? 0) === targetPostRenderBaseline
           );
-        }, SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT);
+        });
 
         return {
           targetPreRenderBaseline,

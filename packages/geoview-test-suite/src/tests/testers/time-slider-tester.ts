@@ -1,5 +1,6 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { TestSkippedError } from '../core/exceptions';
 import {
   addStoreTimeSliderLayer,
   getStoreTimeSliderLayer,
@@ -10,7 +11,6 @@ import {
 import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 import { generateId } from 'geoview-core/core/utils/utilities';
-import { TestSkippedError } from 'geoview-core/core/exceptions';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
 /** Values captured while testing time-slider reset behavior. */
