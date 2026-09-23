@@ -12,7 +12,7 @@ import {
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
-
+import type { DateTimeStepUnit } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { visuallyHidden } from 'geoview-core/ui/style/default';
@@ -20,6 +20,10 @@ import { Switch } from 'geoview-core/ui/switch/switch';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { SxStyles } from 'geoview-core/ui/style/types';
+
+/** Number of equal increments used when no continuous step can be inferred. */
+// TODO: CHECK - Is this still used in a particular usecase?
+const DEFAULT_CONTINUOUS_STEP_COUNT = 20;
 
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
@@ -98,6 +102,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     delay,
     locked,
     reversed,
+    stepUnit,
     displayDateFormat: displayDateFormatFromStore,
     displayDateFormatShort: displayDateFormatShortFromStore,
     displayDateTimezone: displayDateTimezoneFromStore,
@@ -129,40 +134,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const layersAreLoading = useStoreLayerAreLayersLoading();
 
-  const timeStampRange = range.map((entry: string | number | Date) =>
-    typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
-  );
+  /** The lock button tooltip for the current direction and lock state. */
+  let lockTooltip: string;
+  if (reversed) lockTooltip = locked ? t('timeSlider.slider.unlockRight') : t('timeSlider.slider.lockRight');
+  else lockTooltip = locked ? t('timeSlider.slider.unlockLeft') : t('timeSlider.slider.lockLeft');
 
-  // If continous and range is lower then 4, create interval with markers at each 25%
-  let timeMarks: number[] = [];
-  if (range.length < 4 && !discreteValues) {
-    const interval = (DateMgt.convertToMilliseconds(range[range.length - 1]) - DateMgt.convertToMilliseconds(range[0])) / 4;
-    timeMarks = [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
-  } else if (range.length < 6 || singleHandle || discreteValues) timeMarks = timeStampRange;
-  else {
-    timeMarks = [
-      minAndMax[0],
-      DateMgt.convertToMilliseconds(range[Math.round(range.length / 4)]),
-      DateMgt.convertToMilliseconds(range[Math.round(range.length / 2)]),
-      DateMgt.convertToMilliseconds(range[Math.round((3 * range.length) / 4)]),
-      minAndMax[1],
-    ];
-  }
-
-  const sliderMarks = [];
-  for (let i = 0; i < timeMarks.length; i++) {
-    sliderMarks.push({
-      value: timeMarks[i],
-      // Format the date using displayDateFormatShort
-      label: DateMgt.formatDate(
-        timeMarks[i],
-        displayDateFormatShort[displayLanguage],
-        displayLanguage,
-        displayDateTimezone,
-        serviceDateTemporalMode
-      ),
-    });
-  }
+  /** The lock button label for the current direction. */
+  const lockLabel = reversed ? t('timeSlider.slider.lockRight') : t('timeSlider.slider.lockLeft');
 
   /** Provides a unique ID to associate the time delay label with its select control for accessibility. */
   const timeDelayId = useId();
@@ -174,6 +152,47 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // States
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [values, setValues] = useState<number[]>(storeValues);
+
+  /** Converts the configured range values into slider timestamps. */
+  const memoTimeStampRange = useMemo((): number[] => {
+    logger.logTraceUseMemo('TIME-SLIDER - memoTimeStampRange', range);
+    return range.map((entry: string | number | Date) => (typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry));
+  }, [range]);
+
+  /** Builds sparse visual marks without expanding long calendar ranges. */
+  const memoTimeMarks = useMemo((): number[] => {
+    logger.logTraceUseMemo('TIME-SLIDER - memoTimeMarks', range, discreteValues, singleHandle);
+
+    if (range.length < 4 && !discreteValues) {
+      const interval = (memoTimeStampRange[memoTimeStampRange.length - 1] - memoTimeStampRange[0]) / 4;
+      return [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
+    }
+
+    if (range.length < 6 || singleHandle || discreteValues) return memoTimeStampRange;
+
+    return [
+      minAndMax[0],
+      memoTimeStampRange[Math.round(range.length / 4)],
+      memoTimeStampRange[Math.round(range.length / 2)],
+      memoTimeStampRange[Math.round((3 * range.length) / 4)],
+      minAndMax[1],
+    ];
+  }, [discreteValues, minAndMax, memoTimeStampRange, range, singleHandle]);
+
+  /** Formats the sparse marks shown on the slider track. */
+  const memoSliderMarks = useMemo((): { value: number; label: string }[] => {
+    logger.logTraceUseMemo('TIME-SLIDER - memoSliderMarks', memoTimeMarks, displayLanguage, displayDateTimezone, serviceDateTemporalMode);
+    return memoTimeMarks.map((timeMark) => ({
+      value: timeMark,
+      label: DateMgt.formatDate(
+        timeMark,
+        displayDateFormatShort[displayLanguage],
+        displayLanguage,
+        displayDateTimezone,
+        serviceDateTemporalMode
+      ),
+    }));
+  }, [displayDateFormatShort, displayDateTimezone, displayLanguage, memoTimeMarks, serviceDateTemporalMode]);
 
   /**
    * Moves the slider handles based on the specified direction.
@@ -188,31 +207,35 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // Handle single handle case with DISCRETE values
       if (singleHandle && discreteValues) {
         // Find current index in the discrete range array
-        const currentIndex = timeStampRange.findIndex((timestamp) => timestamp === values[0]);
+        const currentIndex = memoTimeStampRange.findIndex((timestamp) => timestamp === values[0]);
 
         if (currentIndex === -1) {
           // Value not found - snap to nearest
-          const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - values[0]) < Math.abs(prev - values[0]) ? curr : prev));
+          const nearest = DateMgt.findNearestTimestamp(memoTimeStampRange, values[0]);
           timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
           return;
         }
 
         // Move to next/previous discrete value (with wrapping)
         let newIndex = currentIndex + stepMove;
-        if (newIndex >= timeStampRange.length) {
+        if (newIndex >= memoTimeStampRange.length) {
           newIndex = 0; // Wrap to start
         } else if (newIndex < 0) {
-          newIndex = timeStampRange.length - 1; // Wrap to end
+          newIndex = memoTimeStampRange.length - 1; // Wrap to end
         }
 
-        timeSliderController.updateTimeSliderValues(layerPath, [timeStampRange[newIndex]]);
+        timeSliderController.updateTimeSliderValues(layerPath, [memoTimeStampRange[newIndex]]);
         return;
       }
 
       // Handle single handle case with continuous values
       if (singleHandle && !discreteValues) {
-        const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
+        const interval = step || (minAndMax[1] - minAndMax[0]) / DEFAULT_CONTINUOUS_STEP_COUNT;
         let newPosition = values[0] + interval * stepMove;
+
+        if (stepUnit) {
+          newPosition = DateMgt.addCalendarStep(values[0], stepUnit, stepMove);
+        }
 
         // Wrap around at boundaries
         if (newPosition > minAndMax[1]) {
@@ -280,7 +303,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       timeSliderController.updateTimeSliderValues(layerPath, [leftHandle, rightHandle]);
     },
-    [timeSliderController, discreteValues, layerPath, locked, minAndMax, reversed, values, singleHandle, step, timeStampRange]
+    [timeSliderController, discreteValues, layerPath, locked, minAndMax, reversed, values, singleHandle, step, stepUnit, memoTimeStampRange]
   );
 
   /**
@@ -373,9 +396,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleStepChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      timeSliderController.setStep(layerPath, Number(event.target.value));
+      const selectedStepUnit = event.target.value as DateTimeStepUnit;
+      const snappedValues = discreteValues ? storeValues : DateMgt.snapValuesToCalendarStep(storeValues, minAndMax[0], selectedStepUnit);
+
+      timeSliderController.setStepUnit(layerPath, selectedStepUnit);
+      timeSliderController.updateTimeSliderValues(layerPath, snappedValues);
     },
-    [timeSliderController, layerPath]
+    [timeSliderController, layerPath, discreteValues, storeValues, minAndMax]
   );
 
   /**
@@ -473,40 +500,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     (newValues: number | number[]): void => {
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
-        const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
+        const nearest = DateMgt.findNearestTimestamp(memoTimeStampRange, value);
         timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
         const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
-        const constrainedValues = timeSliderController.constrainValues(layerPath, valuesAsArray, activeThumbRef.current);
+        const calendarValues =
+          stepUnit && !discreteValues ? DateMgt.snapValuesToCalendarStep(valuesAsArray, minAndMax[0], stepUnit) : valuesAsArray;
+        const constrainedValues = timeSliderController.constrainValues(layerPath, calendarValues, activeThumbRef.current);
         timeSliderController.updateTimeSliderValues(layerPath, constrainedValues);
       }
     },
-    [timeSliderController, discreteValues, layerPath, singleHandle, timeStampRange]
+    [timeSliderController, discreteValues, layerPath, singleHandle, stepUnit, minAndMax, memoTimeStampRange]
   );
-
-  /**
-   * Returns the tooltip text for the lock button based on current state and direction.
-   *
-   * @returns The tooltip text for the lock button
-   */
-  const getLockTooltip = useCallback((): string => {
-    if (reversed) {
-      return locked ? t('timeSlider.slider.unlockRight') : t('timeSlider.slider.lockRight');
-    }
-    return locked ? t('timeSlider.slider.unlockLeft') : t('timeSlider.slider.lockLeft');
-  }, [t, locked, reversed]);
-
-  /**
-   * Returns the consistent label for the lock button based on direction.
-   *
-   * @returns The consistent label for the lock button
-   */
-  const getLockLabel = useCallback((): string => {
-    if (reversed) {
-      return t('timeSlider.slider.lockRight');
-    }
-    return t('timeSlider.slider.lockLeft');
-  }, [t, reversed]);
 
   /**
    * Creates labels for values on slider.
@@ -516,16 +521,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleLabelFormat = useCallback(
     (theValue: number): string => {
+      const displayValue = stepUnit && !discreteValues ? DateMgt.snapToCalendarStep(theValue, minAndMax[0], stepUnit) : theValue;
+
       // Format the date using displayDateFormat.
       return DateMgt.formatDate(
-        theValue,
+        displayValue,
         displayDateFormat[displayLanguage],
         displayLanguage,
         displayDateTimezone,
         serviceDateTemporalMode
       );
     },
-    [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode]
+    [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode, stepUnit, discreteValues, minAndMax]
   );
 
   // #endregion
@@ -639,6 +646,15 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     );
   };
 
+  /** Resolves the slider's native drag increment without expanding calendar ranges. */
+  const memoSliderStep = useMemo((): number | null => {
+    logger.logTraceUseMemo('TIME-SLIDER - memoSliderStep', discreteValues, step, stepUnit, minAndMax);
+
+    if (discreteValues) return null;
+    if (stepUnit) return DateMgt.getApproximateCalendarStep(stepUnit);
+    return step || (minAndMax[1] - minAndMax[0]) / DEFAULT_CONTINUOUS_STEP_COUNT;
+  }, [discreteValues, minAndMax, step, stepUnit]);
+
   return (
     <Box onKeyDown={handleKeyDown} sx={memoSxClasses.containerPadding}>
       {/* Header with title and filter switch */}
@@ -660,8 +676,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           min={minAndMax[0]}
           max={minAndMax[1]}
           value={values}
-          marks={sliderMarks}
-          step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
+          marks={memoSliderMarks}
+          step={memoSliderStep}
           onChange={handleSliderChange}
           onChangeCommitted={handleSliderChangeCommitted}
           onValueLabelFormat={handleLabelFormat}
@@ -690,9 +706,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         {!singleHandle && (
           <IconButton
             className="buttonOutline"
-            aria-label={getLockLabel()}
+            aria-label={lockLabel}
             aria-pressed={locked}
-            tooltip={getLockTooltip()}
+            tooltip={lockTooltip}
             tooltipPlacement="top"
             aria-disabled={isPlaying}
             onClick={handleLock}
@@ -780,17 +796,17 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               </InputLabel>
               <NativeSelect
                 id={stepValueId}
-                defaultValue={step}
+                defaultValue={stepUnit}
                 onChange={handleStepChange}
                 inputProps={{
                   name: 'timeStep',
                 }}
               >
-                <option value={3600000}>{t('timeSlider.slider.hour')}</option>
-                <option value={86400000}>{t('timeSlider.slider.day')}</option>
-                <option value={604800000}>{t('timeSlider.slider.week')}</option>
-                <option value={2592000000}>{t('timeSlider.slider.month')}</option>
-                <option value={31536000000}>{t('timeSlider.slider.year')}</option>
+                <option value="hour">{t('timeSlider.slider.hour')}</option>
+                <option value="day">{t('timeSlider.slider.day')}</option>
+                <option value="week">{t('timeSlider.slider.week')}</option>
+                <option value="month">{t('timeSlider.slider.month')}</option>
+                <option value="year">{t('timeSlider.slider.year')}</option>
               </NativeSelect>
             </FormControl>
           </Box>

@@ -13,6 +13,7 @@ import {
   setStoreTimeSliderReversed,
   setStoreTimeSliderSelectedLayerPath,
   setStoreTimeSliderStep,
+  setStoreTimeSliderStepUnit,
   setStoreTimeSliderValues,
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
@@ -20,7 +21,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt, type DateTimeStepUnit, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -199,6 +200,17 @@ export class TimeSliderController extends AbstractMapViewerController {
   setStep(layerPath: string, step: number): void {
     // Save in the store
     setStoreTimeSliderStep(this.getMapId(), layerPath, step);
+  }
+
+  /**
+   * Sets the calendar unit used to advance a continuous time-slider value.
+   *
+   * @param layerPath - The layer path
+   * @param stepUnit - The calendar unit used for playback increments
+   */
+  setStepUnit(layerPath: string, stepUnit: DateTimeStepUnit): void {
+    // Save in the store
+    setStoreTimeSliderStepUnit(this.getMapId(), layerPath, stepUnit);
   }
 
   /**
@@ -432,9 +444,19 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // If using absolute axis
     let step: number | undefined;
+    let stepUnit: DateTimeStepUnit | undefined;
     if (nearestValues === 'continuous') {
+      const normalizedDurationInterval = rangeItems.durationInterval?.trim().toUpperCase();
+      if (normalizedDurationInterval === 'PT1H') stepUnit = 'hour';
+      else if (normalizedDurationInterval === 'P1D') stepUnit = 'day';
+      else if (normalizedDurationInterval === 'P1W') stepUnit = 'week';
+      else if (normalizedDurationInterval === 'P1M') stepUnit = 'month';
+      else if (normalizedDurationInterval === 'P1Y') stepUnit = 'year';
+
+      if (!stepUnit) stepUnit = DateMgt.guessEstimatedStepUnit(minAndMax[0], minAndMax[1]);
+
       // Try to guess the steps that should be used
-      step = DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+      step = stepUnit ? undefined : DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
 
     const timeStampRange = range.map((date) => DateMgt.convertToMilliseconds(date));
@@ -470,6 +492,7 @@ export class TimeSliderController extends AbstractMapViewerController {
       reversed: timesliderConfig?.reversed,
       singleHandle,
       step,
+      stepUnit,
       title,
       values,
     };

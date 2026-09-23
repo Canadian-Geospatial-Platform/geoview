@@ -240,6 +240,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Sync check: already loaded once
     if (this.loadedOnce) return Promise.resolve();
 
+    // The config can reach loaded before this instance's first-loaded flag is observed.
+    // Treat the authoritative config status as already loaded to avoid waiting for an event that has fired.
+    if (this.getLayerStatus() === 'loaded') {
+      this.loadedOnce = true;
+      return Promise.resolve();
+    }
+
     // Sync check: already in error
     if (this.getLayerStatus() === 'error') {
       return Promise.reject(new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName()));

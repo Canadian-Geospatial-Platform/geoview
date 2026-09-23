@@ -373,7 +373,7 @@ export class UtilitiesDateTester extends GVAbstractTester {
         Test.assertIsEqual(DateMgt.MILLISECONDS_IN_1_DAY, 86400000);
 
         test.addStep('Verifying MILLISECONDS_IN_1_YEAR...');
-        Test.assertIsEqual(DateMgt.MILLISECONDS_IN_1_YEAR, 31536000000);
+        Test.assertIsEqual(DateMgt.APPROXIMATE_MILLISECONDS_IN_1_YEAR, 31536000000);
 
         test.addStep('Verifying DEFAULT_TEMPORAL_MODE...');
         Test.assertIsDefined('DEFAULT_TEMPORAL_MODE', DateMgt.DEFAULT_TEMPORAL_MODE);

@@ -116,6 +116,7 @@ _(User-facing features added or enabled)_
 - Improved WMS style and ESRI Image raster-function selection to Layer Settings, including metadata-driven initial selections.
 - Added temporal metadata to Layer Info, including normalized range values, ISO 8601 duration intervals, and grouped-dimension status.
 - Added support to the special QGIS group dimension configuration allowing time-dimension WMS rasters to function with the time-slider.
+- Added calendar-aware time-slider stepping for hour, day, week, month, and year intervals, including leap-year-safe year navigation.
 
 ## Bug Fixes
 
@@ -154,6 +155,8 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed Swiper layer opacity handling by rewriting clip logic for features based on slider position (#3562)
 - Fixed Swiper rendering isolation so clipping is applied only to selected layers and their descendants (#3597)
 - Fixed time-slider reset behavior and dual-handle constraints so registered defaults are preserved and handles remain separated (#3569, #3599)
+- Fixed time-slider calendar stepping so month and year intervals no longer use fixed millisecond durations that drift across leap years; drag labels and committed values now use the same calendar-aligned dates.
+- Improved long-range time-slider performance by keeping the slider marks sparse and snapping dragged values to calendar steps instead of materializing every daily timestamp.
 - Fixed Add Layer WMS group selection so selecting every child preserves the parent group `layerId` and lets WMS expand its sub-layers during layer creation instead of serializing duplicate child entries.
 - Improved WMS temporal metadata handling by retaining ISO 8601 interval durations, resolving supported OGC `current` values during parsing, and synchronizing supported parent-group dimensions across direct sibling layers.
 - Improved ESRI Image identify and raster-function preview requests, including reuse of in-flight preview requests.
@@ -214,6 +217,7 @@ _(Optimizations, refactors, structural changes)_
 - Refactored overview-map visibility and sizing flow into centralized store-driven logic (`overviewMapVisible`) with unified controller/event handling and atomic selector usage (#3581)
 - Optimized proxy support with a second pass using `FetchWithProxyResult` return wrapper instead of `CallbackNewMetadataDelegate` callbacks (#3562)
 - Simplified `processGeoviewLayerConfig` and `createGeoviewLayerConfig` in all layer types to accept `TypeLayerEntryShell[]` instead of `layerIds[]` (#3562)
+- Centralized calendar-step, calendar-snapping, and nearest-timestamp operations in `DateMgt` for reuse by the time-slider component and controllers.
 - Consolidated `onceEventPromiseWithTimeout` into `onceEventPromise` with an optional timeout parameter (#3562)
 - Deprecated `getOLLayerAsync` from layer-controller to centralize code logic around GV types instead of OL types (#3562)
 - Improved Swiper component implementation with enhanced lifecycle functions and code cleanup (~221 lines changed) (#3562)
@@ -339,3 +343,5 @@ _(Properties added, renamed, or with changed defaults)_
 Highlight the temporal-layer improvements: WMS group dimensions now synchronize supported sibling layers with the time slider, normalized metadata retains ISO 8601 interval durations, and Layer Info exposes the resulting temporal metadata. Layer Settings also provides metadata-aware WMS style and ESRI Image raster-function selection.
 
 Call out the new hidden-layer workflow in Details, Data Table, Chart, and Time Slider panels, including parent visibility restoration and accessible list behavior. The release includes regression coverage for WMS group dimensions, duplicate WMS group names, large ESRI Feature loading, and ESRI Dynamic geometry pairing.
+
+Also highlight that time-slider navigation now treats month and year intervals as calendar units, preserving dates across leap years, while long daily ranges remain responsive through sparse marks and calendar snapping.

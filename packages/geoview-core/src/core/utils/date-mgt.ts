@@ -109,14 +109,27 @@ export type TimeDimensionESRI = {
   timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
 
+/** Calendar unit used when advancing a continuous time-slider value. */
+export type DateTimeStepUnit = 'hour' | 'day' | 'week' | 'month' | 'year';
+
 /**
  * Class used to handle date as ISO 8601.
  */
 export abstract class DateMgt {
+  /** Number of milliseconds in one hour. */
+  static readonly MILLISECONDS_IN_1_HOUR = 60 * 60 * 1000;
+
   /** The milliseconds for 1 day. */
   static readonly MILLISECONDS_IN_1_DAY: number = 24 * 60 * 60 * 1000;
+
+  /** Number of milliseconds in one week. */
+  static readonly MILLISECONDS_IN_1_WEEK = 7 * DateMgt.MILLISECONDS_IN_1_DAY;
+
+  /** Approximate number of milliseconds in one month (estimation, not considering months of 28, 29 or 31 days). */
+  static readonly APPROXIMATE_MILLISECONDS_IN_1_MONTH = 30 * DateMgt.MILLISECONDS_IN_1_DAY;
+
   /** The milliseconds for 1 year (estimation, not considering leap years). */
-  static readonly MILLISECONDS_IN_1_YEAR: number = DateMgt.MILLISECONDS_IN_1_DAY * 365;
+  static readonly APPROXIMATE_MILLISECONDS_IN_1_YEAR: number = DateMgt.MILLISECONDS_IN_1_DAY * 365;
 
   /** The international ISO date format. */
   static readonly ISO_DATE_FORMAT = 'YYYY-MM-DD';
@@ -272,6 +285,92 @@ export abstract class DateMgt {
           datetimeFormat: DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES,
         };
     }
+  }
+
+  /**
+   * Returns an approximate numeric step used only by the draggable slider.
+   *
+   * @param stepUnit - The calendar unit to approximate
+   * @returns The approximate duration in milliseconds
+   */
+  static getApproximateCalendarStep(stepUnit: DateTimeStepUnit): number {
+    if (stepUnit === 'hour') return DateMgt.MILLISECONDS_IN_1_HOUR;
+    if (stepUnit === 'day') return DateMgt.MILLISECONDS_IN_1_DAY;
+    if (stepUnit === 'week') return DateMgt.MILLISECONDS_IN_1_WEEK;
+    if (stepUnit === 'month') return DateMgt.APPROXIMATE_MILLISECONDS_IN_1_MONTH;
+    return DateMgt.APPROXIMATE_MILLISECONDS_IN_1_YEAR;
+  }
+
+  /**
+   * Advances a timestamp by one calendar step without converting months or years to fixed durations.
+   *
+   * @param timestamp - The timestamp to advance
+   * @param stepUnit - The calendar unit to apply
+   * @param direction - The number and direction of calendar units to advance
+   * @returns The advanced timestamp
+   */
+  static addCalendarStep(timestamp: number, stepUnit: DateTimeStepUnit, direction: number): number {
+    const currentDate = new Date(timestamp);
+    const originalDay = currentDate.getUTCDate();
+    const isCalendarMonthOrYear = stepUnit === 'month' || stepUnit === 'year';
+
+    if (isCalendarMonthOrYear) currentDate.setUTCDate(1);
+
+    if (stepUnit === 'hour') currentDate.setUTCHours(currentDate.getUTCHours() + direction);
+    else if (stepUnit === 'day') currentDate.setUTCDate(currentDate.getUTCDate() + direction);
+    else if (stepUnit === 'week') currentDate.setUTCDate(currentDate.getUTCDate() + direction * 7);
+    else if (stepUnit === 'month') currentDate.setUTCMonth(currentDate.getUTCMonth() + direction);
+    else currentDate.setUTCFullYear(currentDate.getUTCFullYear() + direction);
+
+    if (isCalendarMonthOrYear) {
+      const lastDayOfTargetMonth = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 0)).getUTCDate();
+      currentDate.setUTCDate(Math.min(originalDay, lastDayOfTargetMonth));
+    }
+
+    return currentDate.getTime();
+  }
+
+  /**
+   * Snaps a timestamp to the nearest calendar step without building the full range.
+   *
+   * @param timestamp - The timestamp to snap
+   * @param anchor - The first timestamp in the calendar sequence
+   * @param stepUnit - The calendar unit to apply
+   * @returns The nearest calendar-aligned timestamp
+   */
+  static snapToCalendarStep(timestamp: number, anchor: number, stepUnit: DateTimeStepUnit): number {
+    const approximateStep = DateMgt.getApproximateCalendarStep(stepUnit);
+    const approximateCount = Math.round((timestamp - anchor) / approximateStep);
+    const candidates = [approximateCount - 1, approximateCount, approximateCount + 1].map((count) =>
+      DateMgt.addCalendarStep(anchor, stepUnit, count)
+    );
+
+    return candidates.reduce((closest, candidate) =>
+      Math.abs(candidate - timestamp) < Math.abs(closest - timestamp) ? candidate : closest
+    );
+  }
+
+  /**
+   * Snaps multiple timestamps to the same calendar sequence.
+   *
+   * @param values - The timestamps to snap
+   * @param anchor - The first timestamp in the calendar sequence
+   * @param stepUnit - The calendar unit to apply
+   * @returns The calendar-aligned timestamps
+   */
+  static snapValuesToCalendarStep(values: number[], anchor: number, stepUnit: DateTimeStepUnit): number[] {
+    return values.map((value) => DateMgt.snapToCalendarStep(value, anchor, stepUnit));
+  }
+
+  /**
+   * Finds the timestamp in a range nearest to the requested value.
+   *
+   * @param timeStamps - The timestamp values to search
+   * @param value - The target timestamp
+   * @returns The timestamp with the smallest absolute difference from the target
+   */
+  static findNearestTimestamp(timeStamps: number[], value: number): number {
+    return timeStamps.reduce((nearest, timeStamp) => (Math.abs(timeStamp - value) < Math.abs(nearest - value) ? timeStamp : nearest));
   }
 
   /**
@@ -802,7 +901,7 @@ export abstract class DateMgt {
         }
 
         // If there's more than 10 years in the time delta
-        if (timeDelta >= this.MILLISECONDS_IN_1_YEAR * 10) {
+        if (timeDelta >= this.APPROXIMATE_MILLISECONDS_IN_1_YEAR * 10) {
           // We assume we want the years only, not caring about the months
           return {
             displayDateFormat: defaults.dateFormat,
@@ -857,6 +956,25 @@ export abstract class DateMgt {
     if (intervalDiff > years2) step = month1; // Monthly stepping
     if (intervalDiff > years10) step = year1; // Yearly stepping
     return step;
+  }
+
+  /**
+   * Guesses a calendar unit for continuous time-slider playback.
+   *
+   * @param minValue - The minimum timestamp value
+   * @param maxValue - The maximum timestamp value
+   * @returns The estimated calendar unit, or `undefined` when no calendar unit is appropriate
+   */
+  static guessEstimatedStepUnit(minValue: number, maxValue: number): 'day' | 'month' | 'year' | undefined {
+    const intervalDiff = maxValue - minValue;
+    const twoMonths = DateMgt.MILLISECONDS_IN_1_DAY * 30 * 2;
+    const twoYears = DateMgt.MILLISECONDS_IN_1_DAY * 365 * 2;
+    const tenYears = DateMgt.MILLISECONDS_IN_1_DAY * 365 * 10;
+
+    if (intervalDiff > tenYears) return 'year';
+    if (intervalDiff > twoYears) return 'month';
+    if (intervalDiff > twoMonths) return 'day';
+    return undefined;
   }
 
   /**
@@ -1134,7 +1252,7 @@ export abstract class DateMgt {
    * @throws {InvalidDateError} When input has invalid dates
    */
   static #createAbsoluteInterval(ogcTimeDimension: string): { range: string[]; durationInterval: string } {
-    const parts = ogcTimeDimension.split('/');
+    const parts = ogcTimeDimension.split('/').map((part) => part.trim());
     if (parts.length !== 3) {
       throw new InvalidTimeDimensionError(ogcTimeDimension);
     }
@@ -1256,13 +1374,15 @@ export abstract class DateMgt {
    * @returns A new Dayjs instance incremented by the specified duration
    */
   static #addDurationSafely(current: Dayjs, step: Duration, periodStr: string): dayjs.Dayjs {
+    const normalizedPeriod = periodStr.trim().toUpperCase();
+
     // Month-based duration (P1M, P2M, etc.)
-    if (periodStr.endsWith('M') && !periodStr.startsWith('PT')) {
+    if (normalizedPeriod.endsWith('M') && !normalizedPeriod.startsWith('PT')) {
       return current.add(step.months(), 'month');
     }
 
     // Year-based duration (P1Y, P2Y, etc.)
-    if (periodStr.endsWith('Y')) {
+    if (normalizedPeriod.endsWith('Y')) {
       return current.add(step.years(), 'year');
     }
 
