@@ -61,6 +61,50 @@ this.test(message, callback, callbackAssert, callbackFinalize?)
 | `callbackAssert`   | `(test, result) => void` | Run assertions on the result (throw = fail) |
 | `callbackFinalize` | `(test) => void`         | Cleanup (always runs, optional)             |
 
+### The Three Callbacks Are Three Distinct Sections (enforced)
+
+Every test is split into three sections, and **each section has exactly one job**:
+
+| Callback           | Section       | Responsibility                                                                                     |
+| ------------------ | ------------- | -------------------------------------------------------------------------------------------------- |
+| `callback`         | **Execution** | Perform all the work, run the operation under test, and **return** its outcome as `result`         |
+| `callbackAssert`   | **Assertion** | Receive `result` and **only verify it** with `Test.assert*` (read-only navigation getters allowed) |
+| `callbackFinalize` | **Cleanup**   | Remove layers / reset state (always runs)                                                          |
+
+**Rule:** The operation being tested — the "act" — must run in the **execution** callback and be **returned** as `result`. The **assertion** callback receives that `result` as its second parameter and verifies it. **Never execute the function under test inside the assertion callback.**
+
+- If the subject of the test is a **function's return value**, call that function in the execution callback and `return` it, then assert on the `result` parameter — do not re-call it in the assertion callback.
+- Read-only getters used purely to **navigate to a value** for an assertion may live in the assertion callback. The line is: navigating to a property is fine; executing the behavior under test is not.
+
+```typescript
+// ❌ Bad: the function under test runs in the ASSERTION callback
+async (test) => {
+  await this.helperStepAddLayerOnMap(test, gvConfig);
+  return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+},
+(test) => {
+  // The "act" is happening in the wrong section
+  const resolved = this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId);
+  Test.assertIsDefined("resolved", resolved);
+},
+
+// ✅ Good: the function under test runs in EXECUTION and flows through `result`
+async (test) => {
+  await this.helperStepAddLayerOnMap(test, gvConfig);
+  await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+  test.addStep("Resolving the first layer under the root id...");
+  return this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId); // the "act"
+},
+(test, result) => {
+  // Assertion only — verify the passed result
+  Test.assertIsDefined("resolved", result);
+  Test.assertIsEqual(result.getLayerPath(), layerPath);
+},
+```
+
+Set the `Test<T>` generic to the type the execution callback returns (e.g. `Test<AbstractBaseGVLayer>` when it returns `getGeoviewLayerByRootId(...)`).
+
 ### The `testError()` Method (True Negatives)
 
 Use when the test should **throw** a specific error to pass:

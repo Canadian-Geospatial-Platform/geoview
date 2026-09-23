@@ -67,6 +67,15 @@ const layer = mapViewer.layer.getGeoviewLayerIfExists("myLayer");
 // Throws if not found
 const layer = mapViewer.layer.getGeoviewLayer("myLayer");
 
+// First layer under a root id (e.g. a GeoCore UUID whose `uuid/<layerId>` path is resolved at runtime)
+// Throws if none found; use the IfExists variant for a safe undefined return
+const layer = mapViewer.layer.getGeoviewLayerByRootId(
+  "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+);
+const maybeLayer = mapViewer.layer.getGeoviewLayerByRootIdIfExists(
+  "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+);
+
 // All layers, filtered variants
 const all = mapViewer.layer.getGeoviewLayers(); // AbstractBaseGVLayer[]
 const regulars = mapViewer.layer.getGeoviewLayersRegulars(); // AbstractGVLayer[] (no groups)

@@ -58,7 +58,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 40;
+    return 41;
   }
 
   /**
@@ -97,6 +97,10 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Test data table pre-loaded in app bar
     const pDataTableInAppBar = this.#mapConfigTester.testDataTableSelectedTabAppBar();
     await pDataTableInAppBar;
+
+    // Test selectedLayersLayerPath referencing a GeoCore layer by UUID resolves to its first layer path (#3633)
+    const pSelectedLayersLayerPathGeoCore = this.#mapConfigTester.testSelectedLayersLayerPathGeoCoreResolution();
+    await pSelectedLayersLayerPathGeoCore;
 
     // Test no footerBar/appBar config has defaults
     const pNoFooterBarAppBarDefaults = this.#mapConfigTester.testNoFooterBarAppBarConfigHasDefaults();

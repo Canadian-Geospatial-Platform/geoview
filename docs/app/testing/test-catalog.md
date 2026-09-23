@@ -71,21 +71,22 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 ### Summary
 
-| Group             | Suite               | Tester(s)                                                                                       | Test Count | Execution                   |
-| ----------------- | ------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`        | `CoreTester`                                                                                    | 14         | Parallel                    |
-| 1. Core / Utility | `suite-config`      | `ConfigTester`                                                                                  | 39         | Parallel                    |
-| 1. Core / Utility | `suite-utilities`   | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`       | `LayerTester`                                                                                   | 44         | Mixed parallel + sequential |
-| 3. Map            | `suite-map`         | `MapTester`                                                                                     | 16         | Complex mixed               |
-| 3. Map            | `suite-map-config`  | `MapConfigTester`                                                                               | 40         | Fully sequential            |
-| 4. Components     | `suite-ui`          | `UITester`                                                                                      | 2          | Parallel                    |
-| 4. Components     | `suite-details`     | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table`  | `DataTableTester`                                                                               | 13         | Guarded sequential          |
-| 5. Packages       | `suite-geochart`    | `GeochartTester`                                                                                | 2          | Guarded sequential          |
-| 5. Packages       | `suite-swiper`      | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
-| 5. Packages       | `suite-time-slider` | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                     |                                                                                                 | **231**    |                             |
+| Group             | Suite                   | Tester(s)                                                                                       | Test Count | Execution                   |
+| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
+| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 14         | Parallel                    |
+| 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
+| 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
+| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 44         | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 8          | Mixed parallel + sequential |
+| 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map-config`      | `MapConfigTester`                                                                               | 41         | Fully sequential            |
+| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
+| 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
+| 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
+| 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
+| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
+| **Total**         |                         |                                                                                                 | **239**    |                             |
 
 ---
 
@@ -504,6 +505,46 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 ---
 
+### 2.2 Layer Functions (EPSG: 3857)
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-layer-functions` · **File:** `tests/suites/suite-layer-functions.ts` · **Tester:** `LayerTester` (`tests/testers/layer-tester.ts`)
+**Execution:** Mixed — parallel for the duplicate-group-names test, then sequential for zoom/query tests (they change zoom level) · **Guard:** None
+
+> **Note:** This suite runs on a single map with EPSG: 3857, testing layer controller functions and feature-query behavior.
+
+#### 2.2.1 Layer Path Resolution
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                          | Type | Description                                                                                                          |
+| --- | ------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | `testAddWMSDuplicateGroupNames` | test | Test WMS with duplicate nested group names loads without ambiguous paths or recursion loops (#3521)...               |
+| 2   | `testGetGeoviewLayerByRootId`   | test | Test getGeoviewLayerByRootId resolves the first layer under a root id (e.g. a GeoCore UUID) for selection (#3633)... |
+
+#### 2.2.2 Zoom To Extent (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                              | Type | Description                                                           |
+| --- | --------------------------------------------------- | ---- | --------------------------------------------------------------------- |
+| 3   | `testZoomExtentWithOneFeature`                      | test | Test zoom to extent of a layer with only one point feature...         |
+| 4   | `testZoomExtentWithoutFeatures`                     | test | Test zoom to extent of a layer without features...                    |
+| 5   | `testZoomExtentWithoutFeaturesWithConfiguredExtent` | test | Test zoom to extent falls back to the configured extent when empty... |
+
+#### 2.2.3 Feature Query (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                                  | Type | Description                                                                   |
+| --- | ------------------------------------------------------- | ---- | ----------------------------------------------------------------------------- |
+| 6   | `testFeatureHasGeometryWhenOutfieldsHasNoGeometryField` | test | Test feature query still retrieves geometry when outfields omit geometry...   |
+| 7   | `testQueryWMSLayerForWFSFeaturesCities`                 | test | Test WMS layer retrieves feature results via its associated WFS (Cities)...   |
+| 8   | `testQueryWMSLayerForWFSFeaturesAirborne`               | test | Test WMS layer retrieves feature results via its associated WFS (Airborne)... |
+
+---
+
 ## 3. Map
 
 [↑ Back to top](#table-of-contents)
@@ -678,6 +719,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 36  | `testInitialSettingsFiltersWfs`         | test | Test WFS layerFilter is stored and accessible after loading...          |
 | 37  | `testInitialSettingsFiltersEsriDynamic` | test | Test Esri Dynamic layerFilter is stored and accessible after loading... |
 | 38  | `testInitialSettingsFiltersEsriFeature` | test | Test Esri Feature layerFilter is stored and accessible after loading... |
+
+#### 3.2.15 Selected Layer Path Resolution
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                         | Type | Description                                                                                                       |
+| --- | ---------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
+| 39  | `testSelectedLayersLayerPathGeoCoreResolution` | test | Test selectedLayersLayerPath with a GeoCore UUID resolves to the first layer path (`uuid/0`) in the store (#3633) |
 
 ---
 

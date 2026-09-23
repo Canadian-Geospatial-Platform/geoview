@@ -2280,7 +2280,8 @@ export class MapViewer {
         logger.logPromiseFailed('in Promise.all for zooming in #readyMap', error);
       });
 
-    // If there's a layer path that should be selected in footerBar or appBar configs, select it
+    // If there's a layer path that should be selected in footerBar or appBar configs, select it. For a GeoCore layer
+    // this is resolved from the root UUID to the first `uuid/<layerId>` path during config load (see loadListOfGeoviewLayer).
     const selectedLayerPath =
       this.mapFeaturesConfig.footerBar?.selectedLayersLayerPath || this.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
     if (selectedLayerPath) this.controllers.layerController.setSelectedLayerPath(selectedLayerPath);

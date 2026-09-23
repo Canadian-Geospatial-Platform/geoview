@@ -1281,6 +1281,15 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
 
+### GeoCore `selectedLayersLayerPath` Resolution (config-rewrite, not runtime lookup)
+
+A configured `footerBar.selectedLayersLayerPath` / `appBar.selectedLayersLayerPath` can only reference a **GeoCore** layer by its bare UUID, because the real path (`uuid/<layerId>`) is unknown until the GeoCore layer resolves. The bare UUID never matches an `orderedLayers` entry or a `#gvLayers` key, so the layer is not pre-selected.
+
+**Fix location = config rewrite at resolution time, NOT `#readyMap`.** `LayerCreatorController.loadListOfGeoviewLayer()` rewrites the config value in place right after `generateOrderedLayerPaths()` resolves the real paths (`#resolveConfiguredSelectedLayersLayerPath(rootId, firstLayerPath)`): if `footerBar`/`appBar` `selectedLayersLayerPath` still equals the root `geoviewLayerId`, it is replaced with `layerPaths[0]` (the first resolved path, e.g. `uuid/0`). `MapViewer.#readyMap` then applies the already-corrected value verbatim (unchanged logic + a clarifying comment).
+
+- **Why not resolve in `#readyMap`?** GeoCore sublayers are NOT yet in `#gvLayers` at `#readyMap` time (they register much later than `processed`/`loaded` map status), so a runtime GV-layer lookup there fails. `loadListOfGeoviewLayer` is awaited before `#readyMap`, so the config-level rewrite is the robust point. Deferring to after `waitForLayersLoaded()` also fails for the same registration-timing reason.
+- **`getGeoviewLayerByRootId(rootId)`** (on `LayerDomain`, `LayerController`, `LayerApi`) is a public convenience resolver — returns the first layer whose path is exactly `rootId` or starts with `${rootId}/`. It **throws `LayerNotFoundError`** when none is found; the companion **`getGeoviewLayerByRootIdIfExists(rootId)`** returns `undefined` instead (same throw/`IfExists` pairing as `getGeoviewLayerRegular` / `getGeoviewLayerRegularIfExists`). It is **for external devs who hold only a GeoCore UUID**; it is deliberately NOT used in the selection path (which relies on the config rewrite). Name is `...ByRootId` (not `...ById`) to distinguish it from `getGeoviewLayer(layerPath)` exact-path lookup.
+
 ### GeoCore VCS Package Config Extraction
 
 The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) returns per-layer package configs in `response.gcs[].{lang}.packages`. Each package type (geochart, time-slider, etc.) has its own extraction method in `UUIDmapConfigReader` — they are **not** handled by a generic extractor because each type has unique parsing needs (e.g., geochart requires `.layers` array transformation and `.trim()` cleanup; time-slider is passed through as-is).
@@ -2140,6 +2149,53 @@ this.testError(
 );
 ```
 
+### Three-Callback Separation (Execution / Assertion / Cleanup) — ENFORCED
+
+A test is made of **three distinct sections**, and each has one job. Do not blur them.
+
+| Callback                 | Section       | Responsibility                                                                                  |
+| ------------------------ | ------------- | ----------------------------------------------------------------------------------------------- |
+| 1st — `callback`         | **Execution** | Perform ALL the work, run the operation under test, and **return** its outcome as `result`      |
+| 2nd — `callbackAssert`   | **Assertion** | Receive `result` and **only verify it** with `Test.assert*` (plus read-only navigation getters) |
+| 3rd — `callbackFinalize` | **Cleanup**   | Remove layers / reset map state (always runs)                                                   |
+
+**The rule (enforced in reviews):** The operation being tested — the "act" — MUST run in the **execution** callback and be **returned** as `result`. The **assertion** callback must receive that `result` as its second parameter and verify it. **Never execute the function under test inside the assertion callback.**
+
+- If the subject of the test is a **function's return value**, call that function in the execution callback and `return` it. Then assert on the `result` parameter — do NOT re-call the function in the assertion callback just to inspect it.
+- Read-only getters used purely to **navigate to a value** for an assertion (e.g. `getLayerEntryConfigRegular(...)`, `getGeoviewLayerPaths()`) may live in the assertion callback. The distinction: navigation-to-a-property is allowed; executing the behavior under test is not.
+
+```typescript
+// ❌ Bad: the function under test is executed in the ASSERTION callback
+async (test) => {
+  await this.helperStepAddLayerOnMap(test, gvConfig);
+  return this.helperStepCheckLayerAtLayerPath(test, layerPath); // returns the wrong subject
+},
+(test) => {
+  // The "act" is happening here — WRONG section
+  const resolved = this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId);
+  Test.assertIsDefined('resolved', resolved);
+  Test.assertIsEqual(resolved.getLayerPath(), layerPath);
+},
+
+// ✅ Good: the function under test runs in EXECUTION and flows through `result`
+async (test) => {
+  await this.helperStepAddLayerOnMap(test, gvConfig);
+  await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+  // The "act" — run it here and return it as the result
+  test.addStep('Resolving the first layer under the root id...');
+  return this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId);
+},
+(test, result) => {
+  // ASSERTION only — verify the passed result (a read-only lookup to prove the negative is fine)
+  Test.assertIsUndefined('exactByRootId', this.getMapViewer().layer.getGeoviewLayerIfExists(gvLayerId));
+  Test.assertIsDefined('resolved', result);
+  Test.assertIsEqual(result.getLayerPath(), layerPath);
+},
+```
+
+**Why it matters:** the framework sets `status='running'` during execution and `status='verifying'` during assertions. Running the "act" in the assertion phase mislabels failures, hides the real subject from `result`, and breaks the mental model of the three sections. Also set the `Test<T>` generic to the type the execution callback returns (e.g. `Test<AbstractBaseGVLayer>` when returning `getGeoviewLayerByRootId(...)`).
+
 ### Shared Constants (on `GVAbstractTester`)
 
 All test URLs, UUIDs, coordinates, and expected icon lists are defined as `static readonly` constants on `GVAbstractTester`. Reuse these rather than hardcoding:
@@ -2683,15 +2739,16 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 1. **Always use `test.addStep()`** to log progress — this creates visibility in the test UI
 2. **Use static assertions** from `Test` class — never use `if/else` to check results
 3. **Always clean up** in the `callbackFinalize` — remove layers, reset map state
-4. **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
-5. **Reuse existing helpers** — instance helpers via `this.helperStep*` and static assertion helpers via `LayerTester.helperStepAssert*`
-6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
-7. **True negative tests** use `testError()` with an expected error class
-8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
-9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
-10. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`, **including** heavy-conditional calls gated by `getIsRunningHeavyTests()` (they are toggle-gated, not removed); exclude only debug-only and commented-out calls, and update the count whenever the pipeline changes
-11. **Update the automated-suite checklist** — Each time you add/remove a test, also update [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md): bump the affected suite's `Tests` count (remember `suite-layer` is listed twice — LCC and WM — so a single new layer test is +1 to each row and +2 to the **Total**) and recompute the **Total** row. When adding a layer test, the four counts that must move together — and must all be **equal** to the same call count — are: the TS `getTestsTotalFinal()`, `test-catalog.md` summary, both `00-automated-suite.md` suite-layer rows, and the `00-automated-suite.md` Total.
-12. **Re-audit ALL suites every time an automated test changes** — Adding, removing, or renaming any automated test requires a full audit of **every** suite (not just the one you touched), because the three count sources drift independently. For each of the 12 suites, verify `getTestsTotalFinal()` equals the actual `testXXXX()` / `testErrorXXXX()` call count in its `onLaunchTestSuite()` (include heavy-conditional calls, exclude debug-only and commented-out), then reconcile all three sources so they agree: the suite's `getTestsTotalFinal()`, the suite's `test-catalog.md` summary row, and the suite's `00-automated-suite.md` row(s). Also verify each doc's own **Total** equals the sum of its rows (`00-automated-suite.md` counts `suite-layer` twice for LCC + WM; `test-catalog.md` counts it once). Fix any drift you find, even in suites you did not modify.
+4. **Keep the three callbacks separated** — the operation under test runs in the **execution** callback and is **returned** as `result`; the **assertion** callback only verifies that `result` (see [Three-Callback Separation](#three-callback-separation-execution--assertion--cleanup--enforced)). Never execute the function under test in the assertion callback.
+5. **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
+6. **Reuse existing helpers** — instance helpers via `this.helperStep*` and static assertion helpers via `LayerTester.helperStepAssert*`
+7. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
+8. **True negative tests** use `testError()` with an expected error class
+9. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
+10. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
+11. **Keep the suite total accurate** — Every concrete suite must implement `getTestsTotalFinal()` with the exact count of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()`, **including** heavy-conditional calls gated by `getIsRunningHeavyTests()` (they are toggle-gated, not removed); exclude only debug-only and commented-out calls, and update the count whenever the pipeline changes
+12. **Update the automated-suite checklist** — Each time you add/remove a test, also update [`docs/programming/release-testing/00-automated-suite.md`](../docs/programming/release-testing/00-automated-suite.md): bump the affected suite's `Tests` count (remember `suite-layer` is listed twice — LCC and WM — so a single new layer test is +1 to each row and +2 to the **Total**) and recompute the **Total** row. When adding a layer test, the four counts that must move together — and must all be **equal** to the same call count — are: the TS `getTestsTotalFinal()`, `test-catalog.md` summary, both `00-automated-suite.md` suite-layer rows, and the `00-automated-suite.md` Total.
+13. **Re-audit ALL suites every time an automated test changes** — Adding, removing, or renaming any automated test requires a full audit of **every** suite (not just the one you touched), because the three count sources drift independently. For each of the 12 suites, verify `getTestsTotalFinal()` equals the actual `testXXXX()` / `testErrorXXXX()` call count in its `onLaunchTestSuite()` (include heavy-conditional calls, exclude debug-only and commented-out), then reconcile all three sources so they agree: the suite's `getTestsTotalFinal()`, the suite's `test-catalog.md` summary row, and the suite's `00-automated-suite.md` row(s). Also verify each doc's own **Total** equals the sum of its rows (`00-automated-suite.md` counts `suite-layer` twice for LCC + WM; `test-catalog.md` counts it once). Fix any drift you find, even in suites you did not modify.
 
 ### Gotchas & Pitfalls
 

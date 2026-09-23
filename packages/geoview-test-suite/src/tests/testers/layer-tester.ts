@@ -22,6 +22,7 @@ import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/laye
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
@@ -2542,6 +2543,55 @@ export class LayerTester extends GVAbstractTester {
         const feature = result?.[0];
         Test.assertIsDefined('feature', feature);
         Test.assertIsDefined('feature.extent', feature.extent);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that getGeoviewLayerByRootId resolves the first layer registered under a root id (issue #3633).
+   *
+   * When only a root id is known (e.g. a GeoCore UUID whose `uuid/<layerId>` path is resolved at runtime), an exact
+   * lookup by the bare id fails, but getGeoviewLayerByRootId must return the first layer under that root id — which is
+   * what lets the configured `selectedLayersLayerPath` pre-select a GeoCore layer.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testGetGeoviewLayerByRootId(): Promise<Test<AbstractBaseGVLayer>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const gvLayerName = 'Root Id Resolver';
+
+    return this.test(
+      `Test getGeoviewLayerByRootId resolves the first layer under a root id...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
+        ]);
+
+        // Add the layer to the map and wait until it's ready
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        // Root-id resolution must return the first layer under that id (this is the function under test)
+        test.addStep('Resolving the first layer under the root id...');
+        return this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId);
+      },
+      (test, result) => {
+        // An exact lookup by the bare root id must not resolve (the real path is `${gvLayerId}/<layerId>`)
+        test.addStep('Verifying the bare root id has no exact layer...');
+        Test.assertIsUndefined('exactByRootId', this.getMapViewer().layer.getGeoviewLayerIfExists(gvLayerId));
+
+        // The resolved layer must be the first layer under the root id
+        test.addStep('Verifying getGeoviewLayerByRootId resolved the first layer under the root id...');
+        Test.assertIsDefined('resolved', result);
+        Test.assertIsEqual(result.getLayerPath(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
