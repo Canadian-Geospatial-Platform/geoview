@@ -238,7 +238,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         layerDisplayDateTimezone ||
         layerTimeDimension?.field) && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalSettings')}</Typography>
+          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalInformation')}</Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
             {layerDisplayDateFormat && <Box>{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>}
             {layerDisplayDateFormatShort && (

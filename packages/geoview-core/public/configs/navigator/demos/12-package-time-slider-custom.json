@@ -165,9 +165,9 @@
                 "2027-07-15T00:00:00Z"
               ],
               "nearestValues": "continuous",
-              "displayDateFormat": {
-                "en": "YYYY-MM-DD",
-                "fr": "YYYY-MM-DD"
+              "displayDateFormatShort": {
+                "en": "MMM YYYY",
+                "fr": "MMM YYYY"
               },
               "rangeItems": {
                 "type": "",
