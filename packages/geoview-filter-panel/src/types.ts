@@ -21,26 +21,8 @@ export interface TypeFilterLayer {
   enabled: boolean;
   /** Array of filterable attributes. */
   attributes: TypeFilterAttribute[];
-  /** Whether this layer's filter section is collapsible. */
-  collapsible?: boolean;
   /** Default collapsed state for this layer's filter section. */
   defaultCollapsed?: boolean;
-}
-
-/**
- * Filter panel settings.
- */
-export interface TypeFilterSettings {
-  /** Panel title. */
-  title?: string;
-  /** Allow collapsing/expanding layer sections. */
-  collapsible?: boolean;
-  /** Default collapsed state for layer sections. */
-  defaultCollapsed?: boolean;
-  /** Show reset button. */
-  showResetButton?: boolean;
-  /** Auto-apply filters on change. */
-  autoApply?: boolean;
 }
 
 /**
