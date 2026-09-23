@@ -1281,6 +1281,15 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
 
+### GeoCore `selectedLayersLayerPath` Resolution (config-rewrite, not runtime lookup)
+
+A configured `footerBar.selectedLayersLayerPath` / `appBar.selectedLayersLayerPath` can only reference a **GeoCore** layer by its bare UUID, because the real path (`uuid/<layerId>`) is unknown until the GeoCore layer resolves. The bare UUID never matches an `orderedLayers` entry or a `#gvLayers` key, so the layer is not pre-selected.
+
+**Fix location = config rewrite at resolution time, NOT `#readyMap`.** `LayerCreatorController.loadListOfGeoviewLayer()` rewrites the config value in place right after `generateOrderedLayerPaths()` resolves the real paths (`#resolveConfiguredSelectedLayersLayerPath(rootId, firstLayerPath)`): if `footerBar`/`appBar` `selectedLayersLayerPath` still equals the root `geoviewLayerId`, it is replaced with `layerPaths[0]` (the first resolved path, e.g. `uuid/0`). `MapViewer.#readyMap` then applies the already-corrected value verbatim (unchanged logic + a clarifying comment).
+
+- **Why not resolve in `#readyMap`?** GeoCore sublayers are NOT yet in `#gvLayers` at `#readyMap` time (they register much later than `processed`/`loaded` map status), so a runtime GV-layer lookup there fails. `loadListOfGeoviewLayer` is awaited before `#readyMap`, so the config-level rewrite is the robust point. Deferring to after `waitForLayersLoaded()` also fails for the same registration-timing reason.
+- **`getGeoviewLayerByRootId(rootId)`** (on `LayerDomain`, `LayerController`, `LayerApi`) is a public convenience resolver — returns the first layer whose path is exactly `rootId` or starts with `${rootId}/`. It is **for external devs who hold only a GeoCore UUID**; it is deliberately NOT used in the selection path (which relies on the config rewrite). Name is `...ByRootId` (not `...ById`) to distinguish it from `getGeoviewLayer(layerPath)` exact-path lookup.
+
 ### GeoCore VCS Package Config Extraction
 
 The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) returns per-layer package configs in `response.gcs[].{lang}.packages`. Each package type (geochart, time-slider, etc.) has its own extraction method in `UUIDmapConfigReader` — they are **not** handled by a generic extractor because each type has unique parsing needs (e.g., geochart requires `.layers` array transformation and `.trim()` cleanup; time-slider is passed through as-is).

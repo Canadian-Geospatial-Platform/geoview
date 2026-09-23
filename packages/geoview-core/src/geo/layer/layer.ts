@@ -443,6 +443,21 @@ export class LayerApi {
     return this.#controllers.layerController.getGeoviewLayerIfExists(layerPath);
   }
 
+  /**
+   * Returns the first GeoView layer registered under the given root id.
+   *
+   * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). Unlike
+   * `getGeoviewLayer(layerPath)` (exact path), this resolves the first layer under a root id, which is useful when
+   * only the root id is known \u2014 e.g. a GeoCore UUID whose sublayer path (`uuid/<layerId>`) is resolved at runtime.
+   *
+   * @param rootId - The root layer id (e.g. a GeoCore UUID)
+   * @returns The first AbstractBaseGVLayer under that root id, or undefined when none is found
+   */
+  getGeoviewLayerByRootId(rootId: string): AbstractBaseGVLayer | undefined {
+    // Redirect to controller
+    return this.#controllers.layerController.getGeoviewLayerByRootId(rootId);
+  }
+
   // #endregion LAYER CONTROLLER GETTERS REDIRECTIONS
 
   // #region PUBLIC METHODS - LAYER CONTROLLER GENERAL REDIRECTIONS

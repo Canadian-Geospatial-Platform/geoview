@@ -13,7 +13,12 @@ import {
   getStoreDataTableAllFeaturesDataArray,
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreLayerBounds, getStoreLayerControls, getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import {
+  getStoreLayerBounds,
+  getStoreLayerControls,
+  getStoreLayerLegendLayerByPath,
+  getStoreLayerSelectedLayerPath,
+} from 'geoview-core/core/stores/states/layer-state';
 import { getGVElementById, getGVMapTargetElement, getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreMapPointMarkers,
@@ -163,6 +168,47 @@ export class MapConfigTester extends GVAbstractTester {
         } else {
           Test.assertFail('No data table OR features data found in data table.');
         }
+      }
+    );
+  }
+
+  /**
+   * Test selectedLayersLayerPath with a GeoCore UUID resolves to the first layer path in the store.
+   *
+   * A GeoCore layer can only be referenced by its bare UUID in the config, but its real path becomes `uuid/<layerId>`
+   * at runtime. During config load the configured `selectedLayersLayerPath` is rewritten from the bare UUID to that
+   * first resolved path, so the layers panel pre-selects the GeoCore layer (issue #3633).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSelectedLayersLayerPathGeoCoreResolution(): Promise<Test<MapViewer>> {
+    const mapId = this.getMapId();
+    const geocoreUuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
+    const expectedLayerPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP;
+
+    // Test
+    return this.test(
+      'Test selectedLayersLayerPath with a GeoCore UUID resolves to the first layer path in the store',
+      (test) => {
+        // Pre-select the GeoCore layer in the layers tab using only its bare UUID
+        const footerBarConfig = {
+          tabs: { core: ['layers'] },
+          selectedTab: 'layers',
+          selectedLayersLayerPath: geocoreUuid,
+        };
+        const geocoreLayerConfig = [{ geoviewLayerType: 'geoCore' as TypeGeoviewLayerType, geoviewLayerId: geocoreUuid }];
+
+        // Create the map viewer from config (waits for layers loaded)
+        return this.#helperCreateMapConfig(test, mapId, [
+          ['map.listOfGeoviewLayerConfig', geocoreLayerConfig],
+          ['footerBar', footerBarConfig],
+        ]);
+      },
+      (test) => {
+        // The bare UUID should have been rewritten to the first resolved layer path in the store selection
+        test.addStep('Verifying the layers store selectedLayerPath resolved the UUID to its first layer path...');
+        const selectedLayerPath = getStoreLayerSelectedLayerPath(mapId);
+        Test.assertIsEqual(selectedLayerPath, expectedLayerPath);
       }
     );
   }

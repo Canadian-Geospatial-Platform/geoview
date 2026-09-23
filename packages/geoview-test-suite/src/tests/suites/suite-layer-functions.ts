@@ -43,7 +43,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests layer controller functions and feature-query behavior:<br/>
-      <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops<br/>
+      <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
       <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>`;
@@ -55,7 +55,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 7;
+    return 8;
   }
 
   /**
@@ -106,6 +106,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test WMS query via associated WFS layer (Airborne)
     await this.#layerTester.testQueryWMSLayerForWFSFeaturesAirborne(this.getIsRunningOnVPN());
+
+    // Test resolving the first layer under a root id (e.g. a GeoCore UUID) — issue #3633
+    await this.#layerTester.testGetGeoviewLayerByRootId();
 
     // Resolve when all parallel tests are done
     return Promise.all([pLayerWMSDuplicateGroupNames]);

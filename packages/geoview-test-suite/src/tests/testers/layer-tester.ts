@@ -2551,6 +2551,52 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests that getGeoviewLayerByRootId resolves the first layer registered under a root id (issue #3633).
+   *
+   * When only a root id is known (e.g. a GeoCore UUID whose `uuid/<layerId>` path is resolved at runtime), an exact
+   * lookup by the bare id fails, but getGeoviewLayerByRootId must return the first layer under that root id — which is
+   * what lets the configured `selectedLayersLayerPath` pre-select a GeoCore layer.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testGetGeoviewLayerByRootId(): Promise<Test<AbstractGVLayer>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const gvLayerName = 'Root Id Resolver';
+
+    return this.test(
+      `Test getGeoviewLayerByRootId resolves the first layer under a root id...`,
+      async (test) => {
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
+        ]);
+
+        // Add the layer to the map and wait until it's ready
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+      },
+      (test) => {
+        // An exact lookup by the bare root id must not resolve (the real path is `${gvLayerId}/<layerId>`)
+        test.addStep('Verifying the bare root id has no exact layer...');
+        Test.assertIsUndefined('exactByRootId', this.getMapViewer().layer.getGeoviewLayerIfExists(gvLayerId));
+
+        // Root-id resolution must return the first layer under that id
+        test.addStep('Verifying getGeoviewLayerByRootId resolves the first layer under the root id...');
+        const resolved = this.getMapViewer().layer.getGeoviewLayerByRootId(gvLayerId);
+        Test.assertIsDefined('resolved', resolved);
+        Test.assertIsEqual(resolved.getLayerPath(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests that ESRI Dynamic identify pairs each returned feature's geometry to its own OBJECTID (issue #3636).
    *
    * At a shared boundary/junction, identify returns multiple coincident polygons while the separate geometry query

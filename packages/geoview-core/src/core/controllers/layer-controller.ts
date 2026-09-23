@@ -631,6 +631,20 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
+   * Returns the first GeoView layer registered under the given root id.
+   *
+   * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). This is useful when
+   * only the root id is known (e.g. a GeoCore UUID whose sublayer path is resolved at runtime).
+   *
+   * @param rootId - The root layer id (e.g. a GeoCore UUID)
+   * @returns The first AbstractBaseGVLayer under that root id, or undefined when none is found
+   */
+  getGeoviewLayerByRootId(rootId: string): AbstractBaseGVLayer | undefined {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerByRootId(rootId);
+  }
+
+  /**
    * Returns the AbstractGVLayer instance associated to the layer path.
    *
    * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.

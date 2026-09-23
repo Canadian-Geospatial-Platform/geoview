@@ -185,6 +185,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
           if (geoviewLayerConfig.useAsBasemap !== true) {
             const layerPaths = AbstractMapViewerController.generateOrderedLayerPaths(geoviewLayerConfig);
             orderedLayers.push(...layerPaths);
+
+            // If a configured layers-panel selection references only this layer's root id (e.g. a GeoCore UUID whose
+            // sublayer path is unknown at config time), rewrite it to the first resolved layer path under that root id.
+            if (layerPaths.length) this.#resolveConfiguredSelectedLayersLayerPath(geoviewLayerConfig.geoviewLayerId, layerPaths[0]);
           }
 
           // Add it
@@ -684,6 +688,22 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   // #region PRIVATE METHODS
+
+  /**
+   * Rewrites a configured layers-panel selection that references only a layer's root id to its first resolved path.
+   *
+   * The config can only reference a GeoCore layer by its UUID; once the sublayer structure resolves the real path is
+   * `uuid/<layerId>`, so the bare root id would never match an entry in the layers panel. This updates the app bar and
+   * footer bar `selectedLayersLayerPath` in place when they still point at the given root id.
+   *
+   * @param rootId - The layer's root id (e.g. a GeoCore UUID)
+   * @param firstLayerPath - The first resolved layer path under that root id
+   */
+  #resolveConfiguredSelectedLayersLayerPath(rootId: string, firstLayerPath: string): void {
+    const { footerBar, appBar } = this.getMapViewer().mapFeaturesConfig;
+    if (footerBar?.selectedLayersLayerPath === rootId) footerBar.selectedLayersLayerPath = firstLayerPath;
+    if (appBar?.selectedLayersLayerPath === rootId) appBar.selectedLayersLayerPath = firstLayerPath;
+  }
 
   /**
    * Continues the addition of the geoview layer.
