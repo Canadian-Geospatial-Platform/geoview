@@ -148,7 +148,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   if (loading) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -161,7 +161,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   if (uniqueValues.length === 0) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -173,7 +173,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+      <Typography variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
 
@@ -183,10 +183,14 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
           onChange={handleSliderChange}
           onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
-          valueLabelFormat={formatValue}
+          onValueLabelFormat={formatValue}
           min={memoBounds.min}
           max={memoBounds.max}
           step={attribute.rangeStep ?? 1}
+          getAriaLabel={(index: number) =>
+            t(index === 0 ? 'FilterPanel.rangeMinValue' : 'FilterPanel.rangeMaxValue', { attribute: attribute.displayLabel })
+          }
+          onValueDisplayAriaLabel={formatValue}
         />
       </Box>
 

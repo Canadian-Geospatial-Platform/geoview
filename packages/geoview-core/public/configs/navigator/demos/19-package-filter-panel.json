@@ -64,7 +64,6 @@
             "layerPath": "esriFeatureLYR4/0",
             "filterName": "Top 100 exploration projects in Canada",
             "enabled": true,
-            "collapsible": true,
             "defaultCollapsed": true,
             "attributes": [
               {
@@ -96,7 +95,6 @@
           {
             "layerPath": "historical-flood/0",
             "enabled": true,
-            "collapsible": false,
             "attributes": [
               {
                 "fieldName": "flood_cause",

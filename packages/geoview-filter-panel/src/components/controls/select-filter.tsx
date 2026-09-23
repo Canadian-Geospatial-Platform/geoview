@@ -15,6 +15,8 @@ interface SelectFilterProps {
   attribute: TypeFilterAttribute;
   /** Current filter value. */
   value: TypeFilterValue;
+  /** Name of the filter, used for accessibility labels. */
+  filterName: string | undefined;
   /** Callback when value changes. */
   onChange: (value: TypeFilterValue) => void;
   /** Unique values available for selection. */
@@ -33,7 +35,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/select-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading } = props;
+  const { attribute, value, onChange, uniqueValues, loading, filterName } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
@@ -86,7 +88,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   if (loading) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -98,13 +100,14 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+      <Typography id={`select-${filterName}-${attribute.fieldName}-label`} variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
       <Select
         fullWidth
         value={value || ''}
         onChange={handleSelectChange}
+        labelId={`select-${filterName}-${attribute.fieldName}-label`}
         label=""
         inputLabel={{ shrink: true }}
         menuItems={memoMenuItems}

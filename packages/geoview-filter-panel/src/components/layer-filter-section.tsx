@@ -6,7 +6,6 @@ import { useFilterPanelController } from 'geoview-core/core/controllers/use-cont
 import {
   useStoreFilterPanelLayerFilterState,
   useStoreFilterPanelLayerCollapsed,
-  getStoreFilterPanelLayerConfig,
   setStoreFilterPanelLayerCollapsed,
 } from 'geoview-core/core/stores/states/filter-panel-state';
 import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
@@ -45,7 +44,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const { cgpv } = window as TypeWindow;
   const { useState, useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Typography, Collapse, Button, IconButton } = ui.elements;
+  const { Box, Typography, Collapse, Button, IconButton, List, ListItem } = ui.elements;
   const { ExpandMoreIcon, CloseIcon, ZoomInSearchIcon } = ui.elements;
   const controller = useFilterPanelController();
 
@@ -60,10 +59,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Indicate if there are filters
   const hasFilter = Object.keys(filterState).length > 0;
-
-  // Get config values (static)
-  const layerConfig = getStoreFilterPanelLayerConfig(mapId, layer.layerPath);
-  const collapsible = layerConfig?.collapsible ?? true;
 
   // Hook the layer status to know if this specific layer is ready
   const layerStatus = useStoreLayerStatus(layer.layerPath);
@@ -188,33 +183,39 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
       const loading = !fieldValues[attr.fieldName];
 
       // Render based on filter type
+      let control: JSX.Element | null = null;
       switch (attr.filterType) {
         case 'select':
-          return (
+          control = (
             <SelectFilter
               key={attr.fieldName}
               attribute={attr}
               value={value}
+              filterName={layer.filterName || layerName}
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues}
               loading={loading}
             />
           );
+          break;
 
         case 'multiselect':
-          return (
+          control = (
             <MultiselectFilter
               key={attr.fieldName}
               attribute={attr}
               value={value}
+              layerPath={layer.layerPath}
+              filterName={layer.filterName || layerName}
               onChange={(event) => onFilterChange(attr.fieldName, event.currentValues)}
               uniqueValues={uniqueValues}
               loading={loading}
             />
           );
+          break;
 
         case 'range':
-          return (
+          control = (
             <RangeFilter
               key={attr.fieldName}
               attribute={attr}
@@ -224,9 +225,10 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               loading={loading}
             />
           );
+          break;
 
         case 'date':
-          return (
+          control = (
             <DateFilter
               key={attr.fieldName}
               attribute={attr}
@@ -236,12 +238,19 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               loading={loading}
             />
           );
+          break;
 
         default:
-          return null;
+          control = null;
       }
+
+      return (
+        <ListItem key={attr.fieldName} sx={{ display: 'block' }}>
+          {control}
+        </ListItem>
+      );
     },
-    [layer, filterState, fieldValues, onFilterChange]
+    [layer, filterState, fieldValues, ListItem, layerName, onFilterChange]
   );
 
   if (!layer.enabled) return null;
@@ -250,24 +259,26 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     <Box sx={memoSxClasses.filterLayerSection}>
       <Box sx={memoHeaderSx}>
         <Box sx={memoSxClasses.filterLayerHeaderTop}>
-          <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
+          <Typography variant="h3" sx={memoSxClasses.filterLayerName}>
             {layer.filterName || layerName}
           </Typography>
-          {collapsible && (
-            <IconButton
-              aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
-              aria-expanded={!isCollapsed}
-              aria-controls={`filter-panel-layer-${layer.layerPath}`}
-              tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}
-              onClick={handleToggle}
-              size="small"
-              sx={memoToggleIconSx}
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-          )}
+          <IconButton
+            aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
+            aria-expanded={!isCollapsed}
+            aria-controls={`filter-panel-layer-${layer.layerPath}`}
+            tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}
+            onClick={handleToggle}
+            size="small"
+            sx={memoToggleIconSx}
+          >
+            <ExpandMoreIcon />
+          </IconButton>
         </Box>
-        <Box sx={memoSxClasses.filterLayerActions}>
+        <Box
+          sx={memoSxClasses.filterLayerActions}
+          role="group"
+          aria-label={t('FilterPanel.filterActions', { filterName: layer.filterName || layerName })}
+        >
           <Button
             type="text"
             variant="outlined"
@@ -276,6 +287,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             onClick={onClearLayer}
             disabled={!hasFilter}
             sx={memoSxClasses.filterLayerClearButton}
+            aria-label={t('FilterPanel.clearAria', { filterName: layer.filterName })}
           >
             {t('FilterPanel.clear')}
           </Button>
@@ -287,6 +299,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             onClick={handleZoomToFiltered}
             disabled={!hasFilter}
             sx={memoSxClasses.filterLayerClearButton}
+            aria-label={t('FilterPanel.zoomToAria', { filterName: layer.filterName })}
           >
             {t('FilterPanel.zoomToFiltered')}
           </Button>
@@ -302,7 +315,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               </Typography>
             </Box>
           ) : (
-            layer.attributes.map(renderFilterControl)
+            <List>{layer.attributes.map(renderFilterControl)}</List>
           )}
         </Box>
       </Collapse>

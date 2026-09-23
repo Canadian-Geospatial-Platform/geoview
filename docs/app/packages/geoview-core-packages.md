@@ -1655,7 +1655,6 @@ interface FilterPanelConfig {
     layerPath: string;
     filterName?: string;
     enabled?: boolean;
-    collapsible?: boolean;
     defaultCollapsed?: boolean;
     attributes?: Array<
       | SelectFilterAttribute
@@ -1720,8 +1719,7 @@ type DateFilterAttribute = {
 - **layerPath** (string, required): Unique layer path identifier
 - **filterName** (string, optional): Display name for the layer (if not provided, layer path is used)
 - **enabled** (boolean, default: true): Whether filtering is enabled for this layer
-- **collapsible** (boolean, default: true): Allow collapsing/expanding this layer section
-- **defaultCollapsed** (boolean, default: false): Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open.
+- **defaultCollapsed** (boolean, default: false): Default collapsed state for this layer section.
 - **attributes** (array): Array of filterable attributes
 
 **Attribute properties (common to all types):**
@@ -1784,7 +1782,6 @@ type DateFilterAttribute = {
             "layerPath": "cities-layer",
             "filterName": "Canadian Cities",
             "enabled": true,
-            "collapsible": true,
             "defaultCollapsed": false,
             "attributes": [
               {
@@ -1862,7 +1859,6 @@ type DateFilterAttribute = {
             "layerPath": "population-data",
             "filterName": "Population Data",
             "enabled": true,
-            "collapsible": true,
             "defaultCollapsed": false,
             "attributes": [
               {
@@ -1914,7 +1910,6 @@ type DateFilterAttribute = {
             "layerPath": "environmental-data",
             "filterName": "Environmental Monitoring",
             "enabled": true,
-            "collapsible": false,
             "attributes": [
               {
                 "fieldName": "pollutant_type",
@@ -1948,7 +1943,6 @@ type DateFilterAttribute = {
   "corePackagesConfig": [
     {
       "filter-panel": {
-        "enabled": true,
         "layers": [
           {
             "layerPath": "weather-stations",
@@ -1982,11 +1976,7 @@ type DateFilterAttribute = {
               }
             ]
           }
-        ],
-        "settings": {
-          "collapsible": true,
-          "defaultCollapsed": false
-        }
+        ]
       }
     }
   ]
