@@ -10,6 +10,7 @@ import {
 import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 import { generateId } from 'geoview-core/core/utils/utilities';
+import { TestSkippedError } from 'geoview-core/core/exceptions';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
 /** Values captured while testing time-slider reset behavior. */
@@ -218,9 +219,10 @@ export class TimeSliderTester extends GVAbstractTester {
    * Tests that a WMS group-time-dimension (QGIS 'landcover_groupe' style) is flagged as such in the store,
    * both on the group layer and on each of its sub-layers.
    *
+   * @param isRunningOnVPN - Whether the test environment can access the VPN-only service
    * @returns A promise that resolves when the test completes
    */
-  testWMSLayerLandcoverGroupDimensionFlags(): Promise<Test<LandcoverGroupDimensionResult>> {
+  testWMSLayerLandcoverGroupDimensionFlags(isRunningOnVPN: boolean): Promise<Test<LandcoverGroupDimensionResult>> {
     const gvLayerId = generateId();
     const groupPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
     const year2010Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010}`;
@@ -231,6 +233,11 @@ export class TimeSliderTester extends GVAbstractTester {
     return this.test(
       'Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers...',
       async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
         test.addStep('Creating the GeoView Layer Configuration...');
         // isTimeAware must be true so the layers get registered by TimeSliderController.tryRegisterLayer()
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, GVAbstractTester.LANDCOVER_CDTK_URL, undefined, true, [
@@ -294,8 +301,11 @@ export class TimeSliderTester extends GVAbstractTester {
         Test.assertIsDefined('year2015TimeSliderValues', result.year2015TimeSliderValues);
         Test.assertIsDefined('year2020TimeSliderValues', result.year2020TimeSliderValues);
       },
-      () => {
-        // this.finalizeStepRemoveLayerAndAssert(test, groupPath);
+      (test) => {
+        // If the test was running
+        if (isRunningOnVPN) {
+          this.finalizeStepRemoveLayerAndAssert(test, groupPath);
+        }
       }
     );
   }

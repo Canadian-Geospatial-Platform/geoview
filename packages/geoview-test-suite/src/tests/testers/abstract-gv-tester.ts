@@ -4,7 +4,7 @@ import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -1012,43 +1012,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly WATER_NETWORK_LAYER_NAME: string = 'Water Network';
   static readonly WATER_NETWORK_DOMAIN_FIELD_NAME: string = 'material';
 
-  static readonly INITIAL_SETTINGS_CONFIG = {
-    geoviewLayerId: 'geojsonLYR1',
-    geoviewLayerName: 'GeoJSON Sample',
-    metadataAccessPath: './datasets/geojson/metadata.meta',
-    geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-    serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
-    initialSettings: {
-      controls: {
-        highlight: false,
-        zoom: false,
-      },
-    },
-    listOfLayerEntryConfig: [
-      {
-        entryType: 'group',
-        layerId: 'point-feature-group',
-        layerName: 'Points & Icons',
-        initialSettings: {
-          controls: {
-            remove: false,
-          },
-        },
-        listOfLayerEntryConfig: [
-          {
-            layerId: 'points_1.json',
-            layerName: 'Points 1',
-            initialSettings: {
-              controls: {
-                highlight: true,
-              },
-            },
-          },
-        ],
-      },
-    ],
-  };
-
   /** The API for the tests */
   #api: API;
 
@@ -1299,4 +1262,55 @@ export abstract class GVAbstractTester extends AbstractTester {
   waitForFooterTabNotSelected(tabId: string): Promise<Element> {
     return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}:not(.Mui-selected)`);
   }
+
+  // #region STATIC METHODS
+
+  /**
+   * Creates the GeoJSON group configuration used by settings and visibility tests.
+   *
+   * The returned fixture contains a group with one child layer and nested initial settings for testing inheritance.
+   *
+   * @param geoviewLayerId - The unique GeoView layer identifier to assign to the configuration
+   * @returns A GeoJSON group layer configuration with nested initial settings
+   */
+  static createGeoJsonPointsSettings(geoviewLayerId: string): TypeGeoviewLayerConfig {
+    return {
+      geoviewLayerId,
+      geoviewLayerName: 'GeoJSON Sample',
+      metadataAccessPath: './datasets/geojson/metadata.meta',
+      geoviewLayerType: 'GeoJSON',
+      serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+      initialSettings: {
+        controls: {
+          highlight: false,
+          zoom: false,
+        },
+      },
+      listOfLayerEntryConfig: [
+        {
+          entryType: 'group',
+          layerId: 'point-feature-group',
+          layerName: 'Points & Icons',
+          initialSettings: {
+            controls: {
+              remove: false,
+            },
+          },
+          listOfLayerEntryConfig: [
+            {
+              layerId: 'points_1.json',
+              layerName: 'Points 1',
+              initialSettings: {
+                controls: {
+                  highlight: true,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    } as unknown as TypeGeoviewLayerConfig;
+  }
+
+  // #endregion STATIC METHODS
 }

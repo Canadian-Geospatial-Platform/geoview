@@ -1578,7 +1578,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testSettingsCascadeToSublayers(): Promise<Test<MapConfigLayerEntry>> {
     // The values
-    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as MapConfigLayerEntry;
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings('geojsonLYR1') as unknown as MapConfigLayerEntry;
 
     // Expected config
     const expectedResults = {

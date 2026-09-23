@@ -640,9 +640,10 @@ export class LayerTester extends GVAbstractTester {
    * The test verifies that the selected group expands into WMS child layers and that the first child is marked as
    * having been added through a group with a group time dimension.
    *
+   * @param isRunningOnVPN Indicates whether the test is running on a VPN
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerLandcoverGroupDimension(): Promise<Test<AbstractBaseGVLayer>> {
+  testAddWMSLayerLandcoverGroupDimension(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
@@ -653,6 +654,11 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Landcover pointing to a group layer with a group time dimension...`,
       async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
@@ -688,8 +694,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, true);
       },
       (test) => {
-        // Redirect to helper to clean up and assert
-        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        // If the test was running
+        if (isRunningOnVPN) {
+          // Redirect to helper to clean up and assert
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        }
       }
     );
   }
@@ -700,9 +709,10 @@ export class LayerTester extends GVAbstractTester {
    * The test verifies that directly selected sub-layers remain regular WMS layers and are not marked as having been
    * added through a group.
    *
+   * @param isRunningOnVPN Indicates whether the test is running on a VPN
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerLandcoverGroupDimensionNegative(): Promise<Test<AbstractBaseGVLayer>> {
+  testAddWMSLayerLandcoverGroupDimensionNegative(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
@@ -713,6 +723,11 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       `Test Adding WMS Landcover pointing to sub-layers directly, negating the group time dimension...`,
       async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
@@ -750,8 +765,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, false);
       },
       (test) => {
-        // Redirect to helper to clean up and assert
-        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        // If the test was running
+        if (isRunningOnVPN) {
+          // Redirect to helper to clean up and assert
+          this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        }
       }
     );
   }
@@ -1848,8 +1866,9 @@ export class LayerTester extends GVAbstractTester {
    */
   testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
     // The config
-    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
-    const layerPath = 'geojsonLYR1/point-feature-group';
+    const geoviewLayerId = 'geojsonLYR1-settings';
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const layerPath = `${geoviewLayerId}/point-feature-group`;
 
     // Expected config
     const expectedResults = {
@@ -2272,8 +2291,9 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSetLayerVisibleIncludingParents(): Promise<Test<ParentCrawlVisibilityResult>> {
-    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
-    const groupPath = 'geojsonLYR1/point-feature-group';
+    const geoviewLayerId = 'geojsonLYR1-visibility';
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const groupPath = `${geoviewLayerId}/point-feature-group`;
     const childPath = `${groupPath}/points_1.json`;
 
     // Test

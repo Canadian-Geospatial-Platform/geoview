@@ -79,7 +79,7 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags();
+    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
 
     // Resolve when all
     return Promise.resolve();
@@ -93,7 +93,7 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     await this.#timeSliderTester.testResetValues();
     await this.#timeSliderTester.testConstrainValues();
-    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags();
+    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
 
     return Promise.resolve();
   }
