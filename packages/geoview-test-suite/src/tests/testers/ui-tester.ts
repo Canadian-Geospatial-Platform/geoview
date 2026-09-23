@@ -28,8 +28,8 @@ export class UITester extends GVAbstractTester {
       async (test) => {
         // Step 1: Select the details tab in footer bar
         test.addStep('Selecting details panel and wait for the UI to refresh...');
-        this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
-        await this.waitForFooterTabSelected('details');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
+        await this.waitForAppbarTabSelected('details');
 
         // Get the GeoView HTML element
         test.addStep('Getting GeoView HTML element...');
