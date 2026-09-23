@@ -1597,10 +1597,8 @@ The panel gracefully handles:
 - Multiple filter types (select, multiselect, range, date)
 - Real-time or manual filter application
 - Layer organization with collapsible sections
-- Feature count display
 - Theme-aware UI (adapts to geo.ca, light, dark themes)
-- Auto-apply or manual apply modes
-- Reset individual filters or all filters at once
+- Clear a layer's active filters with one click
 - Optional search box for multiselect filters with long value lists
 - Zoom to the extent of features matching a layer's active filters
 - Integration with GeoView's LayerFilters system
@@ -2162,8 +2160,7 @@ In this example:
 - **Layer Paths:** Must reference existing layers in the map configuration
 - **Filter Names:** Optional - if not provided, the layer path will be used as the display name
 - **Field Names:** Must match actual field names in the layer schema
-- **Auto-Apply:** When `autoApply: true`, filters apply immediately on every change. When `false`, filters still apply automatically but may have a slight delay
-- **Reset:** Individual filters can be reset, or all filters can be reset at once using the reset button
+- **Reset:** Each layer section has a "Clear" button that resets that layer's active filters
 - **Zoom to Filtered:** Each layer section has a "Zoom to filtered" button (next to Clear) that zooms the map to the extent of features currently matching that layer's active filters. Disabled when no filters are active; shows a warning notification instead of an error if no feature currently matches
 - **Theme Integration:** UI automatically adapts to the map's theme (geo.ca, light, dark)
 - **Performance:** Range and date filters are optimized for large datasets
@@ -2224,8 +2221,7 @@ In this example:
           }
         ]
       }
-    ],
-    "settings": { "autoApply": true }
+    ]
   }
 }
 ```
@@ -2262,8 +2258,7 @@ In this example:
           }
         ]
       }
-    ],
-    "settings": { "autoApply": true }
+    ]
   }
 }
 ```

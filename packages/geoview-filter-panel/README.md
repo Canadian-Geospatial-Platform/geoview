@@ -14,7 +14,6 @@ The Filter Panel does not currently sync with other components like the layer li
 - **Searchable Multiselect**: Optional search box to filter long checkbox value lists (`searchable: true`)
 - **Zoom to Filtered**: Per-layer button to zoom the map to the extent of features matching the active filters
 - **Theme-Aware**: Automatically adapts to GeoView's theme (geo.ca, light, dark)
-- **Auto-Apply or Manual**: Configure whether filters apply automatically or require user action
 - **Layer Organization**: Collapsible layer sections for clean UI
 - **Real-Time Updates**: Filters update the map in real-time using GeoView's LayerFilters system
 
@@ -30,11 +29,13 @@ Add the filter panel to your map configuration:
       "filter-panel": {
         "enabled": true,
         "isOpen": false,
+        "title": "Filter Layers",
         "layers": [
           {
-            "layerId": "my-layer-path",
-            "layerName": "My Layer",
+            "layerPath": "my-layer-path",
+            "filterName": "My Layer",
             "enabled": true,
+            "defaultCollapsed": false,
             "attributes": [
               {
                 "fieldName": "category",
@@ -59,15 +60,7 @@ Add the filter panel to your map configuration:
               }
             ]
           }
-        ],
-        "settings": {
-          "title": "Filter Layers",
-          "defaultCollapsed": false,
-          "showApplyButton": false,
-          "showResetButton": true,
-          "autoApply": true,
-          "showFeatureCount": true
-        }
+        ]
       }
     }
   ]
@@ -129,17 +122,6 @@ Date range selection
   "defaultValues": { "start": null, "end": null }
 }
 ```
-
-## Settings
-
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `title` | string | "Filter Layers" | Panel title |
-| `defaultCollapsed` | boolean | false | Default collapsed state |
-| `showApplyButton` | boolean | false | Show apply button |
-| `showResetButton` | boolean | true | Show reset button |
-| `autoApply` | boolean | true | Auto-apply filters on change |
-| `showFeatureCount` | boolean | true | Show feature count after filtering |
 
 ## Layer Actions
 

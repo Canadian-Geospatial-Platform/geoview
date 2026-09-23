@@ -3125,7 +3125,6 @@ interface FilterPanelConfig {
     layerPath: string;
     filterName?: string;
     enabled?: boolean;
-    collapsible?: boolean;
     defaultCollapsed?: boolean;
     attributes?: Array<
       | SelectFilterAttribute
@@ -3157,8 +3156,7 @@ type DateFilterAttribute = {
   - **layerPath** (required): Unique layer path identifier
   - **filterName** (optional): Display name for the layer (if not provided, layer path is used)
   - **enabled**: Whether filtering is enabled for this layer (default: true)
-  - **collapsible**: Allow collapsing/expanding this layer section (default: true)
-  - **defaultCollapsed**: Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open (default: false)
+  - **defaultCollapsed**: Default collapsed state for this layer section (default: false)
   - **attributes**: Array of filterable attributes (each attribute must specify one of the four filter types)
 
 **Common attribute properties:**
@@ -3208,7 +3206,6 @@ type DateFilterAttribute = {
           "layerPath": "cities-layer",
           "filterName": "Canadian Cities",
           "enabled": true,
-          "collapsible": true,
           "defaultCollapsed": false,
           "attributes": [
             {
@@ -3237,7 +3234,6 @@ type DateFilterAttribute = {
           "layerPath": "population-data",
           "filterName": "Population Data",
           "enabled": true,
-          "collapsible": true,
           "defaultCollapsed": false,
           "attributes": [
             {
@@ -3259,42 +3255,6 @@ type DateFilterAttribute = {
           ]
         }
       ]
-    }
-  }
-]
-```
-
-**Custom Settings:**
-
-```json
-"corePackagesConfig": [
-  {
-    "filter-panel": {
-      "layers": [
-        {
-          "layerPath": "environmental-data",
-          "filterName": "Environmental Monitoring",
-          "enabled": true,
-          "collapsible": false,
-          "attributes": [
-            {
-              "fieldName": "pollutant_type",
-              "displayLabel": "Pollutant Type",
-              "filterType": "multiselect"
-            },
-            {
-              "fieldName": "concentration",
-              "displayLabel": "Concentration (ppm)",
-              "filterType": "range"
-            }
-          ]
-        }
-      ]
-      "settings": {
-        "title": "Environmental Filters",
-        "collapsible": false,
-        "showResetButton": true
-      }
     }
   }
 ]
@@ -3336,7 +3296,6 @@ Domain mapping displays user-friendly labels instead of raw codes. When `filterM
 - Layer paths must reference existing layers in the map configuration
 - Layer names are optional - if not provided, the layer path will be used as the display name
 - Field names must match actual field names in the layer schema
-- When `autoApply: true`, filters apply immediately on every change
 - UI automatically adapts to the map's theme (geo.ca, light, dark)
 - Range and date filters are optimized for large datasets
 - **Domain mapping**: Use the `domain` property on attributes to display custom labels for coded values. Values are ordered according to the domain array order (not alphabetically). Set `filterMissingDomainValues: true` to hide features with values outside the domain
