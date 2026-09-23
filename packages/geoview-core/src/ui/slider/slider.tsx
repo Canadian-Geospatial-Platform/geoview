@@ -40,6 +40,7 @@ type SliderProps = {
   size?: 'small' | 'medium';
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
+  getAriaLabel?: (index: number) => string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
   valueLabelDisplay?: 'auto' | 'on' | 'off';
   slotProps?: MuiSliderProps['slotProps'];
