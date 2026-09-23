@@ -2741,7 +2741,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
