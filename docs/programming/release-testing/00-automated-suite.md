@@ -27,6 +27,8 @@ rush serve
 - [API Reference](../../app/testing/api-reference.md) — Assertion API and test lifecycle
 - [Test Suite Package](../../../packages/geoview-test-suite/) — Source code for `geoview-test-suite`
 
+The checklist counts release executions rather than unique test methods. `suite-layer` runs once on LCC (EPSG:3978) and once on Web Mercator (EPSG:3857), so its 46 tests contribute 92 executions to the total.
+
 ## Suite Checklist
 
 | #   | Suite                           | Tests   | Status   |
@@ -34,17 +36,17 @@ rush serve
 | 1   | `suite-core`                    | 14      | [ ] Pass |
 | 2   | `suite-config`                  | 39      | [ ] Pass |
 | 3   | `suite-utilities`               | 53      | [ ] Pass |
-| 4   | `suite-layer` (LCC — EPSG:3978) | 44      | [ ] Pass |
-| 5   | `suite-layer` (WM — EPSG:3857)  | 44      | [ ] Pass |
+| 4   | `suite-layer` (LCC — EPSG:3978) | 46      | [ ] Pass |
+| 5   | `suite-layer` (WM — EPSG:3857)  | 46      | [ ] Pass |
 | 6   | `suite-map`                     | 16      | [ ] Pass |
-| 7   | `suite-map-config`              | 40      | [ ] Pass |
+| 7   | `suite-map-config`              | 41      | [ ] Pass |
 | 8   | `suite-ui`                      | 2       | [ ] Pass |
 | 9   | `suite-details`                 | 6       | [ ] Pass |
 | 10  | `suite-data-table`              | 13      | [ ] Pass |
 | 11  | `suite-geochart`                | 2       | [ ] Pass |
 | 12  | `suite-swiper`                  | 2       | [ ] Pass |
 | 13  | `suite-time-slider`             | 3       | [ ] Pass |
-|     | **Total**                       | **278** |          |
+|     | **Total**                       | **283** |          |
 
 ## What to Do if a Suite Fails
 
