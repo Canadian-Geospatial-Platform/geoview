@@ -448,14 +448,30 @@ export class LayerApi {
    *
    * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). Unlike
    * `getGeoviewLayer(layerPath)` (exact path), this resolves the first layer under a root id, which is useful when
-   * only the root id is known \u2014 e.g. a GeoCore UUID whose sublayer path (`uuid/<layerId>`) is resolved at runtime.
+   * only the root id is known — e.g. a GeoCore UUID whose sublayer path (`uuid/<layerId>`) is resolved at runtime.
+   *
+   * @param rootId - The root layer id (e.g. a GeoCore UUID)
+   * @returns The first AbstractBaseGVLayer under that root id
+   * @throws {LayerNotFoundError} When no layer is found under the given root id
+   */
+  getGeoviewLayerByRootId(rootId: string): AbstractBaseGVLayer {
+    // Redirect to controller
+    return this.#controllers.layerController.getGeoviewLayerByRootId(rootId);
+  }
+
+  /**
+   * Returns the first GeoView layer registered under the given root id, if one exists.
+   *
+   * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). Unlike
+   * `getGeoviewLayerIfExists(layerPath)` (exact path), this resolves the first layer under a root id, which is useful
+   * when only the root id is known — e.g. a GeoCore UUID whose sublayer path (`uuid/<layerId>`) is resolved at runtime.
    *
    * @param rootId - The root layer id (e.g. a GeoCore UUID)
    * @returns The first AbstractBaseGVLayer under that root id, or undefined when none is found
    */
-  getGeoviewLayerByRootId(rootId: string): AbstractBaseGVLayer | undefined {
+  getGeoviewLayerByRootIdIfExists(rootId: string): AbstractBaseGVLayer | undefined {
     // Redirect to controller
-    return this.#controllers.layerController.getGeoviewLayerByRootId(rootId);
+    return this.#controllers.layerController.getGeoviewLayerByRootIdIfExists(rootId);
   }
 
   // #endregion LAYER CONTROLLER GETTERS REDIRECTIONS
