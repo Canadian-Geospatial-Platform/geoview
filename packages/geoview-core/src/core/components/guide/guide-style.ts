@@ -156,7 +156,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       fontSize: theme.palette.geoViewFontSize?.xs,
       color: theme.palette.geoViewColor?.textColor.light[200],
       whiteSpace: 'nowrap',
-      mr: theme.spacing(0.125),
     },
     searchNavigationButton: {
       '&.Mui-focusVisible': {

@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     background: theme.palette.geoViewColor?.bgColor.dark[900],
     opacity: 0.9,
     fontSize: theme.palette.geoViewFontSize?.default,
-    padding: '3px 8px',
+    padding: theme.spacing(0.5, 1),
     borderRadius: '5px',
     textAlign: 'center',
     maxWidth: '350px',
@@ -36,6 +36,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    padding: '5px',
+    padding: theme.spacing(0.5),
   },
 });

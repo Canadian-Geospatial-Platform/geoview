@@ -152,22 +152,13 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
 
   /**
    * Builds custom sx classes for the geometry picker panel.
+   *
+   * Reused from nav-bar-style.ts, which already defines the shared `listItem` spacing
+   * used to keep the focus indicator visible around list rows.
    */
   const memoSxClasses = useMemo((): SxStyles => {
     return getSxClasses(theme);
   }, [theme]);
-
-  /**
-   * Builds local list styles for the geometry picker.
-   */
-  const memoListStyles = useMemo((): SxStyles => {
-    logger.logTraceUseMemo('GEOMETRY-PICKER - GeometryPickerPanel - memoListStyles');
-    return {
-      listItem: {
-        mb: '6px', // Create space for the focus indicator to be visible
-      },
-    };
-  }, []);
 
   /**
    * Builds icon style properties from the current drawing style.
@@ -254,7 +245,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   return (
     <List>
       {geomTypes?.includes('Point') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<PointIcon IconComponent={PlaceIcon} />}
@@ -271,7 +262,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('Text') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />}
@@ -288,7 +279,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('LineString') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<ShowChartIcon sx={{ color: memoIconStyle.stroke }} />}
@@ -305,7 +296,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('Polygon') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
@@ -322,7 +313,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('Rectangle') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
@@ -339,7 +330,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('Circle') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
@@ -356,7 +347,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         </ListItem>
       )}
       {geomTypes?.includes('Star') && (
-        <ListItem sx={memoListStyles.listItem}>
+        <ListItem sx={memoSxClasses.listItem}>
           <Button
             type="textWithIcon"
             startIcon={<StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}

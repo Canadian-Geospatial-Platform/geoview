@@ -94,11 +94,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const swiperRef = useRef<HTMLElement>(null);
 
   // SxClasses
+  const theme = ui.useTheme();
   const mapHeight = useStoreMapSize()[1];
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('SWIPER - memoSxClasses', mapHeight);
-    return getSxClasses(mapHeight);
-  }, [mapHeight]);
+    return getSxClasses(theme, mapHeight);
+  }, [theme, mapHeight]);
 
   // States
   const [gvLayers, setGvLayers] = useState<AbstractBaseGVLayer[]>([]);

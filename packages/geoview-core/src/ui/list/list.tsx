@@ -1,7 +1,9 @@
 import type { Ref } from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import MaterialList from '@mui/material/List';
 import type { ListProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import type { Theme, SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
@@ -12,12 +14,18 @@ export interface TypeListProps extends ListProps {
   type?: 'ul' | 'ol';
 }
 
-const sxClasses = {
+/**
+ * Gets custom sx classes for the list.
+ *
+ * @param theme - The MUI theme object
+ * @returns The sx classes object
+ */
+const getSxClasses = (theme: Theme): SxStyles => ({
   list: {
-    padding: 0,
+    padding: theme.spacing(0),
     width: '100%',
   },
-};
+});
 
 /**
  * Material-UI List component with semantic HTML support.
@@ -35,7 +43,20 @@ function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
 
   // Get constant from props
   const { children, className, style, type, sx, ...rest } = props;
-  const sxMerged = composeSxProps(sxClasses.list, sx);
+
+  // Hook
+  const theme = useTheme();
+
+  /**
+   * Builds custom sx classes for the list.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('LIST - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
+
+  const sxMerged = composeSxProps(memoSxClasses.list, sx);
 
   return (
     <MaterialList ref={ref} sx={sxMerged} className={className || ''} style={style || undefined} component={type || 'ul'} {...rest}>
