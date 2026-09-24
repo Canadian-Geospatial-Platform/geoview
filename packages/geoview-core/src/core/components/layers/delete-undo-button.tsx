@@ -9,6 +9,10 @@ import { TIMEOUT } from '@/core/utils/constant';
 import { getGVElementByFullId } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
+import { getSxClasses } from './delete-undo-button-style';
+
+/** Sx classes for this component. No theme dependency, so computed once at module scope. */
+const sxClasses = getSxClasses();
 
 interface UndoButtonProps {
   progressValue: number;
@@ -26,29 +30,9 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   const { progressValue, onUndo, handleKeyDown, iconRef } = props;
 
   return (
-    <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
-      <CircularProgressBase
-        variant="determinate"
-        size={40}
-        value={progressValue}
-        sx={{
-          '& .MuiCircularProgress-circle': {
-            transition: 'none', // completely disable transitions so it doesn't mess up the progress animation, which relies on requestAnimationFrame and smooth updates to the value prop. If transition is not set to none, the progress circle will only update on weird force renders.
-          },
-        }}
-      />
-      <Box
-        style={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+    <Box sx={sxClasses.undoButtonContainer} onClick={onUndo}>
+      <CircularProgressBase variant="determinate" size={40} value={progressValue} sx={sxClasses.progressNoTransition} />
+      <Box sx={sxClasses.undoIconOverlay}>
         <IconButton iconRef={iconRef} aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={handleKeyDown}>
           <UndoIcon />
         </IconButton>

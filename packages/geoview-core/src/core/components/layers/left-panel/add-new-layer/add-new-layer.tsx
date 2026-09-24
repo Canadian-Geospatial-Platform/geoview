@@ -215,7 +215,7 @@ function FileUploadSection({
   return (
     <Box
       className="dropzone"
-      style={{ position: 'relative' }}
+      sx={memoSxClasses.dropZone}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
@@ -227,10 +227,11 @@ function FileUploadSection({
         </Box>
       )}
       <Box>
-        <input
+        <Box
+          component="input"
           type="file"
           ref={fileInputRef}
-          style={{ display: 'none' }}
+          sx={memoSxClasses.fileInput}
           onChange={handleChange}
           accept={VALID_FILE_EXTENSIONS_ACCEPT}
           aria-label={t('layers.fileTypes')} // WCAG - Provides an accessible label for the hidden file input control
@@ -250,9 +251,9 @@ function FileUploadSection({
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>
       </Button>
-      <p style={{ textAlign: 'center' }}>
+      <Box component="p" sx={memoSxClasses.centeredCaption}>
         <small>{t('layers.drop')}</small>
-      </p>
+      </Box>
       <TextField
         fullWidth
         label={disabledLayerTypes.includes(GEOCORE as TypeInitialGeoviewLayerType) ? t('layers.urlNoGeocore') : t('layers.url')}
@@ -317,7 +318,13 @@ function NavButtons({
   return (
     <ButtonGroup sx={memoSxClasses.buttonGroup}>
       {isLoading ? (
-        <IconButton sx={{ width: '80px' }} size="small" className="buttonOutlineFilled" disabled aria-label={t('layers.stepOneLoading')}>
+        <IconButton
+          sx={memoSxClasses.loadingIconButton}
+          size="small"
+          className="buttonOutlineFilled"
+          disabled
+          aria-label={t('layers.stepOneLoading')}
+        >
           <CircularProgressBase size="20px" />
         </IconButton>
       ) : (

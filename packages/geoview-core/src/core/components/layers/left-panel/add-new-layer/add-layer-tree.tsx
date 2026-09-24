@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '@mui/material/styles';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
@@ -32,6 +33,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
   const { layerTree, onSelectedItemsChange } = props;
   const { t } = useTranslation();
+  const theme = useTheme();
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
   /**
@@ -182,8 +184,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
         fontSize: '0.8rem',
         '& .MuiTreeItem-label': {
           fontSize: '0.8rem !important',
-          paddingTop: '3px',
-          paddingBottom: '3px',
+          padding: theme.spacing(0.5, 0),
           ...ellipsisOverflow,
         },
       }}

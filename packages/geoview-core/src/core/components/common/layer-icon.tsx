@@ -21,12 +21,6 @@ interface LayerIconProps {
   layerPath: string;
 }
 
-/** Styles for the loading spinner container. */
-const LOADING_BOX_STYLES = {
-  padding: '5px',
-  marginRight: '10px',
-} as const;
-
 /** Base props shared across icon buttons. */
 const ICON_BUTTON_BASE_PROPS = {
   color: 'primary' as const,
@@ -164,7 +158,7 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
 
   if (!iconAvailable) {
     return (
-      <Box component="span" sx={LOADING_BOX_STYLES}>
+      <Box component="span" sx={sxClasses.loadingBox}>
         <CircularProgressBase size={20} />
       </Box>
     );

@@ -125,10 +125,10 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   return (
     <ListItem sx={sxClasses.legendListItem} disablePadding className="layerListItem groupItem" aria-labelledby={groupTitleId}>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={sxClasses.groupItemWrapper}>
         <Box sx={sxClasses.groupItemButton}>
           {/* Group Icon*/}
-          <ListItemIcon sx={{ minWidth: '24px' }}>
+          <ListItemIcon sx={sxClasses.groupIconListItemIcon}>
             <Box>
               <Box sx={sxClasses.groupIcon}>
                 <LayerGroupIcon />
@@ -145,7 +145,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
             {/* Description */}
             {item.description && <DescriptionText description={item.description} sxClasses={sxClasses} />}
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+            <Box sx={sxClasses.groupTitleRow}>
               {/* Sublayer count */}
               <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
                 {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
@@ -160,7 +160,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
                   tooltip={t('layers.toggleVisibility')}
                   aria-label={`${t('layers.toggleVisibility')}, ${item.text}`}
                   aria-pressed={allVisible}
-                  sx={{ padding: '4px' }}
+                  sx={sxClasses.groupActionIconButton}
                 >
                   {allVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
                 </IconButton>
@@ -168,7 +168,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
             </Box>
           </Box>
           {/* Collapse button */}
-          <Box sx={{ alignSelf: 'center' }}>
+          <Box sx={sxClasses.groupCollapseButtonWrapper}>
             <IconButton
               id={collapseButtonId}
               onClick={handleToggleCollapse}
@@ -177,7 +177,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
               aria-label={`${t('layers.toggleCollapse')}, ${item.text}`}
               aria-expanded={!collapsed}
               aria-controls={collapseRegionId}
-              sx={{ padding: '4px' }}
+              sx={sxClasses.groupActionIconButton}
             >
               {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
             </IconButton>
@@ -185,7 +185,13 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
         </Box>
 
         {/* Collapsible children */}
-        <Collapse id={collapseRegionId} role="region" aria-labelledby={collapseButtonId} in={!collapsed} sx={{ marginRight: '6px' }}>
+        <Collapse
+          id={collapseRegionId}
+          role="region"
+          aria-labelledby={collapseButtonId}
+          in={!collapsed}
+          sx={sxClasses.groupChildrenCollapse}
+        >
           <List sx={sxClasses.groupChildren}>
             {item.children.map((child, index) => {
               const childId = generateLegendItemId(child, index);

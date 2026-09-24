@@ -36,7 +36,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
 
   // State
   const [marks, setMarks] = useState<Mark[]>([]);
-  const [localOpacity, setLocalOpacity] = useState(layerOpacity);
+  const [localOpacity, setLocalOpacity] = useState<number>(layerOpacity);
 
   // Sync local state with store when layerDetails.opacity changes
   useEffect(() => {

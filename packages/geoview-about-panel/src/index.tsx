@@ -2,12 +2,19 @@ import React from 'react'; // GV This import is to validate that we're on the ri
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
-import { PublicIcon } from 'geoview-core/ui';
+import { Box, PublicIcon } from 'geoview-core/ui';
+import type { Theme, SxProps } from 'geoview-core/ui/style/types';
 
 import { AboutPanel } from './about-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-about-panel.json';
 import type { TypeAboutPanelConfig } from './about-panel-types';
+
+/** Sx classes for the configured icon. No theme dependency, so computed once at module scope. */
+const ICON_STYLES: SxProps<Theme> = {
+  width: '24px',
+  height: '24px',
+};
 
 /**
  * About panel plugin.
@@ -74,7 +81,7 @@ class AboutPanelPlugin extends AppBarPlugin {
     const config = this.getConfig();
 
     // Use custom icon if iconPath is provided, otherwise use default PublicIcon
-    return config.iconPath ? <img src={config.iconPath} alt="About" style={{ width: '24px', height: '24px' }} /> : <PublicIcon />;
+    return config.iconPath ? <Box component="img" src={config.iconPath} alt="About" sx={ICON_STYLES} /> : <PublicIcon />;
   }
 
   /**

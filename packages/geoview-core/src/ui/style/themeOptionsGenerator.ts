@@ -178,8 +178,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
   };
 
   const themeOptions: ThemeOptions = {
-    // Spike: emits CSS custom properties for theme values (e.g. non-React/OpenLayers styling consumption).
-    cssVariables: true,
+    cssVariables: false,
     palette: {
       geoViewColor: geoViewColors,
       geoViewFontSize: geoViewFontSizes,
