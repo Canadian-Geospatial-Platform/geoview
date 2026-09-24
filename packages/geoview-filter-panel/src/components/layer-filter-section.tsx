@@ -42,7 +42,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useState, useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useState, useEffect, useCallback, useMemo, useId } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Typography, Collapse, Button, IconButton, List, ListItem } = ui.elements;
   const { ExpandMoreIcon, CloseIcon, ZoomInSearchIcon } = ui.elements;
@@ -69,6 +69,9 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Determine if this layer is ready for filtering
   const layerIsReady = layerStatus === 'processed' || layerStatus === 'loaded';
+
+  // Collapse ID
+  const collapseId = useId();
 
   /**
    * Memoized header styles based on collapsed state.
@@ -191,7 +194,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               key={attr.fieldName}
               attribute={attr}
               value={value}
-              filterName={layer.filterName || layerName}
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues}
               loading={loading}
@@ -205,7 +207,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               key={attr.fieldName}
               attribute={attr}
               value={value}
-              layerPath={layer.layerPath}
               filterName={layer.filterName || layerName}
               onChange={(event) => onFilterChange(attr.fieldName, event.currentValues)}
               uniqueValues={uniqueValues}
@@ -265,7 +266,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           <IconButton
             aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
             aria-expanded={!isCollapsed}
-            aria-controls={`filter-panel-layer-${layer.layerPath}`}
+            aria-controls={collapseId}
             tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}
             onClick={handleToggle}
             size="small"
@@ -306,7 +307,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         </Box>
       </Box>
 
-      <Collapse in={!isCollapsed}>
+      <Collapse in={!isCollapsed} id={collapseId}>
         <Box sx={{ p: 1.5 }}>
           {!layerIsReady ? (
             <Box sx={memoSxClasses.filterLayerLoading}>

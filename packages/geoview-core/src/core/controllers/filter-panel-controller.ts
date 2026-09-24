@@ -248,14 +248,15 @@ export class FilterPanelController extends AbstractMapViewerController {
    */
   async zoomToFilteredExtent(layerPath: string): Promise<void> {
     let extent: Extent;
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+
     try {
       // Get the extent of the features matching the layer's active filters
-      extent = await this.getControllersRegistry().layerController.getExtentFromFilteredFeatures(layerPath);
+      extent = await layer.getExtentFromFilteredFeatures(this.getMapViewer().getProjection());
     } catch (error: unknown) {
       // No feature currently satisfies the active filters - expected when a filter excludes everything, not a bug
       if (error instanceof NoExtentError) {
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
-        this.getMapViewer().notifications.showWarning('filterPanel.warningNoFilteredExtent', { layerName: layer?.getLayerName() });
+        this.getMapViewer().notifications.showWarning('filterPanel.warningNoFilteredExtent', { layerName: layer.getLayerName() });
         return;
       }
       throw error;

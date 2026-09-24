@@ -15,8 +15,6 @@ interface SelectFilterProps {
   attribute: TypeFilterAttribute;
   /** Current filter value. */
   value: TypeFilterValue;
-  /** Name of the filter, used for accessibility labels. */
-  filterName: string | undefined;
   /** Callback when value changes. */
   onChange: (value: TypeFilterValue) => void;
   /** Unique values available for selection. */
@@ -35,11 +33,11 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/select-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading, filterName } = props;
+  const { attribute, value, onChange, uniqueValues, loading } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useCallback, useMemo, useId } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Select, Typography } = ui.elements;
 
@@ -47,6 +45,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const controller = useFilterPanelController();
+  const headerLabelId = useId();
   /**
    * Memoized menu items for the select dropdown.
    */
@@ -100,14 +99,14 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography id={`select-${filterName}-${attribute.fieldName}-label`} variant="h4" sx={memoSxClasses.filterLabel}>
+      <Typography id={headerLabelId} variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
       <Select
         fullWidth
         value={value || ''}
         onChange={handleSelectChange}
-        labelId={`select-${filterName}-${attribute.fieldName}-label`}
+        labelId={headerLabelId}
         label=""
         inputLabel={{ shrink: true }}
         menuItems={memoMenuItems}
