@@ -826,7 +826,10 @@ See package-specific sections ([Swiper](#swiper-package), [GeoChart](#geochart-p
   {
     "swiper": {
       "orientation": "vertical",
-      "layers": ["layer1", "layer2"],
+      "layers": [
+        { "layerPath": "layer1", "side": "left" },
+        { "layerPath": "layer2", "side": "left" }
+      ],
       "keyboardOffset": 20
     }
   }
@@ -854,7 +857,7 @@ See package-specific sections ([Swiper](#swiper-package), [GeoChart](#geochart-p
   {
     "swiper": {
       "orientation": "horizontal",
-      "layers": ["layer1/0"]
+      "layers": [{ "layerPath": "layer1/0", "side": "up" }]
     }
   },
   {
@@ -2386,9 +2389,13 @@ Layer comparison package using a swipe control.
 interface SwiperConfig {
   // Required
   orientation: "vertical" | "horizontal";
-  layers: Array<string>;
+  layers: Array<{
+    layerPath: string;
+    side: "left" | "right" | "up" | "down";
+  }>;
 
   // Optional
+  interactive?: boolean;
   keyboardOffset?: number;
   version?: string;
 }
@@ -2399,9 +2406,12 @@ interface SwiperConfig {
 - **orientation** (Required): Swiper bar orientation
   - `"vertical"` - Vertical swipe bar
   - `"horizontal"` - Horizontal swipe bar
-- **layers** (Required): Array of layer IDs to include in swiper
+- **layers** (Required): Array of layer entries participating in the swiper. Each entry is an object:
+  - `layerPath` - The layer path to include in the swiper
+  - `side` - The **visible** side of the bar for this layer. Use `"left"`/`"right"` with a vertical bar and `"up"`/`"down"` with a horizontal bar. `"left"` means the layer stays visible on the left of the divider, and so on (default: `"left"`)
+- **interactive**: When `true`, users can add/remove layers from the swiper and choose each layer's side directly from the layer settings panel (right panel → settings gear). When `false` (default), the swiper is static and author-defined
 - **keyboardOffset**: Pixel offset when using keyboard (default: 10, range: 10-100)
-- **version**: Schema version (default: "1.0")
+- **version**: Schema version (default: "1.1")
 
 #### Example
 
@@ -2410,8 +2420,12 @@ interface SwiperConfig {
   {
     "swiper": {
       "orientation": "vertical",
-      "layers": ["satellite-imagery", "street-map"],
-      "keyboardOffset": 20
+      "interactive": true,
+      "keyboardOffset": 20,
+      "layers": [
+        { "layerPath": "satellite-imagery", "side": "left" },
+        { "layerPath": "street-map", "side": "right" }
+      ]
     }
   }
 ]

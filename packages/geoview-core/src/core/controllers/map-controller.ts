@@ -112,6 +112,15 @@ import {
   isStoreGeochartInitialized,
   getStoreGeochartChartsConfig,
 } from '@/core/stores/states/geochart-state';
+import {
+  getStoreSwiperInteractive,
+  getStoreSwiperLayerPaths,
+  getStoreSwiperLayerSides,
+  getStoreSwiperOrientation,
+  isStoreSwiperInitialized,
+  type SwipeOrientation,
+  type SwipeSide,
+} from '@/core/stores/states/swiper-state';
 import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
@@ -1303,6 +1312,16 @@ export class MapController extends AbstractMapViewerController {
         } else if (charts) corePackagesConfig = [{ geochart: { charts } }];
       }
 
+      // Create swiper config and add to core package configs
+      if (isStoreSwiperInitialized(mapId)) {
+        const swiperConfig = MapController.#createSwiperConfig(mapId);
+        if (corePackagesConfig) {
+          const configObj = corePackagesConfig.find((packageConfig) => Object.keys(packageConfig).includes('swiper'));
+          if (configObj) configObj['swiper'] = { ...(configObj['swiper'] as Record<string, unknown>), ...swiperConfig };
+          else corePackagesConfig.push({ swiper: swiperConfig });
+        } else corePackagesConfig = [{ swiper: swiperConfig }];
+      }
+
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
         configMeta: getStoreMapConfigMeta(mapId),
@@ -1980,6 +1999,32 @@ export class MapController extends AbstractMapViewerController {
   // #endregion PRIVATE METHODS - MAP
 
   // #region STATIC METHODS - CONFIG CREATION
+
+  /**
+   * Creates the swiper configuration based on the current swiper state.
+   *
+   * @param mapId - The map identifier
+   * @returns The swiper config carrying the orientation, interactive flag and per-layer sides
+   */
+  static #createSwiperConfig(mapId: string): {
+    orientation: SwipeOrientation;
+    interactive: boolean;
+    layers: { layerPath: string; side: SwipeSide }[];
+  } {
+    // Get swiper state
+    const layerPaths = getStoreSwiperLayerPaths(mapId);
+    const layerSides = getStoreSwiperLayerSides(mapId);
+    const orientation = getStoreSwiperOrientation(mapId);
+    const interactive = getStoreSwiperInteractive(mapId);
+
+    // Build structured layer entries, defaulting to the orientation's primary side (left/up)
+    const layers = layerPaths.map((layerPath) => ({
+      layerPath,
+      side: layerSides[layerPath] ?? (orientation === 'vertical' ? 'left' : 'up'),
+    }));
+
+    return { orientation, interactive, layers };
+  }
 
   /**
    * Creates time slider configurations based on the current time slider state.

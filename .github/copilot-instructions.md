@@ -898,7 +898,9 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 ### Function Order in Classes
 
-1. Class name → 2. Abstracts → 3. Overrides → 4. Public → 5. Private → 6. Event emits/hooks → 7. Static public → 8. Static private → 9. Event types
+1. Class name → 2. Static `readonly` constants (top of class) → 3. Abstracts → 4. Overrides → 5. Public → 6. Private → 7. Event emits/hooks → 8. Static public methods → 9. Static private methods → 10. Event types
+
+**Static `readonly` constants go at the TOP of the class**, immediately after the class declaration and before the constructor — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;` (see `LayerController`, `DrawerController`). NEVER append them at the bottom of the class/file. Use `static readonly` (not bare `static`) for threshold/config constants. Static **methods** still live near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
 

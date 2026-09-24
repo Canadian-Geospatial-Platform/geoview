@@ -23,6 +23,40 @@
       <div class="demo-section">
         <h4>Package - Swiper (interactive)</h4>
         <p>This page is used to showcase loading "Swiper" package with different configuration.</p>
+        <h5>How to use</h5>
+        <p>
+          The swiper draws a draggable divider on the map and clips the selected layers to one side of it, letting you compare layers.
+          Drag the handle (or focus it and use the arrow keys) to move the divider. The swiper follows map resizing automatically.
+        </p>
+        <ul>
+          <li>
+            <strong>Configuration (static):</strong> the swiper reads its <code>orientation</code> and its <code>layers</code> from the
+            package config. Each layer entry is an object <code>{ "layerPath": "&hellip;", "side": "left" | "right" | "up" | "down" }</code>.
+            The <code>side</code> is the <em>visible</em> side of the divider for that layer (use left/right with a vertical bar and up/down
+            with a horizontal bar).
+          </li>
+          <li>
+            <strong>Interactive mode:</strong> when the config sets <code>"interactive": true</code>, open a layer's right panel and click the
+            settings gear. A <strong>Swiper</strong> section lets you toggle the layer in/out of the swiper and pick its visible side. The side
+            options match the current orientation. This demo is loaded with <code>interactive</code> enabled.
+          </li>
+          <li>
+            <strong>Programmatic control:</strong> use the buttons below (or the console API) to add/remove layers and toggle orientation at
+            runtime.
+          </li>
+        </ul>
+        <p>Console API examples:</p>
+        <pre><code>const swiper = cgpv.api.getMapViewer('map1').plugins['swiper'];
+swiper.activateForLayer('swipe6/lakes');
+swiper.deActivateForLayer('swipe6/lakes');
+swiper.deActivateAll();
+swiper.setOrientation('horizontal');
+
+// Per-layer side placement and the interactive flag live on the controller:
+const { swiperController } = cgpv.api.getMapViewer('map1').controllers;
+swiperController.addLayerPath('swipe6/lakes', 'right');
+swiperController.setLayerSide('swipe6/lakes', 'left');
+swiperController.setInteractive(true);</code></pre>
       </div>
     </div>
 

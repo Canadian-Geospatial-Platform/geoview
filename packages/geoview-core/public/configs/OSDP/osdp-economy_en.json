@@ -77,7 +77,7 @@
     "home",
     "location",
     "basemap-select",
-    "measure"
+    "measurement"
   ],
   "appBar": {
     "tabs": {

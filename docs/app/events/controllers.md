@@ -229,6 +229,26 @@ if (swiperPlugin) {
 }
 ```
 
+For per-layer side placement and the interactive customization flag, use the swiper controller from the map's controller registry:
+
+```typescript
+const { swiperController } = mapViewer.controllers;
+
+if (swiperController) {
+  // Add a layer and reveal it on a specific side ("left"/"right" for vertical, "up"/"down" for horizontal)
+  swiperController.addLayerPath("layerPath", "right");
+
+  // Change an existing layer's visible side
+  swiperController.setLayerSide("layerPath", "left");
+
+  // Replace the full selection at once
+  swiperController.setLayers([{ layerPath: "layerPath", side: "left" }]);
+
+  // Enable the user-driven customization UI in the layer settings panel
+  swiperController.setInteractive(true);
+}
+```
+
 ### Geochart Plugin
 
 ```typescript
