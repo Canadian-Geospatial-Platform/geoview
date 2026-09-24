@@ -1,16 +1,24 @@
 import type { Ref } from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import type { ListItemProps } from '@mui/material';
 import { ListItem as MaterialListItem } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import type { Theme, SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
-const sxClasses = {
+/**
+ * Gets custom sx classes for the list item.
+ *
+ * @param theme - The MUI theme object
+ * @returns The sx classes object
+ */
+const getSxClasses = (theme: Theme): SxStyles => ({
   listItem: {
     color: 'text.primary',
-    padding: 0,
+    padding: theme.spacing(0),
   },
-};
+});
 
 /**
  * Material-UI ListItem component for list content containers.
@@ -29,8 +37,14 @@ function ListItemUI(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element 
   // Extract sx prop to merge with internal styles
   const { children, sx, ...rest } = props;
 
+  // Hook
+  const theme = useTheme();
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
+
   // Compose internal and caller sx props without nesting array-form sx.
-  const sxMerged = composeSxProps(sxClasses.listItem, sx);
+  const sxMerged = composeSxProps(memoSxClasses.listItem, sx);
 
   return (
     <MaterialListItem sx={sxMerged} {...rest} ref={ref}>

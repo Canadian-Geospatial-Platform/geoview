@@ -216,7 +216,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       {/* Preview image */}
       {previewUrl && (
         <Box sx={sxClasses.detailSection}>
-          <img src={previewUrl} alt={title} style={{ width: '100%', maxHeight: 300, objectFit: 'contain', borderRadius: 4 }} />
+          <Box component="img" src={previewUrl} alt={title} sx={sxClasses.previewImage} />
         </Box>
       )}
 

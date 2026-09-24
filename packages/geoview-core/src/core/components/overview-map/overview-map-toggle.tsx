@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 
 import { ChevronLeftIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
@@ -27,7 +28,8 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
   // Hook
   const { t } = useTranslation<string>();
   const tooltipAndAria = t('mapctrl.overviewmap.toggle');
-  const sxClasses = useMemo(() => getSxClasses(), []);
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [isExpanded, setIsExpanded] = useState(true);

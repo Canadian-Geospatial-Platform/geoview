@@ -103,7 +103,7 @@ export default function Version(): JSX.Element {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box sx={{ padding: interaction === 'dynamic' ? '0' : '5px' }}>
+      <Box sx={interaction === 'dynamic' ? memoSxClasses.versionButtonBoxDynamic : memoSxClasses.versionButtonBoxStatic}>
         <IconButton
           id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`}
           aria-haspopup="dialog"
@@ -169,7 +169,7 @@ export default function Version(): JSX.Element {
               </Box>
               <Box sx={memoSxClasses.versionInfoContent}>
                 <List sx={memoSxClasses.versionList}>
-                  <Box component="li" sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                  <Box component="li" sx={memoSxClasses.versionListItem}>
                     <SvgIcon viewBox="-4 -2 38 36">
                       <GeoCaIcon />
                     </SvgIcon>
@@ -177,7 +177,7 @@ export default function Version(): JSX.Element {
                       {GEO_URL_TEXT.text}
                     </Link>
                   </Box>
-                  <Box component="li" sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
+                  <Box component="li" sx={memoSxClasses.versionListItem}>
                     <GitHubIcon />
                     <Link rel="noopener" href={GITHUB_REPO} target="_blank">
                       {t('appbar.repoLink')}

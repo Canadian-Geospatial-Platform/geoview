@@ -50,6 +50,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Checks whether any filter is active.
    */
   const memoHasActiveFilters = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoHasActiveFilters', province, category);
     return !!(province.length || category.length);
   }, [province, category]);
 
@@ -112,6 +113,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Builds the active filters display for screen readers.
    */
   const memoActiveFiltersDisplay = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoActiveFiltersDisplay', province, category);
     if (!(province.length || category.length)) return null;
 
     return (

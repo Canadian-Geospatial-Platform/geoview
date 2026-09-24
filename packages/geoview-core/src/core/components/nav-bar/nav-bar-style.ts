@@ -239,7 +239,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       flexDirection: 'column',
       alignItems: 'center',
       marginTop: theme.spacing(1.25),
-      gap: '1px',
+      gap: theme.spacing(0.5),
       [theme.breakpoints.up('sm')]: {
         flexDirection: 'row',
       },

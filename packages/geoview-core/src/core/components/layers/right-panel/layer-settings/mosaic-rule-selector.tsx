@@ -70,7 +70,7 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
   const layerController = useLayerController();
 
   // State
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   // Current values
   const currentMethod = mosaicRule?.mosaicMethod ?? 'esriMosaicNone';
@@ -79,6 +79,7 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
 
   // Build a summary showing the current selections
   const memoSelectionSummary = useMemo(() => {
+    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoSelectionSummary', currentMethod, currentOperation);
     const methodLabel = t(METHOD_ENTRIES[currentMethod]?.labelKey ?? currentMethod);
     const operationLabel = t(OPERATION_ENTRIES[currentOperation] ?? currentOperation);
     return `${methodLabel} · ${operationLabel}`;
@@ -107,20 +108,19 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
   );
 
   // Menu items derived from the module-level entry maps
-  const memoMethodMenuItems = useMemo(
-    () =>
-      Object.entries(METHOD_ENTRIES)
-        .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
-        .filter((option) => {
-          return !allowedMosaicMethods || allowedMosaicMethods.includes(option.item.name as TypeMosaicMethod);
-        }),
-    [t, allowedMosaicMethods]
-  );
+  const memoMethodMenuItems = useMemo(() => {
+    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoMethodMenuItems', allowedMosaicMethods);
+    return Object.entries(METHOD_ENTRIES)
+      .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
+      .filter((option) => {
+        return !allowedMosaicMethods || allowedMosaicMethods.includes(option.item.name as TypeMosaicMethod);
+      });
+  }, [t, allowedMosaicMethods]);
 
-  const memoOperationMenuItems = useMemo(
-    () => Object.entries(OPERATION_ENTRIES).map(([key, labelKey]) => ({ key, item: { value: key, children: t(labelKey) } })),
-    [t]
-  );
+  const memoOperationMenuItems = useMemo(() => {
+    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoOperationMenuItems', t);
+    return Object.entries(OPERATION_ENTRIES).map(([key, labelKey]) => ({ key, item: { value: key, children: t(labelKey) } }));
+  }, [t]);
 
   const handleToggle = useCallback((): void => {
     setExpanded((prev) => !prev);
