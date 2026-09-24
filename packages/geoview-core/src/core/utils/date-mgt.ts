@@ -188,8 +188,8 @@ export abstract class DateMgt {
   /** Regex used to spot a timezone inside a date input. */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
-  /** Regex used to spot the OGC 'current' keyword as a standalone segment of a time dimension value. */
-  static readonly #REGEX_CURRENT_KEYWORD = /^current$/i;
+  /** Regex used to spot the 'current' or 'present' keyword as a standalone time-dimension segment. */
+  static readonly #REGEX_CURRENT_OR_PRESENT_KEYWORD = /^(?:current|present)$/i;
 
   /** Regex used to detect a time component ('T...') in an OGC date segment. */
   static readonly #REGEX_HAS_TIME_COMPONENT = /T/i;
@@ -1109,7 +1109,7 @@ export abstract class DateMgt {
   /**
    * Creates a normalized range model for an OGC time dimension value.
    *
-   * This method resolves the `current` keyword before classifying the value, normalizes whitespace,
+   * This method resolves the `current` or `present` keyword before classifying the value, normalizes whitespace,
    * and returns a structured {@link RangeItems} object whose `type` is one of `discrete`, `relative`,
    * or `none`. Discrete values are split into a list of ISO strings, while relative and absolute
    * intervals are expanded into bounded UTC start/end values with an optional duration payload.
@@ -1125,7 +1125,7 @@ export abstract class DateMgt {
   static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
     let rangeItems: RangeItems = { type: 'none', range: [] };
 
-    // Resolve the 'current' keyword, if any, to today's date/time before classifying the range
+    // Resolve the 'current' or 'present' keyword, if any, to today's date/time before classifying the range
     const resolvedValues = this.#substituteCurrentKeyword(ogcTimeDimensionValues);
 
     // find what type of dimension it is:
@@ -1219,25 +1219,25 @@ export abstract class DateMgt {
   }
 
   /**
-   * Substitutes the OGC `current` keyword (e.g. `2027-07-01/current`) with today's date/time.
+   * Substitutes the `current` or `present` keyword (e.g. `2027-07-01/current`) with today's date/time.
    *
    * The replacement is formatted to match the shape (date-only vs date-time) of the other,
-   * non-`current` segment(s) found in the value, so the resulting string keeps a consistent format.
+   * non-keyword segment(s) found in the value, so the resulting string keeps a consistent format.
    *
-   * @param ogcTimeDimensionValues - The raw OGC time dimension value, possibly containing 'current'
-   * @returns The value with every 'current' segment replaced by today's date/time, unchanged if none found
+   * @param ogcTimeDimensionValues - The raw OGC time dimension value, possibly containing `current` or `present`
+   * @returns The value with every keyword segment replaced by today's date/time, unchanged if none found
    */
   static #substituteCurrentKeyword(ogcTimeDimensionValues: string): string {
     const segments = ogcTimeDimensionValues.split('/');
-    if (!segments.some((segment) => this.#REGEX_CURRENT_KEYWORD.test(segment.trim()))) return ogcTimeDimensionValues;
+    if (!segments.some((segment) => this.#REGEX_CURRENT_OR_PRESENT_KEYWORD.test(segment.trim()))) return ogcTimeDimensionValues;
 
     // Mirror the format of the first real date found, defaulting to a date-time format when none is found
-    const referenceSegment = segments.find((segment) => !this.#REGEX_CURRENT_KEYWORD.test(segment.trim()));
+    const referenceSegment = segments.find((segment) => !this.#REGEX_CURRENT_OR_PRESENT_KEYWORD.test(segment.trim()));
     const hasTimeComponent = referenceSegment ? this.#REGEX_HAS_TIME_COMPONENT.test(referenceSegment) : true;
     const format = hasTimeComponent ? `${this.ISO_DATETIME_FORMAT_SECONDS}[Z]` : this.ISO_DATE_FORMAT;
     const now = dayjs.utc().format(format);
 
-    return segments.map((segment) => (this.#REGEX_CURRENT_KEYWORD.test(segment.trim()) ? now : segment)).join('/');
+    return segments.map((segment) => (this.#REGEX_CURRENT_OR_PRESENT_KEYWORD.test(segment.trim()) ? now : segment)).join('/');
   }
 
   /**

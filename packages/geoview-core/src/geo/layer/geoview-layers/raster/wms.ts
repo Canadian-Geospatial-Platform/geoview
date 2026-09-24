@@ -1460,12 +1460,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     // If there's a dimension on the parent
     if (parentDimension) {
-      // If there's the special keyword on the group layer indicating a group dimension
-      if (layerCapabilities?.ParentLayer?.KeywordList?.Keyword.includes('cdtk-time-dimension')) {
-        // It's clear, we want group dimension on the layer
-        return true;
-      }
-
       // Read the child dimension
       const layerDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.Dimension);
 
