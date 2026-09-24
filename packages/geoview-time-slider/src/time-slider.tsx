@@ -21,9 +21,22 @@ import { useTimeSliderController } from 'geoview-core/core/controllers/use-contr
 
 import type { SxStyles } from 'geoview-core/ui/style/types';
 
-/** Number of equal increments used when no continuous step can be inferred. */
-// TODO: CHECK - Is this still used in a particular usecase?
+/** Number of equal increments used when no configured or calendar step is available. */
 const DEFAULT_CONTINUOUS_STEP_COUNT = 20;
+
+/** One-millisecond native step used so calendar ranges can reach exact endpoints before snapping. */
+const CALENDAR_SLIDER_NATIVE_STEP = 1;
+
+/** Applies calendar stepping to continuous slider values while preserving discrete service values. */
+function getCalendarStepValues(
+  values: number[],
+  anchor: number,
+  stepUnit: DateTimeStepUnit | undefined,
+  discreteValues: boolean
+): number[] {
+  // Service-provided discrete ranges already define their valid slider positions.
+  return stepUnit && !discreteValues ? DateMgt.snapValuesToCalendarStep(values, anchor, stepUnit) : values;
+}
 
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
@@ -82,6 +95,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderValueRef = useRef<number | undefined>(undefined);
   const sliderDeltaRef = useRef<number | undefined>(undefined);
   const activeThumbRef = useRef<number>(0);
+  const calendarStepAnchorRef = useRef<number | undefined>(undefined);
 
   const pendingCloseRef = useRef<boolean>(false);
 
@@ -397,12 +411,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const handleStepChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
       const selectedStepUnit = event.target.value as DateTimeStepUnit;
-      const snappedValues = discreteValues ? storeValues : DateMgt.snapValuesToCalendarStep(storeValues, minAndMax[0], selectedStepUnit);
+      calendarStepAnchorRef.current = values[0];
 
       timeSliderController.setStepUnit(layerPath, selectedStepUnit);
-      timeSliderController.updateTimeSliderValues(layerPath, snappedValues);
     },
-    [timeSliderController, layerPath, discreteValues, storeValues, minAndMax]
+    [timeSliderController, layerPath, values]
   );
 
   /**
@@ -486,9 +499,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       activeThumbRef.current = activeThumb;
 
       const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
-      setValues(timeSliderController.constrainValues(layerPath, valuesAsArray, activeThumb));
+      const calendarValues = getCalendarStepValues(valuesAsArray, calendarStepAnchorRef.current ?? minAndMax[0], stepUnit, discreteValues);
+      setValues(timeSliderController.constrainValues(layerPath, calendarValues, activeThumb));
     },
-    [layerPath, timeSliderController]
+    [layerPath, timeSliderController, stepUnit, discreteValues, minAndMax]
   );
 
   /**
@@ -504,8 +518,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
         const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
-        const calendarValues =
-          stepUnit && !discreteValues ? DateMgt.snapValuesToCalendarStep(valuesAsArray, minAndMax[0], stepUnit) : valuesAsArray;
+        const calendarValues = getCalendarStepValues(
+          valuesAsArray,
+          calendarStepAnchorRef.current ?? minAndMax[0],
+          stepUnit,
+          discreteValues
+        );
         const constrainedValues = timeSliderController.constrainValues(layerPath, calendarValues, activeThumbRef.current);
         timeSliderController.updateTimeSliderValues(layerPath, constrainedValues);
       }
@@ -521,18 +539,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleLabelFormat = useCallback(
     (theValue: number): string => {
-      const displayValue = stepUnit && !discreteValues ? DateMgt.snapToCalendarStep(theValue, minAndMax[0], stepUnit) : theValue;
-
       // Format the date using displayDateFormat.
       return DateMgt.formatDate(
-        displayValue,
+        theValue,
         displayDateFormat[displayLanguage],
         displayLanguage,
         displayDateTimezone,
         serviceDateTemporalMode
       );
     },
-    [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode, stepUnit, discreteValues, minAndMax]
+    [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode]
   );
 
   // #endregion
@@ -650,8 +666,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const memoSliderStep = useMemo((): number | null => {
     logger.logTraceUseMemo('TIME-SLIDER - memoSliderStep', discreteValues, step, stepUnit, minAndMax);
 
+    // Discrete ranges let the slider choose among the supplied timestamps directly.
     if (discreteValues) return null;
-    if (stepUnit) return DateMgt.getApproximateCalendarStep(stepUnit);
+
+    // Calendar snapping happens in the change handlers; keep the native slider precise enough to reach leap days and exact endpoints.
+    if (stepUnit) return CALENDAR_SLIDER_NATIVE_STEP;
+
+    // Use the configured step or divide an unconfigured range into manageable increments.
     return step || (minAndMax[1] - minAndMax[0]) / DEFAULT_CONTINUOUS_STEP_COUNT;
   }, [discreteValues, minAndMax, step, stepUnit]);
 

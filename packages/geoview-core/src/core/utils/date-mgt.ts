@@ -288,7 +288,7 @@ export abstract class DateMgt {
   }
 
   /**
-   * Returns an approximate numeric step used only by the draggable slider.
+   * Returns an approximate numeric step used to estimate nearby calendar-step candidates.
    *
    * @param stepUnit - The calendar unit to approximate
    * @returns The approximate duration in milliseconds
