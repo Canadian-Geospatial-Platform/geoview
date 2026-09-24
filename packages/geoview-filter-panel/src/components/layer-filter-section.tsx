@@ -79,6 +79,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Memoized header styles based on collapsed state.
    */
   const memoHeaderSx = useMemo(() => {
+    logger.logTraceUseMemo('LAYER-FILTER-SECTION - memoHeaderSx', isCollapsed);
     return {
       ...memoSxClasses.filterLayerHeader,
       ...(isCollapsed ? memoSxClasses.filterLayerHeaderCollapsed : memoSxClasses.filterLayerHeaderExpanded),
@@ -89,6 +90,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Memoized toggle icon styles based on collapsed state.
    */
   const memoToggleIconSx = useMemo(() => {
+    logger.logTraceUseMemo('LAYER-FILTER-SECTION - memoToggleIconSx', isCollapsed);
     return {
       ...memoSxClasses.filterLayerToggleIcon,
       ...(isCollapsed && memoSxClasses.filterLayerToggleIconCollapsed),

@@ -56,7 +56,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
 
   // State
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<string[][]>([]);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
 
   // Store
