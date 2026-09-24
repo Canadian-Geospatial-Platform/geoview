@@ -1,12 +1,13 @@
-import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
 /**
  * Gets custom sx classes for the swiper.
  *
+ * @param theme - The MUI theme object
  * @param mapHeight - The map height
  * @returns The sx classes object
  */
-export const getSxClasses = (mapHeight: number): SxStyles => ({
+export const getSxClasses = (theme: Theme, mapHeight: number): SxStyles => ({
   layerSwipe: {
     position: 'absolute',
     width: '100%',
@@ -25,8 +26,8 @@ export const getSxClasses = (mapHeight: number): SxStyles => ({
     backgroundColor: 'rgba(50,50,50,0.75)',
     zIndex: 151,
     boxSizing: 'content-box',
-    margin: 0,
-    padding: '0!important',
+    margin: theme.spacing(0),
+    padding: `${theme.spacing(0)} !important`,
   },
 
   vertical: {
@@ -71,7 +72,7 @@ export const getSxClasses = (mapHeight: number): SxStyles => ({
 
       '& .handleL': {
         verticalAlign: 'top',
-        marginBottom: '8px',
+        marginBottom: theme.spacing(1),
       },
     },
   },

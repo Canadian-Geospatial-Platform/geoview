@@ -97,7 +97,7 @@ export const NorthPoleFlag = memo((): JSX.Element => {
   }, [mapController]);
 
   return (
-    <Box ref={northPoleRef} id={`${mapId}-northpole`} style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+    <Box ref={northPoleRef} id={`${mapId}-northpole`} sx={{ visibility: isVisible ? 'visible' : 'hidden' }}>
       <NorthPoleIcon />
     </Box>
   );

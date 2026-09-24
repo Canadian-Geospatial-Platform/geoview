@@ -15,6 +15,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     bgcolor: 'background.paper',
   },
 
+  // Wrapper for the no-config / no-controller error states
+  filterPanelErrorContainer: {
+    padding: theme.spacing(0.25),
+  },
+
   filterPanelButtonContainer: {
     display: 'flex',
     gap: theme.spacing(1),
@@ -109,6 +114,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterLayerContent: {
     flex: 1,
     overflowY: 'auto',
+    padding: theme.spacing(0.25),
+  },
+
+  // Collapsible content wrapper for a single layer's filter controls
+  filterLayerCollapseContent: {
     padding: theme.spacing(0.25),
   },
 

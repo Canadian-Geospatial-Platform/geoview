@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Skeleton } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
+import { getSxClasses } from './data-skeleton-style';
 
 /**
  * Renders a skeleton loading placeholder for the data table.
@@ -12,6 +15,10 @@ export default function DataSkeleton(): JSX.Element {
   logger.logTraceRender('components/data-table/data-skeleton');
 
   const theme = useTheme();
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('DATA-SKELETON - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   return (
     <TableContainer component={Paper}>
@@ -19,18 +26,18 @@ export default function DataSkeleton(): JSX.Element {
         <TableHead>
           <TableRow>
             {[...Array(5).keys()].map((value) => (
-              <TableCell sx={{ width: '20%' }} key={value}>
-                <Skeleton variant="text" width="100%" height="25px" sx={{ bgcolor: theme.palette.grey[400] }} />
+              <TableCell sx={memoSxClasses.skeletonCell} key={value}>
+                <Skeleton variant="text" width="100%" height="25px" sx={memoSxClasses.skeletonBar} />
               </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {[...Array(20).keys()].map((row) => (
-            <TableRow key={row} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            <TableRow key={row} sx={memoSxClasses.skeletonRow}>
               {[...Array(5).keys()].map((value) => (
-                <TableCell sx={{ width: '20%' }} key={value}>
-                  <Skeleton variant="text" width="100%" height="25px" sx={{ bgcolor: theme.palette.grey[400] }} />
+                <TableCell sx={memoSxClasses.skeletonCell} key={value}>
+                  <Skeleton variant="text" width="100%" height="25px" sx={memoSxClasses.skeletonBar} />
                 </TableCell>
               ))}
             </TableRow>

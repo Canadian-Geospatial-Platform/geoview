@@ -9,6 +9,12 @@ import { visuallyHidden } from '@/ui/style/default';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  bellButtonContainerDynamic: {
+    padding: theme.spacing(0),
+  },
+  bellButtonContainerStatic: {
+    padding: theme.spacing(0.5),
+  },
   popper: {
     pointerEvents: 'auto',
     zIndex: theme.zIndex.modal,
@@ -64,7 +70,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       height: 'auto',
       clip: 'auto',
       margin: theme.spacing(0),
-      padding: '1px',
+      padding: theme.spacing(0.25),
       textDecoration: 'underline',
       overflow: 'visible',
       whiteSpace: 'normal',

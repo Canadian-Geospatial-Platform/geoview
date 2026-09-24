@@ -1,6 +1,17 @@
-import type { Theme } from '@mui/material';
-import type { SxStyles } from '@/ui/style/types';
+import type { Theme } from '@mui/material/styles';
+import type { SxProps, SxStyles } from '@/ui/style/types';
 import { ellipsisOverflow } from '@/ui/style/default';
+
+/**
+ * Sx for truncated, single-line cell content (tooltip wrapper).
+ *
+ * No theme dependency, so exported as a standalone constant for components without theme access.
+ */
+export const truncatedCellContentSx: SxProps<Theme> = {
+  display: 'block',
+  width: '100%',
+  ...ellipsisOverflow,
+};
 
 /**
  * Gets custom sx classes for the data table.
@@ -21,6 +32,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
   },
   tableCell: ellipsisOverflow,
+  loadingSpinnerContainer: {
+    minHeight: '300px',
+    minWidth: '450px',
+    position: 'relative',
+  },
   dataTableWrapper: {
     height: '100%',
     '& .MuiTableContainer-root': {
@@ -136,7 +152,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .Mui-TableHeadCell-Content-Actions': {
       '& .MuiIconButton-root': {
         opacity: 1,
-        marginRight: '1px',
+        marginRight: theme.spacing(0.25),
         '&:hover': {
           border: `2px solid ${theme.palette.divider}`,
         },
