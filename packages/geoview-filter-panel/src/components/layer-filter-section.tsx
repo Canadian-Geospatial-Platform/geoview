@@ -1,6 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
-import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { SxStyles, SxProps, Theme } from 'geoview-core/ui/style/types';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import {
@@ -78,21 +78,20 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   /**
    * Memoized header styles based on collapsed state.
    */
-  const memoHeaderSx = useMemo(() => {
-    return {
-      ...memoSxClasses.filterLayerHeader,
-      ...(isCollapsed ? memoSxClasses.filterLayerHeaderCollapsed : memoSxClasses.filterLayerHeaderExpanded),
-    };
+  const memoHeaderSx = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('LAYER-FILTER-SECTION - memoHeaderSx', isCollapsed);
+    return [
+      memoSxClasses.filterLayerHeader,
+      isCollapsed ? memoSxClasses.filterLayerHeaderCollapsed : memoSxClasses.filterLayerHeaderExpanded,
+    ] as SxProps<Theme>;
   }, [memoSxClasses, isCollapsed]);
 
   /**
    * Memoized toggle icon styles based on collapsed state.
    */
-  const memoToggleIconSx = useMemo(() => {
-    return {
-      ...memoSxClasses.filterLayerToggleIcon,
-      ...(isCollapsed && memoSxClasses.filterLayerToggleIconCollapsed),
-    };
+  const memoToggleIconSx = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('LAYER-FILTER-SECTION - memoToggleIconSx', isCollapsed);
+    return [memoSxClasses.filterLayerToggleIcon, isCollapsed && memoSxClasses.filterLayerToggleIconCollapsed] as SxProps<Theme>;
   }, [memoSxClasses, isCollapsed]);
 
   /**
@@ -271,7 +270,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
       </Box>
 
       <Collapse in={!isCollapsed}>
-        <Box sx={{ p: 0.25 }}>
+        <Box sx={memoSxClasses.filterLayerCollapseContent}>
           {!layerIsReady ? (
             <Box sx={memoSxClasses.filterLayerLoading}>
               <Typography variant="body2" sx={memoSxClasses.filterLayerLoadingText}>

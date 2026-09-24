@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterControl: {
     marginBottom: theme.spacing(0.25),
     '&:last-child': {
-      marginBottom: 0,
+      marginBottom: theme.spacing(0),
     },
   },
 
@@ -44,7 +44,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Multiselect checkbox item
   filterCheckboxItem: {
     display: 'block',
-    marginLeft: 0,
+    marginLeft: theme.spacing(0),
   },
 
   // Date range info text
@@ -72,5 +72,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),
+  },
+
+  // Select placeholder text (shown when no value is selected)
+  selectPlaceholder: {
+    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
   },
 });

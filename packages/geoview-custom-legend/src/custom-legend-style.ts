@@ -98,6 +98,38 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flex: '1 1 auto',
   },
 
+  // Full-width wrapper for the group item body
+  groupItemWrapper: {
+    width: '100%',
+  },
+
+  // Wrapper around the group icon inside ListItemIcon
+  groupIconListItemIcon: {
+    minWidth: '24px',
+  },
+
+  // Row containing the group title area (title, subtext, visibility button)
+  groupTitleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.25),
+  },
+
+  // Small action icon buttons (visibility toggle, collapse toggle)
+  groupActionIconButton: {
+    padding: theme.spacing(0.5),
+  },
+
+  // Wrapper keeping the collapse button vertically centered
+  groupCollapseButtonWrapper: {
+    alignSelf: 'center',
+  },
+
+  // Collapsible children container spacing (Collapse component)
+  groupChildrenCollapse: {
+    marginRight: theme.spacing(0.75),
+  },
+
   // Sublayer count caption
   groupSubLayerCount: {
     display: 'block',

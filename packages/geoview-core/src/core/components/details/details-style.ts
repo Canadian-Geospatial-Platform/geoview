@@ -95,6 +95,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
   },
+  featureDetailHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: theme.spacing(2),
+  },
+  inlineBlock: {
+    display: 'inline-block',
+  },
   featureDetailModal: {
     '& .MuiDialog-container': {
       '& .MuiPaper-root': {
@@ -131,11 +140,22 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   coordinateInfoDeclinationContent: {
     marginLeft: theme.spacing(0.25),
   },
+  featureHeaderContainer: {
+    padding: theme.spacing(0, 2, 1.25, 2),
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  featurePaper: {
+    boxShadow: 'none',
+    border: 'none',
+    paddingTop: theme.spacing(1),
+  },
   skeletonBox: {
     padding: theme.spacing(1.25),
   },
   skeletonTitle: {
-    marginBottom: theme.spacing(0.125),
+    marginBottom: theme.spacing(0.25),
   },
   skeletonRow: {
     paddingTop: theme.spacing(0.5),

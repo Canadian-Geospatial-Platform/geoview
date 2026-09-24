@@ -55,5 +55,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       margin: theme.spacing(0, 0, 0.75, 0),
     },
   },
+  versionButtonBoxDynamic: {
+    padding: theme.spacing(0),
+  },
+  versionButtonBoxStatic: {
+    padding: theme.spacing(0.5),
+  },
+  versionListItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: theme.spacing(0.75),
+  },
   visuallyHidden,
 });

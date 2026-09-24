@@ -48,17 +48,6 @@ interface FullscreenButtonProps {
   buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-// Constant style outside of render (styles)
-const styles = {
-  noLayersContainer: {
-    padding: '2rem',
-    margin: '2rem',
-    width: '100%',
-    textAlign: 'center',
-    height: 'fit-content',
-  },
-} as const;
-
 // Constant style outside of render (responsive widths)
 const responsiveWidths = {
   responsive: {
@@ -224,7 +213,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
     logger.logTraceUseMemo('components/legend-fullscreen - noLayersContent');
 
     return (
-      <Box sx={styles.noLayersContainer}>
+      <Box sx={memoSxClasses.noLayersContainer}>
         <Typography component="div" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>

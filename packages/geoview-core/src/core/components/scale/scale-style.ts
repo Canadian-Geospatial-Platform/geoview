@@ -1,5 +1,5 @@
 import type { Theme } from '@mui/material/styles';
-import type { SxStyles } from '@/ui/style/types';
+import type { SxProps, SxStyles } from '@/ui/style/types';
 import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 
@@ -7,27 +7,27 @@ import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 export const SCALE_BOX_STYLES = { minWidth: 120 } as const;
 
 /** Hides the radio circle visually but keeps it keyboard-accessible. */
-export const SCALE_RADIO_HIDDEN_STYLES = {
+export const getScaleRadioHiddenStyles = (theme: Theme): SxProps<Theme> => ({
   opacity: 0,
   width: 0,
   height: 0,
-  padding: 0,
-  margin: 0,
+  padding: theme.spacing(0),
+  margin: theme.spacing(0),
   position: 'absolute',
   top: 0,
   left: 0,
   // Prevent any pointer interaction directly on the Radio
   pointerEvents: 'none',
-} as const;
+});
 
 /** Styles for the FormControlLabel wrapping each scale radio option. */
-export const SCALE_FORM_CONTROL_LABEL_STYLES = {
-  margin: 0,
+export const getScaleFormControlLabelStyles = (theme: Theme): SxProps<Theme> => ({
+  margin: theme.spacing(0),
   alignItems: 'center',
   width: '100%',
   cursor: 'pointer',
   justifyContent: 'center',
-} as const;
+});
 
 /**
  * Gets custom sx classes for the scale.
