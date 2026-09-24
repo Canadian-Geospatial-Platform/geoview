@@ -47,8 +47,6 @@ interface MultiselectFilterProps {
   attribute: TypeFilterAttribute;
   /** Current filter value. */
   value: TypeFilterValue;
-  /** The name of the layer this filter belongs to. */
-  layerPath: string;
   /** The display name of the filter. */
   filterName: string | undefined;
   /** Callback when value changes. */
@@ -107,11 +105,11 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/multiselect-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading, layerPath, filterName } = props;
+  const { attribute, value, onChange, uniqueValues, loading, filterName } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useState, useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useState, useCallback, useMemo, useId } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Typography, TextField } = ui.elements;
 
@@ -121,6 +119,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const controller = useFilterPanelController();
+  const headerLabelId = useId();
 
   /**
    * Filters the unique values by the current search string, when the attribute is searchable.
@@ -196,7 +195,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography id={`multiselect-${layerPath}-${attribute.fieldName}-label`} variant="h4" sx={memoSxClasses.filterLabel}>
+      <Typography id={headerLabelId} variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
       <Box sx={memoSxClasses.filterMultiselectWrapper}>
@@ -217,11 +216,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
             />
           </Box>
         )}
-        <Box
-          sx={memoSxClasses.filterMultiselectContainer}
-          role="group"
-          aria-labelledby={`multiselect-${layerPath}-${attribute.fieldName}-label`}
-        >
+        <Box sx={memoSxClasses.filterMultiselectContainer} role="group" aria-labelledby={headerLabelId}>
           {memoFilteredValues.length === 0 && (
             <Typography variant="body2" sx={memoSxClasses.filterLoading}>
               {t('FilterPanel.noSearchResults')}
