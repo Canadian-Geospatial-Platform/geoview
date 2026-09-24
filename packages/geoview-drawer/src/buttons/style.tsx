@@ -66,6 +66,9 @@ const getSxClasses = (theme: Theme): SxStyles => ({
  * @returns The palette icon element
  */
 export function StyleButton(): JSX.Element {
+  // Log
+  logger.logTraceRender('geoview-drawer/src/buttons/style > StyleButton');
+
   const { PaletteIcon } = (window as TypeWindow).cgpv.ui.elements;
 
   return <PaletteIcon />;
@@ -103,10 +106,10 @@ export function StylePanel(): JSX.Element {
   const currentGeomType = selectedDrawingType ?? activeGeom;
 
   // Local state for color inputs
-  const [localFillColor, setLocalFillColor] = useState(style.fillColor);
-  const [localStrokeColor, setLocalStrokeColor] = useState(style.strokeColor);
-  const [localTextColor, setLocalTextColor] = useState(style.textColor || '#000000');
-  const [localTextHaloColor, setLocalTextHaloColor] = useState(style.textHaloColor || 'rgba(255,255,255,0.8)');
+  const [localFillColor, setLocalFillColor] = useState<string>(style.fillColor);
+  const [localStrokeColor, setLocalStrokeColor] = useState<string>(style.strokeColor);
+  const [localTextColor, setLocalTextColor] = useState<string>(style.textColor || '#000000');
+  const [localTextHaloColor, setLocalTextHaloColor] = useState<string>(style.textHaloColor || 'rgba(255,255,255,0.8)');
 
   // #region Handlers
 

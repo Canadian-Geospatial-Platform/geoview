@@ -6,8 +6,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { Radio, RadioGroup, FormControlLabel, CheckIcon, Tooltip, Box, Button } from '@/ui';
 
-import { getSxClasses, SCALE_BOX_STYLES, SCALE_RADIO_HIDDEN_STYLES, SCALE_FORM_CONTROL_LABEL_STYLES } from './scale-style';
-import type { SxStyles } from '@/ui/style/types';
+import { getSxClasses, getScaleRadioHiddenStyles, getScaleFormControlLabelStyles, SCALE_BOX_STYLES } from './scale-style';
+import type { SxStyles, SxProps, Theme } from '@/ui/style/types';
 import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -56,6 +56,22 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
   const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('SCALE - memoSxClasses');
     return getSxClasses(theme);
+  }, [theme]);
+
+  /**
+   * Computes the hidden radio input styles for the scale component.
+   */
+  const memoScaleRadioHiddenStyles = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('SCALE - memoScaleRadioHiddenStyles');
+    return getScaleRadioHiddenStyles(theme);
+  }, [theme]);
+
+  /**
+   * Computes the form control label styles for the scale component.
+   */
+  const memoScaleFormControlLabelStyles = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('SCALE - memoScaleFormControlLabelStyles');
+    return getScaleFormControlLabelStyles(theme);
   }, [theme]);
 
   // State
@@ -214,7 +230,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
             value={index}
             control={
               <Radio
-                sx={SCALE_RADIO_HIDDEN_STYLES}
+                sx={memoScaleRadioHiddenStyles}
                 slotProps={{
                   input: {
                     'aria-label': `${value.label}${value.borderBottom ? ` ${t('mapnav.scale.graphicScale')}` : ''}`,
@@ -236,7 +252,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
                 {renderScaleLabel(index, false)}
               </Box>
             }
-            sx={SCALE_FORM_CONTROL_LABEL_STYLES}
+            sx={memoScaleFormControlLabelStyles}
           />
         ))}
       </RadioGroup>
@@ -251,6 +267,8 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
     memoSxClasses.scaleExpandedContainer,
     memoSxClasses.scaleExpandedCheckmarkText,
     memoSxClasses.scaleCheckmark,
+    memoScaleRadioHiddenStyles,
+    memoScaleFormControlLabelStyles,
     t,
     theme,
   ]);

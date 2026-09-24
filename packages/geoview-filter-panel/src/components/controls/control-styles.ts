@@ -11,7 +11,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterControl: {
     marginBottom: theme.spacing(0.25),
     '&:last-child': {
-      marginBottom: 0,
+      marginBottom: theme.spacing(0),
     },
   },
 
@@ -44,7 +44,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Multiselect checkbox item
   filterCheckboxItem: {
     display: 'block',
-    marginLeft: 0,
+    marginLeft: theme.spacing(0),
   },
 
   // Date range info text

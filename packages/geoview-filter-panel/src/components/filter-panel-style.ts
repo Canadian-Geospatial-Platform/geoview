@@ -112,6 +112,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.25),
   },
 
+  // Collapsible content wrapper for a single layer's filter controls
+  filterLayerCollapseContent: {
+    padding: theme.spacing(0.25),
+  },
+
   // Loading state container
   filterLayerLoading: {
     textAlign: 'center',
