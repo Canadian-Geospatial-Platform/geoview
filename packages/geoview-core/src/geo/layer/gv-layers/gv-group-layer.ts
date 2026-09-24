@@ -165,7 +165,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   // #endregion OVERRIDES
 
-  // #region METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Gets the immediate layers in the group.
@@ -279,6 +279,10 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     this.#emitLayerRemoved({ child: layer });
   }
 
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
   /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
    *
@@ -300,7 +304,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     }
   }
 
-  // #endregion METHODS
+  // #endregion PRIVATE METHODS
 
   // #region EVENTS
 

@@ -173,7 +173,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           <a href={`${GeoUtilities.ISO_8601_REF_DIMENSION_INTERVAL}`} target="_blank" rel="noopener noreferrer">
             {t('layers.layerTimeDimensionRangeDurationIntervalSpec')}
           </a>
-          ): {rangeItems.durationInterval ?? 'undefined'}
+          ): {rangeItems.durationInterval ?? <em>{t('layers.layerTimeDimensionRangeDurationIntervalSpecNotSet')}</em>}
         </Box>
       </>
     );

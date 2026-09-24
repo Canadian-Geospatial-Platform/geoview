@@ -25,20 +25,12 @@
       },
       {
         "geoviewLayerId": "landcover-xml-distinct",
-        "geoviewLayerName": "Landcover 2010-2020 Distinct (XML)",
+        "geoviewLayerName": "Landcover (no group time dimension)",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "landcover_2010_19classes",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          },
-          {
-            "layerId": "landcover_2015_19classes",
             "initialSettings": {
               "states": {
                 "visible": false
