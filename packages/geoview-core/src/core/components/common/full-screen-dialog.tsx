@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react';
-import { memo, useRef, useEffect } from 'react';
+import { memo, useMemo, useRef, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import type { DialogProps } from '@mui/material';
 
 import { CloseIcon, Dialog, DialogTitle, DialogContent, IconButton, Box } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
+import { getSxClasses } from './full-screen-dialog-style';
 
 /** Properties for the FullScreenDialog component. */
 interface FullScreenDialogProps extends DialogProps {
@@ -24,31 +25,6 @@ interface FullScreenDialogProps extends DialogProps {
   children: ReactNode;
 }
 
-/** Styles for the dialog content container. */
-const DIALOG_CONTENT_STYLES = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'end',
-} as const;
-
-/** Styles for the close button. */
-const CLOSE_BUTTON_STYLES = {
-  margin: '10px',
-} as const;
-
-/** Styles for the dialog header container. */
-const DIALOG_HEADER_STYLES = (theme: Theme): SxProps => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
-});
-
-/** Styles for the dialog title text. */
-const DIALOG_TITLE_STYLES = (theme: Theme): SxProps => ({
-  fontSize: theme.palette.geoViewFontSize?.lg,
-  fontWeight: '600',
-});
-
 /**
  * Fullscreen dialog with custom header and accessibility features.
  *
@@ -60,14 +36,7 @@ const DIALOG_TITLE_STYLES = (theme: Theme): SxProps => ({
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const FullScreenDialog = memo(({
-  open,
-  onClose,
-  onExited,
-  title,
-  children,
-  ...dialogProps
-}: FullScreenDialogProps): JSX.Element => {
+export const FullScreenDialog = memo(({ open, onClose, onExited, title, children, ...dialogProps }: FullScreenDialogProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/full-screen-dialog');
 
@@ -77,6 +46,10 @@ export const FullScreenDialog = memo(({
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('FULL-SCREEN DIALOG - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Manage body scroll when dialog is open
   useEffect(() => {
@@ -125,20 +98,20 @@ export const FullScreenDialog = memo(({
       disablePortal={false}
       {...dialogProps}
     >
-      <Box sx={DIALOG_HEADER_STYLES(theme)}>
-        <DialogTitle sx={DIALOG_TITLE_STYLES(theme)}>{title}</DialogTitle>
+      <Box sx={memoSxClasses.dialogHeader}>
+        <DialogTitle sx={memoSxClasses.dialogTitle}>{title}</DialogTitle>
         <IconButton
           iconRef={closeButtonRef}
           onClick={(event) => onClose(event, 'backdropClick')}
           aria-label={t('general.closeFullscreen')}
           color="primary"
           className="buttonFilledOutline"
-          sx={CLOSE_BUTTON_STYLES}
+          sx={memoSxClasses.closeButton}
         >
           <CloseIcon />
         </IconButton>
       </Box>
-      <DialogContent sx={DIALOG_CONTENT_STYLES}>{children}</DialogContent>
+      <DialogContent sx={memoSxClasses.dialogContent}>{children}</DialogContent>
     </Dialog>
   );
 });

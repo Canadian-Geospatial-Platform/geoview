@@ -14,7 +14,6 @@ import type { SxProps } from '@mui/material';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import type { SxStyles } from '@/ui/style/types';
-import { ellipsisOverflow } from '@/ui/style/default';
 
 import {
   MaterialReactTable,
@@ -58,7 +57,7 @@ import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
-import { getSxClasses } from './data-table-style';
+import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import type { DataTableProps, DataTableRow } from './data-table-types';
@@ -184,17 +183,7 @@ function TooltipCell({ children, title, isOpen = false }: TooltipCellProps): JSX
 
   return (
     <Tooltip title={title} arrow open={isTruncated && (isOpen || isHovered)} disableHoverListener disableFocusListener disableTouchListener>
-      <Box
-        ref={contentRef}
-        component="span"
-        sx={{
-          display: 'block',
-          width: '100%',
-          ...ellipsisOverflow,
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <Box ref={contentRef} component="span" sx={truncatedCellContentSx} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         {children}
       </Box>
     </Tooltip>

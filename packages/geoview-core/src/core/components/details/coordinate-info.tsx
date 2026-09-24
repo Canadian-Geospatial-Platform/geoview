@@ -107,6 +107,9 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
  * @returns The coordinate info panel
  */
 export function CoordinateInfo(): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/coordinate-info');
+
   const { t } = useTranslation();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => {

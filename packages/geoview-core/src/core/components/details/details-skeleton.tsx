@@ -33,8 +33,8 @@ export const DetailsSkeleton = memo((): JSX.Element => {
       <Box sx={memoSxClasses.skeletonBox}>
         {sizes.map((size, index) => (
           <Box sx={memoSxClasses.skeletonRow} key={`${index.toString()}-${size}`}>
-            <Skeleton variant="text" width={size} height="25px" />
-            <Skeleton variant="text" width={size} height="25px" />
+            <Skeleton variant="text" width={size} height={25} />
+            <Skeleton variant="text" width={size} height={25} />
           </Box>
         ))}
       </Box>

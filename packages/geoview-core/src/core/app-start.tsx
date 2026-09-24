@@ -57,6 +57,8 @@ class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDis
 
     if (hasError) {
       return (
+        // Plain HTML + inline style (not Box/sx) intentionally: this fallback renders when ThemeProvider itself
+        // may be gone (ErrorBoundary wraps ThemeProvider), so it must not depend on the theme context.
         <div style={{ padding: '10px', border: '1px solid red' }}>
           <p>
             {language === 'fr'

@@ -131,10 +131,10 @@ const ResponsiveGridLayout = forwardRef(
     const shellContainer = useStoreAppShellContainer();
 
     // States
-    const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
-    const [isGuideOpen, setIsGuideOpen] = useState(false);
-    const [isEnlarged, setIsEnlarged] = useState(false);
-    const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
+    const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+    const [isEnlarged, setIsEnlarged] = useState<boolean>(false);
+    const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
     // #region Handlers
 

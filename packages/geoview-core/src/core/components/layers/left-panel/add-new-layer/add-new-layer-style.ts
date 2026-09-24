@@ -16,6 +16,18 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginTop: theme.spacing(1.5),
     gap: theme.spacing(0.75),
   },
+  fileInput: {
+    display: 'none',
+  },
+  centeredCaption: {
+    textAlign: 'center',
+  },
+  loadingIconButton: {
+    width: '80px',
+  },
+  dropZone: {
+    position: 'relative',
+  },
   dragOverlay: {
     backgroundColor: theme.palette.geoViewColor?.grey.opacity(0.95),
     position: 'absolute',

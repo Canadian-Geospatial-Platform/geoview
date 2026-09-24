@@ -193,7 +193,7 @@ export default function DataTableModal(): JSX.Element {
       contentModal={
         <>
           {isLoading && (
-            <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
+            <Box sx={sxClasses.loadingSpinnerContainer}>
               <CircularProgress
                 isLoaded={!isLoading}
                 style={{

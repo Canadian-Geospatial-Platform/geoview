@@ -61,24 +61,6 @@ interface FeatureHeaderProps {
   onGeochart: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-// Constants outside component to prevent recreating every render
-/** Style constants for the feature header container. */
-const HEADER_STYLES = {
-  container: {
-    p: '0 16px 10px 16px',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-} as const;
-
-/** Style constants for the Paper wrapper. */
-const PAPER_STYLES = {
-  boxShadow: 'none',
-  border: 'none',
-  paddingTop: '0.5rem',
-} as const;
-
 /**
  * Creates the feature header component.
  *
@@ -128,7 +110,7 @@ const FeatureHeader = memo(
     // #endregion
 
     return (
-      <Box sx={HEADER_STYLES.container}>
+      <Box sx={memoSxClasses.featureHeaderContainer}>
         <Box sx={memoSxClasses.flexBoxAlignCenter}>
           {iconSrc ? (
             <Box component="img" src={iconSrc} alt="" className="layer-icon" />
@@ -364,7 +346,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   }, [checkedFeatures, feature]);
 
   return (
-    <Paper sx={PAPER_STYLES}>
+    <Paper sx={memoSxClasses.featurePaper}>
       <FeatureHeader
         iconSrc={feature.featureIcon}
         name={memoFeatureName}

@@ -435,7 +435,7 @@ const Notifications = memo((): JSX.Element => {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box sx={{ padding: interaction === 'dynamic' ? '0' : '5px' }}>
+      <Box sx={interaction === 'dynamic' ? memoSxClasses.bellButtonContainerDynamic : memoSxClasses.bellButtonContainerStatic}>
         <IconButton
           id={bellButtonId}
           iconRef={bellButtonRef}
