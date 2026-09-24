@@ -40,7 +40,7 @@ export default function FeatureDetailModal(): JSX.Element {
   const containerType = activeAppBarTab.tabId === TABS.DATA_TABLE && activeAppBarTab.isOpen ? 'appBar' : 'footerBar';
 
   // State
-  const [nameFieldValue, setNameFieldValue] = useState('');
+  const [nameFieldValue, setNameFieldValue] = useState<string>('');
 
   /**
    * Builds the features list to display in the table.

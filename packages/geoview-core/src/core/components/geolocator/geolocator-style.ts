@@ -86,7 +86,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     listStylePosition: 'inside',
     '& li': {
       display: 'list-item',
-      paddingLeft: theme.spacing(2.25),
+      paddingLeft: theme.spacing(2),
       '& .MuiListItemText-root': {
         display: 'inline-flex',
         marginLeft: theme.spacing(-1),

@@ -41,6 +41,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',
       height: 48,
+      gap: theme.spacing(0.5),
     },
     '& .MuiCardHeader-title': {
       fontSize: theme.palette.geoViewFontSize?.default,
@@ -60,19 +61,15 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       },
     },
     '& .MuiCardHeader-action': {
-      marginTop: theme.spacing(-1.25),
+      alignSelf: 'center',
       '& .MuiButtonBase-root': {
         border: `1px solid ${theme.palette.geoViewColor?.primary.main}`,
         height: 36,
         width: 36,
-        marginRight: theme.spacing(1.5),
         transition: 'all 0.3s ease-in-out',
         '& .MuiSvgIcon-root': {
           width: 24,
           height: 24,
-        },
-        '&:last-child': {
-          marginRight: theme.spacing(0),
         },
         '&:hover': {
           backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
