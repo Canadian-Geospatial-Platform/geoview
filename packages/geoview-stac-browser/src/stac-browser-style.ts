@@ -143,7 +143,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1),
-    padding: theme.spacing(0.5),
+    padding: theme.spacing(0.5, 1),
     borderRadius: theme.shape.borderRadius,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -277,9 +277,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   itemRow: {
     display: 'flex',
-    gap: theme.spacing(4),
-    padding: theme.spacing(5, 3),
-    marginBottom: theme.spacing(10),
+    gap: theme.spacing(0.625),
+    padding: theme.spacing(0.75, 0.5),
+    marginBottom: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
     cursor: 'pointer',
     alignItems: 'center',
@@ -302,7 +302,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   assetTypeBadge: {
     display: 'inline-block',
-    padding: '1px 6px',
+    padding: theme.spacing(0.25, 0.75),
     fontSize: '0.7rem',
     fontWeight: 600,
     borderRadius: '4px',
@@ -312,7 +312,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   assetRoleBadge: {
     display: 'inline-block',
-    padding: '1px 6px',
+    padding: theme.spacing(0.25, 0.75),
     fontSize: '0.65rem',
     fontWeight: 500,
     borderRadius: '4px',

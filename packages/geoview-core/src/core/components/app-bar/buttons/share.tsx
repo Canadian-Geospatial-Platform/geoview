@@ -108,8 +108,8 @@ export default function Share(): JSX.Element | null {
   const layers = useStoreLayerOrderedLayerPaths();
 
   // State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [shareUrl, setShareUrl] = useState<string>('');
 
   // #region Handlers
 

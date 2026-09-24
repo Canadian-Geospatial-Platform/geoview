@@ -46,7 +46,7 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
 
   // State
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Log
@@ -151,7 +151,7 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
   const layerController = useLayerController();
 
   // State
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   /**
    * Builds preview image promises for the available raster functions.

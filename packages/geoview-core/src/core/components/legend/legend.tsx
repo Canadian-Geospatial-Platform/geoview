@@ -49,14 +49,14 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     logger.logTraceUseMemo('LEGEND - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
-  const memoSxClassesMain = useMemo(() => {
+  const memoSxClassesMain = useMemo((): ReturnType<typeof getSxClassesMain> => {
     logger.logTraceUseMemo('LEGEND - memoSxClassesMain', theme);
     return getSxClassesMain(theme);
   }, [theme]);
 
   // State
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<string[][]>([]);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
 
   // Store

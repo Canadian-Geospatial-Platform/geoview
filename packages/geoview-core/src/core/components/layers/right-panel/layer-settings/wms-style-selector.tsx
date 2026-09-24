@@ -41,7 +41,7 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
 
   // State
   const [legendSrc, setLegendSrc] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Log
@@ -142,11 +142,14 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
   // Store hooks
   const currentWmsStyle = useStoreLayerWmsStyle(layerPath);
   const storeWmsStyles = useStoreLayerWmsStyles(layerPath);
-  const memoWmsStyleArray = useMemo(() => storeWmsStyles || [], [storeWmsStyles]);
+  const memoWmsStyleArray = useMemo(() => {
+    logger.logTraceUseMemo('WMS-STYLE-SELECTOR - memoWmsStyleArray', storeWmsStyles);
+    return storeWmsStyles || [];
+  }, [storeWmsStyles]);
   const layerController = useLayerController();
 
   // State
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {

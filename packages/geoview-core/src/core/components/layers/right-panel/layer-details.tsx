@@ -163,7 +163,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const sxClasses = getSxClasses(theme);
   const hiddenStyle = sxClasses.hiddenText;
 
-  const [contentVisible, setContentVisible] = useState(true);
+  const [contentVisible, setContentVisible] = useState<boolean>(true);
   const [activeView, setActiveView] = useState<'details' | 'settings' | 'info'>('details');
 
   // Ref for settings button focus restoration
