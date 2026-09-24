@@ -63,6 +63,30 @@ Demo: `templates/demos/package-swiper.html`
 | Rotate map     | Divider rotates with map       | 1. Rotate the map while the swiper is active | Swiper divider rotates with the map correctly     | M    |
 | Swipe position | Divider moves and clips layers | 1. Drag the swiper divider                   | Divider moves smoothly and clips layers correctly | M    |
 
+## Map Resize with Swiper
+
+Demo: `templates/demos/package-swiper.html`
+
+The swiper bar and the layer clip rectangle both derive from the divider percentage of the current map size, so they stay aligned on resize.
+
+| Test       | Description               | Steps                                                    | Expected Result                                                    | Auto |
+| ---------- | ------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------ | ---- |
+| Grow map   | Bar and clip stay aligned | 1. Enlarge the window/map while the swiper is active     | The divider bar and the clipped layer edge remain aligned (no gap) | M    |
+| Shrink map | Bar and clip stay aligned | 1. Reduce the window/map size while the swiper is active | The divider bar and the clipped layer edge remain aligned (no gap) | M    |
+
+## Interactive Mode (Layer Settings Panel)
+
+Demo: `templates/demos/package-swiper.html` (loaded with `"interactive": true`)
+
+When the swiper config sets `"interactive": true`, each layer's right panel exposes a **Swiper** section (settings gear) to add/remove the layer and choose its visible side. Side options follow the orientation (left/right for vertical, up/down for horizontal). When `interactive` is `false` (default), no section appears and the swiper stays static.
+
+| Test                    | Description                             | Steps                                                                             | Expected Result                                                       | Auto |
+| ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---- |
+| Settings section shown  | Swiper section appears when interactive | 1. Open a layer's right panel<br>2. Click the settings gear                       | A "Swiper" section with a "Show in Swiper" toggle is visible          | M    |
+| Add via settings        | Layer joins the swiper                  | 1. Toggle "Show in Swiper" on                                                     | The layer is clipped by the swiper; a side selector appears           | M    |
+| Change side             | Layer reveals on the chosen side        | 1. With the layer in the swiper, pick a different side in the selector            | The layer's visible side switches accordingly (left/right or up/down) | M    |
+| Section hidden (static) | No section when not interactive         | 1. Load a config without `interactive` (or `false`)<br>2. Open a layer's settings | No "Swiper" section appears; swiper behaves exactly as before         | M    |
+
 ## Swiper + Details Interaction
 
 Demo: `templates/demos/package-swiper.html`

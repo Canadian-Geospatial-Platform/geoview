@@ -287,6 +287,7 @@ In components, functions should be ordered in the following way:
 In classes, functions should be ordered in the following way:
 
 - class name
+- static readonly constants (declared at the very top of the class)
 - abstracts
 - overrides
 - public
@@ -295,6 +296,8 @@ In classes, functions should be ordered in the following way:
 - static public
 - static private
 - event types
+
+> **Static `readonly` constants belong at the TOP of the class**, right after the class declaration (before the constructor), using `static readonly` — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;`. Do NOT drop them at the bottom of the file. This applies to configuration/threshold constants; static **methods** still go near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region` / `// #endregion` markers so that VS Code can collapse them. Use **UPPER CASE** labels that match the group:
 

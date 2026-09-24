@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Divider, Typography } from '@/ui';
+import { Box, Divider, Typography, Select } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
 import {
@@ -13,13 +14,109 @@ import {
   useStoreLayerHoverable,
   useStoreLayerQueryable,
 } from '@/core/stores/states/layer-state';
+import {
+  useStoreSwiperInteractive,
+  useStoreSwiperLayerPaths,
+  useStoreSwiperLayerSides,
+  useStoreSwiperOrientation,
+  type SwipeSide,
+} from '@/core/stores/states/swiper-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
 import { useLayerController } from '@/core/controllers/use-controllers';
+import { useSwiperControllerIfExists } from '@/core/controllers/use-controllers';
+import type { SwiperController } from '@/core/controllers/swiper-controller';
 import { logger } from '@/core/utils/logger';
+
+interface SwiperLayerSettingsSectionProps {
+  /** The layer path to configure swiper settings for. */
+  layerPath: string;
+
+  /** The swiper controller used to add/remove layers and set their side. */
+  controller: SwiperController;
+}
+
+/**
+ * Renders the swiper settings section for a layer.
+ *
+ * Only visible when the swiper plugin is loaded and configured as interactive. Lets the user add
+ * or remove the layer from the swiper and choose which side of the bar reveals the layer.
+ *
+ * @param layerPath - The layer path to configure.
+ * @param controller - The swiper controller instance.
+ * @returns The swiper settings section, or null when the swiper is not interactive.
+ */
+function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettingsSectionProps): JSX.Element | null {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-settings/layer-settings > SwiperLayerSettingsSection');
+
+  // Hooks
+  const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
+
+  // Store
+  const interactive = useStoreSwiperInteractive();
+  const orientation = useStoreSwiperOrientation();
+  const layerPaths = useStoreSwiperLayerPaths();
+  const layerSides = useStoreSwiperLayerSides();
+
+  // Derived values
+  const isInSwiper = layerPaths.includes(layerPath);
+  const currentSide = layerSides[layerPath] ?? (orientation === 'vertical' ? 'left' : 'up');
+
+  // #region Handlers
+
+  /**
+   * Handles adding or removing the current layer from the swiper.
+   */
+  const handleToggleSwiper = useCallback((): void => {
+    if (isInSwiper) controller.removeLayerPath(layerPath);
+    else controller.addLayerPath(layerPath);
+  }, [isInSwiper, controller, layerPath]);
+
+  /**
+   * Handles changing the visible side of the swiper bar for the current layer.
+   */
+  const handleChangeSide = useCallback(
+    (event: SelectChangeEvent<unknown>): void => {
+      controller.setLayerSide(layerPath, event.target.value as SwipeSide);
+    },
+    [controller, layerPath]
+  );
+
+  // #endregion
+
+  if (!interactive) return null;
+
+  const sideMenuItems =
+    orientation === 'vertical'
+      ? [{ item: { value: 'left', children: t('swiper.sideLeft') } }, { item: { value: 'right', children: t('swiper.sideRight') } }]
+      : [{ item: { value: 'up', children: t('swiper.sideUp') } }, { item: { value: 'down', children: t('swiper.sideDown') } }];
+
+  return (
+    <Box sx={sxClasses.infoSection}>
+      <Typography sx={sxClasses.infoSectionTitle}>{t('swiper.settingsTitle')}</Typography>
+      <Box sx={sxClasses.swiperSectionContent}>
+        <Switch size="small" onChange={handleToggleSwiper} label={t('swiper.showInSwiper')} checked={isInSwiper} />
+        {isInSwiper && (
+          <Select
+            value={currentSide}
+            onChange={handleChangeSide}
+            label={t('swiper.sideLabel')}
+            labelId={`${layerPath}-swiper-side-label`}
+            inputLabel={{ id: `${layerPath}-swiper-side-label` }}
+            menuItems={sideMenuItems}
+            sx={sxClasses.swiperSideSelect}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+}
 
 interface LayerSettingsPanelProps {
   /** The layer path to configure settings for. */
@@ -46,6 +143,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
 
   // Store
   const layerController = useLayerController();
+  const swiperController = useSwiperControllerIfExists();
   const hasText = useStoreLayerHasText(layerPath);
   const textVisible = useStoreLayerTextVisibility(layerPath);
   const availableSettings = useStoreLayerStyleSettings(layerPath);
@@ -111,6 +209,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
       {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerPath={layerPath} />}
 
       {renderInteractionSection()}
+      {swiperController && <SwiperLayerSettingsSection layerPath={layerPath} controller={swiperController} />}
     </Box>
   );
 }

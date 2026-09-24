@@ -41,12 +41,26 @@ class SwiperPlugin extends MapPlugin {
         swiper: {
           tooltip: 'Drag to see underlying layer',
           menu: 'Swiper',
+          settingsTitle: 'Swiper',
+          showInSwiper: 'Show in Swiper',
+          sideLabel: 'Visible side',
+          sideLeft: 'Left',
+          sideRight: 'Right',
+          sideUp: 'Up',
+          sideDown: 'Down',
         },
       },
       fr: {
         swiper: {
           tooltip: 'Faites glisser pour voir les couches sous-jacentes',
           menu: 'Balayage',
+          settingsTitle: 'Balayage',
+          showInSwiper: 'Afficher dans le balayage',
+          sideLabel: 'Côté visible',
+          sideLeft: 'Gauche',
+          sideRight: 'Droit',
+          sideUp: 'Haut',
+          sideDown: 'Bas',
         },
       },
     };
@@ -70,8 +84,9 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    this.controllerRegistry.swiperController?.setLayerPaths(this.getConfig().layers);
     this.controllerRegistry.swiperController?.setOrientation(this.getConfig().orientation);
+    this.controllerRegistry.swiperController?.setInteractive(this.getConfig().interactive ?? false);
+    this.controllerRegistry.swiperController?.setLayers(this.getConfig().layers);
   }
 
   /**

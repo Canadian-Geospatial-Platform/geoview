@@ -32,7 +32,7 @@
       <p>Two layers loaded. Use buttons to activate/deactivate swiper on each layer.</p>
 
       <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
-        <button onclick="activateSwiper('ccc75c12-5acc-4a6a-959f-ef6f621147b9')">Activate Swiper (Layer 1)</button>
+        <button onclick="activateSwiper('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0')">Activate Swiper (Layer 1)</button>
         <button onclick="deactivateAll()">Deactivate All</button>
         <strong style="margin-left: 16px;">Layer paths:</strong>
         <span id="layerPaths" style="font-size: 12px; color: #666;">Loading...</span>
@@ -58,10 +58,20 @@
             ]
           },
           'navBar': ['zoom', 'home'],
-          'appBar': { 'tabs': { 'core': ['legend', 'layers'] } },
-          'footerBar': { 'tabs': { 'core': [] } },
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
           'corePackages': ['swiper'],
-          'theme': 'geo.ca'
+          'theme': 'geo.ca',
+          'corePackagesConfig': [
+            {
+              'swiper': {
+                'orientation': 'vertical',
+                'interactive': true,
+                'keyboardOffset': 10,
+                'layers': []
+              }
+            }
+          ]
         }"
       ></div>
 

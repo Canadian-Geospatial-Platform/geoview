@@ -55,6 +55,7 @@ import {
 } from '@/core/stores/states/layer-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIFooterBarComponents, useStoreUIAppbarComponents } from '@/core/stores/states/ui-state';
 import { useStoreDataTableAllFeaturesDataArray, useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
+import { useStoreSwiperInteractiveIfExists } from '@/core/stores/states/swiper-state';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { LayerSettingsPanel } from './layer-settings/layer-settings';
@@ -195,6 +196,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const availableSettings = useStoreLayerStyleSettings(layerPath);
+  const swiperInteractive = useStoreSwiperInteractiveIfExists();
   const timeSliderLayer = useStoreTimeSliderLayer(layerPath);
   const isFocusTrap = useStoreUIActiveTrapGeoView();
   const footerBarComponents = useStoreUIFooterBarComponents();
@@ -686,7 +688,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    */
   const renderSettingsButton = (): JSX.Element | null => {
     const hasInteraction = layerControls?.hover || layerControls?.query;
-    if (!availableSettings?.length && !hasInteraction && !hasText) return null;
+    if (!availableSettings?.length && !hasInteraction && !hasText && !swiperInteractive) return null;
 
     if (activeView === 'settings') {
       return (
