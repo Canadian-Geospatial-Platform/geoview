@@ -56,7 +56,7 @@ import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import { getGVElementByFullId, getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
-import { camelCase, handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
+import { camelCase, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
 /** Scroll step size in pixels (matches single button height). */
@@ -616,9 +616,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         // Apply marginTop: auto to first item
         const existingSx = (item.props as { sx?: SxProps }).sx;
         // Flatten sx to avoid nested arrays if existingSx is already an array
-        const combinedSx = existingSx
-          ? [...(Array.isArray(existingSx) ? existingSx : [existingSx]), sxClasses.appBarBottomSection]
-          : sxClasses.appBarBottomSection;
+        const combinedSx = existingSx ? [...toArray(existingSx), sxClasses.appBarBottomSection] : sxClasses.appBarBottomSection;
         return cloneElement(item as ReactElement<{ sx?: SxProps }>, { sx: combinedSx as SxProps });
       }
       return item;

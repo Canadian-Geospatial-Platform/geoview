@@ -43,7 +43,7 @@ import {
   LayerServiceMetadataUnableToFetchError,
 } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { parseXMLToJson } from '@/core/utils/utilities';
+import { parseXMLToJson, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
@@ -140,8 +140,7 @@ export class WFS extends AbstractGeoViewVector {
     // If any
     if (fetchResult.data.FeatureTypeList?.FeatureType) {
       // Now that we have metadata, get the layer ids from it
-      if (!Array.isArray(fetchResult.data.FeatureTypeList?.FeatureType))
-        fetchResult.data.FeatureTypeList.FeatureType = [fetchResult.data.FeatureTypeList?.FeatureType];
+      fetchResult.data.FeatureTypeList.FeatureType = toArray(fetchResult.data.FeatureTypeList.FeatureType);
 
       const metadataLayerList = fetchResult?.data.FeatureTypeList.FeatureType;
       entries = metadataLayerList.map((layerMetadata) => {
@@ -519,7 +518,7 @@ export class WFS extends AbstractGeoViewVector {
     if (describeFeatureOp) {
       // Find the outputFormat parameter
       let describeFeatureOperationParameter = describeFeatureOp['ows:Parameter'] as TypeMetadataWFSOperationMetadataOperationParameter[];
-      if (!Array.isArray(describeFeatureOperationParameter)) describeFeatureOperationParameter = [describeFeatureOperationParameter];
+      describeFeatureOperationParameter = toArray(describeFeatureOperationParameter);
 
       // Now Parameter is an array, find the 'outputFormat' parameter
       const describeOperationOutputFormat = describeFeatureOperationParameter.find((op) => op['@attributes'].name === 'outputFormat');
@@ -532,20 +531,20 @@ export class WFS extends AbstractGeoViewVector {
           // GEO SERVER WAY
           // Read
           let values = describeOperationOutputFormat['ows:AllowedValues'] as TypeMetadataWFSOperationMetadataOperationParameterValue[];
-          if (!Array.isArray(values)) values = [values];
+          values = toArray(values);
 
           // Read first one
           outputFormatValue = values?.[0]['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
-          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+          outputFormatValue = toArray(outputFormatValue);
         } else if (typeof describeOperationOutputFormat === 'object' && 'ows:Value' in describeOperationOutputFormat) {
           // QGIS SERVER WAY
           // Read
           let values = describeOperationOutputFormat['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
-          if (!Array.isArray(values)) values = [values];
+          values = toArray(values);
 
           // Read first one
           outputFormatValue = values?.[0];
-          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+          outputFormatValue = toArray(outputFormatValue);
         }
 
         // Final read
