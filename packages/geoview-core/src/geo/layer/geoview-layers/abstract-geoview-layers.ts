@@ -848,7 +848,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the metadata has been fetched and assigned to the 'metadata' property
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerServiceMetadataEmptyError} When the metadata fetch return empty metadata
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
@@ -1021,6 +1021,7 @@ export abstract class AbstractGeoViewLayer {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry config has its metadata processed
+   * @throws {PromiseRejectErrorWrapper} Wrapper containing the layer configuration when the metadata and the internal cause for the error.
    */
   async #processLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -1543,7 +1544,7 @@ export abstract class AbstractGeoViewLayer {
    * @param geoviewLayerId - The geoview layer id
    * @param layerName - The layer name
    * @param metadata - The metadata to check
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   // GV The metadata structure can be anything, we only care to check if there's an error inside of it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
