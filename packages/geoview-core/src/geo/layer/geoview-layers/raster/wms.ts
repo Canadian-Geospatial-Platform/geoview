@@ -39,7 +39,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { generateId, normalizeDatacubeAccessPath, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -188,8 +188,7 @@ export class WMS extends AbstractGeoViewRaster {
     // If a group
     if (layerFound.Layer) {
       // Make sure it's an array
-      let layerMetadataSubTree: TypeMetadataWMSCapabilityLayer[] = layerFound.Layer;
-      if (!Array.isArray(layerFound.Layer)) layerMetadataSubTree = [layerFound.Layer];
+      const layerMetadataSubTree = toArray(layerFound.Layer);
 
       // Map the sub layers information
       const layerConfigMapped = layerMetadataSubTree.map((config) => {
@@ -1090,7 +1089,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Remaining segments: search only within the current scope's children so nested duplicates resolve correctly
     for (let i = 1; i < layerIdPath.length; i++) {
       if (!scope?.Layer) return undefined;
-      const children = Array.isArray(scope.Layer) ? scope.Layer : [scope.Layer];
+      const children = toArray(scope.Layer);
       let next: TypeMetadataWMSCapabilityLayer | undefined;
       for (const child of children) {
         next = WMS.findLayerMetadataInCapability(layerIdPath[i], child);
