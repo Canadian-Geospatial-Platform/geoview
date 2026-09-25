@@ -485,8 +485,6 @@ export class LayerSetController extends AbstractMapViewerController {
     const controls: TypeLayerControls = this.#buildLegendLayerControls(layerConfig, isChild);
 
     // Get the visibility flag, use the gv layer if we can, or use the initial settings of the config or default true if none are specified
-    // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
-    // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
     const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
 
     // Compute effective layer scales to get the in visible range flag
@@ -555,7 +553,6 @@ export class LayerSetController extends AbstractMapViewerController {
 
       // If the layer is GVEsriImage
       if (layer instanceof GVEsriImage) {
-        // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
         legendLayerEntry.rasterFunction = layer.getRasterFunction();
         legendLayerEntry.rasterFunctionInfos = layer.getMetadataRasterFunctionInfos();
         legendLayerEntry.mosaicRule = layer.getMosaicRule();
