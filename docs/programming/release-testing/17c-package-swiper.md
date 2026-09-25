@@ -15,10 +15,15 @@ Demo: `templates/demos/package-swiper.html`
 Swiper is activated/deactivated via the console API:
 
 ```js
-cgpv.api.getMapViewer("mapId").plugins["swiper"].activateForLayer("layerPath");
+cgpv.api
+  .getMapViewer("mapId")
+  .plugins["swiper"].activateForLayer("layerPath", "right");
 cgpv.api
   .getMapViewer("mapId")
   .plugins["swiper"].deActivateForLayer("layerPath");
+cgpv.api
+  .getMapViewer("mapId")
+  .plugins["swiper"].setLayerSide("layerPath", "left");
 cgpv.api.getMapViewer("mapId").plugins["swiper"].deActivateAll();
 ```
 

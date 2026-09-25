@@ -7,12 +7,12 @@ a package that enable a swiper control to tooggle visibility of layers from one 
 
 ## Configuration
 
-| Property         | Type      | Default      | Description                                                                                                                                    |
-| ---------------- | --------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `orientation`    | string    | `"vertical"` | Orientation of the swiper bar. One of `"vertical"` or `"horizontal"`.                                                                           |
-| `keyboardOffset` | number    | `10`         | The offset value when the swiper is moved from the keyboard.                                                                                    |
+| Property         | Type      | Default      | Description                                                                                                                                                                           |
+| ---------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `orientation`    | string    | `"vertical"` | Orientation of the swiper bar. One of `"vertical"` or `"horizontal"`.                                                                                                                 |
+| `keyboardOffset` | number    | `10`         | The offset value when the swiper is moved from the keyboard.                                                                                                                          |
 | `interactive`    | boolean   | `false`      | When `true`, users can add/remove layers from the swiper and choose the revealed side directly from the layer settings panel. When `false`, the swiper stays static (author-defined). |
-| `layers`         | object\[] | `[]`         | The layers participating in the swiper. Each entry is `{ "layerPath": string, "side": "left" \| "right" \| "up" \| "down" }`.                   |
+| `layers`         | object\[] | `[]`         | The layers participating in the swiper. Each entry is `{ "layerPath": string, "side": "left" \| "right" \| "up" \| "down" }`.                                                         |
 
 ### Per-layer side
 
@@ -31,3 +31,15 @@ Each layer entry declares which side of the bar the layer is revealed on. The `s
 }
 ```
 
+### Programmatic control
+
+Use the plugin façade for common operations. The optional `side` argument defaults to `left` for vertical orientation and `up` for horizontal orientation.
+
+```typescript
+const swiper = cgpv.api.getMapViewer('map1').plugins['swiper'];
+swiper.activateForLayer('myLayerId/sublayer', 'right');
+swiper.setLayerSide('myLayerId/sublayer', 'left');
+swiper.deActivateForLayer('myLayerId/sublayer');
+```
+
+Use `mapViewer.controllers.swiperController` for bulk or advanced state operations such as `setLayers()` and `setInteractive()`.

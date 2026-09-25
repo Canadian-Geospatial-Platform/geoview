@@ -47,15 +47,15 @@
         </ul>
         <p>Console API examples:</p>
         <pre><code>const swiper = cgpv.api.getMapViewer('map1').plugins['swiper'];
-swiper.activateForLayer('swipe6/lakes');
+swiper.activateForLayer('swipe6/lakes', 'right');
+swiper.setLayerSide('swipe6/lakes', 'left');
 swiper.deActivateForLayer('swipe6/lakes');
 swiper.deActivateAll();
 swiper.setOrientation('horizontal');
 
-// Per-layer side placement and the interactive flag live on the controller:
+// Bulk layer updates and interactive-mode state use the controller:
 const { swiperController } = cgpv.api.getMapViewer('map1').controllers;
-swiperController.addLayerPath('swipe6/lakes', 'right');
-swiperController.setLayerSide('swipe6/lakes', 'left');
+swiperController.setLayers([{ layerPath: 'swipe6/lakes', side: 'right' }]);
 swiperController.setInteractive(true);</code></pre>
       </div>
     </div>
