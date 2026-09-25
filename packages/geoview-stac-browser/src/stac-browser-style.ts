@@ -143,7 +143,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1),
-    padding: theme.spacing(0.5),
+    padding: theme.spacing(0.5, 1),
     borderRadius: theme.shape.borderRadius,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -173,6 +173,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     alignItems: 'center',
   },
+  containedInExtentCheckbox: {
+    marginLeft: theme.spacing(0.25),
+  },
   dateInput: {
     flex: 1,
     '& input': {
@@ -185,7 +188,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'auto',
   },
   detailSection: {
-    padding: '0 12px',
+    padding: theme.spacing(0, 1.5),
   },
 
   // Collection card styles
@@ -221,7 +224,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   keywordChip: {
     display: 'inline-block',
-    padding: '2px 8px',
+    padding: theme.spacing(0.25, 1),
     fontSize: '0.75rem',
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.geoViewColor?.textColor.main,
@@ -274,9 +277,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   itemRow: {
     display: 'flex',
-    gap: theme.spacing(4),
-    padding: theme.spacing(5, 3),
-    marginBottom: theme.spacing(10),
+    gap: theme.spacing(0.5),
+    padding: theme.spacing(0.75, 0.5),
+    marginBottom: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
     cursor: 'pointer',
     alignItems: 'center',
@@ -299,7 +302,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   assetTypeBadge: {
     display: 'inline-block',
-    padding: '1px 6px',
+    padding: theme.spacing(0.25, 0.75),
     fontSize: '0.7rem',
     fontWeight: 600,
     borderRadius: '4px',
@@ -309,7 +312,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   assetRoleBadge: {
     display: 'inline-block',
-    padding: '1px 6px',
+    padding: theme.spacing(0.25, 0.75),
     fontSize: '0.65rem',
     fontWeight: 500,
     borderRadius: '4px',
@@ -322,6 +325,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     gap: theme.spacing(0.5),
     flexShrink: 0,
+  },
+  assetBadgeRow: {
+    display: 'flex',
+    gap: theme.spacing(0.5),
+    flexWrap: 'wrap',
   },
   paginationBar: {
     display: 'flex',

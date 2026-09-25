@@ -46,7 +46,7 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
 
   // State
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Log
@@ -115,8 +115,8 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
       sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{ fontWeight: 600 }}>{info.name}</Typography>
+      <Box sx={sxClasses.settingsCardText}>
+        <Typography sx={sxClasses.settingsCardTitle}>{info.name}</Typography>
         {info.description && (
           <Typography variant="body2" color="text.secondary">
             {info.description}
@@ -151,7 +151,7 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
   const layerController = useLayerController();
 
   // State
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   /**
    * Builds preview image promises for the available raster functions.
@@ -189,17 +189,17 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
     <Box sx={sxClasses.settingsSection}>
       <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
         <FunctionsIcon fontSize="small" />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={sxClasses.settingsSectionHeaderText}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectRasterFunction')}</Typography>
           {currentRasterFunction && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} noWrap>
+            <Typography variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
               {currentRasterFunction}
             </Typography>
           )}
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
-      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
+      <Collapse in={expanded} sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}>
         <Box sx={sxClasses.settingsCardList}>
           {rasterFunctionInfos.map((info) => (
             <RasterFunctionItem

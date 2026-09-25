@@ -19,7 +19,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiListItem-root': {
       '& .MuiListItemButton-root': {
-        padding: '0 2px 0 16px',
+        padding: theme.spacing(0, 0.25, 0, 2),
         height: '100%',
         backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
       },
@@ -42,6 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   listItemButton: {
     width: '100%',
     borderRadius: '5px',
+    gap: theme.spacing(1.5),
     '&.Mui-selected:hover': {
       backgroundColor: 'inherit',
     },
@@ -62,23 +63,21 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   listPrimaryText: {
     minWidth: '0',
-    marginTop: '0.5rem',
-    marginBottom: '0.5rem',
-    marginLeft: '10px',
     flex: '1 1 auto',
     display: 'flex',
     flexDirection: 'column',
+    margin: theme.spacing(0.75, 0),
     '& .layerTitle': {
       fontSize: theme.palette.geoViewFontSize?.default,
       fontWeight: '600',
       lineHeight: 1.5,
-      paddingRight: '10px',
+      paddingRight: theme.spacing(1.25),
       display: 'block',
     },
     '>div': {
       display: 'flex',
       alignItems: 'center',
-      marginTop: '4px',
+      marginTop: theme.spacing(0.5),
       '>p': {
         fontSize: `${theme.palette.geoViewFontSize?.sm} !important`,
         color: theme.palette.text.secondary,
@@ -134,7 +133,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     pointerEvents: 'auto',
   },
   dividerVertical: {
-    marginLeft: '0.4rem',
+    marginLeft: theme.spacing(0.75),
     height: '1.5rem',
     backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
   },
@@ -144,9 +143,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   listSectionHeader: {
     display: 'block',
-    paddingTop: '0.75rem',
-    paddingBottom: '0.25rem',
-    paddingLeft: '16px',
+    padding: theme.spacing(1.5, 0, 0.5, 2),
     fontSize: theme.palette.geoViewFontSize?.sm,
     fontWeight: 700,
     textTransform: 'uppercase',
@@ -165,7 +162,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   listPrimaryTextHidden: {
-    paddingRight: '2.5rem',
+    paddingRight: theme.spacing(5),
     // Match the Layers panel "not visible" symbology: greyed + italic text
     '& .layerTitle': {
       color: theme.palette.grey[700],

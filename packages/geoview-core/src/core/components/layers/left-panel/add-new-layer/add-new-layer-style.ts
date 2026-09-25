@@ -10,11 +10,11 @@ import type { SxStyles } from '@/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   paper: {
-    padding: '20px',
+    padding: theme.spacing(2.5),
   },
   buttonGroup: {
-    marginTop: '12px',
-    gap: '6px',
+    marginTop: theme.spacing(1.5),
+    gap: theme.spacing(0.75),
   },
   dragOverlay: {
     backgroundColor: theme.palette.geoViewColor?.grey.opacity(0.95),

@@ -37,11 +37,11 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
-  const [useMapExtent, setUseMapExtent] = useState(false);
-  const [containedInExtent, setContainedInExtent] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const [useMapExtent, setUseMapExtent] = useState<boolean>(false);
+  const [containedInExtent, setContainedInExtent] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
 
   // #region Handlers
 
@@ -140,7 +140,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
             <FormControlLabel
               control={<Checkbox checked={containedInExtent} onChange={handleContainedInExtentChange} size="small" />}
               label={t('stacBrowser.containedInExtent')}
-              sx={{ marginLeft: theme.spacing(2) }}
+              sx={sxClasses.containedInExtentCheckbox}
             />
           )}
         </Box>

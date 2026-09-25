@@ -14,8 +14,8 @@ export const getFocusTrapSxClasses = (theme: Theme): SxStyles => {
       justifyContent: 'center',
       alignItems: 'center',
       position: 'absolute',
-      top: theme.spacing(0),
-      left: theme.spacing(0),
+      top: '0px',
+      left: '0px',
       width: '100%',
       zIndex: theme.zIndex.focusDialog,
       overflow: 'hidden',
@@ -43,7 +43,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     width: '100%',
 
     '& .layer-icon': {
-      padding: 3,
+      padding: theme.spacing(0.5),
       borderRadius: 0,
       border: '1px solid',
       borderColor: theme.palette.geoViewColor?.grey.dark[100],
@@ -52,7 +52,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
       objectFit: 'scale-down',
       width: '35px',
       height: '35px',
-      marginRight: '10px',
+      marginRight: theme.spacing(1.25),
     },
 
     '& a[href]': {
@@ -89,10 +89,10 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     scrollMarginTop: '20px',
     display: 'flex',
     flexDirection: 'column',
-    top: theme.spacing(0),
-    right: theme.spacing(0),
-    left: theme.spacing(0),
-    bottom: theme.spacing(0),
+    top: '0px',
+    right: '0px',
+    left: '0px',
+    bottom: '0px',
     overflow: 'clip',
     zIndex: 0,
     height: '100%',
@@ -129,12 +129,12 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     zIndex: theme.zIndex.tooltip,
 
     '&:active, &:focus': {
-      left: theme.spacing(0),
+      left: '0px',
       zIndex: theme.zIndex.tooltip,
       width: 'auto',
       height: 'auto',
       overflow: 'visible',
-      padding: theme.spacing(3),
+      padding: theme.spacing(0.5),
     },
   },
 });

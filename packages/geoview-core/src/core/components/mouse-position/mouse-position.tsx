@@ -170,18 +170,7 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
         onKeyDown={handleRadioGroupKeyDown}
         onClick={handleRadioGroupClick}
         aria-label={t('mapctrl.mouseposition.selectFormat')}
-        sx={{
-          padding: theme.spacing(0, 6),
-          // Show focus ring when any child Radio has focus
-          '&:has(:focus-visible)': {
-            borderRadius: '4px',
-            outline: `3px solid ${
-              theme.palette.geoViewColor?.focusIndicator.outline ??
-              (theme.palette.mode === 'dark' ? theme.palette.common.white : theme.palette.common.black)
-            }`,
-            outlineOffset: 0,
-          },
-        }}
+        sx={memoSxClasses.mousePositionRadioGroup}
       >
         {memoPositions.map((position, index) => {
           // Calculate checkmark opacity: hide if no position data, or if not selected
@@ -194,19 +183,7 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
               value={index}
               control={
                 <Radio
-                  sx={{
-                    // Hide the radio circle visually but keep it keyboard-accessible
-                    opacity: 0,
-                    width: 0,
-                    height: 0,
-                    padding: 0,
-                    margin: 0,
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    // Prevent any pointer interaction directly on the Radio
-                    pointerEvents: 'none',
-                  }}
+                  sx={memoSxClasses.mousePositionRadioHidden}
                   slotProps={{
                     input: {
                       'aria-label': POSITION_LABELS[index],
@@ -219,39 +196,20 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
                   <CheckIcon
                     sx={{
                       ...memoSxClasses.mousePositionCheckmark,
-                      fontSize: theme.palette.geoViewFontSize?.lg,
                       opacity: checkmarkOpacity,
-                      color: theme.palette.geoViewColor?.bgColor?.dark?.[650],
                     }}
                     aria-hidden="true"
                   />
                   <Box component="span">{position}</Box>
                 </Box>
               }
-              sx={{
-                margin: 0,
-                alignItems: 'center',
-                width: '100%',
-                cursor: 'pointer',
-                justifyContent: 'flex-start',
-              }}
+              sx={memoSxClasses.mousePositionRadioLabel}
             />
           );
         })}
       </RadioGroup>
     );
-  }, [
-    positionMode,
-    memoPositions,
-    pointerPosition,
-    handleRadioChange,
-    handleRadioGroupClick,
-    handleRadioGroupKeyDown,
-    memoSxClasses.mousePositionTextCheckmarkContainer,
-    memoSxClasses.mousePositionCheckmark,
-    t,
-    theme,
-  ]);
+  }, [positionMode, memoPositions, pointerPosition, handleRadioChange, handleRadioGroupClick, handleRadioGroupKeyDown, memoSxClasses, t]);
 
   return (
     <Tooltip title={t('mapctrl.mouseposition.coordinates')} placement="top">

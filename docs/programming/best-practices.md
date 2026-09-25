@@ -665,3 +665,7 @@ A few lookups are genuinely **not** a single map's descendant. Keep the raw `doc
 - **The fullscreen-portaled guide**, which is map-scoped via `[data-map-id="${mapId}"]` but must be queried globally because the portal moves it out of the map root.
 
 > Note: `document.getElementsByClassName` / `getElementsByTagName` are **not** flagged by the rule, but still scope them to a map's root (e.g. `getGVRootElement(mapId)?.getElementsByClassName(...)`) whenever the result should be map-specific.
+
+## 19- Styling and CSS conventions
+
+Styling, spacing, and theming conventions are collected in a dedicated document since this area is expected to keep growing: [styling-best-practices.md](./styling-best-practices.md).

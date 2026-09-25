@@ -330,25 +330,8 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   const validSelectedTab = memoVisibleTabs.find((tab) => tab.value === selectedTab)?.value;
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        width: '100%',
-      }}
-    >
-      <Grid
-        container
-        id={`${mapId}-footerbar-header`}
-        onClick={onHeaderClick}
-        sx={{
-          width: '100%',
-          paddingLeft: '7px',
-          border: 'unset',
-          borderBottom: isCollapsed ? 'none' : `2px solid ${theme.palette.geoViewColor?.primary.main} !important`,
-        }}
-      >
+    <Box sx={memoSxClasses.wrapper}>
+      <Grid container id={`${mapId}-footerbar-header`} onClick={onHeaderClick} sx={memoSxClasses.header}>
         <Grid size={{ xs: 7, sm: 10 }}>
           {!isMobile ? (
             <MaterialTabs
@@ -358,6 +341,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               value={validSelectedTab !== undefined ? Math.max(0, validSelectedTab) : false}
               onChange={handleChange}
               aria-label={t('footerBar.tabsLabel')}
+              sx={memoSxClasses.tabsContainer}
               {...tabsProps}
             >
               {memoVisibleTabs.map((tab) => {

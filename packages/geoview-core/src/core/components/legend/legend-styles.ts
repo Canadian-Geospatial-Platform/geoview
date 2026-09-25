@@ -4,10 +4,12 @@ import { visuallyHidden } from '@/ui/style/default';
 type SxClasses = Record<string, object>;
 
 /**
- * Generates the main SX classes for styling components
+ * Generates the main SX classes for styling components.
+ *
+ * @param theme - The theme object, used for spacing values via `theme.spacing()`
  * @returns An object containing the style classes
  */
-export const getSxClassesMain = (): SxClasses => ({
+export const getSxClassesMain = (theme: Theme): SxClasses => ({
   legendWrapper: {
     display: 'flex',
     flexDirection: 'column',
@@ -15,7 +17,8 @@ export const getSxClassesMain = (): SxClasses => ({
     overflow: 'hidden',
   },
   container: {
-    padding: '16px',
+    background: theme.palette.geoViewColor?.bgColor.main,
+    padding: theme.spacing(2),
     display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
@@ -41,10 +44,10 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   layerStackContainer: {
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 5,
+    gap: theme.spacing(0.75),
     '& button': {
-      padding: '0.25rem',
-      marginRight: 0,
+      padding: theme.spacing(0.5),
+      marginRight: theme.spacing(0),
       '& svg': {
         width: '1.25rem',
         height: '1.25rem',
@@ -59,7 +62,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     alignItems: 'center',
   },
   legendList: {
-    paddingRight: '0.65rem',
+    paddingRight: theme.spacing(1.25),
   },
   loading: {
     display: 'block !important',
@@ -69,11 +72,11 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     span: { height: '2px' },
   },
   legendListItem: {
-    padding: '6px 4px',
+    padding: theme.spacing(0.75, 0.5),
     flexDirection: 'column',
     alignItems: 'flex-start',
     '& .MuiCollapse-vertical': {
-      marginLeft: '6px',
+      marginLeft: theme.spacing(0.75),
     },
     '& .outOfRange': {
       '& .legendTitle': {
@@ -85,7 +88,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   legendListItemHeader: {
     width: '100%',
     display: 'flex',
-    gap: 8,
+    gap: theme.spacing(1.5),
     alignItems: 'center',
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
   },
@@ -97,7 +100,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       fontWeight: 'inherit',
     },
     '>p': {
-      margin: 0,
+      margin: theme.spacing(0),
       color: theme.palette.geoViewColor?.textColor.light[400],
       fontSize: theme.palette.geoViewFontSize?.sm,
       lineHeight: 1.43,
@@ -107,21 +110,21 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
   },
   layerList: {
-    marginTop: 0,
-    padding: 0,
+    marginTop: theme.spacing(0),
+    padding: theme.spacing(0),
     width: '100%',
     '& .MuiListItemIcon-root': {
       minWidth: '1rem',
     },
   },
   layerListItem: {
-    paddingLeft: '6px',
-    marginBottom: '6px',
+    paddingLeft: theme.spacing(0.75),
+    marginBottom: theme.spacing(0.75),
     fontWeight: '400',
   },
   layerListItemButton: {
-    padding: '0 0 0 6px',
-    gap: 8,
+    padding: theme.spacing(0, 0, 0, 0.75),
+    gap: theme.spacing(1.5),
     '&:hover': {
       backgroundColor: 'transparent',
     },
@@ -147,8 +150,8 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
 
   collapsibleContainer: {
     width: '100%',
-    padding: '10px 0',
-    margin: '0px 10px',
+    padding: theme.spacing(1.25, 0),
+    margin: theme.spacing(0, 1.25),
   },
   legendInstructionsTitle: {
     fontSize: theme.palette.geoViewFontSize?.lg,
@@ -160,7 +163,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
-    padding: 6,
+    padding: theme.spacing(1),
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
@@ -169,8 +172,8 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   buttonDivider: {
     display: 'flex',
     alignItems: 'center',
-    marginRight: 3,
-    paddingRight: 3,
+    marginRight: theme.spacing(0.5),
+    paddingRight: theme.spacing(0.5),
     position: 'relative',
     '&::after': {
       content: '""',
@@ -204,6 +207,18 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     maxWidth: '100%',
     height: 'auto',
     display: 'block',
+  },
+  noLayersContainer: {
+    padding: theme.spacing(4),
+    margin: theme.spacing(4),
+    width: '100%',
+    textAlign: 'center',
+    height: 'fit-content',
+  },
+  flexContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   visuallyHidden,
 });

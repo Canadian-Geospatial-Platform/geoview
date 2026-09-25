@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { SelectChangeEvent } from '@mui/material';
+import type { SelectChangeEvent, SxProps } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { TypeMenuItemProps } from '@/ui';
@@ -50,6 +50,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Checks whether any filter is active.
    */
   const memoHasActiveFilters = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoHasActiveFilters', province, category);
     return !!(province.length || category.length);
   }, [province, category]);
 
@@ -112,6 +113,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Builds the active filters display for screen readers.
    */
   const memoActiveFiltersDisplay = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoActiveFiltersDisplay', province, category);
     if (!(province.length || category.length)) return null;
 
     return (
@@ -176,25 +178,19 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               aria-disabled={!memoHasActiveFilters}
             >
-              <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize?.md }} />
+              <ClearFiltersIcon sx={memoSxClasses.clearFiltersIcon} />
             </IconButton>
           </Box>
         </Box>
       )}
       <Box
-        sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}
+        sx={[memoSxClasses.resultsRegion, { maxHeight: mapSize[1] - 240 }] as SxProps}
         className="geolocator-results-region"
         role="region"
         aria-label={t('geolocator.searchResults')}
       >
         {error && (
-          <Typography
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            component="p"
-            sx={{ p: 10, fontSize: theme.palette.geoViewFontSize?.md }}
-          >
+          <Typography role="status" aria-live="polite" aria-atomic="true" component="p" sx={memoSxClasses.resultMessage}>
             {t('error.geolocator.noService')}
           </Typography>
         )}
@@ -211,14 +207,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </>
         )}
         {!memoFilteredData.length && searchValue.length >= 3 && (
-          <Box sx={{ p: 10 }}>
-            <Typography
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              component="p"
-              sx={{ fontSize: theme.palette.geoViewFontSize?.md }}
-            >
+          <Box sx={memoSxClasses.resultMessage}>
+            <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
             {memoActiveFiltersDisplay}

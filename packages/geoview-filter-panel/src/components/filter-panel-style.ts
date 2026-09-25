@@ -8,7 +8,7 @@ import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   filterPanel: {
-    padding: '16px',
+    padding: theme.spacing(2),
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -17,19 +17,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   filterPanelButtonContainer: {
     display: 'flex',
-    gap: 1,
-    p: 2,
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.25),
     borderTop: 1,
     borderColor: 'divider',
     bgcolor: 'background.default',
   },
 
   filterHeader: {
-    padding: '3px',
+    padding: theme.spacing(0.5),
     borderBottom: 1,
     borderColor: 'divider',
     bgcolor: 'background.default',
-    paddingLeft: '3px',
+    paddingLeft: theme.spacing(0.5),
   },
 
   filterTitle: {
@@ -39,11 +39,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Layer section container
   filterLayerSection: {
-    mb: 5,
+    marginBottom: theme.spacing(0.75),
     '&:last-child': {
-      mb: 0,
+      marginBottom: theme.spacing(0),
     },
-    padding: '3px 6px 0px',
+    padding: theme.spacing(0.5, 0.75, 0),
     border: 1,
     borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
     borderRadius: 1,
@@ -54,8 +54,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterLayerHeader: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 1,
-    p: 1.5,
+    gap: theme.spacing(1),
+    padding: theme.spacing(1.5),
     bgcolor: 'background.default',
   },
 
@@ -63,7 +63,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 1,
+    gap: theme.spacing(1),
   },
 
   // Layer section header (collapsed state - no bottom border)
@@ -102,20 +102,26 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: 'auto',
     whiteSpace: 'nowrap',
     alignSelf: 'flex-start',
-    marginBottom: 5,
+    marginBottom: theme.spacing(0.75),
   },
 
   // Layer content area
   filterLayerContent: {
     flex: 1,
     overflowY: 'auto',
-    p: 2,
+    padding: theme.spacing(0.25),
+  },
+
+  // Collapsible content wrapper for a single layer's filter controls
+  filterLayerCollapseContent: {
+    padding: theme.spacing(0.25),
   },
 
   // Loading state container
   filterLayerLoading: {
     textAlign: 'center',
-    py: 2,
+    paddingTop: theme.spacing(0.25),
+    paddingBottom: theme.spacing(0.25),
   },
 
   // Loading text

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+import type { Theme, SxProps } from '@mui/material/styles';
 import type { Mark } from '@mui/material/Slider/useSlider.types';
 
 import { getSxClasses } from './layer-opacity-control-styles';
@@ -35,7 +36,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
 
   // State
   const [marks, setMarks] = useState<Mark[]>([]);
-  const [localOpacity, setLocalOpacity] = useState(layerOpacity);
+  const [localOpacity, setLocalOpacity] = useState<number>(layerOpacity);
 
   // Sync local state with store when layerDetails.opacity changes
   useEffect(() => {
@@ -88,7 +89,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
 
   return (
     <Box sx={sxClasses.layerOpacityControl}>
-      <Typography id={labelId} sx={layerHidden ? sxClasses.controlHidden : sxClasses.controlVisible}>
+      <Typography id={labelId} sx={[sxClasses.controlLabel, layerHidden ? sxClasses.controlLabelHidden : undefined] as SxProps<Theme>}>
         {t('layers.opacity')}
       </Typography>
       <Slider

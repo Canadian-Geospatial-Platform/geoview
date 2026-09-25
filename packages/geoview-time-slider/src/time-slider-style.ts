@@ -11,14 +11,14 @@ import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   containerPadding: {
-    padding: '10px 10px',
+    padding: theme.spacing(1.25, 1.25),
   },
   headerContainer: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px',
-    gap: '16px',
+    padding: theme.spacing(2.5),
+    gap: theme.spacing(2),
     boxShadow: '0px 12px 9px -13px #E0E0E0',
     flexWrap: 'wrap',
   },
@@ -28,18 +28,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   centeredContainer: {
     textAlign: 'center',
-    paddingTop: '20px',
+    paddingTop: theme.spacing(2.5),
   },
   controlWrapper: {
-    paddingLeft: '10px',
+    paddingLeft: theme.spacing(1.25),
   },
   formControlWidth: {
     width: '100px',
   },
   descriptionText: {
-    px: theme.spacing(2.5),
-    py: theme.spacing(0.625),
-    paddingTop: '15px',
+    padding: theme.spacing(2, 2.5, 0, 2.5),
     fontSize: theme.palette.geoViewFontSize?.sm,
   },
 });

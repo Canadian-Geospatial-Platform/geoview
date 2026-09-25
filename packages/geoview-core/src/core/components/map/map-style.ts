@@ -41,7 +41,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       left: 'auto',
       right: '10px', // Adding 2px to the usual 8px to account for the box shadow
       top: '10px', // Adding 2px to the usual 8px to account for the box shadow
-      padding: 0,
+      padding: theme.spacing(0),
       position: 'absolute',
       borderRadius: 4,
 
@@ -59,7 +59,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         left: 'auto',
         right: 100,
         top: 100,
-        margin: 5,
+        margin: theme.spacing(0.75),
       },
       '&:not(.ol-collapsed)': {
         boxShadow: '0 1px 5px rgb(0 0 0 / 65%)',

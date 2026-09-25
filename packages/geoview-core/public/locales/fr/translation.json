@@ -568,6 +568,7 @@
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",
+    "resizeAriaLabel": "Redimensionner le panneau de pied de page",
     "noTab": "Pas d'onglet",
     "tabsLabel": "Onglets du panneau de pied de page"
   },

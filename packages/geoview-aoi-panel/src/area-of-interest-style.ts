@@ -18,11 +18,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     border: '2px solid rgba(255,255,255,0.25)',
     borderRadius: '6px',
     boxShadow: 'none',
-    margin: '16px',
+    margin: theme.spacing(2),
     transition: 'all 0.3s ease-in-out',
     cursor: 'pointer',
     '&:last-child': {
-      marginBottom: '0px',
+      marginBottom: theme.spacing(0),
     },
     '&:hover': {
       border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
@@ -36,8 +36,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: theme.palette.geoViewColor?.grey.light[900],
       fontSize: 14,
       fontWeight: 400,
-      margin: 0,
-      padding: '0 12px',
+      margin: theme.spacing(0),
+      padding: theme.spacing(0, 1.5),
       height: 60,
       width: '100%',
       order: 2,
@@ -47,9 +47,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       order: 1,
       height: 190,
       position: 'relative',
-      padding: 0,
+      padding: theme.spacing(0),
       '&:last-child': {
-        padding: 0,
+        padding: theme.spacing(0),
       },
       '& .aoiCardThumbnail': {
         position: 'absolute',

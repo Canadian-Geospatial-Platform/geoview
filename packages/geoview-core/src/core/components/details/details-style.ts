@@ -9,22 +9,6 @@ import { visuallyHidden } from '@/ui/style/default';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  detailsContainer: {
-    background: theme.palette.geoViewColor?.bgColor.main,
-    paddingBottom: '1rem',
-  },
-  detailsInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
-  detailsInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize?.default,
-  },
-  panelHeaders: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: '600',
-  },
   rightPanelContainer: {
     color: theme.palette.geoViewColor?.textColor.main,
   },
@@ -33,18 +17,18 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    padding: '10px 16px',
+    padding: theme.spacing(1.25, 2),
     boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
   },
   rightPanelButtons: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: theme.spacing(0.5),
     flexWrap: 'wrap',
   },
   featureInfoListContainer: {
-    padding: '0 16px 16px',
+    padding: theme.spacing(0, 2, 2, 2),
     overflowY: 'auto',
     overflowX: 'hidden',
   },
@@ -59,7 +43,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& td, & th': {
       verticalAlign: 'top',
       width: '50%',
-      padding: '5px',
+      padding: theme.spacing(0.5),
       borderBottom: 'none',
       overflowWrap: 'break-word',
       wordBreak: 'break-word',
@@ -71,7 +55,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   featureInfoItemValue: {
-    marginRight: 0,
+    marginRight: theme.spacing(0),
     overflowX: 'auto',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
@@ -84,7 +68,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     ' th, td': {
       border: '1px solid',
       textAlign: 'center',
-      padding: '5px',
+      padding: theme.spacing(0.5),
       overflowWrap: 'break-word',
       wordBreak: 'break-word',
       whiteSpace: 'pre-wrap',
@@ -121,9 +105,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   layoutSwitch: {
     alignItems: 'center',
     display: 'flex',
-    gap: '10px',
+    gap: theme.spacing(1.25),
     justifyContent: 'space-between',
-    marginBottom: '10px',
+    marginBottom: theme.spacing(1.25),
     width: '100%',
   },
   imageButton: {
@@ -131,18 +115,33 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   coordinateInfoContainer: {
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[600],
-    padding: '16px',
+    padding: theme.spacing(2),
   },
   coordinateInfoTitle: {
-    mb: 10,
+    marginBottom: theme.spacing(2),
   },
   coordinateInfoSection: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    marginBottom: '10px',
+    marginBottom: theme.spacing(1.25),
   },
   coordinateInfoSectionTitle: {
     fontWeight: 'bold',
+  },
+  coordinateInfoDeclinationContent: {
+    marginLeft: theme.spacing(0.25),
+  },
+  skeletonBox: {
+    padding: theme.spacing(1.25),
+  },
+  skeletonTitle: {
+    marginBottom: theme.spacing(0.125),
+  },
+  skeletonRow: {
+    paddingTop: theme.spacing(0.5),
+    paddingBottom: theme.spacing(0.5),
+    display: 'flex',
+    justifyContent: 'space-between',
   },
   visuallyHidden,
 });

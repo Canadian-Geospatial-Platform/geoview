@@ -12,9 +12,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '1rem',
+    gap: theme.spacing(2),
     margin: '0 auto',
-    padding: '16px 10%',
+    padding: `${theme.spacing(2)} 10%`,
     width: '100%',
     overflowX: 'hidden',
     flex: '1 0 auto',
@@ -25,9 +25,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
+    gap: theme.spacing(2),
     justifyContent: 'space-between',
-    marginBottom: 2,
+    marginBottom: theme.spacing(0.25),
     [theme.breakpoints.up('md')]: {
       flexDirection: 'row',
     },
@@ -46,7 +46,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'row',
     flex: '1 1 auto',
-    gap: '1rem',
+    gap: theme.spacing(2),
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     '& .MuiFormControl-root': {
@@ -55,13 +55,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiInputLabel-formControl': {
       fontSize: theme.palette.geoViewFontSize?.default,
-      marginTop: 0,
+      marginTop: theme.spacing(0),
     },
     '& .MuiInputLabel-formControl.Mui-focused': {
       color: theme.palette.text.primary,
     },
-    '& .MuiSelect-select': {
-      padding: '0px 12px 4px 0px !important',
+    '& .MuiInputBase-input.MuiSelect-select': {
+      padding: theme.spacing(0, 1.5, 0.5, 0),
     },
     [theme.breakpoints.down('md')]: {
       flexDirection: 'column',
@@ -96,7 +96,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   dialogActions: {
     flexWrap: 'wrap',
-    padding: '1rem',
-    gap: '0.5rem',
+    padding: theme.spacing(2),
+    gap: theme.spacing(1),
   },
 });

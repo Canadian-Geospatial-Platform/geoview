@@ -152,7 +152,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
   return (
     <Box sx={memoSxClasses.layerInfo}>
-      <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+      <Divider sx={memoSxClasses.sectionDivider} variant="middle" />
 
       {/* Service Information */}
       <Box sx={memoSxClasses.infoSection}>
