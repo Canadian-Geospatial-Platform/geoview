@@ -84,9 +84,9 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
-| 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
+| 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **239**    |                             |
+| **Total**         |                         |                                                                                                 | **244**    |                             |
 
 ---
 
@@ -817,10 +817,15 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-swiper` · **File:** `tests/suites/suite-swiper.ts` · **Tester:** `SwiperTester` (`tests/testers/swiper-tester.ts`)
 **Execution:** Sequential · **Guard:** `swiper` must be in `corePackages` and swiper controller must exist
 
-| #   | Method                      | Type | Description                                                                              |
-| --- | --------------------------- | ---- | ---------------------------------------------------------------------------------------- |
-| 1   | `testSwiperRenderIsolation` | test | Test Swiper rendering isolation with a higher-level layer selector...                    |
-| 2   | `testSwiperLifecycle`       | test | Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all... |
+| #   | Method                              | Type | Description                                                                              |
+| --- | ----------------------------------- | ---- | ---------------------------------------------------------------------------------------- |
+| 1   | `testSwiperRenderIsolation`         | test | Test Swiper rendering isolation with a higher-level layer selector...                    |
+| 2   | `testSwiperLifecycle`               | test | Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all... |
+| 3   | `testSwiperPerLayerSides`           | test | Test Swiper per-layer side semantics...                                                  |
+| 4   | `testSwiperProgressiveRegistration` | test | Test Swiper progressive layer registration...                                            |
+| 5   | `testSwiperConfigPersistence`       | test | Test Swiper interactive configuration persistence...                                     |
+| 6   | `testSwiperSettingsGating`          | test | Test Swiper settings-panel gating...                                                     |
+| 7   | `testSwiperHoverSuppression`        | test | Test Swiper hover-query suppression over the bar and handle...                           |
 
 ---
 

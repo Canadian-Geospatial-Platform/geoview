@@ -572,6 +572,15 @@ Toggle switches to control layer interaction behavior:
 - **Hoverable**: When enabled, hovering over a feature on the map displays a tooltip with feature information.
 - **Queryable**: When enabled, clicking on the map queries features from this layer.
 
+**Swiper** _(when the Swiper package is loaded with interactive customization enabled)_
+
+If the map configuration enables the Swiper package, the settings panel includes a **Swiper** section. Use **Show in Swiper** to add or remove the selected layer from the swipe comparison. When the layer is included, use **Visible side** to choose which side of the divider reveals it:
+
+- **Vertical** swiper: **Left** or **Right**
+- **Horizontal** swiper: **Up** or **Down**
+
+If interactive customization is disabled or the Swiper package is not loaded, this section is not displayed and the Swiper remains author-configured.
+
 =3!add=
 
 ### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Add icon" /> Add a layer

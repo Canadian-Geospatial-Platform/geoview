@@ -1244,6 +1244,14 @@ Plugins are loaded through **different config properties** depending on their ty
 
 **Swiper render clipping** — The swiper must clip only the configured layer outputs. Do not apply CSS `clip-path` to `AbstractBaseGVLayer.getRendererContainer()` because OpenLayers renderer containers/canvases can be shared across conceptual layers, which can hide non-swiped layers. Use per-layer OpenLayers render events instead: clip in `prerender`, restore in `postrender`, use `getRenderPixel()` for canvas pixel conversion, and restore WebGL scissor state when the renderer uses WebGL. Regression tests should verify that only selected/resolved descendant layers gain render handlers and that non-target layers remain unaffected.
 
+**Interactive Swiper configuration** — The finalized user-customization flag is `interactive` (default `false`), not `allowUserCustomization`. The `layers` schema is intentionally a breaking structured shape: `{ layerPath, side }[]`, with `side` using `left/right` for vertical orientation and `up/down` for horizontal orientation. When changing this schema, migrate every in-repo config/demo and bump the package schema version; do not silently retain the old string-array shape.
+
+**Progressive Swiper layer registration** — Do not use `Promise.all()` before attaching swiper render handlers. A configured group may resolve descendant layers at different times; wait for each path independently and append each registered GV layer to the swiper state as soon as it resolves. Reconcile removed paths without clearing already-registered layers, so loaded layers become clipped immediately while slower layers continue loading.
+
+**Swiper hover-query suppression** — The swiper bar overlays the OpenLayers viewport, so DOM `stopPropagation()` from React or the bar is not a reliable way to prevent GeoView hover queries; React delegated handlers can run after OL's viewport listener. Gate the query at `LayerSetController.#handleMapPointerStopped()` using a swiper-controller pixel hit test, clear hover results, and skip the query when the pointer is over the divider/handle. Use separate tight bar and larger centered-handle bands to avoid suppressing nearby map features.
+
+**Swiper drag isolation** — `react-draggable` can lose its mouse stream when OpenLayers `DragPan` starts underneath the overlay, especially during diagonal movement. Disable `DragPan` and set the map viewport's `pointer-events` to `none` for the drag duration, then restore both on stop and unmount. Keep resize remounts guarded by an `isDragging` ref so a map resize cannot destroy an active drag.
+
 ```json
 // ✅ Correct: each plugin loaded via its proper config property
 {
