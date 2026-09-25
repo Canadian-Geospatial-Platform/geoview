@@ -570,6 +570,15 @@ Interrupteurs pour contrôler le comportement d'interaction de la couche :
 - **Survol** : Lorsqu'activé, le survol d'un élément sur la carte affiche une infobulle avec les informations de l'élément.
 - **Interrogeable** : Lorsqu'activé, cliquer sur la carte interroge les éléments de cette couche.
 
+**Balayage** _(lorsque le module Balayage est chargé avec la personnalisation interactive activée)_
+
+Si la configuration de la carte active le module Balayage, le panneau des paramètres contient une section **Balayage**. Utilisez **Afficher dans le balayage** pour ajouter ou retirer la couche sélectionnée de la comparaison. Lorsque la couche est incluse, utilisez **Côté visible** pour choisir le côté du séparateur où elle sera révélée :
+
+- Balayage **vertical** : **Gauche** ou **Droit**
+- Balayage **horizontal** : **Haut** ou **Bas**
+
+Si la personnalisation interactive est désactivée ou si le module Balayage n'est pas chargé, cette section n'est pas affichée et le balayage demeure configuré par l'auteur.
+
 =3!add=
 
 ### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Icône ajouter" /> Ajouter une couche

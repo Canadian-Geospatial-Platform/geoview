@@ -223,13 +223,14 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  swiperPlugin.activateForLayer("layerPath");
+  swiperPlugin.activateForLayer("layerPath", "right");
   swiperPlugin.deActivateForLayer("layerPath");
+  swiperPlugin.setLayerSide("layerPath", "left");
   swiperPlugin.setOrientation("vertical");
 }
 ```
 
-For per-layer side placement and the interactive customization flag, use the swiper controller from the map's controller registry:
+The plugin façade covers common operations, including the optional side when activating a layer. For bulk layer updates, interactive-mode state, or other advanced controller operations, use the swiper controller from the map's controller registry:
 
 ```typescript
 const { swiperController } = mapViewer.controllers;
@@ -328,7 +329,7 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 // Check if a plugin is loaded before using it
 const swiperPlugin = mapViewer.plugins["swiper"];
 if (swiperPlugin) {
-  swiperPlugin.activateForLayer("layerPath");
+  swiperPlugin.activateForLayer("layerPath", "right");
 }
 ```
 

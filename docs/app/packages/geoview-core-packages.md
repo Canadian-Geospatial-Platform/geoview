@@ -607,7 +607,7 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  swiperPlugin.activateForLayer("layerPath");
+  swiperPlugin.activateForLayer("layerPath", "right");
   swiperPlugin.setOrientation("vertical");
 }
 ```
@@ -655,11 +655,14 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  // Activate swiper for a layer
-  swiperPlugin.activateForLayer("layerPath");
+  // Activate swiper for a layer on the right side
+  swiperPlugin.activateForLayer("layerPath", "right");
 
   // Deactivate for a layer
   swiperPlugin.deActivateForLayer("layerPath");
+
+  // Change the visible side for an active layer
+  swiperPlugin.setLayerSide("layerPath", "left");
 
   // Set orientation
   swiperPlugin.setOrientation("vertical");

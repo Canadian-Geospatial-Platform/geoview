@@ -3404,7 +3404,10 @@ Domain mapping displays user-friendly labels instead of raw codes. When `filterM
     {
       "swiper": {
         "orientation": "vertical",
-        "layers": ["weather-data", "satellite-layer"],
+        "layers": [
+          { "layerPath": "weather-data", "side": "left" },
+          { "layerPath": "satellite-layer", "side": "right" }
+        ],
         "keyboardOffset": 20
       }
     }
