@@ -20,6 +20,7 @@ import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoUtilities, type FetchWithProxyResult } from '@/geo/utils/utilities';
+import { toArray } from '@/core/utils/utilities';
 import {
   LayerNoCapabilitiesError,
   LayerServiceMetadataUnableToFetchError,
@@ -117,21 +118,13 @@ export class WMTS extends AbstractGeoViewRaster {
     const layers = fetchResult?.data.Contents.Layer;
 
     // Get all entries
-    const entries = Array.isArray(layers)
-      ? layers.map((layer) => {
-          return {
-            id: layer['ows:Identifier'],
-            layerId: layer['ows:Identifier'],
-            layerName: layer['ows:Title'],
-          };
-        })
-      : [
-          {
-            id: layers['ows:Identifier'],
-            layerId: layers['ows:Identifier'],
-            layerName: layers['ows:Title'],
-          },
-        ];
+    const entries = toArray(layers).map((layer) => {
+      return {
+        id: layer['ows:Identifier'],
+        layerId: layer['ows:Identifier'],
+        layerName: layer['ows:Title'],
+      };
+    });
 
     // Redirect
     return WMTS.createGeoviewLayerConfig(
