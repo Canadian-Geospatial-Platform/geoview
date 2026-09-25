@@ -6,7 +6,7 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
 import type { ConfigProps } from './swiper';
 import { Swiper } from './swiper';
-import type { SwipeOrientation } from './swiper-types';
+import type { SwipeOrientation, SwipeSide } from './swiper-types';
 
 /**
  * Create a class for the plugin instance.
@@ -41,12 +41,26 @@ class SwiperPlugin extends MapPlugin {
         swiper: {
           tooltip: 'Drag to see underlying layer',
           menu: 'Swiper',
+          settingsTitle: 'Swiper',
+          showInSwiper: 'Show in Swiper',
+          sideLabel: 'Visible side',
+          sideLeft: 'Left',
+          sideRight: 'Right',
+          sideUp: 'Up',
+          sideDown: 'Down',
         },
       },
       fr: {
         swiper: {
           tooltip: 'Faites glisser pour voir les couches sous-jacentes',
           menu: 'Balayage',
+          settingsTitle: 'Balayage',
+          showInSwiper: 'Afficher dans le balayage',
+          sideLabel: 'Côté visible',
+          sideLeft: 'Gauche',
+          sideRight: 'Droit',
+          sideUp: 'Haut',
+          sideDown: 'Bas',
         },
       },
     };
@@ -70,8 +84,9 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    this.controllerRegistry.swiperController?.setLayerPaths(this.getConfig().layers);
     this.controllerRegistry.swiperController?.setOrientation(this.getConfig().orientation);
+    this.controllerRegistry.swiperController?.setInteractive(this.getConfig().interactive ?? false);
+    this.controllerRegistry.swiperController?.setLayers(this.getConfig().layers);
   }
 
   /**
@@ -87,11 +102,12 @@ class SwiperPlugin extends MapPlugin {
    * Activates the swiper for the layer indicated by the given layer path.
    *
    * @param layerPath - The layer path to activate swiper functionality
+   * @param side - Optional visible side for the layer. Defaults to left for vertical orientation and up for horizontal orientation
    */
-  activateForLayer(layerPath: string): void {
+  activateForLayer(layerPath: string, side?: SwipeSide): void {
     try {
       // Add the layer path
-      this.controllerRegistry.swiperController?.addLayerPath(layerPath);
+      this.controllerRegistry.swiperController?.addLayerPath(layerPath, side);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -111,6 +127,16 @@ class SwiperPlugin extends MapPlugin {
       // Log
       logger.logError(error);
     }
+  }
+
+  /**
+   * Sets the visible side for a layer already participating in the swiper.
+   *
+   * @param layerPath - The layer path to update
+   * @param side - The visible side for the layer
+   */
+  setLayerSide(layerPath: string, side: SwipeSide): void {
+    this.controllerRegistry.swiperController?.setLayerSide(layerPath, side);
   }
 
   /**

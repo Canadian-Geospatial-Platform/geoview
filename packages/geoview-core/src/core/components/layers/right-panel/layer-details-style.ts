@@ -76,6 +76,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   infoSectionContent: {
     paddingLeft: theme.spacing(1),
   },
+  swiperSectionContent: {
+    paddingLeft: theme.spacing(1),
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  swiperSideSelect: {
+    minWidth: '120px',
+  },
   verticalDivider: {
     width: '1px',
     height: '30px',

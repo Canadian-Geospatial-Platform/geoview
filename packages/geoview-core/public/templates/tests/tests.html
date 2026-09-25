@@ -1101,17 +1101,6 @@
                 ]
               },
               {
-                'geoviewLayerId': 'swiperGeojson',
-                'geoviewLayerName': 'GeoJSON Sample',
-                'metadataAccessPath': './datasets/geojson/metadata.meta',
-                'geoviewLayerType': 'GeoJSON',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'polygons.json'
-                  }
-                ]
-              },
-              {
                 'geoviewLayerId': 'swiperOgcFeature',
                 'geoviewLayerName': 'Large Lakes',
                 'metadataAccessPath': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
@@ -1139,6 +1128,7 @@
             {
               'swiper': {
                 'orientation': 'vertical',
+                'interactive': true,
                 'layers': []
               },
               'test-suite': { 'suites': ['suite-swiper'] }

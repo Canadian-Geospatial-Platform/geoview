@@ -1,6 +1,13 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { getStoreSwiperLayerPaths, getStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
+import {
+  getStoreSwiperInteractive,
+  getStoreSwiperLayerPaths,
+  getStoreSwiperOrientation,
+  getStoreSwiperPosition,
+} from 'geoview-core/core/stores/states/swiper-state';
+import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
+import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
 
 /** Listener counts and renderer state captured during the swiper render-isolation test. */
 type SwiperRenderIsolationResult = {
@@ -32,6 +39,30 @@ type SwiperRenderIsolationResult = {
   nonTargetPostRenderClean: number;
 };
 
+/** Results captured while testing per-side Swiper query semantics. */
+type SwiperSideResult = {
+  /** Whether the left-side layer accepts a left-side query. */
+  leftVisible: boolean;
+  /** Whether the left-side layer rejects a right-side query. */
+  leftHidden: boolean;
+  /** Whether the right-side layer accepts a right-side query. */
+  rightVisible: boolean;
+  /** Whether the right-side layer rejects a left-side query. */
+  rightHidden: boolean;
+  /** Whether the up-side layer accepts an upper query. */
+  upVisible: boolean;
+  /** Whether the down-side layer accepts a lower query. */
+  downVisible: boolean;
+};
+
+/** Results captured while testing Swiper configuration persistence. */
+type SwiperPersistenceResult = {
+  /** Persisted interactive flag. */
+  interactive: boolean;
+  /** Persisted layer entries. */
+  layers: { layerPath: string; side: SwipeSide }[];
+};
+
 /**
  * Main Swiper testing class.
  */
@@ -44,9 +75,6 @@ export class SwiperTester extends GVAbstractTester {
 
   /** Layer path for WMS layer used in swiper tests. */
   static readonly SWIPER_WMS_LAYER_PATH = 'swiperWms/msi-94-or-more';
-
-  /** Layer path for GeoJSON layer used in swiper tests. */
-  static readonly SWIPER_GEOJSON_LAYER_PATH = 'swiperGeojson/polygons.json';
 
   /** Layer path for OGC Feature layer used in swiper tests. */
   static readonly SWIPER_OGC_FEATURE_LAYER_PATH = 'swiperOgcFeature/lakes';
@@ -61,6 +89,214 @@ export class SwiperTester extends GVAbstractTester {
   }
 
   /**
+   * Tests that each configured Swiper side clips and queries its own visible half.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSwiperPerLayerSides(): Promise<Test<SwiperSideResult>> {
+    return this.test(
+      'Test Swiper per-layer side semantics...',
+      (test) => {
+        const controller = this.getControllersRegistry().swiperController!;
+        const mapSize = this.getMapViewer().map.getSize()!;
+        const verticalPath = SwiperTester.SWIPER_WMS_LAYER_PATH;
+        const horizontalPath = SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH;
+        const entries = [
+          { layerPath: verticalPath, side: 'left' as SwipeSide },
+          { layerPath: horizontalPath, side: 'right' as SwipeSide },
+        ];
+
+        test.addStep('Configuring left and right Swiper layers...');
+        controller.setOrientation('vertical');
+        controller.setLayers(entries);
+        const verticalPosition = (mapSize[0] * getStoreSwiperPosition(this.getMapId())) / 100;
+        const leftVisible = controller.shouldQueryAtPixel(verticalPath, [verticalPosition - 1, mapSize[1] / 2], mapSize);
+        const leftHidden = controller.shouldQueryAtPixel(verticalPath, [verticalPosition + 1, mapSize[1] / 2], mapSize);
+        const rightVisible = controller.shouldQueryAtPixel(horizontalPath, [verticalPosition + 1, mapSize[1] / 2], mapSize);
+        const rightHidden = controller.shouldQueryAtPixel(horizontalPath, [verticalPosition - 1, mapSize[1] / 2], mapSize);
+
+        test.addStep('Configuring up and down Swiper layers...');
+        controller.setOrientation('horizontal');
+        controller.setLayerSide(verticalPath, 'up');
+        controller.setLayerSide(horizontalPath, 'down');
+        const horizontalPosition = mapSize[1] / 2;
+        const upVisible = controller.shouldQueryAtPixel(verticalPath, [mapSize[0] / 2, horizontalPosition - 1], mapSize);
+        const downVisible = controller.shouldQueryAtPixel(horizontalPath, [mapSize[0] / 2, horizontalPosition + 1], mapSize);
+
+        return { leftVisible, leftHidden, rightVisible, rightHidden, upVisible, downVisible };
+      },
+      (test, result) => {
+        test.addStep('Verifying each layer uses its configured visible side...');
+        Test.assertIsEqual(result.leftVisible, true);
+        Test.assertIsEqual(result.leftHidden, false);
+        Test.assertIsEqual(result.rightVisible, true);
+        Test.assertIsEqual(result.rightHidden, false);
+        Test.assertIsEqual(result.upVisible, true);
+        Test.assertIsEqual(result.downVisible, true);
+      },
+      () => {
+        this.getControllersRegistry().swiperController!.removeAllLayerPaths();
+        this.getControllersRegistry().swiperController!.setOrientation('vertical');
+      }
+    );
+  }
+
+  /**
+   * Tests that runtime Swiper state is included in an exported map configuration.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSwiperConfigPersistence(): Promise<Test<SwiperPersistenceResult>> {
+    return this.test(
+      'Test Swiper interactive configuration persistence...',
+      (test) => {
+        const controller = this.getControllersRegistry().swiperController!;
+        const layers = [{ layerPath: SwiperTester.SWIPER_WMS_LAYER_PATH, side: 'right' as SwipeSide }];
+
+        test.addStep('Setting interactive Swiper state and per-layer side...');
+        controller.setInteractive(true);
+        controller.setOrientation('vertical');
+        controller.setLayers(layers);
+
+        test.addStep('Creating a map configuration from current map state...');
+        const mapConfig = this.getControllersRegistry().mapController.createMapConfigFromMapState();
+        const swiperConfig = mapConfig?.corePackagesConfig?.find((entry) => 'swiper' in entry)?.swiper as {
+          interactive: boolean;
+          layers: { layerPath: string; side: SwipeSide }[];
+        };
+        Test.assertIsDefined('swiperConfig', swiperConfig);
+        return { interactive: swiperConfig.interactive, layers: swiperConfig.layers };
+      },
+      (test, result) => {
+        test.addStep('Verifying interactive mode and layer sides were persisted...');
+        Test.assertIsEqual(result.interactive, true);
+        Test.assertIsArrayLengthEqual(result.layers, 1);
+        Test.assertIsEqual(result.layers[0].layerPath, SwiperTester.SWIPER_WMS_LAYER_PATH);
+        Test.assertIsEqual(result.layers[0].side, 'right');
+      },
+      () => {
+        this.getControllersRegistry().swiperController!.removeAllLayerPaths();
+        this.getControllersRegistry().swiperController!.setInteractive(false);
+      }
+    );
+  }
+
+  /**
+   * Tests that selected layers attach render handlers independently as they become registered.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSwiperProgressiveRegistration(): Promise<Test<{ wmsHandlers: number; nonTargetHandlers: number }>> {
+    return this.test(
+      'Test Swiper progressive layer registration...',
+      async (test) => {
+        const controller = this.getControllersRegistry().swiperController!;
+        const targetPaths = [SwiperTester.SWIPER_WMS_LAYER_PATH, SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH];
+        const wmsLayer = await controller.getControllersRegistry().layerController.waitForLayerRegistered(targetPaths[0]);
+        const nonTargetLayer = await controller.getControllersRegistry().layerController.waitForLayerRegistered(targetPaths[1]);
+        const wmsOLLayer = wmsLayer.getOLLayer();
+        const nonTargetOLLayer = nonTargetLayer.getOLLayer();
+        const wmsBaseline = wmsOLLayer.getListeners('prerender')?.length ?? 0;
+        const nonTargetBaseline = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
+
+        test.addStep('Selecting both layers for the Swiper...');
+        controller.setLayerPaths(targetPaths);
+        await SwiperTester.waitForCondition(
+          () => (wmsOLLayer.getListeners('prerender')?.length ?? 0) === wmsBaseline + 1,
+          SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT
+        );
+        const wmsHandlers = wmsOLLayer.getListeners('prerender')?.length ?? 0;
+
+        await SwiperTester.waitForCondition(
+          () => (nonTargetOLLayer.getListeners('prerender')?.length ?? 0) === nonTargetBaseline + 1,
+          SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT
+        );
+        const nonTargetHandlers = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
+        return { wmsHandlers, nonTargetHandlers };
+      },
+      (test, result) => {
+        test.addStep('Verifying each selected layer received its own render handler...');
+        Test.assertIsEqual(result.wmsHandlers > 0, true);
+        Test.assertIsEqual(result.nonTargetHandlers > 0, true);
+      },
+      () => {
+        this.getControllersRegistry().swiperController!.removeAllLayerPaths();
+      }
+    );
+  }
+
+  /**
+   * Tests that the layer settings panel exposes Swiper controls only in interactive mode.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSwiperSettingsGating(): Promise<Test<{ interactive: boolean; settingsButtonVisible: boolean }>> {
+    return this.test(
+      'Test Swiper settings-panel gating...',
+      async (test) => {
+        const mapRoot = getGVRootElement(this.getMapId());
+        const { layerController } = this.getControllersRegistry();
+        const layerPath = SwiperTester.SWIPER_WMS_LAYER_PATH;
+
+        test.addStep('Enabling interactive Swiper mode and selecting a layer...');
+        this.getControllersRegistry().swiperController!.setInteractive(true);
+        layerController.setSelectedLayerPath(layerPath);
+        await SwiperTester.waitForCondition(() => !!mapRoot?.querySelector('[aria-label="Layer settings"]'));
+
+        const settingsButton = mapRoot?.querySelector('[aria-label="Layer settings"]') as HTMLElement | null;
+        settingsButton?.click();
+        await SwiperTester.waitForCondition(() => mapRoot?.textContent?.includes('Show in Swiper') ?? false);
+
+        return {
+          interactive: getStoreSwiperInteractive(this.getMapId()),
+          settingsButtonVisible: !!settingsButton,
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying interactive mode exposes the layer settings control...');
+        Test.assertIsEqual(result.interactive, true);
+        Test.assertIsEqual(result.settingsButtonVisible, true);
+      },
+      () => {
+        this.getControllersRegistry().swiperController!.setInteractive(false);
+        this.getControllersRegistry().layerController.setSelectedLayerPath('');
+      }
+    );
+  }
+
+  /**
+   * Tests that hover queries are suppressed over the Swiper bar and handle bands.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSwiperHoverSuppression(): Promise<Test<{ overBar: boolean; overHandle: boolean; away: boolean }>> {
+    return this.test(
+      'Test Swiper hover-query suppression over the bar and handle...',
+      (test) => {
+        const controller = this.getControllersRegistry().swiperController!;
+        const mapSize = this.getMapViewer().map.getSize()!;
+        const dividerX = mapSize[0] / 2;
+
+        test.addStep('Activating a Swiper layer and checking the bar band...');
+        controller.addLayerPath(SwiperTester.SWIPER_WMS_LAYER_PATH);
+        const overBar = controller.isPointerOverSwiper([dividerX, 10], mapSize);
+        const overHandle = controller.isPointerOverSwiper([dividerX + 20, mapSize[1] / 2 + 20], mapSize);
+        const away = controller.isPointerOverSwiper([dividerX + 40, 10], mapSize);
+        return { overBar, overHandle, away };
+      },
+      (test, result) => {
+        test.addStep('Verifying only the bar and handle regions suppress hover queries...');
+        Test.assertIsEqual(result.overBar, true);
+        Test.assertIsEqual(result.overHandle, true);
+        Test.assertIsEqual(result.away, false);
+      },
+      () => {
+        this.getControllersRegistry().swiperController!.removeAllLayerPaths();
+      }
+    );
+  }
+
+  /**
    * Tests that swiper rendering handlers and clipping are isolated to descendant layers of the selected path.
    *
    * @returns A promise that resolves when the test completes
@@ -72,7 +308,7 @@ export class SwiperTester extends GVAbstractTester {
         test.addStep('Waiting for target and non-target layers to be registered on the map...');
         const [targetLayer, nonTargetLayer] = await Promise.all([
           this.getControllersRegistry().layerController.waitForLayerRegistered(SwiperTester.SWIPER_WMS_LAYER_PATH),
-          this.getControllersRegistry().layerController.waitForLayerRegistered(SwiperTester.SWIPER_GEOJSON_LAYER_PATH),
+          this.getControllersRegistry().layerController.waitForLayerRegistered(SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH),
         ]);
         const targetOLLayer = targetLayer.getOLLayer();
         const nonTargetOLLayer = nonTargetLayer.getOLLayer();
@@ -170,13 +406,10 @@ export class SwiperTester extends GVAbstractTester {
         const promiseWMS = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
           SwiperTester.SWIPER_WMS_LAYER_PATH
         );
-        const promiseGeoJSON = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
-          SwiperTester.SWIPER_GEOJSON_LAYER_PATH
-        );
         const promiseOgcFeature = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
           SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH
         );
-        await Promise.all([promiseWMS, promiseGeoJSON, promiseOgcFeature]);
+        await Promise.all([promiseWMS, promiseOgcFeature]);
 
         // Step 2: Verify swiper starts with no active layers (config has empty layers array)
         test.addStep('Verifying swiper starts with no active layers...');
@@ -208,19 +441,19 @@ export class SwiperTester extends GVAbstractTester {
         const afterRemove = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(afterRemove, 0);
 
-        // Step 8: Add WMS layer back and add GeoJSON layer
+        // Step 8: Add WMS layer back and add OGC Feature layer
         test.addStep('Adding WMS layer back to swiper...');
         this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_WMS_LAYER_PATH);
 
-        test.addStep('Adding GeoJSON layer to swiper...');
-        this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_GEOJSON_LAYER_PATH);
+        test.addStep('Adding OGC Feature layer to swiper...');
+        this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH);
 
         // Step 9: Assert swiper is active with 2 layers
         test.addStep('Verifying swiper is active with 2 layers...');
         const afterAddTwo = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(afterAddTwo, 2);
         Test.assertArrayIncludes(afterAddTwo, SwiperTester.SWIPER_WMS_LAYER_PATH);
-        Test.assertArrayIncludes(afterAddTwo, SwiperTester.SWIPER_GEOJSON_LAYER_PATH);
+        Test.assertArrayIncludes(afterAddTwo, SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH);
 
         // Step 10: Set orientation to horizontal
         test.addStep('Setting swiper orientation to horizontal...');

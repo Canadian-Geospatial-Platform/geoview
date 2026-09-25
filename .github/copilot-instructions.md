@@ -898,7 +898,9 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 ### Function Order in Classes
 
-1. Class name → 2. Abstracts → 3. Overrides → 4. Public → 5. Private → 6. Event emits/hooks → 7. Static public → 8. Static private → 9. Event types
+1. Class name → 2. Static `readonly` constants (top of class) → 3. Abstracts → 4. Overrides → 5. Public → 6. Private → 7. Event emits/hooks → 8. Static public methods → 9. Static private methods → 10. Event types
+
+**Static `readonly` constants go at the TOP of the class**, immediately after the class declaration and before the constructor — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;` (see `LayerController`, `DrawerController`). NEVER append them at the bottom of the class/file. Use `static readonly` (not bare `static`) for threshold/config constants. Static **methods** still live near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
 
@@ -1241,6 +1243,14 @@ Plugins are loaded through **different config properties** depending on their ty
 **Duplicate panels across bars (cross-bar uniqueness, #3648)** — Several panels are valid in **both** `appBar.tabs.core` and `footerBar.tabs.core`: `legend`, `layers`, `details`, `data-table`, `guide`. Declaring the same panel in both bars creates two instances and causes UI bugs (e.g. competing focus traps, #3221). This can't be expressed in JSON Schema, so it is a **runtime check in `MapFeatureConfig`'s constructor** (after the appBar/footerBar deep-merge, alongside the `projection`/`basemapId` validations): it keeps the **app bar** occurrence, removes the duplicate from `footerBar.tabs.core`, records the removed panels on `duplicatedPanelsRemovedFromFooter`, and `logger.logWarning`s. `app.tsx` surfaces `warning.config.duplicatedPanels` once the `MapViewer` exists (config layer has no `notifications` access — same pattern as `hasSchemaErrors`). Keep detection/correction in `api/config`; keep the notification in `app.tsx`.
 
 **Swiper render clipping** — The swiper must clip only the configured layer outputs. Do not apply CSS `clip-path` to `AbstractBaseGVLayer.getRendererContainer()` because OpenLayers renderer containers/canvases can be shared across conceptual layers, which can hide non-swiped layers. Use per-layer OpenLayers render events instead: clip in `prerender`, restore in `postrender`, use `getRenderPixel()` for canvas pixel conversion, and restore WebGL scissor state when the renderer uses WebGL. Regression tests should verify that only selected/resolved descendant layers gain render handlers and that non-target layers remain unaffected.
+
+**Interactive Swiper configuration** — The finalized user-customization flag is `interactive` (default `false`), not `allowUserCustomization`. The `layers` schema is intentionally a breaking structured shape: `{ layerPath, side }[]`, with `side` using `left/right` for vertical orientation and `up/down` for horizontal orientation. When changing this schema, migrate every in-repo config/demo and bump the package schema version; do not silently retain the old string-array shape.
+
+**Progressive Swiper layer registration** — Do not use `Promise.all()` before attaching swiper render handlers. A configured group may resolve descendant layers at different times; wait for each path independently and append each registered GV layer to the swiper state as soon as it resolves. Reconcile removed paths without clearing already-registered layers, so loaded layers become clipped immediately while slower layers continue loading.
+
+**Swiper hover-query suppression** — The swiper bar overlays the OpenLayers viewport, so DOM `stopPropagation()` from React or the bar is not a reliable way to prevent GeoView hover queries; React delegated handlers can run after OL's viewport listener. Gate the query at `LayerSetController.#handleMapPointerStopped()` using a swiper-controller pixel hit test, clear hover results, and skip the query when the pointer is over the divider/handle. Use separate tight bar and larger centered-handle bands to avoid suppressing nearby map features.
+
+**Swiper drag isolation** — `react-draggable` can lose its mouse stream when OpenLayers `DragPan` starts underneath the overlay, especially during diagonal movement. Disable `DragPan` and set the map viewport's `pointer-events` to `none` for the drag duration, then restore both on stop and unmount. Keep resize remounts guarded by an `isDragging` ref so a map resize cannot destroy an active drag.
 
 ```json
 // ✅ Correct: each plugin loaded via its proper config property

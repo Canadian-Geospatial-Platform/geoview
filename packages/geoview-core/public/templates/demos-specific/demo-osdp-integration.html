@@ -55,7 +55,7 @@
           'listOfGeoviewLayerConfig': []
         },
         'components': ['overview-map'],
-        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select'],
         'appBar': {
           'tabs': {
             'core': ['legend', 'details', 'geolocator', 'export']
@@ -66,14 +66,24 @@
             'core': ['layers', 'data-table', 'time-slider', 'geochart']
           }
         },
-        'corePackages': [],
+        'corePackages': ['swiper'],
         'serviceUrls': {
           'metadataUrl': 'https://osdp-psdo.canada.ca/dp/en/search/metadata/NRCAN-FGP-1-'
         },
         'globalSettings': {
           'canRemoveSublayers': false
         },
-        'theme': 'geo.ca'
+        'theme': 'geo.ca',
+        'corePackagesConfig': [
+          {
+            'swiper': {
+              'orientation': 'vertical',
+              'interactive': true,
+              'keyboardOffset': 10,
+              'layers': []
+            }
+          }
+        ]
       }"
       ></div>
     </div>

@@ -49,8 +49,9 @@
       "swiper": {
         "orientation": "horizontal",
         "keyboardOffset": 10,
+        "interactive": true,
         "layers": [
-          "esriFeatureLYR4/0"
+          { "layerPath": "esriFeatureLYR4/0", "side": "up" }
         ]
       }
     }

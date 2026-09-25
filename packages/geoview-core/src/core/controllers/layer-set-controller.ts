@@ -672,6 +672,14 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param event - The map pointer move event containing the pixel coordinates
    */
   #handleMapPointerStopped(sender: MapViewer, event: MapPointerMoveEvent): void {
+    // Suppress the hover query when the pointer rests on the swiper bar/handle (it overlays the map)
+    const { swiperController } = this.getControllersRegistry();
+    const mapSize = this.getMapViewer().map.getSize();
+    if (swiperController && mapSize && swiperController.isPointerOverSwiper(event.pixel, mapSize)) {
+      this.hoverFeatureInfoLayerSet.clearResults();
+      return;
+    }
+
     // Query
     this.hoverFeatureInfoLayerSet.queryLayers(event.pixel).catch((error: unknown) => {
       // Log

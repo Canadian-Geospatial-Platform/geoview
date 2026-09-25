@@ -570,6 +570,8 @@ const geochartPlugin = mapViewer.plugins["geochart"];
 
 - Interactive swiper bar
 - Layer visibility toggle on each side
+- Per-layer side placement (left/right for vertical, up/down for horizontal)
+- Optional user customization from the layer settings panel (`interactive` flag)
 - Draggable swiper control
 - Vertical or horizontal orientation
 - Synchronized map views
@@ -605,7 +607,7 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  swiperPlugin.activateForLayer("layerPath");
+  swiperPlugin.activateForLayer("layerPath", "right");
   swiperPlugin.setOrientation("vertical");
 }
 ```
@@ -636,12 +638,15 @@ if (swiperPlugin) {
       "swiper": {
         "orientation": "horizontal",
         "keyboardOffset": 10,
-        "layers": ["esriFeatureLYR4/0"]
+        "interactive": true,
+        "layers": [{ "layerPath": "esriFeatureLYR4/0", "side": "up" }]
       }
     }
   ]
 }
 ```
+
+> **Interactive mode:** When `interactive` is `true`, a **Swiper** section appears in each layer's right panel (settings gear). Users can toggle a layer in/out of the swiper and pick its visible side. The side options follow the current orientation (left/right for vertical, up/down for horizontal). When `interactive` is `false` (default) the swiper stays static and author-defined. Each `layers` entry is an object `{ layerPath, side }`; `side` names the visible side of the divider.
 
 ### API Methods
 
@@ -650,11 +655,14 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  // Activate swiper for a layer
-  swiperPlugin.activateForLayer("layerPath");
+  // Activate swiper for a layer on the right side
+  swiperPlugin.activateForLayer("layerPath", "right");
 
   // Deactivate for a layer
   swiperPlugin.deActivateForLayer("layerPath");
+
+  // Change the visible side for an active layer
+  swiperPlugin.setLayerSide("layerPath", "left");
 
   // Set orientation
   swiperPlugin.setOrientation("vertical");
@@ -663,6 +671,8 @@ if (swiperPlugin) {
   swiperPlugin.deActivateAll();
 }
 ```
+
+> The swiper controller (accessible on the map's controller registry as `swiperController`) also exposes `setLayers(entries)`, `addLayerPath(layerPath, side?)`, `setLayerSide(layerPath, side)`, and `setInteractive(interactive)` for finer-grained control, including per-layer side placement.
 
 **See Also:** [Controllers API](app/events/controllers.md)
 

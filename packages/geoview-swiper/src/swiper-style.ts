@@ -27,6 +27,7 @@ export const getSxClasses = (mapHeight: number): SxStyles => ({
     boxSizing: 'content-box',
     margin: 0,
     padding: '0!important',
+    touchAction: 'none',
   },
 
   vertical: {
