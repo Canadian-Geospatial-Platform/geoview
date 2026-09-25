@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Many Group Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Outlier geocore with many group layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase a geocore uuid with many group layers</p></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hmap1">Many Group Layers</h4></div><button class="collapsible active">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><select name="projections" id="projections"><option value="3857">Web Mercator (3857)</option><option value="3978">LCC (3978)</option></select> <button type="button" onclick="reloadMap()">Set Projection</button><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/many-groups.json"></div><div>Outlier Layers:<ul><li>Huge number of group layers and layers: <a href="https://github.com/Canadian-Geospatial-Platform/geoview/issues/2642">Issue #2642</a></li></ul></div><hr/><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      function reloadMap() {
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

@@ -1,0 +1,66 @@
+{
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          4,
+          [
+            -90,
+            60
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "polling-division-boudnaries-2019",
+        "geoviewLayerName": "Polling Division Boundaries of 2019",
+        "geoviewLayerType": "esriFeature",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "location",
+    "home"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "theme": "geo.ca"
+}

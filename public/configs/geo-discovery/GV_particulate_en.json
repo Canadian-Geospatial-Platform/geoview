@@ -1,0 +1,220 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "particulate_stations",
+        "geoviewLayerName": "Particulate Stations",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "noble_gas_stations",
+        "geoviewLayerName": "Noble Gas Stations",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "Station Location Range",
+        "geoviewLayerName": "Station Location Range",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "3"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "particulate_stations/1",
+                "propertyValue": "station_name",
+                "propertyDisplay": "station_name"
+              }
+            ],
+            "chart": "line",
+            "chartjsOptions": {
+              "radius": 2
+            },
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "station_name",
+                    "prefix": "'",
+                    "valueFrom": "station_name",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "start_time"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "start_time",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "logarithmic",
+                "property": "measure",
+                "label": "Airborne Radionuclide Concentrations (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nuclide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": false
+              },
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
+              "stepsSwitcher": false,
+              "resetStates": true,
+              "description": "Airborne Radionuclide Concentrations",
+              "download": true
+            }
+          },
+          {
+            "layers": [
+              {
+                "layerId": "noble_gas_stations/2",
+                "propertyValue": "station_name",
+                "propertyDisplay": "station_name"
+              }
+            ],
+            "chart": "line",
+            "chartjsOptions": {
+              "radius": 2
+            },
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_en/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "station_name",
+                    "prefix": "'",
+                    "valueFrom": "station_name",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "start_time"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "start_time",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "logarithmic",
+                "property": "measure",
+                "label": "Airborne Radionuclide Concentrations (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nuclide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": false
+              },
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
+              "stepsSwitcher": false,
+              "resetStates": true,
+              "description": "Airborne Radionuclide Concentrations",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
