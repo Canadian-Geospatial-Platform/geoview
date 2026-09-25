@@ -7,7 +7,7 @@ import { getRenderPixel } from 'ol/render';
 import type Layer from 'ol/layer/Layer';
 import DragPan from 'ol/interaction/DragPan';
 
-import type { SwipeOrientation, SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
+import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
 import {
   useStoreSwiperLayerPaths,
   useStoreSwiperLayerSides,
@@ -23,6 +23,7 @@ import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/states/laye
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import type { SwiperConfig } from './swiper-types';
 import { getSxClasses } from './swiper-style';
 
 /** The number of milliseconds to wait for a layer when trying to attach it to the swiper */
@@ -67,16 +68,7 @@ type SwiperProps = {
 };
 
 /** Configuration properties for the Swiper plugin. */
-export type ConfigProps = {
-  /** The layer entries selected for swiping, each with its visible side. */
-  layers: { layerPath: string; side: SwipeSide }[];
-
-  /** The orientation of the swiper divider. */
-  orientation: SwipeOrientation;
-
-  /** Whether the user can add/remove layers and set their side from the layer settings panel. */
-  interactive: boolean;
-};
+export type ConfigProps = SwiperConfig;
 
 /**
  * Swiper component that provides a draggable bar to compare underlying layers.
