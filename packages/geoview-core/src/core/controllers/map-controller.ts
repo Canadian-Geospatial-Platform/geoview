@@ -118,8 +118,8 @@ import {
   getStoreSwiperLayerSides,
   getStoreSwiperOrientation,
   isStoreSwiperInitialized,
+  type TypeSwiperLayerEntry,
   type SwipeOrientation,
-  type SwipeSide,
 } from '@/core/stores/states/swiper-state';
 import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
@@ -2009,7 +2009,7 @@ export class MapController extends AbstractMapViewerController {
   static #createSwiperConfig(mapId: string): {
     orientation: SwipeOrientation;
     interactive: boolean;
-    layers: { layerPath: string; side: SwipeSide }[];
+    layers: TypeSwiperLayerEntry[];
   } {
     // Get swiper state
     const layerPaths = getStoreSwiperLayerPaths(mapId);

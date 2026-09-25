@@ -6,9 +6,18 @@ import { PluginStateUninitializedError } from '@/core/exceptions/geoview-excepti
 import { logger } from '@/core/utils/logger';
 
 // #region INTERFACE DEFINITION
+/** A single layer entry participating in the swiper, with its visible side. */
+export type TypeSwiperLayerEntry = {
+  /** The layer path participating in the swiper. */
+  layerPath: string;
+  /** The visible side of the swiper bar for this layer. */
+  side: SwipeSide;
+};
 
 /**
  * Represents the Swiper Zustand store slice.
+  setLayers(entries: TypeSwiperLayerEntry[]): void {
+export const setStoreSwiperLayers = (mapId: string, entries: TypeSwiperLayerEntry[]): void => {
  *
  * Manages state for the swiper including layer paths and orientation.
  */

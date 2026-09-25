@@ -17,6 +17,7 @@ import {
   setStoreSwiperLayerSide,
   setStoreSwiperOrientation,
   setStoreSwiperPosition,
+  type TypeSwiperLayerEntry,
   type SwipeOrientation,
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
@@ -68,7 +69,7 @@ export class SwiperController extends AbstractMapViewerController {
    *
    * @param entries - The layer entries to set, each with a layer path and its visible side
    */
-  setLayers(entries: { layerPath: string; side: SwipeSide }[]): void {
+  setLayers(entries: TypeSwiperLayerEntry[]): void {
     // Save in the store
     setStoreSwiperLayers(this.getMapId(), entries);
   }

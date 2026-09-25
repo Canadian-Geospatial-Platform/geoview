@@ -23,6 +23,7 @@ import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/states/laye
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import type { SwiperLayerEntry } from './swiper-types';
 import { getSxClasses } from './swiper-style';
 
 /** The number of milliseconds to wait for a layer when trying to attach it to the swiper */
@@ -69,7 +70,7 @@ type SwiperProps = {
 /** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
   /** The layer entries selected for swiping, each with its visible side. */
-  layers: { layerPath: string; side: SwipeSide }[];
+  layers: SwiperLayerEntry[];
 
   /** The orientation of the swiper divider. */
   orientation: SwipeOrientation;
