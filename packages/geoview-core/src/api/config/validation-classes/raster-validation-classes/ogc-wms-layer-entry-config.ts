@@ -15,7 +15,7 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
-import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { normalizeDatacubeAccessPath, sortByNameDefaultFirst } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -32,6 +32,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /** The supported styles */
   #styles: string[] | undefined;
+
+  /** Indicates whether the WMS layer was added as part of a group initially in the config */
+  #addedViaGroup = false;
 
   /**
    * Creates an instance of OgcWmsLayerEntryConfig.
@@ -141,7 +144,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, fetchResult.data.Capability.Layer);
 
     // Init the layer metadata
-    await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+    await WMS.initLayerMetadata(this, layerCapabilities, this.getAddedViaAGroup(), displayDateMode);
   }
 
   // #endregion OVERRIDES
@@ -242,7 +245,11 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns The list of available style metadata objects, or `undefined` if none are defined
    */
   getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
-    return this.getLayerMetadata()?.Style;
+    const styles = this.getLayerMetadata()?.Style;
+    if (!styles) return undefined;
+
+    // Sort by the style names and return
+    return sortByNameDefaultFirst(styles, (style) => style.Name);
   }
 
   /**
@@ -258,6 +265,12 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     const styles = this.getStyles();
     if (styles && styles.length > 0) {
+      // Prioritize a layer style named default if any
+      const defaultStyleIndex = styles.findIndex((style) => style.toLowerCase() === 'default');
+      if (defaultStyleIndex !== -1) {
+        return styles[defaultStyleIndex];
+      }
+
       // Return the first one
       return styles[0];
     }
@@ -379,6 +392,24 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   setWfsLayerConfig(layerConfig: OgcWfsLayerEntryConfig): void {
     this.#wfsLayerConfig = layerConfig;
+  }
+
+  /**
+   * Gets whether the WMS layer was added as part of a group in the config.
+   *
+   * @returns True when the layer was added as part of a group
+   */
+  getAddedViaAGroup(): boolean {
+    return this.#addedViaGroup;
+  }
+
+  /**
+   * Sets whether the WMS layer was added as part of a group in the config.
+   *
+   * @param addedViaGroup - True when the layer was added as part of a group
+   */
+  setAddedViaGroup(addedViaGroup: boolean): void {
+    this.#addedViaGroup = addedViaGroup;
   }
 
   /**

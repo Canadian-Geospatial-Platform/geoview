@@ -4,7 +4,7 @@ import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -718,6 +718,13 @@ export abstract class GVAbstractTester extends AbstractTester {
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAABICAYAAAC+050oAAAOlUlEQVR4AeydCawd0x/Hf7+GaEgpQgghtCGEiLVNLalIixBiKSpEY0lLQyqkao99iYYQW4Q8IWgJIXaxpA2xLyEEVUsIIfYQQvr+7zPzzr9nTufed/vezH33Xt/mnfs7y2/OmfuZM7+eOzP3e8f0658IiIAIiEBbCYwx/RMBERABEWgrAQXetuLWYCIgAh1LoI07psDbRtgaSgREQAQgoMALBSUREAERaCMBBd42wtZQIiACq0ugN/0VeHvzuOpdiYAIdDABBd4OPjjaNREQgd4koMDbm8dV70oE6iSgvkdIQIF3hAC1uQiIgAisLgEF3tUlJn8REAERGCEBBd4RAtTmItApBLQf3UNAgbd7jpX2VAREoEcIKPD2yIHU2xABEegeAgq83XOstKfdSED7LAIlBBR4S6CoSgREQATqJKDAWyfdgb6feOIJO+qoo5TEoCPnAPNzYJrqr80EFHhrBn733Xfbgw8+qNRRDHQ8wpxkftZ8Cqj7EgIKvCVQ6qhydxszZoytscYatuaaa9paa61lY8eOtbXXXtvWWWcdGzdunK277ro2fvx422CDDWzDDTe0jTbayDbeeGPbZJNNbNNNN7XNNtvMNt98c9tiiy1syy23tK222somTJhgEydOtG222ca23XZb22677Wz77be3HXbYwXbccUfbaaedbOedd7ZddtnFdtttN9t9991t0qRJNnnyZJsyZYrtueeetvfee9s+++xjU6dOtX333df2228/mzZtmk2fPt0OOOAAO/DAA+2ggw6ygw8+2A455BA79NBD7bDDDrPDDz/cjjzyyGwld/TRR9vMmTPt2GOPteOOO86OP/54O+GEE2zWrFl24okn2kknnWSnnHKKzZ492+bMmWOnnXaazZ07104//XQ744wzbN68eXbmmWfaWWedZWeffbbNnz/fFixYYOeee66df/75dsEFF9hFF11kF198sV1yySV26aWX2uWXX25XXHGFXXXVVXb11Vfbtddea9ddd50tXLjQrr/+ervhhhvsxhtvtJtuusluvvlmu+WWW+y2226z22+/3e644w6788477a677rK+vj4jAN1zzz1277332n333Wf333+/LVq0KPsP86GHHrKHH37YHnnkEXv00Uftscces8cff9xY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';
   static readonly DATACUBE_RING_FIRE_LAYER_ID_VICTORIA: string = 'victoria';
 
+  /** Landcover group WMS served from a local XML capability document */
+  static readonly LANDCOVER_CDTK_URL: string = 'https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en';
+  static readonly LANDCOVER_CDTK_LAYER_GROUP_ID: string = 'landcover_groupe';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2010: string = 'landcover_2010_19classes';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2015: string = 'landcover_2015_19classes';
+  static readonly LANDCOVER_CDTK_LAYER_ID_2020: string = 'landcover_2020_19classes';
+
   /** Cities (serves WMS and WFS) */
   static readonly CITIES_WMS_URL: string = 'https://demo.mapserver.org/cgi-bin/wms';
   static readonly CITIES_WMS_LAYER_ID: string = 'cities';
@@ -853,6 +860,16 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly CANIMAGE_WMS_GROUP_ID: string = 'canimage';
   static readonly CANIMAGE_WMS_LEAF_ID: string = 'canimage.natural-colour.overview8';
 
+  static readonly CBMT_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/CBMT?REQUEST=GetCapabilities&SERVICE=WMS';
+  static readonly CBMT_WMS_LAYER_ID: string = 'National';
+
+  static readonly VLIZ_BE_WMS_URL: string = 'https://geo.vliz.be/geoserver/wms?REQUEST=GetCapabilities&SERVICE=WMS';
+  static readonly VLIZ_BE_WMSLAYER_ID: string = 'EMODPACE:EMOD-PACE_VD_2019_01_st_09';
+
+  /** WMS - Forest Burn service (CORS blocked, triggers proxy fallback) */
+  static readonly FOREST_BURN_WMS_URL: string = 'https://opendata.nfis.org/mapserver/cgi-bin/wms_change.cgi';
+  static readonly FOREST_BURN_WMS_LAYER_ID: string = 'CA_Forest_Burn_Probability_baseline_1991-2020';
+
   /** WFS — Belgium Meteo service (CORS blocked, triggers proxy fallback) */
   static readonly BELGIUM_WFS_URL: string = 'https://opendata.meteo.be/service/aws/ows';
 
@@ -866,7 +883,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** WMTS — ArcGIS World Timezones sample service */
   static readonly WORLD_TIMEZONES_WMTS_URL: string =
     'https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS';
-  static readonly WORLD_TIMEZONES_WMTS_URL_LAYER_ID: string = '0';
+  static readonly WORLD_TIMEZONES_WMTS_URL_LAYER_ID: string = 'WorldTimeZones';
   static readonly WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID: string = 'default028mm';
 
   // GV: Can't add the icon property here, because it's a randomly generated color depending on the layers processed on the map
@@ -995,43 +1012,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly WATER_NETWORK_LAYER_NAME: string = 'Water Network';
   static readonly WATER_NETWORK_DOMAIN_FIELD_NAME: string = 'material';
 
-  static readonly INITIAL_SETTINGS_CONFIG = {
-    geoviewLayerId: 'geojsonLYR1',
-    geoviewLayerName: 'GeoJSON Sample',
-    metadataAccessPath: './datasets/geojson/metadata.meta',
-    geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-    serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
-    initialSettings: {
-      controls: {
-        highlight: false,
-        zoom: false,
-      },
-    },
-    listOfLayerEntryConfig: [
-      {
-        entryType: 'group',
-        layerId: 'point-feature-group',
-        layerName: 'Points & Icons',
-        initialSettings: {
-          controls: {
-            remove: false,
-          },
-        },
-        listOfLayerEntryConfig: [
-          {
-            layerId: 'points_1.json',
-            layerName: 'Points 1',
-            initialSettings: {
-              controls: {
-                highlight: true,
-              },
-            },
-          },
-        ],
-      },
-    ],
-  };
-
   /** The API for the tests */
   #api: API;
 
@@ -1123,7 +1103,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapConfig - The map configuration object (will be JSON-stringified)
    * @returns A promise that resolves with the newly created MapViewer
    */
-  async replaceMap<T>(test: Test<T>, mapId: string, mapConfig: unknown): Promise<MapViewer> {
+  async replaceMap(test: Test, mapId: string, mapConfig: unknown): Promise<MapViewer> {
     // Delete current map
     test.addStep('Deleting current map...');
     await this.getApi().deleteMapViewer(mapId, false);
@@ -1157,7 +1137,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapViewer - The map viewer instance from which the layer is removed
    * @param layerPath - The unique path or ID of the layer to be removed
    */
-  helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, layerPath: string): void {
+  finalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
     Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
@@ -1171,4 +1151,168 @@ export abstract class GVAbstractTester extends AbstractTester {
     const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
     Test.assertIsUndefined('legendLayer', legendLayer);
   }
+
+  /**
+   * Simulates a map click and waits for the batched query results to propagate to the store.
+   *
+   * @param test - The test instance used to record each step
+   * @param clickCoordinates - The longitude and latitude coordinates to click
+   * @returns A promise that resolves after the query and batched store propagation complete
+   */
+  async simulateMapClickWaitForBatchedQuery(test: Test, clickCoordinates: Coordinate): Promise<void> {
+    // Simulate map click
+    test.addStep(`Simulating map click on all queryable layers for coordinate [${clickCoordinates.join(', ')}]...`);
+    const promiseMapclick = this.getMapViewer().simulateMapClick(clickCoordinates);
+
+    // Wait for batched query
+    test.addStep(`Waiting on the query to complete and get in the store...`);
+    await promiseMapclick.promiseQueryBatched;
+  }
+
+  /**
+   * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
+   *
+   * @param test - The test instance used to record each step
+   * @param tabId - The app bar tab identifier
+   * @param open - Whether to open or close the app bar tab
+   * @returns A promise that resolves when the app bar tab reaches the requested state
+   */
+  async toggleAppbarTab(test: Test, tabId: string, open: boolean): Promise<void> {
+    if (open) {
+      // Opening app bar tab
+      test.addStep(`Opening ${tabId} app bar panel...`);
+      this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, true, false);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to open...`);
+      await this.waitForAppbarTabSelected(tabId);
+    } else {
+      test.addStep(`Closing ${tabId} app bar panel...`);
+      this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, false, false);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to close...`);
+      await this.waitForAppbarTabNotSelected(tabId);
+    }
+  }
+
+  /**
+   * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
+   *
+   * @param test - The test instance used to record each step
+   * @param tabId - The app bar tab identifier
+   * @param open - Whether to open or close the app bar tab
+   * @returns A promise that resolves when the app bar tab reaches the requested state
+   */
+  async toggleFooterbarTab(test: Test, tabId: string, open: boolean): Promise<void> {
+    if (open) {
+      // Opening app bar tab
+      test.addStep(`Opening ${tabId} footer bar panel...`);
+      this.getControllersRegistry().uiController.setActiveFooterBarTab(tabId);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to open...`);
+      await this.waitForFooterTabSelected(tabId);
+    } else {
+      test.addStep(`Closing ${tabId} footer bar panel...`);
+      this.getControllersRegistry().uiController.setActiveFooterBarTab(undefined);
+
+      // Wait for the React UI to actually pick up on the store update
+      test.addStep(`Waiting on the ${tabId} panel to close...`);
+      await this.waitForFooterTabNotSelected(tabId);
+    }
+  }
+
+  /**
+   * Waits for an app bar tab button to receive the active class.
+   *
+   * @param tabId - The app bar tab identifier
+   * @returns A promise that resolves with the active app bar tab button element
+   */
+  waitForAppbarTabSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn.active`);
+  }
+
+  /**
+   * Waits for an app bar tab button to no longer have the active class.
+   *
+   * @param tabId - The app bar tab identifier
+   * @returns A promise that resolves with the inactive app bar tab button element
+   */
+  waitForAppbarTabNotSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn:not(.active)`);
+  }
+
+  /**
+   * Waits for a footer tab to receive the selected class.
+   *
+   * @param tabId - The footer tab identifier
+   * @returns A promise that resolves with the selected footer tab element
+   */
+  waitForFooterTabSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}.Mui-selected`);
+  }
+
+  /**
+   * Waits for a footer tab to no longer have the selected class.
+   *
+   * @param tabId - The footer tab identifier
+   * @returns A promise that resolves with the inactive footer tab element
+   */
+  waitForFooterTabNotSelected(tabId: string): Promise<Element> {
+    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}:not(.Mui-selected)`);
+  }
+
+  // #region STATIC METHODS
+
+  /**
+   * Creates the GeoJSON group configuration used by settings and visibility tests.
+   *
+   * The returned fixture contains a group with one child layer and nested initial settings for testing inheritance.
+   *
+   * @param geoviewLayerId - The unique GeoView layer identifier to assign to the configuration
+   * @returns A GeoJSON group layer configuration with nested initial settings
+   */
+  static createGeoJsonPointsSettings(geoviewLayerId: string): TypeGeoviewLayerConfig {
+    const layerConfig: unknown = {
+      geoviewLayerId,
+      geoviewLayerName: 'GeoJSON Sample',
+      metadataAccessPath: './datasets/geojson/metadata.meta',
+      geoviewLayerType: 'GeoJSON',
+      serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+      initialSettings: {
+        controls: {
+          highlight: false,
+          zoom: false,
+        },
+      },
+      listOfLayerEntryConfig: [
+        {
+          entryType: 'group',
+          layerId: 'point-feature-group',
+          layerName: 'Points & Icons',
+          initialSettings: {
+            controls: {
+              remove: false,
+            },
+          },
+          listOfLayerEntryConfig: [
+            {
+              layerId: 'points_1.json',
+              layerName: 'Points 1',
+              initialSettings: {
+                controls: {
+                  highlight: true,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    return layerConfig as TypeGeoviewLayerConfig;
+  }
+
+  // #endregion STATIC METHODS
 }

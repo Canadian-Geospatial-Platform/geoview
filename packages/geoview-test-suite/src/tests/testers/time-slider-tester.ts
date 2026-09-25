@@ -1,5 +1,6 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { TestSkippedError } from '../core/exceptions';
 import {
   addStoreTimeSliderLayer,
   getStoreTimeSliderLayer,
@@ -7,6 +8,10 @@ import {
   setStoreTimeSliderValues,
   type TypeTimeSliderValues,
 } from 'geoview-core/core/stores/states/time-slider-state';
+import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
+import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
+import { generateId } from 'geoview-core/core/utils/utilities';
+import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
 /** Values captured while testing time-slider reset behavior. */
 type TimeSliderResetResult = {
@@ -30,6 +35,24 @@ type TimeSliderConstraintResult = {
   absoluteLeftThumb: number[];
   /** Absolute values constrained while moving the right thumb. */
   absoluteRightThumb: number[];
+};
+
+/** Time dimensions captured for the landcover group and each of its sub-layers. */
+type LandcoverGroupDimensionResult = {
+  /** Time dimension of the 'landcover_groupe' group layer. */
+  groupTimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2010_19classes' sub-layer. */
+  year2010TimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2015_19classes' sub-layer. */
+  year2015TimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2020_19classes' sub-layer. */
+  year2020TimeDimension: TimeDimension | undefined;
+  /** Time-slider store entry for the 'landcover_2010_19classes' sub-layer. */
+  year2010TimeSliderValues: TypeTimeSliderValues | undefined;
+  /** Time-slider store entry for the 'landcover_2015_19classes' sub-layer. */
+  year2015TimeSliderValues: TypeTimeSliderValues | undefined;
+  /** Time-slider store entry for the 'landcover_2020_19classes' sub-layer. */
+  year2020TimeSliderValues: TypeTimeSliderValues | undefined;
 };
 
 /** Main Time Slider testing class. */
@@ -136,7 +159,10 @@ export class TimeSliderTester extends GVAbstractTester {
       filtering: true,
       isMainLayerPath: true,
       minAndMax: TimeSliderTester.CONTINUOUS_MIN_AND_MAX,
-      range: ['1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z'],
+      rangeItems: {
+        type: 'discrete',
+        range: ['1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z'],
+      },
       singleHandle: false,
       values: [0, 1000],
     };
@@ -150,7 +176,10 @@ export class TimeSliderTester extends GVAbstractTester {
           defaultValues: [1000, 3000],
           discreteValues: true,
           minAndMax: [1000, 3000],
-          range: TimeSliderTester.DISCRETE_TIMESTAMPS.map((value) => new Date(value).toISOString()),
+          rangeItems: {
+            type: 'discrete',
+            range: TimeSliderTester.DISCRETE_TIMESTAMPS.map((value) => new Date(value).toISOString()),
+          },
           values: [1000, 3000],
         });
         addStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.CONTINUOUS_STEP_LAYER_PATH, {
@@ -182,6 +211,101 @@ export class TimeSliderTester extends GVAbstractTester {
         removeStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.DISCRETE_LAYER_PATH, (): void => {});
         removeStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.CONTINUOUS_STEP_LAYER_PATH, (): void => {});
         removeStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.CONTINUOUS_FALLBACK_LAYER_PATH, (): void => {});
+      }
+    );
+  }
+
+  /**
+   * Tests that a WMS group-time-dimension (QGIS 'landcover_groupe' style) is flagged as such in the store,
+   * both on the group layer and on each of its sub-layers.
+   *
+   * @param isRunningOnVPN - Whether the test environment can access the VPN-only service
+   * @returns A promise that resolves when the test completes
+   */
+  testWMSLayerLandcoverGroupDimensionFlags(isRunningOnVPN: boolean): Promise<Test<LandcoverGroupDimensionResult>> {
+    const gvLayerId = generateId();
+    const groupPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
+    const year2010Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010}`;
+    const year2015Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2015}`;
+    const year2020Path = `${groupPath}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2020}`;
+    const gvLayerName = 'Landcover 2010-2020 (XML)';
+
+    return this.test(
+      'Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers...',
+      async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
+        test.addStep('Creating the GeoView Layer Configuration...');
+        // isTimeAware must be true so the layers get registered by TimeSliderController.tryRegisterLayer()
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, GVAbstractTester.LANDCOVER_CDTK_URL, undefined, true, [
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID },
+        ]);
+
+        // Add the layer on the map
+        test.addStep('Adding the layer on the map...');
+        this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
+
+        // Wait for the group and its sub-layers to be registered and loaded
+        test.addStep('Waiting for the group and its sub-layers to be registered and loaded...');
+        const groupLayer = await this.getControllersRegistry().layerController.waitForLayerRegistered(groupPath);
+
+        // Wait for each layer to be loaded at least once
+        await groupLayer.waitForLoadedOnce();
+
+        // Wait for the legend to be queried for each sub-layer
+        test.addStep('Waiting for the legend to be queried for each sub-layer...');
+        await Promise.all(
+          [year2010Path, year2015Path, year2020Path].map((path) =>
+            this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLegendQueried(path, true)
+          )
+        );
+
+        // Wait for each sub-layer to be registered in the time-slider store
+        test.addStep('Waiting for each sub-layer to be registered in the time-slider store...');
+        await Promise.all(
+          [year2010Path, year2015Path, year2020Path].map((path) =>
+            TimeSliderTester.waitForCondition(
+              () => !!getStoreTimeSliderLayer(this.getMapId(), path),
+              GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
+            )
+          )
+        );
+
+        // Return the test information
+        return {
+          groupTimeDimension: getStoreLayerTimeDimension(this.getMapId(), groupPath),
+          year2010TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2010Path),
+          year2015TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2015Path),
+          year2020TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2020Path),
+          year2010TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2010Path),
+          year2015TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2015Path),
+          year2020TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2020Path),
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the group and its sub-layers are all flagged as a group dimension...');
+        Test.assertIsDefined('groupTimeDimension', result.groupTimeDimension);
+        Test.assertIsDefined('year2010TimeDimension', result.year2010TimeDimension);
+        Test.assertIsDefined('year2015TimeDimension', result.year2015TimeDimension);
+        Test.assertIsDefined('year2020TimeDimension', result.year2020TimeDimension);
+        Test.assertIsEqual(result.groupTimeDimension.isGroupDimension, true);
+        Test.assertIsEqual(result.year2010TimeDimension.isGroupDimension, true);
+        Test.assertIsEqual(result.year2015TimeDimension.isGroupDimension, true);
+        Test.assertIsEqual(result.year2020TimeDimension.isGroupDimension, true);
+
+        test.addStep('Verifying the time-slider store has an entry for each of the 3 sub-layer paths...');
+        Test.assertIsDefined('year2010TimeSliderValues', result.year2010TimeSliderValues);
+        Test.assertIsDefined('year2015TimeSliderValues', result.year2015TimeSliderValues);
+        Test.assertIsDefined('year2020TimeSliderValues', result.year2020TimeSliderValues);
+      },
+      (test) => {
+        // If the test was running
+        if (isRunningOnVPN) {
+          this.finalizeStepRemoveLayerAndAssert(test, groupPath);
+        }
       }
     );
   }

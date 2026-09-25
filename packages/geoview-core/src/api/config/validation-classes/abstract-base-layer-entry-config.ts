@@ -18,7 +18,7 @@ import type {
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { DateMgt } from '@/core/utils/date-mgt';
-import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { LayerDataAccessPathMandatoryError, LayerMetadataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -65,9 +65,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The OpenLayers Text style to apply to the label (will override the global feature text). */
   #layerText?: TypeLayerTextConfig;
-
-  /** The time dimension information. */
-  #timeDimension?: TimeDimension;
 
   /** Attributions used in the OpenLayer source. */
   #attributions?: string[];
@@ -412,24 +409,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getDisplayDateTimezone(): TimeIANA | undefined {
     return this.getGeoviewLayerConfig().displayDateTimezone ?? this.getTimeDimension()?.displayDateTimezone;
-  }
-
-  /**
-   * Gets the temporal dimension, if any, that is associated to the layer.
-   *
-   * @returns The temporal dimension, or undefined if not set
-   */
-  getTimeDimension(): TimeDimension | undefined {
-    return this.#timeDimension;
-  }
-
-  /**
-   * Sets the temporal dimension that is associated to the layer.
-   *
-   * @param timeDimension - The temporal dimension
-   */
-  setTimeDimension(timeDimension: TimeDimension): void {
-    this.#timeDimension = timeDimension;
   }
 
   /**
@@ -849,6 +828,29 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getGeometryType(): TypeStyleGeometry | undefined {
     return this.onGetGeometryType();
+  }
+
+  /**
+   * Gets the layer paths of this entry's siblings in its parent group.
+   *
+   * @param includeOwn - Whether to include this entry's own layer path (defaults to `true`)
+   * @returns The sibling layer paths, or an empty array when this entry has no parent group
+   */
+  getSiblingsLayerPaths(includeOwn = true): string[] {
+    return (
+      this.getParentLayerConfig()
+        ?.listOfLayerEntryConfig.map((entry: ConfigBaseClass) => entry.layerPath)
+        .filter((entry: string) => includeOwn || entry !== this.layerPath) ?? []
+    );
+  }
+
+  /**
+   * Gets the first layer path from this entry's sibling list.
+   *
+   * @returns The first sibling layer path, or `undefined` when no sibling path is available
+   */
+  getFirstSiblingLayerPath(): string | undefined {
+    return this.getSiblingsLayerPaths()[0];
   }
 
   // #endregion METHODS

@@ -67,7 +67,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testQueryWMSLayerForWFSFeaturesAirborne(this.getIsRunningOnVPN());
+    const pDevTest0 = this.#layerTester.testAddWMSDuplicateGroupNames();
 
     // Resolve when all
     return Promise.all([pDevTest0]);

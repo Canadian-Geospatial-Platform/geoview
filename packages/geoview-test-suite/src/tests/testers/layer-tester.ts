@@ -23,8 +23,9 @@ import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/except
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
+import { GVWMS } from 'geoview-core/geo/layer/gv-layers/raster/gv-wms';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -83,7 +84,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriDynamicHistoFloodEvents(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriDynamicHistoFloodEvents(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
@@ -113,7 +114,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -123,7 +124,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the test result
    */
-  testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractBaseGVLayer>> {
     const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
     const layerPathGroup = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP}`;
     const layerPathPetroleum = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM}`;
@@ -199,7 +200,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -251,7 +252,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriFeatureForestIndustry(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriFeatureForestIndustry(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER;
@@ -281,7 +282,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -329,7 +330,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriFeatureInvalidGeometry(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriFeatureInvalidGeometry(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.LOW_HEAD_HYDRO_DATABASE;
@@ -359,7 +360,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -373,7 +374,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriImageWithElevation(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.IMAGE_SERVER_ELEVATION_URL;
@@ -403,7 +404,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -413,7 +414,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriImageWithUSA(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriImageWithUSA(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.IMAGE_SERVER_USA_URL;
@@ -454,7 +455,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -506,7 +507,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractGVLayer>> {
+  testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
@@ -536,7 +537,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -546,7 +547,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerWithDatacubeMSI(): Promise<Test<AbstractGVLayer>> {
+  testAddWMSLayerWithDatacubeMSI(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.DATACUBE_MSI;
@@ -582,7 +583,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -592,7 +593,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerWithDatacubeRingOfFire(): Promise<Test<AbstractGVLayer>> {
+  testAddWMSLayerWithDatacubeRingOfFire(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.DATACUBE_RING_FIRE;
@@ -628,7 +629,147 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that adding the WMS landcover group creates a group-dimension layer.
+   *
+   * The test verifies that the selected group expands into WMS child layers and that the first child is marked as
+   * having been added through a group with a group time dimension.
+   *
+   * @param isRunningOnVPN Indicates whether the test is running on a VPN
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSLayerLandcoverGroupDimension(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
+    const gvLayerName = 'Landcover 2010-2020 (XML)';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Landcover pointing to a group layer with a group time dimension...`,
+      async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+      },
+      (test, result) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+
+        // Validate the layer is a group layer
+        Test.assertIsInstance(result, GVGroupLayer);
+
+        // Validate the group layer has at least 1 child
+        Test.assertIsArrayLengthMinimal(result.getLayers(), 1);
+
+        // Get the first child
+        const firstChild = result.getLayers()[0];
+
+        // Validate the first child is a WMS layer
+        Test.assertIsInstance(firstChild, GVWMS);
+
+        // Validate the layer has the 'was added as group' flag set
+        test.addStep('Validating the layer is flagged as it was added via a group and time dimension is a group dimension');
+        Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), true);
+        Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, true);
+      },
+      (test) => {
+        // If the test was running
+        if (isRunningOnVPN) {
+          // Redirect to helper to clean up and assert
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        }
+      }
+    );
+  }
+
+  /**
+   * Tests that adding the WMS landcover sub-layers directly does not create a group dimension.
+   *
+   * The test verifies that directly selected sub-layers remain regular WMS layers and are not marked as having been
+   * added through a group.
+   *
+   * @param isRunningOnVPN Indicates whether the test is running on a VPN
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSLayerLandcoverGroupDimensionNegative(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
+    const layerPathGroup = `${gvLayerId}/base-group`;
+    const gvLayerName = 'Landcover 2010-2020 (XML)';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Landcover pointing to sub-layers directly, negating the group time dimension...`,
+      async (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
+        // Create the config
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2010 },
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2015 },
+          { id: GVAbstractTester.LANDCOVER_CDTK_LAYER_ID_2020 },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPathGroup);
+      },
+      (test, result) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPathGroup);
+
+        // Validate the layer is a group layer
+        Test.assertIsInstance(result, GVGroupLayer);
+
+        // Validate the group layer has at least 1 child
+        Test.assertIsArrayLengthMinimal(result.getLayers(), 1);
+
+        // Get the first child
+        const firstChild = result.getLayers()[0];
+
+        // Validate the first child is a WMS layer
+        Test.assertIsInstance(firstChild, GVWMS);
+
+        // Validate the layer has the 'was added as group' flag set
+        test.addStep('Validating the layer is NOT flagged as it was added via a group and time dimension is NOT a group dimension');
+        Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), false);
+        Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, false);
+      },
+      (test) => {
+        // If the test was running
+        if (isRunningOnVPN) {
+          // Redirect to helper to clean up and assert
+          this.finalizeStepRemoveLayerAndAssert(test, layerPathGroup);
+        }
       }
     );
   }
@@ -638,7 +779,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSNonna(): Promise<Test<AbstractGVLayer>> {
+  testAddWMSNonna(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.NONNA_WMS_URL;
@@ -667,7 +808,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -727,7 +868,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSDuplicateGroupNames(): Promise<Test<AbstractGVLayer>> {
+  testAddWMSDuplicateGroupNames(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.CANIMAGE_WMS_URL;
@@ -764,7 +905,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert (removing the outer group removes the whole subtree)
-        this.helperFinalizeStepRemoveLayerAndAssert(test, groupPath);
+        this.finalizeStepRemoveLayerAndAssert(test, groupPath);
       }
     );
   }
@@ -778,7 +919,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMTSWorldTimezones(): Promise<Test<AbstractGVLayer>> {
+  testAddWMTSWorldTimezones(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.WORLD_TIMEZONES_WMTS_URL;
@@ -810,7 +951,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -865,7 +1006,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddXYZTilesOSM(): Promise<Test<AbstractGVLayer>> {
+  testAddXYZTilesOSM(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.XYZ_TILES_OSM_URL;
@@ -899,7 +1040,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -951,7 +1092,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddVectorTilesCBMT(): Promise<Test<AbstractGVLayer | LayerEntryNotSupportingProjectionError>> {
+  testAddVectorTilesCBMT(): Promise<Test<AbstractBaseGVLayer | LayerEntryNotSupportingProjectionError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
@@ -980,11 +1121,11 @@ export class LayerTester extends GVAbstractTester {
         },
         (test) => {
           // Perform assertions
-          LayerTester.helperStepAssertLayerExists(test as Test<AbstractGVLayer>, this.getMapId(), layerPath);
+          LayerTester.helperStepAssertLayerExists(test as Test<AbstractBaseGVLayer>, this.getMapId(), layerPath);
         },
         (test) => {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         }
       );
     }
@@ -1047,7 +1188,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWFSLayerWithWithGeometCurrentConditions(): Promise<Test<AbstractGVLayer>> {
+  testAddWFSLayerWithWithGeometCurrentConditions(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOMET_URL;
@@ -1077,7 +1218,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1166,7 +1307,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeoJSONWithMetadataPolygons(): Promise<Test<AbstractGVLayer>> {
+  testAddGeoJSONWithMetadataPolygons(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
@@ -1199,7 +1340,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1209,7 +1350,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeoJSONWithGeometryCollection(): Promise<Test<AbstractGVLayer>> {
+  testAddGeoJSONWithGeometryCollection(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOJSON_DATASET_ROOT;
@@ -1238,7 +1379,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1295,7 +1436,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testAddGeotiffLayerWithDatacubeVegetation(): Promise<Test<AbstractGVLayer>> {
+  testAddGeotiffLayerWithDatacubeVegetation(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOTIFF_VEGETATION;
@@ -1325,7 +1466,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1382,7 +1523,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddCSVWithStationList(): Promise<Test<AbstractGVLayer>> {
+  testAddCSVWithStationList(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.CSV_STATION_LIST;
@@ -1412,7 +1553,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1469,7 +1610,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddOGCFeatureWithPygeoapi(): Promise<Test<AbstractGVLayer>> {
+  testAddOGCFeatureWithPygeoapi(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
@@ -1505,7 +1646,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1557,7 +1698,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWKBWithSouthAfrica(): Promise<Test<AbstractGVLayer>> {
+  testAddWKBWithSouthAfrica(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.WKB_SOUTH_AFRICA;
@@ -1585,7 +1726,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1640,7 +1781,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddKMLWithTornado(): Promise<Test<AbstractGVLayer>> {
+  testAddKMLWithTornado(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.KML_TORNADO;
@@ -1668,7 +1809,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1725,7 +1866,9 @@ export class LayerTester extends GVAbstractTester {
    */
   testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
     // The config
-    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
+    const geoviewLayerId = 'geojsonLYR1-settings';
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const layerPath = `${geoviewLayerId}/point-feature-group`;
 
     // Expected config
     const expectedResults = {
@@ -1741,6 +1884,9 @@ export class LayerTester extends GVAbstractTester {
         // Add the layer to the map and get the AbstractGeoViewLayer
         await this.helperStepAddLayerOnMap(test, layerConfig);
 
+        // Wait for the layer to be loaded at least once
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
         // Return created map config
         return this.getControllersRegistry().mapController.createMapConfigFromMapState();
       },
@@ -1750,7 +1896,6 @@ export class LayerTester extends GVAbstractTester {
         ) as TypeGeoviewLayerConfig;
 
         // Perform assertions
-
         test.addStep('Verifying group layer highlight control...');
         Test.assertIsEqual(layer?.initialSettings?.controls?.highlight, expectedResults.groupHighlight);
 
@@ -1769,7 +1914,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, 'geojsonLYR1/point-feature-group');
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1784,7 +1929,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriDynamicWithDomainField(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriDynamicWithDomainField(): Promise<Test<AbstractBaseGVLayer>> {
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
     const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
@@ -1837,7 +1982,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1848,7 +1993,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddEsriFeatureWithDomainField(): Promise<Test<AbstractGVLayer>> {
+  testAddEsriFeatureWithDomainField(): Promise<Test<AbstractBaseGVLayer>> {
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
     const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
@@ -1901,7 +2046,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1985,7 +2130,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2068,7 +2213,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2132,7 +2277,7 @@ export class LayerTester extends GVAbstractTester {
         // If the test was running
         if (isRunningHeavyTests) {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, gvLayerPath);
         }
       }
     );
@@ -2146,8 +2291,9 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSetLayerVisibleIncludingParents(): Promise<Test<ParentCrawlVisibilityResult>> {
-    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
-    const groupPath = 'geojsonLYR1/point-feature-group';
+    const geoviewLayerId = 'geojsonLYR1-visibility';
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const groupPath = `${geoviewLayerId}/point-feature-group`;
     const childPath = `${groupPath}/points_1.json`;
 
     // Test
@@ -2294,7 +2440,7 @@ export class LayerTester extends GVAbstractTester {
           .layerController.getGeoviewLayerPaths()
           .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
         Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+        if (cleanupLayerPath) this.finalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
       }
     );
   }
@@ -2341,7 +2487,7 @@ export class LayerTester extends GVAbstractTester {
           .layerController.getGeoviewLayerPaths()
           .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
         Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+        if (cleanupLayerPath) this.finalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
       }
     );
   }
@@ -2355,7 +2501,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the loaded GeoJSON layer
    */
-  testZoomExtentWithOneFeature(): Promise<Test<AbstractGVLayer>> {
+  testZoomExtentWithOneFeature(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
@@ -2393,7 +2539,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2427,7 +2573,7 @@ export class LayerTester extends GVAbstractTester {
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2437,7 +2583,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the loaded GeoJSON layer
    */
-  testZoomExtentWithoutFeaturesWithConfiguredExtent(): Promise<Test<AbstractGVLayer>> {
+  testZoomExtentWithoutFeaturesWithConfiguredExtent(): Promise<Test<AbstractBaseGVLayer>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
@@ -2477,7 +2623,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2546,7 +2692,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2595,7 +2741,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2693,7 +2839,7 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Restore the initial view then remove the layer
         await this.getControllersRegistry().mapController.zoomToInitialExtent(false);
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2755,7 +2901,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -2826,7 +2972,7 @@ export class LayerTester extends GVAbstractTester {
         // If the test was running
         if (isRunningOnVPN) {
           // Redirect to helper to clean up and assert
-          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         }
       }
     );
@@ -2894,10 +3040,10 @@ export class LayerTester extends GVAbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  async helperStepCheckLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractGVLayer> {
+  async helperStepCheckLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractBaseGVLayer> {
     // Wait for the layer to get registered
     test.addStep(`Wait for the layer ${layerPath} to be registered...`);
-    const layer = (await this.getControllersRegistry().layerController.waitForLayerRegistered(layerPath)) as AbstractGVLayer;
+    const layer = await this.getControllersRegistry().layerController.waitForLayerRegistered(layerPath);
 
     // Wait until the layer has at least loaded once
     test.addStep(`Waiting for the layer to be loaded at least once...`);
@@ -2928,7 +3074,7 @@ export class LayerTester extends GVAbstractTester {
    *   If provided, the function will additionally verify that the legend's icon list matches this array
    */
   static helperStepAssertLayerExists(
-    test: Test<AbstractGVLayer>,
+    test: Test<AbstractBaseGVLayer>,
     mapId: string,
     layerPath: string,
     checkIconImage?: string,
@@ -2965,7 +3111,7 @@ export class LayerTester extends GVAbstractTester {
    * @param checkIconsList - Optional expected list of legend icon items
    */
   static helperStepAssertStyleApplied(
-    test: Test<AbstractGVLayer>,
+    test: Test<AbstractBaseGVLayer>,
     mapId: string,
     layerPath: string,
     checkIconImage?: string,

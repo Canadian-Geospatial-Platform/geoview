@@ -326,11 +326,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test footer bar select tab',
-      (test) => {
+      async (test) => {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getControllersRegistry().uiController.setActiveFooterBarTab(targetTab);
+        await this.toggleFooterbarTab(test, targetTab, true);
 
         return targetTab;
       },
@@ -352,11 +352,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test app bar select tab',
-      (test) => {
+      async (test) => {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getControllersRegistry().uiController.setActiveAppBarTab(targetTab, true, true);
+        await this.toggleAppbarTab(test, targetTab, true);
 
         return targetTab;
       },
@@ -837,11 +837,7 @@ export class MapTester extends GVAbstractTester {
       'Test details layer selection persistence across map clicks',
       async (test) => {
         // Simulate a map click at first location
-        test.addStep(`Performing first map click at [${clickCoordinates1.join(', ')}]...`);
-        const simulatedMapClick1 = this.getMapViewer().simulateMapClick(clickCoordinates1);
-
-        // Wait for the UI to be updated
-        await simulatedMapClick1.promiseQueryBatched;
+        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates1);
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
@@ -856,11 +852,7 @@ export class MapTester extends GVAbstractTester {
         this.getControllersRegistry().detailsController.setSelectedLayerPath(altLayerPath);
 
         // Simulate a map click at second location
-        test.addStep(`Performing second map click at [${clickCoordinates2.join(', ')}]...`);
-        const simulatedMapClick2 = this.getMapViewer().simulateMapClick(clickCoordinates2);
-
-        // Wait for the UI to be updated
-        await simulatedMapClick2.promiseQueryBatched;
+        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates2);
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');

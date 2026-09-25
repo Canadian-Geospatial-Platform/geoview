@@ -2,8 +2,9 @@ import { useStore } from 'zustand';
 
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { DateTimeStepUnit, RangeItems, TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACE DEFINITION
@@ -69,6 +70,9 @@ export interface ITimeSliderState {
 
     /** Sets the step value for a time-slider layer. */
     setStep: (layerPath: string, step: number) => void;
+
+    /** Sets the calendar step unit for a time-slider layer. */
+    setStepUnit: (layerPath: string, stepUnit: DateTimeStepUnit) => void;
 
     /** Sets the current slider values (timestamps) for a time-slider layer. */
     setValues: (layerPath: string, values: number[]) => void;
@@ -321,6 +325,22 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       },
 
       /**
+       * Sets the calendar step unit for a time slider layer.
+       *
+       * @param layerPath - The layer path
+       * @param stepUnit - The calendar unit used for playback increments
+       */
+      setStepUnit(layerPath: string, stepUnit: DateTimeStepUnit): void {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], stepUnit } },
+          },
+        });
+      },
+
+      /**
        * Sets the values for a time slider layer.
        *
        * @param layerPath - The layer path
@@ -395,7 +415,18 @@ export const getStoreTimeSliderLayers = (mapId: string): TimeSliderLayerSet => {
 /** Hooks the full set of time-slider layers. Safe to call outside the TimeSlider plugin (optional chaining). */
 // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
 export const useStoreTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+  useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = state.timeSliderState?.timeSliderLayers;
+    if (!allLayers) return undefined;
+
+    // Return the object with all time slider layers keyed by layer path
+    return Object.entries(allLayers).reduce<TimeSliderLayerSet>((acc, [layerPath, timeSliderLayer]) => {
+      // eslint-disable-next-line no-param-reassign
+      acc[layerPath] = timeSliderLayer;
+      return acc;
+    }, {});
+  });
 
 /**
  * Gets the time-slider values for a specific layer path.
@@ -411,8 +442,19 @@ export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeT
 
 /** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
 // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
-export const useStoreTimeSliderLayer = (layerPath: string): TypeTimeSliderValues | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+export const useStoreTimeSliderLayer = (layerPath: string): TypeTimeSliderValues | undefined => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = state.timeSliderState?.timeSliderLayers;
+    if (!allLayers) return undefined;
+
+    // Return the requested time slider layer
+    return Object.entries(allLayers).reduce<TypeTimeSliderValues | undefined>((timeSliderLayerFound, [path, timeSliderLayer]) => {
+      return path === layerPath ? timeSliderLayer : timeSliderLayerFound;
+    }, undefined);
+  });
+};
 
 /**
  * Gets the currently selected layer path from the time slider.
@@ -640,6 +682,12 @@ export const setStoreTimeSliderStep = (mapId: string, layerPath: string, step: n
   timeSliderState.actions.setStep(layerPath, step);
 };
 
+/** Sets the calendar step unit for a time-slider layer in the store. */
+export const setStoreTimeSliderStepUnit = (mapId: string, layerPath: string, stepUnit: DateTimeStepUnit): void => {
+  const timeSliderState = getStoreTimeSliderState(mapId);
+  timeSliderState.actions.setStepUnit(layerPath, stepUnit);
+};
+
 /**
  * Sets the filtering state for a time-slider layer in the store.
  *
@@ -707,6 +755,9 @@ export interface TypeTimeSliderValues {
   /** Optional step increment for the slider. */
   step?: number;
 
+  /** Calendar unit used when advancing a continuous slider value. */
+  stepUnit?: DateTimeStepUnit;
+
   /** The temporal field name on the layer. */
   field: string;
 
@@ -725,8 +776,8 @@ export interface TypeTimeSliderValues {
   /** The minimum and maximum timestamp values for the slider range. */
   minAndMax: number[];
 
-  /** The array of date-range strings available for the slider. */
-  range: string[];
+  /** The range items available for the slider. */
+  rangeItems: RangeItems;
 
   /** Optional flag indicating the slider plays in reverse. */
   reversed?: boolean;

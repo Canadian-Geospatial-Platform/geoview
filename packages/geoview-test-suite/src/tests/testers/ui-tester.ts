@@ -27,12 +27,9 @@ export class UITester extends GVAbstractTester {
       'Test Details Panel - Select and Find Top Anchor',
       async (test) => {
         // Step 1: Select the details tab in footer bar
-        test.addStep('Selecting details panel...');
-        this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
-
-        // Wait for the React UI to actually pick up on the store update
-        test.addStep(`Waiting on UI to refresh and the active footer tab to be details...`);
-        await GVAbstractTester.waitForReactIdle();
+        test.addStep('Selecting details panel and wait for the UI to refresh...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
+        await this.waitForAppbarTabSelected('details');
 
         // Get the GeoView HTML element
         test.addStep('Getting GeoView HTML element...');

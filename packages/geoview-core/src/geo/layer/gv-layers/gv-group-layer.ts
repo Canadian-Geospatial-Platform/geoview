@@ -151,9 +151,21 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     return this.getLayersAllLeafs().some((child) => child.isInVisibleRange(currentResolution));
   }
 
+  /**
+   * Overrides the way to wait for the layer to be loaded at least once.
+   *
+   * A group layer resolves once every leaf layer nested within it (including sub-groups) has loaded at least once.
+   *
+   * @returns A promise that resolves once all leaf layers in the group hierarchy have loaded at least once
+   * @throws {LayerStatusErrorError} When a leaf layer enters the `error` state before loading (propagated from `waitForLoadedOnce()`)
+   */
+  protected override async onWaitForLoadedOnce(): Promise<void> {
+    await Promise.all(this.getLayersAllLeafs().map((layer) => layer.waitForLoadedOnce()));
+  }
+
   // #endregion OVERRIDES
 
-  // #region METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Gets the immediate layers in the group.
@@ -267,6 +279,10 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     this.#emitLayerRemoved({ child: layer });
   }
 
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
   /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
    *
@@ -288,7 +304,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     }
   }
 
-  // #endregion METHODS
+  // #endregion PRIVATE METHODS
 
   // #region EVENTS
 

@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 44;
+    return 46;
   }
 
   /**
@@ -70,7 +70,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
+    const pDevTest0 = this.#layerTester.testInitialSettingsCascade();
 
     // Resolve when all
     return Promise.all([pDevTest0]);
@@ -128,6 +128,16 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerWMSDatacubeRingFireHalifax = this.#layerTester.testAddWMSLayerWithDatacubeRingOfFire();
     if (isRunningSequentially) await pLayerWMSDatacubeRingFireHalifax;
+
+    // Test adding layer
+    const pLayerWMSLandcoverGroupDimension = this.#layerTester.testAddWMSLayerLandcoverGroupDimension(this.getIsRunningOnVPN());
+    if (isRunningSequentially) await pLayerWMSLandcoverGroupDimension;
+
+    // Test adding layer
+    const pLayerWMSLandcoverGroupDimensionNegative = this.#layerTester.testAddWMSLayerLandcoverGroupDimensionNegative(
+      this.getIsRunningOnVPN()
+    );
+    if (isRunningSequentially) await pLayerWMSLandcoverGroupDimensionNegative;
 
     // Test adding layer
     const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
@@ -252,6 +262,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSOWSMundialis,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
+      pLayerWMSLandcoverGroupDimension,
+      pLayerWMSLandcoverGroupDimensionNegative,
       pLayerNonnaWithCors,
       pLayerWMSBadUrl,
       pLayerWFSWithGeometCurrentConditions,

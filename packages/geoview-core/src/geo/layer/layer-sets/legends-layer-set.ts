@@ -271,6 +271,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
             // Emit about the legend being queried
             this.#emitLegendQueried({ layerPath, legendSchemaTag: legend?.type, styleConfig: legend?.styleConfig, icons, items });
+
+            // Bubble the 'queried' status up to parent groups once all their leaf layers are queried too
+            this.#propagateGroupLegendQueriedIfComplete(layer);
           }
         })
         .catch((error: unknown) => {
@@ -316,6 +319,32 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // Return if legend should be queried
     return shouldQueryLegend;
+  }
+
+  /**
+   * Marks each ancestor group of the given layer as 'queried' once all of its own leaf layers are 'queried'.
+   *
+   * Walks up from the immediate parent to the top-most ancestor, stopping at the first group whose leaf
+   * layers aren't all queried yet, since higher ancestors can't be complete either at that point.
+   *
+   * @param layer - The leaf layer whose legend was just queried
+   */
+  #propagateGroupLegendQueriedIfComplete(layer: AbstractBaseGVLayer): void {
+    for (const parent of layer.getParents()) {
+      const allLeafsQueried = parent
+        .getLayersAllLeafs()
+        .every((leaf) => getStoreLayerLegendQueryStatus(this.getMapId(), leaf.getLayerPath()) === 'queried');
+
+      // Not complete yet: higher ancestors depend on this group, so they can't be complete either
+      if (!allLeafsQueried) break;
+
+      // Mark the group itself as queried (it has no legend of its own) and notify listeners, unless already done
+      const groupLayerPath = parent.getLayerPath();
+      if (getStoreLayerLegendQueryStatus(this.getMapId(), groupLayerPath) !== 'queried') {
+        setStoreLegendQueryStatus(this.getMapId(), groupLayerPath, 'queried', undefined, undefined, undefined, undefined);
+        this.#emitLegendQueried({ layerPath: groupLayerPath });
+      }
+    }
   }
 
   /**

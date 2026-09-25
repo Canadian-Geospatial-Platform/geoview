@@ -324,7 +324,9 @@ export class UtilitiesDateTester extends GVAbstractTester {
         const discrete = DateMgt.createRangeOGC('2020-01-01,2020-06-01,2021-01-01');
         // Relative range (start/end)
         const relative = DateMgt.createRangeOGC('2020-01-01/2021-01-01');
-        return [discrete, relative];
+        // Absolute range (start/end/period)
+        const absolute = DateMgt.createRangeOGC('2002-09-01T00:00:00Z/2002-09-03T00:00:00Z/P1D');
+        return [discrete, relative, absolute];
       },
       (test, results) => {
         test.addStep('Verifying discrete range parsed...');
@@ -335,6 +337,10 @@ export class UtilitiesDateTester extends GVAbstractTester {
         test.addStep('Verifying relative range parsed...');
         Test.assertIsEqual(results[1].type, 'relative');
         Test.assertIsArrayLengthMinimal(results[1].range, 2);
+
+        test.addStep('Verifying absolute range expands all discrete values...');
+        Test.assertIsEqual(results[2].type, 'discrete');
+        Test.assertIsArrayEqual(results[2].range, ['2002-09-01T00:00:00.000Z', '2002-09-02T00:00:00.000Z', '2002-09-03T00:00:00.000Z']);
       }
     );
   }
@@ -367,7 +373,7 @@ export class UtilitiesDateTester extends GVAbstractTester {
         Test.assertIsEqual(DateMgt.MILLISECONDS_IN_1_DAY, 86400000);
 
         test.addStep('Verifying MILLISECONDS_IN_1_YEAR...');
-        Test.assertIsEqual(DateMgt.MILLISECONDS_IN_1_YEAR, 31536000000);
+        Test.assertIsEqual(DateMgt.APPROXIMATE_MILLISECONDS_IN_1_YEAR, 31536000000);
 
         test.addStep('Verifying DEFAULT_TEMPORAL_MODE...');
         Test.assertIsDefined('DEFAULT_TEMPORAL_MODE', DateMgt.DEFAULT_TEMPORAL_MODE);

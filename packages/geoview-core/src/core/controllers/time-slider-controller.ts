@@ -13,6 +13,7 @@ import {
   setStoreTimeSliderReversed,
   setStoreTimeSliderSelectedLayerPath,
   setStoreTimeSliderStep,
+  setStoreTimeSliderStepUnit,
   setStoreTimeSliderValues,
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
@@ -20,7 +21,7 @@ import {
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt, type DateTimeStepUnit, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -158,7 +159,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
     if (!timeSliderValues) return values;
 
-    const timeStampRange = timeSliderValues.range.map((date) => DateMgt.convertToMilliseconds(date));
+    const timeStampRange = timeSliderValues.rangeItems.range.map((date) => DateMgt.convertToMilliseconds(date));
     return TimeSliderController.#constrainValues(
       values,
       activeThumb,
@@ -199,6 +200,17 @@ export class TimeSliderController extends AbstractMapViewerController {
   setStep(layerPath: string, step: number): void {
     // Save in the store
     setStoreTimeSliderStep(this.getMapId(), layerPath, step);
+  }
+
+  /**
+   * Sets the calendar unit used to advance a continuous time-slider value.
+   *
+   * @param layerPath - The layer path
+   * @param stepUnit - The calendar unit used for playback increments
+   */
+  setStepUnit(layerPath: string, stepUnit: DateTimeStepUnit): void {
+    // Save in the store
+    setStoreTimeSliderStepUnit(this.getMapId(), layerPath, stepUnit);
   }
 
   /**
@@ -376,7 +388,21 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (!layerTimeDimensionInfo.rangeItems && (!configTimeDimension || !configTimeDimension.rangeItems)) return undefined;
 
     // Set defaults values from temporal dimension
-    const { range } = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
+    let rangeItems = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
+    let { range } = rangeItems;
+
+    // If the time timension is a groupDimension
+    if (layerTimeDimensionInfo.isGroupDimension) {
+      // Get the siblings of the layer config
+      const siblings = layerConfig.getSiblings();
+
+      // Gather all dates exposed by the siblings of the layer
+      const siblingDates = new Set(siblings.flatMap((sibling) => sibling.getTimeDimension()?.rangeItems?.range ?? []));
+
+      // Keep only the dates also exposed by a sibling, preserving the range's original order for the min/max computation below
+      range = range.filter((date) => siblingDates.has(date));
+      rangeItems = { ...rangeItems, range };
+    }
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
     const singleHandle = configTimeDimension?.singleHandle ?? layerTimeDimensionInfo?.singleHandle ?? false;
@@ -384,7 +410,13 @@ export class TimeSliderController extends AbstractMapViewerController {
     const nearestValues = configTimeDimension?.nearestValues ?? layerTimeDimensionInfo?.nearestValues;
 
     // Check if the time slider info is associated with another time slider
-    const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
+    let isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
+
+    // If the layer is part of a Group Dimension
+    if (layerTimeDimensionInfo?.isGroupDimension) {
+      // The main layer path is the first layer path in the siblings
+      isMainLayerPath = layerConfig.getFirstSiblingLayerPath() === layerConfig.layerPath;
+    }
 
     // Only use the field from the config if this is the main layer of the slider
     let field = isMainLayerPath && configTimeDimension?.field ? configTimeDimension?.field : layerTimeDimensionInfo.field;
@@ -393,8 +425,14 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (timesliderConfig?.fields && index) field = timesliderConfig.fields[index];
 
     // Paths of layers tied to this time slider, if any
-    const additionalLayerpaths =
+    let additionalLayerpaths =
       isMainLayerPath && timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.slice(1) : undefined;
+
+    // If the layer is part of a Group Dimension and is main layer path
+    if (layerTimeDimensionInfo?.isGroupDimension && isMainLayerPath) {
+      // The time-slider should have all the other layer paths siblings into the additionalLayerPaths
+      additionalLayerpaths = layerConfig.getSiblingsLayerPaths(false);
+    }
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
@@ -406,9 +444,19 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // If using absolute axis
     let step: number | undefined;
+    let stepUnit: DateTimeStepUnit | undefined;
     if (nearestValues === 'continuous') {
+      const normalizedDurationInterval = rangeItems.durationInterval?.trim().toUpperCase();
+      if (normalizedDurationInterval === 'PT1H') stepUnit = 'hour';
+      else if (normalizedDurationInterval === 'P1D') stepUnit = 'day';
+      else if (normalizedDurationInterval === 'P1W') stepUnit = 'week';
+      else if (normalizedDurationInterval === 'P1M') stepUnit = 'month';
+      else if (normalizedDurationInterval === 'P1Y') stepUnit = 'year';
+
+      if (!stepUnit) stepUnit = DateMgt.guessEstimatedStepUnit(minAndMax[0], minAndMax[1]);
+
       // Try to guess the steps that should be used
-      step = DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+      step = stepUnit ? undefined : DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
 
     const timeStampRange = range.map((date) => DateMgt.convertToMilliseconds(date));
@@ -416,6 +464,14 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (defaultDates?.length) initialValues = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
     const values = TimeSliderController.#constrainValues(initialValues, 1, nearestValues === 'discrete', timeStampRange, step, minAndMax);
 
+    // The title of the time-slider configuration
+    let title = timesliderConfig?.title;
+    if (layerTimeDimensionInfo?.isGroupDimension) {
+      // For a time-slider that is part of a group dimension, use the parent layer's name as the title
+      title = layerConfig.getParentLayerConfig()?.getLayerNameCascade();
+    }
+
+    // Return the final time slider configuration object
     return {
       additionalLayerpaths,
       delay: timesliderConfig?.delay || 1000,
@@ -432,11 +488,12 @@ export class TimeSliderController extends AbstractMapViewerController {
       isMainLayerPath,
       locked: timesliderConfig?.locked,
       minAndMax,
-      range,
+      rangeItems,
       reversed: timesliderConfig?.reversed,
       singleHandle,
       step,
-      title: timesliderConfig?.title,
+      stepUnit,
+      title,
       values,
     };
   }
@@ -577,9 +634,9 @@ export class TimeSliderController extends AbstractMapViewerController {
           filter = `${field} >= ${startDate} and ${field} <= ${endDate}`;
         } else if (timeSliderValues.discreteValues) {
           // Discrete mode (single handle)
-          const { range } = timeSliderValues;
+          const { rangeItems } = timeSliderValues;
 
-          const rangeMs = range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
+          const rangeMs = rangeItems.range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
 
           const nextIdx = rangeMs.findIndex((entry) => entry > values[0]);
 

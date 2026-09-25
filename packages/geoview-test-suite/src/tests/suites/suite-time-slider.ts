@@ -40,7 +40,8 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests Time Slider controller behavior:<br/>
       <b>Reset</b> — Registered defaults are restored through the controller<br/>
-      <b>Overlap constraints</b> — Discrete and continuous dual handles remain separated`;
+      <b>Overlap constraints</b> — Discrete and continuous dual handles remain separated<br/>
+      <b>Group dimension</b> — WMS group and sub-layer dimensions are flagged in the store`;
   }
 
   /**
@@ -49,7 +50,7 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 2;
+    return 3;
   }
 
   /**
@@ -71,12 +72,29 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
   }
 
   /**
+   * Overrides the debug hook for running a subset of tests during development.
+   *
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME, search for DEBUG_RUN_ONLY_DEBUG_FUNCTION for the flag.
+   *
+   * @returns A promise that resolves when the debug tests are completed
+   */
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
+
+    // Resolve when all
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     await this.#timeSliderTester.testResetValues();
-    return this.#timeSliderTester.testConstrainValues();
+    await this.#timeSliderTester.testConstrainValues();
+    await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
+
+    return Promise.resolve();
   }
 }

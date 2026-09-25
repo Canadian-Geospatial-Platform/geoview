@@ -103,6 +103,7 @@ _(User-facing features added or enabled)_
 - New `ConfigValidation.isListOfLayerEntryConfigValidated` to prevent double-validation in `addGeoviewLayer()` (#3544)
 - Map configuration `map.interaction` is no longer mandatory in schema; when omitted, runtime defaults to `dynamic` (#3584)
 - New `waitForLayerConfigRegistered` in layer-domain and enhanced `waitForLayerRegistered` with optional timeout (#3562)
+- New `waitForLoadedOnce` lifecycle wait on GV layers; group layers wait for all descendant leaf layers before resolving
 - New `getRendererContainer` function on `AbstractBaseGVLayer` (#3562)
 - New `waitForDomElement`, `waitForDomContent`, and `waitForDomChange` test utilities for explicit React UI tracking (#3562)
 - Map view now uses `viewOptions.padding` to account for the map-info bar height (#3562)
@@ -112,6 +113,10 @@ _(User-facing features added or enabled)_
 - Added built-in `canada.ca` display theme with Government of Canada-inspired colors and typography (#3609)
 - New `cgpv.api.utilities.dom` public surface exposing the map-scoped DOM helpers (`buildGVElementId`, `getGVRootElement`, `getGVElementById`, `getGVElementByFullId`, `getGVMapTargetElement`, `getGVShellElement`, `getGVGuidebox`, `queryGVSelector`/`queryGVSelectorAll`) so plugins and framework consumers can resolve map-scoped elements without deep-importing internal modules (#3221)
 - Layers hidden on the map now stay listed in the data table, details, geochart, and time slider panels under a separate **Hidden layers** section (greyed/italic, non-interactive) with an inline eye toggle to restore visibility directly from the list, so a table/chart/slider for a hidden layer stays discoverable without opening the Layers panel. Includes a new `LayerController.setLayerVisibleIncludingParents()` that crawls parent groups (a child hidden only because its group is hidden becomes visible again) and a new `useStoreLayerInVisibleRangeSet()` store selector; out-of-scale-range filtering, the Legend, and the Layers panel are unchanged (#3635)
+- Improved WMS style and ESRI Image raster-function selection to Layer Settings, including metadata-driven initial selections.
+- Added temporal metadata to Layer Info, including normalized range values, ISO 8601 duration intervals, and grouped-dimension status.
+- Added support to the special QGIS group dimension configuration allowing time-dimension WMS rasters to function with the time-slider.
+- Added calendar-aware time-slider stepping for hour, day, week, month, and year intervals, including leap-year-safe year navigation.
 
 ## Bug Fixes
 
@@ -150,6 +155,11 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed Swiper layer opacity handling by rewriting clip logic for features based on slider position (#3562)
 - Fixed Swiper rendering isolation so clipping is applied only to selected layers and their descendants (#3597)
 - Fixed time-slider reset behavior and dual-handle constraints so registered defaults are preserved and handles remain separated (#3569, #3599)
+- Fixed time-slider calendar stepping so month and year intervals no longer use fixed millisecond durations that drift across leap years; drag labels and committed values now use the same calendar-aligned dates.
+- Improved long-range time-slider performance by keeping the slider marks sparse and snapping dragged values to calendar steps instead of materializing every daily timestamp.
+- Fixed Add Layer WMS group selection so selecting every child preserves the parent group `layerId` and lets WMS expand its sub-layers during layer creation instead of serializing duplicate child entries.
+- Improved WMS temporal metadata handling by retaining ISO 8601 interval durations, resolving supported OGC `current` values during parsing, and synchronizing supported parent-group dimensions across direct sibling layers.
+- Improved ESRI Image identify and raster-function preview requests, including reuse of in-flight preview requests.
 - Fixed abort controller in add-new-layer component when clicking 'back' then completing steps to add a layer (#3562)
 - Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
@@ -207,6 +217,7 @@ _(Optimizations, refactors, structural changes)_
 - Refactored overview-map visibility and sizing flow into centralized store-driven logic (`overviewMapVisible`) with unified controller/event handling and atomic selector usage (#3581)
 - Optimized proxy support with a second pass using `FetchWithProxyResult` return wrapper instead of `CallbackNewMetadataDelegate` callbacks (#3562)
 - Simplified `processGeoviewLayerConfig` and `createGeoviewLayerConfig` in all layer types to accept `TypeLayerEntryShell[]` instead of `layerIds[]` (#3562)
+- Centralized calendar-step, calendar-snapping, and nearest-timestamp operations in `DateMgt` for reuse by the time-slider component and controllers.
 - Consolidated `onceEventPromiseWithTimeout` into `onceEventPromise` with an optional timeout parameter (#3562)
 - Deprecated `getOLLayerAsync` from layer-controller to centralize code logic around GV types instead of OL types (#3562)
 - Improved Swiper component implementation with enhanced lifecycle functions and code cleanup (~221 lines changed) (#3562)
@@ -301,6 +312,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
 - Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
 - Added automated `suite-layer` test `testAddWMSDuplicateGroupNames` (LayerTester) guarding issue #3521 — loads the `canimage_en` WMS by its duplicate top group id, asserts the nested `canimage/canimage` path is built and a deep leaf loads without infinite-looping (`suite-layer` total 41 → 43: +1 for the new test and +1 for correctly counting the heavy-conditional test that was previously excluded)
+- Added automated `suite-layer` coverage for the local CDT landcover WMS fixture: selecting the parent group verifies group-dimension metadata, while selecting the three child layers directly verifies the group-dimension flag is absent; `suite-time-slider` also verifies the group and all three children are registered in the time-slider store.
 - Added regression tests covering the feature-info geometry fallback when `outFields` omits the geometry column, and `zoomToExtent` behavior for empty, single-feature, and many-feature layer cases.
 - Added automated `suite-layer` test `testSetLayerVisibleIncludingParents` (LayerTester) for the hidden-layers feature (#3635): adds a GeoJSON group with a visible child, hides the parent group, and asserts the child is flagged hidden on the map (`getStoreLayerIsHiddenOnMap`) while staying in scale range (`getStoreLayerInVisibleRangeLayerPaths`) — i.e. it would appear in the panels' "Hidden layers" section rather than be filtered out as out-of-range — then calls `LayerController.setLayerVisibleIncludingParents()` and asserts the parent crawl restores the child's effective visibility (moving it back to the available list). Bumped `suite-layer` `getTestsTotalFinal` 42 → 43 to include the new test; `test-catalog.md` and `00-automated-suite.md` already read 43 and now match the actual count.
 - Added automated `suite-ui` test `testControllerGetFooterHeight` (UITester) proving a non-React consumer can reach the combined store+DOM getter `UIController.getFooterHeight()` via the controller registry (`suite-ui` 1 → 2; `00-automated-suite` total 273 → 274; `test-catalog` declared total 229 → 230). Introduced `getGVRootDataAttribute` (dom-helper, DOM half) and `UIController.getFooterHeight()` (combines the consumer `data-footer-height` attribute with the store `appHeight` fallback); footer-bar now reads the attribute via `getGVRootDataAttribute` while keeping the reactive `useStoreAppHeight` hook (#3221)
@@ -328,4 +340,8 @@ _(Properties added, renamed, or with changed defaults)_
 
 ## Notes for Release Notes Author
 
-_(Anything the release note author should highlight)_
+Highlight the temporal-layer improvements: WMS group dimensions now synchronize supported sibling layers with the time slider, normalized metadata retains ISO 8601 interval durations, and Layer Info exposes the resulting temporal metadata. Layer Settings also provides metadata-aware WMS style and ESRI Image raster-function selection.
+
+Call out the new hidden-layer workflow in Details, Data Table, Chart, and Time Slider panels, including parent visibility restoration and accessible list behavior. The release includes regression coverage for WMS group dimensions, duplicate WMS group names, large ESRI Feature loading, and ESRI Dynamic geometry pairing.
+
+Also highlight that time-slider navigation now treats month and year intervals as calendar units, preserving dates across leap years, while long daily ranges remain responsive through sparse marks and calendar snapping.

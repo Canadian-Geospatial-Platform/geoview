@@ -2,7 +2,7 @@
 
 > **Auto-maintained** — This file must be updated each time a test is added, removed, or renamed in the `geoview-test-suite` package.
 
-This catalog lists every test in the GeoView test suite, organized by group, suite, and tester. Each entry shows the test method name, type (`test` for happy-path, `testError` for true-negative), and the runtime description string.
+This catalog lists every test in the GeoView test suite, organized by group, suite, and tester. Each entry shows the test method name, type (`test` for happy-path, `testError` for true-negative), and the runtime description string. The Summary total is the number of declared test methods; the release checklist reports executions and counts `suite-layer` twice because it runs on both EPSG:3978 and EPSG:3857 maps.
 
 ---
 
@@ -76,7 +76,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 14         | Parallel                    |
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 44         | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 46         | Mixed parallel + sequential |
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 8          | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`                                                                               | 41         | Fully sequential            |
@@ -85,8 +85,8 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
-| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **239**    |                             |
+| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
+| **Total**         |                         |                                                                                                 | **245**    |                             |
 
 ---
 
@@ -393,8 +393,10 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 10  | `testAddWMSLayerWithOWSMundialis`       | test      | Test Adding WMS Mundialis on map...                                                  |
 | 11  | `testAddWMSLayerWithDatacubeMSI`        | test      | Test Adding WMS Datacube MSI on map...                                               |
 | 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
-| 13  | `testAddWMSDuplicateGroupNames`         | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)            |
-| 14  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
+| 13  | `testAddWMSLayerLandcoverGroupDimension`         | test      | Test Adding WMS Landcover group with a group time dimension...                     |
+| 14  | `testAddWMSLayerLandcoverGroupDimensionNegative` | test      | Test Adding WMS Landcover sub-layers without a group time dimension...             |
+| 15  | `testAddWMSDuplicateGroupNames`                   | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)         |
+| 16  | `testAddWMSBadUrl`                                | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
 #### 2.1.5 WFS — Lifecycle
 
@@ -835,3 +837,4 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | --- | --------------------- | ---- | ----------------------------------------------------------------------------------- |
 | 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                        |
 | 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges... |
+| 3   | `testWMSLayerLandcoverGroupDimensionFlags` | test | Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers... |

@@ -139,7 +139,7 @@ export class GeochartTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
-        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathRemove);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathRemove);
       }
     );
   }
@@ -171,13 +171,9 @@ export class GeochartTester extends GVAbstractTester {
     await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
     // Set the footer tab to Geochart
-    test.addStep(`Setting active footerbar tab to geochart...`);
+    test.addStep(`Setting active footerbar tab to geochart and wait for UI to refresh...`);
     this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
-    await GVAbstractTester.waitForReactIdle();
-
-    // Wait for the React UI to actually pick up on the store update
-    test.addStep(`Waiting on UI to refresh and the active footer tab to be geochart...`);
-    await GVAbstractTester.waitForReactIdle();
+    await this.waitForFooterTabSelected('geochart');
 
     // Select the right layer path
     test.addStep(`Selecting the geochart for the added layer...`);

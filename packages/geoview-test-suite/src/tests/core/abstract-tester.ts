@@ -614,6 +614,50 @@ export abstract class AbstractTester {
   }
 
   /**
+   * Returns a promise that resolves when an element matching the given class selector exists.
+   *
+   * Resolves immediately if the parent or one of its descendants already matches. Otherwise, observes class attribute changes
+   * within the parent until an element matches the selector.
+   *
+   * @param selector - The CSS class selector to match
+   * @param parent - Optional parent element to observe (default: document.body)
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves with the matched element
+   */
+  static waitForClass(selector: string, parent?: Element, timeout?: number): Promise<Element> {
+    const root = parent ?? document.body;
+    const findMatch = (): Element | undefined => (root.matches(selector) ? root : (root.querySelector(selector) ?? undefined));
+
+    const existing = findMatch();
+    if (existing) {
+      return Promise.resolve(existing);
+    }
+
+    return new Promise<Element>((resolve, reject) => {
+      const state = { resolved: false };
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        const element = findMatch();
+        if (element) {
+          state.resolved = true;
+          observer.disconnect();
+          resolve(element);
+        }
+      });
+      observer.observe(root, { attributes: true, attributeFilter: ['class'], subtree: true });
+
+      if (timeout !== undefined) {
+        setTimeout(() => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForClass timed out after ${timeout}ms waiting for "${selector}"`));
+        }, timeout);
+      }
+    });
+  }
+
+  /**
    * Returns a promise that resolves when the given element has non-empty text content.
    *
    * Resolves immediately if the element already has text content. Otherwise, delegates to waitForDomChange

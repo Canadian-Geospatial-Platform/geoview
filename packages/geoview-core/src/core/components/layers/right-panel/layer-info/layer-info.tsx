@@ -7,18 +7,20 @@ import { Box, Divider, Typography } from '@/ui';
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';
 import { isLocalhost, isValidUUID } from '@/core/utils/utilities';
+import type { RangeItems } from '@/core/utils/date-mgt';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/states/app-state';
 import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import { useStoreDataTableFilter } from '@/core/stores/states/data-table-state';
 import {
+  useStoreLayerBounds,
+  useStoreLayerBounds4326,
+  useStoreLayerDataProjectionCode,
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateFormatShort,
   useStoreLayerDisplayDateTimezone,
-  useStoreLayerBounds,
-  useStoreLayerBounds4326,
   useStoreLayerEntryType,
   useStoreLayerFilter,
   useStoreLayerFilterClass,
@@ -30,7 +32,6 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
-  useStoreLayerDataProjectionCode,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -150,6 +151,34 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
     return name;
   }, [memoLocalizedLayerType, schemaTag, url, t]);
 
+  /**
+   * Renders temporal range values or minimum, maximum, and duration information.
+   *
+   * @param rangeItems - Temporal range information to render
+   * @param isDiscrete - Whether the range contains discrete values
+   * @returns The temporal range information, or null when the range is empty
+   */
+  const renderTemporalRangeInfo = (rangeItems: RangeItems, isDiscrete: boolean): JSX.Element | null => {
+    if (!rangeItems.range[0]) return null;
+
+    if (isDiscrete && !rangeItems.durationInterval) {
+      return <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${rangeItems.range.join(', ')}`}</Box>;
+    }
+
+    return (
+      <>
+        <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${rangeItems.range[0]} / ${rangeItems.range[rangeItems.range.length - 1]}`}</Box>
+        <Box>
+          {t('layers.layerTimeDimensionRangeDurationInterval')} (
+          <a href={`${GeoUtilities.ISO_8601_REF_DIMENSION_INTERVAL}`} target="_blank" rel="noopener noreferrer">
+            {t('layers.layerTimeDimensionRangeDurationIntervalSpec')}
+          </a>
+          ): {rangeItems.durationInterval ?? <em>{t('layers.layerTimeDimensionRangeDurationIntervalSpecNotSet')}</em>}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Box sx={memoSxClasses.layerInfo}>
       <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
@@ -209,7 +238,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         layerDisplayDateTimezone ||
         layerTimeDimension?.field) && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalSettings')}</Typography>
+          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalInformation')}</Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
             {layerDisplayDateFormat && <Box>{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>}
             {layerDisplayDateFormatShort && (
@@ -218,9 +247,12 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {layerDateTemporalMode && <Box>{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
             {layerDisplayDateTimezone && <Box>{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
             {layerTimeDimension?.field && <Box>{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
-            {layerTimeDimension?.rangeItems?.range?.[0] && (
-              <Box>{`Min/Max: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+            {layerTimeDimension?.rangeItems.type && (
+              <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems.type}`}</Box>
             )}
+            {layerTimeDimension &&
+              renderTemporalRangeInfo(layerTimeDimension.rangeItems, layerTimeDimension.rangeItems.type === 'discrete')}
+            <Box>{`${t('layers.layerIsGroupDimension')}: ${layerTimeDimension?.isGroupDimension ?? false}`}</Box>
           </Box>
         </Box>
       )}
@@ -242,9 +274,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
               <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
             )}
-            {timeSliderDimension?.range?.[0] && (
-              <Box>{`Min/Max: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
-            )}
+            {renderTemporalRangeInfo(timeSliderDimension.rangeItems, timeSliderDimension.discreteValues)}
           </Box>
         </Box>
       )}
