@@ -75,6 +75,16 @@ export function range(start: number, end: number, step = 1): number[] {
 }
 
 /**
+ * Normalizes a value to an array.
+ *
+ * @param value - The value to normalize
+ * @returns The value as an array
+ */
+export function toArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
+/**
  * Converts a string to camelCase.
  *
  * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
@@ -1218,7 +1228,7 @@ export function findPropertyByRegexPath<T = Record<string, unknown>>(
   objectItem: unknown | undefined,
   patterns: RegExp | RegExp[]
 ): T | T[] | undefined {
-  const regexes = Array.isArray(patterns) ? patterns : [patterns];
+  const regexes = toArray(patterns);
 
   let current = objectItem;
 

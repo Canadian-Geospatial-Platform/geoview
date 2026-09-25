@@ -11,6 +11,7 @@ import 'dayjs/locale/fr';
 import type { TypeDisplayLanguage, DisplayDateMode } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
 import { InvalidDateError, InvalidTimezoneError, InvalidTimeDimensionError } from '@/core/exceptions/core-exceptions';
+import { toArray } from './utilities';
 import { logger } from './logger';
 
 /** Extend the Dayjs utility. */
@@ -1410,7 +1411,7 @@ export abstract class DateMgt {
   static #buildInputFormats(inputFormat?: string | string[]): string[] {
     if (!inputFormat) return this.#DEFAULT_INPUT_FORMATS;
     if (inputFormat === this.#DEFAULT_INPUT_FORMATS) return this.#DEFAULT_INPUT_FORMATS;
-    return Array.isArray(inputFormat) ? [...inputFormat, ...this.#DEFAULT_INPUT_FORMATS] : [inputFormat, ...this.#DEFAULT_INPUT_FORMATS];
+    return [...toArray(inputFormat), ...this.#DEFAULT_INPUT_FORMATS];
   }
 
   // #endregion STATIC PRIVATE METHODS
