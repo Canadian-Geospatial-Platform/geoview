@@ -367,7 +367,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   async #fetchAndProcessSingleWmsMetadata(
@@ -464,7 +464,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param metadataUrl - The metadataAccessPath
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the execution is completed
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   async #fetchXmlServiceMetadata(
@@ -1114,6 +1114,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layers - An array of layer configurations to fetch metadata for
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns An array of metadata fetch promises, one per unique layer config
+   * @throws {PromiseRejectErrorWrapper} Wrapper containing the layer configuration when the metadata and the internal cause for the error.
    */
   static #createLayerMetadataPromises(
     url: string,
