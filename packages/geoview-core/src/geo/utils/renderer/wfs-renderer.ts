@@ -33,6 +33,8 @@ import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
  * Class used to interpret a WFS, via its WMS equivalent, and build a Geoview Renderer style.
  */
 export abstract class WfsRenderer {
+  // #region STATIC PUBLIC METHODS
+
   /**
    * Builds a layer style settings object from a WMS Styled Layer Descriptor (SLD).
    *
@@ -61,16 +63,14 @@ export abstract class WfsRenderer {
     // If couldn't read
     if (!featureTypeStyleRaw) throw new NotSupportedError(`Invalid StyledLayerDescriptor (SLD). Check the 'GetStyles' response.`);
 
-    const firstFeatureTypeStyle = Array.isArray(featureTypeStyleRaw) ? featureTypeStyleRaw[0] : featureTypeStyleRaw;
+    // SLD allows several feature type styles. Preserve all rules because a later style can
+    // contain symbolizers that complement the first style rather than replace it.
+    const featureTypeStyles = toArray(featureTypeStyleRaw);
+    const rules = featureTypeStyles.flatMap((featureTypeStyle) => toArray(featureTypeStyle['se:Rule']));
 
-    // Read rules
-    const rulesRaw = firstFeatureTypeStyle['se:Rule'];
-    const rules = toArray(rulesRaw);
+    if (rules.length === 0) throw new NotSupportedError('Unsupported Layer styling: no rules were found in the SLD');
 
-    // Default geometry type
-    let geomType: TypeStyleGeometry = 'Point';
-
-    const infos: TypeLayerStyleConfigInfo[] = [];
+    const infosByGeometry: Partial<Record<TypeStyleGeometry, TypeLayerStyleConfigInfo[]>> = {};
     const fields: string[] = [];
     let hasClassBreaks = false;
     let hasDefault = false;
@@ -84,7 +84,7 @@ export abstract class WfsRenderer {
       if (userRule['ogc:Filter']) {
         // Get filter information
         filterInfo = this.#readFilterFromRule(userRule['ogc:Filter']);
-        hasClassBreaks = filterInfo.hasGreaterOrLessThan;
+        hasClassBreaks ||= filterInfo.hasGreaterOrLessThan;
 
         // Compile the fields
         const propertyNames = toArray(filterInfo.propertyName);
@@ -95,86 +95,140 @@ export abstract class WfsRenderer {
         hasDefault = true;
       }
 
-      // Check if it's a PointSymbolizer
-      let theSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      // Parse every symbolizer in the rule. Mixed-geometry SLDs commonly contain more than
+      // one symbolizer, and each one must be retained under its own Geoview geometry key.
       let pointSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
       let lineSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
       let polygonSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
       if (userRule['se:PointSymbolizer']) {
-        // Process point symbolizers
         pointSymbolizer = this.#buildLayerStyleInfoPointSymbolizer(userRule['se:PointSymbolizer']);
-        theSymbolizer = pointSymbolizer;
       }
 
       if (userRule['se:LineSymbolizer']) {
-        // Line geometry type
-        geomType = 'LineString';
-
-        // Process line symbolizers
         lineSymbolizer = this.#buildLayerStyleInfoLineSymbolizer(userRule['se:LineSymbolizer']);
-        theSymbolizer = lineSymbolizer;
       }
 
       if (userRule['se:PolygonSymbolizer']) {
-        // Polygon geometry type
-        geomType = 'Polygon';
-
-        // Process polygon symbolizers
         polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
-        theSymbolizer = polygonSymbolizer;
       }
 
-      // If both a polygon and a line symbolizer for the same rule, combine
       if (polygonSymbolizer && lineSymbolizer) {
-        // Combine
+        // A polygon rule can carry both a fill and an outline. Preserve the line's stroke
+        // on the polygon while still retaining the line entry for mixed geometries.
         const polygonSymbolSettings = polygonSymbolizer.settings as TypePolygonVectorConfig;
         const lineSymbolSettings = lineSymbolizer.settings as TypeLineStringVectorConfig;
         polygonSymbolSettings.color = lineSymbolSettings.stroke.color;
         polygonSymbolSettings.stroke = lineSymbolSettings.stroke;
-        theSymbolizer = polygonSymbolizer;
       }
 
-      // If the symbolizer is defined
-      if (theSymbolizer) {
-        // Set the label and values now completing the 'TypeLayerStyleConfigInfo'
-        theSymbolizer.label = label;
-        theSymbolizer.values = filterInfo?.values || [];
-        theSymbolizer.valuesConditions = filterInfo?.valuesConditions;
+      const symbolizersByGeometry: Array<[TypeStyleGeometry, Partial<TypeLayerStyleConfigInfo> | undefined]> = [
+        ['Point', pointSymbolizer],
+        ['LineString', lineSymbolizer],
+        ['Polygon', polygonSymbolizer],
+      ];
 
-        // Add it
-        infos.push(theSymbolizer as TypeLayerStyleConfigInfo);
-      }
+      symbolizersByGeometry.forEach(([geometry, symbolizer]) => {
+        if (!symbolizer?.settings) return;
+
+        const completedSymbolizer: TypeLayerStyleConfigInfo = {
+          ...symbolizer,
+          label,
+          values: filterInfo?.values || [],
+          valuesConditions: filterInfo?.valuesConditions,
+          visible: symbolizer.visible ?? true,
+          settings: symbolizer.settings,
+        };
+        const geometryInfos = infosByGeometry[geometry] ?? (infosByGeometry[geometry] = []);
+        geometryInfos.push(completedSymbolizer);
+      });
     });
 
-    // If no infos
-    if (infos.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
+    const geometryTypes = Object.keys(infosByGeometry) as TypeStyleGeometry[];
+    if (geometryTypes.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
 
     // Read the type from the symbolizers
     const type = this.#readTypeFromSymbolizers(rules, hasClassBreaks, fields);
 
     // The settings
-    const styleSettings = {
-      type,
-      fields,
-      hasDefault,
-      info: infos,
-    } as unknown as TypeLayerStyleSettings;
-
-    // Compile the style settings into the layer style for the geometry type
     const layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> = {};
-    layerStyle[geomType] = styleSettings;
+    geometryTypes.forEach((geometry) => {
+      const info = infosByGeometry[geometry];
+      if (!info) return;
+
+      layerStyle[geometry] = {
+        type,
+        fields,
+        hasDefault,
+        info,
+      };
+    });
 
     // Special case:
     // If processing a polygon geometry type and could only find a 'LineString', make it a 'Polygon' instead with transparent fill
     if ((geomTypeMetadata === 'Polygon' || geomTypeMetadata === 'MultiPolygon') && layerStyle['LineString'] && !layerStyle['Polygon']) {
       // Replace the LineString for a Polygon/MultiPolygon
-      layerStyle[geomTypeMetadata] = WfsRenderer.#copyLineStyleForPolygon(styleSettings);
+      layerStyle[geomTypeMetadata] = WfsRenderer.#copyLineStyleForPolygon(layerStyle['LineString']);
       delete layerStyle.LineString;
     }
 
     // Return the information
     return layerStyle as Record<TypeStyleGeometry, TypeLayerStyleSettings>;
   }
+
+  /**
+   * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
+   *
+   * This function handles:
+   *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
+   *  - Boolean operators (AND, OR, NOT)
+   *  - "Always false" queries such as `1=0` or `false`
+   * If the filter string is an "always false" expression, it generates a minimal
+   * OGC filter using the provided `fieldNameForNegativeQueries` to ensure a valid
+   * WFS request that returns no features.
+   * For normal filters, it:
+   *  1. Parses the SQL string into an AST.
+   *  2. Converts the AST into an OpenLayers filter object.
+   *  3. Serializes the filter object into XML suitable for WFS requests.
+   * Only the inner children of the `<Filter>` element are returned; you can wrap them
+   * in `<ogc:Filter>` as needed for a full WFS request.
+   *
+   * @param filterStr - The SQL-like filter expression to convert
+   * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
+   * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
+   * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
+   *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
+   */
+  static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
+    // Trim the filter
+    const filterStrTrimmed = filterStr.trim();
+
+    // Parse the SQL-like filter expression
+    const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
+
+    // Convert into filter object
+    const olFilter = this.#astToOlFilter(ast, fieldNameForNegativeQueries);
+
+    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 1.1.0
+    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '1.1.0';
+
+    // Create the filter in XML format
+    const filterNode = writeFilter(olFilter, sanitizedVersion);
+
+    // Only the children, we'll add the <Filter> node later
+    const childrenXml = Array.from(filterNode.childNodes)
+      .map((child) => new XMLSerializer().serializeToString(child))
+      .join('');
+
+    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
+    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
+
+    // Return it
+    return childrenXmlDecoded;
+  }
+
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Parses a user style rule filter and extracts normalized filter information.
@@ -448,6 +502,7 @@ export abstract class WfsRenderer {
     let globalSize = 1;
     let globalMaxViewBox = 0;
     let globalFromSVGsOrMarkers: 'svg' | 'marker' | undefined;
+    let directIcon: DirectIconInfo | undefined;
     const allGraphicsInfo: GraphicInfo[] = [];
     symbolizers.forEach((symbol) => {
       // Parse the graphics
@@ -458,7 +513,10 @@ export abstract class WfsRenderer {
         mimeType: symMime,
         fromSVGsOrMarkers: fromGraphic,
         rotation: graphicRotation,
+        directIcon: parsedDirectIcon,
       } = this.#parseGraphic(symbol['se:Graphic']);
+
+      if (parsedDirectIcon) directIcon ??= parsedDirectIcon;
 
       // If no graphics info gathered
       if (graphicsInfo.length === 0) return; // Skip
@@ -487,6 +545,17 @@ export abstract class WfsRenderer {
     });
 
     // If no graphics info gathered at all
+    if (allGraphicsInfo.length === 0 && directIcon) {
+      return {
+        visible: true,
+        settings: {
+          mimeType: directIcon.mimeType,
+          src: directIcon.src,
+          type: 'iconSymbol',
+        },
+      } as Partial<TypeLayerStyleConfigInfo>;
+    }
+
     if (allGraphicsInfo.length === 0) return undefined;
 
     // Merge the SVGs togeter
@@ -1011,7 +1080,7 @@ export abstract class WfsRenderer {
     const rotation = rotationNode ? Number(rotationNode?.['ogc:Literal']) : undefined;
 
     // Check if we have ExternalGraphics (SVGs)
-    const externalGraphics = graphic?.['se:ExternalGraphic'] ?? [];
+    const externalGraphics = toArray(graphic?.['se:ExternalGraphic'] ?? []);
     if (externalGraphics.length > 0) {
       // Redirect building the SVGs
       const result = this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
@@ -1051,12 +1120,29 @@ export abstract class WfsRenderer {
   static #parseGraphicsGatherSVGs(graphics: TypeUserStyleExternalGraphic[], sizeGraphic: number): ExternalGraphicsInfo {
     let maxViewBox = 0;
     let mimeType: string | undefined;
+    let directIcon: DirectIconInfo | undefined;
     const graphicsInfo: GraphicInfo[] = [];
 
     graphics.forEach((graphic) => {
       mimeType ??= graphic['se:Format'];
       const imgSrc = graphic['se:OnlineResource']['@attributes']['xlink:href'];
-      const imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc);
+      const graphicMimeType = graphic['se:Format'] || 'image/svg+xml';
+      const isDataUri = /^data:/i.test(imgSrc);
+      const isDirectSource = /^(https?:\/\/|blob:|\/)/i.test(imgSrc) || !/svg/i.test(graphicMimeType);
+
+      if (isDirectSource && graphics.length === 1) {
+        directIcon = { src: imgSrc, mimeType: graphicMimeType };
+        return;
+      }
+
+      let imgSrcRaw: string;
+      if (isDataUri && /;base64,/i.test(imgSrc)) {
+        imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc.substring(imgSrc.indexOf(',') + 1));
+      } else if (isDataUri) {
+        imgSrcRaw = decodeURIComponent(imgSrc.substring(imgSrc.indexOf(',') + 1));
+      } else {
+        imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc);
+      }
 
       // If invalid SVG content (still has dynamic functions)
       if (imgSrcRaw.includes('param(')) return; // Skip
@@ -1090,7 +1176,7 @@ export abstract class WfsRenderer {
     });
 
     // Return the information
-    return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'svg' };
+    return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'svg', directIcon };
   }
 
   /**
@@ -1151,7 +1237,8 @@ export abstract class WfsRenderer {
   static #parseGraphicsMarkers(marker: TypeUserStyleMark, sizeGraphic: number): ExternalGraphicsInfo {
     const graphicsInfo: GraphicInfo[] = [];
 
-    const wellKnownName = marker['se:WellKnownName'] ?? 'circle';
+    const wellKnownNameRaw = marker['se:WellKnownName'] ?? 'circle';
+    const wellKnownName = typeof wellKnownNameRaw === 'string' ? wellKnownNameRaw : (wellKnownNameRaw['#text'] ?? 'circle');
 
     // Stroke params (inside mark or symbolizer.stroke)
     const strokeObj = marker['se:Stroke'];
@@ -1421,59 +1508,6 @@ export abstract class WfsRenderer {
     }
 
     return serialize(xml.documentElement);
-  }
-
-  // #region FILTER TO OGC_FILTER
-
-  /**
-   * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
-   *
-   * This function handles:
-   *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
-   *  - Boolean operators (AND, OR, NOT)
-   *  - "Always false" queries such as `1=0` or `false`
-   * If the filter string is an "always false" expression, it generates a minimal
-   * OGC filter using the provided `fieldNameForNegativeQueries` to ensure a valid
-   * WFS request that returns no features.
-   * For normal filters, it:
-   *  1. Parses the SQL string into an AST.
-   *  2. Converts the AST into an OpenLayers filter object.
-   *  3. Serializes the filter object into XML suitable for WFS requests.
-   * Only the inner children of the `<Filter>` element are returned; you can wrap them
-   * in `<ogc:Filter>` as needed for a full WFS request.
-   *
-   * @param filterStr - The SQL-like filter expression to convert
-   * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
-   * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
-   * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
-   *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
-   */
-  static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
-    // Trim the filter
-    const filterStrTrimmed = filterStr.trim();
-
-    // Parse the SQL-like filter expression
-    const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
-
-    // Convert into filter object
-    const olFilter = this.#astToOlFilter(ast, fieldNameForNegativeQueries);
-
-    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 1.1.0
-    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '1.1.0';
-
-    // Create the filter in XML format
-    const filterNode = writeFilter(olFilter, sanitizedVersion);
-
-    // Only the children, we'll add the <Filter> node later
-    const childrenXml = Array.from(filterNode.childNodes)
-      .map((child) => new XMLSerializer().serializeToString(child))
-      .join('');
-
-    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
-    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
-
-    // Return it
-    return childrenXmlDecoded;
   }
 
   /**
@@ -1831,7 +1865,7 @@ export abstract class WfsRenderer {
       `.trim();
   }
 
-  // #endregion
+  // #endregion STATIC PRIVATE METHODS
 }
 
 type ExternalGraphicsInfo = {
@@ -1841,6 +1875,14 @@ type ExternalGraphicsInfo = {
   mimeType?: string;
   fromSVGsOrMarkers: 'svg' | 'marker';
   rotation?: number;
+  directIcon?: DirectIconInfo;
+};
+
+type DirectIconInfo = {
+  src: string;
+  mimeType: string;
+  width?: number;
+  height?: number;
 };
 
 type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number; sizeGraphic: number; isMarker: boolean };

@@ -1225,7 +1225,8 @@ export abstract class GeoviewRenderer {
    */
   static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
     const iconOptions: IconOptions = {};
-    iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
+    const source = settings.src.trim();
+    iconOptions.src = /^(data:|https?:\/\/|blob:|\/)/i.test(source) ? source : `data:${settings.mimeType};base64,${source}`;
     if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
     if (settings.offset !== undefined) iconOptions.offset = settings.offset;
     if (settings.rotation !== undefined) iconOptions.rotation = (settings.rotation * Math.PI) / 180;
