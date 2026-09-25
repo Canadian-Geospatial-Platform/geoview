@@ -5,10 +5,7 @@ export type SwipeOrientation = 'horizontal' | 'vertical';
 export type SwipeSide = 'left' | 'right' | 'up' | 'down';
 
 /** A single layer entry participating in the swiper, with its visible side. */
-export type SwiperLayerEntry = {
-  /** The layer path participating in the swiper. */
-  layerPath: string;
+export type { TypeSwiperLayerEntry as SwiperLayerEntry } from 'geoview-core/core/stores/states/swiper-state';
 
-  /** The visible side of the swiper bar for this layer. */
-  side: SwipeSide;
-};
+/** The persisted Swiper package configuration. */
+export type { TypeSwiperConfig as SwiperConfig } from 'geoview-core/core/stores/states/swiper-state';
