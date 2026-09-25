@@ -63,7 +63,7 @@ export class EsriUtilities {
    * @param displayDateMode - Optional display date mode
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer configuration has its metadata processed
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   static async initLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(
     layerConfig: T,
@@ -783,6 +783,7 @@ export class EsriUtilities {
    * @param baseUrl - The base service URL for constructing the parent query URL
    * @param layerConfig - The layer configuration (used for logging)
    * @param abortSignal - Optional abort signal for request cancellation
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   static async #inheritAnnotationSubLayerMetadata(
     layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage,
