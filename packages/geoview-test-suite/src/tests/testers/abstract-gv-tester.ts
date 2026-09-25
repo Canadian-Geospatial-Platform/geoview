@@ -1274,7 +1274,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @returns A GeoJSON group layer configuration with nested initial settings
    */
   static createGeoJsonPointsSettings(geoviewLayerId: string): TypeGeoviewLayerConfig {
-    return {
+    const layerConfig: unknown = {
       geoviewLayerId,
       geoviewLayerName: 'GeoJSON Sample',
       metadataAccessPath: './datasets/geojson/metadata.meta',
@@ -1309,7 +1309,9 @@ export abstract class GVAbstractTester extends AbstractTester {
           ],
         },
       ],
-    } as unknown as TypeGeoviewLayerConfig;
+    };
+
+    return layerConfig as TypeGeoviewLayerConfig;
   }
 
   // #endregion STATIC METHODS
