@@ -7,11 +7,12 @@
 } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
+import { toArray } from '@/core/utils/utilities';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
@@ -78,7 +79,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     // If metadata FeatureType isn't an array
     let featureTypes: TypeMetadataWFSFeatureTypeListFeatureType[] = metadata.FeatureTypeList
       .FeatureType as TypeMetadataWFSFeatureTypeListFeatureType[];
-    if (!Array.isArray(metadata.FeatureTypeList.FeatureType)) featureTypes = [metadata.FeatureTypeList.FeatureType];
+    featureTypes = toArray(metadata.FeatureTypeList.FeatureType);
 
     // Find the feature type for this layer
     const featureTypeForLayer = featureTypes.find((layerMetadata) => {
