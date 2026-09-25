@@ -1,6 +1,6 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Circle } from 'ol/style';
-import type { Geometry } from 'ol/geom';
+import type { Geometry, SimpleGeometry } from 'ol/geom';
 import { LineString, Point, Polygon, GeometryCollection } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
 import Icon from 'ol/style/Icon';
@@ -11,6 +11,7 @@ import type { Options as FillOptions } from 'ol/style/Fill';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
+import type { SketchCoordType } from 'ol/interaction/Draw';
 
 import { setAlphaColor } from '@/core/utils/utilities';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -208,6 +209,148 @@ export abstract class GeoviewRenderer {
    */
   static SVGStringToBase64(svgXML: string): string {
     return window.btoa(svgXML);
+  }
+
+  /**
+   * Creates a star polygon from a fixed SVG path and draw coordinates.
+   *
+   * The first coordinate is treated as the star center and the second as the radius/rotation handle.
+   * When a geometry is provided, it is updated in place for live sketch rendering.
+   *
+   * @param coordinates - Draw coordinates containing the center and outer handle
+   * @param geometry - Optional existing sketch geometry to update
+   * @returns The generated star polygon
+   */
+  static getStarGeometryFromSVG(coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon {
+    const svgPath = 'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
+    return this.svgPathToGeometry(svgPath, coordinates, geometry);
+  }
+
+  /**
+   * Converts an SVG path string to a polygon geometry with auto-centering.
+   *
+   * @param svgPath - SVG path string
+   * @param coordinates - Circle coordinate (center and outer edge)
+   * @param geometry - Optional intermediate geometry for display while expanding
+   * @returns The resulting polygon
+   */
+  static svgPathToGeometry(svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon {
+    const center = coordinates[0] as number[];
+    const last = coordinates[1] as number[];
+    const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
+    const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
+
+    // Parse the SVG path to get coordinates
+    const coords = this.svgPathToCoordinates(svgPath, [0, 0]);
+
+    // Find the bounding box to calculate center
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    coords.forEach((point) => {
+      minX = Math.min(minX, point[0]);
+      minY = Math.min(minY, point[1]);
+      maxX = Math.max(maxX, point[0]);
+      maxY = Math.max(maxY, point[1]);
+    });
+
+    // Calculate center of the SVG path
+    const svgCenterX = (minX + maxX) / 2;
+    const svgCenterY = (minY + maxY) / 2;
+
+    // Calculate the size of the SVG path
+    const svgWidth = maxX - minX;
+    const svgHeight = maxY - minY;
+    const svgSize = Math.max(svgWidth, svgHeight);
+
+    // Calculate scale factor to fit the shape within the radius
+    const scaleFactor = (radius * 2) / svgSize;
+
+    // Center, scale, and rotate the coordinates
+    const finalCoords = coords.map((point) => {
+      // Center the point
+      const centeredX = point[0] - svgCenterX;
+      const centeredY = point[1] - svgCenterY;
+
+      // Scale to fit within radius
+      const scaledX = centeredX * scaleFactor;
+      const scaledY = centeredY * scaleFactor;
+
+      // Rotate point
+      const x = scaledX * Math.cos(angle) - scaledY * Math.sin(angle);
+      const y = scaledX * Math.sin(angle) + scaledY * Math.cos(angle);
+
+      // Translate to target center
+      return [x + center[0], y + center[1]];
+    });
+
+    // Create or update geometry
+    if (!geometry) {
+      // eslint-disable-next-line no-param-reassign
+      geometry = new Polygon([finalCoords]);
+    } else {
+      geometry.setCoordinates([finalCoords]);
+    }
+
+    return geometry as Polygon;
+  }
+
+  /**
+   * Converts an SVG path string to an array of coordinates.
+   *
+   * @param pathData - SVG path string
+   * @param center - Center coordinates
+   * @returns Array of coordinates
+   */
+  static svgPathToCoordinates(pathData: string, center: number[]): number[][] {
+    const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
+    const coords: number[][] = [];
+    let currentPoint = [0, 0];
+
+    commands.forEach((cmd) => {
+      const type = cmd[0];
+      const values = cmd
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .filter((n) => !Number.isNaN(n));
+
+      if (type === 'M') {
+        // Absolute move
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i], values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'm') {
+        // Relative move
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'L') {
+        // Absolute line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i], values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'l') {
+        // Relative line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'Z' || type === 'z') {
+        // Close path - add first point again
+        if (coords.length > 0) {
+          coords.push([...coords[0]]);
+        }
+      }
+    });
+
+    // Apply center offset after all coordinates are calculated
+    return coords.map((point) => [point[0] + center[0], point[1] + center[1]]);
   }
 
   /**
