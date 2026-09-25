@@ -24,20 +24,10 @@ import type {
   TypeStrokeSymbolConfig,
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
+import { isNumeric, toArray } from '@/core/utils/utilities';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { isNumeric } from '@/core/utils/utilities';
-
-/**
- * Normalizes a value to an array. If the value is already an array, returns it as-is; otherwise wraps it in a single-element array.
- *
- * @param value - The value to normalize
- * @returns The value as an array
- */
-function toArray<T>(value: T | T[]): T[] {
-  return Array.isArray(value) ? value : [value];
-}
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Class used to interpret a WFS, via its WMS equivalent, and build a Geoview Renderer style.
