@@ -64,14 +64,14 @@
             "layerPath": "esriFeatureLYR4/0",
             "filterName": "Top 100 exploration projects in Canada",
             "enabled": true,
-            "collapsible": true,
             "defaultCollapsed": true,
             "attributes": [
               {
                 "fieldName": "province_en",
                 "displayLabel": "Province / Territory",
                 "filterType": "multiselect",
-                "enabled": true
+                "enabled": true,
+                "searchable": true
               },
               {
                 "fieldName": "commodity_group_en",
@@ -95,7 +95,6 @@
           {
             "layerPath": "historical-flood/0",
             "enabled": true,
-            "collapsible": false,
             "attributes": [
               {
                 "fieldName": "flood_cause",

@@ -33,7 +33,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Typography } = ui.elements;
+  const { Box, Typography, List, ListItem } = ui.elements;
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo((): SxStyles => {
@@ -106,16 +106,20 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.filterPanel}>
       <Box sx={memoSxClasses.filterLayerContent}>
-        {config.layers
-          .filter((layer) => layer.enabled)
-          .map((layer) => (
-            <LayerFilterSection
-              key={layer.layerPath}
-              layer={layer}
-              onFilterChange={(fieldName, value) => updateFilter(layer.layerPath, fieldName, value)}
-              onClearLayer={() => clearLayerFilters(layer.layerPath)}
-            />
-          ))}
+        <List>
+          {config.layers
+            .filter((layer) => layer.enabled)
+            .map((layer) => (
+              <ListItem key={layer.layerPath} sx={{ display: 'block' }}>
+                <LayerFilterSection
+                  key={layer.layerPath}
+                  layer={layer}
+                  onFilterChange={(fieldName, value) => updateFilter(layer.layerPath, fieldName, value)}
+                  onClearLayer={() => clearLayerFilters(layer.layerPath)}
+                />
+              </ListItem>
+            ))}
+        </List>
       </Box>
     </Box>
   );

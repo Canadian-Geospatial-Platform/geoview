@@ -11,8 +11,9 @@ The Filter Panel does not currently sync with other components like the layer li
 ## Features
 
 - **Multiple Filter Types**: Support for select, multiselect, range, and date filters
+- **Searchable Multiselect**: Optional search box to filter long checkbox value lists (`searchable: true`)
+- **Zoom to Filtered**: Per-layer button to zoom the map to the extent of features matching the active filters
 - **Theme-Aware**: Automatically adapts to GeoView's theme (geo.ca, light, dark)
-- **Auto-Apply or Manual**: Configure whether filters apply automatically or require user action
 - **Layer Organization**: Collapsible layer sections for clean UI
 - **Real-Time Updates**: Filters update the map in real-time using GeoView's LayerFilters system
 
@@ -28,11 +29,13 @@ Add the filter panel to your map configuration:
       "filter-panel": {
         "enabled": true,
         "isOpen": false,
+        "title": "Filter Layers",
         "layers": [
           {
-            "layerId": "my-layer-path",
-            "layerName": "My Layer",
+            "layerPath": "my-layer-path",
+            "filterName": "My Layer",
             "enabled": true,
+            "defaultCollapsed": false,
             "attributes": [
               {
                 "fieldName": "category",
@@ -57,16 +60,7 @@ Add the filter panel to your map configuration:
               }
             ]
           }
-        ],
-        "settings": {
-          "title": "Filter Layers",
-          "collapsible": true,
-          "defaultCollapsed": false,
-          "showApplyButton": false,
-          "showResetButton": true,
-          "autoApply": true,
-          "showFeatureCount": true
-        }
+        ]
       }
     }
   ]
@@ -96,9 +90,12 @@ Multiple-value checkbox list
   "displayLabel": "Category",
   "filterType": "multiselect",
   "enabled": true,
-  "defaultValues": []
+  "defaultValues": [],
+  "searchable": true
 }
 ```
+
+Set `searchable: true` to show a search box below the label for filtering long value lists. Off by default.
 
 ### Range
 Numeric min/max range
@@ -126,17 +123,12 @@ Date range selection
 }
 ```
 
-## Settings
+## Layer Actions
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `title` | string | "Filter Layers" | Panel title |
-| `collapsible` | boolean | true | Allow collapsing layer sections |
-| `defaultCollapsed` | boolean | false | Default collapsed state |
-| `showApplyButton` | boolean | false | Show apply button |
-| `showResetButton` | boolean | true | Show reset button |
-| `autoApply` | boolean | true | Auto-apply filters on change |
-| `showFeatureCount` | boolean | true | Show feature count after filtering |
+Each layer section has two buttons next to its header:
+
+- **Clear**: Resets all active filters for that layer. Disabled when the layer has no active filters.
+- **Zoom to Filtered**: Zooms the map to the extent of features currently matching that layer's active filters. Disabled when the layer has no active filters. Shows a warning notification instead of erroring out when no feature currently matches.
 
 ## Usage
 

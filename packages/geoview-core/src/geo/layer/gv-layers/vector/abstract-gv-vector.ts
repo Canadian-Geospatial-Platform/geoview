@@ -467,6 +467,49 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
+   * Gets the extent of all currently loaded features that satisfy the layer's active filters.
+   *
+   * Vector features are always loaded client-side, so this evaluates each feature against the same
+   * combined filter equation (initial, class, data, panel, and time) used to style/hide features on the map.
+   *
+   * @param outProjection - The output projection for the extent
+   * @returns A promise that resolves with the extent of the features matching the active filters
+   * @throws {NoExtentError} When no loaded feature satisfies the active filters
+   */
+  override onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent> {
+    // Get the OpenLayers source (not the configured source property)
+    const source = this.getOLSource();
+    const srcProjection = source.getProjection();
+    const filterEquation = this.getLayerFilters().getFilterEquation();
+
+    // Determine max extent from the features that respect the active filters
+    let calculatedExtent: Extent | undefined;
+    source.getFeatures().forEach((feature) => {
+      if (!GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation)) return;
+
+      // Get the geometry
+      const geom = feature.getGeometry();
+      if (geom) {
+        // Get the extent
+        let extent = geom.getExtent();
+        if (srcProjection) {
+          // Make sure to project the extent in the wanted projection
+          extent = Projection.transformExtentFromProj(extent, srcProjection, outProjection);
+        }
+
+        // Union it into the calculated extent so far
+        calculatedExtent = GeoUtilities.getExtentUnion(calculatedExtent, extent);
+      }
+    });
+
+    // If no calculated extent
+    if (!calculatedExtent) throw new NoExtentError(this.getLayerPath());
+
+    // Resolve
+    return Promise.resolve(calculatedExtent);
+  }
+
+  /**
    * Sets the layer style.
    *
    * @param style - The layer style

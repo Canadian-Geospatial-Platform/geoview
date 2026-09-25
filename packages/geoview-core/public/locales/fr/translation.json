@@ -519,6 +519,7 @@
     "filterMap": "Filtrer la carte",
     "stopFilterMap": "Arrêter le filtrage de la carte",
     "clearFilters": "Effacer les filtres",
+    "zoomToFilteredExtent": "Zoomer sur l'étendue filtrée",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",
     "enlargeBtn": "Agrandir",
@@ -550,7 +551,8 @@
   "filterPanel": {
     "errorRegistrationTimeout": "Erreur de délai d'attente du panneau de filtres : La couche '{{layerName}}' a mis trop de temps à s'enregistrer",
     "errorFilterPanelQuery": "Erreur de requête du panneau de filtres : La couche '{{layerName}}' n'a pas pu être interrogée",
-    "errorFilterPanelClear": "Erreur de nettoyage du panneau de filtres : La couche '{{layerName}}' n'a pas pu effacer les filtres"
+    "errorFilterPanelClear": "Erreur de nettoyage du panneau de filtres : La couche '{{layerName}}' n'a pas pu effacer les filtres",
+    "warningNoFilteredExtent": "Aucun élément ne correspond actuellement aux filtres actifs pour la couche '{{layerName}}' - rien à zoomer"
   },
   "guide": {
     "title": "Guide",

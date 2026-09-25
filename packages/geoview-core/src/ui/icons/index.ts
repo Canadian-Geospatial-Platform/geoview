@@ -137,6 +137,7 @@ export {
   Warning as WarningIcon,
   WhereToVote as ClickMapMarker,
   ZoomIn as ZoomInSearchIcon,
+  ZoomInMap as ZoomToFilteredExtentIcon,
   ZoomOut as ZoomOutSearchIcon,
 } from '@mui/icons-material';
 
