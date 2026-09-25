@@ -6,6 +6,25 @@ import { PluginStateUninitializedError } from '@/core/exceptions/geoview-excepti
 import { logger } from '@/core/utils/logger';
 
 // #region INTERFACE DEFINITION
+/** A single layer entry participating in the swiper, with its visible side. */
+export type TypeSwiperLayerEntry = {
+  /** The layer path participating in the swiper. */
+  layerPath: string;
+  /** The visible side of the swiper bar for this layer. */
+  side: SwipeSide;
+};
+
+/** Represents the persisted Swiper package configuration. */
+export type TypeSwiperConfig = {
+  /** The orientation of the swiper divider. */
+  orientation: SwipeOrientation;
+
+  /** Whether users can customize the swiper from layer settings. */
+  interactive: boolean;
+
+  /** The configured layers and their visible sides. */
+  layers: TypeSwiperLayerEntry[];
+};
 
 /**
  * Represents the Swiper Zustand store slice.
