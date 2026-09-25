@@ -55,7 +55,7 @@ import {
   getStoreMapConfigViewSettings,
   getStoreMapCurrentBasemapOptions,
   getStoreMapHighlightedFeatures,
-  getStoreMapHighlightedFeaturesByUid,
+  getStoreMapHighlightedFeaturesExcludingUid,
   getStoreMapHomeView,
   getStoreMapInitialView,
   getStoreMapInteraction,
@@ -626,8 +626,7 @@ export class MapController extends AbstractMapViewerController {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       this.getMapViewer().featureHighlight.highlightFeature(feature);
 
-      // Save in store
-      // TODO: CHECK - What is this doing? Just refreshing the highlighted features with the same list?
+      // Track the highlighted feature so it can be removed by uid later.
       setStoreMapHighlightedFeatures(this.getMapId(), [...getStoreMapHighlightedFeatures(this.getMapId()), feature]);
     }
 
@@ -651,9 +650,8 @@ export class MapController extends AbstractMapViewerController {
       } else {
         this.getMapViewer().featureHighlight.removeHighlight(feature.uid!);
 
-        // Get highlighted features from the store
-        // TODO: CHECK - Why are we getting the features to resave them right after? Just to trigger a store update?
-        highlightedFeatures = getStoreMapHighlightedFeaturesByUid(this.getMapId(), feature.uid);
+        // Keep all other highlighted features in the store after removing this one from the overlay.
+        highlightedFeatures = getStoreMapHighlightedFeaturesExcludingUid(this.getMapId(), feature.uid);
       }
 
       // Save in store
@@ -1814,79 +1812,61 @@ export class MapController extends AbstractMapViewerController {
     overrideGeocoreServiceNames: boolean | 'hybrid',
     includeFeatureInfo: boolean
   ): MapConfigLayerEntry | undefined {
-    // Get the map id
     const mapId = this.getMapId();
-
-    // Get needed info
     const layerEntryConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPath);
-    const geoviewLayerConfig = layerEntryConfig?.getGeoviewLayerConfig();
 
-    // If not found, log warning and skip
-    if (!layerEntryConfig || !geoviewLayerConfig) {
-      // TODO: Check if better to use getLayerEntryConfig instead of getLayerEntryConfigIfExists above and have an error be thrown?
-      // Log
+    // Skip stale ordered-layer paths that no longer have a matching runtime layer config.
+    if (!layerEntryConfig) {
       logger.logWarning(`Couldn't find the layer entry config for layer path '${layerPath}'`);
       return undefined;
     }
 
-    // Get info
+    // Read the store to get information on the layer
     const legendLayerInfo = getStoreLayerLegendLayerByPath(mapId, layerPath);
-
-    // Check if the layer is a geocore layers
     const isGeocore = isValidUUID(layerPath.split('/')[0]);
-
-    // If is a group
-    let layerEntryLayerPaths: string[] = [];
-    if (layerEntryConfig instanceof GroupLayerEntryConfig) {
-      layerEntryLayerPaths = layerEntryConfig.getLayerPaths();
-    }
-
-    // Check for sublayers
-    const sublayerPaths = getStoreLayerOrderedLayerPaths(mapId).filter(
-      // We only want the immediate child layers, group sublayers will handle their own sublayers
-      (entryLayerPath) => layerEntryLayerPaths.includes(entryLayerPath)
-    );
-
-    // Build list of sublayer entry configs
-    const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-    if (sublayerPaths.length && layerEntryConfig.layerId === 'base-group')
-      sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(sublayerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo))
-      );
-    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo));
-
-    // Get initial settings
     const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo);
 
-    // Construct geoview layer config
-    const newGeoviewLayerConfig: MapConfigLayerEntry =
-      isGeocore && overrideGeocoreServiceNames !== true
-        ? {
-            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-            geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getGeoviewLayerName(),
-            geoviewLayerType: 'geoCore',
-            initialSettings,
-            useAsBasemap: geoviewLayerConfig.useAsBasemap,
-            listOfLayerEntryConfig,
-          }
-        : {
-            geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
-            geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
-            geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
-            initialSettings,
-            isTimeAware: geoviewLayerConfig.isTimeAware,
-            listOfLayerEntryConfig,
-            metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
-            serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
-            serviceDateFormatIdentify: geoviewLayerConfig.serviceDateFormatIdentify,
-            serviceDateTimezone: geoviewLayerConfig.serviceDateTimezone,
-            serviceDateTemporalMode: geoviewLayerConfig.serviceDateTemporalMode,
-            displayDateFormat: geoviewLayerConfig.displayDateFormat,
-            displayDateTimezone: geoviewLayerConfig.displayDateTimezone,
-            useAsBasemap: geoviewLayerConfig.useAsBasemap,
-          };
+    // Export direct children of the synthetic base group; nested groups export their own children in #createLayerEntryConfig.
+    const sublayerPaths =
+      layerEntryConfig instanceof GroupLayerEntryConfig && layerEntryConfig.layerId === 'base-group'
+        ? getStoreLayerOrderedLayerPaths(mapId).filter((entryLayerPath) => layerEntryConfig.getLayerPaths().includes(entryLayerPath))
+        : [];
 
-    return newGeoviewLayerConfig;
+    const listOfLayerEntryConfig = (sublayerPaths.length ? sublayerPaths : [layerPath]).map((entryLayerPath) => {
+      return this.#createLayerEntryConfig(entryLayerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo);
+    });
+
+    // Get the geoview layer config
+    const geoviewLayerConfig = layerEntryConfig.getGeoviewLayerConfig();
+
+    if (isGeocore && overrideGeocoreServiceNames !== true) {
+      // Keep GeoCore exports compact unless callers explicitly request fully resolved service metadata.
+      return {
+        geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+        geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getGeoviewLayerName(),
+        geoviewLayerType: 'geoCore',
+        initialSettings,
+        useAsBasemap: geoviewLayerConfig.useAsBasemap,
+        listOfLayerEntryConfig,
+      };
+    }
+
+    return {
+      geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
+      geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
+      geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
+      initialSettings,
+      isTimeAware: geoviewLayerConfig.isTimeAware,
+      listOfLayerEntryConfig,
+      metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
+      serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+      serviceDateFormatIdentify: geoviewLayerConfig.serviceDateFormatIdentify,
+      serviceDateTimezone: geoviewLayerConfig.serviceDateTimezone,
+      serviceDateTemporalMode: geoviewLayerConfig.serviceDateTemporalMode,
+      displayDateFormat: geoviewLayerConfig.displayDateFormat,
+      displayDateTimezone: geoviewLayerConfig.displayDateTimezone,
+      useAsBasemap: geoviewLayerConfig.useAsBasemap,
+    };
   }
 
   /**
