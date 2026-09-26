@@ -72,6 +72,16 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     onRefresh(projection: OLProjection | undefined): void;
     /**
+     * Overrides the way to wait for the layer to be loaded at least once.
+     *
+     * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
+     * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
+     *
+     * @returns A promise that resolves once the layer has been loaded at least once
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
+     */
+    onWaitForLoadedOnce(): Promise<void>;
+    /**
      * Overridable function that gets the extent of an array of features.
      *
      * @param objectIds - The IDs of the features to calculate the extent from
@@ -330,9 +340,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     getFilterFromStyle(): string | undefined;
     /**
-     * Gets the temporal dimension that is associated to the layer.
+     * Gets the effective temporal dimension associated with the layer.
      *
-     * @returns The temporal dimension associated to the layer or undefined.
+     * When the layer participates in a QGIS group dimension, the parent group's temporal dimension takes precedence.
+     * Otherwise, the temporal dimension configured directly on the layer is returned.
+     *
+     * @returns The effective temporal dimension, or undefined when none is configured
      */
     getTimeDimension(): TimeDimension | undefined;
     /**
@@ -463,16 +476,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @returns A promise that resolves after the layer has rendered at least once
      */
     waitForRender(): Promise<void>;
-    /**
-     * Utility function allowing to wait for the layer to be loaded at least once.
-     *
-     * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
-     * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
-     *
-     * @returns A promise that resolves once the layer has been loaded at least once
-     * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
-     */
-    waitForLoadedOnce(): Promise<void>;
     /**
      * Utility function allowing to wait for the layer status to become `loaded`.
      *

@@ -299,6 +299,12 @@ export declare const getStoreLayerVisible: (mapId: string, layerPath: string) =>
  */
 export declare const useStoreLayerVisible: (layerPath: string) => boolean | undefined;
 /**
+ * Hook that returns a record of layer visibility flags for all layers.
+ *
+ * @returns A record of visibility flags keyed by layer path, defaulting to false
+ */
+export declare const useStoreLayerVisibleSet: () => Record<string, boolean>;
+/**
  * Returns the layer paths of all layers currently visible.
  *
  * @param mapId - The map identifier

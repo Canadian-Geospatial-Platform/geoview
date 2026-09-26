@@ -1,9 +1,10 @@
 import type { Projection as OLProjection } from 'ol/proj';
 import { ImageWMS } from 'ol/source';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig, TypeOfServer, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeOfServer, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode, TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { type TimeDimension } from '@/core/utils/date-mgt';
 import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -135,9 +136,10 @@ export declare class WMS extends AbstractGeoViewRaster {
      *
      * @param layerConfig - The layer configuration to initialize
      * @param layerCapabilities - The WMS capabilities metadata for the specific layer
+     * @param wasAddedAsAGroup - Indicates whether the layer was added as part of a group initially in the config
      * @param displayDateMode - The display date mode to use when creating time dimensions
      */
-    static initLayerMetadata(layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined, displayDateMode: DisplayDateMode): Promise<void>;
+    static initLayerMetadata(layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined, wasAddedAsAGroup: boolean, displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Processes a WMS GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -206,6 +208,26 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
      */
     static createLayerStyleFromWMS(url: string, geomType: TypeStyleGeometry | undefined): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
+    /**
+     * Parses the WMS time dimension metadata for a layer or group.
+     *
+     * It locates the `TIME` dimension entry in the metadata and converts the OGC-formatted values into
+     * GeoView's normalized `TimeDimension` structure, including any group-specific handling required for
+     * inherited or aggregate temporal metadata.
+     *
+     * @param metadataDimensions - The metadata dimensions declared by the WMS layer
+     * @param displayDateMode - The preferred display mode used when translating date values for the UI
+     * @param isGroupDimension - Whether the time dimension is a group-level temporal definition
+     * @returns The parsed time dimension, or `undefined` when the layer does not expose a `TIME` dimension
+     */
+    static parseTimeDimension(metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined, displayDateMode: DisplayDateMode | undefined, isGroupDimension: boolean): TimeDimension | undefined;
+    /**
+     * Finds the time dimension in WMS dimension metadata.
+     *
+     * @param metadataDimensions - Optional WMS dimension metadata to search
+     * @returns The time dimension metadata, or undefined when none is found
+     */
+    static findTimeDimensionInDimensions(metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined): TypeMetadataWMSCapabilityLayerDimension | undefined;
 }
 /** Delegate type for the callback when processing group layers */
 export type GroupLayerCreatedDelegate = (config: ConfigBaseClass) => void;

@@ -28,23 +28,37 @@ export type TemporalMode = 'calendar' | 'instant';
 /** Type alias for Day.js manipulate type. */
 export type ManipulateType = dayjs.ManipulateType;
 /** Type used to define the range values for an OGC time dimension. */
-type RangeItems = {
+export type RangeItems = {
     type: string;
     range: string[];
+    durationInterval?: string;
 };
-/** Type used to define the GeoView OGC time dimension. */
+/** Represents the normalized OGC time dimension metadata used by GeoView layers and time controls. */
 export type TimeDimension = {
+    /** Field name exposed by the service for the time dimension. */
     field: string;
+    /** Default values selected by the service, normalized to an array of ISO strings. */
     default: string[];
+    /** Optional unit symbol associated with the time values, such as `Y`, `M`, or `D`. */
     unitSymbol?: string;
+    /** Parsed range metadata for the normalized time values. */
     rangeItems: RangeItems;
+    /** Whether the time values are treated as discrete or continuous. */
     nearestValues: 'discrete' | 'continuous';
+    /** Whether the time control is configured for a single handle or a range selection. */
     singleHandle: boolean;
+    /** Display format used when rendering dates in the current locale. */
     displayDateFormat?: TypeDisplayDateFormat;
+    /** Short display format used when space is limited. */
     displayDateFormatShort?: TypeDisplayDateFormat;
+    /** Temporal interpretation applied to the values when formatting them. */
     serviceDateTemporalMode?: TemporalMode;
+    /** Timezone used for display and interpretation of the time values. */
     displayDateTimezone?: TimeIANA;
+    /** Whether the parsed time dimension is valid for use. */
     isValid: boolean;
+    /** Indicates if the time dimension is part of a group dimension. Notably useful for some QGIS-based services. */
+    isGroupDimension?: boolean;
 };
 /** Guessed time information inferred from service date formats or time dimensions. */
 export type GuessedTimeInformation = {
@@ -63,15 +77,23 @@ export type TimeDimensionESRI = {
     hasLiveData?: boolean;
     timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
+/** Calendar unit used when advancing a continuous time-slider value. */
+export type DateTimeStepUnit = 'hour' | 'day' | 'week' | 'month' | 'year';
 /**
  * Class used to handle date as ISO 8601.
  */
 export declare abstract class DateMgt {
     #private;
+    /** Number of milliseconds in one hour. */
+    static readonly MILLISECONDS_IN_1_HOUR: number;
     /** The milliseconds for 1 day. */
     static readonly MILLISECONDS_IN_1_DAY: number;
+    /** Number of milliseconds in one week. */
+    static readonly MILLISECONDS_IN_1_WEEK: number;
+    /** Approximate number of milliseconds in one month (estimation, not considering months of 28, 29 or 31 days). */
+    static readonly APPROXIMATE_MILLISECONDS_IN_1_MONTH: number;
     /** The milliseconds for 1 year (estimation, not considering leap years). */
-    static readonly MILLISECONDS_IN_1_YEAR: number;
+    static readonly APPROXIMATE_MILLISECONDS_IN_1_YEAR: number;
     /** The international ISO date format. */
     static readonly ISO_DATE_FORMAT = "YYYY-MM-DD";
     /** The international ISO time format with seconds. */
@@ -121,12 +143,82 @@ export declare abstract class DateMgt {
     /** The default temporal mode to be used by the application. */
     static DEFAULT_TEMPORAL_MODE: TemporalMode;
     /**
+     * Checks whether an OGC time dimension contains comma-separated discrete values.
+     *
+     * @param ogcTimeDimension - The OGC time dimension value to check
+     * @returns Whether the value represents a discrete range
+     */
+    static isDiscreteRange(ogcTimeDimension: string): boolean;
+    /**
+     * Checks whether an OGC time dimension contains one discrete value.
+     *
+     * @param ogcTimeDimension - The OGC time dimension value to check
+     * @returns Whether the value represents one discrete value
+     */
+    static isDiscreteSingleValue(ogcTimeDimension: string): boolean;
+    /**
+     * Checks whether an OGC time dimension is an absolute start/end/interval range.
+     *
+     * @param ogcTimeDimension - The OGC time dimension value to check
+     * @returns Whether the value represents an absolute range
+     */
+    static isAbsoluteRange(ogcTimeDimension: string): boolean;
+    /**
+     * Checks whether an OGC time dimension is a relative two-part range.
+     *
+     * @param ogcTimeDimension - The OGC time dimension value to check
+     * @returns Whether the value represents a relative range
+     */
+    static isRelativeRange(ogcTimeDimension: string): boolean;
+    /**
      * Gets the default date and datetime formats based on the display date mode.
      *
      * @param displayDateMode - The display date mode, e.g., 'long' or undefined for default
      * @returns The default date and datetime formats for the given mode
      */
     static getDisplayDateDefaults(displayDateMode: DisplayDateMode | undefined): TypeDisplayDateDefaults;
+    /**
+     * Returns an approximate numeric step used to estimate nearby calendar-step candidates.
+     *
+     * @param stepUnit - The calendar unit to approximate
+     * @returns The approximate duration in milliseconds
+     */
+    static getApproximateCalendarStep(stepUnit: DateTimeStepUnit): number;
+    /**
+     * Advances a timestamp by one calendar step without converting months or years to fixed durations.
+     *
+     * @param timestamp - The timestamp to advance
+     * @param stepUnit - The calendar unit to apply
+     * @param direction - The number and direction of calendar units to advance
+     * @returns The advanced timestamp
+     */
+    static addCalendarStep(timestamp: number, stepUnit: DateTimeStepUnit, direction: number): number;
+    /**
+     * Snaps a timestamp to the nearest calendar step without building the full range.
+     *
+     * @param timestamp - The timestamp to snap
+     * @param anchor - The first timestamp in the calendar sequence
+     * @param stepUnit - The calendar unit to apply
+     * @returns The nearest calendar-aligned timestamp
+     */
+    static snapToCalendarStep(timestamp: number, anchor: number, stepUnit: DateTimeStepUnit): number;
+    /**
+     * Snaps multiple timestamps to the same calendar sequence.
+     *
+     * @param values - The timestamps to snap
+     * @param anchor - The first timestamp in the calendar sequence
+     * @param stepUnit - The calendar unit to apply
+     * @returns The calendar-aligned timestamps
+     */
+    static snapValuesToCalendarStep(values: number[], anchor: number, stepUnit: DateTimeStepUnit): number[];
+    /**
+     * Finds the timestamp in a range nearest to the requested value.
+     *
+     * @param timeStamps - The timestamp values to search
+     * @param value - The target timestamp
+     * @returns The timestamp with the smallest absolute difference from the target
+     */
+    static findNearestTimestamp(timeStamps: number[], value: number): number;
     /**
      * Parses a `DateLike` input into a Dayjs object, automatically handling different types
      * of input and temporal modes.
@@ -418,6 +510,14 @@ export declare abstract class DateMgt {
      */
     static guessEstimatedStep(minValue: number, maxValue: number): number | undefined;
     /**
+     * Guesses a calendar unit for continuous time-slider playback.
+     *
+     * @param minValue - The minimum timestamp value
+     * @param maxValue - The maximum timestamp value
+     * @returns The estimated calendar unit, or `undefined` when no calendar unit is appropriate
+     */
+    static guessEstimatedStepUnit(minValue: number, maxValue: number): 'day' | 'month' | 'year' | undefined;
+    /**
      * Create the Geoview time dimension from ESRI dimension.
      *
      * @param timeDimensionESRI - Esri time dimension object
@@ -429,22 +529,36 @@ export declare abstract class DateMgt {
      */
     static createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, displayDateMode: DisplayDateMode | undefined, singleHandle?: boolean): TimeDimension;
     /**
-     * Create the Geoview time dimension from OGC dimension.
+     * Creates a normalized GeoView time-dimension model from an OGC WMS time dimension.
      *
-     * @param ogcTimeDimension - The OGC time dimension object or string
-     * @param displayDateMode - Optional display date mode
-     * @returns The Geoview time dimension
-     * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-     * @throws {InvalidDateError} When input has invalid dates
+     * The method parses the raw OGC values with {@link DateMgt.createRangeOGC}, infers display formatting
+     * from the resulting range, and resolves the initial slider defaults from the service metadata.
+     * When the dimension belongs to a QGIS group, a synthetic default is injected so the control still
+     * behaves as a valid single-value selection even if the service omits a default.
+     *
+     * @param ogcTimeDimension - The OGC dimension object or its JSON string representation from the WMS capability document
+     * @param displayDateMode - Optional display date mode used to infer the presentation format
+     * @param isGroupDimension - Optional flag indicating whether this dimension belongs to a grouped layer definition
+     * @returns The normalized GeoView time dimension, including parsed range metadata and default selection values
+     * @throws {InvalidTimeDimensionError} When the OGC values cannot be parsed into a valid range or the duration is invalid
+     * @throws {InvalidDateError} When any parsed date is invalid
      */
-    static createDimensionFromOGC(ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string, displayDateMode: DisplayDateMode | undefined): TimeDimension;
+    static createDimensionFromOGC(ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string, displayDateMode: DisplayDateMode | undefined, isGroupDimension: boolean | undefined): TimeDimension;
     /**
-     * Create a range of date object from OGC time dimension following ISO 8601.
+     * Creates a normalized range model for an OGC time dimension value.
      *
-     * @param ogcTimeDimensionValues - OGC time dimension values
-     * @returns Array of date from the dimension
-     * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-     * @throws {InvalidDateError} When input has invalid dates
+     * This method resolves the `current` or `present` keyword before classifying the value, normalizes whitespace,
+     * and returns a structured {@link RangeItems} object whose `type` is one of `discrete`, `relative`,
+     * or `none`. Discrete values are split into a list of ISO strings, while relative and absolute
+     * intervals are expanded into bounded UTC start/end values with an optional duration payload.
+     *
+     * Supported shapes include comma-separated discrete dates, relative intervals such as
+     * `start/end` or `start/duration`, and absolute intervals such as `start/end/period`.
+     *
+     * @param ogcTimeDimensionValues - The raw OGC time dimension value from a WMS capability document
+     * @returns The normalized range metadata for the dimension, including the parsed `type`, `range`, and optional `durationInterval`
+     * @throws {InvalidTimeDimensionError} When the value cannot be parsed into a valid range, or the duration is invalid, non-positive, or would loop indefinitely
+     * @throws {InvalidDateError} When any parsed date is invalid
      */
     static createRangeOGC(ogcTimeDimensionValues: string): RangeItems;
     /**
@@ -465,5 +579,4 @@ export declare abstract class DateMgt {
      */
     static isValidTimezone(timezone: TimeIANA): boolean;
 }
-export {};
 //# sourceMappingURL=date-mgt.d.ts.map

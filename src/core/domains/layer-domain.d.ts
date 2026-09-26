@@ -130,6 +130,33 @@ export declare class LayerDomain {
      */
     getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined;
     /**
+     * Returns the first GeoView layer registered under the given root id.
+     *
+     * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). This is useful when
+     * only the root id is known — e.g. a GeoCore UUID whose sublayer structure (`uuid/<layerId>`) is only resolved at
+     * runtime — so callers holding the root id can still reach the resolved layer.
+     *
+     * Note: the root id is matched verbatim, so a bare UUID does not match a duplicate-UUID `:suffix` path (`uuid:xxx/...`).
+     *
+     * @param rootId - The root layer id (e.g. a GeoCore UUID)
+     * @returns The first AbstractBaseGVLayer under that root id
+     * @throws {LayerNotFoundError} When no layer is found under the given root id
+     */
+    getGeoviewLayerByRootId(rootId: string): AbstractBaseGVLayer;
+    /**
+     * Returns the first GeoView layer registered under the given root id, if one exists.
+     *
+     * A match is a layer whose path is exactly the root id or is nested under it (`${rootId}/...`). This is useful when
+     * only the root id is known — e.g. a GeoCore UUID whose sublayer structure (`uuid/<layerId>`) is only resolved at
+     * runtime — so callers holding the root id can still reach the resolved layer.
+     *
+     * Note: the root id is matched verbatim, so a bare UUID does not match a duplicate-UUID `:suffix` path (`uuid:xxx/...`).
+     *
+     * @param rootId - The root layer id (e.g. a GeoCore UUID)
+     * @returns The first AbstractBaseGVLayer under that root id, or undefined when none is found
+     */
+    getGeoviewLayerByRootIdIfExists(rootId: string): AbstractBaseGVLayer | undefined;
+    /**
      * Returns the AbstractGVLayer instance associated to the layer path.
      *
      * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
