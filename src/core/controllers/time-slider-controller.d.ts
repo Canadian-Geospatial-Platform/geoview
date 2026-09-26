@@ -3,7 +3,7 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import { type TypeTimeSliderProps } from '@/core/stores/states/time-slider-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { type DateTimeStepUnit, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /**
  * Controller responsible for time slider interactions, keyboard shortcuts, and
  * bridging the time slider state with the UI domain and map projection changes.
@@ -66,6 +66,13 @@ export declare class TimeSliderController extends AbstractMapViewerController {
      * @param step - The step value
      */
     setStep(layerPath: string, step: number): void;
+    /**
+     * Sets the calendar unit used to advance a continuous time-slider value.
+     *
+     * @param layerPath - The layer path
+     * @param stepUnit - The calendar unit used for playback increments
+     */
+    setStepUnit(layerPath: string, stepUnit: DateTimeStepUnit): void;
     /**
      * Sets the delay value for a layer path in the time-slider panel.
      *

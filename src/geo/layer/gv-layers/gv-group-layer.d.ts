@@ -70,6 +70,15 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      */
     protected onIsInVisibleRange(currentResolution: number | undefined): boolean;
     /**
+     * Overrides the way to wait for the layer to be loaded at least once.
+     *
+     * A group layer resolves once every leaf layer nested within it (including sub-groups) has loaded at least once.
+     *
+     * @returns A promise that resolves once all leaf layers in the group hierarchy have loaded at least once
+     * @throws {LayerStatusErrorError} When a leaf layer enters the `error` state before loading (propagated from `waitForLoadedOnce()`)
+     */
+    protected onWaitForLoadedOnce(): Promise<void>;
+    /**
      * Gets the immediate layers in the group.
      *
      * @returns The layers in the group
