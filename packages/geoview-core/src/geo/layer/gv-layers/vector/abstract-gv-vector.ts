@@ -624,6 +624,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       return undefined;
     }
 
+    // This cache is used only for point features; keep a single-style fallback if a processor changes shape.
+    if (Array.isArray(featureStyle)) return featureStyle[0];
+
     // Clone the style
     const styleClone = featureStyle.clone();
     // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
@@ -762,14 +765,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param feature - Feature that need its style to be defined.
    * @param label - The style label when one has to be created
    * @param filterEquation - Filter equation associated to the layer.
-   * @returns The style for the feature or undefined if no style could be calculated.
+   * @returns The style or styles for the feature, or undefined if none could be calculated.
    */
   static calculateStyleForFeature(
     layer: AbstractGVLayer,
     feature: FeatureLike,
     label: string,
     filterEquation?: FilterNodeType[]
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Get the style
     const style = layer.getStyle() || {};
 

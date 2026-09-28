@@ -2439,13 +2439,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     };
 
     // Process the feature style
-    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
+    const processedFeatureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     // If no feature style generated
-    if (!featureStyle) {
+    if (!processedFeatureStyle) {
       // No style
       return undefined;
     }
+
+    // Feature-info thumbnails use the base style when line rendering also returns endpoint styles.
+    const featureStyle = Array.isArray(processedFeatureStyle) ? processedFeatureStyle[0] : processedFeatureStyle;
 
     // Clone the style
     const styleClone = featureStyle.clone();
