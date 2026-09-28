@@ -421,7 +421,7 @@ export class ConfigApi {
     const styles = parseXMLToJson<TypeStylesWMS>(xmlContent);
 
     // Redirect
-    return WfsRenderer.buildLayerStyleInfo(styles, 'Polygon');
+    return WfsRenderer.buildLayerStyleInfo(styles, undefined);
   }
 
   /**

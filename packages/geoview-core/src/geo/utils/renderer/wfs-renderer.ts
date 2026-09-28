@@ -681,12 +681,10 @@ export abstract class WfsRenderer {
       stroke: strokeSettings,
     };
 
-    // GV Leaving the code commented here, as it can be useful for debug purposes until we
-    // GV decide we don't need it anymore (there's a TODO in map-schema-types about it too)
-    // // Add graphics with their placements if any
-    // if (graphicStrokes.length > 0) {
-    //   settings.graphicStrokes = graphicStrokes;
-    // }
+    // Add graphics with their placements if any
+    if (graphicStrokes.length > 0) {
+      settings.graphicStrokes = graphicStrokes;
+    }
 
     return {
       visible: true,

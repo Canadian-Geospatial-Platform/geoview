@@ -1,7 +1,7 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Circle } from 'ol/style';
 import type { Geometry, SimpleGeometry } from 'ol/geom';
-import { LineString, Point, Polygon, GeometryCollection } from 'ol/geom';
+import { LineString, MultiLineString, Point, Polygon, GeometryCollection } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
 import Icon from 'ol/style/Icon';
 import type { Options as CircleOptions } from 'ol/style/Circle';
@@ -9,7 +9,7 @@ import type { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { Options as FillOptions } from 'ol/style/Fill';
 import type { FeatureLike } from 'ol/Feature';
-import type Feature from 'ol/Feature';
+import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import type { SketchCoordType } from 'ol/interaction/Draw';
 
@@ -35,6 +35,7 @@ import type {
   TypeAliasLookup,
   codedValueType,
   TypeOutfields,
+  GraphicStrokeWithPlacement,
 } from '@/api/types/map-schema-types';
 import {
   isFilledPolygonVectorConfig,
@@ -51,7 +52,7 @@ type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   options?: TypeStyleProcessorOptions
-) => Style | undefined;
+) => Style | Style[] | undefined;
 
 type TypeEsriLegendItem = {
   label: string;
@@ -79,6 +80,9 @@ export type TypeStyleProcessorOptions = {
 let colorCount = 0;
 
 export abstract class GeoviewRenderer {
+  /** Cached endpoint graphic styles keyed by their parsed SLD graphic-stroke descriptors. */
+  static readonly #GRAPHIC_STROKE_STYLE_CACHE: WeakMap<GraphicStrokeWithPlacement, Style> = new WeakMap();
+
   /** The default filter expression when all features should be included */
   static readonly DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
 
@@ -536,7 +540,7 @@ export abstract class GeoviewRenderer {
    * @param lineStringStyle - Optional style associated to the lineString
    * @returns The created canvas
    */
-  static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
+  static createLineStringCanvas(lineStringStyle?: Style | Style[]): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
     drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
@@ -548,14 +552,72 @@ export abstract class GeoviewRenderer {
     context.fillStyle = gradient;
     context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     const drawingContext = toContext(context);
-    drawingContext.setStyle(lineStringStyle!);
     drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
-    drawingContext.drawGeometry(
+    const lineGeometry = new LineString([
+      [4, drawingCanvas.height - 4],
+      [drawingCanvas.width - 4, 4],
+    ]);
+    const lineFeature = new Feature(lineGeometry);
+    const styles: Style[] = [];
+    if (Array.isArray(lineStringStyle)) styles.push(...lineStringStyle);
+    else if (lineStringStyle) styles.push(lineStringStyle);
+
+    styles.forEach((style) => {
+      const geometry = style.getGeometryFunction()(lineFeature);
+      if (!geometry) return;
+
+      drawingContext.setStyle(style);
+      drawingContext.drawGeometry(geometry);
+    });
+    return drawingCanvas;
+  }
+
+  /**
+   * Creates a line preview canvas after loading endpoint graphic-stroke images.
+   *
+   * @param lineStringStyle - Optional base line and endpoint styles
+   * @returns A promise that resolves with the rendered line canvas
+   */
+  static async createLineStringCanvasAsync(lineStringStyle?: Style | Style[]): Promise<HTMLCanvasElement> {
+    // Keep the base line and endpoint styles in a single ordered list.
+    const styles: Style[] = [];
+    if (Array.isArray(lineStringStyle)) styles.push(...lineStringStyle);
+    else if (lineStringStyle) styles.push(lineStringStyle);
+
+    // Render the synchronous base line first, then add loaded endpoint graphics.
+    const drawingCanvas = this.createLineStringCanvas(styles[0]);
+    const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+
+    // Use the same sample diagonal as the base canvas to resolve endpoint geometry.
+    const lineFeature = new Feature(
       new LineString([
         [4, drawingCanvas.height - 4],
         [drawingCanvas.width - 4, 4],
       ])
     );
+
+    // Load all endpoint images before compositing them onto the exported canvas.
+    const endpointCanvases = await Promise.all(
+      styles.slice(1).map(async (style) => {
+        if (!(style.getImage() instanceof Icon)) return undefined;
+
+        const geometry = style.getGeometryFunction()(lineFeature);
+        if (!(geometry instanceof Point)) return undefined;
+
+        const iconCanvas = await this.createIconCanvas(style);
+        if (!iconCanvas) return undefined;
+
+        return { geometry, iconCanvas };
+      })
+    );
+
+    // Composite each loaded endpoint image at its resolved line endpoint.
+    endpointCanvases.forEach((endpoint) => {
+      if (!endpoint) return;
+      const [x, y] = endpoint.geometry.getCoordinates();
+      context.drawImage(endpoint.iconCanvas, x - endpoint.iconCanvas.width / 2, y - endpoint.iconCanvas.height / 2);
+    });
+
     return drawingCanvas;
   }
 
@@ -1315,7 +1377,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, visualVariables } = options || {};
 
@@ -1328,24 +1390,85 @@ export abstract class GeoviewRenderer {
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     const geometry = feature?.getGeometry() as Geometry;
 
-    let style: Style | undefined;
+    let style: Style | Style[] | undefined;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      style = new Style({
+      const baseLineStyle = new Style({
         stroke: new Stroke(strokeOptions),
         geometry,
         zIndex: settings.zIndex,
       });
+      style = baseLineStyle;
+
+      if (settings.graphicStrokes?.length) {
+        const graphicStyles = this.#createGraphicStrokeStyles(settings);
+        style = graphicStyles.length > 0 ? [baseLineStyle, ...graphicStyles] : baseLineStyle;
+      }
     }
 
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
     if (feature && style && visualVarsToApply) {
-      style = this.#applyVisualVariables(style, feature, visualVarsToApply);
+      style = Array.isArray(style)
+        ? style.map((item) => this.#applyVisualVariables(item, feature, visualVarsToApply))
+        : this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
     return style;
+  }
+
+  /**
+   * Creates cached endpoint styles for graphic strokes attached to a line configuration.
+   *
+   * @param settings - The line configuration containing SLD-derived graphic strokes
+   * @returns The endpoint styles that should be rendered with the base line
+   */
+  static #createGraphicStrokeStyles(settings: TypeLineStringVectorConfig): Style[] {
+    const styles: Style[] = [];
+    settings.graphicStrokes?.forEach((graphicStroke) => {
+      if (!graphicStroke.settings || typeof graphicStroke.settings !== 'object') return;
+
+      const graphicSettings = graphicStroke.settings as TypeKindOfVectorSettings;
+      if (!isIconSymbolVectorConfig(graphicSettings)) return;
+
+      let graphicStyle = this.#GRAPHIC_STROKE_STYLE_CACHE.get(graphicStroke);
+      if (!graphicStyle) {
+        graphicStyle = this.processIconSymbol(graphicSettings);
+        if (!graphicStyle) return;
+
+        const placement = graphicStroke.placement?.toLowerCase() ?? 'firstpoint';
+        const isLastPoint = placement === 'lastpoint';
+        graphicStyle.setGeometry((lineFeature) =>
+          this.#getLineEndpointGeometry(lineFeature.getGeometry() as Geometry | undefined, isLastPoint)
+        );
+        this.#GRAPHIC_STROKE_STYLE_CACHE.set(graphicStroke, graphicStyle);
+      }
+
+      styles.push(graphicStyle);
+    });
+    return styles;
+  }
+
+  /**
+   * Resolves the first or last endpoint geometry for a line feature.
+   *
+   * @param lineGeometry - The feature geometry to inspect
+   * @param isLastPoint - Whether to return the final endpoint
+   * @returns The endpoint point, or undefined for unsupported or empty geometries
+   */
+  static #getLineEndpointGeometry(lineGeometry: Geometry | undefined, isLastPoint: boolean): Point | undefined {
+    if (lineGeometry instanceof LineString) {
+      return new Point(isLastPoint ? lineGeometry.getLastCoordinate() : lineGeometry.getFirstCoordinate());
+    }
+
+    if (lineGeometry instanceof MultiLineString) {
+      const lineCoordinates = lineGeometry.getCoordinates().flat();
+      if (lineCoordinates.length === 0) return undefined;
+      return new Point(isLastPoint ? lineCoordinates[lineCoordinates.length - 1] : lineCoordinates[0]);
+    }
+
+    return undefined;
   }
 
   /**
@@ -1730,16 +1853,21 @@ export abstract class GeoviewRenderer {
         // LineString style configuration
         const layerStyles: TypeVectorLayerStyles = { LineString: {} };
         if (styleConfig.LineString.type === 'simple') {
-          layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+          layerStyles.LineString!.defaultCanvas = await this.createLineStringCanvasAsync(
+            this.processSimpleLineString(styleConfig.LineString)
+          );
         } else {
           if (styleConfig.LineString.hasDefault)
-            layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(
+            layerStyles.LineString!.defaultCanvas = await this.createLineStringCanvasAsync(
               this.processSimpleLineString(styleConfig.LineString.info[styleConfig.LineString.info.length - 1].settings)
             );
           const styleArray: HTMLCanvasElement[] = [];
-          styleConfig.LineString.info.forEach((styleInfo) => {
-            styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
-          });
+          const lineCanvases = await Promise.all(
+            styleConfig.LineString.info.map((styleInfo) =>
+              this.createLineStringCanvasAsync(this.processSimpleLineString(styleInfo.settings))
+            )
+          );
+          styleArray.push(...lineCanvases);
           if (styleConfig.LineString.hasDefault) styleArray.pop();
           layerStyles.LineString!.arrayOfCanvas = styleArray;
         }
@@ -2508,7 +2636,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
@@ -2725,7 +2853,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
@@ -2805,7 +2933,7 @@ export abstract class GeoviewRenderer {
     label: string,
     filterEquation?: FilterNodeType[],
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Determine geometry type, favoring the feature itself
     const geometryType = this.readGeometryTypeSimplifiedFromFeature(feature, layerStyle);
 
