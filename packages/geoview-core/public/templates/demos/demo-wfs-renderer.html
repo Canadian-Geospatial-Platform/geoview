@@ -201,9 +201,9 @@
         try {
           const legendStyles = await cgpv.api.utilities.renderer.getLegendStyles(styleConfig);
           const geometryTypes = ['Point', 'LineString', 'Polygon', 'GeometryCollection'];
-          geometryTypes.forEach((geomType) => {
+          for (const geomType of geometryTypes) {
             const geomStyle = legendStyles[geomType];
-            if (!geomStyle) return;
+            if (!geomStyle) continue;
 
             const section = document.createElement('div');
             section.style.marginBottom = '16px';
@@ -257,7 +257,7 @@
 
             section.appendChild(container);
             previewDiv.appendChild(section);
-          });
+          }
 
           if (!previewDiv.hasChildNodes()) {
             previewDiv.textContent = 'No renderable styles found.';
