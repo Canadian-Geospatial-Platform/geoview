@@ -578,6 +578,8 @@ export type TypeMetadataWMSCapabilityLayer = {
     Name?: string;
     Title?: string;
     Layer?: TypeMetadataWMSCapabilityLayer[];
+    KeywordList?: TypeMetadataWMSServiceKeyword;
+    ParentLayer?: TypeMetadataWMSCapabilityLayer;
     Abstract?: string;
     BoundingBox?: TypeMetadataWMSCapabilityLayerBBox[];
     EX_GeographicBoundingBox?: TypeMetadataWMSCapabilityLayerEXGeographicBBox;

@@ -276,6 +276,28 @@ export declare abstract class ConfigBaseClass {
      */
     getInitialSettingsClassName(): string | undefined;
     /**
+     * Gets the temporal dimension, if any, that is associated to the layer.
+     *
+     * @returns The temporal dimension, or undefined if not set
+     */
+    getTimeDimension(): TimeDimension | undefined;
+    /**
+     * Sets the temporal dimension that is associated to the layer.
+     *
+     * @param timeDimension - The temporal dimension
+     */
+    setTimeDimension(timeDimension: TimeDimension): void;
+    /**
+     * Gets the time dimension inherited from the parent group when available.
+     *
+     * If the current layer belongs to a group that exposes a time dimension,
+     * that parent value is used as the effective dimension for the layer.
+     * Otherwise, the layer's own time dimension is returned.
+     *
+     * @returns The effective time dimension from the parent group or the layer itself
+     */
+    getTimeDimensionFavoringGroup(): TimeDimension | undefined;
+    /**
      * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata, if necessary.
      *
      * @param initialSettingsMetadata - Optional the initialSettings metadata to use to help fill the blanks in our initialSettings config

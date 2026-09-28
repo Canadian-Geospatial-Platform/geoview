@@ -10,7 +10,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
-import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings } from '@/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import type { EffectiveLayerScales, TypeLegend } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -357,6 +357,20 @@ export declare class MapViewer {
      * @param zoom - New maximum zoom level
      */
     setMaxZoomLevel(zoom: number): void;
+    /**
+     * Checks whether an app bar tab is configured on the map viewer.
+     *
+     * @param tabId - The app bar tab identifier to find
+     * @returns Whether the app bar tab is configured
+     */
+    hasAppbarTab(tabId: TypeValidAppBarCoreProps): boolean;
+    /**
+     * Checks whether a footer bar tab is configured on the map viewer.
+     *
+     * @param tabId - The footer bar tab identifier to find
+     * @returns Whether the footer bar tab is configured
+     */
+    hasFooterbarTab(tabId: TypeValidFooterBarTabsCoreProps): boolean;
     /**
      * Add a new custom component to the map.
      *

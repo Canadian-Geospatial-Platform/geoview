@@ -177,6 +177,18 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     setWfsLayerConfig(layerConfig: OgcWfsLayerEntryConfig): void;
     /**
+     * Gets whether the WMS layer was added as part of a group in the config.
+     *
+     * @returns True when the layer was added as part of a group
+     */
+    getAddedViaAGroup(): boolean;
+    /**
+     * Sets whether the WMS layer was added as part of a group in the config.
+     *
+     * @param addedViaGroup - True when the layer was added as part of a group
+     */
+    setAddedViaGroup(addedViaGroup: boolean): void;
+    /**
      * Asynchronously creates and returns a GeoView WFS layer configuration based on the current WMS configuration.
      *
      * This method builds a WFS (Web Feature Service) layer configuration by:

@@ -22,6 +22,10 @@ interface EsriJSONReadResult {
 }
 export declare abstract class GeoUtilities {
     #private;
+    /** The base URL for EPSG.io, used for projection lookups. */
+    static readonly EPSG_URL = "https://epsg.io";
+    /** The ISO reference url for the dimension interval tags */
+    static readonly ISO_8601_REF_DIMENSION_INTERVAL = "https://docs.digi.com//resources/documentation/digidocs/90001488-13/default.htm#reference/r_iso_8601_duration_format.htm";
     /**
      * Checks if the provided proxy URL is an Esri proxy.
      *

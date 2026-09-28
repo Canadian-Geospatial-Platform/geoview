@@ -67,5 +67,11 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      * @returns An array of `layerPath` strings for all descendant layers (including nested groups)
      */
     getLayerPathsAll(): string[];
+    /**
+     * Gets the first direct child configuration in this group.
+     *
+     * @returns The first child configuration, or `undefined` when the group has no children
+     */
+    getFirstChild(): ConfigBaseClass | undefined;
 }
 //# sourceMappingURL=group-layer-entry-config.d.ts.map

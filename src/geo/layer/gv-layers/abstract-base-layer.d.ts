@@ -39,6 +39,12 @@ export declare abstract class AbstractBaseGVLayer {
      */
     protected abstract onRefresh(projection: OLProjection | undefined): void;
     /**
+     * Must override method to wait for the layer to be loaded at least once.
+     *
+     * @returns A promise that resolves once the layer has loaded at least once
+     */
+    protected abstract onWaitForLoadedOnce(): Promise<void>;
+    /**
      * Overridable method to set the opacity of the layer.
      *
      * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
@@ -132,6 +138,15 @@ export declare abstract class AbstractBaseGVLayer {
      * @param projection - Optional projection to refresh to
      */
     refresh(projection: OLProjection | undefined): void;
+    /**
+     * Waits for the layer to be loaded at least once by calling the overridable function 'onWaitForLoadedOnce'.
+     *
+     * When the layer is a GVLayer, resolves once that layer has loaded at least once.
+     * When the layer is a GVGroup, resolves once all its leaf layers have loaded at least once.
+     *
+     * @returns A promise that resolves once the layer has loaded at least once
+     */
+    waitForLoadedOnce(): Promise<void>;
     /**
      * A quick getter to help identify which layer class the current instance is coming from.
      *
@@ -247,6 +262,13 @@ export declare abstract class AbstractBaseGVLayer {
      *   if this layer does not belong to any group.
      */
     getParentRoot(): GVGroupLayer | undefined;
+    /**
+     * Gets the sibling layers of this layer, i.e. the other layers sharing the same direct parent group.
+     *
+     * @param includeOwn - Optional, whether this layer itself is included in the returned array. Defaults to true
+     * @returns The sibling layers, or an empty array when this layer has no parent
+     */
+    getSiblings(includeOwn?: boolean): AbstractBaseGVLayer[];
     /**
      * Gets the opacity of the layer (between 0 and 1).
      *

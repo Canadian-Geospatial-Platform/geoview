@@ -3,7 +3,7 @@ import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, T
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { type TypeProjection } from '@/geo/utils/projection';
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
@@ -192,18 +192,6 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @returns The display timezone, or `undefined` if none is configured
      */
     getDisplayDateTimezone(): TimeIANA | undefined;
-    /**
-     * Gets the temporal dimension, if any, that is associated to the layer.
-     *
-     * @returns The temporal dimension, or undefined if not set
-     */
-    getTimeDimension(): TimeDimension | undefined;
-    /**
-     * Sets the temporal dimension that is associated to the layer.
-     *
-     * @param timeDimension - The temporal dimension
-     */
-    setTimeDimension(timeDimension: TimeDimension): void;
     /**
      * Gets the layer attributions.
      *
@@ -433,6 +421,19 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @returns The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), or undefined if it could not be determined
      */
     getGeometryType(): TypeStyleGeometry | undefined;
+    /**
+     * Gets the layer paths of this entry's siblings in its parent group.
+     *
+     * @param includeOwn - Whether to include this entry's own layer path (defaults to `true`)
+     * @returns The sibling layer paths, or an empty array when this entry has no parent group
+     */
+    getSiblingsLayerPaths(includeOwn?: boolean): string[];
+    /**
+     * Gets the first layer path from this entry's sibling list.
+     *
+     * @returns The first sibling layer path, or `undefined` when no sibling path is available
+     */
+    getFirstSiblingLayerPath(): string | undefined;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
      *

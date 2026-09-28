@@ -1,6 +1,6 @@
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { DateTimeStepUnit, RangeItems, TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /**
  * Represents the TimeSlider Zustand store slice.
  *
@@ -45,6 +45,8 @@ export interface ITimeSliderState {
         setSliderFilters: (newSliderFilters: Record<string, string>) => void;
         /** Sets the step value for a time-slider layer. */
         setStep: (layerPath: string, step: number) => void;
+        /** Sets the calendar step unit for a time-slider layer. */
+        setStepUnit: (layerPath: string, stepUnit: DateTimeStepUnit) => void;
         /** Sets the current slider values (timestamps) for a time-slider layer. */
         setValues: (layerPath: string, values: number[]) => void;
     };
@@ -221,6 +223,8 @@ export declare const setStoreTimeSliderReversed: (mapId: string, layerPath: stri
  * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
  */
 export declare const setStoreTimeSliderStep: (mapId: string, layerPath: string, step: number) => void;
+/** Sets the calendar step unit for a time-slider layer in the store. */
+export declare const setStoreTimeSliderStepUnit: (mapId: string, layerPath: string, stepUnit: DateTimeStepUnit) => void;
 /**
  * Sets the filtering state for a time-slider layer in the store.
  *
@@ -266,6 +270,8 @@ export interface TypeTimeSliderValues {
     discreteValues: boolean;
     /** Optional step increment for the slider. */
     step?: number;
+    /** Calendar unit used when advancing a continuous slider value. */
+    stepUnit?: DateTimeStepUnit;
     /** The temporal field name on the layer. */
     field: string;
     /** The human-readable alias for the temporal field. */
@@ -278,8 +284,8 @@ export interface TypeTimeSliderValues {
     locked?: boolean;
     /** The minimum and maximum timestamp values for the slider range. */
     minAndMax: number[];
-    /** The array of date-range strings available for the slider. */
-    range: string[];
+    /** The range items available for the slider. */
+    rangeItems: RangeItems;
     /** Optional flag indicating the slider plays in reverse. */
     reversed?: boolean;
     /** Whether the slider uses a single handle instead of a range. */

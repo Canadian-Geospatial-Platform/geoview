@@ -1,4 +1,4 @@
-import type { TypeAppBarProps, TypeConfigMeta, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps } from '@/api/types/map-schema-types';
+import type { TypeAppBarProps, TypeConfigMeta, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 /**
  * The map feature configuration class.
  */
@@ -30,6 +30,8 @@ export declare class MapFeatureConfig {
     serviceUrls: TypeServiceUrls;
     /** Indicates whether schema validation errors were detected during configuration parsing. */
     hasSchemaErrors: boolean;
+    /** Panels declared in both appBar and footerBar that were removed from the footer bar during validation. */
+    duplicatedPanelsRemovedFromFooter?: TypeValidFooterBarTabsCoreProps[];
     /** Metadata about the configuration file, including version and optional description. */
     configMeta?: TypeConfigMeta;
     /**

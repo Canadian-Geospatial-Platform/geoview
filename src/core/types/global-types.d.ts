@@ -20,6 +20,8 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
     sharedMode?: boolean;
     /** This attribute is not part of the schema. It indicates whether schema validation errors were detected. */
     hasSchemaErrors?: boolean;
+    /** This attribute is not part of the schema. It lists panels removed from the footer bar because they were also declared in the app bar. */
+    duplicatedPanelsRemovedFromFooter?: string[];
 }
 /** Definition of a global Window type. */
 declare global {
