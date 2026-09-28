@@ -263,7 +263,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             {layer.filterName || layerName}
           </Typography>
           <IconButton
-            aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
+            aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName || layerName })}
             aria-expanded={!isCollapsed}
             aria-controls={collapseId}
             tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}
@@ -287,7 +287,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             onClick={onClearLayer}
             disabled={!hasFilter}
             sx={memoSxClasses.filterLayerClearButton}
-            aria-label={t('FilterPanel.clearAria', { filterName: layer.filterName })}
+            aria-label={t('FilterPanel.clearAria', { filterName: layer.filterName || layerName })}
           >
             {t('FilterPanel.clear')}
           </Button>
@@ -299,7 +299,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             onClick={handleZoomToFiltered}
             disabled={!hasFilter}
             sx={memoSxClasses.filterLayerClearButton}
-            aria-label={t('FilterPanel.zoomToAria', { filterName: layer.filterName })}
+            aria-label={t('FilterPanel.zoomToAria', { filterName: layer.filterName || layerName })}
           >
             {t('FilterPanel.zoomToFiltered')}
           </Button>
