@@ -2541,7 +2541,7 @@ export abstract class GeoviewRenderer {
       let allFieldsMatched = true;
       for (let j = 0; j < fields.length; j++) {
         const field = fields[j];
-        const expectedValue = uniqueValueStyleInfo[i].values[j];
+        const expectedValues = fields.length === 1 ? uniqueValueStyleInfo[i].values : [uniqueValueStyleInfo[i].values[j]];
 
         // Get the target field name: check case-insensitive match in feature keys
         let fieldName = featureKeys.find((key) => key.toLowerCase() === field.toLowerCase());
@@ -2561,8 +2561,10 @@ export abstract class GeoviewRenderer {
         let actualValue = feature.get(fieldName);
 
         // First try direct match
-        // eslint-disable-next-line eqeqeq
-        let matched = actualValue == expectedValue;
+        let matched = expectedValues.some((expectedValue) => {
+          // eslint-disable-next-line eqeqeq
+          return actualValue == expectedValue;
+        });
 
         // If not matched, check coded domain
         if (!matched) {
@@ -2573,8 +2575,10 @@ export abstract class GeoviewRenderer {
             const codedValue = fieldDomainCasted.codedValues.find((dom) => dom.name === actualValue);
             if (codedValue) {
               actualValue = codedValue.code;
-              // eslint-disable-next-line eqeqeq
-              matched = actualValue == expectedValue;
+              matched = expectedValues.some((expectedValue) => {
+                // eslint-disable-next-line eqeqeq
+                return actualValue == expectedValue;
+              });
             }
           }
         }
@@ -3458,8 +3462,11 @@ export abstract class GeoviewRenderer {
     const predicates = relevantInfos.map((entry) => {
       // Single-field => allow IN / =
       if (fieldCount === 1) {
-        const value = this.#formatFieldValue(fields[0], entry.values[0], outFields);
-        return `${fields[0]} = ${value}`;
+        const fieldPredicates = entry.values.map((entryValue) => {
+          const value = this.#formatFieldValue(fields[0], entryValue, outFields);
+          return `${fields[0]} = ${value}`;
+        });
+        return fieldPredicates.length === 1 ? fieldPredicates[0] : `(${fieldPredicates.join(` OR `)})`;
       }
 
       // Multi-field => tuple-style AND predicate
