@@ -940,6 +940,8 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   type: 'lineString';
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
+  /** Additional line strokes rendered over the primary stroke. */
+  additionalStrokes?: TypeStrokeSymbolConfig[];
   /** The additional graphic stroke symbology for special strokes */
   graphicStrokes?: GraphicStrokeWithPlacement[];
   /** The text / label settings */
