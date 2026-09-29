@@ -81,7 +81,7 @@ export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: 
 };
 
 // ✅ Good: the controller owns the intent, so it owns the log
-setLayerSide(layerPath: string, side: SwipeSide): void {
+setStoreLayerSide(layerPath: string, side: SwipeSide): void {
   // Save in the store
   setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
 

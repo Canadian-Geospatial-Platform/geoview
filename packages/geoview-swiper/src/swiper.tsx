@@ -125,30 +125,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
   };
 
   /**
-   * Toggles map interactivity so nothing on the OpenLayers map fights the swiper bar drag.
-   *
-   * Disables the drag-pan interaction and sets `pointer-events: none` on the map viewport for the
-   * duration of the drag, so pointer events over the map can't start a pan or preventDefault the
-   * pointer stream react-draggable relies on.
-   *
-   * @param active - Whether the map should be interactive
-   */
-  const setMapInteractive = useCallback(
-    (active: boolean): void => {
-      mapController.setMapPointerInteractive(active);
-    },
-    [mapController]
-  );
-
-  /**
    * Handles the start of a drag by flagging the drag and disabling map interaction under the bar.
    */
   const onStart = useCallback((): void => {
     isDraggingRef.current = true;
     // Make the map non-interactive for the whole drag: once the cursor moves off the thin bar onto the
     // map, OL would otherwise start a drag-pan and preventDefault the pointer stream, dropping the drag.
-    setMapInteractive(false);
-  }, [setMapInteractive]);
+    mapController.setMapPointerInteractive(false);
+  }, [mapController]);
 
   /**
    * Handles drag events and requests a render at the updated swiper position.
@@ -179,7 +163,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     isDraggingRef.current = false;
 
     // Re-enable map interaction now that the swiper drag is over
-    setMapInteractive(true);
+    mapController.setMapPointerInteractive(true);
 
     if (!layerPaths.length) return;
 
@@ -203,7 +187,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // Render the map so the target layers use the updated clip position
     mapController.forceMapToRender();
-  }, [layerPaths.length, mapController, orientation, controllerRegistry.swiperController, setMapInteractive]);
+  }, [layerPaths.length, mapController, orientation, controllerRegistry.swiperController]);
 
   /**
    * Handles arrow-key presses on the focused swiper bar while in WCAG keyboard navigation mode.
@@ -254,9 +238,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
     logger.logTraceUseEffect('SWIPER - drag interaction safety');
 
     return () => {
-      setMapInteractive(true);
+      mapController.setMapPointerInteractive(true);
     };
-  }, [setMapInteractive]);
+  }, [mapController]);
 
   /**
    * Tracks the OL layers resolved from the configured swiper layer paths.
