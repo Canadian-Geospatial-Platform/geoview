@@ -411,7 +411,7 @@ export function deepMergeObjects<T>(...objects: unknown[]): T {
  * @param str - The object to test
  * @returns true if the object is numeric, false otherwise
  */
-export function isNumeric(str: string): boolean {
+export function isNumeric(str: string | undefined): boolean {
   return !Number.isNaN(Number(str));
 }
 
@@ -421,8 +421,8 @@ export function isNumeric(str: string): boolean {
  * @param obj - The object to test
  * @returns true if the object is empty, false otherwise
  */
-export function isObjectEmpty(obj: object): boolean {
-  return Object.keys(obj).length === 0;
+export function isObjectEmpty(obj: object | undefined): boolean {
+  return !obj || Object.keys(obj).length === 0;
 }
 
 /**
