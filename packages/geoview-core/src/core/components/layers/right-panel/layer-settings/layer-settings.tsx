@@ -101,7 +101,7 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
     <Box sx={sxClasses.infoSection}>
       <Typography sx={sxClasses.infoSectionTitle}>{t('swiper.settingsTitle')}</Typography>
       <Box sx={sxClasses.swiperSectionContent}>
-        <Switch size="small" onChange={handleToggleSwiper} label={t('swiper.maskWithSwiper')} checked={isInSwiper} />
+        <Switch size="small" onChange={handleToggleSwiper} label={t('swiper.useWithSwiper')} checked={isInSwiper} />
         {isInSwiper && (
           <Select
             value={currentSide}
