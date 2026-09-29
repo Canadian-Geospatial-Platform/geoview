@@ -770,7 +770,7 @@ export type TypeUserStyleRule = {
 
 export type TypeUserStyleRuleFilter = {
   'ogc:And'?: TypeUserStyleRuleFilter;
-  'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
+  'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails | TypeUserStyleRuleFilterPropertyDetails[];
   'ogc:PropertyIsGreaterThan'?: TypeUserStyleRuleFilterPropertyDetails;
   'ogc:PropertyIsGreaterThanOrEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
   'ogc:PropertyIsLessThan'?: TypeUserStyleRuleFilterPropertyDetails;

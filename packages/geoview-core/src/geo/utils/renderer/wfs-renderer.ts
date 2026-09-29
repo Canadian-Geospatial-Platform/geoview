@@ -252,7 +252,8 @@ export abstract class WfsRenderer {
    */
   static #readFilterFromRule(filter: TypeUserStyleRuleFilter): FilterInfo {
     // Try to parse function-based filters first
-    if (filter['ogc:PropertyIsEqualTo']?.['ogc:Function']) {
+    const equalityFilter = filter['ogc:PropertyIsEqualTo'];
+    if (!Array.isArray(equalityFilter) && equalityFilter?.['ogc:Function']) {
       const funcInfo = this.#tryParseConcatFunction(filter);
       if (funcInfo) return funcInfo;
 
@@ -287,6 +288,8 @@ export abstract class WfsRenderer {
    */
   static #tryParseConcatFunction(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
     const eqTo = filter['ogc:PropertyIsEqualTo'];
+    if (Array.isArray(eqTo)) return undefined;
+
     const func = eqTo?.['ogc:Function'];
     if (!eqTo || !func) return undefined;
 
@@ -369,55 +372,64 @@ export abstract class WfsRenderer {
    *   contain recognizable numeric comparison operators
    */
   static #readFilterInfoNumberOptionFromFilter(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
-    // Read equal to first
+    // Read equality filters first; XML parsers return repeated PropertyIsEqualTo nodes as an array.
+    const equalityOptions = toArray(filter?.['ogc:PropertyIsEqualTo'] ?? []);
+    if (equalityOptions.length > 0) {
+      const propertyNames = equalityOptions.map((option) => option['ogc:PropertyName']);
+      const values = equalityOptions.map((option) => option['ogc:Literal']);
+      return {
+        hasGreaterOrLessThan: false,
+        propertyName: propertyNames.length === 1 ? propertyNames[0] : propertyNames,
+        values,
+        valuesConditions: undefined,
+      };
+    }
+
+    // Read a single numeric comparison for class-break styles.
     let hasGreaterOrLessThan = false;
-    let filterOption = filter?.['ogc:PropertyIsEqualTo'];
-    let propertyName = filterOption?.['ogc:PropertyName'];
-    let values: (number | string)[] = [filterOption?.['ogc:Literal']!];
+    let filterOption: TypeUserStyleRuleFilter['ogc:PropertyIsGreaterThan'] | undefined;
+    let propertyName: string | undefined;
+    let values: (number | string)[] = [];
     let minValueCondition: TypeLayerStyleValueCondition = '>=';
     let maxValueCondition: TypeLayerStyleValueCondition = '<=';
     let valuesConditions: TypeLayerStyleValueCondition[] | undefined = undefined;
 
-    if (!filterOption) {
-      let min = -99999999999;
-      let max = 99999999999;
+    let min = -99999999999;
+    let max = 99999999999;
 
-      filterOption = filter?.['ogc:PropertyIsGreaterThan'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        minValueCondition = '>';
-        propertyName = filterOption['ogc:PropertyName'];
-        min = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsGreaterThan'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      minValueCondition = '>';
+      propertyName = filterOption['ogc:PropertyName'];
+      min = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsGreaterThanOrEqualTo'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        minValueCondition = '>=';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        min = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsGreaterThanOrEqualTo'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      minValueCondition = '>=';
+      propertyName = filterOption['ogc:PropertyName'];
+      min = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsLessThan'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        maxValueCondition = '<';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        max = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsLessThan'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      maxValueCondition = '<';
+      propertyName = filterOption['ogc:PropertyName'];
+      max = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsLessThanOrEqualTo'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        maxValueCondition = '<=';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        max = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsLessThanOrEqualTo'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      maxValueCondition = '<=';
+      propertyName = filterOption['ogc:PropertyName'];
+      max = Number(filterOption['ogc:Literal']);
+    }
 
+    if (hasGreaterOrLessThan) {
       values = [min, max];
       valuesConditions = [minValueCondition, maxValueCondition];
     }
