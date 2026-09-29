@@ -941,7 +941,6 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
   /** The additional graphic stroke symbology for special strokes */
-  // TODO: CHECK - Maybe remove this. It is used in the generation of SVGs on-the-fly from GetStyles SLD, but not that useful afterall? TBD
   graphicStrokes?: GraphicStrokeWithPlacement[];
   /** The text / label settings */
   text?: TypeLayerTextConfig;

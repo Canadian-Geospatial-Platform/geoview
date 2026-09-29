@@ -351,6 +351,15 @@ The list-based component panels keep visibility-hidden layers in a separate **"H
 - **The eye toggle also selects the layer** when it has content (`numOffeatures !== 0`), so the right panel opens its content and focus follows via `Layout.handleLayerChange` → `setRightPanelFocus`. It skips selection for feature-less layers so the guide stays instead of showing an empty panel. `undefined` feature count (panels with no feature concept, e.g. time slider) counts as "has content".
 - **Scope:** applies to data table, details, geochart, time slider — NOT the Legend or Layers panel (source of truth for visibility). Out-of-scale-range filtering is unchanged.
 
+### WFS SLD Graphic-Stroke Rendering
+
+WFS style configurations derived from a WMS SLD can include multiple `LineSymbolizer` elements and `GraphicStroke` endpoint markers:
+
+- `WfsRenderer.#buildLayerStyleInfoLineSymbolizer()` stores endpoint graphics and their `firstPoint`/`lastPoint` placement in `TypeLineStringVectorConfig.graphicStrokes`; do not discard them when constructing the base line stroke.
+- `ConfigApi.getStyleFromWMSRenderer()` must not force a geometry type. Pass `undefined` so line-only SLDs remain `LineString`; the live WMS path may pass metadata geometry to convert a line-only polygon outline when appropriate.
+- `GeoviewRenderer` line processors may return `Style | Style[] | undefined`. The first style is the base line; additional styles are endpoint graphics. OpenLayers layer callbacks can return the array, while feature-info thumbnails should use the base style only.
+- Endpoint styles are cached by their `GraphicStrokeWithPlacement` descriptor. Use `createLineStringCanvasAsync()` for legend/demo canvases so endpoint images finish loading before the canvas is exported.
+
 ### Layer Style Item Visibility & Class Filters
 
 See [layer-filters.md](../docs/programming/layer-filters.md) for the full filter architecture documentation.

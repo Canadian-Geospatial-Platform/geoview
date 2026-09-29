@@ -117,6 +117,7 @@ _(User-facing features added or enabled)_
 - Added temporal metadata to Layer Info, including normalized range values, ISO 8601 duration intervals, and grouped-dimension status.
 - Added support to the special QGIS group dimension configuration allowing time-dimension WMS rasters to function with the time-slider.
 - Added calendar-aware time-slider stepping for hour, day, week, month, and year intervals, including leap-year-safe year navigation.
+- Added WFS SLD graphic-stroke rendering for line layers, including first/last endpoint SVG or marker graphics in the map and renderer preview.
 
 ## Bug Fixes
 
@@ -163,6 +164,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed abort controller in add-new-layer component when clicking 'back' then completing steps to add a layer (#3562)
 - Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
+- Fixed feature-info styling for line layers with endpoint graphic strokes by using the base line style for thumbnails while preserving the full style array for map rendering.
 - Fixed initial extent being slightly off vertically vs the home view extent, causing the home view button to shift the map (#3562)
 - Fixed configured `geoview-map` height being exceeded when the collapsed footer bar is rendered (#3601)
 - Fixed CESI layer in outlier-style.html template to point to a valid layer id (#3562)
