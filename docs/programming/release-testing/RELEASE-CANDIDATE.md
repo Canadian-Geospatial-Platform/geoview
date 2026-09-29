@@ -128,6 +128,9 @@ _(User-facing features added or enabled)_
 - Added support to the special QGIS group dimension configuration allowing time-dimension WMS rasters to function with the time-slider.
 - Added calendar-aware time-slider stepping for hour, day, week, month, and year intervals, including leap-year-safe year navigation.
 - **Interactive Swiper customization**: a new `interactive` boolean on the swiper package config (default `false`) lets end users add/remove layers from the swiper and choose the revealed side of each layer directly from the layer's right-panel **settings** section — no longer limited to the author-defined config. Each swiper layer now carries a per-layer `side` (`left`/`right` for a vertical bar, `up`/`down` for a horizontal bar), and layers can be clipped to different sides of the divider simultaneously. When `interactive` is `false` (or the swiper package is absent), the swiper stays static and behaves exactly as before. User changes persist into the exported/reloaded map config. New `SwiperController` methods `setLayers(entries)`, `setLayerSide(layerPath, side)`, `setInteractive(interactive)`, and an optional `side` parameter on `addLayerPath(layerPath, side?)`; new store selectors `useStoreSwiperLayerSides`/`useStoreSwiperInteractive` (plus a plugin-safe `useStoreSwiperInteractiveIfExists`) (#3625)
+=======
+- **Interactive Swiper customization**: a new `interactive` boolean on the swiper package config (default `false`) lets end users add/remove layers from the swiper and choose the revealed side of each layer directly from the layer's right-panel **settings** section — no longer limited to the author-defined config. Each swiper layer now carries a per-layer `side` (`left`/`right` for a vertical bar, `up`/`down` for a horizontal bar), and layers can be clipped to different sides of the divider simultaneously. When `interactive` is `false` (or the swiper package is absent), the swiper stays static and behaves exactly as before. User changes persist into the exported/reloaded map config. New `SwiperController` methods `setLayers(entries)`, `setLayerSide(layerPath, side)`, `setInteractive(interactive)`, and an optional `side` parameter on `addLayerPath(layerPath, side?)`; new store selectors `useStoreSwiperLayerSides`/`useStoreSwiperInteractive` (the latter is plugin-safe and returns `false` when the swiper package is absent) (#3625)
+- Added WFS SLD graphic-stroke rendering for line layers, including first/last endpoint SVG or marker graphics in the map and renderer preview.
 
 ## Bug Fixes
 
@@ -174,6 +177,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed abort controller in add-new-layer component when clicking 'back' then completing steps to add a layer (#3562)
 - Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
+- Fixed feature-info styling for line layers with endpoint graphic strokes by using the base line style for thumbnails while preserving the full style array for map rendering.
 - Fixed initial extent being slightly off vertically vs the home view extent, causing the home view button to shift the map (#3562)
 - Fixed configured `geoview-map` height being exceeded when the collapsed footer bar is rendered (#3601)
 - Fixed CESI layer in outlier-style.html template to point to a valid layer id (#3562)
