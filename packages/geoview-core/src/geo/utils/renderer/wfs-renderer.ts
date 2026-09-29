@@ -608,13 +608,8 @@ export abstract class WfsRenderer {
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
     const symbolizers = toArray(symbolizer);
 
-    // Accumulated stroke settings (first non-undefined wins per field)
-    let strokeColor: string | undefined;
-    let strokeWidth = 1;
-    let strokeOpacity = 1;
-    let strokeDashArray: number[] | undefined;
-    let strokeLineJoin: string | undefined;
-    let strokeLineCap: string | undefined;
+    // Keep each LineSymbolizer stroke so multiple strokes can be layered by the renderer.
+    const lineStrokes: TypeStrokeSymbolConfig[] = [];
 
     // Collect graphics with their placements
     const graphicStrokes: GraphicStrokeWithPlacement[] = [];
@@ -624,6 +619,7 @@ export abstract class WfsRenderer {
       if (stroke) {
         // If GraphicStroke present, construct graphicStroke settings
         const graphicStrokeEl = stroke['se:GraphicStroke'];
+        let strokeNode = stroke;
 
         if (graphicStrokeEl) {
           const graphicNode =
@@ -650,48 +646,47 @@ export abstract class WfsRenderer {
             }
           }
 
-          // GraphicStroke may have stroke params
-          const innerStroke = graphicNode?.['se:Stroke'] ?? stroke;
-          const params = this.#extractStrokeParams(innerStroke);
-          strokeColor ??= params.color;
-          strokeWidth = params.width ?? strokeWidth;
-          strokeOpacity = params.opacity ?? strokeOpacity;
-          strokeDashArray ??= params.dasharray;
-          strokeLineJoin ??= params.lineJoin;
-          strokeLineCap ??= params.lineCap;
-        } else {
-          // Normal stroke: extract and merge
-          const params = this.#extractStrokeParams(stroke);
-          strokeColor ??= params.color;
-          strokeWidth = params.width ?? strokeWidth;
-          strokeOpacity = params.opacity ?? strokeOpacity;
-          strokeDashArray ??= params.dasharray;
-          strokeLineJoin ??= params.lineJoin;
-          strokeLineCap ??= params.lineCap;
+          // GraphicStroke may have stroke params of its own.
+          strokeNode = graphicNode?.['se:Stroke'] ?? stroke;
+        }
+
+        const params = this.#extractStrokeParams(strokeNode);
+        if (
+          params.color !== undefined ||
+          params.width !== undefined ||
+          params.opacity !== undefined ||
+          params.dasharray !== undefined ||
+          params.lineJoin !== undefined ||
+          params.lineCap !== undefined
+        ) {
+          lineStrokes.push({
+            color: params.color ?? '#000000',
+            lineStyle: params.dasharray?.length ? 'dash' : 'solid',
+            width: params.width ?? 1,
+            lineDash: params.dasharray,
+            lineJoin: params.lineJoin as TypeStrokeSymbolConfig['lineJoin'],
+            lineCap: params.lineCap as TypeStrokeSymbolConfig['lineCap'],
+          });
         }
       }
     }
 
     // If nothing meaningful found, return undefined
-    if (!strokeColor && strokeWidth === 1 && strokeOpacity === 1 && !strokeDashArray && graphicStrokes.length === 0) {
+    if (lineStrokes.length === 0 && graphicStrokes.length === 0) {
       return undefined;
     }
 
-    // Build the style config
-    const strokeSettings = {
-      color: strokeColor ?? '#000000',
-      lineStyle: strokeDashArray && strokeDashArray.length > 0 ? 'dash' : 'solid',
-      width: strokeWidth,
-      opacity: strokeOpacity,
-      dasharray: strokeDashArray,
-      lineJoin: strokeLineJoin,
-      lineCap: strokeLineCap,
-    } as TypeStrokeSymbolConfig;
+    // Keep a default base stroke for graphic-only line symbolizers.
+    const [strokeSettings = { color: '#000000', width: 1, lineStyle: 'solid' }, ...additionalStrokes] = lineStrokes;
 
     const settings: TypeLineStringVectorConfig = {
       type: 'lineString',
       stroke: strokeSettings,
     };
+
+    if (additionalStrokes.length > 0) {
+      settings.additionalStrokes = additionalStrokes;
+    }
 
     // Add graphics with their placements if any
     if (graphicStrokes.length > 0) {
