@@ -198,16 +198,10 @@ export class SwiperTester extends GVAbstractTester {
 
         test.addStep('Selecting both layers for the Swiper...');
         controller.setLayerPaths(targetPaths);
-        await SwiperTester.waitForCondition(
-          () => (wmsOLLayer.getListeners('prerender')?.length ?? 0) === wmsBaseline + 1,
-          SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT
-        );
+        await SwiperTester.waitForCondition(() => (wmsOLLayer.getListeners('prerender')?.length ?? 0) === wmsBaseline + 1);
         const wmsHandlers = wmsOLLayer.getListeners('prerender')?.length ?? 0;
 
-        await SwiperTester.waitForCondition(
-          () => (nonTargetOLLayer.getListeners('prerender')?.length ?? 0) === nonTargetBaseline + 1,
-          SwiperTester.SWIPER_RENDER_HANDLER_TIMEOUT
-        );
+        await SwiperTester.waitForCondition(() => (nonTargetOLLayer.getListeners('prerender')?.length ?? 0) === nonTargetBaseline + 1);
         const nonTargetHandlers = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
         return { wmsHandlers, nonTargetHandlers };
       },
