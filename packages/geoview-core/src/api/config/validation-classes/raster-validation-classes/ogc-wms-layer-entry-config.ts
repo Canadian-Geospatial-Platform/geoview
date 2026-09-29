@@ -14,8 +14,9 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-sc
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { normalizeDatacubeAccessPath, sortByNameDefaultFirst } from '@/core/utils/utilities';
+import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -419,7 +420,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * 1. Retrieving the metadata access path from the current layer configuration.
    * 2. Using `WFS.processGeoviewLayerConfig` to generate WFS layer configurations.
    * 3. Modifying each generated entry to include the current WMS layer ID.
-   * 4. Returning the first generated WFS layer configuration.
+   * 4. Retrying with an `ms:` layer ID prefix when the service rejects the original layer ID as missing.
+   * 5. Returning the first generated WFS layer configuration.
    *
    * @param configProxyUrl - Proxy URL to use when necessary
    * @returns A promise that resolves with the first generated WFS layer entry configuration
@@ -431,17 +433,27 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Tweak url when switching from WMS to WFS
     url = ServicesManagement.checkUrlSwitchWMSToWFS(url);
 
-    // Initializes a WFS layer config
-    const layerConfigs = await WFS.processGeoviewLayerConfig(
-      WMS.INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID,
-      `Temporary WFS layer config for the WMS layer '${this.getLayerNameCascade()}'`,
-      url,
-      configProxyUrl,
-      [{ id: this.getWfsLayerId(), wmsLayerId: this.layerId }],
-      false,
-      'all',
-      false // Don't fetch styles from the WMS, we already are working with the WMS, we only want the vector information, prevents a "loop"
-    );
+    // Retry the same WFS config request with an alternate layer ID if needed.
+    const processWfsLayerConfig = (wfsLayerId: string): ReturnType<typeof WFS.processGeoviewLayerConfig> =>
+      WFS.processGeoviewLayerConfig(
+        WMS.INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID,
+        `Temporary WFS layer config for the WMS layer '${this.getLayerNameCascade()}'`,
+        url,
+        configProxyUrl,
+        [{ id: wfsLayerId, wmsLayerId: this.layerId }],
+        false,
+        'all',
+        false // Don't fetch styles from the WMS, we already are working with the WMS, we only want the vector information, prevents a "loop"
+      );
+
+    const wfsLayerId = this.getWfsLayerId();
+    let layerConfigs;
+    try {
+      layerConfigs = await processWfsLayerConfig(wfsLayerId);
+    } catch (error: unknown) {
+      if (!(error instanceof LayerEntryConfigLayerIdNotFoundError) || wfsLayerId.startsWith('ms:')) throw error;
+      layerConfigs = await processWfsLayerConfig(ServicesManagement.toggleMsLayerIdPrefix(wfsLayerId));
+    }
 
     // Get the first layer config
     return layerConfigs[0] as OgcWfsLayerEntryConfig;

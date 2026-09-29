@@ -28,13 +28,6 @@ import type {
   TypeLayerMetadataFields,
 } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import type { EsriRelatedRecordsJsonResponse, EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
   LayerNotFeatureLayerError,
@@ -47,6 +40,13 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { EsriRelatedRecordsJsonResponse, EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 export class EsriUtilities {
