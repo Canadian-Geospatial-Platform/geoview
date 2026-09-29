@@ -5,7 +5,6 @@ import { useMemo } from 'react';
 import type RenderEvent from 'ol/render/Event';
 import { getRenderPixel } from 'ol/render';
 import type Layer from 'ol/layer/Layer';
-import DragPan from 'ol/interaction/DragPan';
 
 import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
 import {
@@ -16,11 +15,10 @@ import {
 import { logger } from 'geoview-core/core/utils/logger';
 import { delay } from 'geoview-core/core/utils/utilities';
 import { debounce } from 'geoview-core/core/utils/debounce';
-import { getGVShellElement } from 'geoview-core/core/utils/dom-helper';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreMapSize } from 'geoview-core/core/stores/states/map-state';
+import { useStoreUIActiveTrapGeoView } from 'geoview-core/core/stores/states/ui-state';
 import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/states/layer-state';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import type { SwiperConfig } from './swiper-types';
@@ -48,13 +46,6 @@ type LayerRenderHandlers = {
 /** Properties for the Swiper component. */
 type SwiperProps = {
   /**
-   * The MapViewer associated with the Swiper component.*
-   *
-   * @remarks The controller registry has to be provided via params, because the Swiper itself resides outside of the MapViewer context.
-   */
-  viewer: MapViewer;
-
-  /**
    * The ControllerRegistry associated with the Swiper component.
    *
    * @remarks The controller registry has to be provided via params, because the Swiper itself resides outside of the MapViewer context.
@@ -80,7 +71,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-swiper/swiper');
 
-  const { viewer, controllerRegistry } = props;
+  const { controllerRegistry } = props;
+  const { mapController } = controllerRegistry;
 
   const { cgpv } = window;
   const { ui, reactUtilities } = cgpv;
@@ -88,7 +80,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { Box, Tooltip, HandleIcon } = ui.elements;
 
   // Refs
-  const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
+  const mapSize = useRef<number[]>(mapController.getMapSize() || [0, 0]);
   const swiperValueVertical = useRef(50);
   const swiperValueHorizontal = useRef(50);
   const swiperRef = useRef<HTMLElement>(null);
@@ -117,9 +109,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const { t } = useTranslation<string>();
   const visibleLayers = useStoreLayerVisibleLayers();
   const orientation = useStoreSwiperOrientation();
-
-  // Grab reference
-  const theSwiper = swiperRef.current;
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   // #region Handlers
 
@@ -145,16 +135,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const setMapInteractive = useCallback(
     (active: boolean): void => {
-      // Toggle the drag-pan interaction
-      viewer.map.getInteractions().forEach((interaction) => {
-        if (interaction instanceof DragPan) interaction.setActive(active);
-      });
-
-      // Toggle pointer events on the map viewport (react-draggable keeps working via document listeners)
-      const viewport = viewer.map.getViewport();
-      if (viewport) viewport.style.pointerEvents = active ? '' : 'none';
+      mapController.setMapPointerInteractive(active);
     },
-    [viewer.map]
+    [mapController]
   );
 
   /**
@@ -174,7 +157,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     if (!layerPaths.length) return;
 
     // Get map size
-    mapSize.current = viewer.map.getSize() || [0, 0];
+    mapSize.current = mapController.getMapSize() || [0, 0];
 
     // Update refs ONLY
     if (orientation === 'vertical') {
@@ -186,7 +169,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     }
 
     // Render the map so the target layers use the updated clip position
-    viewer.map.render();
+    mapController.forceMapToRender();
   }, 100);
 
   /**
@@ -201,7 +184,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     if (!layerPaths.length) return;
 
     // Get map size
-    mapSize.current = viewer.map.getSize() || [0, 0];
+    mapSize.current = mapController.getMapSize() || [0, 0];
 
     // Update refs, React state, and controller/store
     if (orientation === 'vertical') {
@@ -219,47 +202,46 @@ export function Swiper(props: SwiperProps): JSX.Element {
     }
 
     // Render the map so the target layers use the updated clip position
-    viewer.map.render();
-  }, [layerPaths.length, viewer.map, orientation, controllerRegistry.swiperController, setMapInteractive]);
+    mapController.forceMapToRender();
+  }, [layerPaths.length, mapController, orientation, controllerRegistry.swiperController, setMapInteractive]);
 
   /**
-   * Updates swiper and layers from keyboard CTRL + Arrow key.
-   *
-   * @param event - The keyboard event to calculate the swiper position
+   * Handles arrow-key presses on the focused swiper bar while in WCAG keyboard navigation mode.
    */
-  const updateSwiper = useCallback(
-    (event: KeyboardEvent): void => {
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLElement>): void => {
       // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
       // * offset from mouse method is not working properly anymore
-      if ('ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(event.key) && layerPaths.length) {
-        // Prevent default behavior and stop propagation immediately
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
+      if (!activeTrapGeoView || !layerPaths.length) return;
+      if (!'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(event.key)) return;
 
-        // Get swiper bar style then set the move
-        const styleValues = getSwiperStyle();
-        const move = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -10 : 10;
+      // Prevent default behavior and stop propagation immediately
+      event.preventDefault();
+      event.stopPropagation();
+      event.nativeEvent.stopImmediatePropagation();
 
-        // Check if value is outside the window and apply modification
-        // eslint-disable-next-line no-nested-ternary
-        styleValues[0] = styleValues[0] <= 10 ? 10 : styleValues[0] >= mapSize.current[0] - 10 ? mapSize.current[0] - 10 : styleValues[0];
-        // eslint-disable-next-line no-nested-ternary
-        styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
+      // Get swiper bar style then set the move
+      const styleValues = getSwiperStyle();
+      const move = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -10 : 10;
 
-        // Apply new style to the bar
-        swiperRef.current!.style.transform =
-          orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
+      // Check if value is outside the window and apply modification
+      // eslint-disable-next-line no-nested-ternary
+      styleValues[0] = styleValues[0] <= 10 ? 10 : styleValues[0] >= mapSize.current[0] - 10 ? mapSize.current[0] - 10 : styleValues[0];
+      // eslint-disable-next-line no-nested-ternary
+      styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
 
-        // Send the onStop event to update layers
-        delay(100)
-          .then(onStop)
-          .catch((error: unknown) => {
-            logger.logPromiseFailed('updateSwiper in Swiper', error);
-          }); // Wait for the DOM to update
-      }
+      // Apply new style to the bar
+      swiperRef.current!.style.transform =
+        orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
+
+      // Send the onStop event to update layers
+      delay(100)
+        .then(onStop)
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('handleKeyDown in Swiper', error);
+        }); // Wait for the DOM to update
     },
-    [layerPaths, orientation, onStop]
+    [activeTrapGeoView, layerPaths, orientation, onStop]
   );
 
   // #endregion
@@ -356,7 +338,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       const preRender = (event: RenderEvent): void => {
         const rendererContext = (olLayer.getRenderer() as { context?: typeof event.context }).context;
         const context = rendererContext ?? event.context;
-        const currentMapSize = viewer.map.getSize();
+        const currentMapSize = mapController.getMapSize();
         if (!context || !currentMapSize) return;
 
         // Divider position in map viewport CSS pixels along the relevant axis.
@@ -446,7 +428,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     });
 
     // Request a frame immediately so newly selected layers are clipped without waiting for a map interaction.
-    viewer.map.render();
+    mapController.forceMapToRender();
 
     return () => {
       // Log
@@ -460,9 +442,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
       });
 
       // Repaint after cleanup to remove the previous frame's clipped target output immediately.
-      viewer.map.render();
+      mapController.forceMapToRender();
     };
-  }, [gvLayers, orientation, viewer.map, layerPaths, layerSides]);
+  }, [gvLayers, orientation, mapController, layerPaths, layerSides]);
 
   /**
    * Keeps the swiper bar and clipping aligned with the map when the map is resized.
@@ -483,42 +465,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // Remount the Draggable so it reapplies the updated defaultPosition, then repaint the clip
     setResizeToken((token) => token + 1);
-    viewer.map.render();
-  }, [storeMapSize, viewer.map]);
-
-  /**
-   * UseEffect for WCAG keyboard navigation.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SWIPER - mount', viewer.mapId);
-
-    const handleFocusIn = (): void => {
-      // Set listener for the focus in on swiper bar when on WCAG mode
-      if (getGVShellElement(viewer.mapId)!.classList.contains('map-focus-trap')) {
-        theSwiper?.addEventListener('keydown', updateSwiper);
-      }
-    };
-
-    const handleFocusOut = (): void => {
-      // Unset listener when focus is out of swiper bar
-      theSwiper?.removeEventListener('keydown', updateSwiper);
-    };
-
-    // Wire events
-    theSwiper?.addEventListener('focusin', handleFocusIn);
-    theSwiper?.addEventListener('focusout', handleFocusOut);
-
-    // Cleanup on unmount
-    return () => {
-      // Log
-      logger.logTraceUseEffectUnmount('SWIPER - unmount', viewer.mapId);
-
-      // Unwire events
-      theSwiper?.removeEventListener('focusout', handleFocusOut);
-      theSwiper?.removeEventListener('focusin', handleFocusIn);
-    };
-  }, [theSwiper, updateSwiper, viewer.mapId]);
+    mapController.forceMapToRender();
+  }, [storeMapSize, mapController]);
 
   // If any layer paths
   if (layerPaths && layerPaths.length > 0) {
@@ -541,6 +489,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
             sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar] as SxProps}
             tabIndex={0}
             ref={swiperRef}
+            onKeyDown={handleKeyDown}
           >
             <Tooltip title={t('swiper.tooltip')}>
               <Box className="handleContainer">

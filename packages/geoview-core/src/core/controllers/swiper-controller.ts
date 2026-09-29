@@ -21,6 +21,7 @@ import {
   type SwipeOrientation,
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Controller responsible for time swiper interactions and
@@ -62,6 +63,9 @@ export class SwiperController extends AbstractMapViewerController {
   setLayerPaths(layerPaths: string[]): void {
     // Save in the store
     setStoreSwiperLayerPaths(this.getMapId(), layerPaths);
+
+    // Log
+    logger.logInfo('Added Swiper functionality for layer paths:', layerPaths);
   }
 
   /**
@@ -72,6 +76,9 @@ export class SwiperController extends AbstractMapViewerController {
   setLayers(entries: TypeSwiperLayerEntry[]): void {
     // Save in the store
     setStoreSwiperLayers(this.getMapId(), entries);
+
+    // Log
+    logger.logInfo('Set Swiper layer entries:', entries);
   }
 
   /**
@@ -83,6 +90,9 @@ export class SwiperController extends AbstractMapViewerController {
   setLayerSide(layerPath: string, side: SwipeSide): void {
     // Save in the store
     setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+    // Log
+    logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
   }
 
   /**
@@ -121,6 +131,9 @@ export class SwiperController extends AbstractMapViewerController {
 
     // Save in the store
     addStoreSwiperLayerPath(this.getMapId(), layerPath, resolvedSide);
+
+    // Log
+    logger.logInfo('Added Swiper functionality for layer path:', layerPath, resolvedSide);
   }
 
   /**
@@ -135,6 +148,9 @@ export class SwiperController extends AbstractMapViewerController {
 
     // Remove from the store
     removeStoreSwiperLayerPath(this.getMapId(), layerPath);
+
+    // Log
+    logger.logInfo('Removed Swiper functionality for layer path:', layerPath);
   }
 
   /**
@@ -145,6 +161,9 @@ export class SwiperController extends AbstractMapViewerController {
   removeLayerPathIfExists(layerPath: string): void {
     // Remove from the store
     removeStoreSwiperLayerPath(this.getMapId(), layerPath);
+
+    // Log
+    logger.logInfo('Removed Swiper functionality for layer path:', layerPath);
   }
 
   /**
@@ -153,6 +172,9 @@ export class SwiperController extends AbstractMapViewerController {
   removeAllLayerPaths(): void {
     // Remove all layers from the store
     removeAllStoreSwipers(this.getMapId());
+
+    // Log
+    logger.logInfo('Removed Swiper functionality for all layer paths');
   }
 
   /**

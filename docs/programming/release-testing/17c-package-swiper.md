@@ -87,8 +87,8 @@ When the swiper config sets `"interactive": true`, each layer's right panel expo
 
 | Test                    | Description                             | Steps                                                                             | Expected Result                                                       | Auto |
 | ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---- |
-| Settings section shown  | Swiper section appears when interactive | 1. Open a layer's right panel<br>2. Click the settings gear                       | A "Swiper" section with a "Show in Swiper" toggle is visible          | M    |
-| Add via settings        | Layer joins the swiper                  | 1. Toggle "Show in Swiper" on                                                     | The layer is clipped by the swiper; a side selector appears           | M    |
+| Settings section shown  | Swiper section appears when interactive | 1. Open a layer's right panel<br>2. Click the settings gear                       | A "Swiper" section with a "Mask with the swipe bar" toggle is visible | M    |
+| Add via settings        | Layer joins the swiper                  | 1. Toggle "Mask with the swipe bar" on                                            | The layer is clipped by the swiper; a side selector appears           | M    |
 | Change side             | Layer reveals on the chosen side        | 1. With the layer in the swiper, pick a different side in the selector            | The layer's visible side switches accordingly (left/right or up/down) | M    |
 | Section hidden (static) | No section when not interactive         | 1. Load a config without `interactive` (or `false`)<br>2. Open a layer's settings | No "Swiper" section appears; swiper behaves exactly as before         | M    |
 

@@ -81,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: '16px',
+    gap: theme.spacing(2),
   },
   swiperSideSelect: {
     minWidth: '120px',

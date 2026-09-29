@@ -42,7 +42,7 @@ class SwiperPlugin extends MapPlugin {
           tooltip: 'Drag to see underlying layer',
           menu: 'Swiper',
           settingsTitle: 'Swiper',
-          showInSwiper: 'Show in Swiper',
+          maskWithSwiper: 'Mask with the swipe bar',
           sideLabel: 'Visible side',
           sideLeft: 'Left',
           sideRight: 'Right',
@@ -55,7 +55,7 @@ class SwiperPlugin extends MapPlugin {
           tooltip: 'Faites glisser pour voir les couches sous-jacentes',
           menu: 'Balayage',
           settingsTitle: 'Balayage',
-          showInSwiper: 'Afficher dans le balayage',
+          maskWithSwiper: 'Masquer avec la barre de balayage',
           sideLabel: 'Côté visible',
           sideLeft: 'Gauche',
           sideRight: 'Droit',
@@ -95,7 +95,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper viewer={this.mapViewer} controllerRegistry={this.controllerRegistry} config={this.getConfig()} />;
+    return <Swiper controllerRegistry={this.controllerRegistry} config={this.getConfig()} />;
   }
 
   /**
