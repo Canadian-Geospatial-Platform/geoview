@@ -24,7 +24,7 @@ import type {
   TypeStrokeSymbolConfig,
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
-import { isNumeric, toArray } from '@/core/utils/utilities';
+import { isNumeric, isObjectEmpty, toArray } from '@/core/utils/utilities';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
@@ -240,7 +240,6 @@ export abstract class WfsRenderer {
    * - `PropertyIsGreaterThanOrEqualTo`
    * - `PropertyIsLessThan`
    * - `PropertyIsLessThanOrEqualTo`
-   * It also supports filters wrapped inside an `ogc:And` block.
    * Unsupported cases:
    * - Function-based filters (e.g., `ogc:Function` inside `PropertyIsEqualTo`)
    * - Complex logical filters that cannot be reduced to numeric comparisons
@@ -266,6 +265,19 @@ export abstract class WfsRenderer {
     let filterOption = this.#readFilterInfoNumberOptionFromFilter(filter);
     if (filterOption) {
       return filterOption;
+    }
+
+    // Treat same-field equality predicates inside OR as alternative values for one field.
+    if (filter?.['ogc:Or']) {
+      filterOption = this.#readFilterInfoNumberOptionFromFilter(filter['ogc:Or']);
+      if (filterOption) {
+        const propertyNames = [...new Set(toArray(filterOption.propertyName))];
+        if (propertyNames.length === 1) {
+          return { ...filterOption, propertyName: propertyNames[0] };
+        }
+
+        throw new NotSupportedError('OR filters are only supported when all equality predicates use the same property.');
+      }
     }
 
     // If using 'AND'
@@ -517,6 +529,12 @@ export abstract class WfsRenderer {
     let directIcon: DirectIconInfo | undefined;
     const allGraphicsInfo: GraphicInfo[] = [];
     symbolizers.forEach((symbol) => {
+      // Read the graphic information
+      const graphic = symbol['se:Graphic'];
+
+      // If the graphic object is empty
+      if (isObjectEmpty(graphic)) return; // Skip if the graphic object is empty
+
       // Parse the graphics
       const {
         graphicsInfo,
@@ -526,7 +544,7 @@ export abstract class WfsRenderer {
         fromSVGsOrMarkers: fromGraphic,
         rotation: graphicRotation,
         directIcon: parsedDirectIcon,
-      } = this.#parseGraphic(symbol['se:Graphic']);
+      } = this.#parseGraphic(graphic);
 
       if (parsedDirectIcon) directIcon ??= parsedDirectIcon;
 
