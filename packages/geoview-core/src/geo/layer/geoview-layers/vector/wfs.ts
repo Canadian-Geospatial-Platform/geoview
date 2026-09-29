@@ -46,7 +46,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { parseXMLToJson, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import { formatError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
@@ -885,8 +885,6 @@ export class WFS extends AbstractGeoViewVector {
    *  - Determines the WMS layer identifier associated with the WFS layer.
    *  - Attempts to infer the geometry type from metadata (non-fatal if it fails).
    *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` -> `cgi-bin/wms`).
-   *  - Requests dynamic styles from the WMS service via `GetStyles`.
-   *  - Applies the generated style back onto the WFS layer if successful.
    * Any failures during the process are logged as warnings but do not throw.
    *
    * Enables a WFS layer to adopt styling derived from a corresponding WMS service, allowing
@@ -915,8 +913,28 @@ export class WFS extends AbstractGeoViewVector {
         // Tweak url with the proxy if necessary
         tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
 
+        // A generic WFS geometry metadata type is recoverable because the WMS SLD can infer the geometry.
+        // GV Sometimes, the metadata is vague about the type of geometry, let it continue (in this try/catch) and it'll be inferred later
+        let geometryType: TypeStyleGeometry | undefined;
+        try {
+          geometryType = layerConfig.getGeometryType();
+        } catch (error: unknown) {
+          if (!(error instanceof NotSupportedError)) throw error;
+        }
+
         // Create the layer style and return
-        return await WMS.createLayerStyleFromWMS(tweakedUrl, layerConfig.getGeometryType());
+        try {
+          return await WMS.createLayerStyleFromWMS(tweakedUrl, geometryType);
+        } catch (error: unknown) {
+          if (!wmsLayerId.startsWith('ms:')) throw error;
+
+          const unprefixedLayerId = ServicesManagement.toggleMsLayerIdPrefix(wmsLayerId);
+          let retryUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getDataAccessPath());
+          retryUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(retryUrl, unprefixedLayerId);
+          retryUrl = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
+
+          return await WMS.createLayerStyleFromWMS(retryUrl, geometryType);
+        }
       } catch (error: unknown) {
         // Log warning
         logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
