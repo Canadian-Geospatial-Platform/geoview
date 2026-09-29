@@ -3,6 +3,7 @@ import type { Pixel } from 'ol/pixel';
 import type { Coordinate } from 'ol/coordinate';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
+import DragPan from 'ol/interaction/DragPan';
 
 import {
   MAP_EXTENTS,
@@ -112,6 +113,14 @@ import {
   isStoreGeochartInitialized,
   getStoreGeochartChartsConfig,
 } from '@/core/stores/states/geochart-state';
+import {
+  getStoreSwiperInteractive,
+  getStoreSwiperLayerPaths,
+  getStoreSwiperLayerSides,
+  getStoreSwiperOrientation,
+  isStoreSwiperInitialized,
+  type TypeSwiperConfig,
+} from '@/core/stores/states/swiper-state';
 import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
@@ -923,6 +932,36 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Gets the current size of the map in pixels.
+   *
+   * @returns The map size as [width, height], or undefined when the map has no size yet
+   */
+  getMapSize(): number[] | undefined {
+    return this.getMapViewer().map.getSize();
+  }
+
+  /**
+   * Toggles whether the map reacts to pointer interactions.
+   *
+   * Disables the drag-pan interaction and suppresses pointer events on the map viewport, so an
+   * overlay (such as the swiper bar) can own the pointer stream without the map starting a pan.
+   *
+   * @param active - Whether the map should react to pointer interactions
+   */
+  setMapPointerInteractive(active: boolean): void {
+    // Toggle the drag-pan interaction
+    this.getMapViewer()
+      .map.getInteractions()
+      .forEach((interaction) => {
+        if (interaction instanceof DragPan) interaction.setActive(active);
+      });
+
+    // Toggle pointer events on the map viewport (overlays using document-level listeners keep working)
+    const viewport = this.getMapViewer().map.getViewport();
+    if (viewport) viewport.style.pointerEvents = active ? '' : 'none';
+  }
+
+  /**
    * Sets the React root for the overview map so it can be destroyed with the map element.
    *
    * @param overviewRoot - The React root element for the overview map
@@ -1304,6 +1343,16 @@ export class MapController extends AbstractMapViewerController {
           if (configObj) configObj['geochart'] = { charts };
           else corePackagesConfig.push({ geochart: { charts } });
         } else if (charts) corePackagesConfig = [{ geochart: { charts } }];
+      }
+
+      // Create swiper config and add to core package configs
+      if (isStoreSwiperInitialized(mapId)) {
+        const swiperConfig = MapController.#createSwiperConfig(mapId);
+        if (corePackagesConfig) {
+          const configObj = corePackagesConfig.find((packageConfig) => Object.keys(packageConfig).includes('swiper'));
+          if (configObj) configObj['swiper'] = { ...(configObj['swiper'] as Record<string, unknown>), ...swiperConfig };
+          else corePackagesConfig.push({ swiper: swiperConfig });
+        } else corePackagesConfig = [{ swiper: swiperConfig }];
       }
 
       // Construct map config
@@ -1995,6 +2044,28 @@ export class MapController extends AbstractMapViewerController {
   // #endregion PRIVATE METHODS - MAP
 
   // #region STATIC METHODS - CONFIG CREATION
+
+  /**
+   * Creates the swiper configuration based on the current swiper state.
+   *
+   * @param mapId - The map identifier
+   * @returns The swiper config carrying the orientation, interactive flag and per-layer sides
+   */
+  static #createSwiperConfig(mapId: string): TypeSwiperConfig {
+    // Get swiper state
+    const layerPaths = getStoreSwiperLayerPaths(mapId);
+    const layerSides = getStoreSwiperLayerSides(mapId);
+    const orientation = getStoreSwiperOrientation(mapId);
+    const interactive = getStoreSwiperInteractive(mapId);
+
+    // Build structured layer entries, defaulting to the orientation's primary side (left/up)
+    const layers = layerPaths.map((layerPath) => ({
+      layerPath,
+      side: layerSides[layerPath] ?? (orientation === 'vertical' ? 'left' : 'up'),
+    }));
+
+    return { orientation, interactive, layers };
+  }
 
   /**
    * Creates time slider configurations based on the current time slider state.

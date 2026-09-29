@@ -315,7 +315,11 @@ export class CustomController extends AbstractMapViewerController {
   /** The bounded reference to the handle value changed */
   #boundedHandleValueChanged: DomainValueChangedDelegate;
 
-  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, customDomain: CustomDomain) {
+  constructor(
+    mapViewer: MapViewer,
+    controllerRegistry: ControllerRegistry,
+    customDomain: CustomDomain,
+  ) {
     super(mapViewer, controllerRegistry);
     this.#customDomain = customDomain;
 
@@ -660,6 +664,40 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
    }
    ```
 
+6. **Log business flow here, not in the store state file**
+
+   ```typescript
+   // ✅ Good: the controller owns the intent, so it owns the log
+   setLayerSide(layerPath: string, side: SwipeSide): void {
+     // Save in the store
+     setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+     // Log
+     logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+   }
+   ```
+
+   `setStore*` / `addStore*` / `removeStore*` adaptors are thin setters with no knowledge of why the change happened. See [Logging — Where to log](logging.md#where-to-log--controllers-not-store-state-files).
+
+7. **Expose a controller method instead of letting components reach into the `MapViewer`**
+
+   When a component (core or plugin) needs a map operation that only exists on the `MapViewer` / OpenLayers map, **add the method to the controller** and call it from the component.
+
+   ```typescript
+   // ✅ Good: the controller owns the OpenLayers detail
+   getMapSize(): number[] | undefined {
+     return this.getMapViewer().map.getSize();
+   }
+
+   setMapPointerInteractive(active: boolean): void {
+     this.getMapViewer().map.getInteractions().forEach((interaction) => {
+       if (interaction instanceof DragPan) interaction.setActive(active);
+     });
+     const viewport = this.getMapViewer().map.getViewport();
+     if (viewport) viewport.style.pointerEvents = active ? '' : 'none';
+   }
+   ```
+
 ### DON'T ❌
 
 1. **Don't expose the domain directly**
@@ -668,7 +706,31 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
    getDomain(): CustomDomain { return this.#domain; }  // ❌ Leaks domain to UI
    ```
 
-2. **Don't import store setters in React components**
+2. **Don't pass the `MapViewer` into a React component**
+
+   React components — including plugin components — must never receive a `MapViewer` prop or touch `mapViewer.map` (the raw OpenLayers map). They receive a `mapId` (or a `ControllerRegistry` for plugin components rendered outside the `MapViewer` React context) and go through controllers.
+
+   ```tsx
+   // ❌ Bad: the component reaches into the MapViewer and OpenLayers
+   <Swiper
+     viewer={this.mapViewer}
+     controllerRegistry={this.controllerRegistry}
+   />;
+   // ...inside the component:
+   const size = viewer.map.getSize();
+   viewer.map.render();
+
+   // ✅ Good: the component only knows controllers
+   <Swiper controllerRegistry={this.controllerRegistry} />;
+   // ...inside the component:
+   const { mapController } = controllerRegistry;
+   const size = mapController.getMapSize();
+   mapController.forceMapToRender();
+   ```
+
+   If the controller has no method for what you need, **add one** — don't bypass it. `this.mapViewer` stays available in the plugin class itself (for `this.mapViewer.mapId` and lifecycle wiring), but it must not leak into the rendered component.
+
+3. **Don't import store setters in React components**
 
    ```typescript
    // ❌ Bad: component directly calls store setter
@@ -680,14 +742,14 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
    uiController.setActiveFooterBarTab("time-slider");
    ```
 
-3. **Don't create circular dependencies between controllers**
+4. **Don't create circular dependencies between controllers**
 
    ```typescript
    // ❌ Bad: Controller A calls B which calls A
    // ✅ Good: Use the store as the shared state, let hooks react
    ```
 
-4. **When creating a new controller, don't forget to add the controller to `allControllers` in the registry**
+5. **When creating a new controller, don't forget to add the controller to `allControllers` in the registry**
 
    ```typescript
    // ❌ Bad: controller created but never hooked
@@ -698,7 +760,7 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
    this.allControllers.push(this.customController);
    ```
 
-5. **Don't subscribe to events outside of `onHook()`**
+6. **Don't subscribe to events outside of `onHook()`**
 
    ```typescript
    // ❌ Bad: subscribing in constructor (no cleanup guarantee)

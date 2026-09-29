@@ -135,6 +135,25 @@ this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
+**Components go through controllers, NEVER the `MapViewer`:**
+
+React components — core **and** plugin components — must never receive a `MapViewer` prop or touch `mapViewer.map` (the raw OpenLayers map). They take a `mapId` (or a `ControllerRegistry` for plugin components rendered outside the `MapViewer` React context) and call controller methods.
+
+```tsx
+// ❌ Bad: the component reaches into the MapViewer and OpenLayers
+<Swiper viewer={this.mapViewer} controllerRegistry={this.controllerRegistry} />;
+const size = viewer.map.getSize();
+viewer.map.render();
+
+// ✅ Good: the component only knows controllers
+<Swiper controllerRegistry={this.controllerRegistry} />;
+const { mapController } = controllerRegistry;
+const size = mapController.getMapSize();
+mapController.forceMapToRender();
+```
+
+**If the controller has no method for what you need, add one to the controller** — do not bypass it. `this.mapViewer` stays available inside the plugin class itself (e.g. `this.mapViewer.mapId`, lifecycle wiring), but it must not leak into the rendered component. See [best-practices.md §20](../docs/programming/best-practices.md#no-mapviewer-in-components) and [controller-architecture.md](../docs/programming/controller-architecture.md#best-practices).
+
 ### Map Initialization Sequence
 
 The global `cgpv` object provides both an initialization function and event listeners:
@@ -902,7 +921,9 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 ### Function Order in Classes
 
-1. Class name → 2. Abstracts → 3. Overrides → 4. Public → 5. Private → 6. Event emits/hooks → 7. Static public → 8. Static private → 9. Event types
+1. Class name → 2. Static `readonly` constants (top of class) → 3. Abstracts → 4. Overrides → 5. Public → 6. Private → 7. Event emits/hooks → 8. Static public methods → 9. Static private methods → 10. Event types
+
+**Static `readonly` constants go at the TOP of the class**, immediately after the class declaration and before the constructor — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;` (see `LayerController`, `DrawerController`). NEVER append them at the bottom of the class/file. Use `static readonly` (not bare `static`) for threshold/config constants. Static **methods** still live near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
 
@@ -1246,6 +1267,14 @@ Plugins are loaded through **different config properties** depending on their ty
 
 **Swiper render clipping** — The swiper must clip only the configured layer outputs. Do not apply CSS `clip-path` to `AbstractBaseGVLayer.getRendererContainer()` because OpenLayers renderer containers/canvases can be shared across conceptual layers, which can hide non-swiped layers. Use per-layer OpenLayers render events instead: clip in `prerender`, restore in `postrender`, use `getRenderPixel()` for canvas pixel conversion, and restore WebGL scissor state when the renderer uses WebGL. Regression tests should verify that only selected/resolved descendant layers gain render handlers and that non-target layers remain unaffected.
 
+**Interactive Swiper configuration** — The finalized user-customization flag is `interactive` (default `false`), not `allowUserCustomization`. The `layers` schema is intentionally a breaking structured shape: `{ layerPath, side }[]`, with `side` using `left/right` for vertical orientation and `up/down` for horizontal orientation. When changing this schema, migrate every in-repo config/demo and bump the package schema version; do not silently retain the old string-array shape.
+
+**Progressive Swiper layer registration** — Do not use `Promise.all()` before attaching swiper render handlers. A configured group may resolve descendant layers at different times; wait for each path independently and append each registered GV layer to the swiper state as soon as it resolves. Reconcile removed paths without clearing already-registered layers, so loaded layers become clipped immediately while slower layers continue loading.
+
+**Swiper hover-query suppression** — The swiper bar overlays the OpenLayers viewport, so DOM `stopPropagation()` from React or the bar is not a reliable way to prevent GeoView hover queries; React delegated handlers can run after OL's viewport listener. Gate the query at `LayerSetController.#handleMapPointerStopped()` using a swiper-controller pixel hit test, clear hover results, and skip the query when the pointer is over the divider/handle. Use separate tight bar and larger centered-handle bands to avoid suppressing nearby map features.
+
+**Swiper drag isolation** — `react-draggable` can lose its mouse stream when OpenLayers `DragPan` starts underneath the overlay, especially during diagonal movement. Disable `DragPan` and set the map viewport's `pointer-events` to `none` for the drag duration, then restore both on stop and unmount. Keep resize remounts guarded by an `isDragging` ref so a map resize cannot destroy an active drag.
+
 ```json
 // ✅ Correct: each plugin loaded via its proper config property
 {
@@ -1433,6 +1462,8 @@ The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSet
 > 12. Missing `#region Handlers` / `#endregion` around handler groups
 > 13. Missing `memo` justification in component JSDoc when `memo()` is used
 > 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()` (including heavy-conditional calls gated by `getIsRunningHeavyTests()`); exclude only debug-only and commented-out calls
+> 15. `logger.logInfo` / `logWarning` / `logError` placed inside a store state file (`core/stores/states/*.ts`) instead of the calling controller
+> 16. A React component (core or plugin) receiving a `MapViewer` prop or calling `mapViewer.map.*` instead of going through a controller
 
 ### Logging
 
@@ -1450,6 +1481,31 @@ Control via localStorage:
 
 - `GEOVIEW_LOG_ACTIVE`: Enable logging outside dev mode
 - `GEOVIEW_LOG_LEVEL`: Set level (number or CSV like "4,6,10")
+
+### Where to Log — Controllers, NOT Store State Files
+
+**Business-flow logging (`logInfo` / `logWarning` / `logError`) belongs at the application level — in controllers, domains, layer classes, or APIs. NEVER inside a store state slice (`core/stores/states/*.ts`).**
+
+Store state adaptors (`setStore*`, `addStore*`, `removeStore*`) are thin setters. They know _what_ changed but not _why_ — that intent lives in the controller that called them. Logging in both places duplicates noise.
+
+```typescript
+// ❌ Bad: logging inside the store state adaptor
+export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: SwipeSide): void => {
+  getStoreSwiperState(mapId).actions.setLayerSides({ ...sides, [layerPath]: side });
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+};
+
+// ✅ Good: the controller owns the intent, so it owns the log
+setStoreLayerSide(layerPath: string, side: SwipeSide): void {
+  // Save in the store
+  setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+  // Log
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+}
+```
+
+React components keep their own `logTraceRender` / `logTraceUseEffect` / `logTraceUseMemo` calls — those trace rendering, not business flow, and are unaffected by this rule. See [best-practices.md §19](../docs/programming/best-practices.md#where-to-log) and [logging.md](../docs/programming/logging.md#where-to-log--controllers-not-store-state-files).
 
 ### Logger Trace Conventions
 

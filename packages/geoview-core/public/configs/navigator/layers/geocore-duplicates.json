@@ -289,9 +289,9 @@
         "orientation": "vertical",
         "keyboardOffset": 10,
         "layers": [
-          "5a65ad7c-561a-466a-8375-8d876624df9d:Water",
-          "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions",
-          "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+          { "layerPath": "5a65ad7c-561a-466a-8375-8d876624df9d:Water", "side": "left" },
+          { "layerPath": "5a65ad7c-561a-466a-8375-8d876624df9d:Facility_Emissions", "side": "left" },
+          { "layerPath": "ccc75c12-5acc-4a6a-959f-ef6f621147b9", "side": "left" }
         ]
       }
     }

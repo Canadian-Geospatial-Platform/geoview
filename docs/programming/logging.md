@@ -67,6 +67,31 @@ logger.logTrackerStart("test", () => toto);
 
 Remember to call `logTrackerStop` to stop tracking.
 
+## Where to log — controllers, not store state files
+
+**Business-flow logging (`logInfo` / `logWarning` / `logError`) belongs at the application level — in controllers, domains, layer classes, or APIs — never inside a store state slice (`core/stores/states/*.ts`).**
+
+Store state adaptors (`setStore*`, `addStore*`, `removeStore*`) are thin setters. They record _what_ changed but have no knowledge of _why_ it changed — that intent lives in the controller that called them. Logging in both places just duplicates noise and makes the log stream harder to read.
+
+```ts
+// ❌ Bad: logging inside the store state adaptor
+export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: SwipeSide): void => {
+  getStoreSwiperState(mapId).actions.setLayerSides({ ...sides, [layerPath]: side });
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+};
+
+// ✅ Good: the controller owns the intent, so it owns the log
+setStoreLayerSide(layerPath: string, side: SwipeSide): void {
+  // Save in the store
+  setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+  // Log
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+}
+```
+
+The only logging that is expected inside a store state file is a `logger.logTrace*` call, and even that is rare. React components keep their own `logTraceRender` / `logTraceUseEffect` / `logTraceUseMemo` calls — those trace rendering, not business flow, and are unaffected by this rule.
+
 ## Characteristics to know when using `useWhatChanged`
 
 The `useWhatChanged` function can be found here: [https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/useWhatChanged.ts](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/useWhatChanged.ts)
