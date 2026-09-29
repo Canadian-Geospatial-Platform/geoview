@@ -79,12 +79,22 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ms:cities",
-            "wmsLayerId": "cities",
             "source": {
               "featureInfo": {
                 "nameField": "NAME"
               }
             }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "street-network",
+        "geoviewLayerName": "Street Network",
+        "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:bgr_v_sous_route_res_sup_act"
           }
         ]
       },

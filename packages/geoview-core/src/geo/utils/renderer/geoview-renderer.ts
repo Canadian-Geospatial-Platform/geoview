@@ -584,8 +584,9 @@ export abstract class GeoviewRenderer {
     if (Array.isArray(lineStringStyle)) styles.push(...lineStringStyle);
     else if (lineStringStyle) styles.push(lineStringStyle);
 
-    // Render the synchronous base line first, then add loaded endpoint graphics.
-    const drawingCanvas = this.createLineStringCanvas(styles[0]);
+    // Render every line stroke synchronously, then add loaded endpoint graphics.
+    const lineStrokeStyles = styles.filter((style) => style.getStroke());
+    const drawingCanvas = this.createLineStringCanvas(lineStrokeStyles);
     const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
 
     // Use the same sample diagonal as the base canvas to resolve endpoint geometry.
@@ -1392,17 +1393,20 @@ export abstract class GeoviewRenderer {
 
     let style: Style | Style[] | undefined;
     if (isLineStringVectorConfig(settings)) {
-      const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      const baseLineStyle = new Style({
-        stroke: new Stroke(strokeOptions),
-        geometry,
-        zIndex: settings.zIndex,
-      });
-      style = baseLineStyle;
+      const lineStrokes = [settings.stroke, ...(settings.additionalStrokes ?? [])];
+      const lineStyles = lineStrokes.map(
+        (strokeSettings) =>
+          new Style({
+            stroke: new Stroke(this.createStrokeOptions({ ...settings, stroke: strokeSettings })),
+            geometry,
+            zIndex: settings.zIndex,
+          })
+      );
+      style = lineStyles.length === 1 ? lineStyles[0] : lineStyles;
 
       if (settings.graphicStrokes?.length) {
         const graphicStyles = this.#createGraphicStrokeStyles(settings);
-        style = graphicStyles.length > 0 ? [baseLineStyle, ...graphicStyles] : baseLineStyle;
+        style = graphicStyles.length > 0 ? [...lineStyles, ...graphicStyles] : style;
       }
     }
 
