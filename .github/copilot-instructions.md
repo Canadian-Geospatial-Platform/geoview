@@ -135,6 +135,25 @@ this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
+**Components go through controllers, NEVER the `MapViewer`:**
+
+React components — core **and** plugin components — must never receive a `MapViewer` prop or touch `mapViewer.map` (the raw OpenLayers map). They take a `mapId` (or a `ControllerRegistry` for plugin components rendered outside the `MapViewer` React context) and call controller methods.
+
+```tsx
+// ❌ Bad: the component reaches into the MapViewer and OpenLayers
+<Swiper viewer={this.mapViewer} controllerRegistry={this.controllerRegistry} />;
+const size = viewer.map.getSize();
+viewer.map.render();
+
+// ✅ Good: the component only knows controllers
+<Swiper controllerRegistry={this.controllerRegistry} />;
+const { mapController } = controllerRegistry;
+const size = mapController.getMapSize();
+mapController.forceMapToRender();
+```
+
+**If the controller has no method for what you need, add one to the controller** — do not bypass it. `this.mapViewer` stays available inside the plugin class itself (e.g. `this.mapViewer.mapId`, lifecycle wiring), but it must not leak into the rendered component. See [best-practices.md §20](../docs/programming/best-practices.md#no-mapviewer-in-components) and [controller-architecture.md](../docs/programming/controller-architecture.md#best-practices).
+
 ### Map Initialization Sequence
 
 The global `cgpv` object provides both an initialization function and event listeners:
@@ -1439,6 +1458,8 @@ The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSet
 > 12. Missing `#region Handlers` / `#endregion` around handler groups
 > 13. Missing `memo` justification in component JSDoc when `memo()` is used
 > 14. Incorrect `getTestsTotalFinal()` in test suites — it must equal the number of full-suite tester `testXXXX()` / `testErrorXXXX()` calls in `onLaunchTestSuite()` (including heavy-conditional calls gated by `getIsRunningHeavyTests()`); exclude only debug-only and commented-out calls
+> 15. `logger.logInfo` / `logWarning` / `logError` placed inside a store state file (`core/stores/states/*.ts`) instead of the calling controller
+> 16. A React component (core or plugin) receiving a `MapViewer` prop or calling `mapViewer.map.*` instead of going through a controller
 
 ### Logging
 
@@ -1456,6 +1477,31 @@ Control via localStorage:
 
 - `GEOVIEW_LOG_ACTIVE`: Enable logging outside dev mode
 - `GEOVIEW_LOG_LEVEL`: Set level (number or CSV like "4,6,10")
+
+### Where to Log — Controllers, NOT Store State Files
+
+**Business-flow logging (`logInfo` / `logWarning` / `logError`) belongs at the application level — in controllers, domains, layer classes, or APIs. NEVER inside a store state slice (`core/stores/states/*.ts`).**
+
+Store state adaptors (`setStore*`, `addStore*`, `removeStore*`) are thin setters. They know _what_ changed but not _why_ — that intent lives in the controller that called them. Logging in both places duplicates noise.
+
+```typescript
+// ❌ Bad: logging inside the store state adaptor
+export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: SwipeSide): void => {
+  getStoreSwiperState(mapId).actions.setLayerSides({ ...sides, [layerPath]: side });
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+};
+
+// ✅ Good: the controller owns the intent, so it owns the log
+setLayerSide(layerPath: string, side: SwipeSide): void {
+  // Save in the store
+  setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+  // Log
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+}
+```
+
+React components keep their own `logTraceRender` / `logTraceUseEffect` / `logTraceUseMemo` calls — those trace rendering, not business flow, and are unaffected by this rule. See [best-practices.md §19](../docs/programming/best-practices.md#where-to-log) and [logging.md](../docs/programming/logging.md#where-to-log--controllers-not-store-state-files).
 
 ### Logger Trace Conventions
 

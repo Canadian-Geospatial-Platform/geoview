@@ -245,7 +245,7 @@ export class SwiperTester extends GVAbstractTester {
 
         const settingsButton = mapRoot?.querySelector('[aria-label="Layer settings"]') as HTMLElement | null;
         settingsButton?.click();
-        await SwiperTester.waitForCondition(() => mapRoot?.textContent?.includes('Show in Swiper') ?? false);
+        await SwiperTester.waitForCondition(() => mapRoot?.textContent?.includes('Mask with the swipe bar') ?? false);
 
         return {
           interactive: getStoreSwiperInteractive(this.getMapId()),

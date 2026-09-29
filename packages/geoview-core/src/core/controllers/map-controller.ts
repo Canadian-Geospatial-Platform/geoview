@@ -3,6 +3,7 @@ import type { Pixel } from 'ol/pixel';
 import type { Coordinate } from 'ol/coordinate';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
+import DragPan from 'ol/interaction/DragPan';
 
 import {
   MAP_EXTENTS,
@@ -925,6 +926,36 @@ export class MapController extends AbstractMapViewerController {
    */
   forceMapToRender(): void {
     this.getMapViewer().map.render();
+  }
+
+  /**
+   * Gets the current size of the map in pixels.
+   *
+   * @returns The map size as [width, height], or undefined when the map has no size yet
+   */
+  getMapSize(): number[] | undefined {
+    return this.getMapViewer().map.getSize();
+  }
+
+  /**
+   * Toggles whether the map reacts to pointer interactions.
+   *
+   * Disables the drag-pan interaction and suppresses pointer events on the map viewport, so an
+   * overlay (such as the swiper bar) can own the pointer stream without the map starting a pan.
+   *
+   * @param active - Whether the map should react to pointer interactions
+   */
+  setMapPointerInteractive(active: boolean): void {
+    // Toggle the drag-pan interaction
+    this.getMapViewer()
+      .map.getInteractions()
+      .forEach((interaction) => {
+        if (interaction instanceof DragPan) interaction.setActive(active);
+      });
+
+    // Toggle pointer events on the map viewport (overlays using document-level listeners keep working)
+    const viewport = this.getMapViewer().map.getViewport();
+    if (viewport) viewport.style.pointerEvents = active ? '' : 'none';
   }
 
   /**

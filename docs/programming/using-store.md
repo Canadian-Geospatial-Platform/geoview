@@ -152,8 +152,13 @@ this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndAppl
 
 **Key rule:** Components never call `setStore*` directly — mutations always go through controller methods.
 
+**Key rule:** Components never receive a `MapViewer` prop. Core and plugin components take a `mapId` (or a `ControllerRegistry` when rendered outside the `MapViewer` React context) and call controller methods. If the controller lacks a method you need, add it — don't reach into `mapViewer.map`. See [Controller Architecture — Best Practices](controller-architecture.md#best-practices).
+
+**Key rule:** Store state files never log business flow. `setStore*` / `addStore*` / `removeStore*` adaptors are thin setters — put `logger.logInfo` (and `logWarning` / `logError`) in the calling controller, which owns the intent behind the change. See [Logging — Where to log](logging.md#where-to-log--controllers-not-store-state-files).
+
 ## See Also
 
 - **[Best Practices](best-practices.md)** - Coding standards
+- **[Logging](logging.md)** - Logger levels and where logging belongs
 - **[Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access)** - When to use the DOM wrappers vs. the `useStoreAppGeoviewHTMLElement` / `getStoreAppGeoviewHTMLElement` root accessors, and the ban on direct `document.*`
 - **[Event Helper](event-helper.md)** - Delegate event system

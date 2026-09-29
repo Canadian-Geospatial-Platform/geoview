@@ -668,3 +668,62 @@ A few lookups are genuinely **not** a single map's descendant. Keep the raw `doc
 - **The fullscreen-portaled guide**, which is map-scoped via `[data-map-id="${mapId}"]` but must be queried globally because the portal moves it out of the map root.
 
 > Note: `document.getElementsByClassName` / `getElementsByTagName` are **not** flagged by the rule, but still scope them to a map's root (e.g. `getGVRootElement(mapId)?.getElementsByClassName(...)`) whenever the result should be map-specific.
+
+## <a id="where-to-log"></a>19- Where to log — controllers, not store state files
+
+Business-flow logging (`logger.logInfo` / `logWarning` / `logError`) belongs at the **application level** — in controllers, domains, layer classes, or APIs. It does **not** belong inside a store state slice (`core/stores/states/*.ts`).
+
+Store state adaptors (`setStore*`, `addStore*`, `removeStore*`) are thin setters. They know _what_ changed but not _why_ — the intent lives in the controller that called them. Logging in both places duplicates noise and makes the log stream harder to read.
+
+```ts
+// ❌ Bad: logging inside the store state adaptor
+export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: SwipeSide): void => {
+  getStoreSwiperState(mapId).actions.setLayerSides({ ...sides, [layerPath]: side });
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+};
+
+// ✅ Good: the controller owns the intent, so it owns the log
+setLayerSide(layerPath: string, side: SwipeSide): void {
+  // Save in the store
+  setStoreSwiperLayerSide(this.getMapId(), layerPath, side);
+
+  // Log
+  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
+}
+```
+
+React components keep their own `logTraceRender` / `logTraceUseEffect` / `logTraceUseMemo` calls — those trace rendering, not business flow, and are unaffected by this rule.
+
+See **[Logging — Where to log](logging.md#where-to-log--controllers-not-store-state-files)** and **[Using the Store](using-store.md)**.
+
+## <a id="no-mapviewer-in-components"></a>20- Components go through controllers, never the `MapViewer`
+
+React components — core components **and** plugin components — must never receive a `MapViewer` prop or touch `mapViewer.map` (the raw OpenLayers map). They take a `mapId` (or a `ControllerRegistry` for plugin components rendered outside the `MapViewer` React context) and go through controllers.
+
+```tsx
+// ❌ Bad: the component reaches into the MapViewer and OpenLayers
+<Swiper viewer={this.mapViewer} controllerRegistry={this.controllerRegistry} />;
+// ...inside the component:
+const size = viewer.map.getSize();
+viewer.map.render();
+
+// ✅ Good: the component only knows controllers
+<Swiper controllerRegistry={this.controllerRegistry} />;
+// ...inside the component:
+const { mapController } = controllerRegistry;
+const size = mapController.getMapSize();
+mapController.forceMapToRender();
+```
+
+**If the controller has no method for what you need, add one to the controller** — do not bypass it. The OpenLayers detail belongs in the controller, not in the component:
+
+```typescript
+// In MapController
+getMapSize(): number[] | undefined {
+  return this.getMapViewer().map.getSize();
+}
+```
+
+`this.mapViewer` remains available inside the plugin class itself (e.g. `this.mapViewer.mapId`, lifecycle wiring), but it must not leak into the rendered component. All other plugins already follow this — they pass `mapId`, not the viewer.
+
+See **[Controller Architecture — Best Practices](controller-architecture.md#best-practices)**.

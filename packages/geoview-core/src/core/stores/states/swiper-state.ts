@@ -3,7 +3,6 @@ import { useStore } from 'zustand';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
-import { logger } from '@/core/utils/logger';
 
 // #region INTERFACE DEFINITION
 /** A single layer entry participating in the swiper, with its visible side. */
@@ -253,17 +252,8 @@ export const getStoreSwiperInteractive = (mapId: string): boolean => {
   return getStoreSwiperState(mapId).interactive;
 };
 
-/** Hooks whether the swiper is interactive from the store. */
-export const useStoreSwiperInteractive = (): boolean => useStore(useGeoViewStore(), (state) => state.swiperState.interactive);
-
-/**
- * Hooks whether the swiper is interactive from the store, returning false when the Swiper plugin is not loaded.
- *
- * Safe to use in always-rendered components that may run without the Swiper plugin, because it does
- * not assume the swiper state slice is initialized.
- */
-export const useStoreSwiperInteractiveIfExists = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.swiperState?.interactive ?? false);
+/** Hooks whether the swiper is interactive from the store, returning false when the Swiper plugin is not loaded. */
+export const useStoreSwiperInteractive = (): boolean => useStore(useGeoViewStore(), (state) => state.swiperState?.interactive ?? false);
 
 /**
  * Gets the swiper orientation from the store.
@@ -313,9 +303,6 @@ export const setStoreSwiperLayerPaths = (mapId: string, layerPaths: string[]): v
 
   // set store layer paths
   swiperState.actions.setLayerPaths(layerPaths);
-
-  // Log
-  logger.logInfo('Added Swiper functionality for layer paths:', layerPaths);
 };
 
 /**
@@ -325,7 +312,7 @@ export const setStoreSwiperLayerPaths = (mapId: string, layerPaths: string[]): v
  * @param entries - The layer entries to set, each with a layer path and its visible side.
  * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
  */
-export const setStoreSwiperLayers = (mapId: string, entries: { layerPath: string; side: SwipeSide }[]): void => {
+export const setStoreSwiperLayers = (mapId: string, entries: TypeSwiperLayerEntry[]): void => {
   // Get the swiper state which is only initialized if the Swiper Plugin exists.
   const swiperState = getStoreSwiperState(mapId);
 
@@ -339,9 +326,6 @@ export const setStoreSwiperLayers = (mapId: string, entries: { layerPath: string
   // Set both in the store
   swiperState.actions.setLayerPaths(layerPaths);
   swiperState.actions.setLayerSides(layerSides);
-
-  // Log
-  logger.logInfo('Set Swiper layer entries:', entries);
 };
 
 /**
@@ -358,9 +342,6 @@ export const setStoreSwiperLayerSide = (mapId: string, layerPath: string, side: 
 
   // Update the side for the layer path
   swiperState.actions.setLayerSides({ ...swiperState.layerSides, [layerPath]: side });
-
-  // Log
-  logger.logInfo('Set Swiper visible side for layer path:', layerPath, side);
 };
 
 /**
@@ -415,12 +396,6 @@ export const addStoreSwiperLayerPath = (mapId: string, layerPath: string, side: 
 
     // Store the visible side for this layer path
     swiperState.actions.setLayerSides({ ...swiperState.layerSides, [layerPath]: side });
-
-    // Log
-    logger.logInfo('Added Swiper functionality for layer path:', layerPath, side);
-  } else {
-    // Log
-    logger.logInfo('Swiper functionality already active for layer path:', layerPath);
   }
 };
 
@@ -454,12 +429,6 @@ export const removeStoreSwiperLayerPath = (mapId: string, layerPath: string): vo
     const updatedSides = { ...swiperState.layerSides };
     delete updatedSides[layerPath];
     swiperState.actions.setLayerSides(updatedSides);
-
-    // Log
-    logger.logInfo('Removed Swiper functionality for layer path:', layerPath);
-  } else {
-    // Log
-    logger.logInfo('Swiper functionality already inactive for layer path:', layerPath);
   }
 };
 
@@ -476,17 +445,11 @@ export const removeAllStoreSwipers = (mapId: string): void => {
   // If no layer paths, return
   if (!swiperState.layerPaths) return;
 
-  // Get all layer paths
-  const { layerPaths } = swiperState;
-
   // Update the layer data array in the store
   swiperState.actions.setLayerPaths([]);
 
   // Clear all visible sides
   swiperState.actions.setLayerSides({});
-
-  // Log
-  logger.logInfo('Removed Swiper functionality for all layer paths', layerPaths);
 };
 
 // #endregion STATE ADAPTORS
