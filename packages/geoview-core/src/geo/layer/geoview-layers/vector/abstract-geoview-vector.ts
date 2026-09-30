@@ -297,6 +297,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerConfig.initQueryableSource(outfields.length > 0);
   }
 
+  // #endregion STATIC METHODS
+
+  // #region STATIC PRIVATE METHODS
+
   /**
    * Processes metadata for a set of features by assigning unique IDs and initializing feature info configuration if needed.
    *
@@ -356,5 +360,5 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     });
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }
