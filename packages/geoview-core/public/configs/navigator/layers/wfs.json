@@ -88,13 +88,57 @@
         ]
       },
       {
-        "geoviewLayerId": "street-network",
-        "geoviewLayerName": "Street Network",
+        "geoviewLayerId": "transports",
+        "geoviewLayerName": "Transports",
         "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
             "layerId": "ms:bgr_v_sous_route_res_sup_act"
+          },
+          {
+            "layerId": "ms:circulation_routier"
+          },
+          {
+            "layerId": "ms:conditions_routieres"
+          },
+          {
+            "layerId": "ms:iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "ms:bgr_v_dirct_genrl_geomt_act"
+          },
+          {
+            "layerId": "ms:radars_photos"
+          },
+          {
+            "layerId": "ms:zpegt"
+          },
+          {
+            "layerId": "ms:site_inv_geotech_p"
+          },
+          {
+            "layerId": "ms:sortie_aut"
+          },
+          {
+            "layerId": "ms:aeroport"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gouv-ouvert",
+        "geoviewLayerName": "Gouv Ouvert (proxied)",
+        "metadataAccessPath": "https://geoegl.msp.gouv.qc.ca/ws/igo_gouvouvert.fcgi",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:vg_observation_v_inondation_embacle_wmst"
+          },
+          {
+            "layerId": "ms:MSP_DESSERTE_MUN_911"
+          },
+          {
+            "layerId": "ms:CASERNE"
           }
         ]
       },
