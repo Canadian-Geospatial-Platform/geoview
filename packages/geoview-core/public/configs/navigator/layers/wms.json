@@ -27,13 +27,57 @@
         ]
       },
       {
-        "geoviewLayerId": "street-network",
-        "geoviewLayerName": "Street Network",
+        "geoviewLayerId": "transports",
+        "geoviewLayerName": "Transports",
         "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "bgr_v_sous_route_res_sup_act"
+          },
+          {
+            "layerId": "circulation_routier"
+          },
+          {
+            "layerId": "conditions_routieres"
+          },
+          {
+            "layerId": "iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "bgr_v_dirct_genrl_geomt_act"
+          },
+          {
+            "layerId": "radars_photos"
+          },
+          {
+            "layerId": "zpegt"
+          },
+          {
+            "layerId": "site_inv_geotech_p"
+          },
+          {
+            "layerId": "sortie_aut"
+          },
+          {
+            "layerId": "aeroport"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gouv-ouvert",
+        "geoviewLayerName": "Gouv Ouvert (proxied)",
+        "metadataAccessPath": "https://geoegl.msp.gouv.qc.ca/ws/igo_gouvouvert.fcgi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "vg_observation_v_inondation_embacle_wmst"
+          },
+          {
+            "layerId": "MSP_DESSERTE_MUN_911"
+          },
+          {
+            "layerId": "CASERNE"
           }
         ]
       },
@@ -96,14 +140,14 @@
         ]
       },
       {
-        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerId": "weather-group",
         "geoviewLayerName": "Weather Group",
         "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "entryType": "group",
-            "layerId": "wmsLYR1-Group",
+            "layerId": "weather-group-g",
             "layerName": "Group",
             "listOfLayerEntryConfig": [
               {
@@ -112,6 +156,24 @@
               {
                 "layerId": "RADAR_1KM_RSNO",
                 "layerName": "Radar Snow"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "weather-clim-group",
+        "geoviewLayerName": "Weather Climate Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet-climate",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "weather-clim-group-g",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "AHCCD.STATIONS"
               }
             ]
           }
