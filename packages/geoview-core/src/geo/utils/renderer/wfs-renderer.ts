@@ -68,6 +68,7 @@ export abstract class WfsRenderer {
     const featureTypeStyles = toArray(featureTypeStyleRaw);
     const rules = featureTypeStyles.flatMap((featureTypeStyle) => toArray(featureTypeStyle['se:Rule']));
 
+    // If no rules
     if (rules.length === 0) throw new NotSupportedError('Unsupported Layer styling: no rules were found in the SLD');
 
     const infosByGeometry: Partial<Record<TypeStyleGeometry, TypeLayerStyleConfigInfo[]>> = {};
@@ -98,19 +99,13 @@ export abstract class WfsRenderer {
       // Parse every symbolizer in the rule. Mixed-geometry SLDs commonly contain more than
       // one symbolizer, and each one must be retained under its own Geoview geometry key.
       let pointSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      pointSymbolizer = this.#buildLayerStyleInfoPointSymbolizer(userRule['se:PointSymbolizer']);
+
       let lineSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      lineSymbolizer = this.#buildLayerStyleInfoLineSymbolizer(userRule['se:LineSymbolizer']);
+
       let polygonSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
-      if (userRule['se:PointSymbolizer']) {
-        pointSymbolizer = this.#buildLayerStyleInfoPointSymbolizer(userRule['se:PointSymbolizer']);
-      }
-
-      if (userRule['se:LineSymbolizer']) {
-        lineSymbolizer = this.#buildLayerStyleInfoLineSymbolizer(userRule['se:LineSymbolizer']);
-      }
-
-      if (userRule['se:PolygonSymbolizer']) {
-        polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
-      }
+      polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
 
       if (polygonSymbolizer && lineSymbolizer) {
         // A polygon rule can carry both a fill and an outline. Preserve the line's stroke
@@ -517,8 +512,11 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the merged SVG symbol, or undefined if no valid graphics were found
    */
   static #buildLayerStyleInfoPointSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
+
     const symbolizers = toArray(symbolizer);
 
     // For each symbolizer
@@ -622,8 +620,11 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the stroke settings, or undefined if no valid stroke
    */
   static #buildLayerStyleInfoLineSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
+
     const symbolizers = toArray(symbolizer);
 
     // Keep each LineSymbolizer stroke so multiple strokes can be layered by the renderer.
@@ -728,8 +729,11 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the fill and stroke settings, or undefined if no valid style found
    */
   static #buildLayerStyleInfoPolygonSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
+
     const symbolizers = toArray(symbolizer);
 
     // Accumulated fill settings
