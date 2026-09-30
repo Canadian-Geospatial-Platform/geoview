@@ -173,7 +173,9 @@
             "layerName": "Group",
             "listOfLayerEntryConfig": [
               {
-                "layerId": "AHCCD.STATIONS"
+                "layerId": "AHCCD.STATIONS",
+                "ogcApiFeaturesUrl": "https://api.weather.gc.ca",
+                "ogcApiFeaturesLayerId": "ahccd-stations"
               }
             ]
           }
