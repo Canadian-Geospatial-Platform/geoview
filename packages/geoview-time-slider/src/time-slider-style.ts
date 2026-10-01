@@ -1,4 +1,15 @@
+import type { CSSProperties } from 'react';
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+
+/**
+ * Inline style for the range slider width.
+ *
+ * Passed via the `style` prop (not `sx`) because the `Slider` UI wrapper always overrides
+ * whatever `sx` it receives with its own internal styling, so a custom `sx` value is silently dropped.
+ */
+export const SLIDER_WIDTH_STYLE: CSSProperties = {
+  width: '80%',
+};
 
 /**
  * Gets custom sx classes for the time slider.
@@ -39,5 +50,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   descriptionText: {
     padding: theme.spacing(2, 2.5, 0, 2.5),
     fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+  hiddenLayerName: {
+    color: theme.palette.grey[600],
+    fontStyle: 'italic',
   },
 });

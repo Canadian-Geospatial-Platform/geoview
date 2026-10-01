@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import type { MouseEvent } from 'react';
-import { useMemo, memo, useCallback, useState, useRef, useEffect } from 'react';
+import { useMemo, memo, useCallback, useState, useRef, useEffect, useId } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
-import Slider from '@mui/material/Slider';
 import type { SxStyles } from '@/ui/style/types';
-import { Box, CloseIcon, HeightIcon, IconButton, Paper, Popper, Typography } from '@/ui';
+import { Box, CloseIcon, HeightIcon, IconButton, Paper, Popper, Slider, Typography } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -62,6 +61,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const prevOpenRef = useRef<boolean>(false);
   const keyboardCloseRef = useRef<boolean>(false);
+  const isPointerInteractionRef = useRef<boolean>(false);
 
   // Get container
   const mapId = useStoreGeoViewMapId();
@@ -69,20 +69,12 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Element IDs for accessibility and focus management
   const closeButtonId = `${mapId}-resize-close-button`;
+  const popperId = useId();
 
   // Marks calculation
   const marks = RESIZE_VALUES.map((value) => ({ value, label: `${value}%` }));
 
   // #region Handlers
-
-  /**
-   * Handles opening the resize popper.
-   */
-  const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
-    event.preventDefault();
-    setAnchorEl(event.currentTarget);
-    setOpen(true);
-  }, []);
 
   /**
    * Handles closing the resize popper, applying any pending keyboard value.
@@ -93,9 +85,34 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
       uiController.setFooterPanelResizeValue(pendingValue);
       setPendingValue(undefined);
     }
+    // Reset in case the popper closes (click-away/Escape) mid-drag, before onChangeCommitted fires
+    isPointerInteractionRef.current = false;
     setOpen(false);
     setAnchorEl(null);
   }, [pendingValue, uiController]);
+
+  /**
+   * Handles toggling the resize popper open or closed.
+   */
+  const handleClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>): void => {
+      event.preventDefault();
+      if (open) {
+        handleClose();
+        return;
+      }
+      setAnchorEl(event.currentTarget);
+      setOpen(true);
+    },
+    [open, handleClose]
+  );
+
+  /**
+   * Marks the beginning of a pointer-driven slider interaction (mouse or touch drag).
+   */
+  const handleSliderPointerDown = useCallback((): void => {
+    isPointerInteractionRef.current = true;
+  }, []);
 
   /**
    * Handles keyboard events on the slider container.
@@ -136,31 +153,39 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   );
 
   /**
+   * Formats the resize value as a translated percentage string.
+   *
+   * @param value - The slider value to format
+   * @returns The translated value text
+   */
+  const getResizeValueText = useCallback((value: number): string => t('footerBar.resizeValueText', { value }), [t]);
+
+  /**
    * Handles slider value change, snapping to marks within threshold.
    */
-  const handleOnSliderChange = useCallback((_event: Event, value: number | number[]): void => {
+  const handleOnSliderChange = useCallback((value: number | number[]): void => {
     const v = value as number;
     const snap = RESIZE_VALUES.find((mark) => Math.abs(v - mark) <= SNAP_THRESHOLD);
     setPendingValue(snap ?? v);
   }, []);
 
   /**
-   * Handles committing the slider value on mouse release.
+   * Handles committing the slider value on pointer release, applying the resize and closing the popper.
    *
-   * For mouse interactions (pointerup/mouseup), applies the resize and closes the popper because
-   * resizing the footer panel moves the anchor button and causes the popper to jump.
-   * For keyboard interactions (keydown), the value stays as pendingValue and is applied when the popper closes.
+   * The underlying slider auto-commits on every arrow-key keystroke too, so this only reacts when
+   * `isPointerInteractionRef` confirms the commit came from a mouse/touch drag release — resizing the
+   * footer panel moves the anchor button and causes the popper to jump, which must not happen mid keyboard
+   * navigation. Keyboard changes stay as pendingValue and are applied when the popper closes.
    */
   const handleOnSliderChangeCommitted = useCallback(
-    (event: React.SyntheticEvent | Event, value: number | number[]): void => {
-      // Only apply on mouse release — keyboard changes stay as pendingValue until popper closes
-      const eventType = (event as Event).type;
-      if (eventType === 'mouseup' || eventType === 'pointerup') {
-        uiController.setFooterPanelResizeValue(value as number);
-        setPendingValue(undefined);
-        setOpen(false);
-        setAnchorEl(null);
-      }
+    (value: number | number[]): void => {
+      if (!isPointerInteractionRef.current) return;
+      isPointerInteractionRef.current = false;
+
+      uiController.setFooterPanelResizeValue(value as number);
+      setPendingValue(undefined);
+      setOpen(false);
+      setAnchorEl(null);
     },
     [uiController]
   );
@@ -205,11 +230,22 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClose}>
-      <Box>
-        <IconButton iconRef={resizeButtonRef} onClick={handleClick} aria-label={t('footerBar.resizeTooltip')}>
+      <Box sx={memoSxClasses.root}>
+        <IconButton
+          iconRef={resizeButtonRef}
+          onClick={handleClick}
+          aria-label={t('footerBar.resizeTooltip')}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? popperId : undefined}
+        >
           <HeightIcon />
         </IconButton>
         <Popper
+          id={popperId}
+          role="dialog"
+          aria-modal="false"
+          aria-label={t('footerBar.resizeAriaLabel')}
           open={open}
           anchorEl={anchorEl}
           placement="top-start"
@@ -219,10 +255,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           focusTrap={activeTrapGeoView}
           handleKeyDown={handleEscapeKey}
           onClose={handleClose}
-          sx={{
-            pointerEvents: 'auto',
-            zIndex: theme.zIndex.modal + 100,
-          }}
+          sx={memoSxClasses.popper}
         >
           <Paper component="section" sx={memoSxClasses.panel}>
             <Box component="header" sx={memoSxClasses.header}>
@@ -240,19 +273,20 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
                 <CloseIcon />
               </IconButton>
             </Box>
-            <Box sx={memoSxClasses.sliderWrapper} onKeyDown={handleSliderKeyDown}>
+            <Box sx={memoSxClasses.sliderWrapper} onKeyDown={handleSliderKeyDown} onPointerDown={handleSliderPointerDown}>
               <Slider
-                aria-label={t('footerBar.resizeAriaLabel')}
-                sx={memoSxClasses.slider}
                 orientation="vertical"
                 value={pendingValue ?? footerPanelResizeValue}
                 step={1}
-                valueLabelDisplay="auto"
+                min={RESIZE_VALUES[0]}
+                max={RESIZE_VALUES[RESIZE_VALUES.length - 1]}
                 marks={marks}
                 onChange={handleOnSliderChange}
                 onChangeCommitted={handleOnSliderChangeCommitted}
-                min={RESIZE_VALUES[0]}
-                max={RESIZE_VALUES[RESIZE_VALUES.length - 1]}
+                valueLabelDisplay="auto"
+                aria-label={t('footerBar.footerPanelHeight')}
+                onValueDisplayAriaLabel={getResizeValueText}
+                onValueLabelFormat={getResizeValueText}
               />
             </Box>
           </Paper>

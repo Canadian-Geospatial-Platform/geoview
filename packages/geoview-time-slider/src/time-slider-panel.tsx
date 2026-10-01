@@ -23,6 +23,10 @@ import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
+import { getSxClasses } from './time-slider-panel-style';
+
+/** Sx classes for this component. No theme dependency, so computed once at module scope. */
+const sxClasses = getSxClasses();
 
 /** Properties for the TimeSliderPanel component. */
 interface TypeTimeSliderProps {
@@ -142,7 +146,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       name: string
     ): JSX.Element => {
       return (
-        <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+        <Box sx={sxClasses.layerTooltip}>
           {name}
           {timeSliderLayerInfo.filtering && `: ${getFilterInfo(layerPath, timeSliderLayerInfo, language) ?? ''}`}
         </Box>
