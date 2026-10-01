@@ -419,10 +419,20 @@ export function isNumeric(str: string | undefined): boolean {
  * Check if an object is empty.
  *
  * @param obj - The object to test
- * @returns true if the object is empty, false otherwise
+ * @returns true if the object is nullish or has no enumerable properties, false otherwise
  */
-export function isObjectEmpty(obj: object | undefined): boolean {
+export function isObjectEmpty(obj: object | undefined | null): boolean {
   return !obj || Object.keys(obj).length === 0;
+}
+
+/**
+ * Checks if an object is defined and has enumerable properties.
+ *
+ * @param obj - The object to test
+ * @returns Whether the object is defined and non-empty
+ */
+export function isObjectNonEmpty<T extends object>(obj: T | undefined | null): obj is T {
+  return !!obj && Object.keys(obj).length > 0;
 }
 
 /**
