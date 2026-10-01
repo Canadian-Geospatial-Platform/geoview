@@ -157,6 +157,12 @@ export class WMTS extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information or contains an error
+   * @throws {InvalidProjectionError} When the metadata projection is invalid
+   * @throws {RequestTimeoutError} When fetching a missing projection definition exceeds the timeout duration
+   * @throws {RequestAbortedError} When fetching a missing projection definition is aborted
+   * @throws {ResponseError} When fetching a missing projection definition returns an unsuccessful response
+   * @throws {ResponseEmptyError} When a missing projection definition response is empty
+   * @throws {NetworkError} When fetching a missing projection definition encounters a network error
    */
   protected override async onProcessLayerMetadata(
     layerConfig: OgcWmtsLayerEntryConfig,
@@ -390,6 +396,13 @@ export class WMTS extends AbstractGeoViewRaster {
    * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When WMTS service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the WMTS service metadata response is empty
+   * @throws {LayerNoCapabilitiesError} When the WMTS capabilities response is empty
+   * @throws {LayerWMTSMetadataError} When required WMTS metadata is missing or invalid
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
