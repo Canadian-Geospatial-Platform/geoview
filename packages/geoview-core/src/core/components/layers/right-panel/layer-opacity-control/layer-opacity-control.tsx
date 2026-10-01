@@ -8,7 +8,12 @@ import type { Mark } from '@mui/material/Slider/useSlider.types';
 
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
-import { useStoreLayerIsHiddenOnMap, useStoreLayerOpacity, useStoreLayerOpacityMaxFromParent } from '@/core/stores/states/layer-state';
+import {
+  useStoreLayerIsHiddenOnMap,
+  useStoreLayerName,
+  useStoreLayerOpacity,
+  useStoreLayerOpacityMaxFromParent,
+} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
@@ -31,6 +36,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
 
   // Store
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
+  const layerName = useStoreLayerName(layerPath);
   const layerController = useLayerController();
   const labelId = useId();
 
@@ -62,11 +68,12 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   }, [layerParentOpacity, t]);
 
   /**
-   * WCAG - Formats the opacity value as a percentage for screen readers.
+   * Formats the opacity value as a translated percentage string.
+   *
+   * @param value - The slider value to format
+   * @returns The translated value text
    */
-  const getAriaValueText = useCallback((value: number): string => {
-    return `${value}%`;
-  }, []);
+  const getOpacityValueText = useCallback((value: number): string => t('layers.opacityValueText', { value }), [t]);
 
   /**
    * Updates the opacity of the layer on the map, optionally updating the store
@@ -93,25 +100,18 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
         {t('layers.opacity')}
       </Typography>
       <Slider
+        disabled={layerHidden}
+        value={Math.round(localOpacity * 100)}
+        step={1}
         min={0}
         max={100}
-        step={1}
-        value={Math.round(localOpacity * 100)}
+        marks={marks}
         onChange={handleSliderChange}
         onChangeCommitted={(value: number | number[]) => handleSliderChange(value, 1, true)}
-        onValueLabelFormat={(value) => `${value}%`}
-        marks={marks}
         valueLabelDisplay="auto"
-        disabled={layerHidden}
-        aria-labelledby={labelId}
-        onValueDisplayAriaLabel={getAriaValueText}
-        slotProps={{
-          input: {
-            // Set to undefined to prevent redundant ARIA attributes; native min and max are already output
-            'aria-valuemin': undefined,
-            'aria-valuemax': undefined,
-          },
-        }}
+        aria-label={t('layers.opacityAriaLabel', { name: layerName, label: t('layers.opacity') })}
+        onValueDisplayAriaLabel={getOpacityValueText}
+        onValueLabelFormat={getOpacityValueText}
       />
     </Box>
   );

@@ -39,11 +39,10 @@ type SliderProps = {
   step?: number | null;
   size?: 'small' | 'medium';
   track?: 'inverted' | 'normal' | false;
-  ariaLabelledby?: string;
-  getAriaLabel?: (index: number) => string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
   valueLabelDisplay?: 'auto' | 'on' | 'off';
   slotProps?: MuiSliderProps['slotProps'];
+  getAriaLabel?: (index: number) => string;
 };
 
 /**
@@ -92,6 +91,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     onKeyDown,
     disabled,
     slotProps,
+    getAriaLabel,
     ...properties
   } = props;
 
@@ -237,7 +237,7 @@ function SliderUI(props: SliderProps): JSX.Element {
    */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent): void => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown'].includes(event.key)) {
         if (sliderRef.current && event.target instanceof HTMLInputElement) {
           const inputs = sliderRef.current.querySelectorAll('input[type="range"]');
           const index = Array.from(inputs).indexOf(event.target);
@@ -398,6 +398,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
       getAriaValueText={onValueDisplayAriaLabel}
+      getAriaLabel={getAriaLabel}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
       onKeyDown={handleKeyDown}

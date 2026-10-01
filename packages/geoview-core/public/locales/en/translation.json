@@ -256,7 +256,9 @@
     "fetchStart": "Fetching data for '{{layerName}}'...",
     "only": "only",
     "opacity": "Opacity (%)",
+    "opacityAriaLabel": "{{name}} layer {{label}}",
     "opacityMax": "Maximum from parent",
+    "opacityValueText": "{{value}}%",
     "outOfVisibleRange": "out of visible range",
     "reloadLayer": "Reload layer",
     "reloadSublayers": "Reload all layers in error",
@@ -577,6 +579,8 @@
   "footerBar": {
     "resizeTooltip": "Resize",
     "resizeAriaLabel": "Resize footer panel",
+    "footerPanelHeight": "Footer panel height",
+    "resizeValueText": "{{value}}%",
     "noTab": "No tab",
     "tabsLabel": "Footer panel tabs"
   },

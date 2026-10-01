@@ -8,6 +8,13 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  root: {
+    marginRight: theme.spacing(1),
+  },
+  popper: {
+    pointerEvents: 'auto',
+    zIndex: theme.zIndex.modal + 100,
+  },
   panel: {
     display: 'flex',
     flexDirection: 'column',
@@ -40,11 +47,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         bottom: '98%',
         left: '30px',
       },
-    },
-  },
-  slider: {
-    '& input[type="range"]': {
-      WebkitAppearance: 'slider-vertical',
     },
   },
 });

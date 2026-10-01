@@ -14,7 +14,7 @@ import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-
 import { logger } from 'geoview-core/core/utils/logger';
 import type { DateTimeStepUnit } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
-import { getSxClasses } from './time-slider-style';
+import { getSxClasses, SLIDER_WIDTH_STYLE } from './time-slider-style';
 import { visuallyHidden } from 'geoview-core/ui/style/default';
 import { Switch } from 'geoview-core/ui/switch/switch';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
@@ -26,6 +26,9 @@ const DEFAULT_CONTINUOUS_STEP_COUNT = 20;
 
 /** One-millisecond native step used so calendar ranges can reach exact endpoints before snapping. */
 const CALENDAR_SLIDER_NATIVE_STEP = 1;
+
+/** Number of calendar steps applied for a single Page Up/Down key press, mirroring the native range input's larger jump. */
+const CALENDAR_SLIDER_PAGE_STEP_MULTIPLIER = 10;
 
 /** Applies calendar stepping to continuous slider values while preserving discrete service values. */
 function getCalendarStepValues(
@@ -97,7 +100,17 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const activeThumbRef = useRef<number>(0);
   const calendarStepAnchorRef = useRef<number | undefined>(undefined);
 
+  /**
+   * Set (via a capture-phase listener, before MUI's native keydown handling runs) whenever a
+   * calendar-stepped Arrow/Page key is pressed, so handleSliderChange/handleSliderChangeCommitted
+   * can ignore the native 1ms step MUI applies on the way to handleSliderKeyDown (see there).
+   */
+  const calendarKeyStepRef = useRef<boolean>(false);
+
   const pendingCloseRef = useRef<boolean>(false);
+
+  /** Wraps the slider so focus can be checked before announcing value changes in the live region. */
+  const sliderBoxRef = useRef<HTMLDivElement>(null);
 
   const displayLanguage = useStoreAppDisplayLanguage();
   const { t } = useTranslation<string>();
@@ -160,8 +173,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const timeDelayId = useId();
   /** Provides a unique ID to associate the step value label with its select control for accessibility. */
   const stepValueId = useId();
-  /** Provides a unique ID to associate the slider title with the slider control for accessibility. */
-  const sliderLabelId = useId();
 
   // States
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -425,7 +436,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean): void => {
       timeSliderController.updateTimeSliderFiltering(layerPath, newValue);
       if (!newValue) {
-        clearInterval(playIntervalRef.current);
+        clearTimeout(playIntervalRef.current);
         setIsPlaying(false);
       }
     },
@@ -490,9 +501,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    * Handles when the slider changes in the UI.
    *
    * Adjusts the local state so the Slider thumb updates.
+   *
+   * Ignores changes while a calendar-stepped key press is in flight (see calendarKeyStepRef):
+   * MUI's hidden-input keydown handler fires its own native 1ms-step onChange before
+   * handleSliderKeyDown gets a chance to apply the real calendar-stepped value, so this would
+   * otherwise commit a throwaway value on every keystroke.
    */
   const handleSliderChange = useCallback(
     (newValues: number | number[], activeThumb: number): void => {
+      if (calendarKeyStepRef.current) return;
+
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
@@ -509,9 +527,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    * Handles when the slider thumb has committed to a value in the slider.
    *
    * Adjusts the main time slider store with the values.
+   *
+   * Ignores commits while a calendar-stepped key press is in flight (see calendarKeyStepRef and
+   * handleSliderChange) — MUI calls onChangeCommitted unconditionally for every keydown, which
+   * would otherwise write a throwaway native-stepped value to the store before handleSliderKeyDown
+   * applies (and commits) the real calendar-stepped value.
    */
   const handleSliderChangeCommitted = useCallback(
     (newValues: number | number[]): void => {
+      if (calendarKeyStepRef.current) return;
+
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
         const nearest = DateMgt.findNearestTimestamp(memoTimeStampRange, value);
@@ -529,6 +554,71 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       }
     },
     [timeSliderController, discreteValues, layerPath, singleHandle, stepUnit, minAndMax, memoTimeStampRange]
+  );
+
+  /**
+   * Handles keyboard navigation for calendar-stepped, non-discrete sliders.
+   *
+   * The native 1ms step (see memoSliderStep) snaps right back to the same calendar-aligned
+   * value, leaving keyboard users unable to move the thumb (WCAG 2.1.1). This moves the focused
+   * thumb by whole calendar units instead, under the same constraints as mouse interactions.
+   *
+   * MUI applies its native step and fires onChange/onChangeCommitted before this handler runs
+   * (it's bound on the Slider root, which only sees the keydown after the hidden thumb input
+   * does). handleSliderKeyDownCapture flags that native step so handleSliderChange /
+   * handleSliderChangeCommitted ignore it, leaving this handler's value as the only one committed.
+   * Discrete and fixed-step sliders keep MUI's default keyboard behaviour.
+   */
+  const handleSliderKeyDown = useCallback(
+    (event: React.KeyboardEvent): void => {
+      if (!stepUnit || discreteValues) return;
+
+      const isIncrementKey = event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'PageUp';
+      const isDecrementKey = event.key === 'ArrowLeft' || event.key === 'ArrowDown' || event.key === 'PageDown';
+      if (!isIncrementKey && !isDecrementKey) return;
+
+      // Suppress the browser's native range-input stepping behaviour (not MUI's own JS-driven step, see JSDoc above).
+      event.preventDefault();
+
+      const isPage = event.key === 'PageUp' || event.key === 'PageDown';
+      const direction = (isIncrementKey ? 1 : -1) * (isPage ? CALENDAR_SLIDER_PAGE_STEP_MULTIPLIER : 1);
+
+      // Use event.target (the focused hidden thumb input that dispatched the key event), not
+      // currentTarget: this handler is bound on the Slider's root element (not the thumb input
+      // itself), so currentTarget would always be the root and never carry a 'data-index'.
+      const thumbIndex = Number((event.target as HTMLElement | null)?.getAttribute('data-index') ?? 0);
+
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+      sliderDeltaRef.current = undefined;
+      activeThumbRef.current = thumbIndex;
+
+      const newValues = [...values];
+      const movedValue = DateMgt.addCalendarStep(newValues[thumbIndex] ?? values[0], stepUnit, direction);
+      newValues[thumbIndex] = Math.min(minAndMax[1], Math.max(minAndMax[0], movedValue));
+
+      const constrainedValues = timeSliderController.constrainValues(layerPath, newValues, thumbIndex);
+      setValues(constrainedValues);
+      timeSliderController.updateTimeSliderValues(layerPath, constrainedValues);
+
+      // Done applying the real value — let subsequent, unrelated changes through again.
+      calendarKeyStepRef.current = false;
+    },
+    [stepUnit, discreteValues, values, minAndMax, timeSliderController, layerPath]
+  );
+
+  /**
+   * Flags an incoming calendar-stepped Arrow/Page key before MUI's hidden-input keydown handler
+   * runs (see handleSliderKeyDown for why this needs to happen in the capture phase).
+   */
+  const handleSliderKeyDownCapture = useCallback(
+    (event: React.KeyboardEvent): void => {
+      if (!stepUnit || discreteValues) return;
+
+      const isStepKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown'].includes(event.key);
+      if (isStepKey) calendarKeyStepRef.current = true;
+    },
+    [stepUnit, discreteValues]
   );
 
   /**
@@ -550,6 +640,45 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     },
     [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode]
   );
+
+  /**
+   * Formats one or two slider timestamps into a single human-readable range string.
+   *
+   * @param rangeValues - The slider value(s) to format
+   * @returns The formatted value, or the formatted start and end values joined by "to"
+   */
+  const formatRange = useCallback(
+    (rangeValues: number[]): string => {
+      if (rangeValues.length > 1) {
+        return `${handleLabelFormat(rangeValues[0])} ${t('timeSlider.slider.to')} ${handleLabelFormat(rangeValues[rangeValues.length - 1])}`;
+      }
+      return handleLabelFormat(rangeValues[0]);
+    },
+    [handleLabelFormat, t]
+  );
+
+  /**
+   * Provides a user-friendly accessible name for a slider thumb.
+   *
+   * Includes the layer/panel title in the label itself (instead of an `aria-labelledby` reference)
+   * so each thumb keeps its own distinct accessible name while still conveying which layer it
+   * belongs to — `aria-labelledby` would take precedence over this per-thumb label and make both
+   * thumbs announce the same text.
+   *
+   * @param index - The index of the slider thumb (0 for the first thumb, 1 for the second)
+   * @returns The translated thumb label
+   */
+  const handleGetAriaLabel = useCallback(
+    (index: number): string => {
+      const name = title || names[layerPath];
+      if (singleHandle) return t('timeSlider.slider.date', { name });
+      return index === 0 ? t('timeSlider.slider.startDate', { name }) : t('timeSlider.slider.endDate', { name });
+    },
+    [singleHandle, t, title, names, layerPath]
+  );
+
+  /** The live region message announced to screen readers for the current slider value (see the announcement effect below). */
+  const [announcement, setAnnouncement] = useState<string>(() => formatRange(storeValues));
 
   // #endregion
 
@@ -589,6 +718,24 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     // Sync local state
     setValues(storeValues);
   }, [storeValues]);
+
+  /**
+   * Announces the current slider value to screen readers via the live region.
+   *
+   * Skipped while playback animation is running, since it would spam the live region on every
+   * tick (the final range is announced once playback stops and this effect re-runs), and
+   * skipped while focus is on the slider itself, since its native aria-valuetext already
+   * announces the change there.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - announcement', storeValues, isPlaying);
+
+    if (isPlaying) return;
+    if (sliderBoxRef.current?.contains(document.activeElement)) return;
+
+    setAnnouncement(formatRange(storeValues));
+  }, [storeValues, isPlaying, formatRange]);
 
   /**
    * Auto-closes the panel when conditions stabilize after blocked Esc press.
@@ -632,11 +779,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const renderLayerName = (nameLayerPath: string, prefix = ''): JSX.Element => {
     return (
-      <Box
-        component="span"
-        key={nameLayerPath}
-        sx={layerVisibilities[nameLayerPath] ? undefined : { color: theme.palette.grey[600], fontStyle: 'italic' }}
-      >
+      <Box component="span" key={nameLayerPath} sx={layerVisibilities[nameLayerPath] ? undefined : memoSxClasses.hiddenLayerName}>
         {`${prefix}${names[nameLayerPath]}`}
       </Box>
     );
@@ -680,7 +823,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     <Box onKeyDown={handleKeyDown} sx={memoSxClasses.containerPadding}>
       {/* Header with title and filter switch */}
       <Box sx={memoSxClasses.headerContainer}>
-        <Typography id={sliderLabelId} component="h2" sx={memoSxClasses.panelTitle}>
+        <Typography component="h2" sx={memoSxClasses.panelTitle}>
           {renderDisplayTitle()}
         </Typography>
         <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
@@ -691,9 +834,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       </Box>
 
       {/* Slider */}
-      <Box sx={memoSxClasses.centeredContainer}>
+      <Box ref={sliderBoxRef} onKeyDownCapture={handleSliderKeyDownCapture} sx={memoSxClasses.centeredContainer}>
         <Slider
-          style={{ width: '80%' }}
+          style={SLIDER_WIDTH_STYLE}
           min={minAndMax[0]}
           max={minAndMax[1]}
           value={values}
@@ -701,14 +844,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           step={memoSliderStep}
           onChange={handleSliderChange}
           onChangeCommitted={handleSliderChangeCommitted}
+          onKeyDown={handleSliderKeyDown}
           onValueLabelFormat={handleLabelFormat}
-          aria-labelledby={sliderLabelId}
+          onValueDisplayAriaLabel={handleLabelFormat}
+          getAriaLabel={handleGetAriaLabel}
         />
-        {/* WCAG - Live region to announce slider value changes */}
-        <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
-          {`${handleLabelFormat(values[0])}${
-            values.length > 1 ? ` ${t('timeSlider.slider.to')} ${handleLabelFormat(values[values.length - 1])}` : ''
-          }`}
+        {/* WCAG - Live region announcing the slider's value. Only updated when the change didn't originate from direct
+            interaction with the slider (its native aria-valuetext already announces that) and no animation is playing
+            (see the announcement effect). role="status" implies aria-live value of polite and aria-atomic value of true. */}
+        <Typography role="status" sx={visuallyHidden}>
+          {announcement}
         </Typography>
       </Box>
 

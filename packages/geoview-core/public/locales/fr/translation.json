@@ -256,7 +256,9 @@
     "fetchStart": "Téléchargement des données pour « {{layerName}} »...",
     "only": "seulement",
     "opacity": "Opacité (%)",
+    "opacityAriaLabel": "{{label}} de la couche {{name}}",
     "opacityMax": "Maximum du parent",
+    "opacityValueText": "{{value}} %",
     "outOfVisibleRange": "hors de la plage visible",
     "reloadLayer": "Recharger la couche",
     "reloadSublayers": "Recharger toutes les couches en erreur",
@@ -577,6 +579,8 @@
   "footerBar": {
     "resizeTooltip": "Redimensionner",
     "resizeAriaLabel": "Redimensionner le panneau de pied de page",
+    "footerPanelHeight": "Hauteur du panneau de pied de page",
+    "resizeValueText": "{{value}} %",
     "noTab": "Pas d'onglet",
     "tabsLabel": "Onglets du panneau de pied de page"
   },

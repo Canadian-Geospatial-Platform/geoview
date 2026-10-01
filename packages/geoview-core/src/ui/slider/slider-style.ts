@@ -72,7 +72,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: '#000',
     },
     '& .MuiSlider-markLabel': {
-      color: theme.palette.geoViewColor?.textColor.light[200],
+      // Darker than light[200] for WCAG contrast; still lighter than the active-label color for visual distinction.
+      color: theme.palette.geoViewColor?.textColor.light[100],
       '&.MuiSlider-markLabelActive': {
         color: theme.palette.geoViewColor?.textColor.main,
       },
