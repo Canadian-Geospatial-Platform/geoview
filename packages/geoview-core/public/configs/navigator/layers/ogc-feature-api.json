@@ -1,15 +1,6 @@
 {
   "map": {
     "viewSettings": {
-      "initialView": {
-        "zoomAndCenter": [
-          3,
-          [
-            0,
-            20
-          ]
-        ]
-      },
       "projection": 3857
     },
     "basemapOptions": {

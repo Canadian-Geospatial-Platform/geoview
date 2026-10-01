@@ -57,6 +57,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   // #endregion OVERRIDES
 
+  // #region METHODS
+
   /**
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
    *
@@ -186,23 +188,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     return this.getVersionOrDefault().startsWith('2.');
   }
 
-  /**
-   * Gets if the config has specified that we should fetch the styles from the WMS.
-   *
-   * @returns True when the styles should be fetched from the WMS. True by default
-   */
-  getShouldFetchStylesFromWMS(): boolean {
-    return this.getGeoviewLayerConfig().fetchStylesOnWMS ?? true; // default: true
-  }
-
-  /**
-   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
-   *
-   * @returns The WMS styles layer id
-   */
-  getWmsStylesLayerId(): string {
-    return this.layerEntryProps.wmsLayerId || this.layerId;
-  }
+  // #endregion METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object) represents a WFS Feature layer type.
