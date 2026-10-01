@@ -54,7 +54,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 14;
+    return 15;
   }
 
   /**
@@ -103,6 +103,9 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
     if (isRunningSequentially) await pGeometryCollectionLegendStyles;
 
+    const pEsriPictureFillLegendStyles = this.#coreTester.testEsriPictureFillLegendStyles();
+    if (isRunningSequentially) await pEsriPictureFillLegendStyles;
+
     const pWmsMetadata = this.#coreTester.testProxyGetWMSServiceMetadata();
     if (isRunningSequentially) await pWmsMetadata;
 
@@ -134,6 +137,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       pPingUnreachable,
       pPingWmsService,
       pGeometryCollectionLegendStyles,
+      pEsriPictureFillLegendStyles,
       pWmsMetadata,
       pWmsMetadataBadUrl,
       pWfsMetadata,

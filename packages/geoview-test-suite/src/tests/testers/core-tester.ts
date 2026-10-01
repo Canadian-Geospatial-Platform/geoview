@@ -7,16 +7,31 @@ import type {
 import type { PingResult } from 'geoview-core/core/utils/utilities';
 import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
 import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
+import { EsriRenderer, type EsriUniqueValueRenderer } from 'geoview-core/geo/utils/renderer/esri-renderer';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/utilities';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 
+/** Represents the outcomes of the ESRI picture fill legend regression test. */
+interface TypePictureFillLegendTestResult {
+  /** The GeoView style converted from the ESRI renderer. */
+  styleConfig: TypeLayerStyleConfig | undefined;
+  /** The legend styles generated from the converted style. */
+  legendStyles: Awaited<ReturnType<typeof GeoviewRenderer.getLegendStyles>>;
+  /** The RGBA values sampled from the center of the polygon legend canvas. */
+  centerPixel: number[];
+}
+
 /**
  * Main Core testing class.
  */
 export class CoreTester extends GVAbstractTester {
+  /** A two-pixel magenta SVG encoded as base64 for deterministic picture fill rendering. */
+  static readonly PICTURE_FILL_IMAGE_DATA =
+    'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyIiBoZWlnaHQ9IjIiPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZjAwZmYiLz48L3N2Zz4=';
+
   /**
    * Returns the name of the Tester.
    *
@@ -296,6 +311,91 @@ export class CoreTester extends GVAbstractTester {
 
         test.addStep('Verifying generated GeometryCollection canvases have height...');
         Test.assertIsEqual((result.GeometryCollection?.defaultCanvas?.height ?? 0) > 0, true);
+      }
+    );
+  }
+
+  /**
+   * Tests ESRI picture fill conversion and polygon legend rendering.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testEsriPictureFillLegendStyles(): Promise<Test<TypePictureFillLegendTestResult>> {
+    // Create an Esri unique value renderer
+    const renderer: EsriUniqueValueRenderer = {
+      type: 'uniqueValue',
+      defaultLabel: null,
+      defaultSymbol: null,
+      field1: 'category',
+      fieldDelimiter: ',',
+      rotationType: 'arithmetic',
+      uniqueValueInfos: [
+        {
+          description: 'Picture fill',
+          label: 'Picture fill',
+          value: 'pattern',
+          symbol: {
+            type: 'esriPFS',
+            angle: 0,
+            contentType: 'image/svg+xml',
+            height: 2,
+            imageData: CoreTester.PICTURE_FILL_IMAGE_DATA,
+            outline: {
+              type: 'esriSLS',
+              color: [0, 0, 0, 255],
+              style: 'esriSLSSolid',
+              width: 1,
+            },
+            width: 2,
+            xoffset: 0,
+            xscale: 1,
+            yoffset: 0,
+            yscale: 1,
+          },
+        },
+      ],
+    };
+
+    return this.test(
+      `Test ESRI picture fill legend style generation...`,
+      async (test) => {
+        test.addStep('Converting the ESRI picture fill renderer to GeoView styles...');
+        const styleConfig = EsriRenderer.createStylesFromEsriRenderer(renderer);
+
+        test.addStep('Generating legend styles from the converted picture fill style...');
+        const legendStyles = await GeoviewRenderer.getLegendStyles(styleConfig);
+        const polygonCanvas = legendStyles.Polygon?.arrayOfCanvas?.[0];
+        const centerPixel = polygonCanvas
+          ? Array.from(
+              polygonCanvas
+                .getContext('2d', { willReadFrequently: true })!
+                .getImageData(Math.floor(polygonCanvas.width / 2), Math.floor(polygonCanvas.height / 2), 1, 1).data
+            )
+          : [];
+
+        return { styleConfig, legendStyles, centerPixel };
+      },
+      (test, result) => {
+        test.addStep('Verifying the converted style is a Polygon unique-value style...');
+        Test.assertIsDefined('result.styleConfig.Polygon', result.styleConfig?.Polygon);
+        Test.assertIsEqual(result.styleConfig?.Polygon?.type, 'uniqueValue');
+
+        test.addStep('Verifying the converted style has one picture fill entry...');
+        Test.assertIsArrayLengthEqual(result.styleConfig?.Polygon?.info, 1);
+        Test.assertJsonObject(result.styleConfig?.Polygon?.info[0].settings, {
+          patternImage: {
+            mimeType: 'image/svg+xml',
+            src: CoreTester.PICTURE_FILL_IMAGE_DATA,
+          },
+        });
+
+        test.addStep('Verifying the polygon legend canvas is nonblank...');
+        Test.assertIsArrayLengthEqual(result.legendStyles.Polygon?.arrayOfCanvas, 1);
+        Test.assertIsEqual((result.legendStyles.Polygon?.arrayOfCanvas?.[0]?.width ?? 0) > 0, true);
+        Test.assertIsEqual((result.legendStyles.Polygon?.arrayOfCanvas?.[0]?.height ?? 0) > 0, true);
+
+        test.addStep('Verifying the loaded magenta pattern was rendered at the canvas center...');
+        Test.assertIsArrayEqual(result.centerPixel, [255, 0, 255, 255]);
       }
     );
   }
