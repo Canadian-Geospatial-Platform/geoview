@@ -73,7 +73,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 | Group             | Suite                   | Tester(s)                                                                                       | Test Count | Execution                   |
 | ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 14         | Parallel                    |
+| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 15         | Parallel                    |
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 46         | Mixed parallel + sequential |
@@ -86,7 +86,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 2          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **245**    |                             |
+| **Total**         |                         |                                                                                                 | **246**    |                             |
 
 ---
 
@@ -101,13 +101,23 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-core` · **File:** `tests/suites/suite-core.ts` · **Tester:** `CoreTester` (`tests/testers/core-tester.ts`)
 **Execution:** Fully parallel (`Promise.all`) · **Guard:** None
 
-| #   | Method                               | Type | Description                                           |
-| --- | ------------------------------------ | ---- | ----------------------------------------------------- |
-| 1   | `testValidateAndPingUrlReachable`    | test | Test validateAndPingUrl with a valid reachable URL... |
-| 2   | `testValidateAndPingUrlInvalid`      | test | Test validateAndPingUrl with an invalid URL format... |
-| 3   | `testValidateAndPingUrlUnreachable`  | test | Test validateAndPingUrl with an unreachable URL...    |
-| 4   | `testValidateAndPingUrlWMS`          | test | Test validateAndPingUrl with a WMS service URL...     |
-| 5   | `testGeometryCollectionLegendStyles` | test | Test GeometryCollection legend style generation...    |
+| #   | Method                                  | Type      | Description                                                                           |
+| --- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------- |
+| 1   | `testSimplePingValidReachable`          | test      | Test validateAndPingUrl (simple) with a directly reachable URL...                     |
+| 2   | `testSimplePingXyzTileUrl`              | test      | Test validateAndPingUrl (simple) with an XYZ tile URL template...                     |
+| 3   | `testSimplePingXyzTileUrlUnauthorized`  | test      | Test validateAndPingUrl (simple) with an XYZ tile URL returning 401...                |
+| 4   | `testValidateAndPingUrlInvalidFormat`   | test      | Test validateAndPingUrl with an invalid URL format...                                 |
+| 5   | `testValidateAndPingUrlUnreachable`     | test      | Test validateAndPingUrl with an unreachable URL...                                    |
+| 6   | `testValidateAndPingUrlWmsService`      | test      | Test validateAndPingUrl with a WMS service URL...                                     |
+| 7   | `testGeometryCollectionLegendStyles`    | test      | Test GeometryCollection legend style generation...                                    |
+| 8   | `testEsriPictureFillLegendStyles`       | test      | Test ESRI picture fill legend style generation...                                     |
+| 9   | `testProxyGetWMSServiceMetadata`        | test      | Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...          |
+| 10  | `testProxyGetWMSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWMSServiceMetadata with bad URL...                               |
+| 11  | `testProxyGetWFSServiceMetadata`        | test      | Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...          |
+| 12  | `testProxyGetWFSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWFSServiceMetadata with bad URL...                               |
+| 13  | `testProxyGetWMTSServiceMetadata`       | test      | Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service (proxy fallback)... |
+| 14  | `testProxyGetWMTSServiceMetadataBadUrl` | testError | Test GeoUtilities.getWMTSServiceMetadata with bad URL...                              |
+| 15  | `testFetchJsonWithProxyFallbackBadUrl`  | testError | Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...                          |
 
 ---
 

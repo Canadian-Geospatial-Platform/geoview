@@ -106,6 +106,16 @@ export abstract class EsriRenderer {
   };
 
   /**
+   * Type guard function that redefines an EsriBaseSymbol as an EsriPictureFillSymbol.
+   *
+   * @param verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid
+   * @returns True if the type ascention is valid
+   */
+  static isPictureFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriPictureFillSymbol => {
+    return verifyIfSymbol?.type === 'esriPFS';
+  };
+
+  /**
    * Type guard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer.
    *
    * The type ascention applies only to the true block of the if clause that use this function.
@@ -247,7 +257,7 @@ export abstract class EsriRenderer {
    * @param symbol - ESRI symbol to convert
    * @returns The Geoview symbol corresponding to the ESRI symbol, or undefined if not handled
    */
-  static convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined {
+  static convertSymbol(symbol: EsriSymbol | null | undefined): TypeKindOfVectorSettings | undefined {
     if (symbol) {
       if (this.isSimpleMarkerSymbol(symbol)) {
         const offset: [number, number] = [
@@ -290,6 +300,22 @@ export abstract class EsriRenderer {
             width: symbol?.outline?.width ?? 0,
           },
           fillStyle: this.convertFillStyle(symbol.style),
+        };
+        return polygonVectorConfig;
+      }
+      if (this.isPictureFillSymbol(symbol)) {
+        const polygonVectorConfig: TypePolygonVectorConfig = {
+          type: 'filledPolygon',
+          stroke: {
+            color: this.convertEsriColor(symbol.outline?.color),
+            lineStyle: this.convertLineStyle(symbol.outline?.style),
+            width: symbol.outline?.width ?? 0,
+          },
+          fillStyle: 'solid',
+          patternImage: {
+            mimeType: symbol.contentType,
+            src: symbol.imageData,
+          },
         };
         return polygonVectorConfig;
       }
@@ -396,7 +422,7 @@ export abstract class EsriRenderer {
       }
 
       uniqueValueStyleInfo.push({
-        label: renderer.defaultLabel,
+        label: renderer.defaultLabel ?? undefined,
         visible: true,
         values: [''],
         settings: defaultSettings,
@@ -408,7 +434,7 @@ export abstract class EsriRenderer {
       const styleGeometry = this.getStyleGeometry(uniqueValueStyleInfo[0].settings);
       const styleSettings: TypeLayerStyleSettings = {
         type: 'uniqueValue',
-        hasDefault: !!renderer.defaultLabel,
+        hasDefault,
         fields,
         info: uniqueValueStyleInfo,
       };
@@ -581,11 +607,11 @@ type TypeEsriColor = [number, number, number, number];
 /** ESRI unique value renderer configuration. */
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
   type: 'uniqueValue';
-  defaultLabel: string;
-  defaultSymbol: EsriSymbol;
-  field1?: string;
-  field2?: string;
-  field3?: string;
+  defaultLabel: string | null;
+  defaultSymbol: EsriSymbol | null;
+  field1?: string | null;
+  field2?: string | null;
+  field3?: string | null;
   fieldDelimiter: string;
   rotationType: 'arithmetic' | 'geographic';
   uniqueValueInfos: EsriUniqueValueInfo[];
@@ -602,11 +628,12 @@ export type EsriUniqueValueInfo = {
 };
 
 /** Union of all supported ESRI symbol types. */
-export type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriPictureMarkerSymbol;
+export type EsriSymbol =
+  EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriSimpleFillSymbol | EsriPictureMarkerSymbol | EsriPictureFillSymbol;
 
 /** Base properties shared by all ESRI symbol types. */
 export type EsriBaseSymbol = {
-  type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriSFS';
+  type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriPFS' | 'esriSFS';
 };
 
 /** ESRI simple marker symbol configuration for point geometries. */
@@ -687,6 +714,22 @@ export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
   width: number;
   xoffset: number;
   yoffset: number;
+}
+
+/** ESRI picture fill symbol configuration for polygon geometries. */
+export interface EsriPictureFillSymbol extends EsriBaseSymbol {
+  angle: number;
+  contentType: string;
+  height: number;
+  imageData: string;
+  outline: EsriSimpleLineSymbol;
+  type: 'esriPFS';
+  url?: string;
+  width: number;
+  xoffset: number;
+  xscale: number;
+  yoffset: number;
+  yscale: number;
 }
 
 type EsriClassBreakInfoEntry = {
