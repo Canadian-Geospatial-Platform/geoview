@@ -54,6 +54,17 @@
         ]
       },
       {
+        "geoviewLayerId": "permafrost-atlas",
+        "geoviewLayerName": "Permafrost Atlas",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/permafrost_atlas_of_canada_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "classBreaksId",
         "geoviewLayerName": "classBreaks",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/",

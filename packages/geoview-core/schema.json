@@ -906,6 +906,22 @@
         }
       ]
     },
+    "TypeImagePatternConfig": {
+      "description": "Definition of an image used as a repeating polygon fill pattern.",
+      "type": "object",
+      "properties": {
+        "mimeType": {
+          "description": "MIME type of the pattern image.",
+          "type": "string"
+        },
+        "src": {
+          "description": "Pattern image source.",
+          "type": "string"
+        }
+      },
+      "required": ["mimeType", "src"],
+      "additionalProperties": false
+    },
     "TypePolygonVectorConfig": {
       "type": "object",
       "allOf": [
@@ -933,6 +949,9 @@
               "description": "Pattern line width.",
               "type": "number",
               "default": 1
+            },
+            "patternImage": {
+              "$ref": "#/definitions/TypeImagePatternConfig"
             },
             "fillStyle": {
               "description": "Kind of filling  for vector features.",
