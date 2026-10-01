@@ -2,6 +2,8 @@ import type { TypeGeoviewLayerType, TypeBaseVectorSourceInitialConfig } from '@/
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Max number of records for query */
@@ -38,4 +40,53 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   }
 
   // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Gets if the config has specified that we should fetch the styles from the WMS.
+   *
+   * @returns True when the styles should be fetched from the WMS. True by default
+   */
+  getShouldFetchStylesFromWMS(): boolean {
+    return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig | TypeOgcFeatureLayerConfig).fetchStylesOnWMS ?? true; // default: true
+  }
+
+  /**
+   * Gets the WMS styles URL associated with this OGC Feature layer entry config if any.
+   *
+   * @returns The WMS styles URL
+   */
+  getWmsStylesUrl(): string | undefined {
+    return this.layerEntryProps.wmsUrl;
+  }
+
+  /**
+   * Gets the WMS styles URL associated with this OGC Feature layer entry config if any. Returns the DataAccessPath if not specified.
+   *
+   * @returns The WMS styles URL
+   */
+  getWmsStylesUrlOrDefault(): string {
+    return this.layerEntryProps.wmsUrl ?? this.getDataAccessPath();
+  }
+
+  /**
+   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
+   *
+   * @returns The WMS styles layer id
+   */
+  getWmsStylesLayerId(): string | undefined {
+    return this.layerEntryProps.wmsLayerId;
+  }
+
+  /**
+   * Gets the WMS styles layer id associated with this WFS layer entry config if any. Returns the layerId if not specified.
+   *
+   * @returns The WMS styles layer id
+   */
+  getWmsStylesLayerIdOrDefault(): string {
+    return this.layerEntryProps.wmsLayerId ?? this.layerId;
+  }
+
+  // #endregion METHODS
 }
