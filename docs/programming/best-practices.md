@@ -727,3 +727,7 @@ getMapSize(): number[] | undefined {
 `this.mapViewer` remains available inside the plugin class itself (e.g. `this.mapViewer.mapId`, lifecycle wiring), but it must not leak into the rendered component. All other plugins already follow this — they pass `mapId`, not the viewer.
 
 See **[Controller Architecture — Best Practices](controller-architecture.md#best-practices)**.
+
+## 19- Styling and CSS conventions
+
+Styling, spacing, and theming conventions are collected in a dedicated document since this area is expected to keep growing: [styling-best-practices.md](./styling-best-practices.md).

@@ -15,18 +15,18 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Section container for each settings group (raster function, mosaic rule)
   settingsSection: {
-    marginBottom: '24px',
+    marginBottom: theme.spacing(3),
     border: '1px solid',
     borderColor: theme.palette.divider,
     borderRadius: '8px',
-    padding: '12px',
+    padding: theme.spacing(1.5),
     transition: 'border-color 0.2s',
   },
 
   settingsSectionHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: theme.spacing(1),
     color: theme.palette.geoViewColor?.textColor.main,
     cursor: 'pointer',
     userSelect: 'none',
@@ -46,11 +46,43 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.default,
   },
 
+  settingsSectionHeaderText: {
+    flex: 1,
+    minWidth: 0,
+  },
+
+  settingsSectionSummary: {
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+
+  settingsSectionContentCollapsed: {
+    marginTop: theme.spacing(0),
+  },
+
+  settingsSectionContentExpanded: {
+    marginTop: theme.spacing(1.5),
+  },
+
+  settingsSectionContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+  },
+
+  settingsAscendingRow: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+
+  settingsAscendingLabel: {
+    marginLeft: theme.spacing(0.25),
+  },
+
   // Shared card list styles (used by raster function and WMS style selectors)
   settingsCardList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: theme.spacing(1),
     maxHeight: '400px',
     overflowY: 'auto',
     // Custom scrollbar styling
@@ -74,8 +106,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   settingsCard: {
     display: 'flex',
     alignItems: 'center',
-    margin: '4px',
-    padding: '12px',
+    margin: theme.spacing(0.5),
+    padding: theme.spacing(1.5),
     border: '1px solid',
     borderColor: theme.palette.divider,
     borderRadius: '8px',
@@ -96,6 +128,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.action.selected,
   },
 
+  settingsCardText: {
+    flex: 1,
+    minWidth: 0,
+  },
+
+  settingsCardTitle: {
+    fontWeight: 600,
+  },
+
   // ESRI Image Raster Function specific styles
   rasterFunctionPreviewImageContainer: {
     width: 100,
@@ -107,7 +148,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginRight: '16px',
+    marginRight: theme.spacing(2),
     flexShrink: 0,
   },
 
@@ -129,7 +170,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginRight: '16px',
+    marginRight: theme.spacing(2),
     flexShrink: 0,
   },
 

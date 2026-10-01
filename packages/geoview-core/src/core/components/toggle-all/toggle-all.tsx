@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme, useMediaQuery } from '@mui/material';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
   useStoreLayerDisplayState,
@@ -13,7 +13,10 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
+import type { SxProps } from '@mui/material';
+import type { Theme } from '@mui/material/styles';
 import { useLayerController } from '@/core/controllers/use-controllers';
+import { getToggleAllStyles } from './toggle-all-style';
 
 /** The properties for the toggle all component. */
 interface ToggleAllProps {
@@ -22,14 +25,6 @@ interface ToggleAllProps {
   /** The type of container box. */
   containerType: TypeContainerBox;
 }
-
-/** Default styles for the toggle all container. */
-const toggleAllStyle = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: 3,
-  alignItems: 'center',
-};
 
 /**
  * Renders toggle switches to control visibility and collapse state of all layers.
@@ -44,6 +39,14 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation<string>();
+
+  /**
+   * Computes the style classes for the toggle all component.
+   */
+  const memoToggleAllStyles = useMemo((): SxProps<Theme> => {
+    logger.logTraceUseMemo('TOGGLE_ALL - memoToggleAllStyles');
+    return getToggleAllStyles(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -73,7 +76,7 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   // TO.DO There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
   // TO.DO So need something more stable from the state
   return (
-    <Box id={`${mapId}-${containerType}-${source}-toggle-all`} sx={toggleAllStyle}>
+    <Box id={`${mapId}-${containerType}-${source}-toggle-all`} sx={memoToggleAllStyles}>
       {(source === 'legend' || displayState === 'view') && (
         <Tooltip title={t('toggleAll.showTooltip')} placement="top" describeChild>
           <span>

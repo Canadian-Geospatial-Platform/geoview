@@ -25,15 +25,6 @@ Hold viewer specific css not inside theme
 }
 
 /*
-TODO Issue #3069: Is this needed? MuiGrid-container does not have a border by default
-If this is to override a specific element it should be done there and not placed globally
-the use of !important should also be used sparingly
- */
-.MuiGrid-container:first-of-type {
-  border: none !important;
-}
-
-/*
  * Accessibility: Visually hidden content for screen readers
  * 
  * This CSS class is required for HTML string contexts where sanitizeHtmlContent()

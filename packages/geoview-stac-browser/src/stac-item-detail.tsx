@@ -216,7 +216,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       {/* Preview image */}
       {previewUrl && (
         <Box sx={sxClasses.detailSection}>
-          <img src={previewUrl} alt={title} style={{ width: '100%', maxHeight: 300, objectFit: 'contain', borderRadius: 4 }} />
+          <Box component="img" src={previewUrl} alt={title} sx={sxClasses.previewImage} />
         </Box>
       )}
 
@@ -302,13 +302,11 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
                   sx={{
                     ...sxClasses.assetItem,
                     backgroundColor: isSelected ? theme.palette.action.selected : 'transparent',
-                    borderRadius: '4px',
-                    padding: '4px 8px',
                   }}
                 >
-                  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+                  <Box sx={sxClasses.itemRowText}>
                     <Typography sx={{ ...sxClasses.resultMeta, fontWeight: isSelected ? 600 : 400 }}>{asset.title ?? key}</Typography>
-                    <Box sx={{ display: 'flex', gap: theme.spacing(0.5), flexWrap: 'wrap' }}>
+                    <Box sx={sxClasses.assetBadgeRow}>
                       {roles.map((role) => (
                         <Box key={role} component="span" sx={sxClasses.assetRoleBadge}>
                           {role.toUpperCase()}

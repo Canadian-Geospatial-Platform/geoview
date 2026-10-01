@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CloseIcon, AppBarUI, Box, IconButton, Toolbar, InputAdornment } from '@/ui';
+import { CloseIcon, AppBarUI, IconButton, Toolbar, InputAdornment } from '@/ui';
 import { SearchIcon } from '@/ui/icons';
 import { StyledInputField } from '@/core/components/geolocator/geolocator-style';
 import { logger } from '@/core/utils/logger';
@@ -35,7 +35,7 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
 
   return (
     <AppBarUI position="static" component="div">
-      <Toolbar variant="dense">
+      <Toolbar variant="dense" disableGutters>
         <form
           role="search"
           aria-label={t('geolocator.searchFormLabel')}
@@ -61,18 +61,9 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
             value={searchValue}
             inputRef={inputRef}
           />
-          <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
-            <IconButton
-              edge="end"
-              aria-label={t('geolocator.searchClose')}
-              className="buttonOutline"
-              size="small"
-              sx={{ mr: 2, ml: 4 }}
-              onClick={onReset}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
+          <IconButton edge="end" aria-label={t('geolocator.searchClose')} className="buttonOutline" size="small" onClick={onReset}>
+            <CloseIcon />
+          </IconButton>
         </form>
       </Toolbar>
     </AppBarUI>

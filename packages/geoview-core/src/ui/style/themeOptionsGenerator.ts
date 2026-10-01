@@ -290,14 +290,6 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         fontWeight: 500,
       },
     },
-    spacing: (factor: number) => {
-      const values = [0, 1, 2, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 30];
-      const index = Math.floor(factor);
-      const currentSpace = values[index];
-      const nextSpace = values[index + 1] || currentSpace * 2;
-      const space = currentSpace + (nextSpace - currentSpace) * (factor - index);
-      return `${space}px`;
-    },
     breakpoints: {
       values: {
         xs: 0,

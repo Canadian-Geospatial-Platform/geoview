@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import { createElement, useState, useCallback, useEffect } from 'react';
+import { createElement, useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
 
 import { LineString, Polygon, Point } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
@@ -11,6 +13,7 @@ import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 
 import type { TypePanelProps } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Box, Switch, ToggleButtonGroup, ToggleButton, Typography } from '@/ui';
@@ -18,6 +21,7 @@ import { ShowChartIcon, DeleteIcon, StraightenIcon, HexagonOutlinedIcon } from '
 import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -73,6 +77,7 @@ export default function Measurement(): JSX.Element {
 
   // Hooks
   const { t } = useTranslation<string>();
+  const theme = useTheme();
 
   // Stores
   const mapId = useStoreGeoViewMapId();
@@ -85,6 +90,15 @@ export default function Measurement(): JSX.Element {
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
   const [statusMessage, setStatusMessage] = useState<string>('');
+
+  /**
+   * Builds custom sx classes for the measurement component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('MEASUREMENT - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // #region Handlers
 
@@ -418,7 +432,7 @@ export default function Measurement(): JSX.Element {
     const isMeasurementActive = activeMeasurement !== null;
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <Box sx={memoSxClasses.measurementPanel}>
         {/* WCAG - Screen reader status announcements */}
         <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
           {statusMessage}
@@ -450,18 +464,7 @@ export default function Measurement(): JSX.Element {
             fullWidth
             size="small"
             disabled={!isMeasurementActive}
-            sx={{
-              '& .MuiToggleButton-root': {
-                gap: 6, // Adds 8px spacing between icon and text
-              },
-              '& .MuiToggleButton-root.Mui-selected': {
-                backgroundColor: 'primary.main',
-                color: 'primary.contrastText',
-                '&:hover': {
-                  backgroundColor: 'primary.dark',
-                },
-              },
-            }}
+            sx={memoSxClasses.measurementToggleGroup}
           >
             <ToggleButton value="line" aria-label={t('measurement.line')}>
               <ShowChartIcon fontSize="small" />
@@ -482,7 +485,7 @@ export default function Measurement(): JSX.Element {
           className="buttonOutline"
           disabled={measurementFeatures.length === 0}
           size="small"
-          sx={{ alignSelf: 'center' }}
+          sx={memoSxClasses.measurementClearButton}
         >
           <DeleteIcon fontSize="small" />
         </IconButton>

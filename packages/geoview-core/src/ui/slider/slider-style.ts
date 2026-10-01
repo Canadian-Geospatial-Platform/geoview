@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiSlider-valueLabel': {
       fontSize: '0.7rem',
-      padding: '0.25rem 0.4rem',
+      padding: theme.spacing(0.5, 0.75),
       [theme.breakpoints.down('md')]: {
         ...visuallyHidden, // Hide value tooltips on tablets and below
       },

@@ -9,14 +9,14 @@ import type { SxStyles } from '@/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   list: {
-    padding: 0,
+    padding: theme.spacing(0),
   },
   typography: {
-    padding: 0,
+    padding: theme.spacing(0),
   },
   listItem: {
     height: '28px',
-    padding: 0,
+    padding: theme.spacing(0),
     color: theme.palette.secondary.contrastText,
     '&:hover': {
       backgroundColor: '#dddddd',
@@ -27,6 +27,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: '0px',
   },
   boxcontent: {
-    padding: 0,
+    padding: theme.spacing(0),
   },
 });
