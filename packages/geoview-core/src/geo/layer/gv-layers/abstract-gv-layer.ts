@@ -50,7 +50,7 @@ import { formatError, NotImplementedError, NotSupportedError } from '@/core/exce
 import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
-import { delay, doTimeout, type DelayJob } from '@/core/utils/utilities';
+import { delay, doTimeout, isObjectNonEmpty, type DelayJob } from '@/core/utils/utilities';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
@@ -1116,11 +1116,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     promiseLegend
       .then((legend) => {
         // If legend was received
-        if (legend) {
+        if (isObjectNonEmpty(legend)) {
           // Set the legend
           this.setLegend(legend);
+
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
+
           // Emit legend information once retrieved
           this.#emitLegendQueried({ legend });
         }

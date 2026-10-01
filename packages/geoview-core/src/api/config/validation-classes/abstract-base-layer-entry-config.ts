@@ -261,7 +261,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       normalizedMetadata[simplifiedType as TypeStyleGeometry] = styleConfig;
     });
 
-    this.#layerStyle = deepMerge(normalizedMetadata, this.#layerStyle);
+    // Set the layer style
+    this.setLayerStyle(deepMerge(normalizedMetadata, this.#layerStyle));
   }
 
   /**

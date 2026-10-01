@@ -541,6 +541,7 @@ export abstract class WfsRenderer {
         mimeType: symMime,
         fromSVGsOrMarkers: fromGraphic,
         rotation: graphicRotation,
+        displacement,
         directIcon: parsedDirectIcon,
       } = this.#parseGraphic(graphic);
 
@@ -568,6 +569,8 @@ export abstract class WfsRenderer {
       graphicsInfo.forEach((gInfo) => {
         // eslint-disable-next-line no-param-reassign
         gInfo.sizeGraphic = symSize;
+        // eslint-disable-next-line no-param-reassign
+        gInfo.displacement = displacement ?? [0, 0];
       });
       allGraphicsInfo.push(...graphicsInfo);
     });
@@ -1105,6 +1108,12 @@ export abstract class WfsRenderer {
     // Extract rotation if present
     const rotationNode = graphic?.['se:Rotation'];
     const rotation = rotationNode ? Number(rotationNode?.['ogc:Literal']) : undefined;
+    const displacementX = Number(graphic?.['se:Displacement']?.['se:DisplacementX'] ?? 0);
+    const displacementY = Number(graphic?.['se:Displacement']?.['se:DisplacementY'] ?? 0);
+    const displacement: [number, number] = [
+      Number.isNaN(displacementX) ? 0 : displacementX,
+      Number.isNaN(displacementY) ? 0 : displacementY,
+    ];
 
     // Check if we have ExternalGraphics (SVGs)
     const externalGraphics = toArray(graphic?.['se:ExternalGraphic'] ?? []);
@@ -1112,6 +1121,7 @@ export abstract class WfsRenderer {
       // Redirect building the SVGs
       const result = this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
       result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      result.displacement = displacement;
       return result;
     }
 
@@ -1121,6 +1131,7 @@ export abstract class WfsRenderer {
       // Redirect building the markers
       const result = this.#parseGraphicsMarkers(marker, sizeGraphic);
       result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      result.displacement = displacement;
       return result;
     }
 
@@ -1199,7 +1210,7 @@ export abstract class WfsRenderer {
       // logger.logDebug('INNER SVG', innerSVG);
 
       // Add it
-      graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: false });
+      graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: false, displacement: [0, 0] });
     });
 
     // Return the information
@@ -1274,10 +1285,13 @@ export abstract class WfsRenderer {
     // Fill params
     const fillParams = this.#readXMLParam(marker['se:Fill']?.['se:SvgParameter'] ?? marker['se:Fill']?.['se:CssParameter']);
 
-    const stroke = strokeParams['stroke'] ?? strokeParams['colour'] ?? strokeParams['color'] ?? '#000';
+    const fontResource = marker['se:OnlineResource']?.['@attributes']['xlink:href'];
+    const isFontMarker = fontResource?.toLowerCase().startsWith('ttf://') ?? false;
+    const stroke = strokeParams['stroke'] ?? strokeParams['colour'] ?? strokeParams['color'] ?? (isFontMarker ? 'none' : '#000');
     const strokeWidth = Number(strokeParams['stroke-width'] ?? strokeParams['width'] ?? 1);
     const strokeOpacity = strokeParams['stroke-opacity'] ? Number(strokeParams['stroke-opacity']) : undefined;
     const fill = fillParams['fill'] ?? fillParams['colour'] ?? fillParams['color'] ?? fillParams['se:fill'] ?? 'none';
+    const fillOpacity = fillParams['fill-opacity'] ? Number(fillParams['fill-opacity']) : undefined;
 
     // Build a simple SVG for common well-known names
     const cx = sizeGraphic / 2;
@@ -1287,60 +1301,68 @@ export abstract class WfsRenderer {
     const r = Math.max(1, (sizeGraphic - strokeWidth) / 2);
     let shape = '';
 
-    switch (wellKnownName.toLowerCase()) {
-      case 'square':
-      case 'rect':
-      case 'rectangle':
-        {
-          const pad = sizeGraphic * 0.15;
-          const side = sizeGraphic - pad * 2;
-          shape = `<rect x="${pad}" y="${pad}" width="${side}" height="${side}" rx="${Math.max(0, side * 0.08)}" ry="${Math.max(
-            0,
-            side * 0.08
-          )}" />`;
-        }
-        break;
-      case 'triangle':
-      case 'triangle-up':
-        {
-          const p1 = `${cx},${sizeGraphic * 0.15}`;
-          const p2 = `${sizeGraphic * 0.85},${sizeGraphic * 0.85}`;
-          const p3 = `${sizeGraphic * 0.15},${sizeGraphic * 0.85}`;
-          shape = `<polygon points="${p1} ${p2} ${p3}" />`;
-        }
-        break;
-      case 'star':
-        {
-          // simple 5-point star approximation
-          const R = r;
-          const r2 = R * 0.5;
-          const pts = Array.from({ length: 5 }).map((_, i) => {
-            const a = ((-90 + i * 72) * Math.PI) / 180;
-            const x = cx + R * Math.cos(a);
-            const y = cy + R * Math.sin(a);
-            const a2 = ((-90 + i * 72 + 36) * Math.PI) / 180;
-            const x2 = cx + r2 * Math.cos(a2);
-            const y2 = cy + r2 * Math.sin(a2);
-            return `${x},${y} ${x2},${y2}`;
-          });
-          // pts is sequence; join into single polygon by flattening coords
-          const flat = pts.join(' ');
-          shape = `<polygon points="${flat}" />`;
-        }
-        break;
-      case 'circle':
-      default:
-        {
-          const rFixed = Math.max(r, 2);
-          shape = `<circle cx="${cx}" cy="${cy}" r="${rFixed}" vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision" />`;
-        }
-        break;
+    const markIndex = Number(marker['se:MarkIndex']);
+    if (isFontMarker && fontResource && Number.isInteger(markIndex) && markIndex >= 0 && markIndex <= 0x10ffff) {
+      const fontFamily = fontResource.substring('ttf://'.length);
+      const glyph = WfsRenderer.#escapeXML(String.fromCodePoint(markIndex));
+      shape = `<text x="${cx}" y="${cy}" font-family="${WfsRenderer.#escapeXML(fontFamily)}" font-size="${sizeGraphic}" text-anchor="middle" dominant-baseline="central">${glyph}</text>`;
+    } else {
+      switch (wellKnownName.toLowerCase()) {
+        case 'square':
+        case 'rect':
+        case 'rectangle':
+          {
+            const pad = sizeGraphic * 0.15;
+            const side = sizeGraphic - pad * 2;
+            shape = `<rect x="${pad}" y="${pad}" width="${side}" height="${side}" rx="${Math.max(0, side * 0.08)}" ry="${Math.max(
+              0,
+              side * 0.08
+            )}" />`;
+          }
+          break;
+        case 'triangle':
+        case 'triangle-up':
+          {
+            const p1 = `${cx},${sizeGraphic * 0.15}`;
+            const p2 = `${sizeGraphic * 0.85},${sizeGraphic * 0.85}`;
+            const p3 = `${sizeGraphic * 0.15},${sizeGraphic * 0.85}`;
+            shape = `<polygon points="${p1} ${p2} ${p3}" />`;
+          }
+          break;
+        case 'star':
+          {
+            // simple 5-point star approximation
+            const R = r;
+            const r2 = R * 0.5;
+            const pts = Array.from({ length: 5 }).map((_, i) => {
+              const a = ((-90 + i * 72) * Math.PI) / 180;
+              const x = cx + R * Math.cos(a);
+              const y = cy + R * Math.sin(a);
+              const a2 = ((-90 + i * 72 + 36) * Math.PI) / 180;
+              const x2 = cx + r2 * Math.cos(a2);
+              const y2 = cy + r2 * Math.sin(a2);
+              return `${x},${y} ${x2},${y2}`;
+            });
+            // pts is sequence; join into single polygon by flattening coords
+            const flat = pts.join(' ');
+            shape = `<polygon points="${flat}" />`;
+          }
+          break;
+        case 'circle':
+        default:
+          {
+            const rFixed = Math.max(r, 2);
+            shape = `<circle cx="${cx}" cy="${cy}" r="${rFixed}" vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision" />`;
+          }
+          break;
+      }
     }
 
     // Build attributes string
     const attrs: string[] = [];
     if (fill && fill !== 'none') attrs.push(`fill="${fill}"`);
     else attrs.push(`fill="none"`);
+    if (fillOpacity !== undefined && !Number.isNaN(fillOpacity)) attrs.push(`fill-opacity="${fillOpacity}"`);
     if (stroke) attrs.push(`stroke="${stroke}"`);
     if (!Number.isNaN(strokeWidth) && strokeWidth > 0) attrs.push(`stroke-width="${strokeWidth}"`);
     if (strokeOpacity !== undefined && !Number.isNaN(strokeOpacity)) attrs.push(`stroke-opacity="${strokeOpacity}"`);
@@ -1355,7 +1377,7 @@ export abstract class WfsRenderer {
     const vh = sizeGraphic;
     const mimeType = 'image/svg+xml';
     const maxViewBox = Math.max(0, vw, vh);
-    graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: true });
+    graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: true, displacement: [0, 0] });
 
     // Return the information
     return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'marker' };
@@ -1396,6 +1418,21 @@ export abstract class WfsRenderer {
   }
 
   /**
+   * Escapes text for inclusion in generated SVG markup.
+   *
+   * @param value - The text to escape
+   * @returns The XML-safe text
+   */
+  static #escapeXML(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
+  }
+
+  /**
    * Merges multiple SVG fragments into a single combined SVG element.
    *
    * If more than one graphic is provided, each SVG is scaled and translated
@@ -1416,41 +1453,48 @@ export abstract class WfsRenderer {
 
     // If from multiple svgs (compilation) the viewBox needs adjusting again and svgs recentered
     let svgs: string[] = [];
-    if (graphicsInfo.length > 1) {
-      const half = size / 2;
-
+    if (graphicsInfo.length > 1 || graphicsInfo[0].displacement.some((offset) => offset !== 0)) {
       // Check if the first (background) graphic is a marker shape (circle, square, etc.)
       const backgroundIsMarker = graphicsInfo[0].isMarker;
       // Uniform scale for SVG-only compositions (content bounds naturally encode size differences)
       const uniformScale = size / maxViewBox;
 
-      svgs = graphicsInfo.map(({ innerSVG, vx, vy, vw, vh, sizeGraphic: graphicSize }, idx) => {
-        let graphicScale: number;
-        if (backgroundIsMarker) {
-          // When background is a marker, use proportional scaling with inset so
-          // foreground fits inside the marker shape (marker radius = 0.4 * size)
-          const maxDim = Math.max(vw, vh, 1);
-          const inset = idx > 0 ? 0.8 : 1;
-          graphicScale = (graphicSize / maxDim) * inset;
-        } else {
-          // For all-SVG compositions, uniform scaling preserves natural proportions
-          graphicScale = uniformScale;
-        }
+      const scaledGraphics = graphicsInfo.map((graphicInfo) => {
+        const { vw, vh, sizeGraphic: graphicSize } = graphicInfo;
+        const graphicScale = backgroundIsMarker ? graphicSize / Math.max(vw, vh, 1) : uniformScale;
+        return { ...graphicInfo, graphicScale };
+      });
+      const halfWidth = Math.max(
+        size / 2,
+        ...scaledGraphics.map(({ vw, graphicScale, displacement }) => Math.abs(displacement[0]) + (vw * graphicScale) / 2)
+      );
+      const halfHeight = Math.max(
+        size / 2,
+        ...scaledGraphics.map(({ vh, graphicScale, displacement }) => Math.abs(displacement[1]) + (vh * graphicScale) / 2)
+      );
+      const svgWidth = halfWidth * 2;
+      const svgHeight = halfHeight * 2;
+      outerViewBox = `viewBox="${-halfWidth} ${-halfHeight} ${svgWidth} ${svgHeight}"`;
+
+      svgs = scaledGraphics.map(({ innerSVG, vx, vy, vw, vh, graphicScale, displacement }) => {
         // Center of original content
         const cx = vx + vw / 2;
         const cy = vy + vh / 2;
-        // Translate so center aligns with output center, then scale
-        const tx = half - cx * graphicScale;
-        const ty = half - cy * graphicScale;
+        // Translate the graphic center to the feature coordinate plus its SLD displacement
+        const tx = displacement[0] - cx * graphicScale;
+        const ty = displacement[1] - cy * graphicScale;
         return `<g transform="translate(${tx},${ty}) scale(${graphicScale})">${innerSVG}</g>`;
       });
-    } else {
-      // Only 1 graphic, if svg created recenter it(?)
-      if (fromSVGsOrMarkers === 'svg') {
-        outerViewBox = `viewBox="${0} ${-size} ${size} ${size}"`;
-      }
-      svgs.push(graphicsInfo[0].innerSVG);
+
+      const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
+      return this.#prettyPrintSVG(svgContent, 2, true);
     }
+
+    // Only 1 graphic, if svg created recenter it(?)
+    if (fromSVGsOrMarkers === 'svg') {
+      outerViewBox = `viewBox="${0} ${-size} ${size} ${size}"`;
+    }
+    svgs.push(graphicsInfo[0].innerSVG);
 
     // Combine into one big svg
     const svgSize = Math.max(size, maxViewBox);
@@ -1902,6 +1946,7 @@ type ExternalGraphicsInfo = {
   mimeType?: string;
   fromSVGsOrMarkers: 'svg' | 'marker';
   rotation?: number;
+  displacement?: [number, number];
   directIcon?: DirectIconInfo;
 };
 
@@ -1912,7 +1957,16 @@ type DirectIconInfo = {
   height?: number;
 };
 
-type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number; sizeGraphic: number; isMarker: boolean };
+type GraphicInfo = {
+  innerSVG: string;
+  vx: number;
+  vy: number;
+  vw: number;
+  vh: number;
+  sizeGraphic: number;
+  isMarker: boolean;
+  displacement: [number, number];
+};
 
 type FilterInfo = {
   hasGreaterOrLessThan: boolean;

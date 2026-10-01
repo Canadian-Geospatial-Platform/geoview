@@ -1432,18 +1432,23 @@ export class WMS extends AbstractGeoViewRaster {
     const shouldFetchVectorInfoExternally = layerConfig.getShouldFetchVectorInformationExternally();
     if (!shouldFetchVectorInfoExternally) return undefined;
 
-    // Style parsing is independent from vector service metadata and can infer geometry from the SLD
-    const layerStyle = await this.#tryCreateVectorialStyle(layerConfig);
-
     // If should fetch vectorial information from WFS
     let vectorInfoProcessed = false;
     vectorInfoProcessed = await this.#tryProcessLayerVectorialInformationIfAnyWFS(layerConfig, configProxyUrl);
 
     // Fall back to OGC API Features only when WFS did not provide vector information
     if (!vectorInfoProcessed) {
-      await this.#tryProcessLayerVectorialInformationIfAnyOGCApiFeatures(layerConfig, configProxyUrl);
+      vectorInfoProcessed = await this.#tryProcessLayerVectorialInformationIfAnyOGCApiFeatures(layerConfig, configProxyUrl);
     }
 
+    // If the vector information has been processed, only then do we consider fetching the style from the WMS to match it with the data, otherwise, default raster styling is used.
+    let layerStyle;
+    if (vectorInfoProcessed) {
+      // Style parsing is independent from vector service metadata and can infer geometry from the SLD
+      layerStyle = await this.#tryCreateVectorialStyle(layerConfig);
+    }
+
+    // Return the style
     return layerStyle;
   }
 
