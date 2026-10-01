@@ -637,7 +637,7 @@ export class ConfigApi {
       case 'WKB':
         return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'ogcFeature':
-        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
+        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, undefined, layerEntries, isTimeAware, true);
       case 'ogcWfs':
         return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, undefined, layerEntries, isTimeAware, 'all', true);
       default:
