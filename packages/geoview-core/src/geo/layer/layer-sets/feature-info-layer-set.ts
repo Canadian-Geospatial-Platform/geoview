@@ -285,6 +285,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       if (layer instanceof GVWMS) {
         const wfsLayerConfig = layer.getLayerConfig().getWfsLayerConfig();
 
+        // TODO: CHECK - Should we also consider the OGC Feature API layer config here?
         // If it has a WFS layer config associated with it
         if (wfsLayerConfig && !wfsLayerConfig.getLayerStyle()) {
           // The WFS layer config has no layer style defined, it means the vectorial features are unsymbolized and we shouldn't filter out their featureIcon

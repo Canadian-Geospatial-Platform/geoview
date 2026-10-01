@@ -40,8 +40,12 @@ export interface ConfigBaseClassProps {
   bounds?: number[];
   timeDimension?: TimeDimension;
   layerStyle?: TypeLayerStyleConfig;
+  wmsUrl?: string;
   wmsLayerId?: string;
+  wfsUrl?: string;
   wfsLayerId?: string;
+  ogcApiFeaturesUrl?: string;
+  ogcApiFeaturesLayerId?: string;
 }
 
 /**

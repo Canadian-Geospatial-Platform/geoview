@@ -95,6 +95,15 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that the layer entry configuration has gotten its metadata processed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataEmptyError} When the layer metadata response is empty
+   * @throws {InvalidTimeDimensionError} When the time dimension range cannot be computed
+   * @throws {InvalidDateError} When the time dimension contains invalid dates
+   * @throws {InvalidProjectionError} When the metadata projection is invalid
+   * @throws {RequestTimeoutError} When fetching a missing projection definition exceeds the timeout duration
+   * @throws {RequestAbortedError} When fetching a missing projection definition is aborted
+   * @throws {ResponseError} When fetching a missing projection definition returns an unsuccessful response
+   * @throws {ResponseEmptyError} When a missing projection definition response is empty
+   * @throws {NetworkError} When fetching a missing projection definition encounters a network error
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
@@ -252,6 +261,13 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param url - The URL of the service endpoint
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured layer ID is not found
+   * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,

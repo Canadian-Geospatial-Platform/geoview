@@ -5,14 +5,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import { bbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import type {
-  DisplayDateMode,
-  TypeLayerStyleSettings,
-  TypeOutfields,
-  TypeOutfieldsType,
-  TypeStyleGeometry,
-} from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   TypePostSettings,
@@ -46,11 +39,11 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { parseXMLToJson, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { formatError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { logger } from '@/core/utils/logger';
 import { ServicesManagement } from '@/geo/utils/services-management';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
@@ -220,6 +213,11 @@ export class WFS extends AbstractGeoViewVector {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
+   * @throws {RequestTimeoutError} When the DescribeFeatureType request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the DescribeFeatureType request is aborted
+   * @throws {ResponseError} When the DescribeFeatureType response is not successful
+   * @throws {ResponseEmptyError} When the DescribeFeatureType response is empty
+   * @throws {NetworkError} When the DescribeFeatureType request encounters a network error
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -264,7 +262,7 @@ export class WFS extends AbstractGeoViewVector {
     WFS.initLayerMetadata(layerConfigWFS, featureProps);
 
     // Try
-    const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+    const layerStyle = await WMS.tryProcessLayerStylingInformationIfAny(layerConfigWFS);
 
     // Initialize the layer style by filling the blanks with the information from the metadata
     layerConfigWFS.initLayerStyleFromMetadata(layerStyle);
@@ -470,6 +468,19 @@ export class WFS extends AbstractGeoViewVector {
    * @param vectorStrategy - The strategy to use for fetching vector data
    * @param fetchStylesOnWMS - Indicates whether to fetch styles from WMS
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When WFS service metadata cannot be fetched
+   * @throws {LayerNoCapabilitiesError} When the WFS capabilities response is empty
+   * @throws {LayerServiceMetadataEmptyError} When the WFS service metadata is incomplete
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured feature type is not found
+   * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+   * @throws {RequestTimeoutError} When a DescribeFeatureType request exceeds the timeout duration
+   * @throws {RequestAbortedError} When a DescribeFeatureType request is aborted
+   * @throws {ResponseError} When a DescribeFeatureType response is not successful
+   * @throws {ResponseEmptyError} When a DescribeFeatureType response is empty
+   * @throws {NetworkError} When a DescribeFeatureType request encounters a network error
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -875,74 +886,6 @@ export class WFS extends AbstractGeoViewVector {
 
     // Return the url
     return url;
-  }
-
-  /**
-   * Attempts to derive and apply styling information to a WFS layer using corresponding WMS styles.
-   *
-   * This method:
-   *  - Checks whether the layer has no defined style and is configured to fetch styles from WMS.
-   *  - Determines the WMS layer identifier associated with the WFS layer.
-   *  - Attempts to infer the geometry type from metadata (non-fatal if it fails).
-   *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` -> `cgi-bin/wms`).
-   * Any failures during the process are logged as warnings but do not throw.
-   *
-   * Enables a WFS layer to adopt styling derived from a corresponding WMS service, allowing
-   * consistent symbology between raster and vector representations when the server supports
-   * style retrieval through WMS `GetStyles`.
-   *
-   * @param layerConfig - The WFS layer configuration for which styling should be processed
-   * @returns A promise that resolves with the layer style settings or undefined
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
-   */
-  static async #tryProcessLayerStylingInformationIfAny(
-    layerConfig: OgcWfsLayerEntryConfig
-  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
-    // If should fetch styles from the WMS (default)
-    if (layerConfig.getShouldFetchStylesFromWMS()) {
-      try {
-        // Get the layer id equivalent for the WMS
-        const wmsLayerId = layerConfig.getWmsStylesLayerId();
-
-        // Tweak url when switching from WFS to WMS
-        let tweakedUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getDataAccessPath());
-
-        // Make sure the URL has necessary information
-        tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(tweakedUrl, wmsLayerId);
-
-        // Tweak url with the proxy if necessary
-        tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
-
-        // A generic WFS geometry metadata type is recoverable because the WMS SLD can infer the geometry.
-        // GV Sometimes, the metadata is vague about the type of geometry, let it continue (in this try/catch) and it'll be inferred later
-        let geometryType: TypeStyleGeometry | undefined;
-        try {
-          geometryType = layerConfig.getGeometryType();
-        } catch (error: unknown) {
-          if (!(error instanceof NotSupportedError)) throw error;
-        }
-
-        // Create the layer style and return
-        try {
-          return await WMS.createLayerStyleFromWMS(tweakedUrl, geometryType);
-        } catch (error: unknown) {
-          if (!wmsLayerId.startsWith('ms:')) throw error;
-
-          const unprefixedLayerId = ServicesManagement.toggleMsLayerIdPrefix(wmsLayerId);
-          let retryUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getDataAccessPath());
-          retryUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(retryUrl, unprefixedLayerId);
-          retryUrl = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
-
-          return await WMS.createLayerStyleFromWMS(retryUrl, geometryType);
-        }
-      } catch (error: unknown) {
-        // Log warning
-        logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
-      }
-    }
-
-    // None
-    return undefined;
   }
 
   // #endregion STATIC PRIVATE METHODS
