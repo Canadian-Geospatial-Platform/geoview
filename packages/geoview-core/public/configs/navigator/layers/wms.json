@@ -292,7 +292,9 @@
         "metadataAccessPath": "https://nonna-geoserver.data.chs-shc.ca/geoserver/wms",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
-          { "layerId": "nonna:NONNA 10" }
+          {
+            "layerId": "nonna:NONNA 10"
+          }
         ]
       }
     ]
