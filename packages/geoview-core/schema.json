@@ -2673,8 +2673,8 @@
             }
           }
         },
-        "fetchVectorsOnWFS": {
-          "description": "Flag used by WMS layers to indicate if the layer should get the vector information from a WFS and retrieve the styling information.",
+        "fetchVectorsExternally": {
+          "description": "Flag used by WMS layers to indicate if the layer should get the vector information from an external service such as WFS or OGC API Feature and retrieve the styling information.",
           "type": "boolean",
           "default": true
         },
