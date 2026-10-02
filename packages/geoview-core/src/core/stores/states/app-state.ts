@@ -89,6 +89,7 @@ export interface IAppState {
     setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean) => void;
+    setHeight: (height: number) => void;
     setGuide: (guide: TypeGuideObject) => void;
     setNotifications: (notifications: NotificationDetailsType[]) => void;
   };
@@ -263,6 +264,20 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           appState: {
             ...get().appState,
             guide,
+          },
+        });
+      },
+
+      /**
+       * Sets the map container height.
+       *
+       * @param height - The new height in pixels.
+       */
+      setHeight: (height: number): void => {
+        set({
+          appState: {
+            ...get().appState,
+            height,
           },
         });
       },
@@ -648,6 +663,19 @@ export const setStoreAppCrosshairActive = (mapId: string, active: boolean): void
  */
 export const setStoreAppFullScreenActive = (mapId: string, active: boolean): void => {
   getStoreAppState(mapId).actions.setFullScreenActive(active);
+};
+
+/**
+ * Sets the map container height.
+ *
+ * Triggers the shell/footer-bar layout recalculation and an OpenLayers `updateSize()` via their existing
+ * effects, which already react to this value — no additional resize call is needed after this.
+ *
+ * @param mapId - The map identifier
+ * @param height - The new height in pixels
+ */
+export const setStoreAppHeight = (mapId: string, height: number): void => {
+  getStoreAppState(mapId).actions.setHeight(height);
 };
 
 /**
