@@ -616,7 +616,7 @@ export class UIController extends AbstractMapViewerController {
    *
    * @param height - The new viewer height in pixels
    */
-  resizeMap(height: number): void {
+  resizeMapHeight(height: number): void {
     setStoreAppHeight(this.getMapId(), height);
   }
 

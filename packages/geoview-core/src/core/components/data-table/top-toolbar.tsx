@@ -165,6 +165,14 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
       </Box>
       <Box sx={sxClasses.toolbarRow}>
         <Box>
+          <IconButton
+            className="buttonOutline"
+            aria-label={t('dataTable.zoomToFilteredExtent')}
+            color="primary"
+            onClick={handleZoomToFilteredExtent}
+          >
+            <ZoomToFilteredExtentIcon />
+          </IconButton>
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
           {!isEsriDynamic && <FilterDataToExtent layerPath={layerPath} />}
         </Box>
@@ -190,15 +198,6 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
               onClick={handleClearFilters}
             >
               <ClearFiltersIcon />
-            </IconButton>
-
-            <IconButton
-              className="buttonOutline"
-              aria-label={t('dataTable.zoomToFilteredExtent')}
-              color="primary"
-              onClick={handleZoomToFilteredExtent}
-            >
-              <ZoomToFilteredExtentIcon />
             </IconButton>
 
             {/* Override column pinning options */}
