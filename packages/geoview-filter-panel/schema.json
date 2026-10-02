@@ -43,11 +43,6 @@
             "description": "Whether filtering is enabled for this layer",
             "default": true
           },
-          "collapsible": {
-            "type": "boolean",
-            "description": "Allow collapsing/expanding this layer section",
-            "default": true
-          },
           "defaultCollapsed": {
             "type": "boolean",
             "description": "Default collapsed state for this layer section. Ignored if collapsible is false (forced to false/open).",
@@ -179,6 +174,11 @@
             },
             "filterMissingDomainValues": {
               "type": "boolean",
+              "default": false
+            },
+            "searchable": {
+              "type": "boolean",
+              "description": "Enable search functionality for the multiselect filter",
               "default": false
             }
           },

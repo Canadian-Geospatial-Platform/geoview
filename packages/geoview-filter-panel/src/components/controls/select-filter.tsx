@@ -37,7 +37,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useCallback, useMemo, useId } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Select, Typography } = ui.elements;
 
@@ -45,6 +45,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const controller = useFilterPanelController();
+  const headerLabelId = useId();
   /**
    * Memoized menu items for the select dropdown.
    */
@@ -86,7 +87,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   if (loading) {
     return (
       <Box sx={memoSxClasses.filterControl}>
-        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        <Typography variant="h4" sx={memoSxClasses.filterLabel}>
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
@@ -98,13 +99,14 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterControl}>
-      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+      <Typography id={headerLabelId} variant="h4" sx={memoSxClasses.filterLabel}>
         {attribute.displayLabel}
       </Typography>
       <Select
         fullWidth
         value={value || ''}
         onChange={handleSelectChange}
+        labelId={headerLabelId}
         label=""
         inputLabel={{ shrink: true }}
         menuItems={memoMenuItems}

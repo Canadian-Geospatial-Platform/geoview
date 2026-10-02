@@ -44,15 +44,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Layer section container
   filterLayerSection: {
-    marginBottom: theme.spacing(0.75),
-    '&:last-child': {
-      marginBottom: theme.spacing(0),
-    },
     padding: theme.spacing(0.5, 0.75, 0),
     border: 1,
     borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
     borderRadius: 1,
     overflow: 'hidden',
+  },
+
+  // ListItem wrapping each layer section; owns the inter-layer spacing since the sections are no longer direct siblings
+  filterLayerListItem: {
+    display: 'block',
+    marginBottom: theme.spacing(0.75),
+    '&:last-child': {
+      marginBottom: theme.spacing(0),
+    },
   },
 
   // Layer section header
@@ -108,6 +113,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     whiteSpace: 'nowrap',
     alignSelf: 'flex-start',
     marginBottom: theme.spacing(0.75),
+  },
+
+  // Row wrapping the layer's action buttons (clear, zoom to filtered)
+  filterLayerActions: {
+    display: 'flex',
+    gap: 1,
   },
 
   // Layer content area
