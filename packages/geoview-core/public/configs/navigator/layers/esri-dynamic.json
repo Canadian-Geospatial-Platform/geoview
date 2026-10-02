@@ -9,6 +9,17 @@
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
+       {
+        "geoviewLayerId": "permafrost-atlas",
+        "geoviewLayerName": "Permafrost Atlas",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/permafrost_atlas_of_canada_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
+          }
+        ]
+      },
       {
         "geoviewLayerId": "annotation",
         "geoviewLayerName": "Test Annotation",

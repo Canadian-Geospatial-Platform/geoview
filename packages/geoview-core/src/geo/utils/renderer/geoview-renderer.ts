@@ -442,6 +442,17 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Creates a polygon preview canvas after loading its fill pattern image.
+   *
+   * @param polygonStyle - Optional style associated to the polygon
+   * @returns A promise that resolves with the rendered polygon canvas
+   */
+  static async createPolygonCanvasAsync(polygonStyle?: Style): Promise<HTMLCanvasElement> {
+    await polygonStyle?.getFill()?.ready();
+    return this.createPolygonCanvas(polygonStyle);
+  }
+
+  /**
    * Creates a canvas with the GeometryCollection settings defined in the style.
    *
    * @param geometryCollectionStyle - Optional style associated to the GeometryCollection
@@ -1064,6 +1075,18 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Resolves a configured image source to a URL consumable by OpenLayers.
+   *
+   * @param source - Image URL or base64-encoded image data
+   * @param mimeType - MIME type used for base64-encoded image data
+   * @returns The resolved image URL
+   */
+  static #getImageSource(source: string, mimeType: string): string {
+    const trimmedSource = source.trim();
+    return /^(data:|https?:\/\/|blob:|\/)/i.test(trimmedSource) ? trimmedSource : `data:${mimeType};base64,${trimmedSource}`;
+  }
+
+  /**
    * Process an icon symbol using the settings.
    *
    * @param settings - Settings to use for the Style creation
@@ -1071,7 +1094,7 @@ export abstract class GeoviewRenderer {
    */
   static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
     const iconOptions: IconOptions = {};
-    iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
+    iconOptions.src = this.#getImageSource(settings.src, settings.mimeType);
     if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
     if (settings.offset !== undefined) iconOptions.offset = settings.offset;
     if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
@@ -1180,8 +1203,12 @@ export abstract class GeoviewRenderer {
    */
   static processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     // eslint-disable-next-line no-param-reassign
-    if (settings.color === undefined) settings.color = this.getDefaultColor(0.25, true);
-    const fillOptions: FillOptions = { color: settings.color };
+    if (settings.color === undefined && !settings.patternImage) settings.color = this.getDefaultColor(0.25, true);
+    const fillOptions: FillOptions = {
+      color: settings.patternImage
+        ? { src: this.#getImageSource(settings.patternImage.src, settings.patternImage.mimeType) }
+        : settings.color,
+    };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
     return new Style({
       stroke: new Stroke(strokeOptions),
@@ -1569,17 +1596,18 @@ export abstract class GeoviewRenderer {
         // Polygon style configuration
         const layerStyles: TypeVectorLayerStyles = { Polygon: {} };
         if (styleConfig.Polygon.type === 'simple') {
-          layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.info[0].settings));
+          layerStyles.Polygon!.defaultCanvas = await this.createPolygonCanvasAsync(
+            this.processSimplePolygon(styleConfig.Polygon.info[0].settings)
+          );
         } else {
           if (styleConfig.Polygon.hasDefault)
-            layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(
+            layerStyles.Polygon!.defaultCanvas = await this.createPolygonCanvasAsync(
               this.processSimplePolygon(styleConfig.Polygon.info[styleConfig.Polygon.info.length - 1].settings)
             );
 
-          const styleArray: HTMLCanvasElement[] = [];
-          styleConfig.Polygon.info.forEach((styleInfo) => {
-            styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
-          });
+          const styleArray = await Promise.all(
+            styleConfig.Polygon.info.map((styleInfo) => this.createPolygonCanvasAsync(this.processSimplePolygon(styleInfo.settings)))
+          );
           if (styleConfig.Polygon.hasDefault) styleArray.pop();
           layerStyles.Polygon!.arrayOfCanvas = styleArray;
         }
