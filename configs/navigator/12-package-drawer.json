@@ -1,0 +1,44 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": []
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "theme": "light",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend"
+      ]
+    }
+  },
+  "navBar": ["drawer", "basemap-select"],
+  "corePackages": [],
+  "externalPackages": [],
+  "corePackagesConfig": [{
+    "drawer": {
+      "style": {
+        "fillColor": "rgba(252, 241, 0, 0.3)",
+        "strokeColor": "#000000",
+        "strokeWidth": 1.3
+      },
+      "activeGeom": "LineString",
+      "geomTypes": ["Point", "LineString", "Polygon", "Rectangle", "Circle", "Star"],
+      "hideMeasurements": false
+    }
+  }]
+}

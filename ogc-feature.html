@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>OGC Feature API Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>OGC Feature API Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show OGC Feature layer types</p></td></tr><tr><td><a href="#HLYR1">1. OGC Feature Layers</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. OGC Feature API Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'initialView': { 'zoomAndCenter': [3, [0, 20]]},
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'ogcFeatureLYR1',
+                'geoviewLayerName': 'Large Lakes',
+                'metadataAccessPath': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'lakes',
+                    'layerFilter': 'name in (\'Lake Victoria\', \'Lake Superior\', \'L. Erie\', \'L. Ontario\')'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map'],
+          'corePackages': [],
+          'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (ogcFeatureLYR1/lakes)</button><pre id="ResultSetId1-all-features" class="panel"></pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'LYR1') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable(mapId, 'ResultSetId1', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
+        });
+
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+      }
+    }, (mapId) => {
+      if (mapId === 'LYR1') {
+        // Layers are loaded
+        const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+        getAllFeatureInfo1.addEventListener('click', async () => {
+          const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('ogcFeatureLYR1/lakes');
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+        });
+
+        createTableOfFilter('LYR1');
+      }
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

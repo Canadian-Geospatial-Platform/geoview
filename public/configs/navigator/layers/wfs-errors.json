@@ -1,0 +1,85 @@
+{
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          10,
+          [
+            -75.370748,
+            45.001058
+          ]
+        ]
+      },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfsERROR?REQUEST=GetCapabilities&VERSION=2.0.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR2",
+        "geoviewLayerName": "Error layerId",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:statesERROR"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

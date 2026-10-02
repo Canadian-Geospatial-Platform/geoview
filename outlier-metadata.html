@@ -1,0 +1,210 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Metadata Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Outlier layers with metadata issues</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase layers with unusual or missing metadata</p></td></tr><tr><td><a href="#Hmap1">1. Metadata Issue Layers</a><br/><a href="#Hmap2">2. ESRI service Issue Layers</a><br/><a href="#Hmap3">3. Metadata Extent Issue Layers</a><br/><a href="#Hmap4">4. Feature Layer with old metadata, no 'Feature Layer' in type property, must by on VPN</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hmap1">1. Metadata Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'mpmo',
+              'geoviewLayerName': 'MPMO - Major Project',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/MPMO_Major_Projects/MapServer/',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'MPMO - Major Project',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'floods-canada-current-year',
+              'geoviewLayerName': 'Floods in Canada - Current Year',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                },
+                {
+                  'layerId': '1',
+                  'initialSettings' : {
+                    'states' : {
+                      'visible' : false
+                    }
+                  }
+                },
+                {
+                  'layerId': '2',
+                  'initialSettings' : {
+                    'states' : {
+                      'visible' : false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'permafrost-by-ecoprovince',
+              'geoviewLayerName': 'Permafrost by Ecoprovince',
+              'metadataAccessPath': 'https://agriculture.canada.ca/atlas/rest/services/mapservices/aafc_national_ecological_framework_of_canada/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '33'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><div>Outlier Layers:<ul><li>Permafrost - Metadata has no geometry field - Issue #2212</li><li>Major Project - esri feature layer does not load because of null field value - Issue #2208</li><li>Floods in Canada - layers are missing time extent - Issue #2251</li></ul></div><hr/><div class="map-title-holder"></div><h4 id="Hmap2">2. ESRI Service Issue Layers</h4><a class="ref-link" href="#top">Top</a><button class="collapsible active">Layers Status</button><pre id="Hmap2-state" class="panel map-title-holder"></pre><hr/><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'f182f1f8-9c9b-49e5-8702-9dd37093a768',
+              'geoviewLayerType': 'geoCore'
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><div>Outlier Service:<ul><li>Sewer Overflow - Service has inexistant layer index (https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/)</li></ul></div><div class="map-title-holder"><h4 id="Hmap3">3. Metadata Extent Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap3-state" class="panel map-title-holder"></pre><hr/><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'LYR1',
+              'geoviewLayerName': 'Water quality in Canadian rivers',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '5',
+                  'layerName': 'Water quality at monitoring sites, Canada'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'LYR2',
+              'geoviewLayerName': 'Reported releases to surface water for 2020',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/NPRI_INRP/NPRI_INRP/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '3',
+                  'layerName': 'Reported releases to surface water for 2020'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'overviewMap': {'hideOnZoom': 6},
+        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'export']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><hr/><div>Outlier Service:<ul><li>Water Quality and Reported releases - Services have extent metadata not covering the entirety of the actual data (https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/ and https://maps-cartes.ec.gc.ca/arcgis/rest/services/NPRI_INRP/NPRI_INRP/MapServer/)</li></ul></div><div class="map-title-holder"><h4 id="Hmap4">4. Feature Layer with old metadata, no 'Feature Layer' in type property, must by on VPN</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap4-state" class="panel map-title-holder"></pre><hr/><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'fireLayer',
+              'geoviewLayerName': 'Fire (VPN)',
+              'metadataAccessPath': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'Fire (VPN)'
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'overviewMap': {'hideOnZoom': 6},
+        'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'export']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><hr/><div>Outlier Service:<ul><li>Service is old and doesn't have a 'Feature Layer' as part of its 'type' property in its metadata (https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer?f=json)</li></ul></div><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

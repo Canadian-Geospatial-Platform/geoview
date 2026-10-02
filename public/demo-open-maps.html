@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Open Maps Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div></div><div style="padding: 20px; background-color: #f5f5f5; margin: 20px 0; border-radius: 4px"><h3 style="margin-top: 0">How to Use This Template</h3><p>Replace the UUID in the URL hash to dynamically load different layers from the GeoCore catalog. Simply modify the URL structure: <code>/demo-open-maps.html#{UUID}</code></p><p><strong>Example:</strong> <code>http://localhost:8080/demo-open-maps.html#6c343726-1e92-451a-876a-76e17d398a1c</code></p><p>You can also load multiple layers by separating UUIDs with commas: <code>/demo-open-maps.html#{UUID1},{UUID2}</code></p></div><div style="padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 20px 0; border-radius: 4px"><h4 style="margin-top: 0; color: #856404">⚠️ Technical Note: Hash-Based Routing</h4><p style="margin: 0; color: #856404; font-size: 0.95em">This template uses hash-based routing (<code>#UUID</code>) for compatibility with static hosting services like GitHub Pages. Path-based routing (e.g., <code>/demo-open-maps/UUID</code>) requires server-side URL rewrites and only works with the webpack dev server, not on static file hosting. Hash-based routing works universally on both local development and production environments.</p></div><h4 style="margin-left: 20px">Sample UUIDs to Test (click to copy UUID):</h4><ul class="demo-list" style="display: flex; flex-direction: column"><li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">1. 21b821cf-0f1c-40ee-8925-eab12d357668 - Airborne Radioactivity <strong>- Chart</strong></li><li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">2. fe83a604-aa5a-4e46-903c-685f8b0cc33c - Historical Flood Events <strong>- Time Slider</strong></li><li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">3. ed9b204b-590c-4b17-9703-f6e167acd6c6 - NAPL <strong>- Time Slider</strong></li><li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">4. 0fe65119-e96e-4a57-8bfe-9d9245fba06b - DMS Hillshade</li></ul><style>.uuid-item:hover {
+        background-color: #e3f2fd;
+      }
+      .uuid-item:active {
+        background-color: #bbdefb;
+      }</style><script>// Add click handlers to copy UUID to clipboard
+      document.querySelectorAll('.uuid-item').forEach((item) => {
+        item.addEventListener('click', function () {
+          // Extract UUID from the text (format: "number. UUID - description")
+          const text = this.textContent.trim();
+          const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/);
+
+          if (uuidMatch) {
+            const uuid = uuidMatch[0];
+            navigator.clipboard
+              .writeText(uuid)
+              .then(() => {
+                // Visual feedback
+                const originalBg = this.style.backgroundColor;
+                this.style.backgroundColor = '#4caf50';
+                setTimeout(() => {
+                  this.style.backgroundColor = originalBg;
+                }, 200);
+                console.log('UUID copied to clipboard:', uuid);
+              })
+              .catch((err) => {
+                console.error('Failed to copy UUID:', err);
+                alert('Failed to copy UUID to clipboard');
+              });
+          }
+        });
+      });</script><div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div><div id="MapEN" class="geoview-map" data-lang="en" data-config-url="./configs/open-maps/open-maps-config.json"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="MapENCS" class="panel"></pre><div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div><div id="MapFR" class="geoview-map" data-lang="fr" data-config-url="./configs/open-maps/open-maps-config.json"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="MapFRCS" class="panel"></pre><script src="codedoc.js"></script><script>// JUST FOR DEMO
+      insertPageHeader();
+
+      // Listen for hash changes to reload layers dynamically
+      window.addEventListener('hashchange', () => {
+        const newUuids = loadLayersFromHash();
+
+        if (newUuids) {
+          // Reload the page to clear old layers and load new ones
+          window.location.reload();
+        }
+      });
+
+      // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - START **********
+
+      // Function to load layers from UUID segment
+      function loadLayersFromHash() {
+        // Extract UUID(s) from URL hash (e.g., #uuid1,uuid2)
+        // Hash-based routing is used because GitHub Pages doesn't support server-side rewrites.
+        // Path-based routing (/demo-open-maps/uuid) only works with webpack dev server.
+        const uuidSegment = window.location.hash.substring(1); // Remove # symbol
+
+        // If no hash, return empty array (map will init without layers)
+        if (!uuidSegment) {
+          return [];
+        }
+
+        // Split and validate each UUID using cgpv utilities
+        const uuids = uuidSegment.split(',').map((uuid) => uuid.trim());
+        const invalidUuids = [];
+
+        for (const uuid of uuids) {
+          if (!cgpv.api.utilities.core.isValidUUID(uuid)) {
+            invalidUuids.push(uuid);
+          }
+        }
+
+        if (invalidUuids.length > 0) {
+          alert(`Invalid UUID(s) found:\n${invalidUuids.join('\n')}\n\nPlease provide valid UUID(s) in the URL hash.`);
+          return false;
+        }
+
+        return uuids;
+      }
+
+      // Initial load
+      const initialUuids = loadLayersFromHash();
+
+      if (initialUuids !== false) {
+        // Proceed with map initialization
+        cgpv.onMapInit((mapViewer) => {
+          // Add layers only if UUIDs are provided
+          if (initialUuids.length > 0) {
+            initialUuids.forEach((uuid) => {
+              cgpv.api.getMapViewer(mapViewer.mapId).layer.addGeoviewLayerByGeoCoreUUID(uuid);
+            });
+          }
+        });
+
+        cgpv.init();
+      }
+
+      // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - END **********
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

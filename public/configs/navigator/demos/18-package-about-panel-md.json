@@ -1,0 +1,38 @@
+{
+  "configMeta": {
+    "description": "About-panel plugin using external mdPath file reference."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    }
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "about-panel"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": true,
+        "aboutTitle": "About Atlas of Canada",
+        "iconPath": "./img/canada-icon.png",
+        "mdPath": "./configs/md/about-sample.md"
+      }
+    }
+  ]
+}

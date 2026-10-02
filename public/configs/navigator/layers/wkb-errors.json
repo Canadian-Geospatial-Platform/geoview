@@ -1,0 +1,83 @@
+{
+  "map": {
+    "viewSettings": {
+      "maxExtent": [
+        -180,
+        -90,
+        180,
+        90
+      ],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wkbLYR2",
+        "geoviewLayerName": "Error dataAccessPath (unreachable URL)",
+        "geoviewLayerType": "WKB",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2",
+            "source": {
+              "dataAccessPath": "https://badurl/oops.wkb"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wkbLYR3",
+        "geoviewLayerName": "Error malformed WKB",
+        "geoviewLayerType": "WKB",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "3",
+            "source": {
+              "dataAccessPath": "010300000001000000"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

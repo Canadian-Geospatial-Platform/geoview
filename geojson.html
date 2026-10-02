@@ -1,0 +1,160 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>GeoJson Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>GeoJSON Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show GeoJSON layer types</p></td></tr><tr><td><a href="#HLYR1">1. Many GeoJSON Layers</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Many GeoJSON Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonLYR1',
+              'geoviewLayerName': 'GeoJSON Sample',
+              'metadataAccessPath': './datasets/geojson/metadata.json',
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json',
+                  'layerName': 'Polygons'
+                },
+                {
+                  'layerId': 'lines.json',
+                  'layerName': 'Lines'
+                },
+                {
+                  'entryType': 'group',
+                  'layerId': 'point-feature-group',
+                  'layerName': 'point-feature-group',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'icon_points.json',
+                      'layerName': 'Icons',
+                      'initialSettings': { 'states': {'visible' : false} }
+                    },
+                    {
+                      'layerId': 'points.json',
+                      'layerName': 'Points'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'overviewMap': {'hideOnZoom': 7},
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible active">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel">
+      <button id="add-geojson">Add GeoJSON Layer</button> <button id="remove-geojson">Remove GeoJSON Layer</button> <br/>
+      <label> Added Layer ID : </label> <label id="new-layer-id-label"></label>
+    </pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (geojsonLYR1/geojsonLYR1/polygons.json)</button><pre id="ResultSetId1-all-features" class="panel"></pre><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'LYR1') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
+        });
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+      } else if (mapId === 'LYR3') {
+        listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+      }
+    }, (mapId) => {
+      if (mapId === 'LYR1') {
+        // Layers are loaded
+        createTableOfFilter('LYR1');
+
+        const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+        getAllFeatureInfo1.addEventListener('click', async () => {
+          const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('geojsonLYR1/geojsonLYR1/polygons.json');
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+        });
+      }
+    });
+
+    // =======================================================================================================================
+    var addGeoJSONButton = document.getElementById('add-geojson');
+
+    // add an event listener when a button is clicked
+    addGeoJSONButton.addEventListener('click', async () => {
+      // adding a geojson layer requires a type of geojson and url
+      const addResult = cgpv.api.maps['LYR1'].layer.addGeoviewLayer(
+        {
+          geoviewLayerId: 'geoJsonSample',
+          geoviewLayerName: 'Historical Flood',
+          geoviewLayerType: 'GeoJSON',
+          listOfLayerEntryConfig: [
+            {
+              layerId: 'historical_flood_0.geojson',
+              layerName: 'Map',
+              source: {
+                dataAccessPath: './datasets/geojson/',
+                featureInfo: {
+                  queryable: true,
+                  nameField: 'comment_en',
+                  outfields: [
+                    {
+                      name: 'comment_en',
+                      alias: 'comment_en',
+                      type: 'string',
+                      domain: []
+                    },
+                    {
+                      name: 'death_en_1',
+                      alias: 'death_en_1',
+                      type: 'string',
+                      domain: []
+                    },
+                    {
+                      name: 'end_date',
+                      alias: 'end_date',
+                      type: 'date',
+                      domain: []
+                    },
+                    {
+                      name: 'evacuation_en_1',
+                      alias: 'evacuation_en_1',
+                      type: 'string',
+                      domain: []
+                    }
+                  ]
+                },
+              },
+            },
+          ],
+        },
+        ['en', 'fr']
+      );
+
+      // Wait for the full response
+      await addResult.promiseLayer;
+
+      document.getElementById('new-layer-id-label').innerText = addResult.layer.geoviewLayerId;
+      createTableOfFilter('LYR1');
+    });
+
+    // =======================================================================================================================
+    var removeGeoJSONButton = document.getElementById('remove-geojson');
+
+    // add an event listener when a button is clicked
+    removeGeoJSONButton.addEventListener('click', function (e) {
+      // removing a geojson layer using the ID
+      const layerPath = document.getElementById('new-layer-id-label').innerText;
+      if (layerPath) cgpv.api.maps['LYR1'].layer.removeLayerUsingPath(layerPath);
+      document.getElementById('new-layer-id-label').innerText = '';
+      createTableOfFilter('LYR1');
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

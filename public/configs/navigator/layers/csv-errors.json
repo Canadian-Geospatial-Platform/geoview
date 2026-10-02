@@ -1,0 +1,94 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "csvLYR1",
+        "geoviewLayerName": "Station List (valid)",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Station_List_Minus_HQ-MELCC",
+            "layerName": "Station List",
+            "source": {
+              "dataAccessPath": "./datasets/csv-files/Station_List_Minus_HQ-MELCC.csv"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvLYR2",
+        "geoviewLayerName": "Error dataAccessPath",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Station_List_Minus_HQ-MELCC",
+            "layerName": "Station List",
+            "source": {
+              "dataAccessPath": "./datasets/csv-files/Station_List_Minus_HQ-MELCCERROR.csv"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvLYR3",
+        "geoviewLayerName": "Error metadataAccessPath",
+        "metadataAccessPath": "./datasets/csv-filesERROR/",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
+            "layerName": "NPRI Water Media Group 2022",
+            "source": {
+              "separator": ","
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}
