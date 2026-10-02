@@ -582,9 +582,7 @@ export class TimeSliderController extends AbstractMapViewerController {
   /**
    * Generates the filter expression string for temporal filtering on a layer.
    *
-   * Handles different layer types (WMS, Esri Image, Dynamic/Vector) with their
-   * respective date formatting conventions, and supports single-handle, range,
-   * discrete, and absolute slider modes.
+   * Creates a service-neutral predicate and supports single-handle, range, discrete, and absolute slider modes.
    *
    * @param layer - The GeoView layer
    * @param timeSliderValues - The time slider configuration values
@@ -602,60 +600,43 @@ export class TimeSliderController extends AbstractMapViewerController {
   ): string {
     let filter = '';
 
-    // Helper function to format dates Esri way
-    const helperEsriDate = (ms: number): string => `date '${DateMgt.formatDateISOShort(ms)}'`;
+    // Helper function to format a quoted ISO date
+    const helperDate = (ms: number): string => `'${DateMgt.formatDateISOShort(ms)}'`;
 
     // If filtering
     if (filtering) {
-      // ---- GVWMS ----
-      if (layer instanceof GVWMS) {
-        if (values.length > 1) {
-          filter = `${field} = ${helperEsriDate(values[0])}/${helperEsriDate(values[1])}`;
+      const startDate = helperDate(values[0]);
+
+      // If range mode
+      if (values.length > 1) {
+        const endDate = helperDate(values[1]);
+        filter = `${field} >= ${startDate} and ${field} <= ${endDate}`;
+      } else if (layer instanceof GVWMS || layer instanceof GVEsriImage) {
+        // Raster time parameters use an instant for a single-handle selection.
+        filter = `${field} = ${startDate}`;
+      } else if (timeSliderValues.discreteValues) {
+        // Discrete mode (single handle)
+        const { rangeItems } = timeSliderValues;
+
+        const rangeMs = rangeItems.range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
+
+        const nextIdx = rangeMs.findIndex((entry) => entry > values[0]);
+
+        if (nextIdx !== -1) {
+          const nextDate = helperDate(rangeMs[nextIdx]);
+          filter = `${field} >= ${startDate} and ${field} < ${nextDate}`;
         } else {
-          filter = `${field} = ${helperEsriDate(values[0])}`;
-        }
-      } else if (layer instanceof GVEsriImage) {
-        // ---- Esri Image ----
-        // Esri Image layers expect the date to be an Epoch timestamp, not an ISO format
-        if (values.length > 1) {
-          filter = `time=${values[0]},${values[1]}`;
-        } else {
-          filter = `time=${values[0]}`;
+          filter = `${field} >= ${startDate}`;
         }
       } else {
-        // ---- Other layers (Dynamic / Vector) ----
-        // Esri Dynamic and Vector layers expect the date to be in ISO format
-        const startDate = helperEsriDate(values[0]);
+        // Absolute mode (single handle)
+        const step = timeSliderValues.step ?? DateMgt.guessEstimatedStep(timeSliderValues.minAndMax[0], timeSliderValues.minAndMax[1]);
 
-        // If range mode
-        if (values.length > 1) {
-          // Range mode (double handle)
-          const endDate = helperEsriDate(values[1]);
-          filter = `${field} >= ${startDate} and ${field} <= ${endDate}`;
-        } else if (timeSliderValues.discreteValues) {
-          // Discrete mode (single handle)
-          const { rangeItems } = timeSliderValues;
-
-          const rangeMs = rangeItems.range.map((entry) => (typeof entry === 'number' ? entry : DateMgt.convertToMilliseconds(entry)));
-
-          const nextIdx = rangeMs.findIndex((entry) => entry > values[0]);
-
-          if (nextIdx !== -1) {
-            const nextDate = helperEsriDate(rangeMs[nextIdx]);
-            filter = `${field} >= ${startDate} and ${field} < ${nextDate}`;
-          } else {
-            filter = `${field} >= ${startDate}`;
-          }
+        if (step) {
+          const endDate = helperDate(values[0] + step);
+          filter = `${field} >= ${startDate} and ${field} < ${endDate}`;
         } else {
-          // Absolute mode (single handle)
-          const step = timeSliderValues.step ?? DateMgt.guessEstimatedStep(timeSliderValues.minAndMax[0], timeSliderValues.minAndMax[1]);
-
-          if (step) {
-            const endDate = helperEsriDate(values[0] + step);
-            filter = `${field} >= ${startDate} and ${field} < ${endDate}`;
-          } else {
-            filter = `${field} = ${startDate}`;
-          }
+          filter = `${field} = ${startDate}`;
         }
       }
     }
