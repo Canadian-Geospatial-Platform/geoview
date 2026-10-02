@@ -83,6 +83,9 @@ export abstract class GeoviewRenderer {
   /** Cached endpoint graphic styles keyed by their parsed SLD graphic-stroke descriptors. */
   static readonly #GRAPHIC_STROKE_STYLE_CACHE: WeakMap<GraphicStrokeWithPlacement, Style> = new WeakMap();
 
+  /** Exact matcher for ISO date values used in filter comparisons. */
+  static readonly #ISO_DATE_EXACT_REGEX = new RegExp(`^(?:${DateMgt.REGEX_ISO_DATE.source})$`, 'i');
+
   /** The default filter expression when all features should be included */
   static readonly DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
 
@@ -767,6 +770,18 @@ export abstract class GeoviewRenderer {
       else {
         const operand2 = dataStack.pop()!;
         const operand1 = dataStack.pop()!;
+        const comparisonOperators = ['=', '<', '>', '<=', '>=', '<>'];
+        if (comparisonOperators.includes(operator.nodeValue as string)) {
+          const operand1IsEpoch = typeof operand1.nodeValue === 'number';
+          const operand2IsEpoch = typeof operand2.nodeValue === 'number';
+          const operand1IsIsoDate =
+            typeof operand1.nodeValue === 'string' && GeoviewRenderer.#ISO_DATE_EXACT_REGEX.test(operand1.nodeValue);
+          const operand2IsIsoDate =
+            typeof operand2.nodeValue === 'string' && GeoviewRenderer.#ISO_DATE_EXACT_REGEX.test(operand2.nodeValue);
+
+          if (operand1IsEpoch && operand2IsIsoDate) operand2.nodeValue = DateMgt.convertToMilliseconds(operand2.nodeValue as string);
+          if (operand2IsEpoch && operand1IsIsoDate) operand1.nodeValue = DateMgt.convertToMilliseconds(operand1.nodeValue as string);
+        }
         let valueToPush;
         switch (operator.nodeValue) {
           case 'is not':

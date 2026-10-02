@@ -185,6 +185,9 @@ export abstract class DateMgt {
   /** Regular expression for matching ISO date strings with a 'date' prefix. */
   static readonly REGEX_ISO_DATE_WITH_PREFIX =
     /date\s*'(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)'/gi;
+  /** Regular expression for matching quoted ISO date literals with an optional legacy 'date' prefix. */
+  static readonly REGEX_ISO_DATE_LITERAL =
+    /(?:\bdate\s*)?'(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)'/gi;
 
   /** Regex used to spot a timezone inside a date input. */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;

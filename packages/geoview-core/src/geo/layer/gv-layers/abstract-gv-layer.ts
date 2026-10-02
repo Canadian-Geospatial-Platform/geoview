@@ -998,7 +998,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Tweak the current layer filters to modify the time filter (create a new layer filters if none currently exists)
     const layerFilters = this.getLayerFilters();
-    layerFilters.setTimeFilter(`${field} >= date '${date1}' and ${field} <= date '${date2}'`);
+    layerFilters.setTimeFilter(`${field} >= '${date1}' and ${field} <= '${date2}'`);
 
     // Redirect
     this.#setLayerFilters(layerFilters, 'time');
