@@ -47,6 +47,7 @@ export * from './tooltip/tooltip';
 export * from './typography/typography';
 export { default as FocusTrap } from '@mui/material/Unstable_TrapFocus';
 export {
+  ButtonBase,
   Table,
   TableBody,
   TableCell,
