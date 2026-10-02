@@ -110,7 +110,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
           {config.layers
             .filter((layer) => layer.enabled)
             .map((layer) => (
-              <ListItem key={layer.layerPath} sx={{ display: 'block' }}>
+              <ListItem key={layer.layerPath} sx={memoSxClasses.filterLayerListItem}>
                 <LayerFilterSection
                   key={layer.layerPath}
                   layer={layer}
