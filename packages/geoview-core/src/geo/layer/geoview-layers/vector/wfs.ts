@@ -604,7 +604,26 @@ export class WFS extends AbstractGeoViewVector {
    * @returns `true` if the field is a geometry field; otherwise, `false`
    */
   static isGmlGeometryField(field: TypeOutfields): boolean {
-    return field.type.startsWith('gml:');
+    // Cast
+    const fieldType = field.type as string;
+
+    // Check if the field type matches any known GML geometry property types
+    return (
+      fieldType === 'gml:PointPropertyType' ||
+      fieldType === 'gml:MultiPointPropertyType' ||
+      fieldType === 'gml:CurvePropertyType' ||
+      fieldType === 'gml:MultiCurvePropertyType' ||
+      fieldType === 'gml:LineStringPropertyType' ||
+      fieldType === 'gml:MultiLineStringPropertyType' ||
+      fieldType === 'gml:SurfacePropertyType' ||
+      fieldType === 'gml:MultiSurfacePropertyType' ||
+      fieldType === 'gml:PolygonPropertyType' ||
+      fieldType === 'gml:MultiPolygonPropertyType' ||
+      fieldType === 'gml:SolidPropertyType' ||
+      fieldType === 'gml:MultiSolidPropertyType' ||
+      fieldType === 'gml:GeometryPropertyType' ||
+      fieldType === 'gml:MultiGeometryPropertyType'
+    );
   }
 
   /**
@@ -629,6 +648,10 @@ export class WFS extends AbstractGeoViewVector {
     const fieldEntryType = fieldDefinition.type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
     if (fieldEntryType === 'dateTime') return 'date';
+    if (fieldEntryType === 'TimeInstantType') {
+      return 'date';
+    }
+
     if (['int', 'integer', 'number', 'decimal', 'long', 'short', 'float', 'double'].includes(fieldEntryType)) return 'number';
 
     // Default: string
