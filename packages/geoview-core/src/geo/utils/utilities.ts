@@ -223,6 +223,8 @@ export abstract class GeoUtilities {
     const outfieldsClause = outfields ? `&propertyName=${encodeURIComponent(outfields.map((f) => f.name).join(','))}` : '';
     const xmlFilterClause = xmlFilter ? `&filter=${encodeURIComponent(xmlFilter)}` : '';
     const outputProjectionCodeClause = outputProjectionCode ? `&srsName=${encodeURIComponent(outputProjectionCode)}` : '';
+
+    // Return the whole url with all parameters
     return `${this.ensureServiceRequestUrl(url, 'WFS', 'GetFeature', version)}&typeName=${encodeURIComponent(layerId)}${outputFormatClause}${outfieldsClause}${xmlFilterClause}${outputProjectionCodeClause}`;
   }
 
