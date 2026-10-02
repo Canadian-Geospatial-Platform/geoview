@@ -10,8 +10,8 @@ export class GVLayerUtilities {
    * ESRI Dynamic (MapServer) layers.
    *
    * This function:
-   * - Detects SQL-style date literals containing ISO 8601 datetimes
-   *   (e.g. `date '2020-01-01T05:00:00Z'`)
+   * - Detects canonical quoted ISO 8601 datetimes and legacy SQL-style date literals
+   *   (e.g. `'2020-01-01T05:00:00Z'` or `date '2020-01-01T05:00:00Z'`)
    * - Extracts and normalizes the ISO datetime value
    * - Removes timezone information (`Z` or offsets)
    * - Replaces the original literal with an ESRI- and database-friendly
@@ -23,7 +23,7 @@ export class GVLayerUtilities {
    *
    * @example
    * ```
-   * time_field >= date '2020-01-01T05:00:00Z'
+   * time_field >= '2020-01-01T05:00:00Z'
    * ```
    * becomes:
    * ```
@@ -40,11 +40,11 @@ export class GVLayerUtilities {
   static parseDateTimeValuesEsriDynamic(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string {
     // Match ISO 8601 datetimes with optional milliseconds + timezone
     let filterValueToUse = filter;
-    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_WITH_PREFIX)];
+    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_LITERAL)];
 
     // Replace from end to start to preserve indexes
     matches.reverse().forEach((match) => {
-      const fullMatch = match[0]; // date '...'
+      const fullMatch = match[0]; // '...' or date '...'
       const isoValue = match[1]; // ISO datetime only
 
       // Normalize date (clears T and Z)
@@ -75,8 +75,8 @@ export class GVLayerUtilities {
    * ESRI ImageServer and WMS layers.
    *
    * This function:
-   * - Detects SQL-style date literals containing ISO 8601 datetimes
-   *   (e.g. `date '2020-01-01T05:00:00Z'`)
+   * - Detects canonical quoted ISO 8601 datetimes and legacy SQL-style date literals
+   *   (e.g. `'2020-01-01T05:00:00Z'` or `date '2020-01-01T05:00:00Z'`)
    * - Extracts and normalizes the ISO datetime value
    * - Removes the surrounding SQL `date '...'` literal
    *
@@ -85,7 +85,7 @@ export class GVLayerUtilities {
    *
    * @example
    * ```
-   * acquisition_date >= date '2020-01-01T05:00:00Z'
+   * acquisition_date >= '2020-01-01T05:00:00Z'
    * ```
    * becomes:
    * ```
@@ -102,11 +102,11 @@ export class GVLayerUtilities {
   static parseDateTimeValuesEsriImageOrWMS(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string {
     // Match ISO 8601 datetimes with optional milliseconds + timezone
     let filterValueToUse = filter;
-    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_WITH_PREFIX)];
+    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_LITERAL)];
 
     // Replace from end to start to preserve indexes
     matches.reverse().forEach((match) => {
-      const fullMatch = match[0]; // date '...'
+      const fullMatch = match[0]; // '...' or date '...'
       const isoValue = match[1]; // ISO datetime only
 
       // Normalize date adds T and adds Z
