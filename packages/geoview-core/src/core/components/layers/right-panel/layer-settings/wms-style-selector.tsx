@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useId, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
 
-import { Box, CircularProgress, Collapse, Typography } from '@/ui';
+import { Box, ButtonBase, CircularProgressBase, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
@@ -61,63 +61,50 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
   const renderIcon = (): JSX.Element => {
     if (loading) {
       return (
-        <Box sx={sxClasses.wmsStylePreviewImageContainer}>
-          <CircularProgress
-            isLoaded={false}
-            size={24}
-            sx={{
-              position: 'relative',
-              backgroundColor: 'transparent',
-            }}
-            sxCircular={{
-              width: '40px !important',
-              height: '40px !important',
-            }}
-          />
+        <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.wmsStylePreviewImageContainer] as SxProps}>
+          <CircularProgressBase size={40} />
         </Box>
       );
     }
     if (legendSrc) {
       return (
-        <Box sx={sxClasses.wmsStylePreviewImageContainer}>
-          <Box component="img" src={legendSrc} alt={style.Name} sx={sxClasses.wmsStylePreviewImage} />
+        <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.wmsStylePreviewImageContainer] as SxProps}>
+          <Box component="img" alt="" src={legendSrc} sx={[sxClasses.previewImage, sxClasses.wmsStylePreviewImage] as SxProps} />
         </Box>
       );
     }
     return (
-      <Box sx={sxClasses.wmsStylePreviewImageContainer}>
+      <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.wmsStylePreviewImageContainer] as SxProps}>
         <ImageNotSupportedIcon sx={sxClasses.settingSelectorPreviewIcon} />
       </Box>
     );
   };
 
+  // #region Handlers
+
+  /**
+   * Handles selection of the WMS style.
+   */
   const handleClick = useCallback((): void => {
     onSelect(style.Name);
   }, [onSelect, style.Name]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onSelect(style.Name);
-      }
-    },
-    [onSelect, style.Name]
-  );
+  // #endregion Handlers
 
   return (
-    <Box
-      role="button"
-      tabIndex={0}
+    <ButtonBase
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
+      aria-current={isSelected ? 'true' : undefined}
+      disableRipple
       sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
-      <Box sx={sxClasses.settingsCardText}>
-        <Typography sx={sxClasses.settingsCardTitle}>{style.Name}</Typography>
+      <Box component="span" sx={sxClasses.settingsCardText}>
+        <Typography component="span" sx={sxClasses.settingsCardTitle}>
+          {style.Name}
+        </Typography>
       </Box>
-    </Box>
+    </ButtonBase>
   );
 }
 
@@ -151,6 +138,10 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
   // State
   const [expanded, setExpanded] = useState<boolean>(false);
 
+  const baseId = useId();
+  const collapseId = `${baseId}-content`;
+  const titleId = `${baseId}-title`;
+
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {
       layerController.setLayerWmsStyle(layerPath, wmsStyleName);
@@ -162,32 +153,34 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
     setExpanded((prev) => !prev);
   }, []);
 
-  const handleToggleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleToggle();
-      }
-    },
-    [handleToggle]
-  );
-
   return (
     <Box sx={sxClasses.settingsSection}>
-      <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+      <ButtonBase
+        sx={sxClasses.settingsSectionHeader}
+        onClick={handleToggle}
+        aria-expanded={expanded}
+        aria-controls={collapseId}
+        disableRipple
+      >
         <PaletteIcon fontSize="small" />
-        <Box sx={sxClasses.settingsSectionHeaderText}>
-          <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectWmsStyle')}</Typography>
+        <Box component="span" sx={sxClasses.settingsSectionHeaderText}>
+          <Typography component="span" sx={sxClasses.settingsSectionTitle} id={titleId}>
+            {t('layers.settings.selectWmsStyle')}
+          </Typography>
           {currentWmsStyle && (
-            <Typography variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
+            <Typography component="span" variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
               {currentWmsStyle}
             </Typography>
           )}
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-      </Box>
-      <Collapse in={expanded} sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}>
-        <Box sx={sxClasses.settingsCardList}>
+      </ButtonBase>
+      <Collapse
+        id={collapseId}
+        in={expanded}
+        sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}
+      >
+        <Box role="group" aria-labelledby={titleId} sx={sxClasses.settingsCardList}>
           {memoWmsStyleArray.map((style) => (
             <WmsStyleItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />
           ))}

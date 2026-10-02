@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
+import { Box, ButtonBase, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
@@ -72,6 +72,13 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
   // State
   const [expanded, setExpanded] = useState<boolean>(false);
 
+  // Unique ids: the collapse region (aria-controls), the Select labels, and the checkbox
+  const baseId = useId();
+  const collapseId = `${baseId}-content`;
+  const methodLabelId = `${baseId}-method-label`;
+  const operationLabelId = `${baseId}-operation-label`;
+  const ascendingId = `${baseId}-ascending`;
+
   // Current values
   const currentMethod = mosaicRule?.mosaicMethod ?? 'esriMosaicNone';
   const currentOperation = mosaicRule?.mosaicOperation ?? 'MT_FIRST';
@@ -126,29 +133,31 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
     setExpanded((prev) => !prev);
   }, []);
 
-  const handleToggleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleToggle();
-      }
-    },
-    [handleToggle]
-  );
-
   return (
     <Box sx={sxClasses.settingsSection}>
-      <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+      <ButtonBase
+        sx={sxClasses.settingsSectionHeader}
+        onClick={handleToggle}
+        aria-expanded={expanded}
+        aria-controls={collapseId}
+        disableRipple
+      >
         <CollectionsIcon fontSize="small" />
-        <Box sx={sxClasses.settingsSectionHeaderText}>
-          <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
+        <Box component="span" sx={sxClasses.settingsSectionHeaderText}>
+          <Typography component="span" sx={sxClasses.settingsSectionTitle}>
+            {t('layers.settings.updateMosaicRule')}
+          </Typography>
+          <Typography component="span" variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
             {memoSelectionSummary}
           </Typography>
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-      </Box>
-      <Collapse in={expanded} sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}>
+      </ButtonBase>
+      <Collapse
+        id={collapseId}
+        in={expanded}
+        sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}
+      >
         <Box sx={sxClasses.settingsSectionContent}>
           <FormControl fullWidth>
             <Select
@@ -156,7 +165,8 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
               onChange={handleChangeMethod}
               label={t('layers.settings.mosaicMethod')}
               menuItems={memoMethodMenuItems}
-              inputLabel={{ id: 'mosaic-method-label' }}
+              inputLabel={{ id: methodLabelId }}
+              labelId={methodLabelId}
             />
           </FormControl>
           <FormControl fullWidth>
@@ -165,12 +175,13 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
               onChange={handleChangeOperation}
               label={t('layers.settings.mosaicOperation')}
               menuItems={memoOperationMenuItems}
-              inputLabel={{ id: 'mosaic-operation-label' }}
+              inputLabel={{ id: operationLabelId }}
+              labelId={operationLabelId}
             />
           </FormControl>
           <Box sx={sxClasses.settingsAscendingRow}>
-            <Checkbox checked={currentAscending} onChange={handleChangeAscending} />
-            <Box component="span" sx={sxClasses.settingsAscendingLabel}>
+            <Checkbox id={ascendingId} checked={currentAscending} onChange={handleChangeAscending} />
+            <Box component="label" htmlFor={ascendingId} sx={sxClasses.settingsAscendingLabel}>
               {t('layers.settings.ascending')}
             </Box>
           </Box>

@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Divider, Typography, Select } from '@/ui';
+import { Box, Typography, Select } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
 import {
@@ -22,7 +22,8 @@ import {
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
 
-import { getSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerDetailsSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerSettingsSxClasses } from './layer-settings-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
@@ -56,13 +57,15 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = getLayerDetailsSxClasses(theme);
 
   // Store
   const interactive = useStoreSwiperInteractive();
   const orientation = useStoreSwiperOrientation();
   const layerPaths = useStoreSwiperLayerPaths();
   const layerSides = useStoreSwiperLayerSides();
+  const baseId = useId();
+  const sideLabelId = `${baseId}-swiper-side-label`;
 
   // Derived values
   const isInSwiper = layerPaths.includes(layerPath);
@@ -107,8 +110,8 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
             value={currentSide}
             onChange={handleChangeSide}
             label={t('swiper.sideLabel')}
-            labelId={`${layerPath}-swiper-side-label`}
-            inputLabel={{ id: `${layerPath}-swiper-side-label` }}
+            labelId={sideLabelId}
+            inputLabel={{ id: sideLabelId }}
             menuItems={sideMenuItems}
             sx={sxClasses.swiperSideSelect}
           />
@@ -139,7 +142,8 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = getLayerDetailsSxClasses(theme);
+  const settingsSxClasses = getLayerSettingsSxClasses(theme);
 
   // Store
   const layerController = useLayerController();
@@ -201,9 +205,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   }
 
   return (
-    <Box>
-      <Divider sx={sxClasses.sectionDivider} variant="middle" />
-
+    <Box sx={settingsSxClasses.settingsSectionContainer}>
       {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerPath={layerPath} />}
       {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerPath={layerPath} />}
       {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerPath={layerPath} />}

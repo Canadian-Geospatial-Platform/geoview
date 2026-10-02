@@ -13,9 +13,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 100,
   },
 
+  settingsSectionContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    borderTop: `1px solid ${theme.palette.divider}`,
+    marginTop: theme.spacing(1),
+    paddingTop: theme.spacing(2),
+  },
+
   // Section container for each settings group (raster function, mosaic rule)
   settingsSection: {
-    marginBottom: theme.spacing(3),
     border: '1px solid',
     borderColor: theme.palette.divider,
     borderRadius: '8px',
@@ -25,33 +33,33 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionHeader: {
     display: 'flex',
+    width: '100%',
     alignItems: 'center',
     gap: theme.spacing(1),
     color: theme.palette.geoViewColor?.textColor.main,
-    cursor: 'pointer',
-    userSelect: 'none',
+    textAlign: 'left',
     transition: 'color 0.2s',
     '&:hover': {
       color: theme.palette.primary.main,
     },
-    '&:focus-visible': {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: '2px',
-      borderRadius: '4px',
-    },
   },
 
   settingsSectionTitle: {
+    display: 'block',
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
   },
 
   settingsSectionHeaderText: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(0.25),
     flex: 1,
     minWidth: 0,
   },
 
   settingsSectionSummary: {
+    display: 'block',
     fontSize: theme.palette.geoViewFontSize?.sm,
   },
 
@@ -105,21 +113,24 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsCard: {
     display: 'flex',
+    gap: theme.spacing(2),
+    alignSelf: 'stretch',
     alignItems: 'center',
+    flexShrink: 0,
+    textAlign: 'left',
     margin: theme.spacing(0.5),
     padding: theme.spacing(1.5),
     border: '1px solid',
     borderColor: theme.palette.divider,
     borderRadius: '8px',
-    cursor: 'pointer',
     transition: 'border-color 0.2s, background-color 0.2s',
     '&:hover': {
       borderColor: theme.palette.primary.main,
       backgroundColor: theme.palette.action.hover,
     },
     '&:focus-visible': {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: '2px',
+      outlineOffset: 0,
+      boxShadow: 'none',
     },
   },
 
@@ -129,18 +140,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   settingsCardText: {
+    display: 'flex',
+    flexDirection: 'column',
     flex: 1,
     minWidth: 0,
   },
 
   settingsCardTitle: {
+    display: 'block',
     fontWeight: 600,
   },
 
-  // ESRI Image Raster Function specific styles
-  rasterFunctionPreviewImageContainer: {
+  settingsCardDescription: {
+    display: 'block',
+  },
+
+  previewImageContainer: {
     width: 100,
-    height: 100,
     border: '2px solid',
     borderColor: theme.palette.divider,
     borderRadius: '8px',
@@ -148,34 +164,29 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginRight: theme.spacing(2),
     flexShrink: 0,
   },
 
-  rasterFunctionPreviewImage: {
+  previewImage: {
     width: '100%',
+  },
+
+  // ESRI Image Raster Function specific styles
+  rasterFunctionPreviewImageContainer: {
+    height: 100,
+  },
+
+  rasterFunctionPreviewImage: {
     height: '100%',
     objectFit: 'cover',
   },
 
   // WMS Style specific styles
   wmsStylePreviewImageContainer: {
-    width: 100,
     minHeight: 100,
-    maxHeight: 200, // Cap maximum height to handle tall legend images
-    border: '2px solid',
-    borderColor: theme.palette.divider,
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    marginRight: theme.spacing(2),
-    flexShrink: 0,
+    maxHeight: 200,
   },
-
   wmsStylePreviewImage: {
-    width: '100%',
     height: 'auto', // Preserve aspect ratio
     maxHeight: '200px',
     objectFit: 'contain', // Show full image without cropping
