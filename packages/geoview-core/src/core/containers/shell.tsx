@@ -38,7 +38,7 @@ import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
-import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement } from '@/core/utils/dom-helper';
+import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement, queryGVSelectorAll } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -53,6 +53,43 @@ const DEFAULT_SNACKBAR_DISPLAY_TIME = 5 * 1000; // 5 seconds
 
 /** The length of time to display the snackbar message if there are more messages in the queue. */
 const QUEUED_SNACKBAR_DISPLAY_TIME = 3 * 1000; // 3 seconds
+
+/** Selectors for elements that can participate in the viewer's keyboard focus cycle. */
+const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex], [contenteditable]:not([contenteditable="false"])';
+
+/**
+ * Returns visible tabbable elements in keyboard order for the viewer focus trap.
+ *
+ * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.
+ *
+ * @param mapId - The map containing the focus trap
+ * @param root - The viewer shell containing the focusable elements
+ * @returns The currently visible and enabled elements in tab order
+ */
+function getVisibleTabbable(mapId: string, root: HTMLElement): HTMLElement[] {
+  const elements = queryGVSelectorAll<HTMLElement>(mapId, `#${CSS.escape(root.id)} :is(${TABBABLE_SELECTOR})`);
+  const radios = elements.filter(
+    (element): element is HTMLInputElement => element instanceof window.HTMLInputElement && element.type === 'radio'
+  );
+  const candidates = elements.filter((element) => {
+    // Only the checked radio (or first radio when none is checked) participates in a group's tab order.
+    if (element instanceof window.HTMLInputElement && element.type === 'radio' && element.name) {
+      const group = radios.filter((radio) => radio.name === element.name);
+      if (element !== (group.find((radio) => radio.checked) ?? group[0])) return false;
+    }
+
+    return (
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled') &&
+      !element.closest('[inert], [aria-hidden="true"]') &&
+      element.getClientRects().length > 0 &&
+      window.getComputedStyle(element).visibility === 'visible'
+    );
+  });
+
+  const ordered = candidates.filter((element) => element.tabIndex > 0).sort((first, second) => first.tabIndex - second.tabIndex);
+  return [...ordered, ...candidates.filter((element) => element.tabIndex === 0)];
+}
 
 /**
  * Creates a shell component to wrap the map and other components not inside the map.
@@ -124,6 +161,14 @@ export function Shell(props: ShellProps): JSX.Element {
     geoviewElement,
     appHeight,
   });
+
+  /**
+   * Finds visible tabbable elements within this map's shell.
+   *
+   * @param root - The viewer focus trap root
+   * @returns The elements in keyboard order
+   */
+  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => getVisibleTabbable(mapId, root), [mapId]);
 
   // #region HANDLERS
 
@@ -438,7 +483,7 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView}>
+      <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
         <Box
           ref={shellRef}
           id={`${mapViewer.mapId}-shell`}

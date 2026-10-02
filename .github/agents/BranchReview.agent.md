@@ -1,6 +1,6 @@
 ---
 name: BranchReview
-description: "Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting. Runs the GeoView Branch Review Checklist against changed files in the current branch."
+description: "Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity. Runs the GeoView Branch Review Checklist against changed files in the current branch."
 tools: [read, search, execute, edit, todo]
 argument-hint: "target branch (default: upstream/develop)"
 ---
@@ -113,6 +113,14 @@ If any changed file modifies default config values in one of the three sources b
 
 **Key properties to watch:** `navBar`, `footerBar.tabs.core`, `appBar.tabs.core`, `basemapOptions.basemapId`, `highlightColor`, `overviewMap.hideOnZoom`, `viewSettings.zoomAndCenter`, `viewSettings.maxExtent`, `globalSettings`, `serviceUrls` key names.
 
+#### 14. Function Complexity and Length (Pre-Merge Review)
+
+- [ ] Measure functions, methods, and callbacks in the changed `.ts`/`.tsx` files using the locally installed ESLint `complexity` and `max-lines-per-function` rules with **temporary** settings: complexity above 15, length above 50 nonblank/noncomment lines. Do not change the repository ESLint config or run the full lint script. If tooling is unavailable, inspect the changed functions manually and say metrics were not measured.
+- [ ] Review functions above 15 complexity; prioritize those above 25 or with both high complexity and length. Aim for 30–50 lines, but neither threshold is an automatic violation. Check nesting, distinct subtasks, readability, and test coverage; a straightforward 100-line function may be fine while a branch-heavy 60-line function may need extraction.
+- [ ] Audit the entire changed file as in Phase 2, but distinguish **new/modified** functions from pre-existing complexity debt using the branch diff. Highlight actionable pre-merge issues first; identify unrelated legacy issues separately instead of requiring a broad refactor for a small PR.
+- [ ] Do not recommend splitting a file because it exceeds a line-count threshold (including 1,000 lines). Only suggest a file or class boundary when responsibilities are distinct and the split improves navigation or testability without adding unnecessary coupling. Account for large JSX, styles, declarative configuration, types, and test fixtures.
+- [ ] For each actionable finding, report the function name and location, measured complexity and/or length, why it is difficult to maintain, and a **specific** extraction or simplification with tests to protect behavior. If a metric is high but the code is cohesive, mark it as an advisory rather than a violation.
+
 ### Phase 3 — Report
 
 Present findings organized by file with violation counts:
@@ -141,6 +149,8 @@ Present findings organized by file with violation counts:
 **Fix these issues?** I can auto-fix items 1, 2, and 4. Item 3 requires a manual refactor. Reply with the items you'd like me to fix.
 ```
 
+Include a **Complexity & Length** section in every report, even if no functions are flagged. List confirmed pre-merge refactor candidates separately from advisory metrics and pre-existing debt; do not add advisory-only items to the violation total. Suggest fixes before merging, but do not refactor functions without approval and appropriate regression tests.
+
 ### Phase 4 — Fix (on approval)
 
 After the user approves, apply fixes one file at a time:
@@ -150,6 +160,8 @@ After the user approves, apply fixes one file at a time:
 - Rename `useMemo` variables to add `memo` prefix (update all references)
 - Add missing explicit return types
 - Fix import grouping
+
+For approved complexity refactors, extract coherent subtasks into named private methods where appropriate, keep behavior and public APIs unchanged, and verify with relevant tests. Do not auto-split a file solely to satisfy a metric.
 
 Always show the diff for review.
 

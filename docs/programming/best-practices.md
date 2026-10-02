@@ -297,6 +297,12 @@ In classes, functions should be ordered in the following way:
 - static private
 - event types
 
+Aim to keep functions and methods within 30–50 lines. When a class method grows beyond that range, split distinct subtasks into clearly named private methods on the same class. Keep the public method focused on coordinating the workflow; do not split code solely to meet a line count.
+
+Use **cyclomatic complexity alongside length** when reviewing functions and callbacks. An ESLint `complexity` score above 15 warrants review; above 25 is a higher-priority refactoring candidate. A 60-line function with many branches may be harder to maintain than a straightforward 100-line function. Extract coherent decision-making or subtasks, reduce nesting where possible, and preserve behavior with tests. These numbers flag candidates, not automatic violations; consider readability, responsibility, and whether the code is mostly JSX, declarative configuration, or a necessary switch.
+
+Do not split source files based on line count alone. Even files over 1,000 lines can be appropriate when a class or module has one cohesive responsibility. Review whether distinct responsibilities, difficult navigation, or poor testability justify extraction; split only when the new boundary is clear and improves maintainability without adding unnecessary coupling. Keep cohesive files together and use clear method names and regions to navigate them. Test fixtures, type declarations, styles, and configuration data can also be large without needing to be split.
+
 > **Static `readonly` constants belong at the TOP of the class**, right after the class declaration (before the constructor), using `static readonly` — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;`. Do NOT drop them at the bottom of the file. This applies to configuration/threshold constants; static **methods** still go near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region` / `// #endregion` markers so that VS Code can collapse them. Use **UPPER CASE** labels that match the group:

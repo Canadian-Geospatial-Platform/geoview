@@ -923,6 +923,10 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 1. Class name → 2. Static `readonly` constants (top of class) → 3. Abstracts → 4. Overrides → 5. Public → 6. Private → 7. Event emits/hooks → 8. Static public methods → 9. Static private methods → 10. Event types
 
+Aim to keep functions and methods within 30–50 lines. If a class method grows beyond that range, extract distinct subtasks into clearly named private methods on the same class. Keep the public method focused on coordinating the workflow; do not split code solely to meet a line count.
+
+Consider **cyclomatic complexity as well as length** for functions and callbacks. An ESLint `complexity` score above 15 calls for review; above 25 deserves priority. A straightforward 100-line function can be fine, while a branch-heavy 60-line function may need refactoring. Do not split source files based on line count alone, even above 1,000 lines: cohesive classes and modules may be easier to maintain together. Extract only distinct responsibilities with clear boundaries when navigation or testability improves without adding unnecessary coupling; otherwise use focused methods and regions. These are review triggers, not hard limits; consider declarative JSX/configuration and test-fixture content as well. See [best-practices.md §11](../docs/programming/best-practices.md).
+
 **Static `readonly` constants go at the TOP of the class**, immediately after the class declaration and before the constructor — e.g. `static readonly HIGHLIGHT_OPACITY_RATIO = 4;` (see `LayerController`, `DrawerController`). NEVER append them at the bottom of the class/file. Use `static readonly` (not bare `static`) for threshold/config constants. Static **methods** still live near the end in the `STATIC METHODS` region.
 
 Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
