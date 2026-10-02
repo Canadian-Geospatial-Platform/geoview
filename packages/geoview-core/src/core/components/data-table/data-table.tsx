@@ -799,11 +799,16 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoFilteredFeatures', data.features);
 
-    // In addition, filter on the class renderer filters and the time slider filter
-    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
+    // Gather the available field names on the feature
+    const availableFields = new Set(Object.keys(data.features?.[0]?.feature?.getProperties() ?? {}));
 
     // Create the filter equation equivalent of the combined filter
-    const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
+    const layerFilterEquation = LayerFilters.createClientFilterEquation(
+      layerClassFilter,
+      layerTimeFilter,
+      layerFilterPanelFilterExpression,
+      availableFields
+    );
 
     // Filter each features
     return (

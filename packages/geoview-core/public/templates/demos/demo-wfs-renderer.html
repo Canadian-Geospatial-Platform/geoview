@@ -31,10 +31,13 @@
       }
 
       .CodeMirror {
-        height: 700px; /* Height of the text area */
-        width: 100%;           /* make CM fill its cell */
+        height: 300px;
+        min-height: 180px;
+        width: 100%;
         box-sizing: border-box;
         max-width: 100%;
+        overflow: hidden;
+        resize: vertical;
       }
 
       .CodeMirror textarea {
@@ -67,13 +70,14 @@
       <div style="margin-bottom: 15px">
         <label for="renderer">Input WMS/WFS Renderer examples:</label>
         <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
+          <option value='{"url":"https://demo.mapserver.org/cgi-bin/wms","layers":"cities"}'>Cities (Point classBreaks)</option>
+          <option value='{"url":"https://ws.mapserver.transports.gouv.qc.ca/swtq","layers":"bgr_v_sous_route_res_sup_act"}'>Road network (LineString uniqueValue)</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en","layers":"AIRB_RAD"}'>Airborne (Point simple) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en","layers":"mines"}'>Mines (Point simple) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en","layers":"completed"}'>Assessment Completed (Point uniqueValue) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!)) - VPN</option>
-          <option value='{"url":"https://demo.mapserver.org/cgi-bin/wms","layers":"cities"}'>Cities (Point classBreaks)</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en","layers":"DMF"}'>Surficial Geology (Polygon simple) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple) - VPN</option>
@@ -81,6 +85,7 @@
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete)) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en","layers":"mpi-point"}'>Major Projects (styles with functions!) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en","layers":"fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4"}'>FPSN Station (Point complex) - VPN</option>
           <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all) - VPN</option>
         </select>
       </div>
@@ -120,6 +125,9 @@
               </pre>
             </p>
       </div>
+      <h4>Preview of the SVGs:</h4>
+      <button class="btn btn-primary" id="createPreview" style="margin: 0 0 10px 0;">Create preview</button>
+      <div id="previewSVGs"></div>
     </div>
 
     <script src="codedoc.js"></script>
@@ -173,16 +181,96 @@
           await cgpv.api.utilities.core.delay(500);
 
           // Parse it right away
-          parseOutputStyles();
+          await parseOutputStyles();
         } catch (error) {
           alert(error);
         }
       };
       fetchWMSStyles();
 
-      function parseOutputStyles() {
-        const geoViewRenderer = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
-        editorOutputProcess.setValue(JSON.stringify(geoViewRenderer, undefined, 2));
+      async function parseOutputStyles() {
+        const styleConfig = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
+        editorOutputProcess.setValue(JSON.stringify(styleConfig, undefined, 2));
+
+        // Generate previews from the newly created config
+        await generatePreview();
+      }
+
+      async function generatePreview() {
+        // Read the current style config from the output editor
+        const styleConfig = JSON.parse(editorOutputProcess.getValue());
+
+        // Generate icon previews
+        const previewDiv = document.getElementById('previewSVGs');
+        previewDiv.innerHTML = '';
+        try {
+          const legendStyles = await cgpv.api.utilities.renderer.getLegendStyles(styleConfig);
+          const geometryTypes = ['Point', 'LineString', 'Polygon', 'GeometryCollection'];
+          for (const geomType of geometryTypes) {
+            const geomStyle = legendStyles[geomType];
+            if (!geomStyle) continue;
+
+            const section = document.createElement('div');
+            section.style.marginBottom = '16px';
+            const heading = document.createElement('h5');
+            heading.textContent = geomType;
+            section.appendChild(heading);
+
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.flexWrap = 'wrap';
+            container.style.gap = '12px';
+            container.style.alignItems = 'flex-start';
+
+            // Collect canvases: default + array
+            const canvases = [];
+            const styleInfo = styleConfig[geomType];
+            if (geomStyle.defaultCanvas) {
+              const defaultLabel = styleInfo?.type === 'simple' ? (styleInfo.info?.[0]?.label || 'Default') : 'Default';
+              canvases.push({ canvas: geomStyle.defaultCanvas, label: defaultLabel });
+            }
+            if (geomStyle.arrayOfCanvas) {
+              geomStyle.arrayOfCanvas.forEach((canvas, i) => {
+                const label = styleInfo?.info?.[i]?.label || `Item ${i + 1}`;
+                canvases.push({ canvas, label });
+              });
+            }
+
+            canvases.forEach(({ canvas, label }) => {
+              const item = document.createElement('div');
+              item.style.textAlign = 'center';
+              item.style.display = 'flex';
+              item.style.flexDirection = 'column';
+              item.style.alignItems = 'center';
+              item.style.width = '80px';
+              const img = document.createElement('img');
+              img.src = canvas.toDataURL();
+              img.title = label;
+              img.style.display = 'block';
+              img.style.marginBottom = '4px';
+              item.appendChild(img);
+              const text = document.createElement('span');
+              text.textContent = label;
+              text.style.fontSize = '11px';
+              text.style.display = 'block';
+              text.style.wordBreak = 'break-word';
+              text.style.lineHeight = '1.2';
+              text.title = label;
+              item.appendChild(text);
+              container.appendChild(item);
+            });
+
+            section.appendChild(container);
+            previewDiv.appendChild(section);
+          }
+
+          if (!previewDiv.hasChildNodes()) {
+            previewDiv.textContent = 'No renderable styles found.';
+          }
+        } catch (error) {
+          previewDiv.textContent = 'Error generating icon previews: ' + error.message;
+          console.error('Icon preview error:', error);
+        }
       }
 
       rendererDropdown.addEventListener('change', (e) => {
@@ -197,6 +285,10 @@
 
       executeButton.addEventListener('click', (e) => {
         parseOutputStyles();
+      });
+
+      document.getElementById('createPreview').addEventListener('click', (e) => {
+        generatePreview();
       });
     </script>
   </body>

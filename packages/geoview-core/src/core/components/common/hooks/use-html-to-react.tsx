@@ -2,6 +2,7 @@ import { isValidElement, type CSSProperties, type ReactNode } from 'react';
 import parse from 'html-react-parser';
 import { Box } from '@/ui/layout';
 import { logger } from '@/core/utils/logger';
+import { toArray } from '@/core/utils/utilities';
 
 /** Properties for the HTML-to-React converter component. */
 interface HtmlToReactProps {
@@ -26,7 +27,7 @@ export function UseHtmlToReact({ htmlContent, className, style, extraOptions, it
 
   // The html-react-parser can return a single item or an array, ensure we have an array
   const parsed = parse(htmlContent);
-  const items = Array.isArray(parsed) ? parsed : [parsed];
+  const items = toArray(parsed);
 
   // When omitWrappers is true and we have a single element with no wrapper-modifying props, return it directly
   if (

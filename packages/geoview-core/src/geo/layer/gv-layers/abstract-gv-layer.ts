@@ -50,7 +50,7 @@ import { formatError, NotImplementedError, NotSupportedError } from '@/core/exce
 import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
-import { delay, doTimeout, type DelayJob } from '@/core/utils/utilities';
+import { delay, doTimeout, isObjectNonEmpty, type DelayJob } from '@/core/utils/utilities';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
@@ -1023,7 +1023,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Tweak the current layer filters to modify the time filter (create a new layer filters if none currently exists)
     const layerFilters = this.getLayerFilters();
-    layerFilters.setTimeFilter(`${field} >= date '${date1}' and ${field} <= date '${date2}'`);
+    layerFilters.setTimeFilter(`${field} >= '${date1}' and ${field} <= '${date2}'`);
 
     // Redirect
     this.#setLayerFilters(layerFilters, 'time');
@@ -1116,11 +1116,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     promiseLegend
       .then((legend) => {
         // If legend was received
-        if (legend) {
+        if (isObjectNonEmpty(legend)) {
           // Set the legend
           this.setLegend(legend);
+
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
+
           // Emit legend information once retrieved
           this.#emitLegendQueried({ legend });
         }
@@ -2464,13 +2466,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     };
 
     // Process the feature style
-    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
+    const processedFeatureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     // If no feature style generated
-    if (!featureStyle) {
+    if (!processedFeatureStyle) {
       // No style
       return undefined;
     }
+
+    // Feature-info thumbnails use the base style when line rendering also returns endpoint styles.
+    const featureStyle = Array.isArray(processedFeatureStyle) ? processedFeatureStyle[0] : processedFeatureStyle;
 
     // Clone the style
     const styleClone = featureStyle.clone();

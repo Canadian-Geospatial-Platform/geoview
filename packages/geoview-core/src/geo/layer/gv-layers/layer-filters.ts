@@ -1,5 +1,5 @@
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { NodeType, type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /**
  * Aggregates and composes the different filter fragments applied at various
@@ -264,6 +264,37 @@ export class LayerFilters {
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Creates a client-side filter equation from class, time, and panel filters.
+   *
+   * The time filter is omitted when its referenced field is unavailable in the feature data.
+   * This is because sometimes a WMS can have a time filter possible while, at the same time, not offer the time field in its outFields.
+   * The class and panel filters are always retained.
+   *
+   * @param classFilter - Optional class renderer filter
+   * @param timeFilter - Optional time slider filter
+   * @param panelFilter - Optional filter panel filter
+   * @param availableFields - Feature fields available for client-side evaluation
+   * @returns The parsed client-side filter equation
+   */
+  static createClientFilterEquation(
+    classFilter: string | undefined,
+    timeFilter: string | undefined,
+    panelFilter: string | undefined,
+    availableFields: ReadonlySet<string>
+  ): FilterNodeType[] {
+    const timeFilterFieldNode = timeFilter
+      ? GeoviewRenderer.createFilterNodeFromFilter(timeFilter).find(
+          (node) => node.nodeType === NodeType.variable && typeof node.nodeValue === 'string'
+        )
+      : undefined;
+    const timeFilterField = typeof timeFilterFieldNode?.nodeValue === 'string' ? timeFilterFieldNode.nodeValue : undefined;
+    const canApplyTimeFilter = !timeFilterField || availableFields.has(timeFilterField);
+    const clientFilter = LayerFilters.joinWithAnd([classFilter, canApplyTimeFilter ? timeFilter : undefined, panelFilter]);
+
+    return GeoviewRenderer.createFilterNodeFromFilter(clientFilter);
+  }
 
   /**
    * Joins multiple SQL filter fragments using the AND operator.

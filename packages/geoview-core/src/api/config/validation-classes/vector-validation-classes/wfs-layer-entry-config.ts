@@ -12,6 +12,7 @@ import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classe
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
+import { toArray } from '@/core/utils/utilities';
 
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
@@ -56,6 +57,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   // #endregion OVERRIDES
 
+  // #region METHODS
+
   /**
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
    *
@@ -78,7 +81,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     // If metadata FeatureType isn't an array
     let featureTypes: TypeMetadataWFSFeatureTypeListFeatureType[] = metadata.FeatureTypeList
       .FeatureType as TypeMetadataWFSFeatureTypeListFeatureType[];
-    if (!Array.isArray(metadata.FeatureTypeList.FeatureType)) featureTypes = [metadata.FeatureTypeList.FeatureType];
+    featureTypes = toArray(metadata.FeatureTypeList.FeatureType);
 
     // Find the feature type for this layer
     const featureTypeForLayer = featureTypes.find((layerMetadata) => {
@@ -185,23 +188,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     return this.getVersionOrDefault().startsWith('2.');
   }
 
-  /**
-   * Gets if the config has specified that we should fetch the styles from the WMS.
-   *
-   * @returns True when the styles should be fetched from the WMS. True by default
-   */
-  getShouldFetchStylesFromWMS(): boolean {
-    return this.getGeoviewLayerConfig().fetchStylesOnWMS ?? true; // default: true
-  }
-
-  /**
-   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
-   *
-   * @returns The WMS styles layer id
-   */
-  getWmsStylesLayerId(): string {
-    return this.layerEntryProps.wmsLayerId || this.layerId;
-  }
+  // #endregion METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object) represents a WFS Feature layer type.

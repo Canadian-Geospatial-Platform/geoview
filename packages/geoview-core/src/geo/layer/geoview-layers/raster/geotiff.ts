@@ -306,6 +306,12 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param layerEntries - An array of layer entry shells to include in the configuration.
    * @param isTimeAware - Indicates if the layer is time aware.
    * @returns A promise that resolves to an array of layer configurations.
+   * @throws {LayerServiceMetadataUnableToFetchError} When service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty
+   * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,

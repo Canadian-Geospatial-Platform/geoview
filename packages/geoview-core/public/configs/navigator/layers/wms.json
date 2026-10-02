@@ -11,60 +11,35 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "Cities",
-        "geoviewLayerName": "Cities",
-        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wms",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "cities",
-            "wfsLayerId": "ms:cities",
-            "source": {
-              "featureInfo": {
-                "nameField": "NAME"
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerName": "Major Projects Inventory",
-        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
-      },
-      {
         "geoviewLayerId": "DatacubeXML-NAPL",
-        "geoviewLayerName": "NAPL",
+        "geoviewLayerName": "NAPL Ontario ring of fire",
         "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ontario-ring-of-fire",
-            "layerName": "Ontario ring of fire"
+            "layerId": "ontario-ring-of-fire"
           }
         ]
       },
       {
         "geoviewLayerId": "ElevationHRDEM110",
-        "geoviewLayerName": "Elevation HRDEM Mosaic DSM 1.1.0",
+        "geoviewLayerName": "Elevation Hillshade 1.1.0",
         "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic?VERSION=1.1.0",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "dsm-hillshade",
-            "layerName": "Elevation Hillshade 1.1.0"
+            "layerId": "dsm-hillshade"
           }
         ]
       },
       {
         "geoviewLayerId": "ElevationHRDEM130",
-        "geoviewLayerName": "Elevation HRDEM Mosaic 1.3.0",
+        "geoviewLayerName": "Elevation Hillshade 1.3.0",
         "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "dsm-hillshade",
-            "layerName": "Elevation Hillshade 1.3.0"
+            "layerId": "dsm-hillshade"
           }
         ]
       },
@@ -89,14 +64,14 @@
         ]
       },
       {
-        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerId": "weather-group",
         "geoviewLayerName": "Weather Group",
         "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "entryType": "group",
-            "layerId": "wmsLYR1-Group",
+            "layerId": "weather-group-g",
             "layerName": "Group",
             "listOfLayerEntryConfig": [
               {
@@ -124,13 +99,12 @@
       },
       {
         "geoviewLayerId": "wmsLYR1-spatiotemporel",
-        "geoviewLayerName": "Spatiotemporel",
+        "geoviewLayerName": "Test Spatiotemporel",
         "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "RADAR_1KM_RSNO",
-            "layerName": "Test Spatiotemporel"
+            "layerId": "RADAR_1KM_RSNO"
           }
         ]
       },
@@ -222,7 +196,9 @@
         "metadataAccessPath": "https://nonna-geoserver.data.chs-shc.ca/geoserver/wms",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
-          { "layerId": "nonna:NONNA 10" }
+          {
+            "layerId": "nonna:NONNA 10"
+          }
         ]
       }
     ]

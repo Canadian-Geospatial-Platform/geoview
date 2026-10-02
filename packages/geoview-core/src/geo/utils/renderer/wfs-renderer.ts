@@ -24,15 +24,17 @@ import type {
   TypeStrokeSymbolConfig,
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
+import { isNumeric, isObjectEmpty, toArray } from '@/core/utils/utilities';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { isNumeric } from '@/core/utils/utilities';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Class used to interpret a WFS, via its WMS equivalent, and build a Geoview Renderer style.
  */
 export abstract class WfsRenderer {
+  // #region STATIC PUBLIC METHODS
+
   /**
    * Builds a layer style settings object from a WMS Styled Layer Descriptor (SLD).
    *
@@ -61,16 +63,15 @@ export abstract class WfsRenderer {
     // If couldn't read
     if (!featureTypeStyleRaw) throw new NotSupportedError(`Invalid StyledLayerDescriptor (SLD). Check the 'GetStyles' response.`);
 
-    const firstFeatureTypeStyle = Array.isArray(featureTypeStyleRaw) ? featureTypeStyleRaw[0] : featureTypeStyleRaw;
+    // SLD allows several feature type styles. Preserve all rules because a later style can
+    // contain symbolizers that complement the first style rather than replace it.
+    const featureTypeStyles = toArray(featureTypeStyleRaw);
+    const rules = featureTypeStyles.flatMap((featureTypeStyle) => toArray(featureTypeStyle['se:Rule']));
 
-    // Read rules
-    const rulesRaw = firstFeatureTypeStyle['se:Rule'];
-    const rules = Array.isArray(rulesRaw) ? rulesRaw : [rulesRaw];
+    // If no rules
+    if (rules.length === 0) throw new NotSupportedError('Unsupported Layer styling: no rules were found in the SLD');
 
-    // Default geometry type
-    let geomType: TypeStyleGeometry = 'Point';
-
-    const infos: TypeLayerStyleConfigInfo[] = [];
+    const infosByGeometry: Partial<Record<TypeStyleGeometry, TypeLayerStyleConfigInfo[]>> = {};
     const fields: string[] = [];
     let hasClassBreaks = false;
     let hasDefault = false;
@@ -84,10 +85,10 @@ export abstract class WfsRenderer {
       if (userRule['ogc:Filter']) {
         // Get filter information
         filterInfo = this.#readFilterFromRule(userRule['ogc:Filter']);
-        hasClassBreaks = filterInfo.hasGreaterOrLessThan;
+        hasClassBreaks ||= filterInfo.hasGreaterOrLessThan;
 
         // Compile the fields
-        const propertyNames = Array.isArray(filterInfo.propertyName) ? filterInfo.propertyName : [filterInfo.propertyName];
+        const propertyNames = toArray(filterInfo.propertyName);
         propertyNames.forEach((name) => {
           if (!fields.includes(name)) fields.push(name);
         });
@@ -95,86 +96,134 @@ export abstract class WfsRenderer {
         hasDefault = true;
       }
 
-      // Check if it's a PointSymbolizer
-      let theSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      // Parse every symbolizer in the rule. Mixed-geometry SLDs commonly contain more than
+      // one symbolizer, and each one must be retained under its own Geoview geometry key.
       let pointSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      pointSymbolizer = this.#buildLayerStyleInfoPointSymbolizer(userRule['se:PointSymbolizer']);
+
       let lineSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
+      lineSymbolizer = this.#buildLayerStyleInfoLineSymbolizer(userRule['se:LineSymbolizer']);
+
       let polygonSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
-      if (userRule['se:PointSymbolizer']) {
-        // Process point symbolizers
-        pointSymbolizer = this.#buildLayerStyleInfoPointSymbolizer(userRule['se:PointSymbolizer']);
-        theSymbolizer = pointSymbolizer;
-      }
+      polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
 
-      if (userRule['se:LineSymbolizer']) {
-        // Line geometry type
-        geomType = 'LineString';
-
-        // Process line symbolizers
-        lineSymbolizer = this.#buildLayerStyleInfoLineSymbolizer(userRule['se:LineSymbolizer']);
-        theSymbolizer = lineSymbolizer;
-      }
-
-      if (userRule['se:PolygonSymbolizer']) {
-        // Polygon geometry type
-        geomType = 'Polygon';
-
-        // Process polygon symbolizers
-        polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
-        theSymbolizer = polygonSymbolizer;
-      }
-
-      // If both a polygon and a line symbolizer for the same rule, combine
       if (polygonSymbolizer && lineSymbolizer) {
-        // Combine
+        // A polygon rule can carry both a fill and an outline. Preserve the line's stroke
+        // on the polygon while still retaining the line entry for mixed geometries.
         const polygonSymbolSettings = polygonSymbolizer.settings as TypePolygonVectorConfig;
         const lineSymbolSettings = lineSymbolizer.settings as TypeLineStringVectorConfig;
         polygonSymbolSettings.color = lineSymbolSettings.stroke.color;
         polygonSymbolSettings.stroke = lineSymbolSettings.stroke;
-        theSymbolizer = polygonSymbolizer;
       }
 
-      // If the symbolizer is defined
-      if (theSymbolizer) {
-        // Set the label and values now completing the 'TypeLayerStyleConfigInfo'
-        theSymbolizer.label = label;
-        theSymbolizer.values = filterInfo?.values || [];
-        theSymbolizer.valuesConditions = filterInfo?.valuesConditions;
+      const symbolizersByGeometry: Array<[TypeStyleGeometry, Partial<TypeLayerStyleConfigInfo> | undefined]> = [
+        ['Point', pointSymbolizer],
+        ['LineString', lineSymbolizer],
+        ['Polygon', polygonSymbolizer],
+      ];
 
-        // Add it
-        infos.push(theSymbolizer as TypeLayerStyleConfigInfo);
-      }
+      symbolizersByGeometry.forEach(([geometry, symbolizer]) => {
+        if (!symbolizer?.settings) return;
+
+        const completedSymbolizer: TypeLayerStyleConfigInfo = {
+          ...symbolizer,
+          label,
+          values: filterInfo?.values || [],
+          valuesConditions: filterInfo?.valuesConditions,
+          visible: symbolizer.visible ?? true,
+          settings: symbolizer.settings,
+        };
+        const geometryInfos = infosByGeometry[geometry] ?? (infosByGeometry[geometry] = []);
+        geometryInfos.push(completedSymbolizer);
+      });
     });
 
-    // If no infos
-    if (infos.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
+    const geometryTypes = Object.keys(infosByGeometry) as TypeStyleGeometry[];
+    if (geometryTypes.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
 
     // Read the type from the symbolizers
     const type = this.#readTypeFromSymbolizers(rules, hasClassBreaks, fields);
 
     // The settings
-    const styleSettings = {
-      type,
-      fields,
-      hasDefault,
-      info: infos,
-    } as unknown as TypeLayerStyleSettings;
-
-    // Compile the style settings into the layer style for the geometry type
     const layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> = {};
-    layerStyle[geomType] = styleSettings;
+    geometryTypes.forEach((geometry) => {
+      const info = infosByGeometry[geometry];
+      if (!info) return;
+
+      layerStyle[geometry] = {
+        type,
+        fields,
+        hasDefault,
+        info,
+      };
+    });
 
     // Special case:
     // If processing a polygon geometry type and could only find a 'LineString', make it a 'Polygon' instead with transparent fill
     if ((geomTypeMetadata === 'Polygon' || geomTypeMetadata === 'MultiPolygon') && layerStyle['LineString'] && !layerStyle['Polygon']) {
       // Replace the LineString for a Polygon/MultiPolygon
-      layerStyle[geomTypeMetadata] = WfsRenderer.#copyLineStyleForPolygon(styleSettings);
+      layerStyle[geomTypeMetadata] = WfsRenderer.#copyLineStyleForPolygon(layerStyle['LineString']);
       delete layerStyle.LineString;
     }
 
     // Return the information
     return layerStyle as Record<TypeStyleGeometry, TypeLayerStyleSettings>;
   }
+
+  /**
+   * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
+   *
+   * This function handles:
+   *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
+   *  - Boolean operators (AND, OR, NOT)
+   *  - "Always false" queries such as `1=0` or `false`
+   * If the filter string is an "always false" expression, it generates a minimal
+   * OGC filter using the provided `fieldNameForNegativeQueries` to ensure a valid
+   * WFS request that returns no features.
+   * For normal filters, it:
+   *  1. Parses the SQL string into an AST.
+   *  2. Converts the AST into an OpenLayers filter object.
+   *  3. Serializes the filter object into XML suitable for WFS requests.
+   * Only the inner children of the `<Filter>` element are returned; you can wrap them
+   * in `<ogc:Filter>` as needed for a full WFS request.
+   *
+   * @param filterStr - The SQL-like filter expression to convert
+   * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
+   * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
+   * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
+   *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
+   */
+  static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
+    // Trim the filter
+    const filterStrTrimmed = filterStr.trim();
+
+    // Parse the SQL-like filter expression
+    const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
+
+    // Convert into filter object
+    const olFilter = this.#astToOlFilter(ast, fieldNameForNegativeQueries);
+
+    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 1.1.0
+    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '1.1.0';
+
+    // Create the filter in XML format
+    const filterNode = writeFilter(olFilter, sanitizedVersion);
+
+    // Only the children, we'll add the <Filter> node later
+    const childrenXml = Array.from(filterNode.childNodes)
+      .map((child) => new XMLSerializer().serializeToString(child))
+      .join('');
+
+    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
+    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
+
+    // Return it
+    return childrenXmlDecoded;
+  }
+
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Parses a user style rule filter and extracts normalized filter information.
@@ -186,7 +235,6 @@ export abstract class WfsRenderer {
    * - `PropertyIsGreaterThanOrEqualTo`
    * - `PropertyIsLessThan`
    * - `PropertyIsLessThanOrEqualTo`
-   * It also supports filters wrapped inside an `ogc:And` block.
    * Unsupported cases:
    * - Function-based filters (e.g., `ogc:Function` inside `PropertyIsEqualTo`)
    * - Complex logical filters that cannot be reduced to numeric comparisons
@@ -198,7 +246,8 @@ export abstract class WfsRenderer {
    */
   static #readFilterFromRule(filter: TypeUserStyleRuleFilter): FilterInfo {
     // Try to parse function-based filters first
-    if (filter['ogc:PropertyIsEqualTo']?.['ogc:Function']) {
+    const equalityFilter = filter['ogc:PropertyIsEqualTo'];
+    if (!Array.isArray(equalityFilter) && equalityFilter?.['ogc:Function']) {
       const funcInfo = this.#tryParseConcatFunction(filter);
       if (funcInfo) return funcInfo;
 
@@ -211,6 +260,19 @@ export abstract class WfsRenderer {
     let filterOption = this.#readFilterInfoNumberOptionFromFilter(filter);
     if (filterOption) {
       return filterOption;
+    }
+
+    // Treat same-field equality predicates inside OR as alternative values for one field.
+    if (filter?.['ogc:Or']) {
+      filterOption = this.#readFilterInfoNumberOptionFromFilter(filter['ogc:Or']);
+      if (filterOption) {
+        const propertyNames = [...new Set(toArray(filterOption.propertyName))];
+        if (propertyNames.length === 1) {
+          return { ...filterOption, propertyName: propertyNames[0] };
+        }
+
+        throw new NotSupportedError('OR filters are only supported when all equality predicates use the same property.');
+      }
     }
 
     // If using 'AND'
@@ -233,6 +295,8 @@ export abstract class WfsRenderer {
    */
   static #tryParseConcatFunction(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
     const eqTo = filter['ogc:PropertyIsEqualTo'];
+    if (Array.isArray(eqTo)) return undefined;
+
     const func = eqTo?.['ogc:Function'];
     if (!eqTo || !func) return undefined;
 
@@ -250,10 +314,10 @@ export abstract class WfsRenderer {
     // Parse the XML structure - typically alternates PropertyName/Literal
     Object.keys(func).forEach((key) => {
       if (key === 'ogc:PropertyName') {
-        const props = Array.isArray(func[key]) ? func[key] : [func[key]];
+        const props = toArray(func[key]);
         fields.push(...props);
       } else if (key === 'ogc:Literal') {
-        const lits = Array.isArray(func[key]) ? func[key] : [func[key]];
+        const lits = toArray(func[key]);
         separators.push(...lits);
       }
     });
@@ -315,55 +379,64 @@ export abstract class WfsRenderer {
    *   contain recognizable numeric comparison operators
    */
   static #readFilterInfoNumberOptionFromFilter(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
-    // Read equal to first
+    // Read equality filters first; XML parsers return repeated PropertyIsEqualTo nodes as an array.
+    const equalityOptions = toArray(filter?.['ogc:PropertyIsEqualTo'] ?? []);
+    if (equalityOptions.length > 0) {
+      const propertyNames = equalityOptions.map((option) => option['ogc:PropertyName']);
+      const values = equalityOptions.map((option) => option['ogc:Literal']);
+      return {
+        hasGreaterOrLessThan: false,
+        propertyName: propertyNames.length === 1 ? propertyNames[0] : propertyNames,
+        values,
+        valuesConditions: undefined,
+      };
+    }
+
+    // Read a single numeric comparison for class-break styles.
     let hasGreaterOrLessThan = false;
-    let filterOption = filter?.['ogc:PropertyIsEqualTo'];
-    let propertyName = filterOption?.['ogc:PropertyName'];
-    let values: (number | string)[] = [filterOption?.['ogc:Literal']!];
+    let filterOption: TypeUserStyleRuleFilter['ogc:PropertyIsGreaterThan'] | undefined;
+    let propertyName: string | undefined;
+    let values: (number | string)[] = [];
     let minValueCondition: TypeLayerStyleValueCondition = '>=';
     let maxValueCondition: TypeLayerStyleValueCondition = '<=';
     let valuesConditions: TypeLayerStyleValueCondition[] | undefined = undefined;
 
-    if (!filterOption) {
-      let min = -99999999999;
-      let max = 99999999999;
+    let min = -99999999999;
+    let max = 99999999999;
 
-      filterOption = filter?.['ogc:PropertyIsGreaterThan'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        minValueCondition = '>';
-        propertyName = filterOption['ogc:PropertyName'];
-        min = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsGreaterThan'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      minValueCondition = '>';
+      propertyName = filterOption['ogc:PropertyName'];
+      min = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsGreaterThanOrEqualTo'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        minValueCondition = '>=';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        min = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsGreaterThanOrEqualTo'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      minValueCondition = '>=';
+      propertyName = filterOption['ogc:PropertyName'];
+      min = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsLessThan'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        maxValueCondition = '<';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        max = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsLessThan'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      maxValueCondition = '<';
+      propertyName = filterOption['ogc:PropertyName'];
+      max = Number(filterOption['ogc:Literal']);
+    }
 
-      filterOption = filter?.['ogc:PropertyIsLessThanOrEqualTo'];
-      if (filterOption) {
-        // We are doing class breaks
-        hasGreaterOrLessThan = true;
-        maxValueCondition = '<=';
-        propertyName = filterOption?.['ogc:PropertyName'];
-        max = Number(filterOption?.['ogc:Literal']);
-      }
+    filterOption = filter?.['ogc:PropertyIsLessThanOrEqualTo'];
+    if (filterOption) {
+      hasGreaterOrLessThan = true;
+      maxValueCondition = '<=';
+      propertyName = filterOption['ogc:PropertyName'];
+      max = Number(filterOption['ogc:Literal']);
+    }
 
+    if (hasGreaterOrLessThan) {
       values = [min, max];
       valuesConditions = [minValueCondition, maxValueCondition];
     }
@@ -439,17 +512,27 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the merged SVG symbol, or undefined if no valid graphics were found
    */
   static #buildLayerStyleInfoPointSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
+
+    const symbolizers = toArray(symbolizer);
 
     // For each symbolizer
     let globalMimeType: string | undefined;
     let globalSize = 1;
     let globalMaxViewBox = 0;
     let globalFromSVGsOrMarkers: 'svg' | 'marker' | undefined;
+    let directIcon: DirectIconInfo | undefined;
     const allGraphicsInfo: GraphicInfo[] = [];
     symbolizers.forEach((symbol) => {
+      // Read the graphic information
+      const graphic = symbol['se:Graphic'];
+
+      // If the graphic object is empty
+      if (isObjectEmpty(graphic)) return; // Skip if the graphic object is empty
+
       // Parse the graphics
       const {
         graphicsInfo,
@@ -458,7 +541,11 @@ export abstract class WfsRenderer {
         mimeType: symMime,
         fromSVGsOrMarkers: fromGraphic,
         rotation: graphicRotation,
-      } = this.#parseGraphic(symbol['se:Graphic']);
+        displacement,
+        directIcon: parsedDirectIcon,
+      } = this.#parseGraphic(graphic);
+
+      if (parsedDirectIcon) directIcon ??= parsedDirectIcon;
 
       // If no graphics info gathered
       if (graphicsInfo.length === 0) return; // Skip
@@ -477,10 +564,29 @@ export abstract class WfsRenderer {
       globalFromSVGsOrMarkers = globalFromSVGsOrMarkers !== 'svg' ? fromGraphic : 'svg';
       globalSize = Math.max(globalSize, symSize);
       globalMaxViewBox = Math.max(globalMaxViewBox, maxViewBox);
+
+      // Tag each graphic with its symbolizer's intended size for proportional scaling
+      graphicsInfo.forEach((gInfo) => {
+        // eslint-disable-next-line no-param-reassign
+        gInfo.sizeGraphic = symSize;
+        // eslint-disable-next-line no-param-reassign
+        gInfo.displacement = displacement ?? [0, 0];
+      });
       allGraphicsInfo.push(...graphicsInfo);
     });
 
     // If no graphics info gathered at all
+    if (allGraphicsInfo.length === 0 && directIcon) {
+      return {
+        visible: true,
+        settings: {
+          mimeType: directIcon.mimeType,
+          src: directIcon.src,
+          type: 'iconSymbol',
+        },
+      } as Partial<TypeLayerStyleConfigInfo>;
+    }
+
     if (allGraphicsInfo.length === 0) return undefined;
 
     // Merge the SVGs togeter
@@ -517,17 +623,15 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the stroke settings, or undefined if no valid stroke
    */
   static #buildLayerStyleInfoLineSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
 
-    // Accumulated stroke settings (first non-undefined wins per field)
-    let strokeColor: string | undefined;
-    let strokeWidth = 1;
-    let strokeOpacity = 1;
-    let strokeDashArray: number[] | undefined;
-    let strokeLineJoin: string | undefined;
-    let strokeLineCap: string | undefined;
+    const symbolizers = toArray(symbolizer);
+
+    // Keep each LineSymbolizer stroke so multiple strokes can be layered by the renderer.
+    const lineStrokes: TypeStrokeSymbolConfig[] = [];
 
     // Collect graphics with their placements
     const graphicStrokes: GraphicStrokeWithPlacement[] = [];
@@ -537,6 +641,7 @@ export abstract class WfsRenderer {
       if (stroke) {
         // If GraphicStroke present, construct graphicStroke settings
         const graphicStrokeEl = stroke['se:GraphicStroke'];
+        let strokeNode = stroke;
 
         if (graphicStrokeEl) {
           const graphicNode =
@@ -563,55 +668,52 @@ export abstract class WfsRenderer {
             }
           }
 
-          // GraphicStroke may have stroke params
-          const innerStroke = graphicNode?.['se:Stroke'] ?? stroke;
-          const params = this.#extractStrokeParams(innerStroke);
-          strokeColor ??= params.color;
-          strokeWidth = params.width ?? strokeWidth;
-          strokeOpacity = params.opacity ?? strokeOpacity;
-          strokeDashArray ??= params.dasharray;
-          strokeLineJoin ??= params.lineJoin;
-          strokeLineCap ??= params.lineCap;
-        } else {
-          // Normal stroke: extract and merge
-          const params = this.#extractStrokeParams(stroke);
-          strokeColor ??= params.color;
-          strokeWidth = params.width ?? strokeWidth;
-          strokeOpacity = params.opacity ?? strokeOpacity;
-          strokeDashArray ??= params.dasharray;
-          strokeLineJoin ??= params.lineJoin;
-          strokeLineCap ??= params.lineCap;
+          // GraphicStroke may have stroke params of its own.
+          strokeNode = graphicNode?.['se:Stroke'] ?? stroke;
+        }
+
+        const params = this.#extractStrokeParams(strokeNode);
+        if (
+          params.color !== undefined ||
+          params.width !== undefined ||
+          params.opacity !== undefined ||
+          params.dasharray !== undefined ||
+          params.lineJoin !== undefined ||
+          params.lineCap !== undefined
+        ) {
+          lineStrokes.push({
+            color: params.color ?? '#000000',
+            lineStyle: params.dasharray?.length ? 'dash' : 'solid',
+            width: params.width ?? 1,
+            lineDash: params.dasharray,
+            lineJoin: params.lineJoin as TypeStrokeSymbolConfig['lineJoin'],
+            lineCap: params.lineCap as TypeStrokeSymbolConfig['lineCap'],
+          });
         }
       }
     }
 
     // If nothing meaningful found, return undefined
-    if (!strokeColor && strokeWidth === 1 && strokeOpacity === 1 && !strokeDashArray && graphicStrokes.length === 0) {
+    if (lineStrokes.length === 0 && graphicStrokes.length === 0) {
       return undefined;
     }
 
-    // Build the style config
-    const strokeSettings = {
-      color: strokeColor ?? '#000000',
-      lineStyle: strokeDashArray && strokeDashArray.length > 0 ? 'dash' : 'solid',
-      width: strokeWidth,
-      opacity: strokeOpacity,
-      dasharray: strokeDashArray,
-      lineJoin: strokeLineJoin,
-      lineCap: strokeLineCap,
-    } as TypeStrokeSymbolConfig;
+    // Keep a default base stroke for graphic-only line symbolizers.
+    const [strokeSettings = { color: '#000000', width: 1, lineStyle: 'solid' }, ...additionalStrokes] = lineStrokes;
 
     const settings: TypeLineStringVectorConfig = {
       type: 'lineString',
       stroke: strokeSettings,
     };
 
-    // GV Leaving the code commented here, as it can be useful for debug purposes until we
-    // GV decide we don't need it anymore (there's a TODO in map-schema-types about it too)
-    // // Add graphics with their placements if any
-    // if (graphicStrokes.length > 0) {
-    //   settings.graphicStrokes = graphicStrokes;
-    // }
+    if (additionalStrokes.length > 0) {
+      settings.additionalStrokes = additionalStrokes;
+    }
+
+    // Add graphics with their placements if any
+    if (graphicStrokes.length > 0) {
+      settings.graphicStrokes = graphicStrokes;
+    }
 
     return {
       visible: true,
@@ -630,9 +732,12 @@ export abstract class WfsRenderer {
    * @returns A complete layer style configuration object containing the fill and stroke settings, or undefined if no valid style found
    */
   static #buildLayerStyleInfoPolygonSymbolizer(
-    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
+    symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[] | undefined
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    // If no symbolizer is provided, return undefined
+    if (!symbolizer) return undefined;
+
+    const symbolizers = toArray(symbolizer);
 
     // Accumulated fill settings
     let fillColor: string | undefined;
@@ -790,6 +895,33 @@ export abstract class WfsRenderer {
   }
 
   /**
+   * Extracts name-value pairs from SvgParameter/CssParameter nodes inside a style node.
+   *
+   * This is the shared extraction logic used by both stroke and fill parameter readers.
+   *
+   * @param styleNode - The `<se:Stroke>` or `<se:Fill>` XML node
+   * @returns A map of lowercase parameter names to their trimmed string values
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static #extractSvgParamsMap(styleNode: any): Record<string, string> {
+    const out: Record<string, string> = {};
+    if (!styleNode) return out;
+
+    const svgParams = styleNode['se:SvgParameter'] ?? styleNode['se:CssParameter'] ?? [];
+    const params = toArray(svgParams);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params.forEach((p: any) => {
+      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
+      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
+      if (!name || val === undefined) return;
+      out[String(name).toLowerCase()] = String(val).trim();
+    });
+
+    return out;
+  }
+
+  /**
    * Extracts stroke parameters from a `<se:Stroke>` node (SvgParameter/CssParameter)
    * and returns a normalized object.
    *
@@ -816,35 +948,37 @@ export abstract class WfsRenderer {
       lineCap?: string;
     } = {};
 
-    if (!strokeNode) return out;
+    const raw = this.#extractSvgParamsMap(strokeNode);
 
-    const svgParams = strokeNode['se:SvgParameter'] ?? strokeNode['se:CssParameter'] ?? [];
-    const params = Array.isArray(svgParams) ? svgParams : [svgParams];
+    const colorVal = raw['stroke'] ?? raw['color'];
+    if (colorVal) out.color = colorVal;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params.forEach((p: any) => {
-      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
-      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
-      if (!name || val === undefined) return;
-      const n = String(name).toLowerCase();
-      const v = String(val).trim();
+    const widthVal = raw['stroke-width'] ?? raw['width'];
+    if (widthVal !== undefined) {
+      const num = Number(widthVal);
+      if (!Number.isNaN(num)) out.width = num;
+    }
 
-      if (n === 'stroke' || n === 'color') out.color ??= v;
-      else if (n === 'stroke-width' || n === 'width') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.width ??= num;
-      } else if (n === 'stroke-opacity' || n === 'opacity') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.opacity ??= Math.max(0, Math.min(1, num));
-      } else if (n === 'stroke-dasharray' || n === 'dasharray') {
-        const arr = v
-          .split(/[\s,]+/)
-          .map((s) => Number(s))
-          .filter((n1) => !Number.isNaN(n1));
-        if (arr.length) out.dasharray ??= arr;
-      } else if (n === 'stroke-linejoin' || n === 'linejoin') out.lineJoin ??= v.toLowerCase();
-      else if (n === 'stroke-linecap' || n === 'linecap') out.lineCap ??= v.toLowerCase();
-    });
+    const opacityVal = raw['stroke-opacity'] ?? raw['opacity'];
+    if (opacityVal !== undefined) {
+      const num = Number(opacityVal);
+      if (!Number.isNaN(num)) out.opacity = Math.max(0, Math.min(1, num));
+    }
+
+    const dasharrayVal = raw['stroke-dasharray'] ?? raw['dasharray'];
+    if (dasharrayVal) {
+      const arr = dasharrayVal
+        .split(/[\s,]+/)
+        .map((s) => Number(s))
+        .filter((n1) => !Number.isNaN(n1));
+      if (arr.length) out.dasharray = arr;
+    }
+
+    const lineJoinVal = raw['stroke-linejoin'] ?? raw['linejoin'];
+    if (lineJoinVal) out.lineJoin = lineJoinVal;
+
+    const lineCapVal = raw['stroke-linecap'] ?? raw['linecap'];
+    if (lineCapVal) out.lineCap = lineCapVal;
 
     return out;
   }
@@ -867,26 +1001,19 @@ export abstract class WfsRenderer {
       pattern?: string;
     } = {};
 
-    if (!fillNode) return out;
+    const raw = this.#extractSvgParamsMap(fillNode);
 
-    const svgParams = fillNode['se:SvgParameter'] ?? fillNode['se:CssParameter'] ?? [];
-    const params = Array.isArray(svgParams) ? svgParams : [svgParams];
+    const colorVal = raw['fill'] ?? raw['color'];
+    if (colorVal) out.color = colorVal;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params.forEach((p: any) => {
-      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
-      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
-      if (!name || val === undefined) return;
+    const opacityVal = raw['fill-opacity'] ?? raw['opacity'];
+    if (opacityVal !== undefined) {
+      const num = Number(opacityVal);
+      if (!Number.isNaN(num)) out.opacity = Math.max(0, Math.min(1, num));
+    }
 
-      const n = String(name).toLowerCase();
-      const v = String(val).trim();
-
-      if (n === 'fill' || n === 'color') out.color ??= v;
-      else if (n === 'fill-opacity' || n === 'opacity') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.opacity ??= Math.max(0, Math.min(1, num));
-      } else if (n === 'fill-pattern' || n === 'pattern') out.pattern ??= v.toLowerCase();
-    });
+    const patternVal = raw['fill-pattern'] ?? raw['pattern'];
+    if (patternVal) out.pattern = patternVal;
 
     return out;
   }
@@ -923,7 +1050,7 @@ export abstract class WfsRenderer {
     const vendorOptions = sym?.['se:VendorOption'];
     if (!vendorOptions) return placements;
 
-    const items = Array.isArray(vendorOptions) ? vendorOptions : [vendorOptions];
+    const items = toArray(vendorOptions);
     for (const opt of items) {
       const name = opt?.['@attributes']?.name ?? opt?.name;
       if (String(name).toLowerCase() === 'placement') {
@@ -947,7 +1074,7 @@ export abstract class WfsRenderer {
     const vendorOptions = sym?.['se:VendorOption'];
     if (!vendorOptions) return undefined;
 
-    const items = Array.isArray(vendorOptions) ? vendorOptions : [vendorOptions];
+    const items = toArray(vendorOptions);
     for (const opt of items) {
       const name = opt?.['@attributes']?.name ?? opt?.name;
       if (String(name).toLowerCase() === 'fill-pattern') {
@@ -981,13 +1108,20 @@ export abstract class WfsRenderer {
     // Extract rotation if present
     const rotationNode = graphic?.['se:Rotation'];
     const rotation = rotationNode ? Number(rotationNode?.['ogc:Literal']) : undefined;
+    const displacementX = Number(graphic?.['se:Displacement']?.['se:DisplacementX'] ?? 0);
+    const displacementY = Number(graphic?.['se:Displacement']?.['se:DisplacementY'] ?? 0);
+    const displacement: [number, number] = [
+      Number.isNaN(displacementX) ? 0 : displacementX,
+      Number.isNaN(displacementY) ? 0 : displacementY,
+    ];
 
     // Check if we have ExternalGraphics (SVGs)
-    const externalGraphics = graphic?.['se:ExternalGraphic'] ?? [];
+    const externalGraphics = toArray(graphic?.['se:ExternalGraphic'] ?? []);
     if (externalGraphics.length > 0) {
       // Redirect building the SVGs
       const result = this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
       result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      result.displacement = displacement;
       return result;
     }
 
@@ -997,6 +1131,7 @@ export abstract class WfsRenderer {
       // Redirect building the markers
       const result = this.#parseGraphicsMarkers(marker, sizeGraphic);
       result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      result.displacement = displacement;
       return result;
     }
 
@@ -1023,12 +1158,29 @@ export abstract class WfsRenderer {
   static #parseGraphicsGatherSVGs(graphics: TypeUserStyleExternalGraphic[], sizeGraphic: number): ExternalGraphicsInfo {
     let maxViewBox = 0;
     let mimeType: string | undefined;
+    let directIcon: DirectIconInfo | undefined;
     const graphicsInfo: GraphicInfo[] = [];
 
     graphics.forEach((graphic) => {
       mimeType ??= graphic['se:Format'];
       const imgSrc = graphic['se:OnlineResource']['@attributes']['xlink:href'];
-      const imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc);
+      const graphicMimeType = graphic['se:Format'] || 'image/svg+xml';
+      const isDataUri = /^data:/i.test(imgSrc);
+      const isDirectSource = /^(https?:\/\/|blob:|\/)/i.test(imgSrc) || !/svg/i.test(graphicMimeType);
+
+      if (isDirectSource && graphics.length === 1) {
+        directIcon = { src: imgSrc, mimeType: graphicMimeType };
+        return;
+      }
+
+      let imgSrcRaw: string;
+      if (isDataUri && /;base64,/i.test(imgSrc)) {
+        imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc.substring(imgSrc.indexOf(',') + 1));
+      } else if (isDataUri) {
+        imgSrcRaw = decodeURIComponent(imgSrc.substring(imgSrc.indexOf(',') + 1));
+      } else {
+        imgSrcRaw = GeoviewRenderer.base64ToSVGString(imgSrc);
+      }
 
       // If invalid SVG content (still has dynamic functions)
       if (imgSrcRaw.includes('param(')) return; // Skip
@@ -1058,11 +1210,11 @@ export abstract class WfsRenderer {
       // logger.logDebug('INNER SVG', innerSVG);
 
       // Add it
-      graphicsInfo.push({ innerSVG, vx, vy, vw, vh });
+      graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: false, displacement: [0, 0] });
     });
 
     // Return the information
-    return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'svg' };
+    return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'svg', directIcon };
   }
 
   /**
@@ -1123,7 +1275,8 @@ export abstract class WfsRenderer {
   static #parseGraphicsMarkers(marker: TypeUserStyleMark, sizeGraphic: number): ExternalGraphicsInfo {
     const graphicsInfo: GraphicInfo[] = [];
 
-    const wellKnownName = marker['se:WellKnownName'] ?? 'circle';
+    const wellKnownNameRaw = marker['se:WellKnownName'] ?? 'circle';
+    const wellKnownName = typeof wellKnownNameRaw === 'string' ? wellKnownNameRaw : (wellKnownNameRaw['#text'] ?? 'circle');
 
     // Stroke params (inside mark or symbolizer.stroke)
     const strokeObj = marker['se:Stroke'];
@@ -1132,71 +1285,84 @@ export abstract class WfsRenderer {
     // Fill params
     const fillParams = this.#readXMLParam(marker['se:Fill']?.['se:SvgParameter'] ?? marker['se:Fill']?.['se:CssParameter']);
 
-    const stroke = strokeParams['stroke'] ?? strokeParams['colour'] ?? strokeParams['color'] ?? '#000';
+    const fontResource = marker['se:OnlineResource']?.['@attributes']['xlink:href'];
+    const isFontMarker = fontResource?.toLowerCase().startsWith('ttf://') ?? false;
+    const stroke = strokeParams['stroke'] ?? strokeParams['colour'] ?? strokeParams['color'] ?? (isFontMarker ? 'none' : '#000');
     const strokeWidth = Number(strokeParams['stroke-width'] ?? strokeParams['width'] ?? 1);
     const strokeOpacity = strokeParams['stroke-opacity'] ? Number(strokeParams['stroke-opacity']) : undefined;
     const fill = fillParams['fill'] ?? fillParams['colour'] ?? fillParams['color'] ?? fillParams['se:fill'] ?? 'none';
+    const fillOpacity = fillParams['fill-opacity'] ? Number(fillParams['fill-opacity']) : undefined;
 
     // Build a simple SVG for common well-known names
     const cx = sizeGraphic / 2;
     const cy = sizeGraphic / 2;
-    const r = Math.max(1, sizeGraphic * 0.4);
+    // Per SLD spec, se:Size is the total graphic size including stroke.
+    // Radius = (size - strokeWidth) / 2 so the stroke fits within the viewBox.
+    const r = Math.max(1, (sizeGraphic - strokeWidth) / 2);
     let shape = '';
 
-    switch (wellKnownName.toLowerCase()) {
-      case 'square':
-      case 'rect':
-      case 'rectangle':
-        {
-          const pad = sizeGraphic * 0.15;
-          const side = sizeGraphic - pad * 2;
-          shape = `<rect x="${pad}" y="${pad}" width="${side}" height="${side}" rx="${Math.max(0, side * 0.08)}" ry="${Math.max(
-            0,
-            side * 0.08
-          )}" />`;
-        }
-        break;
-      case 'triangle':
-      case 'triangle-up':
-        {
-          const p1 = `${cx},${sizeGraphic * 0.15}`;
-          const p2 = `${sizeGraphic * 0.85},${sizeGraphic * 0.85}`;
-          const p3 = `${sizeGraphic * 0.15},${sizeGraphic * 0.85}`;
-          shape = `<polygon points="${p1} ${p2} ${p3}" />`;
-        }
-        break;
-      case 'star':
-        {
-          // simple 5-point star approximation
-          const R = r;
-          const r2 = R * 0.5;
-          const pts = Array.from({ length: 5 }).map((_, i) => {
-            const a = ((-90 + i * 72) * Math.PI) / 180;
-            const x = cx + R * Math.cos(a);
-            const y = cy + R * Math.sin(a);
-            const a2 = ((-90 + i * 72 + 36) * Math.PI) / 180;
-            const x2 = cx + r2 * Math.cos(a2);
-            const y2 = cy + r2 * Math.sin(a2);
-            return `${x},${y} ${x2},${y2}`;
-          });
-          // pts is sequence; join into single polygon by flattening coords
-          const flat = pts.join(' ');
-          shape = `<polygon points="${flat}" />`;
-        }
-        break;
-      case 'circle':
-      default:
-        {
-          const rFixed = Math.max(r, 2);
-          shape = `<circle cx="${cx}" cy="${cy}" r="${rFixed}" vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision" />`;
-        }
-        break;
+    const markIndex = Number(marker['se:MarkIndex']);
+    if (isFontMarker && fontResource && Number.isInteger(markIndex) && markIndex >= 0 && markIndex <= 0x10ffff) {
+      const fontFamily = fontResource.substring('ttf://'.length);
+      const glyph = WfsRenderer.#escapeXML(String.fromCodePoint(markIndex));
+      shape = `<text x="${cx}" y="${cy}" font-family="${WfsRenderer.#escapeXML(fontFamily)}" font-size="${sizeGraphic}" text-anchor="middle" dominant-baseline="central">${glyph}</text>`;
+    } else {
+      switch (wellKnownName.toLowerCase()) {
+        case 'square':
+        case 'rect':
+        case 'rectangle':
+          {
+            const pad = sizeGraphic * 0.15;
+            const side = sizeGraphic - pad * 2;
+            shape = `<rect x="${pad}" y="${pad}" width="${side}" height="${side}" rx="${Math.max(0, side * 0.08)}" ry="${Math.max(
+              0,
+              side * 0.08
+            )}" />`;
+          }
+          break;
+        case 'triangle':
+        case 'triangle-up':
+          {
+            const p1 = `${cx},${sizeGraphic * 0.15}`;
+            const p2 = `${sizeGraphic * 0.85},${sizeGraphic * 0.85}`;
+            const p3 = `${sizeGraphic * 0.15},${sizeGraphic * 0.85}`;
+            shape = `<polygon points="${p1} ${p2} ${p3}" />`;
+          }
+          break;
+        case 'star':
+          {
+            // simple 5-point star approximation
+            const R = r;
+            const r2 = R * 0.5;
+            const pts = Array.from({ length: 5 }).map((_, i) => {
+              const a = ((-90 + i * 72) * Math.PI) / 180;
+              const x = cx + R * Math.cos(a);
+              const y = cy + R * Math.sin(a);
+              const a2 = ((-90 + i * 72 + 36) * Math.PI) / 180;
+              const x2 = cx + r2 * Math.cos(a2);
+              const y2 = cy + r2 * Math.sin(a2);
+              return `${x},${y} ${x2},${y2}`;
+            });
+            // pts is sequence; join into single polygon by flattening coords
+            const flat = pts.join(' ');
+            shape = `<polygon points="${flat}" />`;
+          }
+          break;
+        case 'circle':
+        default:
+          {
+            const rFixed = Math.max(r, 2);
+            shape = `<circle cx="${cx}" cy="${cy}" r="${rFixed}" vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision" />`;
+          }
+          break;
+      }
     }
 
     // Build attributes string
     const attrs: string[] = [];
     if (fill && fill !== 'none') attrs.push(`fill="${fill}"`);
     else attrs.push(`fill="none"`);
+    if (fillOpacity !== undefined && !Number.isNaN(fillOpacity)) attrs.push(`fill-opacity="${fillOpacity}"`);
     if (stroke) attrs.push(`stroke="${stroke}"`);
     if (!Number.isNaN(strokeWidth) && strokeWidth > 0) attrs.push(`stroke-width="${strokeWidth}"`);
     if (strokeOpacity !== undefined && !Number.isNaN(strokeOpacity)) attrs.push(`stroke-opacity="${strokeOpacity}"`);
@@ -1211,7 +1377,7 @@ export abstract class WfsRenderer {
     const vh = sizeGraphic;
     const mimeType = 'image/svg+xml';
     const maxViewBox = Math.max(0, vw, vh);
-    graphicsInfo.push({ innerSVG, vx, vy, vw, vh });
+    graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: true, displacement: [0, 0] });
 
     // Return the information
     return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'marker' };
@@ -1233,12 +1399,7 @@ export abstract class WfsRenderer {
     const output: Record<string, string> = {};
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let items: any[] = [];
-    if (Array.isArray(obj)) {
-      items = obj;
-    } else if (obj) {
-      items = [obj];
-    }
+    const items: any[] = obj ? toArray(obj) : [];
 
     for (const node of items) {
       if (typeof node === 'string') {
@@ -1254,6 +1415,21 @@ export abstract class WfsRenderer {
     }
 
     return output;
+  }
+
+  /**
+   * Escapes text for inclusion in generated SVG markup.
+   *
+   * @param value - The text to escape
+   * @returns The XML-safe text
+   */
+  static #escapeXML(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
   }
 
   /**
@@ -1277,29 +1453,52 @@ export abstract class WfsRenderer {
 
     // If from multiple svgs (compilation) the viewBox needs adjusting again and svgs recentered
     let svgs: string[] = [];
-    if (graphicsInfo.length > 1) {
-      const scale = size / maxViewBox;
-      const half = size / 2;
+    if (graphicsInfo.length > 1 || graphicsInfo[0].displacement.some((offset) => offset !== 0)) {
+      // Check if the first (background) graphic is a marker shape (circle, square, etc.)
+      const backgroundIsMarker = graphicsInfo[0].isMarker;
+      // Uniform scale for SVG-only compositions (content bounds naturally encode size differences)
+      const uniformScale = size / maxViewBox;
 
-      svgs = graphicsInfo.map(({ innerSVG, vx, vy, vw, vh }) => {
+      const scaledGraphics = graphicsInfo.map((graphicInfo) => {
+        const { vw, vh, sizeGraphic: graphicSize } = graphicInfo;
+        const graphicScale = backgroundIsMarker ? graphicSize / Math.max(vw, vh, 1) : uniformScale;
+        return { ...graphicInfo, graphicScale };
+      });
+      const halfWidth = Math.max(
+        size / 2,
+        ...scaledGraphics.map(({ vw, graphicScale, displacement }) => Math.abs(displacement[0]) + (vw * graphicScale) / 2)
+      );
+      const halfHeight = Math.max(
+        size / 2,
+        ...scaledGraphics.map(({ vh, graphicScale, displacement }) => Math.abs(displacement[1]) + (vh * graphicScale) / 2)
+      );
+      const svgWidth = halfWidth * 2;
+      const svgHeight = halfHeight * 2;
+      outerViewBox = `viewBox="${-halfWidth} ${-halfHeight} ${svgWidth} ${svgHeight}"`;
+
+      svgs = scaledGraphics.map(({ innerSVG, vx, vy, vw, vh, graphicScale, displacement }) => {
         // Center of original content
         const cx = vx + vw / 2;
         const cy = vy + vh / 2;
-        // Translate so center aligns with output center, then scale
-        const tx = half - cx * scale;
-        const ty = half - cy * scale;
-        return `<g transform="translate(${tx},${ty}) scale(${scale})">${innerSVG}</g>`;
+        // Translate the graphic center to the feature coordinate plus its SLD displacement
+        const tx = displacement[0] - cx * graphicScale;
+        const ty = displacement[1] - cy * graphicScale;
+        return `<g transform="translate(${tx},${ty}) scale(${graphicScale})">${innerSVG}</g>`;
       });
-    } else {
-      // Only 1 graphic, if svg created recenter it(?)
-      if (fromSVGsOrMarkers === 'svg') {
-        outerViewBox = `viewBox="${0} ${-size} ${size} ${size}"`;
-      }
-      svgs.push(graphicsInfo[0].innerSVG);
+
+      const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
+      return this.#prettyPrintSVG(svgContent, 2, true);
     }
 
+    // Only 1 graphic, if svg created recenter it(?)
+    if (fromSVGsOrMarkers === 'svg') {
+      outerViewBox = `viewBox="${0} ${-size} ${size} ${size}"`;
+    }
+    svgs.push(graphicsInfo[0].innerSVG);
+
     // Combine into one big svg
-    const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${maxViewBox}" height="${maxViewBox}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
+    const svgSize = Math.max(size, maxViewBox);
+    const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
 
     // Pretty print it and return
     return this.#prettyPrintSVG(svgContent, 2, true);
@@ -1311,6 +1510,8 @@ export abstract class WfsRenderer {
    * This method parses the provided SVG markup into a DOM tree,
    * then recursively serializes each node with consistent indentation,
    * returning a formatted string suitable for display or inspection.
+   * Currently only called with `minify = true`, but the pretty-print branch is
+   * intentionally kept for upcoming debugging and style inspection tooling.
    *
    * @param svg - The raw SVG string
    * @param indent - Optional the number of spaces per indentation level (used only when `minify` is false)
@@ -1378,59 +1579,6 @@ export abstract class WfsRenderer {
     }
 
     return serialize(xml.documentElement);
-  }
-
-  // #region FILTER TO OGC_FILTER
-
-  /**
-   * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
-   *
-   * This function handles:
-   *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
-   *  - Boolean operators (AND, OR, NOT)
-   *  - "Always false" queries such as `1=0` or `false`
-   * If the filter string is an "always false" expression, it generates a minimal
-   * OGC filter using the provided `fieldNameForNegativeQueries` to ensure a valid
-   * WFS request that returns no features.
-   * For normal filters, it:
-   *  1. Parses the SQL string into an AST.
-   *  2. Converts the AST into an OpenLayers filter object.
-   *  3. Serializes the filter object into XML suitable for WFS requests.
-   * Only the inner children of the `<Filter>` element are returned; you can wrap them
-   * in `<ogc:Filter>` as needed for a full WFS request.
-   *
-   * @param filterStr - The SQL-like filter expression to convert
-   * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
-   * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
-   * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
-   *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
-   */
-  static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
-    // Trim the filter
-    const filterStrTrimmed = filterStr.trim();
-
-    // Parse the SQL-like filter expression
-    const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
-
-    // Convert into filter object
-    const olFilter = this.#astToOlFilter(ast, fieldNameForNegativeQueries);
-
-    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 1.1.0
-    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '1.1.0';
-
-    // Create the filter in XML format
-    const filterNode = writeFilter(olFilter, sanitizedVersion);
-
-    // Only the children, we'll add the <Filter> node later
-    const childrenXml = Array.from(filterNode.childNodes)
-      .map((child) => new XMLSerializer().serializeToString(child))
-      .join('');
-
-    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
-    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
-
-    // Return it
-    return childrenXmlDecoded;
   }
 
   /**
@@ -1788,7 +1936,7 @@ export abstract class WfsRenderer {
       `.trim();
   }
 
-  // #endregion
+  // #endregion STATIC PRIVATE METHODS
 }
 
 type ExternalGraphicsInfo = {
@@ -1798,9 +1946,27 @@ type ExternalGraphicsInfo = {
   mimeType?: string;
   fromSVGsOrMarkers: 'svg' | 'marker';
   rotation?: number;
+  displacement?: [number, number];
+  directIcon?: DirectIconInfo;
 };
 
-type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number };
+type DirectIconInfo = {
+  src: string;
+  mimeType: string;
+  width?: number;
+  height?: number;
+};
+
+type GraphicInfo = {
+  innerSVG: string;
+  vx: number;
+  vy: number;
+  vw: number;
+  vh: number;
+  sizeGraphic: number;
+  isMarker: boolean;
+  displacement: [number, number];
+};
 
 type FilterInfo = {
   hasGreaterOrLessThan: boolean;

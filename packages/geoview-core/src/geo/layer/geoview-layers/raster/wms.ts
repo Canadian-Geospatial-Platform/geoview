@@ -23,10 +23,13 @@ import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import {
   formatError,
   InvalidDateError,
   InvalidTimeDimensionError,
+  NotSupportedError,
   PromiseRejectErrorWrapper,
   ResponseEmptyError,
 } from '@/core/exceptions/core-exceptions';
@@ -39,17 +42,17 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { generateId, normalizeDatacubeAccessPath, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
+import { ServicesManagement } from '@/geo/utils/services-management';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
-  fetchVectorsOnWFS?: boolean;
+  fetchVectorsExternally?: boolean;
   useFullWmsSublayers?: boolean;
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
@@ -188,8 +191,7 @@ export class WMS extends AbstractGeoViewRaster {
     // If a group
     if (layerFound.Layer) {
       // Make sure it's an array
-      let layerMetadataSubTree: TypeMetadataWMSCapabilityLayer[] = layerFound.Layer;
-      if (!Array.isArray(layerFound.Layer)) layerMetadataSubTree = [layerFound.Layer];
+      const layerMetadataSubTree = toArray(layerFound.Layer);
 
       // Map the sub layers information
       const layerConfigMapped = layerMetadataSubTree.map((config) => {
@@ -231,8 +233,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-   * @throws {InvalidDateError} When input has invalid dates
    */
   protected override async onProcessLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -367,7 +367,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   async #fetchAndProcessSingleWmsMetadata(
@@ -464,7 +464,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param metadataUrl - The metadataAccessPath
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the execution is completed
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   async #fetchXmlServiceMetadata(
@@ -722,7 +722,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Recursively map layer entries
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) =>
-      WMS.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType)
+      this.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType)
     ) as OgcWmsLayerEntryConfig[]; // Untrue 'as' operation, but we'll fix later
 
     // Return it
@@ -817,7 +817,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       // Interpret the time dimensions of the metadata to determine if it's a special group-time-dimension (à la QGIS landcover) or not
-      const isGroupDimension = WMS.#interpretIsGroupDimension(layerCapabilities, wasAddedAsAGroup, false);
+      const isGroupDimension = this.#interpretIsGroupDimension(layerCapabilities, wasAddedAsAGroup, false);
 
       // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
 
@@ -825,14 +825,14 @@ export class WMS extends AbstractGeoViewRaster {
 
       try {
         // Read the time dimension on the layer (if any)
-        let layerTimeDimension = WMS.parseTimeDimension(layerCapabilities.Dimension, displayDateMode, isGroupDimension);
+        let layerTimeDimension = this.#parseTimeDimension(layerCapabilities.Dimension, displayDateMode, isGroupDimension);
         if (layerTimeDimension) {
           // Set the time dimension on the layer config itself
           layerConfig.setTimeDimension(layerTimeDimension);
         }
 
         // Read the time dimension on the group layer (if any)
-        const groupTimeDimension = WMS.parseTimeDimension(layerCapabilities.ParentLayer?.Dimension, displayDateMode, isGroupDimension);
+        const groupTimeDimension = this.#parseTimeDimension(layerCapabilities.ParentLayer?.Dimension, displayDateMode, isGroupDimension);
         if (groupTimeDimension) {
           // Set the time dimension on the group layer config itself
           layerConfig.getParentLayerConfig()?.setTimeDimension(groupTimeDimension);
@@ -885,6 +885,15 @@ export class WMS extends AbstractGeoViewRaster {
    * @param isTimeAware - Indicates if the layer is time aware
    * @param useFullWmsSublayers - Optional - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers)
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When WMS service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the WMS service metadata response is empty
+   * @throws {LayerNoCapabilitiesError} When the WMS capabilities response is empty
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured layer ID is not found
+   * @throws {LayerEntryConfigWMSSubLayerNotFoundError} When a configured sublayer is not found
+   * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -895,7 +904,7 @@ export class WMS extends AbstractGeoViewRaster {
     useFullWmsSublayers?: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = WMS.createGeoviewLayerConfig(
+    const layerConfig = this.createGeoviewLayerConfig(
       geoviewLayerId,
       geoviewLayerName,
       url,
@@ -934,7 +943,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // For each sub layer
     for (const subLayer of subLayers) {
-      const match = WMS.findLayerMetadataInCapability(layerId, subLayer);
+      const match = this.findLayerMetadataInCapability(layerId, subLayer);
       if (match) return match;
     }
 
@@ -1019,6 +1028,78 @@ export class WMS extends AbstractGeoViewRaster {
     return layerStyle;
   }
 
+  /**
+   * Attempts to derive and apply styling information to a WFS layer using corresponding WMS styles.
+   *
+   * This method:
+   *  - Checks whether the layer has no defined style and is configured to fetch styles from this.
+   *  - Determines the WMS layer identifier associated with the WFS layer.
+   *  - Attempts to infer the geometry type from metadata (non-fatal if it fails).
+   *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` -> `cgi-bin/wms`).
+   * Any failures during the process are logged as warnings but do not throw.
+   *
+   * Enables a WFS layer to adopt styling derived from a corresponding WMS service, allowing
+   * consistent symbology between raster and vector representations when the server supports
+   * style retrieval through WMS `GetStyles`.
+   *
+   * @param layerConfig - The WFS layer configuration for which styling should be processed
+   * @returns A promise that resolves with the layer style settings or undefined
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
+   */
+  static async tryProcessLayerStylingInformationIfAny(
+    layerConfig: VectorLayerEntryConfig
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
+    // If should fetch styles from the WMS (default)
+    if (layerConfig.getShouldFetchStylesFromWMS()) {
+      try {
+        // Tweak url when switching from WFS to WMS
+        let tweakedUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getWmsStylesUrlOrDefault());
+
+        // Get the layer id equivalent for the WMS
+        const wmsLayerId = layerConfig.getWmsStylesLayerIdOrDefault();
+
+        // Make sure the URL has necessary information
+        tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(tweakedUrl, wmsLayerId);
+
+        // Tweak url with the proxy if necessary
+        tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
+
+        // A generic WFS geometry metadata type is recoverable because the WMS SLD can infer the geometry.
+        // GV Sometimes, the metadata is vague about the type of geometry, let it continue (in this try/catch) and it'll be inferred later
+        let geometryType: TypeStyleGeometry | undefined;
+        try {
+          geometryType = layerConfig.getGeometryType();
+        } catch (error: unknown) {
+          // Only an unsupported metadata geometry is recoverable; the SLD parser can infer it from the symbolizers.
+          if (!(error instanceof NotSupportedError)) throw error;
+        }
+
+        try {
+          // Create the layer style, await, and return
+          return await this.createLayerStyleFromWMS(tweakedUrl, geometryType);
+        } catch (error: unknown) {
+          // MapServer may advertise an `ms:` WFS layer ID while GetStyles expects the unprefixed WMS ID.
+          if (!wmsLayerId.startsWith('ms:')) throw error;
+
+          // Retry once with the alternate layer ID while preserving the same endpoint and proxy handling.
+          const unprefixedLayerId = ServicesManagement.toggleMsLayerIdPrefix(wmsLayerId);
+          let retryUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getWmsStylesUrlOrDefault());
+          retryUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(retryUrl, unprefixedLayerId);
+          retryUrl = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
+
+          // Create the layer style, await, and return
+          return await this.createLayerStyleFromWMS(retryUrl, geometryType);
+        }
+      } catch (error: unknown) {
+        // Log warning
+        logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
+      }
+    }
+
+    // None
+    return undefined;
+  }
+
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
@@ -1040,11 +1121,11 @@ export class WMS extends AbstractGeoViewRaster {
     layerConfig: ConfigBaseClass,
     rootCapabilityLayer: TypeMetadataWMSCapabilityLayer | undefined
   ): TypeMetadataWMSCapabilityLayer | undefined {
-    const layerIdPath = WMS.#buildLayerIdPath(layerConfig);
+    const layerIdPath = this.#buildLayerIdPath(layerConfig);
     const hasDuplicateAncestorName = layerIdPath.filter((id) => id === layerConfig.layerId).length > 1;
     return hasDuplicateAncestorName
-      ? WMS.#findLayerMetadataInCapabilityByPath(layerIdPath, rootCapabilityLayer)
-      : WMS.findLayerMetadataInCapability(layerConfig.layerId, rootCapabilityLayer);
+      ? this.#findLayerMetadataInCapabilityByPath(layerIdPath, rootCapabilityLayer)
+      : this.findLayerMetadataInCapability(layerConfig.layerId, rootCapabilityLayer);
   }
 
   /**
@@ -1085,15 +1166,15 @@ export class WMS extends AbstractGeoViewRaster {
     if (layerIdPath.length === 0) return undefined;
 
     // First segment: search the whole capability tree for the top-level named layer
-    let scope = WMS.findLayerMetadataInCapability(layerIdPath[0], rootCapabilityLayer);
+    let scope = this.findLayerMetadataInCapability(layerIdPath[0], rootCapabilityLayer);
 
     // Remaining segments: search only within the current scope's children so nested duplicates resolve correctly
     for (let i = 1; i < layerIdPath.length; i++) {
       if (!scope?.Layer) return undefined;
-      const children = Array.isArray(scope.Layer) ? scope.Layer : [scope.Layer];
+      const children = toArray(scope.Layer);
       let next: TypeMetadataWMSCapabilityLayer | undefined;
       for (const child of children) {
-        next = WMS.findLayerMetadataInCapability(layerIdPath[i], child);
+        next = this.findLayerMetadataInCapability(layerIdPath[i], child);
         if (next) break;
       }
       scope = next;
@@ -1114,6 +1195,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layers - An array of layer configurations to fetch metadata for
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns An array of metadata fetch promises, one per unique layer config
+   * @throws {PromiseRejectErrorWrapper} Wrapper containing the layer configuration when the metadata and the internal cause for the error.
    */
   static #createLayerMetadataPromises(
     url: string,
@@ -1133,7 +1215,7 @@ export class WMS extends AbstractGeoViewRaster {
         const promise = (async (): Promise<MetatadaFetchResult> => {
           try {
             // Perform the actual metadata fetch
-            const result = await WMS.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal);
+            const result = await this.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal);
 
             // Validate capabilities exist
             if (!result.data.Capability) {
@@ -1201,7 +1283,7 @@ export class WMS extends AbstractGeoViewRaster {
       } as GroupLayerEntryConfigProps);
 
       // Recursively build the group's tree
-      WMS.#createGroupLayerRec(layerEntry.listOfLayerEntryConfig!, groupLayer);
+      this.#createGroupLayerRec(layerEntry.listOfLayerEntryConfig!, groupLayer);
 
       // Return the group layer
       return groupLayer;
@@ -1314,7 +1396,7 @@ export class WMS extends AbstractGeoViewRaster {
         };
 
         if (Array.isArray(layer.Layer) && layer.Layer.length > 0) {
-          entry.listOfLayerEntryConfig = WMS.#buildLayerTree(layer.Layer);
+          entry.listOfLayerEntryConfig = this.#buildLayerTree(layer.Layer);
         }
 
         return entry;
@@ -1341,58 +1423,151 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerConfig - The WMS layer configuration being processed
    * @param configProxyUrl - Proxy URL to use when necessary
    * @returns A promise that resolves when processing is complete
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
-   * @throws {LayerEntryConfigFieldsNotFoundError} When WFS `outfields` cannot be read from the derived config
    */
   static async #tryProcessLayerVectorialInformationIfAny(
     layerConfig: OgcWmsLayerEntryConfig,
     configProxyUrl: string | undefined
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
+    // Check if should be fetching vector information externally
+    const shouldFetchVectorInfoExternally = layerConfig.getShouldFetchVectorInformationExternally();
+    if (!shouldFetchVectorInfoExternally) return undefined;
+
     // If should fetch vectorial information from WFS
-    if (layerConfig.getShouldFetchVectorInformationFromWFS()) {
-      try {
-        // Create the Geoview Layer Config WFS equivalent
-        const wfsLayerConfig = await layerConfig.createGeoviewLayerConfigWfs(configProxyUrl);
+    let vectorInfoProcessed = false;
+    vectorInfoProcessed = await this.#tryProcessLayerVectorialInformationIfAnyWFS(layerConfig, configProxyUrl);
 
-        // Keep it as reference
-        layerConfig.setWfsLayerConfig(wfsLayerConfig);
-
-        // If no outfields already configured
-        if (!layerConfig.getOutfields()?.length) {
-          // Validate the outfields could be read
-          const outFields = wfsLayerConfig.getOutfields();
-          if (!outFields) throw new LayerEntryConfigFieldsNotFoundError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
-
-          // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
-          layerConfig.setOutfields(outFields);
-        }
-
-        // If no layer style defined
-        if (!layerConfig.getLayerStyle()) {
-          // If the service metadata offers GetStyles
-          if (layerConfig.getSupportsGetStyles()) {
-            // Make sure the URL has necessary information
-            let tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(layerConfig.getDataAccessPath(), layerConfig.layerId);
-
-            // Tweak url with the proxy if necessary
-            tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
-
-            // Try to create dynamic style from the WMS GetStyles metadata
-            return await WMS.createLayerStyleFromWMS(tweakedUrl, layerConfig.getGeometryType());
-          }
-
-          // Log (best-effort enrichment: the WMS still works, it just won't have WFS-derived vectorial styles)
-          logger.logDebug(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
-        }
-      } catch (error: unknown) {
-        // Best-effort enrichment boundary: deriving a WFS vectorial representation is optional (many WMS sublayers
-        // have no WFS equivalent), the WMS layer still renders, so this is a debug note rather than a user warning.
-        logger.logDebug(`Failed to find a vectorial representation of the WMS ${layerConfig.layerPath}`, error);
-      }
+    // Fall back to OGC API Features only when WFS did not provide vector information
+    if (!vectorInfoProcessed) {
+      vectorInfoProcessed = await this.#tryProcessLayerVectorialInformationIfAnyOGCApiFeatures(layerConfig, configProxyUrl);
     }
 
-    // None
-    return undefined;
+    // If the vector information has been processed, only then do we consider fetching the style from the WMS to match it with the data, otherwise, default raster styling is used.
+    let layerStyle;
+    if (vectorInfoProcessed) {
+      // Style parsing is independent from vector service metadata and can infer geometry from the SLD
+      layerStyle = await this.#tryCreateVectorialStyle(layerConfig);
+    }
+
+    // Return the style
+    return layerStyle;
+  }
+
+  /**
+   * Attempts to enrich a WMS layer with vector information from its WFS equivalent.
+   *
+   * Creates the derived WFS configuration and copies its outfields when needed. Failures are logged as debug
+   * because this enrichment is optional.
+   *
+   * @param layerConfig - The WMS layer configuration to enrich
+   * @param configProxyUrl - The proxy URL to use, or undefined when no proxy is configured
+   * @returns A promise that resolves with whether WFS enrichment succeeded
+   */
+  static async #tryProcessLayerVectorialInformationIfAnyWFS(
+    layerConfig: OgcWmsLayerEntryConfig,
+    configProxyUrl: string | undefined
+  ): Promise<boolean> {
+    try {
+      // Create the Geoview Layer Config WFS equivalent
+      const wfsLayerConfig = await layerConfig.createGeoviewLayerConfigWfs(configProxyUrl);
+
+      // Initialize the WMS outfields from its vector equivalent when needed
+      this.#initOutfieldsFromVectorConfig(layerConfig, wfsLayerConfig);
+
+      return true;
+    } catch (error: unknown) {
+      // Best-effort enrichment boundary: deriving a WFS vectorial representation is optional (many WMS sublayers
+      // have no WFS equivalent), the WMS layer still renders, so this is a debug note rather than a user warning.
+      logger.logDebug(`Failed to find a WFS vectorial representation of the WMS ${layerConfig.layerPath}`, error);
+    }
+
+    return false;
+  }
+
+  /**
+   * Attempts to enrich a WMS layer with vector information from its OGC API Features equivalent.
+   *
+   * Creates the derived OGC API Features configuration and copies its outfields when needed. Failures are logged
+   * as debug because this enrichment is optional.
+   *
+   * @param layerConfig - The WMS layer configuration to enrich
+   * @param configProxyUrl - The proxy URL to use, or undefined when no proxy is configured
+   * @returns A promise that resolves with whether OGC API Features enrichment succeeded
+   */
+  static async #tryProcessLayerVectorialInformationIfAnyOGCApiFeatures(
+    layerConfig: OgcWmsLayerEntryConfig,
+    configProxyUrl: string | undefined
+  ): Promise<boolean> {
+    try {
+      // Create the Geoview Layer Config OGC API Features equivalent
+      const ogcApiLayerConfig = await layerConfig.createGeoviewLayerConfigOGCApiFeatures(configProxyUrl);
+
+      // Initialize the WMS outfields from its vector equivalent when needed
+      this.#initOutfieldsFromVectorConfig(layerConfig, ogcApiLayerConfig);
+
+      return true;
+    } catch (error: unknown) {
+      // Best-effort enrichment boundary: deriving a WFS vectorial representation is optional (many WMS sublayers
+      // have no WFS equivalent), the WMS layer still renders, so this is a debug note rather than a user warning.
+      logger.logDebug(`Failed to find an OGC API Features vectorial representation of the WMS ${layerConfig.layerPath}`, error);
+    }
+
+    return false;
+  }
+
+  /**
+   * Initializes a WMS layer's outfields from a derived vector layer configuration when none are configured.
+   *
+   * @param layerConfig - The WMS layer configuration to initialize
+   * @param vectorLayerConfig - The derived vector layer configuration containing the inferred outfields
+   * @throws {LayerEntryConfigFieldsNotFoundError} When the derived vector configuration has no outfields
+   */
+  static #initOutfieldsFromVectorConfig(layerConfig: OgcWmsLayerEntryConfig, vectorLayerConfig: VectorLayerEntryConfig): void {
+    // Preserve outfields explicitly configured on the WMS layer
+    if (layerConfig.getOutfields()?.length) return;
+
+    // Read the outfields inferred while processing the equivalent vector service
+    const outfields = vectorLayerConfig.getOutfields();
+    if (!outfields) {
+      // Signal that the vector service could not provide the field metadata required for enrichment
+      throw new LayerEntryConfigFieldsNotFoundError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
+    }
+
+    // Reuse the vector field definitions so WMS feature-info results retain field names and types
+    layerConfig.setOutfields(outfields);
+  }
+
+  /**
+   * Attempts to create vector style settings from the WMS GetStyles metadata.
+   *
+   * @param layerConfig - The WMS layer configuration to create style settings for
+   * @returns A promise that resolves with the derived style settings, or undefined when styles are already configured or unsupported
+   */
+  static async #tryCreateVectorialStyle(
+    layerConfig: OgcWmsLayerEntryConfig
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
+    // Preserve a layer style already provided by configuration or metadata
+    if (layerConfig.getLayerStyle()) return undefined;
+
+    // GetStyles is optional and unavailable on many WMS services
+    if (!layerConfig.getSupportsGetStyles()) {
+      logger.logDebug(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
+      return undefined;
+    }
+
+    try {
+      // Build the GetStyles request for this WMS layer
+      let stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(layerConfig.getDataAccessPath(), layerConfig.layerId);
+
+      // Apply the layer proxy after constructing the complete service request
+      stylesUrl = layerConfig.getUrlWithProxyWhenNeeded(stylesUrl);
+
+      // Parse the WMS style, allowing the SLD renderer to infer geometry when WMS metadata does not expose it
+      return await this.createLayerStyleFromWMS(stylesUrl, layerConfig.getGeometryType());
+    } catch (error: unknown) {
+      // Best-effort enrichment boundary: a style failure must not prevent the WMS layer from rendering
+      logger.logDebug(`Failed to create vectorial styles for the WMS ${layerConfig.layerPath}`, error);
+      return undefined;
+    }
   }
 
   /**
@@ -1407,13 +1582,13 @@ export class WMS extends AbstractGeoViewRaster {
    * @param isGroupDimension - Whether the time dimension is a group-level temporal definition
    * @returns The parsed time dimension, or `undefined` when the layer does not expose a `TIME` dimension
    */
-  static parseTimeDimension(
+  static #parseTimeDimension(
     metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined,
     displayDateMode: DisplayDateMode | undefined,
     isGroupDimension: boolean
   ): TimeDimension | undefined {
     // Read the time dimension on the layer (if any)
-    const layerTimeDimensionMeta = WMS.findTimeDimensionInDimensions(metadataDimensions);
+    const layerTimeDimensionMeta = this.#findTimeDimensionInDimensions(metadataDimensions);
     if (layerTimeDimensionMeta) {
       // Try to create the time dimension value
       return DateMgt.createDimensionFromOGC(layerTimeDimensionMeta, displayDateMode, isGroupDimension);
@@ -1429,7 +1604,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param metadataDimensions - Optional WMS dimension metadata to search
    * @returns The time dimension metadata, or undefined when none is found
    */
-  static findTimeDimensionInDimensions(
+  static #findTimeDimensionInDimensions(
     metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined
   ): TypeMetadataWMSCapabilityLayerDimension | undefined {
     return metadataDimensions?.find((dimension) => dimension.name?.toLowerCase() === 'time');
@@ -1456,12 +1631,12 @@ export class WMS extends AbstractGeoViewRaster {
     if (!wasAddedAsAGroup) return false;
 
     // Read the parent time dimension
-    const parentDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.ParentLayer?.Dimension);
+    const parentDimension = this.#findTimeDimensionInDimensions(layerCapabilities?.ParentLayer?.Dimension);
 
     // If there's a dimension on the parent
     if (parentDimension) {
       // Read the child dimension
-      const layerDimension = WMS.findTimeDimensionInDimensions(layerCapabilities?.Dimension);
+      const layerDimension = this.#findTimeDimensionInDimensions(layerCapabilities?.Dimension);
 
       // If the dimension on the parent is different than the dimension on the layer (the latter can also be undefined to be considered different)
       if (layerDimension?.values !== parentDimension.values) {
@@ -1480,7 +1655,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // All siblings must expose discrete date(s) that fall within the parent dimension range
         const allSiblingsHaveValuesInParentRange = layerCapabilities?.ParentLayer?.Layer?.every((siblingLayer) => {
-          const siblingDimension = WMS.findTimeDimensionInDimensions(siblingLayer?.Dimension);
+          const siblingDimension = this.#findTimeDimensionInDimensions(siblingLayer?.Dimension);
           if (!siblingDimension?.values) return false;
 
           // Single discrete date is always accepted; multiple comma-separated dates only when explicitly allowed
