@@ -252,6 +252,19 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
     /**
+     * Zooms to the extent of an arbitrary set of feature info entries.
+     *
+     * Unions the extent already embedded in each entry when present, and falls back to looking up
+     * the extent by object id for entries that don't carry one (e.g. ESRI Dynamic rows).
+     *
+     * @param layerPath - The layer path
+     * @param features - The feature info entries to zoom to
+     * @returns A promise that resolves when the zoom animation is complete
+     * @throws {NotImplementedError} When the layer type does not implement extent-from-features (propagated from `getExtentFromFeatures()`)
+     * @throws {NoExtentError} When no extent could be determined from the provided features
+     */
+    zoomToFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<void>;
+    /**
      * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
      *
      * Uses the layer's buffered effective scale boundaries so the resulting zoom remains inside

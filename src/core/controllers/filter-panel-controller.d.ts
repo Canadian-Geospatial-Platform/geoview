@@ -72,6 +72,18 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      */
     applyAllFilters(): void;
     /**
+     * Zooms the map to the extent of the features currently matching a layer's active filters.
+     *
+     * When no feature currently satisfies the active filters, shows a warning notification
+     * instead of throwing, since this is an expected outcome of filtering rather than an error.
+     *
+     * @param layerPath - The layer path
+     * @returns A promise that resolves when the zoom animation is complete
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path (propagated from `getExtentFromFilteredFeatures()`)
+     * @throws {NotImplementedError} When the layer type doesn't support extent-from-filter (propagated from `getExtentFromFilteredFeatures()`)
+     */
+    zoomToFilteredExtent(layerPath: string): Promise<void>;
+    /**
      * Clears filters for a specific layer.
      *
      * Resets the filter state and removes the panel filter from the layer's filter system.
