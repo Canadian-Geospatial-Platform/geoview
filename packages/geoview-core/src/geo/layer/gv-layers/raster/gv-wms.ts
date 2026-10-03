@@ -344,7 +344,7 @@ export class GVWMS extends AbstractGVRaster {
     // If the layer has an OGC Feature API associated
     if (ogcApiFeatureLayerConfig) {
       // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
-      return await this.#fetchFeatureInfoWithFormatFallbackForOGCAPIFeature(
+      return await this.#fetchFeatureInfoForOGCAPIFeature(
         wmsLayerConfig,
         ogcApiFeatureLayerConfig,
         clickCoordinate,
@@ -417,7 +417,7 @@ export class GVWMS extends AbstractGVRaster {
     // If going through OGC API Features
     if (ogcApiFeatureLayerConfig) {
       // Redirect
-      return this.#fetchFeatureInfoWithFormatFallbackForOGCAPIFeature(
+      return this.#fetchFeatureInfoForOGCAPIFeature(
         wmsLayerConfig,
         ogcApiFeatureLayerConfig,
         undefined,
@@ -1044,7 +1044,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestAbortedError} When the request is aborted
    * @throws {NetworkError} When the request encounters a network error
    */
-  async #fetchFeatureInfoWithFormatFallbackForOGCAPIFeature(
+  async #fetchFeatureInfoForOGCAPIFeature(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     ogcFeatureLayerConfig: OgcFeatureLayerEntryConfig,
     clickCoordinate: Coordinate | undefined,
