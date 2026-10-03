@@ -263,6 +263,21 @@ export declare class MapController extends AbstractMapViewerController {
      */
     forceMapToRender(): void;
     /**
+     * Gets the current size of the map in pixels.
+     *
+     * @returns The map size as [width, height], or undefined when the map has no size yet
+     */
+    getMapSize(): number[] | undefined;
+    /**
+     * Toggles whether the map reacts to pointer interactions.
+     *
+     * Disables the drag-pan interaction and suppresses pointer events on the map viewport, so an
+     * overlay (such as the swiper bar) can own the pointer stream without the map starting a pan.
+     *
+     * @param active - Whether the map should react to pointer interactions
+     */
+    setMapPointerInteractive(active: boolean): void;
+    /**
      * Sets the React root for the overview map so it can be destroyed with the map element.
      *
      * @param overviewRoot - The React root element for the overview map

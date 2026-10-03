@@ -146,6 +146,17 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
+     * Gets the extent of all currently loaded features that satisfy the layer's active filters.
+     *
+     * Vector features are always loaded client-side, so this evaluates each feature against the same
+     * combined filter equation (initial, class, data, panel, and time) used to style/hide features on the map.
+     *
+     * @param outProjection - The output projection for the extent
+     * @returns A promise that resolves with the extent of the features matching the active filters
+     * @throws {NoExtentError} When no loaded feature satisfies the active filters
+     */
+    onGetExtentFromFilteredFeatures(outProjection: OLProjection): Promise<Extent>;
+    /**
      * Sets the layer style.
      *
      * @param style - The layer style

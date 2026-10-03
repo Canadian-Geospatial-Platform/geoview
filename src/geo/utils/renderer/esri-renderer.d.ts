@@ -54,6 +54,13 @@ export declare abstract class EsriRenderer {
      */
     static isPictureMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriPictureMarkerSymbol;
     /**
+     * Type guard function that redefines an EsriBaseSymbol as an EsriPictureFillSymbol.
+     *
+     * @param verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid
+     * @returns True if the type ascention is valid
+     */
+    static isPictureFillSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriPictureFillSymbol;
+    /**
      * Type guard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer.
      *
      * The type ascention applies only to the true block of the if clause that use this function.
@@ -105,7 +112,7 @@ export declare abstract class EsriRenderer {
      * @param symbol - ESRI symbol to convert
      * @returns The Geoview symbol corresponding to the ESRI symbol, or undefined if not handled
      */
-    static convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined;
+    static convertSymbol(symbol: EsriSymbol | null | undefined): TypeKindOfVectorSettings | undefined;
     /**
      * Get the configuration key of the style.
      *
@@ -126,11 +133,11 @@ type TypeEsriColor = [number, number, number, number];
 /** ESRI unique value renderer configuration. */
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
     type: 'uniqueValue';
-    defaultLabel: string;
-    defaultSymbol: EsriSymbol;
-    field1?: string;
-    field2?: string;
-    field3?: string;
+    defaultLabel: string | null;
+    defaultSymbol: EsriSymbol | null;
+    field1?: string | null;
+    field2?: string | null;
+    field3?: string | null;
     fieldDelimiter: string;
     rotationType: 'arithmetic' | 'geographic';
     uniqueValueInfos: EsriUniqueValueInfo[];
@@ -145,10 +152,10 @@ export type EsriUniqueValueInfo = {
     value: string;
 };
 /** Union of all supported ESRI symbol types. */
-export type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriPictureMarkerSymbol;
+export type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriSimpleFillSymbol | EsriPictureMarkerSymbol | EsriPictureFillSymbol;
 /** Base properties shared by all ESRI symbol types. */
 export type EsriBaseSymbol = {
-    type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriSFS';
+    type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriPFS' | 'esriSFS';
 };
 /** ESRI simple marker symbol configuration for point geometries. */
 export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
@@ -201,6 +208,21 @@ export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
     width: number;
     xoffset: number;
     yoffset: number;
+}
+/** ESRI picture fill symbol configuration for polygon geometries. */
+export interface EsriPictureFillSymbol extends EsriBaseSymbol {
+    angle: number;
+    contentType: string;
+    height: number;
+    imageData: string;
+    outline: EsriSimpleLineSymbol;
+    type: 'esriPFS';
+    url?: string;
+    width: number;
+    xoffset: number;
+    xscale: number;
+    yoffset: number;
+    yscale: number;
 }
 type EsriClassBreakInfoEntry = {
     classMaxValue: number;

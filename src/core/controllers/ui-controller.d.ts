@@ -253,5 +253,14 @@ export declare class UIController extends AbstractMapViewerController {
      * @returns The footer height as a CSS length string (e.g. '600px')
      */
     getFooterHeight(): string;
+    /**
+     * Resizes the map viewer height without destroying and recreating the MapViewer.
+     *
+     * Updates the stored viewer height so the footer bar split and the OpenLayers canvas recalculate to match,
+     * through their existing effects. Useful when a host application resizes the container after mount.
+     *
+     * @param height - The new viewer height in pixels
+     */
+    resizeMapHeight(height: number): void;
 }
 //# sourceMappingURL=ui-controller.d.ts.map
