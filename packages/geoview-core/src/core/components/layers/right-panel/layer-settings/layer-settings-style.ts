@@ -1,5 +1,7 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets custom sx classes for the layer settings components.
@@ -129,6 +131,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.action.hover,
     },
     '&:focus-visible': {
+      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
       outlineOffset: 0,
       boxShadow: 'none',
     },

@@ -55,7 +55,6 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   const [marks, setMarks] = useState<Mark[]>([]);
   const [localOpacity, setLocalOpacity] = useState<number>(layerOpacity);
 
-  // Sync local state with store when layerDetails.opacity changes
   /**
    * Synchronizes the local opacity with the layer and its parent limit.
    */
@@ -68,7 +67,6 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
     setLocalOpacity(newValue);
   }, [layerOpacity, layerParentOpacity]);
 
-  // Update markers if the parent has a specific opacity other than 1
   /**
    * Updates the slider marks when the parent opacity limit changes.
    */
