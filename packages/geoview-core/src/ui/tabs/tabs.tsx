@@ -16,49 +16,69 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import type { SxStyles } from '../style/types';
 
-/**
- * Type used for properties of each tab
- */
+/** Properties defining a tab and its panel content. */
 export type TypeTabs = {
+  /** Unique tab identifier. */
   id: string;
+  /** Position value used to select the tab. */
   value: number;
+  /** Visible tab title. */
   label: string;
+  /** Optional tab panel content. */
   content?: JSX.Element | string;
+  /** Optional icon shown beside the tab title. */
   icon?: JSX.Element;
 };
 
-/**
- * Type used for focus
- */
+/** Element IDs used to manage tab panel focus. */
 type FocusItemProps = {
+  /** ID of the active focusable element. */
   activeElementId: string | false;
+  /** ID of the element to receive focus when the trap closes. */
   callbackElementId: string | false;
 };
 
-/**
- * Tabs ui properties
- */
+/** Properties for the tabs UI component. */
 export interface TypeTabsProps {
   /** The map identifier associated with the tabs component. */
   mapId: string;
+  /** Optional container used to portal menus within fullscreen content. */
   shellContainer?: HTMLElement;
+  /** Tabs displayed in the component. */
   tabs: TypeTabs[];
+  /** Index of the selected tab, synchronized when the prop changes. */
   selectedTab?: number;
+  /** Props applied to the tab container. */
   boxProps?: BoxProps;
+  /** Props applied to the MUI Tabs component. */
   tabsProps?: TabsProps;
+  /** Props applied to each MUI Tab. */
   tabProps?: TabProps;
+  /** Optional content rendered beside the tabs. */
   rightButtons?: unknown;
+  /** Whether the tab panel is collapsed. */
   isCollapsed?: boolean;
+  /** Whether keyboard focus is trapped in the panel. */
   activeTrap?: boolean;
+  /** Visibility value applied to the tab content. */
   TabContentVisibilty?: string;
+  /** Callback invoked when the panel collapse state changes. */
   onToggleCollapse?: () => void;
+  /** Callback invoked when a tab is selected. */
   onSelectedTabChanged?: (tab: TypeTabs) => void;
+  /** Callback invoked when the tab header is clicked. */
   onHeaderClick?: () => void;
+  /** Callback invoked when keyboard focus enters the panel. */
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
+  /** Callback invoked when keyboard focus leaves the panel. */
   onCloseKeyboard?: () => void;
+  /** Type of container holding the tab panel. */
   containerType: TypeContainerBox;
+  /** Available height for the application layout. */
   appHeight: string;
+  /** Tab IDs that should not be displayed. */
   hiddenTabs: string[];
+  /** Whether the viewer is in fullscreen mode. */
   isFullScreen: boolean;
 }
 
@@ -165,7 +185,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
-  const [tabPanels, setTabPanels] = useState([tabs[0]]);
+  const [tabPanels, setTabPanels] = useState<TypeTabs[]>([tabs[0]]);
   const tabPanelRef = useRef<HTMLDivElement | null>(null);
   const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('UI.TABS - memoSxClasses', theme, isFullScreen, appHeight);
@@ -220,10 +240,10 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       // We need this information to know if we create, switch or collapse a tab
       const { id } = event.currentTarget;
       // Extract base tab id by removing the prefix
-      const baseId = extractTabId(id, mapId);
+      const tabId = extractTabId(id, mapId);
       // Look up the tab from the `tabs` prop (always current) rather than `tabPanels` which can
       // hold stale entries with outdated values when tabs are reordered (e.g. custom tabs added at mount).
-      const tab = tabs.find((item) => item.id === baseId);
+      const tab = tabs.find((item) => item.id === tabId);
       const index = tab ? tab.value : -1;
 
       // toggle on -1, so that when no tab is selected on fullscreen
@@ -237,10 +257,23 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabs, mapId]
   );
 
+  /**
+   * Handles mobile tab selection.
+   */
+  const handleMobileTabChange = useCallback(
+    (event: SelectChangeEvent<unknown>): void => {
+      updateTabPanel(event.target.value as number);
+    },
+    [updateTabPanel]
+  );
+
   // #endregion
 
+  /**
+   * Synchronizes the visible tab panels with the selected tab.
+   */
   useEffect(() => {
-    logger.logTraceUseEffect('UI.TABS - selectedTab', selectedTab);
+    logger.logTraceUseEffect('UI.TABS - selectedTab', selectedTab, tabs);
 
     // If a selected tab is defined
     if (selectedTab !== undefined) {
@@ -259,7 +292,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    * Builds mobile tab dropdown.
    */
   const memoMobileTabsDropdownValues = useMemo((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('UI.TABS - memoMobileTabsDropdownValues', tabs);
+    logger.logTraceUseMemo('UI.TABS - memoMobileTabsDropdownValues', tabs, t);
 
     const newTabs = tabs.map((tab) => ({
       type: 'item',
@@ -271,8 +304,11 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     return [noTab, ...newTabs] as TypeMenuItemProps[];
   }, [tabs, t]);
 
+  /**
+   * Registers Escape-key handling for the tab panel.
+   */
   useEffect(() => {
-    logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
+    logger.logTraceUseEffect('UI.TABS - isCollapsed', selectedTab, isCollapsed, tabs, onCloseKeyboard, mapId);
 
     const tabPanel = tabPanelRef?.current;
     const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
@@ -313,6 +349,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     };
   }, [selectedTab, isCollapsed, tabs, onCloseKeyboard, mapId]);
 
+  // The panel sx object combines a computed style with a dynamic visibility value.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sxMerged: any = { ...memoSxClasses.panel, visibility: TabContentVisibilty };
 
@@ -365,17 +402,14 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={memoSxClasses.mobileDropdown}>
               <Select
-                labelId={`${mapId}-footerBarDropdownLabel`}
-                label=""
                 formControlProps={{ size: 'small' }}
-                id={`${mapId}-footerBarDropdown`}
                 fullWidth
                 variant="standard"
-                inputLabel={{ id: `${mapId}-footerBarDropdownLabel` }}
                 menuItems={memoMobileTabsDropdownValues}
                 value={value}
-                onChange={(event: SelectChangeEvent<unknown>) => updateTabPanel(event.target.value as number)}
+                onChange={handleMobileTabChange}
                 {...(shellContainer ? { MenuProps: { container: shellContainer } } : {})}
+                aria-label={t('footerBar.tabsSelectionLabel')}
               />
             </Box>
           )}

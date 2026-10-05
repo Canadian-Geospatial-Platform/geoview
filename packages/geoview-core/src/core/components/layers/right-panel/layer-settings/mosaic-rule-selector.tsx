@@ -6,13 +6,14 @@ import { Box, ButtonBase, Checkbox, Collapse, FormControl, Select, Typography } 
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
+import type { SxStyles } from '@/ui/style/types';
 import { useStoreLayerMosaicRule, useStoreLayerAllowedMosaicMethods } from '@/core/stores/states/layer-state';
 
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
-// Maps mosaic method keys to their filter name and translation key
+/** Maps mosaic method keys to their filter name and translation key. */
 const METHOD_ENTRIES: Record<string, { name: string; labelKey: string }> = {
   esriMosaicNone: { name: 'None', labelKey: 'layers.settings.mosaicMethodNone' },
   esriMosaicCenter: { name: 'Center', labelKey: 'layers.settings.mosaicMethodCenter' },
@@ -24,7 +25,7 @@ const METHOD_ENTRIES: Record<string, { name: string; labelKey: string }> = {
   esriMosaicSeamline: { name: 'Seamline', labelKey: 'layers.settings.mosaicMethodSeamline' },
 };
 
-// Maps mosaic operation keys to their translation key
+/** Maps mosaic operation keys to their translation key. */
 const OPERATION_ENTRIES: Record<string, string> = {
   MT_FIRST: 'layers.settings.mosaicOperationFirst',
   MT_LAST: 'layers.settings.mosaicOperationLast',
@@ -35,13 +36,14 @@ const OPERATION_ENTRIES: Record<string, string> = {
   MT_SUM: 'layers.settings.mosaicOperationSum',
 };
 
+/** Properties for the mosaic rule settings panel. */
 interface MosaicRulePanelProps {
   /** The layer path to configure mosaic rules for. */
   layerPath: string;
 }
 
 /**
- * Inline panel section for configuring mosaic rules on ArcGIS ImageServer layers.
+ * Creates the inline mosaic rule settings panel for ArcGIS ImageServer layers.
  *
  * Displays method, operation, and ascending controls directly within
  * the settings panel instead of a floating menu.
@@ -52,8 +54,9 @@ interface MosaicRulePanelProps {
  * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values).
  *
  * @see {@link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule}
- * @param layerPath - The layer path to configure mosaic rules for.
- * @returns A JSX element representing the MosaicRulePanel component.
+ *
+ * @param props - Properties defined in MosaicRulePanelProps interface
+ * @returns The mosaic rule panel
  */
 export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Element {
   // Log
@@ -61,7 +64,9 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
   const { t } = useTranslation();
 
   // Store hooks
@@ -72,11 +77,9 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
   // State
   const [expanded, setExpanded] = useState<boolean>(false);
 
-  // Unique ids: the collapse region (aria-controls), the Select labels, and the checkbox
+  // Unique ids: the collapse region (aria-controls) and the checkbox
   const baseId = useId();
   const collapseId = `${baseId}-content`;
-  const methodLabelId = `${baseId}-method-label`;
-  const operationLabelId = `${baseId}-operation-label`;
   const ascendingId = `${baseId}-ascending`;
 
   // Current values
@@ -84,15 +87,21 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
   const currentOperation = mosaicRule?.mosaicOperation ?? 'MT_FIRST';
   const currentAscending = mosaicRule?.ascending ?? true;
 
-  // Build a summary showing the current selections
-  const memoSelectionSummary = useMemo(() => {
-    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoSelectionSummary', currentMethod, currentOperation);
+  /**
+   * Builds the current mosaic method and operation summary.
+   */
+  const memoSelectionSummary = useMemo((): string => {
+    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoSelectionSummary', currentMethod, currentOperation, t);
     const methodLabel = t(METHOD_ENTRIES[currentMethod]?.labelKey ?? currentMethod);
     const operationLabel = t(OPERATION_ENTRIES[currentOperation] ?? currentOperation);
     return `${methodLabel} · ${operationLabel}`;
   }, [currentMethod, currentOperation, t]);
 
-  // Handlers with stable references
+  // #region Handlers
+
+  /**
+   * Handles changes to the mosaic method.
+   */
   const handleChangeMethod = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
       layerController.setLayerMosaicRuleMethod(layerPath, event.target.value as TypeMosaicMethod);
@@ -100,6 +109,9 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
     [layerPath, layerController]
   );
 
+  /**
+   * Handles changes to the mosaic operation.
+   */
   const handleChangeOperation = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
       layerController.setLayerMosaicRuleOperation(layerPath, event.target.value as TypeMosaicOperation);
@@ -107,6 +119,9 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
     [layerPath, layerController]
   );
 
+  /**
+   * Handles changes to the mosaic ascending option.
+   */
   const handleChangeAscending = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       layerController.setLayerMosaicRuleAscending(layerPath, event.target.checked);
@@ -114,9 +129,20 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
     [layerPath, layerController]
   );
 
-  // Menu items derived from the module-level entry maps
-  const memoMethodMenuItems = useMemo(() => {
-    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoMethodMenuItems', allowedMosaicMethods);
+  /**
+   * Handles expanding or collapsing the mosaic rule settings.
+   */
+  const handleToggle = useCallback((): void => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  // #endregion Handlers
+
+  /**
+   * Builds menu items for the available mosaic methods.
+   */
+  const memoMethodMenuItems = useMemo((): { key: string; item: { value: string; name: string; children: string } }[] => {
+    logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoMethodMenuItems', t, allowedMosaicMethods);
     return Object.entries(METHOD_ENTRIES)
       .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
       .filter((option) => {
@@ -124,30 +150,29 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
       });
   }, [t, allowedMosaicMethods]);
 
-  const memoOperationMenuItems = useMemo(() => {
+  /**
+   * Builds menu items for the available mosaic operations.
+   */
+  const memoOperationMenuItems = useMemo((): { key: string; item: { value: string; children: string } }[] => {
     logger.logTraceUseMemo('MOSAIC-RULE-SELECTOR - memoOperationMenuItems', t);
     return Object.entries(OPERATION_ENTRIES).map(([key, labelKey]) => ({ key, item: { value: key, children: t(labelKey) } }));
   }, [t]);
 
-  const handleToggle = useCallback((): void => {
-    setExpanded((prev) => !prev);
-  }, []);
-
   return (
-    <Box sx={sxClasses.settingsSection}>
+    <Box sx={memoSxClasses.settingsSection}>
       <ButtonBase
-        sx={sxClasses.settingsSectionHeader}
+        sx={memoSxClasses.settingsSectionHeader}
         onClick={handleToggle}
         aria-expanded={expanded}
         aria-controls={collapseId}
         disableRipple
       >
         <CollectionsIcon fontSize="small" />
-        <Box component="span" sx={sxClasses.settingsSectionHeaderText}>
-          <Typography component="span" sx={sxClasses.settingsSectionTitle}>
+        <Box component="span" sx={memoSxClasses.settingsSectionHeaderText}>
+          <Typography component="span" sx={memoSxClasses.settingsSectionTitle}>
             {t('layers.settings.updateMosaicRule')}
           </Typography>
-          <Typography component="span" variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
+          <Typography component="span" variant="body2" color="text.secondary" sx={memoSxClasses.settingsSectionSummary} noWrap>
             {memoSelectionSummary}
           </Typography>
         </Box>
@@ -156,32 +181,28 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
       <Collapse
         id={collapseId}
         in={expanded}
-        sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}
+        sx={expanded ? memoSxClasses.settingsSectionContentExpanded : memoSxClasses.settingsSectionContentCollapsed}
       >
-        <Box sx={sxClasses.settingsSectionContent}>
+        <Box sx={memoSxClasses.settingsSectionContent}>
           <FormControl fullWidth>
             <Select
               value={currentMethod}
               onChange={handleChangeMethod}
-              label={t('layers.settings.mosaicMethod')}
               menuItems={memoMethodMenuItems}
-              inputLabel={{ id: methodLabelId }}
-              labelId={methodLabelId}
+              label={t('layers.settings.mosaicMethod')}
             />
           </FormControl>
           <FormControl fullWidth>
             <Select
               value={currentOperation}
               onChange={handleChangeOperation}
-              label={t('layers.settings.mosaicOperation')}
               menuItems={memoOperationMenuItems}
-              inputLabel={{ id: operationLabelId }}
-              labelId={operationLabelId}
+              label={t('layers.settings.mosaicOperation')}
             />
           </FormControl>
-          <Box sx={sxClasses.settingsAscendingRow}>
+          <Box sx={memoSxClasses.settingsAscendingRow}>
             <Checkbox id={ascendingId} checked={currentAscending} onChange={handleChangeAscending} />
-            <Box component="label" htmlFor={ascendingId} sx={sxClasses.settingsAscendingLabel}>
+            <Box component="label" htmlFor={ascendingId} sx={memoSxClasses.settingsAscendingLabel}>
               {t('layers.settings.ascending')}
             </Box>
           </Box>

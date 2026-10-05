@@ -484,7 +484,8 @@
     "letter": "Letter",
     "legal": "Legal",
     "tabloid": "Tabloid",
-    "previewAlt": "Export Preview"
+    "previewAlt": "Export Preview",
+    "loadingPreview": "Loading preview..."
   },
   "geolocator": {
     "title": "Geolocator",
@@ -582,7 +583,8 @@
     "footerPanelHeight": "Footer panel height",
     "resizeValueText": "{{value}}%",
     "noTab": "No tab",
-    "tabsLabel": "Footer panel tabs"
+    "tabsLabel": "Footer panel tabs",
+    "tabsSelectionLabel": "Panel selection"
   },
   "toggleAll": {
     "show": "Show All",

@@ -15,14 +15,12 @@ import {
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { Box, Slider, Switch, Typography } from '@/ui';
-import { ThreeSixtyIcon } from '@/ui/icons';
+import { Box, Button, Slider, Switch, ThreeSixtyIcon, Typography } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import type { SxStyles } from '@/ui/style/types';
-import { Button } from '@/ui/button/button';
 import { useMapController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 

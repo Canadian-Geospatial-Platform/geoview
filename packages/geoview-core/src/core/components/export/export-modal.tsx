@@ -52,7 +52,7 @@ const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 /** Properties for file export configuration. */
 export interface FileExportProps {
-  /** The language */
+  /** The language used for exported content. */
   language: TypeDisplayLanguage;
   /** The export title text. */
   exportTitle: string;
@@ -104,14 +104,14 @@ export function ExportModal(): JSX.Element {
   const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
 
   // State & refs
-  const [isMapLoading, setIsMapLoading] = useState(true);
-  const [isLegendLoading, setIsLegendLoading] = useState(true);
-  const [isMapExporting, setIsMapExporting] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState<boolean>(true);
+  const [isLegendLoading, setIsLegendLoading] = useState<boolean>(true);
+  const [isMapExporting, setIsMapExporting] = useState<boolean>(false);
   const [exportTitle, setExportTitle] = useState<string>('');
-  const [exportMapResolution, setExportMapResolution] = useState(300);
+  const [exportMapResolution, setExportMapResolution] = useState<number>(300);
   const [exportFormat, setExportFormat] = useState<FileFormat>('png');
   const exportContainerRef = useRef<HTMLDivElement>(null);
-  const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
+  const [jpegQuality, setJpegQuality] = useState<number>(90); // Default 90%
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -122,7 +122,7 @@ export function ExportModal(): JSX.Element {
    * Builds menu items for format selection.
    */
   const memoFormatMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('EXPORT-MODAL - memoFormatMenuItems');
+    logger.logTraceUseMemo('EXPORT-MODAL - memoFormatMenuItems', t);
 
     return [
       { item: { value: 'pdf', children: t('exportModal.pdf') } },
@@ -135,7 +135,7 @@ export function ExportModal(): JSX.Element {
    * Builds menu items for DPI selection.
    */
   const memoDpiMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('EXPORT-MODAL - memoDpiMenuItems');
+    logger.logTraceUseMemo('EXPORT-MODAL - memoDpiMenuItems', t);
 
     return [
       { item: { value: 96, children: `96 ${t('exportModal.dpi')}` } },
@@ -254,7 +254,7 @@ export function ExportModal(): JSX.Element {
    * Generates the image preview when the modal opens.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
+    logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect', activeModalId, generatePreview, mapElement);
     if (activeModalId !== 'export') return;
 
     // Reset loading states to show skeleton immediately when modal opens
@@ -366,47 +366,38 @@ export function ExportModal(): JSX.Element {
           <Box sx={memoSxClasses.exportOptions}>
             {/* Format Selection */}
             <Select
-              labelId={`${mapId}-export-type-label`}
               formControlProps={{ variant: 'standard', size: 'small' }}
-              id={`${mapId}-export-type-select`}
               value={exportFormat}
               onChange={handleFormatChange}
-              label={t('exportModal.formatSelect')}
               menuItems={memoFormatMenuItems}
               variant="standard"
               MenuProps={{ container: shellContainer }}
-              inputLabel={{ id: `${mapId}-export-type-label` }}
+              label={t('exportModal.formatSelect')}
             />
 
             {/* DPI Selection - Only show for PNG and JPEG */}
             {(exportFormat === 'png' || exportFormat === 'jpeg') && (
               <Select
-                labelId={`${mapId}-export-value-label`}
                 formControlProps={{ variant: 'standard', size: 'small' }}
-                id={`${mapId}-export-value-select`}
                 value={exportMapResolution}
                 onChange={handleDpiChange}
-                label={t('exportModal.resolutionSelect')}
                 menuItems={memoDpiMenuItems}
                 variant="standard"
                 MenuProps={{ container: shellContainer }}
-                inputLabel={{ id: `${mapId}-export-value-label` }}
+                label={t('exportModal.resolutionSelect')}
               />
             )}
 
             {/* Quality Selection - Only show for JPEG */}
             {exportFormat === 'jpeg' && (
               <Select
-                labelId={`${mapId}-export-quality-label`}
                 formControlProps={{ variant: 'standard', size: 'small' }}
-                id={`${mapId}-export-quality-select`}
                 value={jpegQuality}
                 onChange={handleQualityChange}
-                label={t('exportModal.qualitySelect')}
                 menuItems={memoQualityMenuItems}
                 variant="standard"
                 MenuProps={{ container: shellContainer }}
-                inputLabel={{ id: `${mapId}-export-quality-label` }}
+                label={t('exportModal.qualitySelect')}
               />
             )}
           </Box>
@@ -433,7 +424,7 @@ export function ExportModal(): JSX.Element {
               });
             }
 
-            return <Box sx={memoSxClasses.mapLoading}>Loading preview...</Box>;
+            return <Box sx={memoSxClasses.mapLoading}>{t('exportModal.loadingPreview')}</Box>;
           })()}
         </Box>
       </DialogContent>

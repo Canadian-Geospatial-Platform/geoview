@@ -7,18 +7,25 @@ import { Box, ButtonBase, CircularProgressBase, Collapse, Typography } from '@/u
 import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
+import type { SxStyles } from '@/ui/style/types';
 import { useStoreLayerRasterFunctionInfos, useStoreLayerRasterFunction } from '@/core/stores/states/layer-state';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
+/** Properties for a raster function selection card. */
 interface RasterFunctionItemProps {
+  /** Metadata describing the raster function. */
   info: TypeMetadataEsriRasterFunctionInfos;
+  /** Whether this raster function is currently selected. */
   isSelected: boolean;
+  /** Optional pending preview image for the raster function. */
   previewPromise: Promise<string> | undefined;
+  /** Callback invoked when this raster function is selected. */
   onSelect: (name: string) => void;
 }
 
+/** Properties for the raster function settings panel. */
 interface RasterFunctionPanelProps {
   /** The layer path to configure raster functions for. */
   layerPath: string;
@@ -28,13 +35,10 @@ interface RasterFunctionPanelProps {
 const EMPTY_RASTER_FUNCTION_INFOS: TypeMetadataEsriRasterFunctionInfos[] = [];
 
 /**
- * Card component displaying a raster function option with image preview.
+ * Creates a raster function selection card with an image preview.
  *
- * @param info - The raster function metadata.
- * @param isSelected - Whether this function is currently selected.
- * @param previewPromise - Promise resolving to the preview image URL.
- * @param onSelect - Callback invoked when the user selects this function.
- * @returns A JSX element representing the raster function card.
+ * @param props - Properties defined in RasterFunctionItemProps interface
+ * @returns The raster function card
  */
 function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: RasterFunctionItemProps): JSX.Element {
   // Log
@@ -42,7 +46,9 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
@@ -95,27 +101,27 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
   const renderIcon = (): JSX.Element => {
     if (loading) {
       return (
-        <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
+        <Box component="span" sx={[memoSxClasses.previewImageContainer, memoSxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
           <CircularProgressBase size={40} />
         </Box>
       );
     }
     if (previewSrc) {
       return (
-        <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
+        <Box component="span" sx={[memoSxClasses.previewImageContainer, memoSxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
           <Box
             component="img"
             src={previewSrc}
             alt=""
             onError={handlePreviewError}
-            sx={[sxClasses.previewImage, sxClasses.rasterFunctionPreviewImage] as SxProps}
+            sx={[memoSxClasses.previewImage, memoSxClasses.rasterFunctionPreviewImage] as SxProps}
           />
         </Box>
       );
     }
     return (
-      <Box component="span" sx={[sxClasses.previewImageContainer, sxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
-        <ImageNotSupportedIcon sx={sxClasses.settingSelectorPreviewIcon} />
+      <Box component="span" sx={[memoSxClasses.previewImageContainer, memoSxClasses.rasterFunctionPreviewImageContainer] as SxProps}>
+        <ImageNotSupportedIcon sx={memoSxClasses.settingSelectorPreviewIcon} />
       </Box>
     );
   };
@@ -136,15 +142,15 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
       onClick={handleClick}
       aria-current={isSelected ? 'true' : undefined}
       disableRipple
-      sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
+      sx={[memoSxClasses.settingsCard, isSelected && memoSxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
-      <Box component="span" sx={sxClasses.settingsCardText}>
-        <Typography component="span" sx={sxClasses.settingsCardTitle}>
+      <Box component="span" sx={memoSxClasses.settingsCardText}>
+        <Typography component="span" sx={memoSxClasses.settingsCardTitle}>
           {info.name}
         </Typography>
         {info.description && (
-          <Typography component="span" variant="body2" color="text.secondary" sx={sxClasses.settingsCardDescription}>
+          <Typography component="span" variant="body2" color="text.secondary" sx={memoSxClasses.settingsCardDescription}>
             {info.description}
           </Typography>
         )}
@@ -154,13 +160,13 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
 }
 
 /**
- * Inline panel section for selecting raster functions.
+ * Creates the inline raster function settings panel.
  *
  * Replaces the previous Menu-based approach with cards displayed
  * directly within the settings panel.
  *
- * @param layerPath - The layer path to configure raster functions for.
- * @returns A JSX element representing the RasterFunctionPanel component.
+ * @param props - Properties defined in RasterFunctionPanelProps interface
+ * @returns The raster function settings panel
  */
 export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JSX.Element {
   // Log
@@ -169,7 +175,9 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store hooks
   const rasterFunctionInfos = useStoreLayerRasterFunctionInfos(layerPath) ?? EMPTY_RASTER_FUNCTION_INFOS;
@@ -194,6 +202,11 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
     return layerController.getLayerRasterFunctionPreviews(layerPath);
   }, [layerPath, rasterFunctionInfos, layerController]);
 
+  // #region Handlers
+
+  /**
+   * Handles selection of a raster function.
+   */
   const handleSelect = useCallback(
     (rasterFunctionName: string): void => {
       layerController.setLayerRasterFunction(layerPath, rasterFunctionName);
@@ -201,26 +214,31 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
     [layerPath, layerController]
   );
 
+  /**
+   * Handles expanding or collapsing the raster function settings.
+   */
   const handleToggle = useCallback((): void => {
     setExpanded((prev) => !prev);
   }, []);
 
+  // #endregion Handlers
+
   return (
-    <Box sx={sxClasses.settingsSection}>
+    <Box sx={memoSxClasses.settingsSection}>
       <ButtonBase
-        sx={sxClasses.settingsSectionHeader}
+        sx={memoSxClasses.settingsSectionHeader}
         onClick={handleToggle}
         aria-expanded={expanded}
         aria-controls={collapseId}
         disableRipple
       >
         <FunctionsIcon fontSize="small" />
-        <Box component="span" sx={sxClasses.settingsSectionHeaderText}>
-          <Typography component="span" sx={sxClasses.settingsSectionTitle} id={titleId}>
+        <Box component="span" sx={memoSxClasses.settingsSectionHeaderText}>
+          <Typography component="span" sx={memoSxClasses.settingsSectionTitle} id={titleId}>
             {t('layers.settings.selectRasterFunction')}
           </Typography>
           {currentRasterFunction && (
-            <Typography component="span" variant="body2" color="text.secondary" sx={sxClasses.settingsSectionSummary} noWrap>
+            <Typography component="span" variant="body2" color="text.secondary" sx={memoSxClasses.settingsSectionSummary} noWrap>
               {currentRasterFunction}
             </Typography>
           )}
@@ -230,9 +248,9 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
       <Collapse
         id={collapseId}
         in={expanded}
-        sx={expanded ? sxClasses.settingsSectionContentExpanded : sxClasses.settingsSectionContentCollapsed}
+        sx={expanded ? memoSxClasses.settingsSectionContentExpanded : memoSxClasses.settingsSectionContentCollapsed}
       >
-        <Box sx={sxClasses.settingsCardList} role="group" aria-labelledby={titleId}>
+        <Box sx={memoSxClasses.settingsCardList} role="group" aria-labelledby={titleId}>
           {rasterFunctionInfos.map((info) => (
             <RasterFunctionItem
               key={info.name}

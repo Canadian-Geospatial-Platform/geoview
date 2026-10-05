@@ -1734,7 +1734,7 @@ type DateFilterAttribute = {
 **Attribute properties (common to all types):**
 
 - **fieldName** (string, required): Field name from the layer schema
-- **displayLabel** (string, required): Label displayed in the UI
+- **displayLabel** (string, required): Label displayed in the UI; must contain at least one non-whitespace character. If an attribute has a blank label, the panel displays a configuration error identifying its layer and field instead of rendering filter controls, and adds the error to the snackbar and notification panel. Correct the label and reload the viewer.
 - **filterType** (string, required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
 - **enabled** (boolean, default: true): Whether this filter is enabled
 

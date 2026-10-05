@@ -56,7 +56,7 @@ interface TimeSliderProps {
 /**
  * Creates a panel with time sliders.
  *
- * @param props - Time slider properties
+ * @param props - Properties defined in TimeSliderProps interface
  * @returns The slider panel
  */
 export function TimeSlider(props: TimeSliderProps): JSX.Element {
@@ -89,6 +89,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   const theme = useTheme();
   const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('TIME-SLIDER - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
 
@@ -186,7 +187,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   /** Builds sparse visual marks without expanding long calendar ranges. */
   const memoTimeMarks = useMemo((): number[] => {
-    logger.logTraceUseMemo('TIME-SLIDER - memoTimeMarks', range, discreteValues, singleHandle);
+    logger.logTraceUseMemo('TIME-SLIDER - memoTimeMarks', range, discreteValues, singleHandle, minAndMax, memoTimeStampRange);
 
     if (range.length < 4 && !discreteValues) {
       const interval = (memoTimeStampRange[memoTimeStampRange.length - 1] - memoTimeStampRange[0]) / 4;
@@ -206,7 +207,14 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   /** Formats the sparse marks shown on the slider track. */
   const memoSliderMarks = useMemo((): { value: number; label: string }[] => {
-    logger.logTraceUseMemo('TIME-SLIDER - memoSliderMarks', memoTimeMarks, displayLanguage, displayDateTimezone, serviceDateTemporalMode);
+    logger.logTraceUseMemo(
+      'TIME-SLIDER - memoSliderMarks',
+      displayDateFormatShort,
+      displayDateTimezone,
+      displayLanguage,
+      memoTimeMarks,
+      serviceDateTemporalMode
+    );
     return memoTimeMarks.map((timeMark) => ({
       value: timeMark,
       label: DateMgt.formatDate(
@@ -608,8 +616,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   );
 
   /**
-   * Flags an incoming calendar-stepped Arrow/Page key before MUI's hidden-input keydown handler
-   * runs (see handleSliderKeyDown for why this needs to happen in the capture phase).
+   * Flags incoming calendar-stepped Arrow/Page keys in the capture phase.
+   *
+   * Runs before MUI's hidden-input keydown handler (see handleSliderKeyDown).
    */
   const handleSliderKeyDownCapture = useCallback(
     (event: React.KeyboardEvent): void => {
@@ -684,9 +693,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // #region USE EFFECT
 
+  /**
+   * Schedules the next playback increment when slider state changes.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
+    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering, reversed, locked);
 
     // If slider cycle is active, pause before advancing to next increment
     if (isPlaying) {
@@ -696,7 +708,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, filtering, reversed, locked]);
 
-  // When slider cycle is activated, advance to first increment without delay
+  /**
+   * Advances to the first increment when playback starts.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER - isPlaying', isPlaying);
@@ -729,7 +743,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TIME-SLIDER - announcement', storeValues, isPlaying);
+    logger.logTraceUseEffect('TIME-SLIDER - announcement', storeValues, isPlaying, formatRange);
 
     if (isPlaying) return;
     if (sliderBoxRef.current?.contains(document.activeElement)) return;
@@ -742,7 +756,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TIME-SLIDER - auto-close on stabilization', isPlaying, layersAreLoading, pendingCloseRef.current);
+    logger.logTraceUseEffect(
+      'TIME-SLIDER - auto-close on stabilization',
+      isPlaying,
+      layersAreLoading,
+      pendingCloseRef.current,
+      onRequestClose
+    );
 
     // When both conditions clear and user had pressed Esc, close the panel
     if (!isPlaying && !layersAreLoading && pendingCloseRef.current) {

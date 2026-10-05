@@ -1,5 +1,5 @@
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -59,6 +59,7 @@ import { getSxClasses } from '@/core/components/layers/left-panel/add-new-layer/
 /** Layer entry type constants from the schema. */
 const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
 
+/** Properties for the file upload and URL input section. */
 interface FileUploadSectionProps {
   /** Callback invoked when a file is selected. */
   onFileSelected: (file: File, fileURL: string, fileName: string) => void;
@@ -116,7 +117,7 @@ function FileUploadSection({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * Process a file for upload and notify the parent component
+   * Processes a file for upload and notifies the parent component.
    *
    * @param file - The file to process (JSON, GeoJSON, ZIP, SHP or CSV)
    * @throws {Error} When file type is not supported
@@ -406,6 +407,8 @@ export function AddNewLayer(): JSX.Element {
 
   // Store
   const mapId = useStoreGeoViewMapId();
+  const baseId = useId();
+  const serviceTypeErrorId = `${baseId}-service-type-error`;
   const disabledLayerTypes = useStoreAppDisabledLayerTypes();
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
@@ -503,7 +506,8 @@ export function AddNewLayer(): JSX.Element {
   // #region HANDLERS FOR THE STEPS
 
   /**
-   * Handle the first step of the layer addition process
+   * Handles the first step of the layer addition process.
+   *
    * Validates the layer URL and attempts to guess the layer type.
    * If valid, advances to the next step.
    */
@@ -531,9 +535,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle the second step of the layer addition process
+   * Handles the second step of the layer addition process.
    *
-   * @description Loads metadata for the selected layer type and URL,
+   * Loads metadata for the selected layer type and URL,
    * populates the layer list, and prepares for layer selection.
    */
   const handleStep2 = (): void => {
@@ -665,9 +669,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle the third step of the layer addition process
+   * Handles the third step of the layer addition process.
    *
-   * @description Validates layer selection and name,
+   * Validates layer selection and name,
    * and either advances to the final step or completes the process
    * depending on whether multiple layers are selected.
    */
@@ -770,9 +774,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle the final step of the layer addition process
+   * Handles the final step of the layer addition process.
    *
-   * @description Creates and adds the configured layer to the map,
+   * Creates and adds the configured layer to the map,
    * shows appropriate notifications, and returns to the layer panel.
    */
   const handleStepLast = (): void => {
@@ -808,7 +812,7 @@ export function AddNewLayer(): JSX.Element {
   // #region HANDLERS
 
   /**
-   * Handle the behavior of the 'Back' button in the Stepper UI
+   * Handles the behavior of the 'Back' button in the Stepper UI.
    */
   const handleBack = (): void => {
     // On step 1 or 3, abort the fetch that may be underway
@@ -1127,18 +1131,13 @@ export function AddNewLayer(): JSX.Element {
                   <Box>
                     <Select
                       fullWidth
-                      labelId="service-type-label"
                       value={layerType}
                       onChange={handleSelectType}
-                      label={t('layers.service')}
                       variant="standard"
                       MenuProps={{ container: shellContainer }}
-                      inputLabel={{
-                        id: 'service-type-label',
-                      }}
                       formControlProps={{ error: serviceTypeError }}
                       ref={serviceTypeRef}
-                      aria-describedby={serviceTypeError ? 'service-type-error' : undefined}
+                      aria-describedby={serviceTypeError ? serviceTypeErrorId : undefined}
                       menuItems={layerOptions
                         .filter(([value]) => {
                           return !disabledLayerTypes.includes(value as TypeInitialGeoviewLayerType);
@@ -1150,9 +1149,10 @@ export function AddNewLayer(): JSX.Element {
                             children: label,
                           },
                         }))}
+                      label={t('layers.service')}
                     />
                     {serviceTypeError && (
-                      <FormHelperText id="service-type-error" error role="status" aria-live="polite" aria-atomic="true">
+                      <FormHelperText id={serviceTypeErrorId} error role="status" aria-live="polite" aria-atomic="true">
                         {serviceTypeErrorMessage}
                       </FormHelperText>
                     )}
