@@ -371,7 +371,7 @@ importers:
     dependencies:
       geochart:
         specifier: github:Canadian-Geospatial-Platform/geochart#develop
-        version: github.com/Canadian-Geospatial-Platform/geochart/d2254a25b57cb57849f8e05d25c89ee11b390fb3(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)(typescript@6.0.3)
+        version: github.com/Canadian-Geospatial-Platform/geochart/612755cecc2abab132a4cf694eb2b5f1da8f2161(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)(typescript@6.0.3)
     devDependencies:
       '@types/luxon':
         specifier: ~3.7.1
@@ -2761,8 +2761,13 @@ packages:
       ajv: 8.20.0
     dev: false
 
-  /ajv-formats@2.1.1:
+  /ajv-formats@2.1.1(ajv@8.20.0):
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
     dependencies:
       ajv: 8.20.0
 
@@ -6826,7 +6831,7 @@ packages:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
     dev: true
 
@@ -8056,9 +8061,9 @@ packages:
       '@types/react': 19.2.18
       react: 19.2.8
 
-  github.com/Canadian-Geospatial-Platform/geochart/d2254a25b57cb57849f8e05d25c89ee11b390fb3(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)(typescript@6.0.3):
-    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/d2254a25b57cb57849f8e05d25c89ee11b390fb3}
-    id: github.com/Canadian-Geospatial-Platform/geochart/d2254a25b57cb57849f8e05d25c89ee11b390fb3
+  github.com/Canadian-Geospatial-Platform/geochart/612755cecc2abab132a4cf694eb2b5f1da8f2161(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)(typescript@6.0.3):
+    resolution: {tarball: https://codeload.github.com/Canadian-Geospatial-Platform/geochart/tar.gz/612755cecc2abab132a4cf694eb2b5f1da8f2161}
+    id: github.com/Canadian-Geospatial-Platform/geochart/612755cecc2abab132a4cf694eb2b5f1da8f2161
     name: geochart
     version: 0.1.0
     peerDependencies:
@@ -8070,7 +8075,7 @@ packages:
       '@mui/icons-material': 7.3.11(@mui/material@7.3.11)(@types/react@19.2.18)(react@19.2.8)
       '@mui/material': 7.3.11(@emotion/react@11.14.0)(@emotion/styled@11.14.1)(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       chart.js: 4.5.1
       chartjs-adapter-luxon: 1.3.1(chart.js@4.5.1)(luxon@3.7.2)
       chartjs-adapter-moment: 1.0.1(chart.js@4.5.1)(moment@2.30.1)

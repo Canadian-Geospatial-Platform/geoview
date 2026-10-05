@@ -1,6 +1,6 @@
 import type { Ref } from 'react';
 import { forwardRef, useId, useMemo } from 'react';
-import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps, SxProps, Theme } from '@mui/material';
+import type { InputLabelProps, FormControlProps, SelectProps, SelectChangeEvent, MenuProps, SxProps, Theme } from '@mui/material';
 import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
@@ -26,6 +26,8 @@ type TypeSelectProps = {
   onChange: (event: SelectChangeEvent<unknown>) => void;
   /** Optional label styling and behaviour; the wrapper owns the label ID. */
   inputLabel?: Omit<InputLabelProps, 'id'> & { id?: never };
+  /** Input attributes forwarded to MUI; a defined top-level aria-label takes precedence. */
+  inputProps?: SelectProps['inputProps'];
   /** Menu entries displayed by the select. */
   menuItems: TypeMenuItemProps[];
   /** Whether the select is disabled. */
@@ -76,6 +78,7 @@ export interface TypeMenuItemProps {
  * Handles both controlled and uncontrolled value modes.
  * Requires a non-empty visible label or aria-label, never both. Visible labels use an
  * automatically generated ID unless labelId is supplied; inputLabel cannot override that ID.
+ * Preserves inputProps attributes, overriding only aria-label when supplied at the top level.
  *
  * @param props - Select configuration (see TypeSelectProps interface)
  * @param ref - Reference to underlying FormControl div
@@ -108,6 +111,7 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     label,
     'aria-label': ariaLabel,
     inputLabel,
+    inputProps,
     menuItems,
     disabled,
     variant = 'standard',
@@ -192,6 +196,7 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       MenuProps,
       displayEmpty,
       renderValue,
+      inputProps,
       selectProps
     );
 
@@ -208,7 +213,10 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       ...(displayEmpty !== undefined ? { displayEmpty } : {}),
       ...(renderValue ? { renderValue } : {}),
       ...selectProps,
-      inputProps: { 'aria-label': ariaLabel },
+      inputProps: {
+        ...inputProps,
+        ...(ariaLabel !== undefined ? { 'aria-label': ariaLabel } : {}),
+      },
     };
   }, [
     label,
@@ -223,6 +231,7 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     MenuProps,
     displayEmpty,
     renderValue,
+    inputProps,
     selectProps,
   ]);
 
