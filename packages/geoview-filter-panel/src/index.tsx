@@ -3,10 +3,33 @@ import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { FilterAltIcon } from 'geoview-core/ui/icons';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import { GeoViewError } from 'geoview-core/core/exceptions/geoview-exceptions';
+import { logger } from 'geoview-core/core/utils/logger';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import type { TypeFilterPanelProps } from './types';
 import { FilterPanel } from './components/filter-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-filter-panel.json';
+
+/** Properties for the filter configuration error component. */
+interface FilterConfigurationErrorProps {
+  /** The configuration error to display in the viewer's current language. */
+  error: GeoViewError;
+}
+
+/**
+ * Creates the filter configuration error component.
+ *
+ * @param props - Properties defined in FilterConfigurationErrorProps interface
+ * @returns The translated filter configuration error
+ */
+function FilterConfigurationError({ error }: FilterConfigurationErrorProps): JSX.Element {
+  logger.logTraceRender('geoview-filter-panel > FilterConfigurationError');
+
+  const { t } = useTranslation<string>();
+  const { Typography } = window.cgpv.ui.elements;
+  return <Typography color="error">{t(error.messageKey, error.messageParams)}</Typography>;
+}
 
 /**
  * Filter panel plugin.
@@ -54,6 +77,8 @@ class FilterPanelPlugin extends AppBarPlugin {
           noNumericValues: 'No numeric values available',
           noDateValues: 'No date values available',
           noConfig: 'No filter configuration provided',
+          invalidDisplayLabel:
+            'Filter configuration error: provide a non-blank displayLabel for field "{{fieldName}}" in layer "{{layerPath}}".',
           noController: 'Filter controller not initialized',
           toggleCollapse: 'Toggle Collapse - {{filterName}}',
           expand: 'Expand',
@@ -89,6 +114,8 @@ class FilterPanelPlugin extends AppBarPlugin {
           noNumericValues: 'Aucune valeur numérique disponible',
           noDateValues: 'Aucune valeur de date disponible',
           noConfig: 'Aucune configuration de filtre fournie',
+          invalidDisplayLabel:
+            'Configuration des filtres : renseignez un displayLabel non vide pour « {{fieldName}} » (couche « {{layerPath}} »).',
           noController: 'Contrôleur de filtre non initialisé',
           toggleCollapse: 'Basculer le repli - {{filterName}}',
           expand: 'Développer',
@@ -156,10 +183,31 @@ class FilterPanelPlugin extends AppBarPlugin {
   /**
    * Overrides the content creation of the AppBar Plugin.
    *
+   * Rejects blank attribute labels before rendering controls, with a persistent panel error and notification.
+   *
    * @returns The filter panel content
    */
   override onCreateContent = (): JSX.Element => {
-    return <FilterPanel config={this.getConfig()} />;
+    const config = this.getConfig();
+
+    for (const layer of config.layers) {
+      const invalidAttribute = layer.attributes?.find(
+        (attribute) => typeof attribute.displayLabel !== 'string' || !attribute.displayLabel.trim()
+      );
+
+      if (invalidAttribute) {
+        const error = new GeoViewError('FilterPanel.invalidDisplayLabel', {
+          fieldName: invalidAttribute.fieldName,
+          layerPath: layer.layerPath,
+        });
+        logger.logError(error);
+        this.mapViewer.notifications.showErrorFromError(error);
+
+        return <FilterConfigurationError error={error} />;
+      }
+    }
+
+    return <FilterPanel config={config} />;
   };
 }
 

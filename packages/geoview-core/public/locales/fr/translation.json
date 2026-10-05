@@ -484,7 +484,8 @@
     "letter": "Lettre",
     "legal": "Légal",
     "tabloid": "Tabloïd",
-    "previewAlt": "Aperçu de l'exportation de la carte"
+    "previewAlt": "Aperçu de l'exportation de la carte",
+    "loadingPreview": "Chargement de l'aperçu..."
   },
   "geolocator": {
     "title": "Géolocalisation",
@@ -582,7 +583,8 @@
     "footerPanelHeight": "Hauteur du panneau de pied de page",
     "resizeValueText": "{{value}} %",
     "noTab": "Pas d'onglet",
-    "tabsLabel": "Onglets du panneau de pied de page"
+    "tabsLabel": "Onglets du panneau de pied de page",
+    "tabsSelectionLabel": "Sélection du panneau"
   },
   "toggleAll": {
     "show": "Afficher tout",

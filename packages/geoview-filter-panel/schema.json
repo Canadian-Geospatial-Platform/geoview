@@ -83,7 +83,8 @@
         },
         "displayLabel": {
           "type": "string",
-          "description": "Display label for the filter"
+          "pattern": "\\S",
+          "description": "Display label for the filter; must contain at least one non-whitespace character"
         },
         "enabled": {
           "type": "boolean",

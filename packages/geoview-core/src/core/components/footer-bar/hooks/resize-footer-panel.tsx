@@ -1,6 +1,7 @@
-import { useTranslation } from 'react-i18next';
 import type { MouseEvent } from 'react';
 import { useMemo, memo, useCallback, useState, useRef, useEffect, useId } from 'react';
+
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
@@ -54,7 +55,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [pendingValue, setPendingValue] = useState<number | undefined>(undefined);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   // Refs
   const resizeButtonRef = useRef<HTMLButtonElement>(null);
