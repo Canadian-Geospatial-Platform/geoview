@@ -91,9 +91,9 @@ The swiper package `layers` property changed shape (schema `version` bumped `1.0
 
 ### UI Components — Select and Slider Compatibility
 
-- `Select` now requires exactly one non-empty `label` or `aria-label`; supplying both or a blank name throws a `TypeError`. `inputLabel.id` is no longer supported: use `labelId` to customize the associated label ID. These restrictions affect external consumers of the UI wrapper (branch `3657-slider-accessibility`; PR pending).
-- `Slider` removed the `ariaLabelledby` prop. Use standard `aria-labelledby` for a shared name or `getAriaLabel(index)` for distinct thumb names (issue #3657; PR pending).
-- Filter-panel attribute `displayLabel` must contain a non-whitespace character for every filter type. Previously schema-valid blank labels now prevent filter controls from rendering and show an explicit configuration error; replace them with meaningful labels and reload the viewer (branch `3657-slider-accessibility`; PR pending).
+- `Select` now requires exactly one non-empty `label` or `aria-label`; supplying both or a blank name throws a `TypeError`. `inputLabel.id` is no longer supported: use `labelId` to customize the associated label ID. These restrictions affect external consumers of the UI wrapper (#3678).
+- `Slider` removed the `ariaLabelledby` prop. Use standard `aria-labelledby` for a shared name or `getAriaLabel(index)` for distinct thumb names (issue #3657; #3678).
+- Filter-panel attribute `displayLabel` must contain a non-whitespace character for every filter type. Previously schema-valid blank labels now prevent filter controls from rendering and show an explicit configuration error; replace them with meaningful labels and reload the viewer (#3678).
 
 ## Breaking Changes — Developer-Only (Internal)
 
