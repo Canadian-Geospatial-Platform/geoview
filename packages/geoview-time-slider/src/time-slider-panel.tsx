@@ -233,7 +233,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TIME-SLIDER-PANEL - check selected layer visibility', timeSliderController, selectedLayerPath, memoLayersList);
+    logger.logTraceUseEffect(
+      'TIME-SLIDER-PANEL - check selected layer visibility',
+      timeSliderController,
+      selectedLayerPath,
+      memoLayersList
+    );
 
     if (!selectedLayerPath) return;
 

@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { AriaAttributes, CSSProperties, ReactNode } from 'react';
 import { useLayoutEffect, useCallback, useRef, useMemo, useState } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
@@ -59,9 +59,9 @@ type SliderProps = {
   valueLabelDisplay?: 'auto' | 'on' | 'off';
   /** Props passed to MUI slider slots. */
   slotProps?: MuiSliderProps['slotProps'];
-  /** Accessible labels for slider thumbs. */
+  /** Per-thumb aria-label, taking precedence over aria-label; use for range sliders without aria-labelledby. */
   getAriaLabel?: (index: number) => string;
-};
+} & AriaAttributes;
 
 /**
  * Custom Material-UI Slider component with advanced label and mark management.
@@ -69,6 +69,12 @@ type SliderProps = {
  * Wraps Material-UI's Slider with intelligent mark limiting (max 30 visible marks)
  * and overlap detection for labels. Handles both single and range values, controlled
  * and uncontrolled modes. Includes keyboard focus workaround for arrow key interactions.
+ * Accepts standard ARIA attributes and forwards them to the underlying MUI slider.
+ *
+ * MUI uses getAriaLabel(index) instead of aria-label when both are supplied. A valid
+ * aria-labelledby reference takes precedence over either in accessible-name computation.
+ * Prefer one naming strategy: aria-label or aria-labelledby for a single thumb, and
+ * getAriaLabel for distinct range-thumb names. Input slot props can override these attributes.
  *
  * @param props - Slider configuration (see SliderProps)
  * @returns Slider component with optimized mark/label rendering

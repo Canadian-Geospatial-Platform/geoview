@@ -603,7 +603,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       const newValues = [...values];
       const movedValue = DateMgt.addCalendarStep(newValues[thumbIndex] ?? values[0], stepUnit, direction);
-      newValues[thumbIndex] = Math.min(minAndMax[1], Math.max(minAndMax[0], movedValue));
+      const snappedValue = DateMgt.snapToCalendarStep(movedValue, calendarStepAnchorRef.current ?? minAndMax[0], stepUnit);
+      newValues[thumbIndex] = Math.min(minAndMax[1], Math.max(minAndMax[0], snappedValue));
 
       const constrainedValues = timeSliderController.constrainValues(layerPath, newValues, thumbIndex);
       setValues(constrainedValues);
@@ -721,6 +722,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
+
+  /**
+   * Initializes the calendar sequence from the slider's starting value when a calendar step is already configured.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - calendarStepAnchor', stepUnit, discreteValues, storeValues);
+
+    if (stepUnit && !discreteValues && calendarStepAnchorRef.current === undefined) {
+      calendarStepAnchorRef.current = storeValues[0];
+    }
+  }, [stepUnit, discreteValues, storeValues]);
 
   /**
    * Keeps the local state values in sync with the store values.
