@@ -115,7 +115,7 @@ class FilterPanelPlugin extends AppBarPlugin {
           noDateValues: 'Aucune valeur de date disponible',
           noConfig: 'Aucune configuration de filtre fournie',
           invalidDisplayLabel:
-            'Configuration des filtres : renseignez un displayLabel non vide pour « {{fieldName}} » (couche « {{layerPath}} »).',
+            'Configuration des filtres : définir un displayLabel non vide pour « {{fieldName}} » (couche « {{layerPath}} »).',
           noController: 'Contrôleur de filtre non initialisé',
           toggleCollapse: 'Basculer le repli - {{filterName}}',
           expand: 'Développer',

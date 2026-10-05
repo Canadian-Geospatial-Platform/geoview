@@ -44,7 +44,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
-    logger.logTraceUseMemo('FILTER-PANEL - memoSxClasses', theme);
+    logger.logTraceUseMemo('SELECT-FILTER - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
   const { t } = useTranslation<string>();
@@ -53,7 +53,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
    * Memoized menu items for the select dropdown.
    */
   const memoMenuItems = useMemo((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('FILTER-PANEL - memoMenuItems', attribute, controller, t, uniqueValues);
+    logger.logTraceUseMemo('SELECT-FILTER - memoMenuItems', attribute, controller, t, uniqueValues);
     const items = [
       {
         type: 'item' as const,
