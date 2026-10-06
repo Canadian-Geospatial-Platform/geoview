@@ -173,6 +173,9 @@ export interface TypeLegendLayer {
   /** Temporal dimension metadata for time-aware layers. */
   timeDimension?: TimeDimension;
 
+  /** The name of the time field used for WMS layer with temporal data with an associated vector layer. */
+  vectorTimeField?: string;
+
   /** Active style for WMS layers. */
   wmsStyle?: string;
 

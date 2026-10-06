@@ -502,6 +502,15 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Gets the vector field configured for time filtering on the associated vector layer such as the WFS or OGC API Feature.
+   *
+   * @returns The configured vector time field, or `undefined` if none is set
+   */
+  getVectorTimeField(): string | undefined {
+    return this.layerEntryProps.vectorTimeField;
+  }
+
+  /**
    * Gets whether the WMS layer was added as part of a group in the config.
    *
    * @returns True when the layer was added as part of a group
