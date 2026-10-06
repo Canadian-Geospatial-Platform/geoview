@@ -46,6 +46,7 @@ export interface ConfigBaseClassProps {
   wfsLayerId?: string;
   ogcApiFeaturesUrl?: string;
   ogcApiFeaturesLayerId?: string;
+  vectorTimeField?: string;
 }
 
 /**
