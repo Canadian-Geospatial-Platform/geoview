@@ -38,7 +38,7 @@ import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
-import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement } from '@/core/utils/dom-helper';
+import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement, getGVVisibleTabbable } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -124,6 +124,14 @@ export function Shell(props: ShellProps): JSX.Element {
     geoviewElement,
     appHeight,
   });
+
+  /**
+   * Finds visible tabbable elements within this map's shell.
+   *
+   * @param root - The viewer focus trap root
+   * @returns The elements in keyboard order
+   */
+  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => getGVVisibleTabbable(mapId, root), [mapId]);
 
   // #region HANDLERS
 
@@ -438,7 +446,7 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView}>
+      <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
         <Box
           ref={shellRef}
           id={`${mapViewer.mapId}-shell`}
