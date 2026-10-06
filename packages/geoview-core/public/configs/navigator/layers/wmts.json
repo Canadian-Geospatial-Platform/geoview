@@ -19,10 +19,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
         "geoviewLayerId": "basemap_wmts",
         "geoviewLayerName": "Shaded Basemap - returning blank tiles",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
             "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
@@ -31,10 +31,10 @@
         ]
       },
       {
-        "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml",
         "geoviewLayerId": "biomass",
         "geoviewLayerName": "Biomass - reprojection issues",
+        "metadataAccessPath": "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
             "layerId": "GEDI_ISS_L4B_Aboveground_Biomass_Density_Mean_201904-202303",
@@ -43,10 +43,10 @@
         ]
       },
       {
-        "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://mrdata.usgs.gov/mapcache/wmts",
         "geoviewLayerId": "sgmc2",
         "geoviewLayerName": "sgmc2",
+        "metadataAccessPath": "https://mrdata.usgs.gov/mapcache/wmts",
+        "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
             "layerId": "sgmc2",
@@ -55,9 +55,9 @@
         ]
       },
       {
-        "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://data.geopf.fr/wmts",
         "geoviewLayerId": "lidar",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
             "layerId": "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW",
@@ -67,8 +67,8 @@
       },
       {
         "geoviewLayerId": "timeZonesLYR",
-        "metadataAccessPath": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS",
         "geoviewLayerName": "Timezones",
+        "metadataAccessPath": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS",
         "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
@@ -78,9 +78,9 @@
         ]
       },
       {
-        "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://data.geopf.fr/wmts",
         "geoviewLayerId": "geopf",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerType": "ogcWmts",
         "useAsBasemap": true,
         "listOfLayerEntryConfig": [
           {
