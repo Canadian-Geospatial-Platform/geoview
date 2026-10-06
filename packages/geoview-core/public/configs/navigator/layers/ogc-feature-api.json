@@ -16,16 +16,9 @@
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
           {
-            "entryType": "group",
-            "layerId": "weather-clim-group-g",
-            "layerName": "Group",
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "ahccd-stations",
-                "wmsUrl": "https://geo.weather.gc.ca/geomet-climate",
-                "wmsLayerId": "AHCCD.STATIONS"
-              }
-            ]
+            "layerId": "ahccd-stations",
+            "wmsUrl": "https://geo.weather.gc.ca/geomet-climate",
+            "wmsLayerId": "AHCCD.STATIONS"
           }
         ]
       }
