@@ -1531,6 +1531,9 @@ export const useStoreLayerUrl = createLayerSelectorHook('url');
 /** Hook that returns the layer name for a specific layer. */
 export const useStoreLayerName = createLayerSelectorHook('layerName');
 
+/** Hook that returns the vector time field for a specific layer with temporal data associated with a WMS layer. */
+export const useStoreLayerVectorTimeField = createLayerSelectorHook('vectorTimeField');
+
 /**
  * Hook that returns a record of layer names for all layers.
  *
