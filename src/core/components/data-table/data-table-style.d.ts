@@ -1,5 +1,11 @@
-import type { Theme } from '@mui/material';
-import type { SxStyles } from '@/ui/style/types';
+import type { Theme } from '@mui/material/styles';
+import type { SxProps, SxStyles } from '@/ui/style/types';
+/**
+ * Sx for truncated, single-line cell content (tooltip wrapper).
+ *
+ * No theme dependency, so exported as a standalone constant for components without theme access.
+ */
+export declare const truncatedCellContentSx: SxProps<Theme>;
 /**
  * Gets custom sx classes for the data table.
  *

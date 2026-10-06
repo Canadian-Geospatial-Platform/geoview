@@ -1,10 +1,10 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Gets custom sx classes for the map information bar.
+ * Gets custom sx classes for the full-screen dialog.
  *
- * @param theme - The MUI theme
+ * @param theme - The MUI theme object
  * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
-//# sourceMappingURL=map-info-style.d.ts.map
+//# sourceMappingURL=full-screen-dialog-style.d.ts.map

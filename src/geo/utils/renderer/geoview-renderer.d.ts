@@ -170,6 +170,13 @@ export declare abstract class GeoviewRenderer {
      */
     static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement;
     /**
+     * Creates a polygon preview canvas after loading its fill pattern image.
+     *
+     * @param polygonStyle - Optional style associated to the polygon
+     * @returns A promise that resolves with the rendered polygon canvas
+     */
+    static createPolygonCanvasAsync(polygonStyle?: Style): Promise<HTMLCanvasElement>;
+    /**
      * Creates a canvas with the GeometryCollection settings defined in the style.
      *
      * @param geometryCollectionStyle - Optional style associated to the GeometryCollection

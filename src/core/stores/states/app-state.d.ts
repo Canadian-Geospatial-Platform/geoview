@@ -60,6 +60,7 @@ export interface IAppState {
         setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
         setDisplayTheme: (theme: TypeDisplayTheme) => void;
         setFullScreenActive: (active: boolean) => void;
+        setHeight: (height: number) => void;
         setGuide: (guide: TypeGuideObject) => void;
         setNotifications: (notifications: NotificationDetailsType[]) => void;
     };
@@ -327,6 +328,16 @@ export declare const setStoreAppCrosshairActive: (mapId: string, active: boolean
  * @param active - Whether fullscreen mode is active
  */
 export declare const setStoreAppFullScreenActive: (mapId: string, active: boolean) => void;
+/**
+ * Sets the map container height.
+ *
+ * Triggers the shell/footer-bar layout recalculation and an OpenLayers `updateSize()` via their existing
+ * effects, which already react to this value — no additional resize call is needed after this.
+ *
+ * @param mapId - The map identifier
+ * @param height - The new height in pixels
+ */
+export declare const setStoreAppHeight: (mapId: string, height: number) => void;
 /**
  * Adds a notification to the store or increments the count if it already exists.
  *

@@ -705,6 +705,13 @@ export interface GraphicFillWithPattern {
     pattern?: string;
     settings: any;
 }
+/** Definition of an image used as a repeating polygon fill pattern. */
+export interface TypeImagePatternConfig {
+    /** MIME type of the pattern image. */
+    mimeType: string;
+    /** Pattern image source. */
+    src: string;
+}
 /** Stroke style for vector features. */
 export type TypeStrokeSymbolConfig = {
     /** Color to use for vector features. */
@@ -734,6 +741,8 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     patternSize?: number;
     /** Pattern line width.default = 1. */
     patternWidth?: number;
+    /** Image repeated across the polygon fill. */
+    patternImage?: TypeImagePatternConfig;
     /** Kind of filling  for vector features. Default = solid.  */
     fillStyle: TypeFillStyle;
     /** The additional graphic fills symbology for special fills */
