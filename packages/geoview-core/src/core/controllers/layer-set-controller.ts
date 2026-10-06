@@ -563,6 +563,7 @@ export class LayerSetController extends AbstractMapViewerController {
       // If the layer is WMS
       if (layer instanceof GVWMS) {
         legendLayerEntry.wmsStyle = layer.getWmsStyle();
+        legendLayerEntry.vectorTimeField = layer.getLayerConfig().getVectorTimeField();
       }
     }
 

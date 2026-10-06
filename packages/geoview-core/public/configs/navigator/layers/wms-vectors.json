@@ -71,7 +71,8 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "vg_observation_v_inondation_embacle_wmst"
+            "layerId": "vg_observation_v_inondation_embacle_wmst",
+            "vectorTimeField": "date_observation"
           },
           {
             "layerId": "MSP_DESSERTE_MUN_911"
