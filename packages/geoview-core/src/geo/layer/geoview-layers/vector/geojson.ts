@@ -66,7 +66,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the fetched metadata and proxy information
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   protected override async onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     try {
@@ -364,6 +364,14 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty
+   * @throws {LayerEntryConfigInvalidLayerEntryConfigError} When layer metadata cannot validate a configured entry
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured layer ID is not found
+   * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,

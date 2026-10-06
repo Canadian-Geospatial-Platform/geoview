@@ -45,6 +45,7 @@ import {
   useStoreLayerDisplayDateTimezone,
   useStoreLayerFilterClass,
   useStoreLayerName,
+  useStoreLayerVectorTimeField,
 } from '@/core/stores/states/layer-state';
 import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
@@ -55,7 +56,7 @@ import linkifyHtml from 'linkify-html';
 import { isImage, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
-import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -259,6 +260,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
   const layerName = useStoreLayerName(layerPath);
+  const vectorTimeField = useStoreLayerVectorTimeField(layerPath);
   const dataTableController = useDataTableController();
   const layerController = useLayerController();
   const uiController = useUIController();
@@ -799,11 +801,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoFilteredFeatures', data.features);
 
-    // In addition, filter on the class renderer filters and the time slider filter
-    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
+    // Gather the available field information from the feature
+    const fieldInfos: Partial<Record<string, TypeFieldEntry>> = data.features?.[0]?.fieldInfo ?? {};
 
     // Create the filter equation equivalent of the combined filter
-    const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
+    const layerFilterEquation = LayerFilters.createClientFilterEquation(
+      layerClassFilter,
+      layerTimeFilter,
+      layerFilterPanelFilterExpression,
+      vectorTimeField,
+      fieldInfos
+    );
 
     // Filter each features
     return (
@@ -811,7 +819,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? []
     );
-  }, [data.features, layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
+  }, [data.features, layerClassFilter, layerTimeFilter, vectorTimeField, layerFilterPanelFilterExpression]);
 
   /**
    * Updates filtered features ref for handler access.

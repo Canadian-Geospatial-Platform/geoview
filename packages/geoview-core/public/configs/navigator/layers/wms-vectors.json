@@ -1,0 +1,164 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true,
+      "labelZIndex": 20
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "Cities",
+        "geoviewLayerName": "Cities",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wms",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "transports",
+        "geoviewLayerName": "Transports",
+        "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "bgr_v_sous_route_res_sup_act"
+          },
+          {
+            "layerId": "circulation_routier"
+          },
+          {
+            "layerId": "conditions_routieres"
+          },
+          {
+            "layerId": "iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "bgr_v_dirct_genrl_geomt_act"
+          },
+          {
+            "layerId": "radars_photos"
+          },
+          {
+            "layerId": "zpegt"
+          },
+          {
+            "layerId": "site_inv_geotech_p"
+          },
+          {
+            "layerId": "sortie_aut"
+          },
+          {
+            "layerId": "aeroport"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gouv-ouvert",
+        "geoviewLayerName": "Gouv Ouvert (proxied)",
+        "metadataAccessPath": "https://geoegl.msp.gouv.qc.ca/ws/igo_gouvouvert.fcgi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "vg_observation_v_inondation_embacle_wmst",
+            "vectorTimeField": "date_observation"
+          },
+          {
+            "layerId": "MSP_DESSERTE_MUN_911"
+          },
+          {
+            "layerId": "CASERNE"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
+        "geoviewLayerId": "weather-clim-group",
+        "geoviewLayerName": "Weather Climate Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet-climate",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "weather-clim-group-g",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "AHCCD.STATIONS",
+                "ogcApiFeaturesUrl": "https://api.weather.gc.ca",
+                "ogcApiFeaturesLayerId": "ahccd-stations"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR13-qgis",
+        "geoviewLayerName": "BC Kelowna Wells (WFS exists, but no GetStyles)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

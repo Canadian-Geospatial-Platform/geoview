@@ -1777,9 +1777,13 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "wmsUrl": {
+          "type": "string",
+          "description": "The url of the WMS layer associated with the vector layer."
+        },
         "wmsLayerId": {
           "type": "string",
-          "description": "The id of the WMS layer associated with the WFS layer."
+          "description": "The id of the WMS layer associated with the vector layer."
         },
         "layerName": {
           "type": "string",
@@ -1921,9 +1925,25 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "wfsUrl": {
+          "type": "string",
+          "description": "The url of the WFS layer associated with the WMS layer."
+        },
         "wfsLayerId": {
           "type": "string",
           "description": "The id of the WFS layer associated with the WMS layer."
+        },
+        "ogcApiFeaturesUrl": {
+          "type": "string",
+          "description": "The id of the OGC API Feature layer associated with the WMS layer."
+        },
+        "ogcApiFeaturesLayerId": {
+          "type": "string",
+          "description": "The id of the OGC API Feature layer associated with the WMS layer."
+        },
+        "vectorTimeField": {
+          "type": "string",
+          "description": "The field name from the vector layer data that should be used when filtering vector features the same way the WMS filters by time."
         },
         "isLayerGroup": {
           "description": "Flag used to distinguish layer group nodes.",
@@ -2673,8 +2693,8 @@
             }
           }
         },
-        "fetchVectorsOnWFS": {
-          "description": "Flag used by WMS layers to indicate if the layer should get the vector information from a WFS and retrieve the styling information.",
+        "fetchVectorsExternally": {
+          "description": "Flag used by WMS layers to indicate if the layer should get the vector information from an external service such as WFS or OGC API Feature and retrieve the styling information.",
           "type": "boolean",
           "default": true
         },

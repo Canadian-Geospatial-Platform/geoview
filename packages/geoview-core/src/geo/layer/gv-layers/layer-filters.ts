@@ -1,5 +1,6 @@
+import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { NodeType, type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /**
  * Aggregates and composes the different filter fragments applied at various
@@ -264,6 +265,61 @@ export class LayerFilters {
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Creates a client-side filter equation from class, time, and panel filters.
+   *
+   * When the time filter field is unavailable, the configured vector time field is preferred if present in the feature data.
+   * Otherwise, a sole date-typed feature field is used; if there are multiple or no date fields, the time filter is omitted.
+   * The class and panel filters are always retained.
+   *
+   * @param classFilter - Optional class renderer filter
+   * @param timeFilter - Optional time slider filter
+   * @param panelFilter - Optional filter panel filter
+   * @param vectorTimeField - Optional configured vector time field
+   * @param fieldInfos - Feature fields available for client-side evaluation
+   * @returns The parsed client-side filter equation
+   */
+  static createClientFilterEquation(
+    classFilter: string | undefined,
+    timeFilter: string | undefined,
+    panelFilter: string | undefined,
+    vectorTimeField: string | undefined,
+    fieldInfos: Partial<Record<string, TypeFieldEntry>>
+  ): FilterNodeType[] {
+    // Create the filter nodes from the time filter
+    const filterNodesFromFilter = timeFilter ? GeoviewRenderer.createFilterNodeFromFilter(timeFilter) : [];
+    const timeFilterFieldNode = filterNodesFromFilter?.find(
+      (node) => node.nodeType === NodeType.variable && typeof node.nodeValue === 'string'
+    );
+
+    const timeFilterField = typeof timeFilterFieldNode?.nodeValue === 'string' ? timeFilterFieldNode.nodeValue : undefined;
+
+    // Keep the configured filter when its field is present in the returned feature data.
+    const canApplyTimeFilter = !timeFilterField || !!fieldInfos[timeFilterField];
+    let theTimeFilter: string | undefined = canApplyTimeFilter ? timeFilter : undefined;
+
+    // Use the sole date field when the configured time field is absent from the feature data.
+    if (!canApplyTimeFilter && timeFilterField) {
+      // Prefer the configured vector time field when it is available.
+      let fallbackTimeField = vectorTimeField && fieldInfos[vectorTimeField] ? vectorTimeField : undefined;
+
+      if (!fallbackTimeField) {
+        // Infer the field by type only when there is exactly one date field.
+        const dateFields = Object.entries(fieldInfos).filter(([, fieldInfo]) => fieldInfo?.dataType === 'date');
+        if (dateFields.length === 1) fallbackTimeField = dateFields[0][0];
+      }
+
+      // Rewrite the missing field reference for client-side filtering.
+      if (fallbackTimeField) theTimeFilter = timeFilter?.replaceAll(timeFilterField, fallbackTimeField);
+    }
+
+    // Combine all applicable filters into a single filter string
+    const allFilters = LayerFilters.joinWithAnd([classFilter, theTimeFilter, panelFilter]);
+
+    // Create the client-side filter equation from the combined filter string
+    return GeoviewRenderer.createFilterNodeFromFilter(allFilters);
+  }
 
   /**
    * Joins multiple SQL filter fragments using the AND operator.

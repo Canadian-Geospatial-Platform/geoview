@@ -1,7 +1,7 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Circle } from 'ol/style';
-import type { Geometry } from 'ol/geom';
-import { LineString, Point, Polygon, GeometryCollection } from 'ol/geom';
+import type { Geometry, SimpleGeometry } from 'ol/geom';
+import { LineString, MultiLineString, Point, Polygon, GeometryCollection } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
 import Icon from 'ol/style/Icon';
 import type { Options as CircleOptions } from 'ol/style/Circle';
@@ -9,8 +9,9 @@ import type { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { Options as FillOptions } from 'ol/style/Fill';
 import type { FeatureLike } from 'ol/Feature';
-import type Feature from 'ol/Feature';
+import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
+import type { SketchCoordType } from 'ol/interaction/Draw';
 
 import { setAlphaColor } from '@/core/utils/utilities';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -34,6 +35,7 @@ import type {
   TypeAliasLookup,
   codedValueType,
   TypeOutfields,
+  GraphicStrokeWithPlacement,
 } from '@/api/types/map-schema-types';
 import {
   isFilledPolygonVectorConfig,
@@ -50,7 +52,7 @@ type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
   options?: TypeStyleProcessorOptions
-) => Style | undefined;
+) => Style | Style[] | undefined;
 
 type TypeEsriLegendItem = {
   label: string;
@@ -78,6 +80,12 @@ export type TypeStyleProcessorOptions = {
 let colorCount = 0;
 
 export abstract class GeoviewRenderer {
+  /** Cached endpoint graphic styles keyed by their parsed SLD graphic-stroke descriptors. */
+  static readonly #GRAPHIC_STROKE_STYLE_CACHE: WeakMap<GraphicStrokeWithPlacement, Style> = new WeakMap();
+
+  /** Exact matcher for ISO date values used in filter comparisons. */
+  static readonly #ISO_DATE_EXACT_REGEX = new RegExp(`^(?:${DateMgt.REGEX_ISO_DATE.source})$`, 'i');
+
   /** The default filter expression when all features should be included */
   static readonly DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
 
@@ -178,8 +186,10 @@ export abstract class GeoviewRenderer {
     // Fix QGIS stroke property not being spaced correctly...
     svgText = svgText.replace('"stroke=', '" stroke=');
 
-    // Fix QGIS stroke-opacity/fill-opacity having wrong values...
-    svgText = svgText.replace(/(stroke-opacity|fill-opacity|stroke-width)="([\d.]+)\s+[\d.]+"/g, '$1="$2"');
+    // Fix QGIS parametric SVG fallback values after param() substitution.
+    // After replacing param(fill) with "#413939", the original fallback "#000" remains as "fill="#413939 #000"".
+    // This regex keeps only the first (substituted) value for color and numeric attributes.
+    svgText = svgText.replace(/((?:stroke-opacity|fill-opacity|stroke-width|fill|stroke))="([^\s"]+)\s+[^\s"]+"/g, '$1="$2"');
 
     // Replace extra QGIS meta stuff
     svgText = svgText
@@ -206,6 +216,148 @@ export abstract class GeoviewRenderer {
    */
   static SVGStringToBase64(svgXML: string): string {
     return window.btoa(svgXML);
+  }
+
+  /**
+   * Creates a star polygon from a fixed SVG path and draw coordinates.
+   *
+   * The first coordinate is treated as the star center and the second as the radius/rotation handle.
+   * When a geometry is provided, it is updated in place for live sketch rendering.
+   *
+   * @param coordinates - Draw coordinates containing the center and outer handle
+   * @param geometry - Optional existing sketch geometry to update
+   * @returns The generated star polygon
+   */
+  static getStarGeometryFromSVG(coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon {
+    const svgPath = 'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
+    return this.svgPathToGeometry(svgPath, coordinates, geometry);
+  }
+
+  /**
+   * Converts an SVG path string to a polygon geometry with auto-centering.
+   *
+   * @param svgPath - SVG path string
+   * @param coordinates - Circle coordinate (center and outer edge)
+   * @param geometry - Optional intermediate geometry for display while expanding
+   * @returns The resulting polygon
+   */
+  static svgPathToGeometry(svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon {
+    const center = coordinates[0] as number[];
+    const last = coordinates[1] as number[];
+    const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
+    const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
+
+    // Parse the SVG path to get coordinates
+    const coords = this.svgPathToCoordinates(svgPath, [0, 0]);
+
+    // Find the bounding box to calculate center
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    coords.forEach((point) => {
+      minX = Math.min(minX, point[0]);
+      minY = Math.min(minY, point[1]);
+      maxX = Math.max(maxX, point[0]);
+      maxY = Math.max(maxY, point[1]);
+    });
+
+    // Calculate center of the SVG path
+    const svgCenterX = (minX + maxX) / 2;
+    const svgCenterY = (minY + maxY) / 2;
+
+    // Calculate the size of the SVG path
+    const svgWidth = maxX - minX;
+    const svgHeight = maxY - minY;
+    const svgSize = Math.max(svgWidth, svgHeight);
+
+    // Calculate scale factor to fit the shape within the radius
+    const scaleFactor = (radius * 2) / svgSize;
+
+    // Center, scale, and rotate the coordinates
+    const finalCoords = coords.map((point) => {
+      // Center the point
+      const centeredX = point[0] - svgCenterX;
+      const centeredY = point[1] - svgCenterY;
+
+      // Scale to fit within radius
+      const scaledX = centeredX * scaleFactor;
+      const scaledY = centeredY * scaleFactor;
+
+      // Rotate point
+      const x = scaledX * Math.cos(angle) - scaledY * Math.sin(angle);
+      const y = scaledX * Math.sin(angle) + scaledY * Math.cos(angle);
+
+      // Translate to target center
+      return [x + center[0], y + center[1]];
+    });
+
+    // Create or update geometry
+    if (!geometry) {
+      // eslint-disable-next-line no-param-reassign
+      geometry = new Polygon([finalCoords]);
+    } else {
+      geometry.setCoordinates([finalCoords]);
+    }
+
+    return geometry as Polygon;
+  }
+
+  /**
+   * Converts an SVG path string to an array of coordinates.
+   *
+   * @param pathData - SVG path string
+   * @param center - Center coordinates
+   * @returns Array of coordinates
+   */
+  static svgPathToCoordinates(pathData: string, center: number[]): number[][] {
+    const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
+    const coords: number[][] = [];
+    let currentPoint = [0, 0];
+
+    commands.forEach((cmd) => {
+      const type = cmd[0];
+      const values = cmd
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .filter((n) => !Number.isNaN(n));
+
+      if (type === 'M') {
+        // Absolute move
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i], values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'm') {
+        // Relative move
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'L') {
+        // Absolute line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [values[i], values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'l') {
+        // Relative line
+        for (let i = 0; i < values.length; i += 2) {
+          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
+          coords.push([...currentPoint]);
+        }
+      } else if (type === 'Z' || type === 'z') {
+        // Close path - add first point again
+        if (coords.length > 0) {
+          coords.push([...coords[0]]);
+        }
+      }
+    });
+
+    // Apply center offset after all coordinates are calculated
+    return coords.map((point) => [point[0] + center[0], point[1] + center[1]]);
   }
 
   /**
@@ -347,6 +499,15 @@ export abstract class GeoviewRenderer {
         drawingCanvas.height = height;
         const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
         drawingContext.globalAlpha = iconStyle.getOpacity();
+
+        // Apply rotation if set on the icon style
+        const rotation = iconStyle.getRotation();
+        if (rotation) {
+          drawingContext.translate(width / 2, height / 2);
+          drawingContext.rotate(rotation);
+          drawingContext.translate(-width / 2, -height / 2);
+        }
+
         drawingContext.drawImage(image, 0, 0);
         return drawingCanvas;
       }
@@ -382,7 +543,7 @@ export abstract class GeoviewRenderer {
    * @param lineStringStyle - Optional style associated to the lineString
    * @returns The created canvas
    */
-  static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
+  static createLineStringCanvas(lineStringStyle?: Style | Style[]): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
     drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
@@ -394,14 +555,73 @@ export abstract class GeoviewRenderer {
     context.fillStyle = gradient;
     context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     const drawingContext = toContext(context);
-    drawingContext.setStyle(lineStringStyle!);
     drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
-    drawingContext.drawGeometry(
+    const lineGeometry = new LineString([
+      [4, drawingCanvas.height - 4],
+      [drawingCanvas.width - 4, 4],
+    ]);
+    const lineFeature = new Feature(lineGeometry);
+    const styles: Style[] = [];
+    if (Array.isArray(lineStringStyle)) styles.push(...lineStringStyle);
+    else if (lineStringStyle) styles.push(lineStringStyle);
+
+    styles.forEach((style) => {
+      const geometry = style.getGeometryFunction()(lineFeature);
+      if (!geometry) return;
+
+      drawingContext.setStyle(style);
+      drawingContext.drawGeometry(geometry);
+    });
+    return drawingCanvas;
+  }
+
+  /**
+   * Creates a line preview canvas after loading endpoint graphic-stroke images.
+   *
+   * @param lineStringStyle - Optional base line and endpoint styles
+   * @returns A promise that resolves with the rendered line canvas
+   */
+  static async createLineStringCanvasAsync(lineStringStyle?: Style | Style[]): Promise<HTMLCanvasElement> {
+    // Keep the base line and endpoint styles in a single ordered list.
+    const styles: Style[] = [];
+    if (Array.isArray(lineStringStyle)) styles.push(...lineStringStyle);
+    else if (lineStringStyle) styles.push(lineStringStyle);
+
+    // Render every line stroke synchronously, then add loaded endpoint graphics.
+    const lineStrokeStyles = styles.filter((style) => style.getStroke());
+    const drawingCanvas = this.createLineStringCanvas(lineStrokeStyles);
+    const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+
+    // Use the same sample diagonal as the base canvas to resolve endpoint geometry.
+    const lineFeature = new Feature(
       new LineString([
         [4, drawingCanvas.height - 4],
         [drawingCanvas.width - 4, 4],
       ])
     );
+
+    // Load all endpoint images before compositing them onto the exported canvas.
+    const endpointCanvases = await Promise.all(
+      styles.slice(1).map(async (style) => {
+        if (!(style.getImage() instanceof Icon)) return undefined;
+
+        const geometry = style.getGeometryFunction()(lineFeature);
+        if (!(geometry instanceof Point)) return undefined;
+
+        const iconCanvas = await this.createIconCanvas(style);
+        if (!iconCanvas) return undefined;
+
+        return { geometry, iconCanvas };
+      })
+    );
+
+    // Composite each loaded endpoint image at its resolved line endpoint.
+    endpointCanvases.forEach((endpoint) => {
+      if (!endpoint) return;
+      const [x, y] = endpoint.geometry.getCoordinates();
+      context.drawImage(endpoint.iconCanvas, x - endpoint.iconCanvas.width / 2, y - endpoint.iconCanvas.height / 2);
+    });
+
     return drawingCanvas;
   }
 
@@ -550,6 +770,18 @@ export abstract class GeoviewRenderer {
       else {
         const operand2 = dataStack.pop()!;
         const operand1 = dataStack.pop()!;
+        const comparisonOperators = ['=', '<', '>', '<=', '>=', '<>'];
+        if (comparisonOperators.includes(operator.nodeValue as string)) {
+          const operand1IsEpoch = typeof operand1.nodeValue === 'number';
+          const operand2IsEpoch = typeof operand2.nodeValue === 'number';
+          const operand1IsIsoDate =
+            typeof operand1.nodeValue === 'string' && GeoviewRenderer.#ISO_DATE_EXACT_REGEX.test(operand1.nodeValue);
+          const operand2IsIsoDate =
+            typeof operand2.nodeValue === 'string' && GeoviewRenderer.#ISO_DATE_EXACT_REGEX.test(operand2.nodeValue);
+
+          if (operand1IsEpoch && operand2IsIsoDate) operand2.nodeValue = DateMgt.convertToMilliseconds(operand2.nodeValue as string);
+          if (operand2IsEpoch && operand1IsIsoDate) operand1.nodeValue = DateMgt.convertToMilliseconds(operand1.nodeValue as string);
+        }
         let valueToPush;
         switch (operator.nodeValue) {
           case 'is not':
@@ -1097,7 +1329,7 @@ export abstract class GeoviewRenderer {
     iconOptions.src = this.#getImageSource(settings.src, settings.mimeType);
     if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
     if (settings.offset !== undefined) iconOptions.offset = settings.offset;
-    if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
+    if (settings.rotation !== undefined) iconOptions.rotation = (settings.rotation * Math.PI) / 180;
     if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
     if (settings.scale !== undefined) iconOptions.scale = settings.scale;
     return new Style({
@@ -1161,7 +1393,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, visualVariables } = options || {};
 
@@ -1174,24 +1406,88 @@ export abstract class GeoviewRenderer {
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     const geometry = feature?.getGeometry() as Geometry;
 
-    let style: Style | undefined;
+    let style: Style | Style[] | undefined;
     if (isLineStringVectorConfig(settings)) {
-      const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      style = new Style({
-        stroke: new Stroke(strokeOptions),
-        geometry,
-        zIndex: settings.zIndex,
-      });
+      const lineStrokes = [settings.stroke, ...(settings.additionalStrokes ?? [])];
+      const lineStyles = lineStrokes.map(
+        (strokeSettings) =>
+          new Style({
+            stroke: new Stroke(this.createStrokeOptions({ ...settings, stroke: strokeSettings })),
+            geometry,
+            zIndex: settings.zIndex,
+          })
+      );
+      style = lineStyles.length === 1 ? lineStyles[0] : lineStyles;
+
+      if (settings.graphicStrokes?.length) {
+        const graphicStyles = this.#createGraphicStrokeStyles(settings);
+        style = graphicStyles.length > 0 ? [...lineStyles, ...graphicStyles] : style;
+      }
     }
 
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
     if (feature && style && visualVarsToApply) {
-      style = this.#applyVisualVariables(style, feature, visualVarsToApply);
+      style = Array.isArray(style)
+        ? style.map((item) => this.#applyVisualVariables(item, feature, visualVarsToApply))
+        : this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
     return style;
+  }
+
+  /**
+   * Creates cached endpoint styles for graphic strokes attached to a line configuration.
+   *
+   * @param settings - The line configuration containing SLD-derived graphic strokes
+   * @returns The endpoint styles that should be rendered with the base line
+   */
+  static #createGraphicStrokeStyles(settings: TypeLineStringVectorConfig): Style[] {
+    const styles: Style[] = [];
+    settings.graphicStrokes?.forEach((graphicStroke) => {
+      if (!graphicStroke.settings || typeof graphicStroke.settings !== 'object') return;
+
+      const graphicSettings = graphicStroke.settings as TypeKindOfVectorSettings;
+      if (!isIconSymbolVectorConfig(graphicSettings)) return;
+
+      let graphicStyle = this.#GRAPHIC_STROKE_STYLE_CACHE.get(graphicStroke);
+      if (!graphicStyle) {
+        graphicStyle = this.processIconSymbol(graphicSettings);
+        if (!graphicStyle) return;
+
+        const placement = graphicStroke.placement?.toLowerCase() ?? 'firstpoint';
+        const isLastPoint = placement === 'lastpoint';
+        graphicStyle.setGeometry((lineFeature) =>
+          this.#getLineEndpointGeometry(lineFeature.getGeometry() as Geometry | undefined, isLastPoint)
+        );
+        this.#GRAPHIC_STROKE_STYLE_CACHE.set(graphicStroke, graphicStyle);
+      }
+
+      styles.push(graphicStyle);
+    });
+    return styles;
+  }
+
+  /**
+   * Resolves the first or last endpoint geometry for a line feature.
+   *
+   * @param lineGeometry - The feature geometry to inspect
+   * @param isLastPoint - Whether to return the final endpoint
+   * @returns The endpoint point, or undefined for unsupported or empty geometries
+   */
+  static #getLineEndpointGeometry(lineGeometry: Geometry | undefined, isLastPoint: boolean): Point | undefined {
+    if (lineGeometry instanceof LineString) {
+      return new Point(isLastPoint ? lineGeometry.getLastCoordinate() : lineGeometry.getFirstCoordinate());
+    }
+
+    if (lineGeometry instanceof MultiLineString) {
+      const lineCoordinates = lineGeometry.getCoordinates().flat();
+      if (lineCoordinates.length === 0) return undefined;
+      return new Point(isLastPoint ? lineCoordinates[lineCoordinates.length - 1] : lineCoordinates[0]);
+    }
+
+    return undefined;
   }
 
   /**
@@ -1576,16 +1872,21 @@ export abstract class GeoviewRenderer {
         // LineString style configuration
         const layerStyles: TypeVectorLayerStyles = { LineString: {} };
         if (styleConfig.LineString.type === 'simple') {
-          layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+          layerStyles.LineString!.defaultCanvas = await this.createLineStringCanvasAsync(
+            this.processSimpleLineString(styleConfig.LineString)
+          );
         } else {
           if (styleConfig.LineString.hasDefault)
-            layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(
+            layerStyles.LineString!.defaultCanvas = await this.createLineStringCanvasAsync(
               this.processSimpleLineString(styleConfig.LineString.info[styleConfig.LineString.info.length - 1].settings)
             );
           const styleArray: HTMLCanvasElement[] = [];
-          styleConfig.LineString.info.forEach((styleInfo) => {
-            styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
-          });
+          const lineCanvases = await Promise.all(
+            styleConfig.LineString.info.map((styleInfo) =>
+              this.createLineStringCanvasAsync(this.processSimpleLineString(styleInfo.settings))
+            )
+          );
+          styleArray.push(...lineCanvases);
           if (styleConfig.LineString.hasDefault) styleArray.pop();
           layerStyles.LineString!.arrayOfCanvas = styleArray;
         }
@@ -2255,7 +2556,7 @@ export abstract class GeoviewRenderer {
       let allFieldsMatched = true;
       for (let j = 0; j < fields.length; j++) {
         const field = fields[j];
-        const expectedValue = uniqueValueStyleInfo[i].values[j];
+        const expectedValues = fields.length === 1 ? uniqueValueStyleInfo[i].values : [uniqueValueStyleInfo[i].values[j]];
 
         // Get the target field name: check case-insensitive match in feature keys
         let fieldName = featureKeys.find((key) => key.toLowerCase() === field.toLowerCase());
@@ -2275,8 +2576,10 @@ export abstract class GeoviewRenderer {
         let actualValue = feature.get(fieldName);
 
         // First try direct match
-        // eslint-disable-next-line eqeqeq
-        let matched = actualValue == expectedValue;
+        let matched = expectedValues.some((expectedValue) => {
+          // eslint-disable-next-line eqeqeq
+          return actualValue == expectedValue;
+        });
 
         // If not matched, check coded domain
         if (!matched) {
@@ -2287,8 +2590,10 @@ export abstract class GeoviewRenderer {
             const codedValue = fieldDomainCasted.codedValues.find((dom) => dom.name === actualValue);
             if (codedValue) {
               actualValue = codedValue.code;
-              // eslint-disable-next-line eqeqeq
-              matched = actualValue == expectedValue;
+              matched = expectedValues.some((expectedValue) => {
+                // eslint-disable-next-line eqeqeq
+                return actualValue == expectedValue;
+              });
             }
           }
         }
@@ -2354,7 +2659,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
@@ -2571,7 +2876,7 @@ export abstract class GeoviewRenderer {
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
     options?: TypeStyleProcessorOptions
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Read options
     const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
@@ -2651,7 +2956,7 @@ export abstract class GeoviewRenderer {
     label: string,
     filterEquation?: FilterNodeType[],
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
-  ): Style | undefined {
+  ): Style | Style[] | undefined {
     // Determine geometry type, favoring the feature itself
     const geometryType = this.readGeometryTypeSimplifiedFromFeature(feature, layerStyle);
 
@@ -3172,8 +3477,11 @@ export abstract class GeoviewRenderer {
     const predicates = relevantInfos.map((entry) => {
       // Single-field => allow IN / =
       if (fieldCount === 1) {
-        const value = this.#formatFieldValue(fields[0], entry.values[0], outFields);
-        return `${fields[0]} = ${value}`;
+        const fieldPredicates = entry.values.map((entryValue) => {
+          const value = this.#formatFieldValue(fields[0], entryValue, outFields);
+          return `${fields[0]} = ${value}`;
+        });
+        return fieldPredicates.length === 1 ? fieldPredicates[0] : `(${fieldPredicates.join(` OR `)})`;
       }
 
       // Multi-field => tuple-style AND predicate

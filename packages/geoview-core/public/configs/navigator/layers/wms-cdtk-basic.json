@@ -14,7 +14,7 @@
         "geoviewLayerName": "Airborne",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "AIRB_RAD"
@@ -26,7 +26,7 @@
         "geoviewLayerName": "Major Projects",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "mpi-point"
@@ -41,7 +41,7 @@
         "geoviewLayerName": "Stations (no WFS)",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4"
@@ -53,7 +53,7 @@
         "geoviewLayerName": "Completed Inventory",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "completed"
@@ -65,7 +65,7 @@
         "geoviewLayerName": "Charging Corridor",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "Corridor Public Charging Planning Map",
@@ -78,7 +78,7 @@
         "geoviewLayerName": "Critical Minerals",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "mines"
@@ -90,7 +90,7 @@
         "geoviewLayerName": "Abandoned Orphaned Mines",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "oam"
@@ -102,7 +102,7 @@
         "geoviewLayerName": "Earthquakes 2000-2010",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "earthquakes_2000-2010"
@@ -114,7 +114,7 @@
         "geoviewLayerName": "GSC Photo Collection",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "seabed-photo"
@@ -126,7 +126,7 @@
         "geoviewLayerName": "Pacific Seismic Reflection",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "pacific"
@@ -138,7 +138,7 @@
         "geoviewLayerName": "Surficial Geology",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "DMF"
@@ -150,7 +150,7 @@
         "geoviewLayerName": "Lidar Point Cloud Elevation",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "lidar-projects"
@@ -162,7 +162,7 @@
         "geoviewLayerName": "Wind Turbine",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "QC"
@@ -174,7 +174,7 @@
         "geoviewLayerName": "Regions",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "regions"
@@ -186,7 +186,7 @@
         "geoviewLayerName": "OpenMaps Water Management",
         "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
         "geoviewLayerType": "ogcWms",
-        "fetchVectorsOnWFS": false,
+        "fetchVectorsExternally": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"

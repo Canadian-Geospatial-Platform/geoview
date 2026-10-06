@@ -83,6 +83,9 @@ export abstract class AbstractGeoViewLayer {
   /** The geoview layer id of the internal, temporary WFS config a WMS layer derives to fetch its vector info (outfields/styles). */
   static readonly INTERNAL_WFS_FOR_WMS_GEOVIEW_LAYER_ID = 'wfsConfigForWms';
 
+  /** The geoview layer id of the internal, temporary OGC API Features config a WMS layer derives to fetch its vector info (outfields/styles). */
+  static readonly INTERNAL_OGCAPIFEATURE_FOR_WMS_GEOVIEW_LAYER_ID = 'ogcApiFeatureConfigForWms';
+
   /** The default display date mode used when generating default configurations */
   static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode = 'long';
 
@@ -510,6 +513,12 @@ export abstract class AbstractGeoViewLayer {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the config base classes created
+   * @throws {LayerServiceMetadataUnableToFetchError} When service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty
+   * @throws {LayerNoCapabilitiesError} When WMS or WFS service metadata contains no capabilities
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {AggregateError} When multiple layer entry errors prevent the root layer from being created
    */
   async createGeoViewLayers(
     displayDateMode: DisplayDateMode,
@@ -848,8 +857,9 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the metadata has been fetched and assigned to the 'metadata' property
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerServiceMetadataEmptyError} When the metadata fetch return empty metadata
+   * @throws {LayerNoCapabilitiesError} When WMS or WFS service metadata contains no capabilities
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
     try {
@@ -1021,6 +1031,7 @@ export abstract class AbstractGeoViewLayer {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry config has its metadata processed
+   * @throws {PromiseRejectErrorWrapper} Wrapper containing the layer configuration when the metadata and the internal cause for the error.
    */
   async #processLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -1543,7 +1554,7 @@ export abstract class AbstractGeoViewLayer {
    * @param geoviewLayerId - The geoview layer id
    * @param layerName - The layer name
    * @param metadata - The metadata to check
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   // GV The metadata structure can be anything, we only care to check if there's an error inside of it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1560,6 +1571,12 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param layer - The layer to use to process the configuration
    * @returns A promise that resolves with the generated ConfigBaseClass array
+   * @throws {LayerServiceMetadataUnableToFetchError} When service metadata cannot be fetched (propagated from `createGeoViewLayers()`)
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty (propagated from `createGeoViewLayers()`)
+   * @throws {LayerNoCapabilitiesError} When WMS or WFS service metadata contains no capabilities (propagated from `createGeoViewLayers()`)
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents root layer creation (propagated from `createGeoViewLayers()`)
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created (propagated from `createGeoViewLayers()`)
+   * @throws {AggregateError} When multiple layer entries fail to process (propagated from `createGeoViewLayers()`)
    */
   protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
     // Create a promise that the layer config will be created

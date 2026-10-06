@@ -12,7 +12,6 @@ import type {
   TypeLayerMetadataOGC,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { Projection } from '@/geo/utils/projection';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -23,11 +22,14 @@ import {
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
+  fetchStylesOnWMS?: boolean;
   listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];
 }
 
@@ -71,7 +73,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the fetched metadata and proxy information
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   protected override async onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     try {
@@ -180,6 +182,12 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
+   * @throws {LayerMetadataAccessPathMandatoryError} When the collection queryables metadata path is not configured
+   * @throws {RequestTimeoutError} When the collection queryables request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the collection queryables request is aborted
+   * @throws {ResponseError} When the collection queryables response is not successful
+   * @throws {ResponseEmptyError} When the collection queryables response is empty
+   * @throws {NetworkError} When the collection queryables request encounters a network error
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -189,23 +197,32 @@ export class OgcFeature extends AbstractGeoViewVector {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
+    // Cast it
+    const layerConfigOgcFeature = layerConfig as OgcFeatureLayerEntryConfig;
+
     // The metadata url
-    const metadataUrl = layerConfig.getMetadataAccessPath();
+    const metadataUrl = layerConfigOgcFeature.getMetadataAccessPath();
 
     // If there is a metadata url
     if (metadataUrl) {
       // The query url
-      const queryUrl = `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}collections/${layerConfig.layerId}/queryables?f=json`;
+      const queryUrl = `${layerConfigOgcFeature.getMetadataAccessPathProxiedWhenNecessary(true)}collections/${layerConfigOgcFeature.layerId}/queryables?f=json`;
 
       // Query the metadata for the queryables
       const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl, { signal: abortSignal });
 
       // Init the layer metadata
-      OgcFeature.initLayerMetadata(layerConfig, queryResultData);
+      OgcFeature.initLayerMetadata(layerConfigOgcFeature, queryResultData);
+
+      // Try
+      const layerStyle = await WMS.tryProcessLayerStylingInformationIfAny(layerConfigOgcFeature);
+
+      // Initialize the layer style by filling the blanks with the information from the metadata
+      layerConfigOgcFeature.initLayerStyleFromMetadata(layerStyle);
     }
 
     // Return the layer config
-    return layerConfig;
+    return layerConfigOgcFeature;
   }
 
   /**
@@ -348,22 +365,45 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
+   * @param configProxyUrl - Proxy URL to use when necessary
    * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
+   * @param fetchStylesOnWMS - Indicates whether to fetch styles from WMS
    * @returns A promise that resolves to an array of layer configurations
+   * @throws {LayerServiceMetadataUnableToFetchError} When OGC API Features service metadata cannot be fetched
+   * @throws {LayerServiceMetadataEmptyError} When the service metadata response is empty
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured collection is not found
+   * @throws {LayerEntryConfigInvalidLayerEntryConfigError} When the OGC API Features service metadata is invalid
+   * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+   * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+   * @throws {LayerMetadataAccessPathMandatoryError} When a collection queryables metadata path is not configured
+   * @throws {RequestTimeoutError} When a collection queryables request exceeds the timeout duration
+   * @throws {RequestAbortedError} When a collection queryables request is aborted
+   * @throws {ResponseError} When a collection queryables response is not successful
+   * @throws {ResponseEmptyError} When a collection queryables response is empty
+   * @throws {NetworkError} When a collection queryables request encounters a network error
+   * @throws {AggregateError} When multiple layer entries fail to process
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
+    configProxyUrl: string | undefined,
     layerEntries: TypeLayerEntryShell[],
-    isTimeAware: boolean
+    isTimeAware: boolean,
+    fetchStylesOnWMS: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = OgcFeature.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware, layerEntries);
 
+    // Keep track if fetching styles on the WMS
+    layerConfig.fetchStylesOnWMS = fetchStylesOnWMS;
+
     // Create the class from geoview-layers package
     const myLayer = new OgcFeature(layerConfig);
+
+    // Set the config proxy url, if any in case the layer needs a proxy during processing
+    myLayer.setConfigProxyUrl(configProxyUrl);
 
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);

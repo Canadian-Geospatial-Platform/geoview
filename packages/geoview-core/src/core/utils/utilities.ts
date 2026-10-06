@@ -75,6 +75,16 @@ export function range(start: number, end: number, step = 1): number[] {
 }
 
 /**
+ * Normalizes a value to an array.
+ *
+ * @param value - The value to normalize
+ * @returns The value as an array
+ */
+export function toArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
+/**
  * Converts a string to camelCase.
  *
  * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
@@ -401,7 +411,7 @@ export function deepMergeObjects<T>(...objects: unknown[]): T {
  * @param str - The object to test
  * @returns true if the object is numeric, false otherwise
  */
-export function isNumeric(str: string): boolean {
+export function isNumeric(str: string | undefined): boolean {
   return !Number.isNaN(Number(str));
 }
 
@@ -409,10 +419,20 @@ export function isNumeric(str: string): boolean {
  * Check if an object is empty.
  *
  * @param obj - The object to test
- * @returns true if the object is empty, false otherwise
+ * @returns true if the object is nullish or has no enumerable properties, false otherwise
  */
-export function isObjectEmpty(obj: object): boolean {
-  return Object.keys(obj).length === 0;
+export function isObjectEmpty(obj: object | undefined | null): boolean {
+  return !obj || Object.keys(obj).length === 0;
+}
+
+/**
+ * Checks if an object is defined and has enumerable properties.
+ *
+ * @param obj - The object to test
+ * @returns Whether the object is defined and non-empty
+ */
+export function isObjectNonEmpty<T extends object>(obj: T | undefined | null): obj is T {
+  return !!obj && Object.keys(obj).length > 0;
 }
 
 /**
@@ -1218,7 +1238,7 @@ export function findPropertyByRegexPath<T = Record<string, unknown>>(
   objectItem: unknown | undefined,
   patterns: RegExp | RegExp[]
 ): T | T[] | undefined {
-  const regexes = Array.isArray(patterns) ? patterns : [patterns];
+  const regexes = toArray(patterns);
 
   let current = objectItem;
 

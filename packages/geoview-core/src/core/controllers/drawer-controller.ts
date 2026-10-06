@@ -20,6 +20,7 @@ import { DrawerText } from '@/geo/style/drawer-text';
 import { DrawerStyle } from '@/geo/style/drawer-style';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { DrawerStyleProperties } from '@/core/types/drawer-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
@@ -58,7 +59,6 @@ import {
   setStoreIsEditing,
   setStoreIsSnapping,
   setStoreDrawerShortcutsEnabled,
-  type StyleProps,
   type DrawGeometryType,
 } from '@/core/stores/states/drawer-state';
 import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
@@ -78,6 +78,7 @@ import {
 import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -231,7 +232,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @param geomType - Optional geometry type to draw (uses current state if not provided)
    * @param styleInput - Optional style properties to use
    */
-  startDrawing(geomType?: DrawGeometryType, styleInput?: StyleProps): void {
+  startDrawing(geomType?: DrawGeometryType, styleInput?: DrawerStyleProperties): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -272,9 +273,7 @@ export class DrawerController extends AbstractMapViewerController {
     // Record of GeometryFunctions for creating custom geometries
     const customGeometries: Record<string, GeometryFunction> = {
       Star: (coordinates: SketchCoordType, geometry: SimpleGeometry): Polygon => {
-        const svgPath =
-          'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
-        return DrawerController.#svgPathToGeometry(svgPath, coordinates, geometry);
+        return GeoviewRenderer.getStarGeometryFromSVG(coordinates, geometry);
       },
       Rectangle: createBox(),
     };
@@ -849,7 +848,7 @@ export class DrawerController extends AbstractMapViewerController {
    *
    * @param newStyle - The new style to apply
    */
-  updateTransformingFeatureStyle(newStyle: StyleProps): void {
+  updateTransformingFeatureStyle(newStyle: DrawerStyleProperties): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -865,7 +864,7 @@ export class DrawerController extends AbstractMapViewerController {
     // Store original style if not already stored
     if (this.#selectedFeatureState) {
       // Apply the new style
-      const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+      const isTextFeature = DrawerStyle.isTextFeature(selectedFeature);
 
       if (selectedFeature.getGeometry() instanceof Point && !isTextFeature) {
         const currentStyle = selectedFeature.getStyle() as DrawerStyle;
@@ -1028,9 +1027,11 @@ export class DrawerController extends AbstractMapViewerController {
     let geometry: Geometry;
 
     if (geomType === 'Circle') {
+      // Treat the first coordinate as the center and the second as a point on the radius.
       const radius = Math.sqrt(Math.pow(secondCoord[0] - firstCoord[0], 2) + Math.pow(secondCoord[1] - firstCoord[1], 2));
       geometry = new CircleGeom(firstCoord, radius);
     } else if (geomType === 'Rectangle') {
+      // Normalize the two opposite corners so dragging in any direction creates the same rectangle ring order.
       const minX = Math.min(firstCoord[0], secondCoord[0]);
       const minY = Math.min(firstCoord[1], secondCoord[1]);
       const maxX = Math.max(firstCoord[0], secondCoord[0]);
@@ -1046,11 +1047,8 @@ export class DrawerController extends AbstractMapViewerController {
         ],
       ]);
     } else if (geomType === 'Star') {
-      // TODO: This needs to be reworked to get the svgPath from a central location
-      // TO.DOCONT: incase other shapes are added in the future
-      const svgPath =
-        'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
-      geometry = DrawerController.#svgPathToGeometry(svgPath, [firstCoord, secondCoord]);
+      // Reuse the renderer helper so keyboard-created stars match pointer-drawn stars.
+      geometry = GeoviewRenderer.getStarGeometryFromSVG([firstCoord, secondCoord]);
     } else {
       return;
     }
@@ -1221,7 +1219,7 @@ export class DrawerController extends AbstractMapViewerController {
     const handleType = transformInstance.getHandleTypeAtCoordinate(coordinate);
     if (handleType === HandleType.VERTEX) {
       // Check if this is a text feature - don't delete vertices from text
-      const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+      const isTextFeature = DrawerStyle.isTextFeature(selectedFeature);
       if (isTextFeature) return false;
 
       // Delete the vertex
@@ -1230,7 +1228,7 @@ export class DrawerController extends AbstractMapViewerController {
     }
 
     // Check if it's a text feature and we're clicking inside it
-    const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+    const isTextFeature = DrawerStyle.isTextFeature(selectedFeature);
     if (!isTextFeature) return false;
 
     // Check if coordinate is within the text's bounding box
@@ -1347,7 +1345,7 @@ export class DrawerController extends AbstractMapViewerController {
       const selectedFeature = transformInstance.getSelectedFeature();
       if (selectedFeature) {
         // Check if we're actually clicking on the selected feature
-        const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+        const isTextFeature = DrawerStyle.isTextFeature(selectedFeature);
 
         if (isTextFeature) {
           // For text features, check bounding box
@@ -1755,7 +1753,7 @@ export class DrawerController extends AbstractMapViewerController {
           const geometry = feature.getGeometry();
 
           // Extract style properties from feature style
-          const styleProps: TypeGeoJSONStyleProps = olStyle && geometry ? DrawerController.#getStyleProperties(olStyle) : {};
+          const styleProps: TypeGeoJSONStyleProps = olStyle && geometry ? DrawerStyle.getStyleProperties(olStyle) : {};
 
           if (!geometry) return undefined;
 
@@ -2031,31 +2029,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @returns The text extent or null if calculation fails
    */
   #calculateTextExtent(feature: Feature): Extent | null {
-    const geometry = feature.getGeometry();
-    if (!(geometry instanceof Point)) return null;
-
-    const coords = geometry.getCoordinates();
-    const style = feature.getStyle() as DrawerStyle;
-    const text = style.getTextContent();
-    const fontSize = style.getTextSize();
-
-    const resolution = this.getMapViewer().getView().getResolution() || 1;
-
-    const charWidth = fontSize * 0.6;
-    const textWidth = text.length * charWidth;
-    const textHeight = fontSize * 1.2;
-
-    const mapWidth = textWidth * resolution;
-    const mapHeight = textHeight * resolution;
-
-    // Text is centered
-    const textCenterY = coords[1];
-    const textLeft = coords[0] - mapWidth / 2.5;
-    const textRight = coords[0] + mapWidth / 2.5;
-    const textBottom = textCenterY - mapHeight / 1.25;
-    const textTop = textCenterY + mapHeight / 1.25;
-
-    return [textLeft, textBottom, textRight, textTop];
+    // Redirect to utility function
+    return DrawerStyle.calculateTextExtent(feature, this.getMapViewer().getView().getResolution() || 1);
   }
 
   /**
@@ -2130,7 +2105,7 @@ export class DrawerController extends AbstractMapViewerController {
       ...action,
       features: action.features.map((feature) => {
         const newFeature = feature.clone();
-        const newStyle = DrawerController.cloneStyle(newFeature.getStyle()!);
+        const newStyle = DrawerStyle.cloneStyle(newFeature.getStyle()!);
         newFeature.setStyle(newStyle);
         return newFeature;
       }),
@@ -2503,12 +2478,12 @@ export class DrawerController extends AbstractMapViewerController {
       const { feature } = event;
       if (!feature) return;
 
-      const isTextFeature = DrawerController.#isTextFeature(feature);
+      const isTextFeature = DrawerStyle.isTextFeature(feature);
       // Update Text Styles
       if (isTextFeature) {
         const currentStyle = feature.getStyle();
         if (currentStyle instanceof DrawerStyle) {
-          const styleProps = DrawerController.#getStyleProperties(currentStyle);
+          const styleProps = DrawerStyle.getStyleProperties(currentStyle);
 
           // Update store
           setStoreTextSize(mapId, styleProps.textSize || 18);
@@ -2595,7 +2570,7 @@ export class DrawerController extends AbstractMapViewerController {
             // Check for changes
             const geometryChanged = currentGeometry && !GeoUtilities.geometriesAreEqual(savedState.originalGeometry, currentGeometry);
             const styleChanged =
-              savedState.originalStyle && DrawerController.#stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle());
+              savedState.originalStyle && DrawerStyle.stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle());
 
             if (geometryChanged || styleChanged) {
               // Save modify action - include geometry and style only if it was changed
@@ -2608,7 +2583,7 @@ export class DrawerController extends AbstractMapViewerController {
                 }),
                 ...(styleChanged && {
                   originalStyles: [savedState.originalStyle],
-                  modifiedStyles: [DrawerController.cloneStyle(previousFeature.getStyle()!)],
+                  modifiedStyles: [DrawerStyle.cloneStyle(previousFeature.getStyle()!)],
                 }),
               });
             }
@@ -2624,7 +2599,7 @@ export class DrawerController extends AbstractMapViewerController {
           this.#selectedFeatureState = {
             feature: newFeature,
             originalGeometry: currentGeometry.clone(),
-            originalStyle: DrawerController.cloneStyle(newFeature.getStyle()!),
+            originalStyle: DrawerStyle.cloneStyle(newFeature.getStyle()!),
           };
         }
       } else {
@@ -2648,10 +2623,10 @@ export class DrawerController extends AbstractMapViewerController {
           newTooltip.getElement().hidden = true;
         }
 
-        const featureProperties = DrawerController.#getFeatureStyleProperties(newFeature);
+        const featureProperties = DrawerStyle.getFeatureStyleProperties(newFeature);
         updateStoreStateStyle(mapId, featureProperties);
 
-        const geomType = DrawerController.#isTextFeature(newFeature) ? 'Text' : newFeature?.getGeometry()?.getType() || undefined;
+        const geomType = DrawerStyle.isTextFeature(newFeature) ? 'Text' : newFeature?.getGeometry()?.getType() || undefined;
         setStoreSelectedDrawingType(mapId, geomType);
       } else {
         // Clear selected drawing type when no feature is selected
@@ -2864,76 +2839,6 @@ export class DrawerController extends AbstractMapViewerController {
   // #region STATIC METHODS
 
   /**
-   * Extracts style properties from a feature.
-   *
-   * @param feature - The feature to extract properties from
-   * @returns The extracted style properties
-   */
-  static #getFeatureStyleProperties(feature: Feature): StyleProps {
-    return this.#getStyleProperties(feature.getStyle() as DrawerStyle);
-  }
-
-  /**
-   * Extracts style properties from a style object.
-   *
-   * @param style - The style object to extract properties from
-   * @returns The extracted style properties
-   */
-  static #getStyleProperties(style: DrawerStyle): StyleProps {
-    const styleProps: StyleProps = {} as StyleProps;
-
-    // Extract stroke/fill properties from the feature's style
-    if (style) {
-      const stroke = style.getStroke();
-      const fill = style.getFill();
-
-      if (stroke) {
-        styleProps.strokeColor = stroke.getColor() as string;
-        styleProps.strokeWidth = stroke.getWidth() || 1.3;
-      }
-
-      if (fill) {
-        styleProps.fillColor = fill.getColor() as string;
-      }
-
-      // Extract text properties from the Text style
-      if (style.isTextStyle()) {
-        styleProps.text = style.getTextContent();
-        styleProps.textBold = style.getTextBold();
-        styleProps.textItalic = style.getTextItalic();
-        styleProps.textSize = style.getTextSize();
-        styleProps.textFont = style.getTextFontFamily();
-        styleProps.textColor = style.getTextColor();
-        styleProps.textHaloColor = style.getTextHaloColor();
-        styleProps.textHaloWidth = style.getTextHaloWidth();
-        styleProps.textRotation = style.getTextRotation();
-      }
-
-      // Extract icon properties from the Image style
-      if (style.isIconStyle()) {
-        styleProps.iconSrc = style.getIconSrc();
-        styleProps.strokeColor = style.getIconStrokeColor() ?? styleProps.strokeColor;
-        styleProps.strokeWidth = style.getIconStrokeWidth() ?? styleProps.strokeWidth;
-        styleProps.fillColor = style.getIconFillColor() ?? styleProps.fillColor;
-        styleProps.iconSize = style.getIconSize();
-      }
-    }
-
-    return styleProps;
-  }
-
-  /**
-   * Checks if a feature has a text style.
-   *
-   * @param feature - The feature to check
-   * @returns True if the feature has a DrawerText style
-   */
-  static #isTextFeature(feature: Feature): boolean {
-    const style = feature.getStyle();
-    return style instanceof DrawerStyle && style.isTextStyle();
-  }
-
-  /**
    * Sets up a feature with ID, geometry group, and type-specific properties.
    *
    * @param feature - The feature to set up
@@ -3038,174 +2943,6 @@ export class DrawerController extends AbstractMapViewerController {
     // Set the tooltip on the feature so it can be replaced later if modified
     feature.set('measureTooltip', measureTooltip);
     return measureTooltip;
-  }
-
-  /**
-   * Converts an SVG path string to a polygon geometry with auto-centering.
-   *
-   * @param svgPath - SVG path string
-   * @param coordinates - Circle coordinate (center and outer edge)
-   * @param geometry - Optional intermediate geometry for display while expanding
-   * @returns The resulting polygon
-   */
-  static #svgPathToGeometry = (svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon => {
-    const center = coordinates[0] as number[];
-    const last = coordinates[1] as number[];
-    const radius = Math.sqrt((last[0] - center[0]) ** 2 + (last[1] - center[1]) ** 2);
-    const angle = Math.atan2(last[1] - center[1], last[0] - center[0]);
-
-    // Parse the SVG path to get coordinates
-    const coords = this.#svgPathToCoordinates(svgPath, [0, 0]);
-
-    // Find the bounding box to calculate center
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    coords.forEach((point) => {
-      minX = Math.min(minX, point[0]);
-      minY = Math.min(minY, point[1]);
-      maxX = Math.max(maxX, point[0]);
-      maxY = Math.max(maxY, point[1]);
-    });
-
-    // Calculate center of the SVG path
-    const svgCenterX = (minX + maxX) / 2;
-    const svgCenterY = (minY + maxY) / 2;
-
-    // Calculate the size of the SVG path
-    const svgWidth = maxX - minX;
-    const svgHeight = maxY - minY;
-    const svgSize = Math.max(svgWidth, svgHeight);
-
-    // Calculate scale factor to fit the shape within the radius
-    const scaleFactor = (radius * 2) / svgSize;
-
-    // Center, scale, and rotate the coordinates
-    const finalCoords = coords.map((point) => {
-      // Center the point
-      const centeredX = point[0] - svgCenterX;
-      const centeredY = point[1] - svgCenterY;
-
-      // Scale to fit within radius
-      const scaledX = centeredX * scaleFactor;
-      const scaledY = centeredY * scaleFactor;
-
-      // Rotate point
-      const x = scaledX * Math.cos(angle) - scaledY * Math.sin(angle);
-      const y = scaledX * Math.sin(angle) + scaledY * Math.cos(angle);
-
-      // Translate to target center
-      return [x + center[0], y + center[1]];
-    });
-
-    // Create or update geometry
-    if (!geometry) {
-      // eslint-disable-next-line no-param-reassign
-      geometry = new Polygon([finalCoords]);
-    } else {
-      geometry.setCoordinates([finalCoords]);
-    }
-
-    return geometry as Polygon;
-  };
-
-  /**
-   * Converts an SVG path string to an array of coordinates.
-   *
-   * @param pathData - SVG path string
-   * @param center - Center coordinates
-   * @returns Array of coordinates
-   */
-  static #svgPathToCoordinates = (pathData: string, center: number[]): number[][] => {
-    const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
-    const coords: number[][] = [];
-    let currentPoint = [0, 0];
-
-    commands.forEach((cmd) => {
-      const type = cmd[0];
-      const values = cmd
-        .slice(1)
-        .trim()
-        .split(/[\s,]+/)
-        .map(Number)
-        .filter((n) => !Number.isNaN(n));
-
-      if (type === 'M') {
-        // Absolute move
-        for (let i = 0; i < values.length; i += 2) {
-          currentPoint = [values[i], values[i + 1]];
-          coords.push([...currentPoint]);
-        }
-      } else if (type === 'm') {
-        // Relative move
-        for (let i = 0; i < values.length; i += 2) {
-          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
-          coords.push([...currentPoint]);
-        }
-      } else if (type === 'L') {
-        // Absolute line
-        for (let i = 0; i < values.length; i += 2) {
-          currentPoint = [values[i], values[i + 1]];
-          coords.push([...currentPoint]);
-        }
-      } else if (type === 'l') {
-        // Relative line
-        for (let i = 0; i < values.length; i += 2) {
-          currentPoint = [currentPoint[0] + values[i], currentPoint[1] + values[i + 1]];
-          coords.push([...currentPoint]);
-        }
-      } else if (type === 'Z' || type === 'z') {
-        // Close path - add first point again
-        if (coords.length > 0) {
-          coords.push([...coords[0]]);
-        }
-      }
-    });
-
-    // Apply center offset after all coordinates are calculated
-    return coords.map((point) => [point[0] + center[0], point[1] + center[1]]);
-  };
-
-  /**
-   * Compares two styles by their properties rather than reference equality.
-   *
-   * @param style1 - First style to compare
-   * @param style2 - Second style to compare
-   * @returns Whether the styles have different properties
-   */
-  static #stylesAreDifferent(style1: StyleLike | undefined, style2: StyleLike | undefined): boolean {
-    // If references are the same, styles are identical
-    if (style1 === style2) return false;
-
-    // If one is undefined/null and the other isn't, they're different
-    if (!style1 || !style2) return true;
-
-    // If either isn't a Style instance, can't compare
-    if (!(style1 instanceof DrawerStyle) || !(style2 instanceof DrawerStyle)) return true;
-
-    // Compare extracted properties
-    const props1 = this.#getStyleProperties(style1);
-    const props2 = this.#getStyleProperties(style2);
-
-    return JSON.stringify(props1) !== JSON.stringify(props2);
-  }
-
-  /**
-   * Clones a given style or array of styles.
-   *
-   * @param styleLike - The style or array of styles to clone
-   * @returns A cloned style or array of cloned styles
-   */
-  static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[] {
-    if (styleLike instanceof Style) {
-      // Single Style — just clone it.
-      return (styleLike as DrawerStyle).clone();
-    } else if (Array.isArray(styleLike)) {
-      // Array of Styles — clone each one.
-      return styleLike.map((style) => (style as DrawerStyle).clone());
-    }
-    throw new Error('Unsupported StyleLike type');
   }
 
   // #endregion STATIC METHODS

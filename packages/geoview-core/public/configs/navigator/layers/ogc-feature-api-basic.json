@@ -10,10 +10,23 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "fetchStylesOnWMS": false,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "weather-clim-group",
         "geoviewLayerName": "Weather Climate Group",
         "metadataAccessPath": "https://api.weather.gc.ca",
         "geoviewLayerType": "ogcFeature",
+        "fetchStylesOnWMS": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "ahccd-stations",

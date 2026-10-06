@@ -203,7 +203,7 @@ export function ExportModal(): JSX.Element {
       const filename = `${fileExportDefaultPrefixName}-${sanitizedTitle}`;
 
       // TODO Find a way to use sx in the pdf/canvas-layout files.
-      // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
+      // TO.DOCONT Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
       if (exportFormat === 'pdf') {
         const pdfUrl = await createPDFMapUrl(mapId, {
           exportTitle,

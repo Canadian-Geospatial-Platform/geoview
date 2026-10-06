@@ -46,4 +46,14 @@ export class ServicesManagement {
     // Return the tweaked url
     return parsedUrl;
   }
+
+  /**
+   * Toggles the MapServer `ms:` prefix on a WFS/WMS layer identifier.
+   *
+   * @param layerId - The layer identifier to transform
+   * @returns The layer identifier with its `ms:` prefix added or removed
+   */
+  static toggleMsLayerIdPrefix(layerId: string): string {
+    return layerId.startsWith('ms:') ? layerId.slice(3) : `ms:${layerId}`;
+  }
 }

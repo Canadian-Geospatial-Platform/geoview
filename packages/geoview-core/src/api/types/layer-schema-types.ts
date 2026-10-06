@@ -770,7 +770,8 @@ export type TypeUserStyleRule = {
 
 export type TypeUserStyleRuleFilter = {
   'ogc:And'?: TypeUserStyleRuleFilter;
-  'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
+  'ogc:Or'?: TypeUserStyleRuleFilter;
+  'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails | TypeUserStyleRuleFilterPropertyDetails[];
   'ogc:PropertyIsGreaterThan'?: TypeUserStyleRuleFilterPropertyDetails;
   'ogc:PropertyIsGreaterThanOrEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
   'ogc:PropertyIsLessThan'?: TypeUserStyleRuleFilterPropertyDetails;
@@ -827,6 +828,16 @@ export type TypeUserStyleGraphic = {
   'se:Mark': TypeUserStyleMark;
   'se:Size': string;
   'se:Rotation': TypeLiteral;
+  /** Optional graphic displacement in pixels. */
+  'se:Displacement'?: TypeUserStyleDisplacement;
+};
+
+/** Describes the horizontal and vertical displacement of an SLD graphic. */
+export type TypeUserStyleDisplacement = {
+  /** Horizontal displacement. */
+  'se:DisplacementX'?: string;
+  /** Vertical displacement. */
+  'se:DisplacementY'?: string;
 };
 
 export type TypeLiteral = {
@@ -835,6 +846,12 @@ export type TypeLiteral = {
 
 export type TypeUserStyleMark = {
   'se:WellKnownName'?: string;
+  /** Optional font resource used by a font mark. */
+  'se:OnlineResource'?: TypeOnlineResourceWMS;
+  /** Optional mark resource format. */
+  'se:Format'?: string;
+  /** Optional Unicode code point used by a font mark. */
+  'se:MarkIndex'?: string;
   'se:Fill'?: TypeUserStyleParameter;
   'se:Stroke'?: TypeUserStyleParameter;
 };

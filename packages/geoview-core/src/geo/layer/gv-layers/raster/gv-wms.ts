@@ -15,7 +15,10 @@ import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type {
   TypeFeatureInfoEntry,
   TypeOutfieldsType,
@@ -34,21 +37,11 @@ import {
   MIME_TYPE_FORMAT_TEXT,
   MIME_TYPE_FORMAT_TEXT_XML,
 } from '@/api/types/layer-schema-types';
-import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { Projection } from '@/geo/utils/projection';
 import {
   LayerConfigWFSMissingError,
   LayerInvalidFeatureInfoFormatWMSError,
   LayerInvalidLayerFilterError,
 } from '@/core/exceptions/layer-exceptions';
-import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
-import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
-import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import {
   LayerImageFailedNoImageError,
   LayerImageFailedToLoadHeightTooBigError,
@@ -57,8 +50,19 @@ import {
   InvalidProjectionError,
   NoExtentError,
 } from '@/core/exceptions/geoview-exceptions';
-import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { logger } from '@/core/utils/logger';
+import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
+import { DateMgt } from '@/core/utils/date-mgt';
+import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { Projection } from '@/geo/utils/projection';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages a WMS layer.
@@ -334,6 +338,24 @@ export class GVWMS extends AbstractGVRaster {
       );
     }
 
+    // Get the Geoview Layer Config OGC Feature API equivalent if any
+    const ogcApiFeatureLayerConfig = wmsLayerConfig.getOGCApiFeaturesLayerConfig();
+
+    // If the layer has an OGC Feature API associated
+    if (ogcApiFeatureLayerConfig) {
+      // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
+      return await this.#fetchFeatureInfoForOGCAPIFeature(
+        wmsLayerConfig,
+        ogcApiFeatureLayerConfig,
+        clickCoordinate,
+        viewResolution,
+        mapProjection.getCode(),
+        language,
+        this.getLayerFilters(),
+        abortController
+      );
+    }
+
     // Try various info formats patterns to get feature info
     return this.#fetchFeatureInfoWithFormatFallbackForWMS(
       wmsLayerConfig,
@@ -373,19 +395,42 @@ export class GVWMS extends AbstractGVRaster {
 
     // Get the Geoview Layer Config WFS equivalent
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
-    if (!wfsLayerConfig) throw new LayerConfigWFSMissingError(this.getLayerPath());
 
-    // Redirect
-    return this.#fetchFeatureInfoWithFormatFallbackForWFS(
-      wmsLayerConfig,
-      wfsLayerConfig,
-      undefined,
-      undefined,
-      map.getView().getProjection().getCode(),
-      language,
-      layerFilters,
-      abortController
-    );
+    // If going through WFS
+    if (wfsLayerConfig) {
+      // Redirect
+      return this.#fetchFeatureInfoWithFormatFallbackForWFS(
+        wmsLayerConfig,
+        wfsLayerConfig,
+        undefined,
+        undefined,
+        map.getView().getProjection().getCode(),
+        language,
+        layerFilters,
+        abortController
+      );
+    }
+
+    // Get the Geoview Layer Config OGC Api Fature equivalent
+    const ogcApiFeatureLayerConfig = wmsLayerConfig.getOGCApiFeaturesLayerConfig();
+
+    // If going through OGC API Features
+    if (ogcApiFeatureLayerConfig) {
+      // Redirect
+      return this.#fetchFeatureInfoForOGCAPIFeature(
+        wmsLayerConfig,
+        ogcApiFeatureLayerConfig,
+        undefined,
+        undefined,
+        map.getView().getProjection().getCode(),
+        language,
+        layerFilters,
+        abortController
+      );
+    }
+
+    // Impossible to get all feature, no associated vector information available
+    throw new LayerConfigWFSMissingError(this.getLayerPath());
   }
 
   /**
@@ -666,6 +711,16 @@ export class GVWMS extends AbstractGVRaster {
 
     // Emit about it
     this.#emitWmsStyleChanged({ wmsStyleName: wmsStyleId });
+  }
+
+  /**
+   * Indicates whether all records can be queried through an associated vector service.
+   *
+   * @returns `true` when a WFS or OGC API Features configuration is associated with the WMS layer
+   */
+  getIsQueryableForAllRecords(): boolean {
+    // Return true if we have a WFS layer config or a OGCFeatureAPI associated with the WMS config
+    return !!this.getLayerConfig().getWfsLayerConfig() || !!this.getLayerConfig().getOGCApiFeaturesLayerConfig();
   }
 
   // #endregion PUBLIC METHODS
@@ -966,6 +1021,65 @@ export class GVWMS extends AbstractGVRaster {
     throw new LayerInvalidFeatureInfoFormatWMSError(wmsLayerConfig.layerPath, featureInfoFormat, wmsLayerConfig.getLayerNameCascade());
   }
 
+  /**
+   * Retrieves and formats features from an associated OGC API Features collection.
+   *
+   * Click queries use a buffered bounding box expressed in the OGC API default CRS84 coordinate order. Active layer filters are applied
+   * locally because filtering is not part of the OGC API Features Core conformance class.
+   *
+   * @param wmsLayerConfig - The current WMS layer config
+   * @param ogcFeatureLayerConfig - The associated OGC API Features layer config
+   * @param clickCoordinate - Optional clicked coordinate in the map projection
+   * @param viewResolution - Optional current map resolution in map units per pixel
+   * @param projectionCode - The map projection code
+   * @param language - The display language used to resolve the best name field
+   * @param layerFilters - Optional layer filters to apply to the returned features
+   * @param abortController - Optional {@link AbortController} used to cancel the request
+   * @returns A promise that resolves with the feature info result
+   * @throws {LayerDataAccessPathMandatoryError} When the OGC API Features data access path is not configured
+   * @throws {InvalidProjectionError} When the map projection cannot be resolved
+   * @throws {ResponseError} When the response is not successful
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request is aborted
+   * @throws {NetworkError} When the request encounters a network error
+   */
+  async #fetchFeatureInfoForOGCAPIFeature(
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    ogcFeatureLayerConfig: OgcFeatureLayerEntryConfig,
+    clickCoordinate: Coordinate | undefined,
+    viewResolution: number | undefined,
+    projectionCode: string,
+    language: TypeDisplayLanguage,
+    layerFilters?: LayerFilters,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
+    const queryParams = new URLSearchParams({
+      f: 'json',
+      // limit: `${this.getGetFeatureInfoFeatureCount()}`,
+    });
+
+    if (clickCoordinate && viewResolution) {
+      const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
+      const mapProjection = Projection.getProjectionFromStringOrNumber(projectionCode);
+      const bbox = Projection.transformExtentFromProj(bufferedPoint.getExtent(), mapProjection, Projection.getProjectionLonLat());
+      queryParams.set('bbox', bbox.join(','));
+    }
+
+    const url = `${ogcFeatureLayerConfig.getDataAccessPathProxiedWhenNecessary(true)}collections/${ogcFeatureLayerConfig.layerId}/items?${queryParams}`;
+    const responseData = await Fetch.fetchJson(url, { signal: abortController?.signal });
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
+    const filterEquation = layerFilters?.getFilterEquation();
+
+    if (filterEquation) {
+      sourceFeaturesInfo.features = sourceFeaturesInfo.features.filter((feature) =>
+        GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation)
+      );
+    }
+
+    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, ogcFeatureLayerConfig, language);
+  }
+
   // #endregion PRIVATE METHODS
 
   // #region STATIC PUBLIC METHODS
@@ -1029,19 +1143,10 @@ export class GVWMS extends AbstractGVRaster {
       // Check the time filter
       newDatetimeFilter = filter?.getTimeFilter();
       if (newDatetimeFilter) {
-        // Read the date filter
-        const queryElements = newDatetimeFilter.split(/(?<=\b)\s*=/);
-
-        // If there's a specific filter
-        if (queryElements.length > 1) {
-          // Parse the filter value to use
-          const datetimeFilter = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(
-            queryElements[1].trim(),
-            layerConfig.getServiceDateTimezone()
-          );
-
-          // Create the source parameter to update
-          sourceParams.TIME = datetimeFilter.replace(/\s*/g, '');
+        if (layerConfig instanceof OgcWmsLayerEntryConfig) {
+          sourceParams.TIME = GVWMS.#parseTimeFilterForWms(newDatetimeFilter, layerConfig.getServiceDateTimezone());
+        } else {
+          sourceParams.TIME = GVWMS.#parseTimeFilterForEsriImage(newDatetimeFilter);
         }
       }
 
@@ -1068,6 +1173,89 @@ export class GVWMS extends AbstractGVRaster {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Converts a reusable time filter predicate into a WMS TIME parameter value.
+   *
+   * @param timeFilter - Time filter predicate to convert
+   * @param timezone - Optional service timezone used to normalize date values
+   * @returns The WMS TIME parameter value
+   * @throws {Error} When the time filter does not use a supported predicate
+   */
+  static #parseTimeFilterForWms(timeFilter: string, timezone?: string): string {
+    // Preserve support for the previous WMS-specific syntax while existing callers migrate.
+    const legacyQueryElements = timeFilter.split(/(?<=\b)\s*=/);
+    if (legacyQueryElements.length > 1 && /\bdate\s*'/i.test(legacyQueryElements[1])) {
+      return GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(legacyQueryElements[1].trim(), timezone).replace(/\s*/g, '');
+    }
+
+    const normalizeDate = (date: string): string => {
+      return GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(`date '${date}'`, timezone);
+    };
+    const timeValues = GVWMS.#parseCanonicalTimeFilterValues(timeFilter);
+
+    return timeValues.map(normalizeDate).join('/');
+  }
+
+  /**
+   * Converts a reusable time filter predicate into an Esri Image TIME parameter value.
+   *
+   * @param timeFilter - Time filter predicate to convert
+   * @returns The Esri Image TIME parameter value
+   * @throws {Error} When the time filter does not use a supported predicate
+   */
+  static #parseTimeFilterForEsriImage(timeFilter: string): string {
+    // Preserve support for the previous ImageServer-specific syntax while existing callers migrate.
+    const legacyTimeMatch = /^\s*time\s*=\s*(\d+)(?:\s*,\s*(\d+))?\s*$/i.exec(timeFilter);
+    if (legacyTimeMatch)
+      return legacyTimeMatch
+        .slice(1)
+        .filter((value) => value !== undefined)
+        .join(',');
+
+    return GVWMS.#parseCanonicalTimeFilterValues(timeFilter)
+      .map((date) => DateMgt.convertToMilliseconds(date))
+      .join(',');
+  }
+
+  /**
+   * Extracts date values from a reusable equality or bounded-range time predicate.
+   *
+   * @param timeFilter - Time filter predicate to parse
+   * @returns The selected date values in predicate order
+   * @throws {Error} When the time filter does not use a supported predicate
+   */
+  static #parseCanonicalTimeFilterValues(timeFilter: string): string[] {
+    const filterEquation = GeoviewRenderer.createFilterNodeFromFilter(timeFilter);
+
+    const isSingleDate =
+      filterEquation.length === 3 &&
+      filterEquation[0].nodeType === NodeType.variable &&
+      filterEquation[1].nodeType === NodeType.binary &&
+      filterEquation[1].nodeValue === '=' &&
+      filterEquation[2].nodeType === NodeType.string &&
+      typeof filterEquation[2].nodeValue === 'string';
+    if (isSingleDate) return [filterEquation[2].nodeValue as string];
+
+    const isDateRange =
+      filterEquation.length === 7 &&
+      filterEquation[0].nodeType === NodeType.variable &&
+      filterEquation[1].nodeType === NodeType.binary &&
+      ['>', '>='].includes(filterEquation[1].nodeValue as string) &&
+      filterEquation[2].nodeType === NodeType.string &&
+      typeof filterEquation[2].nodeValue === 'string' &&
+      filterEquation[3].nodeType === NodeType.binary &&
+      filterEquation[3].nodeValue === 'and' &&
+      filterEquation[4].nodeType === NodeType.variable &&
+      filterEquation[4].nodeValue === filterEquation[0].nodeValue &&
+      filterEquation[5].nodeType === NodeType.binary &&
+      ['<', '<='].includes(filterEquation[5].nodeValue as string) &&
+      filterEquation[6].nodeType === NodeType.string &&
+      typeof filterEquation[6].nodeValue === 'string';
+    if (isDateRange) return [filterEquation[2].nodeValue as string, filterEquation[6].nodeValue as string];
+
+    throw new Error(`Unsupported time filter syntax`);
+  }
 
   /**
    * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
@@ -1111,7 +1299,7 @@ export class GVWMS extends AbstractGVRaster {
     // ? Ignore the data projection of the WFS, because we don't want to confuse it with the data projection of the WMS
 
     // Return the parsed result
-    return GVWMS.#formatFeatureInfoResultFromWFSFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
   }
 
   /**
@@ -1138,39 +1326,39 @@ export class GVWMS extends AbstractGVRaster {
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWFS(responseData, wfsLayerConfig.getVersionOrDefault(), undefined);
 
     // Return the parsed result
-    return GVWMS.#formatFeatureInfoResultFromWFSFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
   }
 
   /**
-   * Formats OpenLayers features returned from WFS into a WMS feature info result.
+   * Formats OpenLayers features returned from an associated vector service into a WMS feature info result.
    *
    * @param sourceFeaturesInfo - The parsed OpenLayers features and source projection information
    * @param wmsLayerConfig - The associated WMS layer configuration
-   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and date formatting
+   * @param vectorLayerConfig - The vector layer configuration used for schema tags, outfields, metadata, and date formatting
    * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @returns The formatted feature info result
    */
-  static #formatFeatureInfoResultFromWFSFeatures(
+  static #formatFeatureInfoResultFromVectorFeatures(
     sourceFeaturesInfo: SourceFeaturesInfo,
     wmsLayerConfig: OgcWmsLayerEntryConfig,
-    wfsLayerConfig: OgcWfsLayerEntryConfig,
+    vectorLayerConfig: VectorLayerEntryConfig,
     language: TypeDisplayLanguage
   ): TypeFeatureInfoResult {
     const { features } = sourceFeaturesInfo;
 
     // Find the best name field and validate its existance at the same time when one was initially configured
-    const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
+    const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), vectorLayerConfig.getOutfields(), language);
 
-    // The style favoring the style in the WMS layer config in case it was overridden otherwise take the WFS style if any
-    const layerStyle = wmsLayerConfig.getLayerStyle() ?? wfsLayerConfig.getLayerStyle();
+    // Favor the WMS layer style when it was overridden; otherwise use the associated vector layer style
+    const layerStyle = wmsLayerConfig.getLayerStyle() ?? vectorLayerConfig.getLayerStyle();
 
     // Parse the features
     const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
       wmsLayerConfig.layerPath,
-      wfsLayerConfig.getSchemaTag(),
+      vectorLayerConfig.getSchemaTag(),
       nameField,
-      wfsLayerConfig.getOutfields(),
+      vectorLayerConfig.getOutfields(),
       wmsLayerConfig.hasOutfieldsPK(),
       undefined,
       layerStyle,

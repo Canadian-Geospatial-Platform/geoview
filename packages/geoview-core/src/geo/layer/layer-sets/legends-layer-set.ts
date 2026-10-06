@@ -5,7 +5,7 @@ import type {
 } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
@@ -22,6 +22,7 @@ import {
 } from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
+import { isObjectNonEmpty } from '@/core/utils/utilities';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -251,9 +252,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
       // Whenever the legend response comes in
       legendPromise
-        ?.then((legend: TypeLegend | null | undefined) => {
-          // If legend received
-          if (legend) {
+        ?.then((legend) => {
+          // If legend was received
+          if (isObjectNonEmpty(legend)) {
             // Check for possible number of icons and set icon cache size
             this.mapViewer.updateIconImageCache(legend);
 
