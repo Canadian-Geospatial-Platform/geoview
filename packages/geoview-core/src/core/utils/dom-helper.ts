@@ -16,6 +16,9 @@ export const GV_DOM_SUFFIX = {
 /** CSS class marking the guide's scrollable content container. */
 const GUIDEBOX_CONTAINER_CLASS = 'guidebox-container';
 
+/** Selectors for elements that can participate in a viewer's keyboard focus cycle. */
+const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex], [contenteditable]:not([contenteditable="false"])';
+
 // #region GENERIC (id & root helpers)
 
 /**
@@ -148,6 +151,40 @@ export function queryGVSelectorAll<T extends Element = HTMLElement>(mapId: strin
   // Fallback: not map-scoped — warn because it can resolve elements from another map.
   logger.logWarning(`queryGVSelectorAll: root element for map '${mapId}' not found, falling back to global document query`, selector);
   return Array.from(document.querySelectorAll<T>(selector));
+}
+
+/**
+ * Returns visible tabbable elements in keyboard order within a map's focus trap.
+ *
+ * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.
+ *
+ * @param mapId - The map containing the focus trap
+ * @param root - The viewer shell containing the focusable elements
+ * @returns The currently visible and enabled elements in tab order
+ */
+export function getGVVisibleTabbable(mapId: string, root: HTMLElement): HTMLElement[] {
+  const elements = queryGVSelectorAll<HTMLElement>(mapId, `#${CSS.escape(root.id)} :is(${TABBABLE_SELECTOR})`);
+  const radios = elements.filter(
+    (element): element is HTMLInputElement => element instanceof window.HTMLInputElement && element.type === 'radio'
+  );
+  const candidates = elements.filter((element) => {
+    // Only the checked radio (or first radio when none is checked) participates in a group's tab order.
+    if (element instanceof window.HTMLInputElement && element.type === 'radio' && element.name) {
+      const group = radios.filter((radio) => radio.name === element.name);
+      if (element !== (group.find((radio) => radio.checked) ?? group[0])) return false;
+    }
+
+    return (
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled') &&
+      !element.closest('[inert], [aria-hidden="true"]') &&
+      element.getClientRects().length > 0 &&
+      window.getComputedStyle(element).visibility === 'visible'
+    );
+  });
+
+  const ordered = candidates.filter((element) => element.tabIndex > 0).sort((first, second) => first.tabIndex - second.tabIndex);
+  return [...ordered, ...candidates.filter((element) => element.tabIndex === 0)];
 }
 
 // #endregion CSS (scoped selector queries)
