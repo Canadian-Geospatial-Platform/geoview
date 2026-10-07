@@ -91,9 +91,8 @@ The swiper package `layers` property changed shape (schema `version` bumped `1.0
 
 ### UI Components — Select and Slider Compatibility
 
-- `Select` now requires exactly one non-empty `label` or `aria-label`; supplying both or a blank name throws a `TypeError`. `inputLabel.id` is no longer supported: use `labelId` to customize the associated label ID. These restrictions affect external consumers of the UI wrapper (#3678).
+- `Select` now requires exactly one non-empty `label` or `aria-label`; invalid naming props log an error without interrupting rendering. `inputLabel.id` is no longer supported: use `labelId` to customize the associated label ID. These restrictions affect external consumers of the UI wrapper (#3678).
 - `Slider` removed the `ariaLabelledby` prop. Use standard `aria-labelledby` for a shared name or `getAriaLabel(index)` for distinct thumb names (issue #3657; #3678).
-- Filter-panel attribute `displayLabel` must contain a non-whitespace character for every filter type. Previously schema-valid blank labels now prevent filter controls from rendering and show an explicit configuration error; replace them with meaningful labels and reload the viewer (#3678).
 
 ## Breaking Changes — Developer-Only (Internal)
 
@@ -288,7 +287,6 @@ _(WCAG fixes and improvements)_
 - Improved slider accessibility with distinct time-slider thumb names, formatted date/percentage value text, calendar-step keyboard navigation, and keyboard-friendly footer resize interaction (issue #3657; #3678).
 - Updated raster function, mosaic rule, and WMS style settings to use native button controls for expandable sections and selectable cards, with associated labels and decorative previews (issue #3656; #3678).
 - Updated Select controls across export, geolocator, layer settings, filter panel, and mobile tabs to use a single accessible naming source and automatically associated visible labels (#3678).
-- Validated filter attribute labels before creating controls: blank `displayLabel` values now show a translated configuration error in the panel, snackbar, and notification history instead of crashing Select during rendering; valid configurations are unchanged (#3678).
 - Localized the export preview loading message in English and French (#3678).
 
 ## Documentation & Cleanup
