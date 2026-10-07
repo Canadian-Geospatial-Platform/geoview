@@ -34,5 +34,12 @@ function readPackage(packageJson, context) {
   //  packageJson.dependencies['log4js'] = '0.6.38';
   // }
 
+  // @luma.gl/gltf pins loaders.gl ~4.4.5 while deck.gl allows ^4.4.3; keep one loaders.gl copy (geoview-3d).
+  for (const deps of [packageJson.dependencies, packageJson.peerDependencies]) {
+    for (const name of Object.keys(deps || {})) {
+      if (name.startsWith('@loaders.gl/') && /^\^4\.4\.\d+$/.test(deps[name])) deps[name] = '~4.4.5';
+    }
+  }
+
   return packageJson;
 }

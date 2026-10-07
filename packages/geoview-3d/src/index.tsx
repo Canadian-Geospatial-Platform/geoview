@@ -41,13 +41,29 @@ class GeoView3DPlugin extends AppBarPlugin {
       en: {
         GeoView3D: {
           title: '3D',
-          placeholder: '3D Tiles viewer (deck.gl) — rendering added in Phase 2.',
+          canvasLabel:
+            '3D view of the configured 3D Tiles tileset. Use the arrow keys to pan, = and - to zoom, Shift with arrow keys to rotate and tilt.',
+          canvasRole: '3D map',
+          status: {
+            invalidUrl: 'No valid tileset URL is configured (set tilesetUrl to an http(s) tileset.json).',
+            loading: 'Loading 3D tileset…',
+            loaded: '3D tileset loaded.',
+            error: 'The 3D tileset could not be displayed: {{message}}',
+          },
         },
       },
       fr: {
         GeoView3D: {
           title: '3D',
-          placeholder: 'Visionneuse 3D Tiles (deck.gl) — rendu ajouté à la phase 2.',
+          canvasLabel:
+            'Vue 3D du jeu de tuiles 3D configuré. Utilisez les flèches pour vous déplacer, = et - pour zoomer, Maj avec les flèches pour pivoter et incliner.',
+          canvasRole: 'Carte 3D',
+          status: {
+            invalidUrl: "Aucune URL de jeu de tuiles valide n'est configurée (définir tilesetUrl vers un tileset.json http(s)).",
+            loading: 'Chargement du jeu de tuiles 3D…',
+            loaded: 'Jeu de tuiles 3D chargé.',
+            error: "Le jeu de tuiles 3D n'a pas pu être affiché : {{message}}",
+          },
         },
       },
     };
