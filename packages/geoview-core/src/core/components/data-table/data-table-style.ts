@@ -40,10 +40,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dataTableWrapper: {
     height: '100%',
     '& .MuiTableContainer-root': {
-      borderRadius: '6px',
+      borderRadius: theme.shape.borderRadiusMd,
     },
     '& .MuiToolbar-root ': {
-      borderRadius: '6px',
+      borderRadius: theme.shape.borderRadiusMd,
     },
     '& .layer-icon': {
       marginRight: theme.spacing(0),
@@ -105,7 +105,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
       '&.Mui-focusVisible': {
         backgroundColor: theme.palette.action.focus,
-        borderRadius: '50%',
+        borderRadius: theme.shape.borderRadiusFull,
         outlineOffset: `-3px`,
         boxShadow: 'none',
         '> svg': {
@@ -128,7 +128,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiBadge-root >span': {
       opacity: 1,
       border: `2px solid transparent`,
-      borderRadius: '50%',
+      borderRadius: theme.shape.borderRadiusFull,
       height: '2rem',
       width: '2rem',
       '& .MuiTableSortLabel-icon': {
@@ -139,12 +139,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
       '&:hover': {
         backgroundColor: theme.palette.action.hover,
-        borderRadius: '50%',
+        borderRadius: theme.shape.borderRadiusFull,
         border: `2px solid ${theme.palette.divider}`,
       },
       '&:focus-visible': {
         backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
-        borderRadius: '50%',
+        borderRadius: theme.shape.borderRadiusFull,
         outlineOffset: `-3px`,
         boxShadow: 'none',
       },
@@ -157,7 +157,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
           border: `2px solid ${theme.palette.divider}`,
         },
         '&:focus-visible': {
-          borderRadius: '50%',
+          borderRadius: theme.shape.borderRadiusFull,
           outlineOffset: `-3px`,
           boxShadow: 'none',
         },

@@ -4,7 +4,7 @@ import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from
 /** MUI theme augmentation. See https://material-ui.com/guides/typescript/ */
 
 /**
- * Custom shape overrides for the MUI theme.
+ * Named border-radius tokens added to the MUI theme `shape` (values from `GEOVIEW_SHAPE`).
  *
  * This type MUST be exported so that TypeScript emits this file to the
  * declaration output (`lib/`). Without at least one export, `.d.ts` files
@@ -15,20 +15,28 @@ import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from
  * The re-export in `external-types.ts` (`export * from './material-ui.d'`)
  * then pulls this file into the module graph for all consumers.
  */
-export type Shape = {
-  borderRadius: number | string;
-  left: string;
-  center: string;
-  right: string;
+export type GeoViewShapeTokens = {
+  /** No rounding (flush/attached edges). */
+  borderRadiusNone: string;
+  /** Small controls, inputs, badges, icons (4px). */
+  borderRadiusSm: string;
+  /** Default surfaces: panels, papers, cards, list items (6px, equals the MUI base). */
+  borderRadiusMd: string;
+  /** Prominent cards and grouped sections (8px). */
+  borderRadiusLg: string;
+  /** Pills and circles. */
+  borderRadiusFull: string;
 };
 
 // #region MUI
 declare module '@mui/material/styles' {
+  interface Shape extends GeoViewShapeTokens {}
+  interface ShapeOptions extends Partial<GeoViewShapeTokens> {}
+
   // allow configuration using `createTheme`
   interface ThemeOptions {
     // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
-    shape?: Shape;
     overrides?: {
       button: {
         size: { width: string | number; height: string | number };

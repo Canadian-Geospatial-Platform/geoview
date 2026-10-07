@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { GEOVIEW_SHAPE } from '@/ui/style/default';
 
 /** Width of the app-bar used to offset panel positioning. */
 const appBarWidth = 48;
@@ -29,7 +30,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
   panelCard: {
     backgroundColor: theme.palette.geoViewColor?.bgColor.main,
     height: '100%',
-    borderRadius: 0,
+    borderRadius: GEOVIEW_SHAPE.borderRadiusNone,
     flexDirection: 'column',
     [theme.breakpoints.down('sm')]: {
       width: '100%',

@@ -210,6 +210,21 @@ export default [
           message:
             'Do not use document.querySelector(All) directly. Use queryGVSelector(mapId, selector) / queryGVSelectorAll(mapId, selector) from @/core/utils/dom-helper. This keeps DOM queries map-scoped and avoids cross-map collisions.',
         },
+        {
+          selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > Literal',
+          message:
+            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. Literal values are off-scale, and numbers are multiplied by the base inside sx.',
+        },
+        {
+          selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > TemplateLiteral[expressions.length=0]',
+          message:
+            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3.',
+        },
+        {
+          selector: "Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > MemberExpression[property.name='borderRadius']",
+          message:
+            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. theme.shape.borderRadius is a number, so inside sx it renders 6 × 6 = 36px.',
+        },
       ],
 
       // Prettier rules

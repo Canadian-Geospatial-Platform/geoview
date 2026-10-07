@@ -163,7 +163,7 @@ export default function Share(): JSX.Element | null {
         tooltip={t('appbar.share')}
         tooltipPlacement="right"
         onClick={handleShareClick}
-        className={interaction === 'dynamic' ? 'buttonFilled' : 'style4'}
+        className={interaction === 'dynamic' ? 'buttonFilled' : 'appBarButtonStatic'}
       >
         <ShareIcon />
       </IconButton>

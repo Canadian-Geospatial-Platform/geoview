@@ -28,7 +28,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxHeight: 'min(100vh, 500px)',
     marginLeft: theme.spacing(1),
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
-    borderRadius: '5px',
     boxShadow: 2,
   },
   notificationsHeader: {
@@ -116,7 +115,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.geoViewColor?.bgColor.dark[800],
     color: theme.palette.geoViewColor?.bgColor.light[800],
     fontSize: theme.palette.geoViewFontSize?.sm,
-    borderRadius: '10px',
+    borderRadius: theme.shape.borderRadiusFull,
     height: '20px',
     lineHeight: '20px',
     textAlign: 'center',

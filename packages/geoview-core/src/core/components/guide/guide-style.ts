@@ -101,7 +101,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       '& .search-highlight': {
         backgroundColor: theme.palette.warning.light,
         padding: theme.spacing(0.25, 0.5),
-        borderRadius: '2px',
+        borderRadius: theme.shape.borderRadiusSm,
       },
       '& .current-match': {
         backgroundColor: theme.palette.warning.main,

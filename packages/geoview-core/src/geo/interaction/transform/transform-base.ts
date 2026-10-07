@@ -20,6 +20,7 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { DrawerText } from '@/geo/style/drawer-text';
 import { DrawerStyle } from '@/geo/style/drawer-style';
+import { GEOVIEW_SHAPE } from '@/ui/style/default';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 
@@ -1809,8 +1810,7 @@ export class OLTransform extends OLPointer {
     this.#textEditorElement.textContent = currentText;
     this.#textEditorElement.style.cssText = `
     background: rgba(255, 255, 255, 0.3);
-    border: 2px solid #007cba;
-    border-radius: 3px;
+    border-radius: ${GEOVIEW_SHAPE.borderRadiusSm};
     border: none;
     padding: 4px;
     font-size: ${currentSize}px;

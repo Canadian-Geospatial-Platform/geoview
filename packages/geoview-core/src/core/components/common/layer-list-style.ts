@@ -41,7 +41,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   listItemButton: {
     width: '100%',
-    borderRadius: '5px',
+    borderRadius: theme.shape.borderRadiusMd,
     gap: theme.spacing(1.5),
     '&.Mui-selected:hover': {
       backgroundColor: 'inherit',

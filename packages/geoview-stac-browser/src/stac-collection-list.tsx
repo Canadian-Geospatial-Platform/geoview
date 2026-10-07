@@ -124,7 +124,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
           sx={{
             color: sortAsc ? theme.palette.geoViewColor?.primary.main : theme.palette.geoViewColor?.textColor.light[200],
             backgroundColor: sortAsc ? theme.palette.action.selected : 'transparent',
-            borderRadius: '4px',
+            borderRadius: theme.shape.borderRadiusSm,
           }}
         >
           <SortByAlphaIcon />

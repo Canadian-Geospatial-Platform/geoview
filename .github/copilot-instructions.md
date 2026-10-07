@@ -989,6 +989,7 @@ Use theme tokens instead of hard-coded colors/sizes:
 - **Colors**: `theme.palette.geoViewColor.primary.main`, `.primary.dark[200]`, `.primary.light[100]`, `.bgColor.dark[100]`, `.textColor.main`, `.textColor.light[200]`, `.white`
 - **Font sizes**: `theme.palette.geoViewFontSize.sm`, `.default`, `.lg`
 - **Spacing**: `theme.spacing(1)` for standard MUI spacing
+- **Border radius**: `theme.shape.borderRadiusNone` (0), `.borderRadiusSm` (4px), `.borderRadiusMd` (6px), `.borderRadiusLg` (8px), `.borderRadiusFull` (9999px — circles/pills). In `@/ui`, `theme.components` overrides and `cssText` strings, use `GEOVIEW_SHAPE.*` from `@/ui/style/default` instead. In theme-aware styles, don't use literal radii or bare numbers; plain CSS must use a literal value with a comment naming its token. Inside `sx`, a numeric `borderRadius` is multiplied by the base (`1` → 6px, `theme.shape.borderRadius` → 36px). Keep the base `theme.shape.borderRadius` a number (6); many MUI components use it, though component-specific defaults or overrides can differ. See [styling-best-practices.md §3](../docs/programming/styling-best-practices.md).
 
 ### Display Theme Registration
 

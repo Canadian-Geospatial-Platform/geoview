@@ -19,7 +19,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
-    borderRadius: '5px',
     boxShadow: 2,
   },
   header: {

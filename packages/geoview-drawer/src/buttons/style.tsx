@@ -12,6 +12,8 @@ import { useDrawerController } from 'geoview-core/core/controllers/use-controlle
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+import { geoViewColors as defaultGeoViewColors, GEOVIEW_SHAPE } from 'geoview-core/ui/style/default';
+import { getFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
 
@@ -38,7 +40,7 @@ const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     padding: theme.spacing(1),
     border: '1px solid #ccc',
-    borderRadius: '4px',
+    borderRadius: theme.shape.borderRadiusSm,
   },
   row: {
     display: 'flex',
@@ -56,7 +58,12 @@ const getSxClasses = (theme: Theme): SxStyles => ({
   formatButton: {
     width: 40,
     height: 40,
-    borderRadius: '10%',
+    borderRadius: theme.shape.borderRadiusFull,
+    '&.Mui-focusVisible': {
+      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      boxShadow: 'none',
+      outlineOffset: 0,
+    },
   },
 });
 
@@ -295,7 +302,7 @@ export function StylePanel(): JSX.Element {
         font-size: 16px;
         cursor: pointer;
         padding: 4px;
-        border-radius: 50%;
+        border-radius: ${GEOVIEW_SHAPE.borderRadiusFull};
         width: 24px;
         height: 24px;
         display: flex;

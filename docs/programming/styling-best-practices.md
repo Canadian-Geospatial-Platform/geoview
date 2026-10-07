@@ -43,7 +43,7 @@ margin: '0px',
 - **Searchability:** `theme.spacing(` is a single, unambiguous grep target for every spacing value in the codebase. Shorthand aliases require matching against a fixed list of MUI spacing-aware keys (`p`, `m`, `px`, `py`, `pt`, `pr`, `pb`, `pl`, `mx`, `my`, `mt`, `mr`, `mb`, `ml`, `gap`, `rowGap`, `columnGap`), which is easy to get wrong and harder to mass find/replace later.
 - **Multi-value declarations:** the `sx` shorthand has no way to express a single declaration with distinct top/right/bottom/left values (CSS's 2/3/4-value shorthand). Only the full property name with `theme.spacing(t, r, b, l)` supports this — e.g. `padding: theme.spacing(0.5, 1, 0.25, 0.75)`.
 
-**Out of scope (leave as-is, not part of the spacing scale):** `border-radius`, `border-width`, fixed control `width`/`height`, icon/graphic sizing, focus-indicator metrics, map-canvas/OpenLayers overlay position offsets (`top`/`left`/`right`/`bottom` used for absolute positioning).
+**Out of scope for spacing-scale conversion:** `border-radius` (follow [§3](#3--border-radius-named-tokens-on-themeshape) for radius values), `border-width`, fixed control `width`/`height`, icon/graphic sizing, focus-indicator metrics, map-canvas/OpenLayers overlay position offsets (`top`/`left`/`right`/`bottom` used for absolute positioning).
 
 **`rem`/`em`-based spacing should be converted too.** Treat an existing `rem`/`em` value on an in-scope property (`padding`, `margin`, `gap`, etc.) as a legacy inconsistency, not an intentional exception — convert it to `theme.spacing()` like any other value, using the px-equivalent at the default root font size (16px) to pick the nearest factor. Only keep a value in `rem`/`em` when it's deliberately coupled to font-size (e.g. spacing meant to scale with adjacent text for WCAG text-resize behavior), and mark that case with a one-line comment explaining why it's exempt.
 
@@ -65,3 +65,38 @@ marginTop: theme.spacing(2), // snapped from 15px
 ```
 
 **Do not silently guess on a tie.** If a snap decision affects a value used in more than one place (a recurring rhythm — for example, the same `15px` legacy value appearing in both a card header and a panel header), confirm the direction once and apply it consistently across the affected files rather than deciding file-by-file.
+
+## 3- Border radius: named tokens on `theme.shape`
+
+Use one of the five border-radius tokens. Never use a literal px/% value or a bare number.
+
+The examples below are guidance rather than fixed mappings; choose a token based on the visual context and consistency with surrounding components.
+
+| Token              | Value    | Example uses                                                                                   |
+| ------------------ | -------- | ---------------------------------------------------------------------------------------------- |
+| `borderRadiusNone` | `0`      | Squared-off corners, e.g. where a surface attaches to another (tabs on panels)                 |
+| `borderRadiusSm`   | `4px`    | Smaller elements, e.g. map controls, chips, thumbnails, icons, scrollbar thumbs, inline `code` |
+| `borderRadiusMd`   | `6px`    | Common surfaces, e.g. cards, panels, popovers, tooltips, inputs (same as the MUI base)         |
+| `borderRadiusLg`   | `8px`    | Larger grouped containers, e.g. settings sections                                              |
+| `borderRadiusFull` | `9999px` | Circles (square elements) and pills (rectangular elements)                                     |
+
+Where each kind of file gets the token:
+
+- **Core and plugin style modules (`getSxClasses(theme)`), plus inline `sx` with a `theme`:** use `theme.shape.borderRadiusMd`.
+- **`@/ui` components, `theme.components` overrides and `cssText` strings:** use `GEOVIEW_SHAPE.borderRadiusMd` from `@/ui/style/default`. `@/ui` components can run under an external theme without the GeoView tokens. Plugins import it from `geoview-core/ui/style/default`.
+- **Plain CSS files:** CSS can't read the theme, so write the literal value with a `/* = borderRadiusSm */` comment.
+- **Mixed corners:** compose tokens, e.g. `` `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusNone}` ``.
+
+```ts
+// ❌ Bad
+borderRadius: '5px',
+borderRadius: 1, // in sx this is multiplied by the base: 1 → 6px, 2 → 12px
+borderRadius: theme.shape.borderRadius, // a number, so in sx it renders 6 × 6 = 36px
+
+// ✅ Good
+borderRadius: theme.shape.borderRadiusMd,
+```
+
+**Prefer central defaults.** MUI's own components (Button, Paper, Dialog, Menu, inputs, Tooltip and others) already read the numeric base `theme.shape.borderRadius` (6), so don't re-declare a radius on them. When a whole component family needs a different radius, change it once in `theme.components` (`themeOptionsGenerator.ts`) instead of at each call site.
+
+**Off-scale legacy values** move to the nearest token: `5px` goes to `borderRadiusMd`, and anything else is decided case by case. Keep `theme.shape.borderRadius` (the base) as a **number** — MUI components such as Skeleton do math on it.

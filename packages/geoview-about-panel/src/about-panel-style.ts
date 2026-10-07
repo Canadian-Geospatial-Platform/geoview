@@ -38,13 +38,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& code': {
       backgroundColor: theme.palette.action.hover,
-      borderRadius: theme.shape.borderRadius,
+      borderRadius: theme.shape.borderRadiusSm,
       fontFamily: 'monospace',
     },
     '& pre': {
       backgroundColor: theme.palette.action.hover,
       padding: theme.spacing(2),
-      borderRadius: theme.shape.borderRadius,
+      borderRadius: theme.shape.borderRadiusMd,
       overflow: 'auto',
       '& code': {
         backgroundColor: 'transparent',

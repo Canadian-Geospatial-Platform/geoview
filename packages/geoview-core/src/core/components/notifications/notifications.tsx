@@ -441,7 +441,7 @@ const Notifications = memo((): JSX.Element => {
           iconRef={bellButtonRef}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
-          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
+          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'appBarButtonStatic'} ${open ? 'active' : ''}`}
           color="primary"
           aria-label={
             notificationsCount > 0 ? t('appbar.notificationsWithCount', { count: notificationsCount }) : t('appbar.notifications')
