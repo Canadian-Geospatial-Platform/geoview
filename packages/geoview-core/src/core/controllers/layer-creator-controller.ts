@@ -2,7 +2,7 @@ import { GeoCore } from '@/api/config/geocore';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import {
   mapConfigLayerEntryIsGeoCore,
@@ -11,6 +11,7 @@ import {
   mapConfigLayerEntryIsShapefile,
   type GeoCoreLayerConfig,
   type MapConfigLayerEntry,
+  type TypeLayerEntryConfig,
   type TypeGeoviewLayerConfig,
 } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
@@ -77,7 +78,6 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
-import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 export class LayerCreatorController extends AbstractMapViewerController {
   /** Reference on the UI domain. */
@@ -88,6 +88,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
   /** Dictionary holding all the geoview layers used for processing layer entry configs */
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
+
+  /** Original GeoView layer configs used to rebuild layers after a failed load. */
+  #geoviewLayerConfigSnapshots: { [geoviewLayerId: string]: TypeGeoviewLayerConfig } = {};
 
   /** Callback delegates for the layer config added event */
   #onLayerConfigAddedHandlers: LayerBuilderDelegate[] = [];
@@ -349,6 +352,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
+    const reloadConfigSnapshot = structuredClone({
+      ...geoviewLayerConfig,
+      listOfLayerEntryConfig: geoviewLayerConfig.listOfLayerEntryConfig.map((config) =>
+        config instanceof ConfigBaseClass ? config.toJson<TypeLayerEntryConfig>() : config
+      ),
+    });
+
     // Check if the geoviewLayerConfig has its list of layer list entry already validated or not
     // GV It's already validated when it comes from:
     // GV - (1) validateLayersConfigAgainstSchema (upon map initialization load or in add-new-layer component)
@@ -364,6 +374,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
       // Throw that the geoview layer id was already created
       throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
     }
+
+    // Keep a snapshot of the GeoView layer config used to rebuild this layer after a failed load.
+    this.#geoviewLayerConfigSnapshots[geoviewLayerConfig.geoviewLayerId] = reloadConfigSnapshot;
 
     // Process the addition of the layer
     const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
@@ -437,66 +450,70 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
-   * Attempts to reload a layer.
+   * Reloads the owning GeoView layer from its original config and restores its ordered position.
    *
    * @param layerPath - The path to the layer to reload
+   * @returns A promise that resolves after the full layer reload finishes
    */
-  reloadLayer(layerPath: string): void {
-    // Get the layer controller
+  async reloadLayer(layerPath: string): Promise<void> {
+    // Use the root layer ID to retrieve the configuration snapshot required to reload the layer.
+    const rootLayerId = layerPath.split('/')[0];
+    const configSnapshot = this.#geoviewLayerConfigSnapshots[rootLayerId];
+    if (!configSnapshot) {
+      this.getMapViewer().notifications.showError('layers.errorNonreloadableLayer');
+      return;
+    }
+
     const { layerController } = this.getControllersRegistry();
+    const rootEntryPaths = layerController
+      .getLayerEntryConfigs()
+      .filter((config) => config.getGeoviewLayerId() === rootLayerId && !config.getParentLayerConfig())
+      .map((config) => config.layerPath);
+    const originalOrderedPaths = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
+    const originalRootPaths = originalOrderedPaths.filter((path) => path === rootLayerId || path.startsWith(`${rootLayerId}/`));
+    const originalMapLayerConfigs = this.getMapViewer().mapFeaturesConfig.map.listOfGeoviewLayerConfig;
+    const originalMapConfigIndex = originalMapLayerConfigs?.findIndex((config) => config.geoviewLayerId === rootLayerId) ?? -1;
 
-    const layerEntryConfig = layerController.getLayerEntryConfig(layerPath);
-    const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.getGeoviewLayerId()] : undefined;
-    const gvLayer = layerController.getGeoviewLayerIfExists(layerPath);
+    try {
+      // Remove every top-level entry so groups and failed-before-registration layers are rebuilt together.
+      rootEntryPaths.reverse().forEach((rootEntryPath) => this.removeLayerUsingPath(rootEntryPath));
 
-    if (geoviewLayer) {
-      if (gvLayer instanceof GVGroupLayer) {
-        // Reload each sub layers that are in error
-        (layerEntryConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
-          if (sublayerEntryConfig.layerStatus === 'error') this.reloadLayer(sublayerEntryConfig.layerPath);
-        });
-      } else {
-        // For each layer paths, check each starting with the given layerPath
-        layerController.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-          if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
-            // Get the geoview layer if exists
-            const innerGVLayer = layerController.getGeoviewLayerIfExists(registeredLayerPath);
-
-            // If found and has already been loaded at least once
-            if (innerGVLayer?.loadedOnce) {
-              // Remove actual OL layer from the map
-              const olLayer = innerGVLayer.getOLLayer();
-              if (olLayer) this.getMapViewer().map.removeLayer(olLayer);
-
-              // Remove from registered layers
-              this.#layerDomain.deleteGVLayer(innerGVLayer);
-
-              // Create and register new layer
-              const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
-
-              // Initialize the GV Layer
-              layer.init();
-
-              // Re-register in the domain
-              this.#layerDomain.registerGVLayer(layer);
-
-              // Re-add on the map
-              this.getMapViewer().map.addLayer(layer.getOLLayer());
-
-              // GV Cheat by pretending the layer was loaded once immediately
-              // GV Otherwise on next "reload layer" call it'll think it never was loaded ever (though it was at least once)
-              layer.loadedOnce = true;
-
-              // Show success of the layer reload
-              // GV As far as we're concerned, the reload worked, if the layer fails again, it'll reshow the fail error
-              this.getMapViewer().notifications.showSuccess('layers.layerReloaded', { layerName: layer.getLayerName() });
-            } else {
-              // Nonreloadable layer
-              this.getMapViewer().notifications.showError('layers.errorNonreloadableLayer');
-            }
-          }
-        });
+      // Removal may update the map config; retain the root config at its existing position.
+      const currentMapLayerConfigs = this.getMapViewer().mapFeaturesConfig.map.listOfGeoviewLayerConfig;
+      if (currentMapLayerConfigs && originalMapConfigIndex >= 0) {
+        const currentConfigIndex = currentMapLayerConfigs.findIndex((config) => config.geoviewLayerId === rootLayerId);
+        if (currentConfigIndex >= 0) currentMapLayerConfigs.splice(currentConfigIndex, 1);
+        currentMapLayerConfigs.splice(Math.min(originalMapConfigIndex, currentMapLayerConfigs.length), 0, structuredClone(configSnapshot));
       }
+
+      // Registration can move the row before asynchronous metadata loading completes.
+      const { layer, promiseLayer } = this.addGeoviewLayer(structuredClone(configSnapshot));
+      this.#restoreOrderedLayerPaths(rootLayerId, originalOrderedPaths, originalRootPaths);
+
+      let reloadSucceeded = false;
+      try {
+        await promiseLayer;
+        reloadSucceeded = layer.getLayerLoadErrors().length === 0;
+      } catch (error: unknown) {
+        // addGeoviewLayer already reports load failures through its promise handler.
+        logger.logPromiseFailed(`Reload failed for GeoView layer ${rootLayerId}`, error);
+      }
+
+      // Reconcile the immediate restore only if refreshed metadata changed the layer's sublayer tree.
+      const refreshedPaths = AbstractMapViewerController.generateOrderedLayerPaths(layer.getGeoviewLayerConfig());
+      const refreshedPathsDiffer =
+        refreshedPaths.length !== originalRootPaths.length || refreshedPaths.some((path, index) => path !== originalRootPaths[index]);
+      if (refreshedPathsDiffer) {
+        this.#restoreOrderedLayerPaths(rootLayerId, originalOrderedPaths, refreshedPaths.length ? refreshedPaths : originalRootPaths);
+      }
+
+      if (reloadSucceeded) {
+        this.getMapViewer().notifications.showSuccess('layers.layerReloaded', { layerName: layer.getGeoviewLayerName() });
+      }
+    } catch (error: unknown) {
+      this.#geoviewLayerConfigSnapshots[rootLayerId] = structuredClone(configSnapshot);
+      this.showLayerError(error, rootLayerId, configSnapshot.geoviewLayerName);
+      this.#restoreOrderedLayerPaths(rootLayerId, originalOrderedPaths, originalRootPaths);
     }
   }
 
@@ -585,6 +602,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
           if (geoviewLayer.olRootLayer) delete geoviewLayer.olRootLayer;
 
           delete this.#geoviewLayers[layerPathNodes[0]];
+          delete this.#geoviewLayerConfigSnapshots[layerPathNodes[0]];
           const { mapFeaturesConfig } = this.getMapViewer();
 
           if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
@@ -703,6 +721,23 @@ export class LayerCreatorController extends AbstractMapViewerController {
     const { footerBar, appBar } = this.getMapViewer().mapFeaturesConfig;
     if (footerBar?.selectedLayersLayerPath === rootId) footerBar.selectedLayersLayerPath = firstLayerPath;
     if (appBar?.selectedLayersLayerPath === rootId) appBar.selectedLayersLayerPath = firstLayerPath;
+  }
+
+  /**
+   * Replaces the paths for one GeoView layer without changing the relative order of other layers.
+   *
+   * @param rootLayerId - The owning GeoView layer id
+   * @param originalOrderedPaths - The ordered paths captured before reload
+   * @param replacementPaths - The newly generated paths, or the prior paths when creation failed
+   */
+  #restoreOrderedLayerPaths(rootLayerId: string, originalOrderedPaths: string[], replacementPaths: string[]): void {
+    const belongsToRoot = (path: string): boolean => path === rootLayerId || path.startsWith(`${rootLayerId}/`);
+    const firstRootIndex = originalOrderedPaths.findIndex(belongsToRoot);
+    const insertionIndex = firstRootIndex < 0 ? originalOrderedPaths.length : firstRootIndex;
+    const orderedPaths = originalOrderedPaths.filter((path) => !belongsToRoot(path));
+
+    orderedPaths.splice(insertionIndex, 0, ...replacementPaths);
+    this.getControllersRegistry().layerController.setMapOrderedLayersDirectly(orderedPaths);
   }
 
   /**
