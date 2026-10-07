@@ -20,7 +20,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxWidth: '70vw',
     maxHeight: 'min(100vh, 200px)',
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
-    borderRadius: '5px',
     boxShadow: 2,
   },
   content: {

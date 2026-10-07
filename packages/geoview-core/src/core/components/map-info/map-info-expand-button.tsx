@@ -1,8 +1,9 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
+import { getSxClasses } from './map-info-expand-button-style';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -16,18 +17,6 @@ interface MapInfoExpandButtonProps {
 
 /** Translation key for the expand/collapse tooltip. */
 const TOOLTIP_KEY = 'layers.toggleCollapse';
-
-/** Layout styles for the expand button container. */
-const BOX_STYLES = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-} as const;
-
-/** Base styles for the expand button. */
-const BUTTON_BASE_STYLES = {
-  my: '1rem',
-} as const;
 
 /**
  * Renders the expand or collapse icon based on state.
@@ -52,14 +41,14 @@ export const MapInfoExpandButton = memo(({ onExpand, expanded }: MapInfoExpandBu
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  /**
+   * Builds the map info expand button styles.
+   */
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
+    logger.logTraceUseMemo('MAP-INFO-EXPAND-BUTTON - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const mapId = useStoreGeoViewMapId();
-
-  const buttonStyles = {
-    ...BUTTON_BASE_STYLES,
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
-    width: 30,
-    height: 30,
-  };
 
   // #region Handlers
 
@@ -77,14 +66,14 @@ export const MapInfoExpandButton = memo(({ onExpand, expanded }: MapInfoExpandBu
   // #endregion Handlers
 
   return (
-    <Box sx={BOX_STYLES}>
+    <Box sx={memoSxClasses.container}>
       <IconButton
         aria-label={t(TOOLTIP_KEY)}
         aria-expanded={expanded}
         aria-controls={`${mapId}-mapInfo`}
         tooltipPlacement="top"
         onClick={handleClick}
-        sx={buttonStyles}
+        sx={memoSxClasses.button}
       >
         <ExpandIcon expanded={expanded} />
       </IconButton>

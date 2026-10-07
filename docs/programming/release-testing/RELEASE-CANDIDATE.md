@@ -78,6 +78,7 @@ _(Config properties, public API methods, event names — affects external consum
 | `CallbackNewMetadataDelegate`                                              | Removed — replaced by `FetchWithProxyResult<T>` return wrapper in `GeoUtilities`                            | #3562 |
 | `GeoUtilities.fetchWMSMetadata` / `fetchWFSMetadata` / `fetchWMTSMetadata` | Now return `FetchWithProxyResult<T>` instead of raw data + callback                                         | #3562 |
 | `OVERVIEW_MAP_MIN_CONTAINER_WIDTH`                                         | Changed from `900` to `700` px                                                                              | #3562 |
+| `GeoViewMUIShape`                                                          | Export removed; use `GeoViewShapeTokens` for the named MUI shape tokens                                     | #3681 |
 
 ### Swiper Package — Schema
 
@@ -256,6 +257,7 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Standardized border-radius values with named MUI theme shape tokens across core and plugins, replacing inconsistent radii and documenting/enforcing the shared token system (#3681)
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
 - Fixed app bar reflow by restructuring app-bar controls into a single list and adding overflow navigation arrows at high zoom / low-height viewports (#3579)
 - Fixed data-table WCAG issues: keyboard focus flow, empty spacer-cell accessibility semantics, and cell scroll-into-view behavior (#3574)

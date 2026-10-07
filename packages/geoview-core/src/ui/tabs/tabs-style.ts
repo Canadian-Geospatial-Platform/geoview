@@ -1,6 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { GEOVIEW_SHAPE } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the tabs component.
@@ -72,7 +73,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     maxWidth: '200px',
     padding: theme.spacing(1, 0),
     '& .MuiInputBase-root': {
-      borderRadius: '4px',
+      borderRadius: GEOVIEW_SHAPE.borderRadiusSm,
     },
     '& .MuiSelect-select': {
       padding: `${theme.spacing(1, 1.5)} !important`,

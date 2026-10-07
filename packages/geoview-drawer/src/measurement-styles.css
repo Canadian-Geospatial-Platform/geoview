@@ -2,7 +2,7 @@
 .drawer-tooltip {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
+  border-radius: 4px; /* = theme.shape.borderRadiusSm (CSS cannot read the theme) */
   color: white;
   padding: 4px 8px;
   opacity: 0.7;

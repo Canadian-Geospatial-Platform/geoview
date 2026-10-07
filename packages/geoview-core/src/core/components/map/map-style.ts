@@ -43,7 +43,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       top: '10px', // Adding 2px to the usual 8px to account for the box shadow
       padding: theme.spacing(0),
       position: 'absolute',
-      borderRadius: 4,
+      borderRadius: theme.shape.borderRadiusSm,
 
       '& .ol-overviewmap-map': {
         border: 'none',
@@ -63,12 +63,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
       '&:not(.ol-collapsed)': {
         boxShadow: '0 1px 5px rgb(0 0 0 / 65%)',
-        borderRadius: '4px',
+        borderRadius: theme.shape.borderRadiusSm,
         border: 'none',
       },
       '&:is(.ol-collapsed)': {
         boxShadow: '0 1px 5px rgb(0 0 0 / 65%)',
-        borderRadius: 4,
+        borderRadius: theme.shape.borderRadiusSm,
         border: 'none',
       },
       '& button': {
@@ -85,7 +85,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         outline: 0,
       },
       '& button:focus-visible': {
-        borderRadius: '50%',
+        borderRadius: theme.shape.borderRadiusFull,
         ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
       },
       '&::before': {
@@ -94,7 +94,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         position: 'absolute',
         width: 0,
         height: 0,
-        borderRadius: 2,
         zIndex: 100,
         right: 0,
         top: 0,
@@ -103,7 +102,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
       },
       '& .ol-viewport': {
-        borderRadius: '4px',
+        borderRadius: theme.shape.borderRadiusSm,
         '& .ol-layer': {
           backgroundColor: '#FFF',
         },

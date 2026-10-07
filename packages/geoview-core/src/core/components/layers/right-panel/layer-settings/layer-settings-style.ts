@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   settingsSection: {
     border: '1px solid',
     borderColor: theme.palette.divider,
-    borderRadius: '8px',
+    borderRadius: theme.shape.borderRadiusMd,
     padding: theme.spacing(1.5),
     transition: 'border-color 0.2s',
   },
@@ -104,7 +104,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '&::-webkit-scrollbar-thumb': {
       backgroundColor: theme.palette.action.disabled,
-      borderRadius: '4px',
+      borderRadius: theme.shape.borderRadiusSm,
       '&:hover': {
         backgroundColor: theme.palette.action.hover,
       },
@@ -124,7 +124,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1.5),
     border: '1px solid',
     borderColor: theme.palette.divider,
-    borderRadius: '8px',
+    borderRadius: theme.shape.borderRadiusMd,
     transition: 'border-color 0.2s, background-color 0.2s',
     '&:hover': {
       borderColor: theme.palette.primary.main,
@@ -162,7 +162,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 100,
     border: '2px solid',
     borderColor: theme.palette.divider,
-    borderRadius: '8px',
+    borderRadius: theme.shape.borderRadiusMd,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

@@ -62,7 +62,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0, 1),
     // Show focus ring when any child Radio has focus
     '&:has(:focus-visible)': {
-      borderRadius: '4px',
+      borderRadius: theme.shape.borderRadiusSm,
       ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
       boxShadow: 'none',
       outlineOffset: 0,
