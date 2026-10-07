@@ -78,7 +78,6 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
-import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 export class LayerCreatorController extends AbstractMapViewerController {
   /** Reference on the UI domain. */
