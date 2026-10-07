@@ -1,0 +1,29 @@
+{
+  "name": "geoview-3d",
+  "version": "1.0.0",
+  "description": "A deck.gl-based 3D Tiles viewer plugin for the geoview project",
+  "main": "src/index.tsx",
+  "keywords": [
+    "geoview-3d",
+    "deck.gl",
+    "3d-tiles"
+  ],
+  "author": "GeoView",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
+  },
+  "peerDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "zustand": "~5.0.12"
+  },
+  "devDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}

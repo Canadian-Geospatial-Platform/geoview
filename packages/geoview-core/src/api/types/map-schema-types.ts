@@ -163,7 +163,8 @@ export type TypeValidAppBarCoreProps =
   | 'data-table'
   | 'layers'
   | 'stac-browser'
-  | 'filter-panel';
+  | 'filter-panel'
+  | 'tiles-3d';
 
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {

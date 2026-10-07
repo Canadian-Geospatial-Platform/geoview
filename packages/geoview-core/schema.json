@@ -203,7 +203,8 @@
         "aoi-panel",
         "custom-legend",
         "stac-browser",
-        "filter-panel"
+        "filter-panel",
+        "tiles-3d"
       ]
     },
     "TypeAppBarProps": {

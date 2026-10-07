@@ -15,6 +15,10 @@
   },
   "projects": [
     {
+      "packageName": "geoview-3d",
+      "projectFolder": "packages/geoview-3d"
+    },
+    {
       "packageName": "geoview-about-panel",
       "projectFolder": "packages/geoview-about-panel"
     },

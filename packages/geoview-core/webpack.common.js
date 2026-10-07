@@ -156,6 +156,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-tiles-3d': {
+      import: '../geoview-3d/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     globalObject: 'self',
