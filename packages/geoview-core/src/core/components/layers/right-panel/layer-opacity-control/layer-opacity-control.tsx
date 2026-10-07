@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,17 +6,30 @@ import { useTheme } from '@mui/material/styles';
 import type { Theme, SxProps } from '@mui/material/styles';
 import type { Mark } from '@mui/material/Slider/useSlider.types';
 
-import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
-import { useStoreLayerIsHiddenOnMap, useStoreLayerOpacity, useStoreLayerOpacityMaxFromParent } from '@/core/stores/states/layer-state';
+import type { SxStyles } from '@/ui/style/types';
+import { getSxClasses } from './layer-opacity-control-styles';
+import {
+  useStoreLayerIsHiddenOnMap,
+  useStoreLayerName,
+  useStoreLayerOpacity,
+  useStoreLayerOpacityMaxFromParent,
+} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
+/** Properties for the layer opacity control. */
 interface LayerOpacityControlProps {
   /** The layer path to control opacity for. */
   layerPath: string;
 }
 
+/**
+ * Creates the opacity control for a layer.
+ *
+ * @param props - Properties defined in LayerOpacityControlProps interface
+ * @returns The layer opacity control
+ */
 export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-opacity-control/layer-opacity-control');
@@ -27,10 +40,14 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   // Hook
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('LAYER-OPACITY-CONTROL - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
+  const layerName = useStoreLayerName(layerPath);
   const layerController = useLayerController();
   const labelId = useId();
 
@@ -38,20 +55,24 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   const [marks, setMarks] = useState<Mark[]>([]);
   const [localOpacity, setLocalOpacity] = useState<number>(layerOpacity);
 
-  // Sync local state with store when layerDetails.opacity changes
+  /**
+   * Synchronizes the local opacity with the layer and its parent limit.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LAYER OPACITY CONTROL - opacity sync', layerOpacity);
+    logger.logTraceUseEffect('LAYER OPACITY CONTROL - opacity sync', layerOpacity, layerParentOpacity);
 
     // Update the local opacity if it exceeds the max
     const newValue = Math.min(layerOpacity, layerParentOpacity);
     setLocalOpacity(newValue);
   }, [layerOpacity, layerParentOpacity]);
 
-  // Update markers if the parent has a specific opacity other than 1
+  /**
+   * Updates the slider marks when the parent opacity limit changes.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LAYER OPACITY CONTROL - parent opacity', layerParentOpacity);
+    logger.logTraceUseEffect('LAYER OPACITY CONTROL - parent opacity', layerParentOpacity, t);
 
     // Add mark for parent opacity
     if (layerParentOpacity !== 1) {
@@ -62,17 +83,17 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   }, [layerParentOpacity, t]);
 
   /**
-   * WCAG - Formats the opacity value as a percentage for screen readers.
+   * Formats the opacity value as a translated percentage string.
+   *
+   * @param value - The slider value to format
+   * @returns The translated value text
    */
-  const getAriaValueText = useCallback((value: number): string => {
-    return `${value}%`;
-  }, []);
+  const getOpacityValueText = useCallback((value: number): string => t('layers.opacityValueText', { value }), [t]);
+
+  // #region Handlers
 
   /**
-   * Updates the opacity of the layer on the map, optionally updating the store
-   * @param value - The opacity to set.
-   * @param activeThumb - Provided by onChange, but not used.
-   * @param updateStore - Should the store be updated.
+   * Handles slider opacity changes, optionally committing them to the store.
    */
   const handleSliderChange = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,31 +108,39 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
     [layerPath, layerParentOpacity, layerController]
   );
 
+  /**
+   * Commits the opacity value after slider interaction.
+   */
+  const handleSliderChangeCommitted = useCallback(
+    (value: number | number[]): void => {
+      handleSliderChange(value, 1, true);
+    },
+    [handleSliderChange]
+  );
+
+  // #endregion Handlers
+
   return (
-    <Box sx={sxClasses.layerOpacityControl}>
-      <Typography id={labelId} sx={[sxClasses.controlLabel, layerHidden ? sxClasses.controlLabelHidden : undefined] as SxProps<Theme>}>
+    <Box sx={memoSxClasses.layerOpacityControl}>
+      <Typography
+        id={labelId}
+        sx={[memoSxClasses.controlLabel, layerHidden ? memoSxClasses.controlLabelHidden : undefined] as SxProps<Theme>}
+      >
         {t('layers.opacity')}
       </Typography>
       <Slider
+        disabled={layerHidden}
+        value={Math.round(localOpacity * 100)}
+        step={1}
         min={0}
         max={100}
-        step={1}
-        value={Math.round(localOpacity * 100)}
-        onChange={handleSliderChange}
-        onChangeCommitted={(value: number | number[]) => handleSliderChange(value, 1, true)}
-        onValueLabelFormat={(value) => `${value}%`}
         marks={marks}
+        onChange={handleSliderChange}
+        onChangeCommitted={handleSliderChangeCommitted}
         valueLabelDisplay="auto"
-        disabled={layerHidden}
-        aria-labelledby={labelId}
-        onValueDisplayAriaLabel={getAriaValueText}
-        slotProps={{
-          input: {
-            // Set to undefined to prevent redundant ARIA attributes; native min and max are already output
-            'aria-valuemin': undefined,
-            'aria-valuemax': undefined,
-          },
-        }}
+        aria-label={t('layers.opacityAriaLabel', { name: layerName, label: t('layers.opacity') })}
+        onValueDisplayAriaLabel={getOpacityValueText}
+        onValueLabelFormat={getOpacityValueText}
       />
     </Box>
   );

@@ -256,7 +256,9 @@
     "fetchStart": "Fetching data for '{{layerName}}'...",
     "only": "only",
     "opacity": "Opacity (%)",
+    "opacityAriaLabel": "{{name}} layer {{label}}",
     "opacityMax": "Maximum from parent",
+    "opacityValueText": "{{value}}%",
     "outOfVisibleRange": "out of visible range",
     "reloadLayer": "Reload layer",
     "reloadSublayers": "Reload all layers in error",
@@ -482,7 +484,8 @@
     "letter": "Letter",
     "legal": "Legal",
     "tabloid": "Tabloid",
-    "previewAlt": "Export Preview"
+    "previewAlt": "Export Preview",
+    "loadingPreview": "Loading preview..."
   },
   "geolocator": {
     "title": "Geolocator",
@@ -577,8 +580,11 @@
   "footerBar": {
     "resizeTooltip": "Resize",
     "resizeAriaLabel": "Resize footer panel",
+    "footerPanelHeight": "Footer panel height",
+    "resizeValueText": "{{value}}%",
     "noTab": "No tab",
-    "tabsLabel": "Footer panel tabs"
+    "tabsLabel": "Footer panel tabs",
+    "tabsSelectionLabel": "Panel selection"
   },
   "toggleAll": {
     "show": "Show All",

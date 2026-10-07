@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { SelectChangeEvent, SxProps } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,6 @@ import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { useStoreMapSize } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Props for the GeolocatorResult component. */
 interface GeolocatorFiltersType {
@@ -36,10 +35,12 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
-  const mapId = useStoreGeoViewMapId();
   const shellContainer = useStoreAppShellContainer();
 
   // State
@@ -49,7 +50,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   /**
    * Checks whether any filter is active.
    */
-  const memoHasActiveFilters = useMemo(() => {
+  const memoHasActiveFilters = useMemo((): boolean => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoHasActiveFilters', province, category);
     return !!(province.length || category.length);
   }, [province, category]);
@@ -73,21 +74,35 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     setCategory('');
   };
 
+  /**
+   * Handles province filter changes.
+   */
+  const handleProvinceChange = useCallback((event: SelectChangeEvent<unknown>): void => {
+    setProvince(event.target.value as string);
+  }, []);
+
+  /**
+   * Handles category filter changes.
+   */
+  const handleCategoryChange = useCallback((event: SelectChangeEvent<unknown>): void => {
+    setCategory(event.target.value as string);
+  }, []);
+
   // #endregion
 
   /**
    * Reduces provinces from the API response data.
    */
-  const memoProvinces: TypeMenuItemProps[] = useMemo(() => {
-    logger.logTraceUseMemo('GEOLOCATOR-RESULT - provinces', geoLocationData);
+  const memoProvinces = useMemo((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - provinces', geoLocationData, t);
     return createMenuItems(geoLocationData, 'province', t('geolocator.noFilter'));
   }, [geoLocationData, t]);
 
   /**
    * Reduces categories from the API response data.
    */
-  const memoCategories: TypeMenuItemProps[] = useMemo(() => {
-    logger.logTraceUseMemo('GEOLOCATOR-RESULT - categories', geoLocationData);
+  const memoCategories = useMemo((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - categories', geoLocationData, t);
     return createMenuItems(geoLocationData, 'category', t('geolocator.noFilter'));
   }, [geoLocationData, t]);
 
@@ -95,12 +110,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Filters geolocation data by selected province and category.
    */
   // Filter data with memo
-  const memoFilteredData = useMemo(() => {
-    logger.logTraceUseMemo('GEOLOCATOR-RESULT - filtering data', {
-      total: geoLocationData.length,
-      province,
-      category,
-    });
+  const memoFilteredData = useMemo((): GeoListItem[] => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - filtering data', geoLocationData, province, category);
 
     return geoLocationData.filter((item) => {
       const matchProvince = !province || item.province === province;
@@ -112,8 +123,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   /**
    * Builds the active filters display for screen readers.
    */
-  const memoActiveFiltersDisplay = useMemo(() => {
-    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoActiveFiltersDisplay', province, category);
+  const memoActiveFiltersDisplay = useMemo((): JSX.Element | null => {
+    logger.logTraceUseMemo('GEOLOCATOR-RESULT - memoActiveFiltersDisplay', province, category, t, memoSxClasses.filterListError);
     if (!(province.length || category.length)) return null;
 
     return (
@@ -138,34 +149,28 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         <Box sx={memoSxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')}>
           <Box sx={memoSxClasses.filterBox}>
             <Select
-              labelId={`${mapId}-geolocator-province-filter-label`}
               formControlProps={{ variant: 'standard', size: 'small' }}
-              id={`${mapId}-geolocator-province-filter`}
               fullWidth
               value={province ?? ''}
-              onChange={(event: SelectChangeEvent<unknown>) => setProvince(event.target.value as string)}
-              label={t('geolocator.province')}
-              inputLabel={{ id: `${mapId}-geolocator-province-filter-label` }}
+              onChange={handleProvinceChange}
               menuItems={memoProvinces}
               disabled={!geoLocationData.length}
               variant="standard"
               MenuProps={{ container: shellContainer }}
+              label={t('geolocator.province')}
             />
           </Box>
           <Box sx={memoSxClasses.filterBox}>
             <Select
-              labelId={`${mapId}-geolocator-category-filter-label`}
-              id={`${mapId}-geolocator-category-filter`}
               formControlProps={{ variant: 'standard', size: 'small' }}
               value={category ?? ''}
               fullWidth
-              onChange={(event: SelectChangeEvent<unknown>) => setCategory(event.target.value as string)}
-              label={t('geolocator.category')}
-              inputLabel={{ id: `${mapId}-geolocator-category-filter-label` }}
+              onChange={handleCategoryChange}
               menuItems={memoCategories}
               disabled={!geoLocationData.length}
               variant="standard"
               MenuProps={{ container: shellContainer }}
+              label={t('geolocator.category')}
             />
           </Box>
           <Box>

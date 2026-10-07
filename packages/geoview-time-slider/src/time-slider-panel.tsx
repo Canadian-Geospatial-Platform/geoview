@@ -23,16 +23,21 @@ import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
+import { getSxClasses } from './time-slider-panel-style';
+
+/** Sx classes for this component. No theme dependency, so computed once at module scope. */
+const sxClasses = getSxClasses();
 
 /** Properties for the TimeSliderPanel component. */
 interface TypeTimeSliderProps {
+  /** Identifier of the map hosting the time slider panel. */
   mapId: string;
 }
 
 /**
- * Time slider tab.
+ * Creates the time slider tab.
  *
- * @param props - The properties passed to slider
+ * @param props - Properties defined in TypeTimeSliderProps interface
  * @returns The time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
@@ -46,7 +51,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   const layoutRef = useRef<LayoutExposedMethods | null>(null);
 
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
@@ -121,10 +126,23 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   // #endregion
 
-  // Reacts when the array of layer data updates
-  const memoLayersList = useMemo(() => {
+  /**
+   * Builds the visible time-slider layer list.
+   */
+  const memoLayersList = useMemo((): LayerListEntry[] => {
     // Log
-    logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
+    logger.logTraceUseMemo(
+      'TIME-SLIDER-PANEL - memoLayersList',
+      timeSliderLayers,
+      visibleInRangeLayers,
+      getFilterInfo,
+      layerStatuses,
+      layerNames,
+      layerHiddenSet,
+      inVisibleRangeSet,
+      displayLanguage,
+      mapId
+    );
 
     /**
      * Creates layer tooltip.
@@ -142,7 +160,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       name: string
     ): JSX.Element => {
       return (
-        <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
+        <Box sx={sxClasses.layerTooltip}>
           {name}
           {timeSliderLayerInfo.filtering && `: ${getFilterInfo(layerPath, timeSliderLayerInfo, language) ?? ''}`}
         </Box>
@@ -215,7 +233,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('TIME-SLIDER-PANEL - check selected layer visibility');
+    logger.logTraceUseEffect(
+      'TIME-SLIDER-PANEL - check selected layer visibility',
+      timeSliderController,
+      selectedLayerPath,
+      memoLayersList
+    );
 
     if (!selectedLayerPath) return;
 

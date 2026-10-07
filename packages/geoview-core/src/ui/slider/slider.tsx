@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { AriaAttributes, CSSProperties, ReactNode } from 'react';
 import { useLayoutEffect, useCallback, useRef, useMemo, useState } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
@@ -11,40 +11,57 @@ import { generateId } from '@/core/utils/utilities';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /**
- * Properties for the Slider
+ * Properties for the Slider.
  */
 type SliderProps = {
-  // Important props: min, max, value
+  /** Minimum slider value. */
   min: number;
+  /** Maximum slider value. */
   max: number;
+  /** Controlled slider value. */
   value?: number[] | number;
+  /** Initial value for an uncontrolled slider. */
   defaultValue?: number[] | number;
 
-  // custom slider classes and styles
+  /** Additional CSS class name. */
   className?: string;
+  /** Inline styles applied to the slider. */
   style?: CSSProperties;
+  /** Theme-aware styles applied to the slider. */
   sx?: SxProps<Theme>;
 
-  // custom onChange callback
+  /** Callback invoked when the slider value changes. */
   onChange?: (value: number | number[], activeThumb: number) => void;
+  /** Callback invoked when a slider interaction is committed. */
   onChangeCommitted?: (value: number | number[]) => void;
+  /** Formats the visible value label. */
   onValueLabelFormat?: (value: number, index: number) => string;
+  /** Formats the accessible value text. */
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
+  /** Callback invoked when a key is pressed on the slider. */
   onKeyDown?: (event: React.KeyboardEvent) => void;
 
-  // MUI optional props
+  /** Whether the slider is disabled. */
   disabled?: boolean;
+  /** Marks displayed along the slider track. */
   marks?: Mark[];
+  /** Slider orientation. */
   orientation?: 'vertical' | 'horizontal';
+  /** Distance between slider steps; null permits mark-only steps. */
   step?: number | null;
+  /** Slider size. */
   size?: 'small' | 'medium';
+  /** Track display mode. */
   track?: 'inverted' | 'normal' | false;
-  ariaLabelledby?: string;
-  getAriaLabel?: (index: number) => string;
+  /** MUI value label format. */
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
+  /** Visibility of the value label. */
   valueLabelDisplay?: 'auto' | 'on' | 'off';
+  /** Props passed to MUI slider slots. */
   slotProps?: MuiSliderProps['slotProps'];
-};
+  /** Per-thumb aria-label, taking precedence over aria-label; use for range sliders without aria-labelledby. */
+  getAriaLabel?: (index: number) => string;
+} & AriaAttributes;
 
 /**
  * Custom Material-UI Slider component with advanced label and mark management.
@@ -52,6 +69,12 @@ type SliderProps = {
  * Wraps Material-UI's Slider with intelligent mark limiting (max 30 visible marks)
  * and overlap detection for labels. Handles both single and range values, controlled
  * and uncontrolled modes. Includes keyboard focus workaround for arrow key interactions.
+ * Accepts standard ARIA attributes and forwards them to the underlying MUI slider.
+ *
+ * MUI uses getAriaLabel(index) instead of aria-label when both are supplied. A valid
+ * aria-labelledby reference takes precedence over either in accessible-name computation.
+ * Prefer one naming strategy: aria-label or aria-labelledby for a single thumb, and
+ * getAriaLabel for distinct range-thumb names. Input slot props can override these attributes.
  *
  * @param props - Slider configuration (see SliderProps)
  * @returns Slider component with optimized mark/label rendering
@@ -92,18 +115,19 @@ function SliderUI(props: SliderProps): JSX.Element {
     onKeyDown,
     disabled,
     slotProps,
+    getAriaLabel,
     ...properties
   } = props;
 
   // Determine if the component is controlled or not to determine if we need an internal state or not.
   // This is the best-practice according to react and is also how MUI does it internally.
   const isControlled = value !== undefined;
-  const [internalValue, setInternalValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState<number[] | number | undefined>(defaultValue);
   const sliderValue = isControlled ? value : internalValue;
 
   // Hooks
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
     logger.logTraceUseMemo('SLIDER - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -197,7 +221,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       // Callback
       onChange?.(newValue, activeThumb);
     },
-    [isControlled, onChange, setInternalValue]
+    [isControlled, onChange]
   );
 
   /**
@@ -233,11 +257,11 @@ function SliderUI(props: SliderProps): JSX.Element {
   // GV enabling independent keyboard control of each thumb.
   // GV See: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
   /**
-   * Handles keyboard events on the slider to maintain focus during arrow key interactions
+   * Handles keyboard events on the slider to maintain focus during arrow key interactions.
    */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent): void => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown'].includes(event.key)) {
         if (sliderRef.current && event.target instanceof HTMLInputElement) {
           const inputs = sliderRef.current.querySelectorAll('input[type="range"]');
           const index = Array.from(inputs).indexOf(event.target);
@@ -376,6 +400,9 @@ function SliderUI(props: SliderProps): JSX.Element {
   useEventListener<Window>('resize', removeLabelOverlap, window);
 
   // Add this new effect to handle slider value changes
+  /**
+   * Recalculates visible mark labels when the slider value changes.
+   */
   useLayoutEffect(() => {
     logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change', sliderValue);
 
@@ -398,6 +425,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
       getAriaValueText={onValueDisplayAriaLabel}
+      getAriaLabel={getAriaLabel}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
       onKeyDown={handleKeyDown}

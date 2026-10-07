@@ -1,26 +1,38 @@
 import type { Ref } from 'react';
-import { forwardRef, useMemo } from 'react';
-import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps, SxProps, Theme } from '@mui/material';
+import { forwardRef, useId, useMemo } from 'react';
+import type { InputLabelProps, FormControlProps, SelectProps, SelectChangeEvent, MenuProps, SxProps, Theme } from '@mui/material';
 import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
 import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
-/**
- * Custom MUI Select properties
- */
+/** Requires exactly one source for the Select's accessible name. */
+type TypeSelectLabelProps = { label: string; 'aria-label'?: never } | { label?: never; 'aria-label': string };
+
+/** Custom MUI Select properties. */
 type TypeSelectProps = {
+  /** Optional ID of the visible label associated with the select. */
   labelId?: string;
+  /** Properties passed to the wrapping form control. */
   formControlProps?: FormControlProps;
+  /** ID applied to the underlying select element. */
   id?: string;
+  /** Whether the select fills the available width. */
   fullWidth?: boolean;
+  /** Current selected value. */
   value: unknown;
+  /** Callback invoked when the selected value changes. */
   onChange: (event: SelectChangeEvent<unknown>) => void;
-  label: string;
-  inputLabel: InputLabelProps;
+  /** Optional label styling and behaviour; the wrapper owns the label ID. */
+  inputLabel?: Omit<InputLabelProps, 'id'> & { id?: never };
+  /** Input attributes forwarded to MUI; aria-label is controlled by the top-level naming strategy. */
+  inputProps?: SelectProps['inputProps'];
+  /** Menu entries displayed by the select. */
   menuItems: TypeMenuItemProps[];
+  /** Whether the select is disabled. */
   disabled?: boolean;
+  /** Visual variant of the select. */
   variant?: 'standard' | 'outlined' | 'filled';
   /**
    * Props applied to the Menu component.
@@ -30,6 +42,7 @@ type TypeSelectProps = {
    * Example: MenuProps={{ container: shellContainer }}
    */
   MenuProps?: Partial<MenuProps>;
+  /** Styles applied to the wrapping form control. */
   sx?: SxProps<Theme>;
   /**
    * If true, the selected value is rendered when the value is empty.
@@ -41,15 +54,18 @@ type TypeSelectProps = {
    * Allows custom rendering of the selected value in the input.
    */
   renderValue?: (value: unknown) => React.ReactNode;
-} & React.AriaAttributes;
+} & Omit<React.AriaAttributes, 'aria-label'> &
+  TypeSelectLabelProps;
 
-/**
- * Menu Item properties
- */
+/** Properties for a select menu entry. */
 export interface TypeMenuItemProps {
+  /** Whether this entry is a selectable item or a group header. */
   type?: 'item' | 'header';
+  /** Value and display content of the menu entry. */
   item: {
+    /** Value emitted when the menu entry is selected. */
     value: string | number;
+    /** Content rendered for the menu entry. */
     children: React.ReactNode;
   };
 }
@@ -60,6 +76,10 @@ export interface TypeMenuItemProps {
  * Wraps Material-UI's Select with FormControl and InputLabel for complete form control.
  * Supports menu item grouping (headers and items) and container placement for fullscreen scenarios.
  * Handles both controlled and uncontrolled value modes.
+ * Requires a non-empty visible label or aria-label, never both. Visible labels use an
+ * automatically generated ID unless labelId is supplied; inputLabel cannot override that ID.
+ * Logs invalid naming props without interrupting rendering; callers must correct them for accessibility.
+ * Preserves inputProps attributes and sets aria-label from the top-level naming strategy.
  *
  * @param props - Select configuration (see TypeSelectProps interface)
  * @param ref - Reference to underlying FormControl div
@@ -89,7 +109,9 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     value,
     onChange,
     label,
+    'aria-label': ariaLabel,
     inputLabel,
+    inputProps,
     menuItems,
     disabled,
     variant = 'standard',
@@ -100,44 +122,62 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     ...selectProps
   } = props;
 
+  const accessibleName = label ?? ariaLabel;
+  if ((label !== undefined) === (ariaLabel !== undefined) || typeof accessibleName !== 'string' || !accessibleName.trim()) {
+    logger.logError('Select requires exactly one non-empty label or aria-label. Provide a visible label or an aria-label.', {
+      id,
+      label,
+      'aria-label': ariaLabel,
+    });
+  }
+
   // Hooks
+  const generatedLabelId = useId();
+  const resolvedLabelId = labelId ?? generatedLabelId;
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  /**
+   * Builds styles for the select component.
+   */
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
+    logger.logTraceUseMemo('SELECT - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   /**
    * Memoized label component.
    */
   const memoLabelComponent = useMemo((): JSX.Element | null => {
     // Log
-    logger.logTraceUseMemo('ui/select/select - memoLabelComponent', label);
+    logger.logTraceUseMemo('SELECT - memoLabelComponent', label, resolvedLabelId, memoSxClasses.label, inputLabel);
 
-    return label ? (
-      <InputLabel id={labelId} sx={sxClasses.label} {...inputLabel}>
+    return label !== undefined ? (
+      <InputLabel sx={memoSxClasses.label} {...inputLabel} id={resolvedLabelId}>
         {label}
       </InputLabel>
     ) : null;
-  }, [label, labelId, sxClasses.label, inputLabel]);
+  }, [label, resolvedLabelId, memoSxClasses.label, inputLabel]);
 
   /**
    * Memoized array of MenuItem components generated from the menuItems prop.
    */
   const memoMenuItemsComponent = useMemo((): JSX.Element[] => {
     // Log
-    logger.logTraceUseMemo('ui/select/select - memoMenuItemsComponent', menuItems);
+    logger.logTraceUseMemo('SELECT - memoMenuItemsComponent', menuItems, memoSxClasses.menuItem);
 
     return menuItems.map((menuItem) => (
-      <MenuItem key={menuItem.item.value} value={menuItem.item.value} sx={sxClasses.menuItem}>
+      <MenuItem key={menuItem.item.value} value={menuItem.item.value} sx={memoSxClasses.menuItem}>
         {menuItem.item.children}
       </MenuItem>
     ));
-  }, [menuItems, sxClasses.menuItem]);
+  }, [menuItems, memoSxClasses.menuItem]);
 
   /**
    * Memoized FormControl props.
    */
   const memoFormControlProps = useMemo((): Record<string, unknown> => {
     // Log
-    logger.logTraceUseMemo('ui/select/select - memoFormControlProps', formControlProps);
+    logger.logTraceUseMemo('SELECT - memoFormControlProps', fullWidth, variant, formControlProps);
 
     return {
       fullWidth,
@@ -151,29 +191,65 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
    */
   const memoSelectProps = useMemo((): Record<string, unknown> => {
     // Log
-    logger.logTraceUseMemo('ui/select/select - memoSelectProps', selectProps);
-
-    return {
-      labelId,
+    logger.logTraceUseMemo(
+      'SELECT - memoSelectProps',
+      label,
+      resolvedLabelId,
+      ariaLabel,
       id,
       value,
       onChange,
       disabled,
       variant,
-      sx: sxClasses.formControl,
+      memoSxClasses.formControl,
+      MenuProps,
+      displayEmpty,
+      renderValue,
+      inputProps,
+      selectProps
+    );
+
+    return {
+      labelId: label !== undefined ? resolvedLabelId : undefined,
+      label,
+      id,
+      value,
+      onChange,
+      disabled,
+      variant,
+      sx: memoSxClasses.formControl,
       ...(MenuProps ? { MenuProps } : {}),
       ...(displayEmpty !== undefined ? { displayEmpty } : {}),
       ...(renderValue ? { renderValue } : {}),
       ...selectProps,
+      inputProps: {
+        ...inputProps,
+        'aria-label': ariaLabel,
+      },
     };
-  }, [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, displayEmpty, renderValue, selectProps]);
+  }, [
+    label,
+    resolvedLabelId,
+    ariaLabel,
+    id,
+    value,
+    onChange,
+    disabled,
+    variant,
+    memoSxClasses.formControl,
+    MenuProps,
+    displayEmpty,
+    renderValue,
+    inputProps,
+    selectProps,
+  ]);
 
   /**
    * Composes FormControl and caller sx props without nesting array-form sx.
    */
   const memoMergedSx = useMemo((): SxProps<Theme> | undefined => {
     // Log
-    logger.logTraceUseMemo('ui/select/select - memoMergedSx', sx);
+    logger.logTraceUseMemo('SELECT - memoMergedSx', formControlProps.sx, sx);
 
     return composeSxProps(formControlProps.sx, sx);
   }, [formControlProps.sx, sx]);

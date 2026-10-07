@@ -52,6 +52,19 @@ All interactive elements include context-specific aria-label attributes:
 - Panels: "Layers panel", "Legend panel", "Details panel"
 - Toggle states: Communicated via `aria-pressed` (stable labels, not dynamic text changes)
 
+The custom `Select` wrapper requires exactly one naming prop: a non-empty visible `label` or
+`aria-label`. Use translated text (or the configured attribute display label for filter controls).
+TypeScript requires exactly one naming prop, but accepts empty strings. At runtime, the wrapper
+logs an error to the browser console for missing, conflicting, empty, or whitespace-only naming
+props without interrupting rendering. These diagnostics are available in development and
+production, subject to the configured logging level; they do not display an in-app notification.
+Logging does not correct the accessible name: callers must fix invalid naming props.
+For visible labels, the wrapper generates and connects the label ID automatically; supply
+`labelId` only when another element or integration needs a specific ID. Optional `inputLabel`
+props customize the label but cannot override its `id`. With `aria-label`, no InputLabel is
+rendered and no label ID is connected to the Select. The visible `label` is also passed to
+Material UI so outlined selects render their notch correctly.
+
 ---
 
 ## 002. Intentional Interaction Patterns

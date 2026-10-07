@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createElement, useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import { createElement, useCallback, useEffect, useState, useRef, useMemo, useId } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -15,14 +15,12 @@ import {
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { Box, Slider, Switch, Typography } from '@/ui';
-import { ThreeSixtyIcon } from '@/ui/icons';
+import { Box, Button, Slider, Switch, ThreeSixtyIcon, Typography } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import type { SxStyles } from '@/ui/style/types';
-import { Button } from '@/ui/button/button';
 import { useMapController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -46,6 +44,7 @@ export default function MapRotation(): JSX.Element {
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const { rotationAngle } = useManageArrow();
   const mapController = useMapController();
+  const rotationLabelId = useId();
 
   /**
    * Builds custom sx classes for the map rotation component.
@@ -105,6 +104,14 @@ export default function MapRotation(): JSX.Element {
       setSliderRotationDegrees(rotationDegrees);
     }
   }, [rotationDegrees, isSliderDragging]);
+
+  /**
+   * Formats a rotation degree value for display and accessibility labeling.
+   *
+   * @param value - The rotation value in degrees
+   * @returns The formatted degree string
+   */
+  const getRotationValueText = useCallback((value: number): string => `${value}°`, []);
 
   // #region Handlers
 
@@ -179,7 +186,7 @@ export default function MapRotation(): JSX.Element {
       <Box sx={memoSxClasses.rotationControlContainer}>
         <Box sx={memoSxClasses.rotationLabelBox}>
           <Typography
-            id={`${mapId}-rotation-label`}
+            id={rotationLabelId}
             variant="body2"
             sx={memoSxClasses.rotationLabel}
             role="status"
@@ -190,13 +197,11 @@ export default function MapRotation(): JSX.Element {
           </Typography>
         </Box>
         <Slider
-          aria-labelledby={`${mapId}-rotation-label`}
+          disabled={isFixNorth}
           value={sliderRotationDegrees}
-          onChange={handleSliderChange}
-          onChangeCommitted={handleSliderChangeCommitted}
+          step={1}
           min={-180}
           max={180}
-          step={1}
           marks={[
             { value: -180, label: '-180°' },
             { value: -90, label: '-90°' },
@@ -204,15 +209,18 @@ export default function MapRotation(): JSX.Element {
             { value: 90, label: '90°' },
             { value: 180, label: '180°' },
           ]}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value}°`}
-          disabled={isFixNorth}
+          onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
           track={false}
           slotProps={{
             input: {
               ref: sliderInputRef,
             },
           }}
+          valueLabelDisplay="auto"
+          aria-labelledby={rotationLabelId}
+          onValueDisplayAriaLabel={getRotationValueText}
+          onValueLabelFormat={getRotationValueText}
         />
         <Box sx={memoSxClasses.rotationButtonContainer}>
           <Button

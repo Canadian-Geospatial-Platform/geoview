@@ -89,6 +89,11 @@ The swiper package `layers` property changed shape (schema `version` bumped `1.0
 | `swiper` schema `version`  | Bumped from `"1.0"` to `"1.1"`                                                                                                                                                                         | #3625 |
 | `ConfigProps` (swiper pkg) | `layers` type changed from `string[]` to `{ layerPath: string; side: SwipeSide }[]`; added required-at-runtime `interactive: boolean`                                                                  | #3625 |
 
+### UI Components — Select and Slider Compatibility
+
+- `Select` now requires exactly one non-empty `label` or `aria-label`; invalid naming props log an error without interrupting rendering. `inputLabel.id` is no longer supported: use `labelId` to customize the associated label ID. These restrictions affect external consumers of the UI wrapper (#3678).
+- `Slider` removed the `ariaLabelledby` prop. Use standard `aria-labelledby` for a shared name or `getAriaLabel(index)` for distinct thumb names (issue #3657; #3678).
+
 ## Breaking Changes — Developer-Only (Internal)
 
 _(Internal code patterns, MUI props, build tooling — does NOT affect external consumers)_
@@ -278,6 +283,11 @@ _(WCAG fixes and improvements)_
 - Fixed the nav bar "Expand Drawing tools group" icon button losing keyboard focus after being pressed in WCAG mode (#3630)
 - Fixed an empty `<ul>` element appearing in the generated legend layer container HTML (#3630)
 - Hidden-layers panel lists render as two separate semantic lists ("Available layers" / "Hidden layers") with `aria-labelledby` headings and an `aria-live` region announcing when a layer moves between lists; hidden rows are non-interactive (`tabIndex=-1`, no click/keydown handlers) with the eye toggle as the sole control, and focus is restored by stable id after a layer is re-enabled (the item re-mounts when moving between the two lists) (#3635)
+
+- Improved slider accessibility with distinct time-slider thumb names, formatted date/percentage value text, calendar-step keyboard navigation, and keyboard-friendly footer resize interaction (issue #3657; #3678).
+- Updated raster function, mosaic rule, and WMS style settings to use native button controls for expandable sections and selectable cards, with associated labels and decorative previews (issue #3656; #3678).
+- Updated Select controls across export, geolocator, layer settings, filter panel, and mobile tabs to use a single accessible naming source and automatically associated visible labels (#3678).
+- Localized the export preview loading message in English and French (#3678).
 
 ## Documentation & Cleanup
 

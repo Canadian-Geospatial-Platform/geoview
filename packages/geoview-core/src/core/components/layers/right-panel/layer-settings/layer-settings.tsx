@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Divider, Typography, Select } from '@/ui';
+import { Box, Typography, Select } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
 import {
@@ -22,7 +22,8 @@ import {
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
 
-import { getSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerDetailsSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerSettingsSxClasses } from './layer-settings-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
@@ -31,6 +32,7 @@ import { useSwiperControllerIfExists } from '@/core/controllers/use-controllers'
 import type { SwiperController } from '@/core/controllers/swiper-controller';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the swiper settings section. */
 interface SwiperLayerSettingsSectionProps {
   /** The layer path to configure swiper settings for. */
   layerPath: string;
@@ -45,9 +47,8 @@ interface SwiperLayerSettingsSectionProps {
  * Only visible when the swiper plugin is loaded and configured as interactive. Lets the user add
  * or remove the layer from the swiper and choose which side of the bar reveals the layer.
  *
- * @param layerPath - The layer path to configure.
- * @param controller - The swiper controller instance.
- * @returns The swiper settings section, or null when the swiper is not interactive.
+ * @param props - Properties defined in SwiperLayerSettingsSectionProps interface
+ * @returns The swiper settings section, or null when the swiper is not interactive
  */
 function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettingsSectionProps): JSX.Element | null {
   // Log
@@ -56,7 +57,7 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = getLayerDetailsSxClasses(theme);
 
   // Store
   const interactive = useStoreSwiperInteractive();
@@ -106,11 +107,9 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
           <Select
             value={currentSide}
             onChange={handleChangeSide}
-            label={t('swiper.sideLabel')}
-            labelId={`${layerPath}-swiper-side-label`}
-            inputLabel={{ id: `${layerPath}-swiper-side-label` }}
             menuItems={sideMenuItems}
             sx={sxClasses.swiperSideSelect}
+            label={t('swiper.sideLabel')}
           />
         )}
       </Box>
@@ -118,19 +117,21 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
   );
 }
 
+/** Properties for the layer settings panel. */
 interface LayerSettingsPanelProps {
   /** The layer path to configure settings for. */
   layerPath: string;
 }
 
 /**
- * Panel view for layer settings content.
+ * Creates the panel view for layer settings content.
  *
  * Displays available settings (raster function, mosaic rule, WMS styles,
  * interaction toggles) as inline collapsible sections. The header and
  * back navigation are handled by the parent.
  *
- * @param layerPath - The layer path to configure.
+ * @param props - Properties defined in LayerSettingsPanelProps interface
+ * @returns The layer settings panel
  */
 export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.Element {
   // Log
@@ -139,7 +140,8 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const sxClasses = getLayerDetailsSxClasses(theme);
+  const settingsSxClasses = getLayerSettingsSxClasses(theme);
 
   // Store
   const layerController = useLayerController();
@@ -155,19 +157,36 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   const isLayerHoverable = layerControls?.hover;
   const isLayerQueryable = layerControls?.query;
 
-  // Stable handlers for hover/query toggles
+  // #region Handlers
+
+  /**
+   * Handles toggling layer hover behavior.
+   */
   const handleToggleHoverable = useCallback((): void => {
     layerController.setLayerHoverable(layerPath, !hoverable);
   }, [layerPath, hoverable, layerController]);
 
+  /**
+   * Handles toggling layer query behavior.
+   */
   const handleToggleQueryable = useCallback((): void => {
     layerController.setLayerQueryable(layerPath, !queryable);
   }, [layerPath, queryable, layerController]);
 
+  /**
+   * Handles toggling layer text visibility.
+   */
   const handleToggleText = useCallback((): void => {
     layerController.setLayerTextVisibility(layerPath, !textVisible);
   }, [layerPath, textVisible, layerController]);
 
+  // #endregion Handlers
+
+  /**
+   * Renders the layer text visibility toggle.
+   *
+   * @returns The text visibility toggle
+   */
   function renderToggleTextButton(): JSX.Element {
     return (
       <Switch
@@ -179,6 +198,11 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
     );
   }
 
+  /**
+   * Renders the available layer interaction controls.
+   *
+   * @returns The interaction section, or null when no controls are available
+   */
   function renderInteractionSection(): JSX.Element | null {
     if (!(isLayerHoverable || isLayerQueryable || hasText)) {
       return null;
@@ -201,9 +225,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   }
 
   return (
-    <Box>
-      <Divider sx={sxClasses.sectionDivider} variant="middle" />
-
+    <Box sx={settingsSxClasses.settingsSectionContainer}>
       {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerPath={layerPath} />}
       {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerPath={layerPath} />}
       {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerPath={layerPath} />}
