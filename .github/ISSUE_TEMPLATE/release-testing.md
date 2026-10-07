@@ -266,7 +266,7 @@ labels: ["testing", "release"]
 - [ ] [Custom Legend with Error Layers](../docs/programming/release-testing/20-edge-cases.md#custom-legend-with-error-layers) (1 test)
 - [ ] [Metadata Edge Cases](../docs/programming/release-testing/20-edge-cases.md#metadata-edge-cases) (4 tests)
 - [ ] [Circumpolar Config](../docs/programming/release-testing/20-edge-cases.md#circumpolar-config) (1 test)
-- [ ] [Error Layer Reload](../docs/programming/release-testing/20-edge-cases.md#error-layer-reload) (2 tests)
+- [ ] [Error Layer Reload](../docs/programming/release-testing/20-edge-cases.md#error-layer-reload) (3 tests)
 - [ ] [Two-Map Page](../docs/programming/release-testing/20-edge-cases.md#two-map-page) (1 test)
 - [ ] [Outlier Test Pages](../docs/programming/release-testing/20-edge-cases.md#outlier-test-pages) (8 tests)
 - [ ] [Overlay Objects](../docs/programming/release-testing/20-edge-cases.md#overlay-objects) (3 tests)
