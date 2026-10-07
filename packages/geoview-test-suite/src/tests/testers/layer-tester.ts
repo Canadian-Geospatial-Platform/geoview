@@ -13,6 +13,7 @@ import {
   getStoreLayerLegendLayerByPath,
   getStoreLayerIsHiddenOnMap,
   getStoreLayerInVisibleRangeLayerPaths,
+  getStoreLayerOrderedLayerPaths,
 } from 'geoview-core/core/stores/states/layer-state';
 import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/feature-info-state';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
@@ -2742,6 +2743,75 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Redirect to helper to clean up and assert
         this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order (issue #3666).
+   *
+   * Reload re-fetches metadata, re-validates the config, and recreates the GV layer. The previous implementation
+   * re-added the rebuilt layer at the top of the ordered layers; this asserts the ordered layer paths are unchanged
+   * after a middle layer is reloaded, and that the reloaded layer is present and loaded again.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testReloadLayerPreservesPosition(): Promise<Test<string[]>> {
+    const gvLayerIdA = generateId();
+    const gvLayerIdB = generateId();
+    const gvLayerIdC = generateId();
+    const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+    const subLayerId = GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID;
+    const layerPathA = `${gvLayerIdA}/${subLayerId}`;
+    const layerPathB = `${gvLayerIdB}/${subLayerId}`;
+    const layerPathC = `${gvLayerIdC}/${subLayerId}`;
+
+    // Ordered layer paths captured before the reload, compared against in the assertion callback
+    let orderedPathsBeforeReload: string[] = [];
+
+    return this.test(
+      `Test reloading a layer preserves its position in the layer order...`,
+      async (test) => {
+        // Add three layers so there is a layer before and after the one being reloaded
+        test.addStep('Adding three layers on the map...');
+        const configA = EsriDynamic.createGeoviewLayerConfig(gvLayerIdA, 'Reload A', layerUrl, false, [{ id: subLayerId }]);
+        const configB = EsriDynamic.createGeoviewLayerConfig(gvLayerIdB, 'Reload B', layerUrl, false, [{ id: subLayerId }]);
+        const configC = EsriDynamic.createGeoviewLayerConfig(gvLayerIdC, 'Reload C', layerUrl, false, [{ id: subLayerId }]);
+        await this.helperStepAddLayerOnMap(test, configA);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathA);
+        await this.helperStepAddLayerOnMap(test, configB);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathB);
+        await this.helperStepAddLayerOnMap(test, configC);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathC);
+
+        // Capture the order before reloading (navigation to a value, the reload below is the act under test)
+        orderedPathsBeforeReload = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
+
+        // The act: reload the middle layer and wait for the rebuild to finish
+        test.addStep('Reloading the middle layer from scratch...');
+        await this.getControllersRegistry().layerCreatorController.reloadLayer(layerPathB);
+
+        // Wait for the rebuilt layer to be registered and loaded again
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathB);
+
+        // Return the ordered layer paths after the reload
+        return [...getStoreLayerOrderedLayerPaths(this.getMapId())];
+      },
+      (test, result) => {
+        // The reload must not change the layer order (the middle layer stays in the middle)
+        test.addStep('Verifying the ordered layer paths are unchanged after the reload...');
+        Test.assertIsArrayEqual(result, orderedPathsBeforeReload);
+
+        // The reloaded layer must have been rebuilt and be present again
+        test.addStep('Verifying the reloaded layer is present and loaded...');
+        Test.assertIsDefined('reloadedLayer', this.getMapViewer().layer.getGeoviewLayerIfExists(layerPathB));
+        Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPathB);
+      },
+      (test) => {
+        // Clean up the three layers
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathA);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathB);
+        this.finalizeStepRemoveLayerAndAssert(test, layerPathC);
       }
     );
   }

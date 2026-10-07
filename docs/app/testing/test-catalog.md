@@ -77,7 +77,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 46         | Mixed parallel + sequential |
-| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 8          | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`                                                                               | 41         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
@@ -398,15 +398,15 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-| #   | Method                                  | Type      | Description                                                                          |
-| --- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------ |
-| 10  | `testAddWMSLayerWithOWSMundialis`       | test      | Test Adding WMS Mundialis on map...                                                  |
-| 11  | `testAddWMSLayerWithDatacubeMSI`        | test      | Test Adding WMS Datacube MSI on map...                                               |
-| 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
-| 13  | `testAddWMSLayerLandcoverGroupDimension`         | test      | Test Adding WMS Landcover group with a group time dimension...                     |
-| 14  | `testAddWMSLayerLandcoverGroupDimensionNegative` | test      | Test Adding WMS Landcover sub-layers without a group time dimension...             |
-| 15  | `testAddWMSDuplicateGroupNames`                   | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)         |
-| 16  | `testAddWMSBadUrl`                                | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
+| #   | Method                                           | Type      | Description                                                                          |
+| --- | ------------------------------------------------ | --------- | ------------------------------------------------------------------------------------ |
+| 10  | `testAddWMSLayerWithOWSMundialis`                | test      | Test Adding WMS Mundialis on map...                                                  |
+| 11  | `testAddWMSLayerWithDatacubeMSI`                 | test      | Test Adding WMS Datacube MSI on map...                                               |
+| 12  | `testAddWMSLayerWithDatacubeRingOfFire`          | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
+| 13  | `testAddWMSLayerLandcoverGroupDimension`         | test      | Test Adding WMS Landcover group with a group time dimension...                       |
+| 14  | `testAddWMSLayerLandcoverGroupDimensionNegative` | test      | Test Adding WMS Landcover sub-layers without a group time dimension...               |
+| 15  | `testAddWMSDuplicateGroupNames`                  | test      | Test Adding WMS with duplicate nested group names on map... (issue #3521)            |
+| 16  | `testAddWMSBadUrl`                               | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
 #### 2.1.5 WFS — Lifecycle
 
@@ -554,6 +554,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 6   | `testFeatureHasGeometryWhenOutfieldsHasNoGeometryField` | test | Test feature query still retrieves geometry when outfields omit geometry...   |
 | 7   | `testQueryWMSLayerForWFSFeaturesCities`                 | test | Test WMS layer retrieves feature results via its associated WFS (Cities)...   |
 | 8   | `testQueryWMSLayerForWFSFeaturesAirborne`               | test | Test WMS layer retrieves feature results via its associated WFS (Airborne)... |
+
+#### 2.2.4 Layer Reload (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                             | Type | Description                                                                                     |
+| --- | ---------------------------------- | ---- | ----------------------------------------------------------------------------------------------- |
+| 9   | `testReloadLayerPreservesPosition` | test | Test reloading a layer rebuilds it from scratch and keeps it at the same layer order (#3666)... |
 
 ---
 
@@ -848,8 +856,8 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-time-slider` · **File:** `tests/suites/suite-time-slider.ts` · **Tester:** `TimeSliderTester` (`tests/testers/time-slider-tester.ts`)
 **Execution:** Sequential · **Guard:** `time-slider` must be in `footerBar.tabs.core` and time-slider controller must exist
 
-| #   | Method                | Type | Description                                                                         |
-| --- | --------------------- | ---- | ----------------------------------------------------------------------------------- |
-| 1   | `testResetValues`     | test | Test Time Slider reset restores registered default values...                        |
-| 2   | `testConstrainValues` | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges... |
+| #   | Method                                     | Type | Description                                                                                      |
+| --- | ------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------ |
+| 1   | `testResetValues`                          | test | Test Time Slider reset restores registered default values...                                     |
+| 2   | `testConstrainValues`                      | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges...              |
 | 3   | `testWMSLayerLandcoverGroupDimensionFlags` | test | Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers... |

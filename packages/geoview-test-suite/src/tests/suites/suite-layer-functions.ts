@@ -46,7 +46,8 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
-      <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>`;
+      <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
+      <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>`;
   }
 
   /**
@@ -55,7 +56,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 8;
+    return 9;
   }
 
   /**
@@ -109,6 +110,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test resolving the first layer under a root id (e.g. a GeoCore UUID) — issue #3633
     await this.#layerTester.testGetGeoviewLayerByRootId();
+
+    // Test that reloading a layer preserves its position in the layer order — issue #3666
+    await this.#layerTester.testReloadLayerPreservesPosition();
 
     // Resolve when all parallel tests are done
     return Promise.all([pLayerWMSDuplicateGroupNames]);

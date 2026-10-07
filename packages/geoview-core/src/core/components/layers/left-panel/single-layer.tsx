@@ -425,11 +425,13 @@ export function SingleLayer({
     [layerPath, layerController, selectLayerIfNeeded, isZoomToVisibleScaleCapable]
   );
 
+  /**
+   * Handles clicking the reload button.
+   */
   const handleReload = useCallback((): void => {
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
-    // Reload layer (void because reloadLayer() returns a Promise<void>)
     void layerCreatorController.reloadLayer(layerPath);
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 

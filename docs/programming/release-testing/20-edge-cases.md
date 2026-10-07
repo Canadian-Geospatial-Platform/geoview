@@ -47,10 +47,11 @@ Config: `configs/navigator/demos/22-circumpolar.json`
 
 ## Error Layer Reload
 
-| Test           | Description           | Steps                                                                              | Expected Result                                | Auto |
-| -------------- | --------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- | ---- |
-| Reload bad URL | Reload stays in error | 1. Load a layer with a bad URL<br>2. After it shows as error, attempt to reload it | Stays in error state (no crash, no duplicates) | M    |
-| Reload bad ID  | Reload stays in error | 1. Load a layer with a bad layer ID<br>2. After error, attempt reload              | Same error state (no crash)                    | M    |
+| Test                         | Description                                       | Steps                                                                                                                                                                                                                                                      | Expected Result                                                                                                   | Auto |
+| ---------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---- |
+| Reload bad URL               | Reload stays in error                             | 1. Load a layer with a bad URL<br>2. After it shows as error, attempt to reload it                                                                                                                                                                         | Stays in error state (no crash, no duplicates)                                                                    | M    |
+| Reload bad ID                | Reload stays in error                             | 1. Load a layer with a bad layer ID<br>2. After error, attempt reload                                                                                                                                                                                      | Same error state (no crash)                                                                                       | M    |
+| Reload after resize recovers | Reload rebuilds a layer that failed on first load | 1. Add the WMS service `https://demo.mapserver.org/cgi-bin/wms` with the viewer large enough that GetMap exceeds the server's max size (layer goes in error)<br>2. Resize the viewer smaller<br>3. In the Layers panel, click reload on the layer in error | Layer reloads from scratch and renders (no "loaded at least once" error); it keeps its position in the layer list | M    |
 
 ## Two-Map Page
 
