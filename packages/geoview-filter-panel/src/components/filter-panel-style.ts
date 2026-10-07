@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.5, 0.75, 0),
     border: 1,
     borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
-    borderRadius: 1,
+    borderRadius: theme.shape.borderRadiusMd,
     overflow: 'hidden',
   },
 

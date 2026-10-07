@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { GEOVIEW_SHAPE } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the modal component.
@@ -16,7 +17,7 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
       backgroundColor: 'transparent',
     },
     '& .MuiPaper-root': {
-      borderRadius: '6px',
+      borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
     },
     ...(width || height
       ? {

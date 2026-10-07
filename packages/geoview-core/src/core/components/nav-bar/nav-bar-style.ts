@@ -39,7 +39,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       overflowY: 'auto',
       padding: theme.spacing(0.25),
       backgroundColor: 'transparent',
-      borderRadius: '6px',
+      borderRadius: theme.shape.borderRadiusMd,
       pointerEvents: 'all',
       scrollbarWidth: 'thin',
       scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
@@ -74,7 +74,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       alignItems: 'center',
     },
     navBtnGroup: {
-      borderRadius: '6px',
       backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
       overflow: 'clip',
       '& .MuiButtonGroup-grouped:not(:last-child)': {
@@ -95,7 +94,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
     navButton: {
       backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
       color: theme.palette.geoViewColor?.bgColor.dark[900],
-      borderRadius: 0,
+      borderRadius: theme.shape.borderRadiusNone,
       width: '44px',
       height: '44px',
       maxWidth: '44px',
@@ -103,13 +102,13 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       padding: 'initial',
       transition: 'background-color 0.3s ease-in-out',
       '&:not(:last-of-type)': {
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
+        borderBottomLeftRadius: theme.shape.borderRadiusNone,
+        borderBottomRightRadius: theme.shape.borderRadiusNone,
         borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.light[900]}`,
       },
       '&:not(:first-of-type)': {
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
+        borderTopLeftRadius: theme.shape.borderRadiusNone,
+        borderTopRightRadius: theme.shape.borderRadiusNone,
       },
       '&:hover': {
         backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],

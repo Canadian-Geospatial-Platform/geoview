@@ -41,7 +41,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterMultiselectWrapper: {
     border: 1,
     borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
-    borderRadius: 1,
+    borderRadius: theme.shape.borderRadiusMd,
     overflow: 'hidden',
     padding: theme.spacing(0.5),
   },

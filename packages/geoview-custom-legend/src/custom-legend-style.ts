@@ -85,7 +85,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '24px',
     height: '24px',
     transform: 'scaleX(-1)', // Mirror to face right
-    borderRadius: '5px',
+    borderRadius: theme.shape.borderRadiusMd,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

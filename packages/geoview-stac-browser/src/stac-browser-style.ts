@@ -54,7 +54,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   modeButton: {
     flex: 1,
-    borderRadius: 0,
+    borderRadius: theme.shape.borderRadiusNone,
     borderBottom: '2px solid transparent',
     padding: theme.spacing(1),
     fontWeight: 500,
@@ -101,7 +101,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadiusMd,
     cursor: 'pointer',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -123,7 +123,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     maxHeight: 150,
     objectFit: 'cover',
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadiusMd,
   },
   detailTitle: {
     fontWeight: 600,
@@ -144,7 +144,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     gap: theme.spacing(1),
     padding: theme.spacing(0.5, 1),
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadiusMd,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
     },
@@ -194,7 +194,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     maxHeight: 300,
     objectFit: 'contain',
-    borderRadius: 4,
+    borderRadius: theme.shape.borderRadiusMd,
   },
 
   // Collection card styles
@@ -303,7 +303,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 60,
     height: 60,
     objectFit: 'cover',
-    borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadiusMd,
     flexShrink: 0,
   },
   assetTypeBadge: {
@@ -311,7 +311,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.25, 0.75),
     fontSize: '0.7rem',
     fontWeight: 600,
-    borderRadius: '4px',
+    borderRadius: theme.shape.borderRadiusSm,
     backgroundColor: theme.palette.geoViewColor?.primary.main,
     color: theme.palette.geoViewColor?.white,
     marginRight: theme.spacing(0.5),
@@ -321,7 +321,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.25, 0.75),
     fontSize: '0.65rem',
     fontWeight: 500,
-    borderRadius: '4px',
+    borderRadius: theme.shape.borderRadiusSm,
     border: `1px solid ${theme.palette.divider}`,
     color: theme.palette.geoViewColor?.textColor.light[200],
     textTransform: 'uppercase',

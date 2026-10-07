@@ -7,6 +7,21 @@ export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 /** Default base font size multiplier in rem units */
 export const defaultFontSize = 1;
 
+/**
+ * Named border-radius tokens, spread onto `theme.shape`.
+ *
+ * Values are px strings so they render identically in `sx`, `styleOverrides` and inline styles
+ * (a numeric `borderRadius` in `sx` is multiplied by the base). `@/ui` components and `cssText`
+ * strings import this constant directly because they may run under an external theme.
+ */
+export const GEOVIEW_SHAPE = {
+  borderRadiusNone: '0',
+  borderRadiusSm: '4px',
+  borderRadiusMd: '6px', // Also sets the numeric MUI base `theme.shape.borderRadius`; must stay a px value
+  borderRadiusLg: '8px',
+  borderRadiusFull: '9999px',
+} as const;
+
 /** Heading typography styles with bold weight */
 export const headingStyles = {
   fontFamily: font,

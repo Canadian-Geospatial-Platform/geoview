@@ -1,9 +1,12 @@
+import { useMemo } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
+
 import { Box, Tooltip } from '@/ui';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
-import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
-import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { getSxClasses } from './map-info-rotation-button-style';
 
 import { useStoreMapRotation } from '@/core/stores/states/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
@@ -21,6 +24,13 @@ export function MapInfoRotationButton(): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  /**
+   * Builds the map info rotation button styles.
+   */
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
+    logger.logTraceUseMemo('MAP-INFO-ROTATION-BUTTON - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -42,32 +52,10 @@ export function MapInfoRotationButton(): JSX.Element {
       ? `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}° (${t('mapctrl.rotation.projection')}: ${projectionRotation}°)`
       : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
 
-  const containerStyles = {
-    color: theme.palette.geoViewColor?.bgColor.light[800],
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    '&:focus-visible': {
-      borderRadius: '4px',
-      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
-      outlineOffset: 0,
-      boxShadow: 'none',
-    },
-  };
-
   return (
     <Tooltip title={tooltipText} placement="top">
-      <Box sx={containerStyles} tabIndex={0} role="note" aria-label={tooltipText}>
-        <Box
-          className={`map-info-rotation-${mapId}`}
-          sx={{
-            transform: `rotate(${rotationAngle}deg)`,
-            transition: 'transform 0.3s ease-in-out',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+      <Box sx={memoSxClasses.container} tabIndex={0} role="note" aria-label={tooltipText}>
+        <Box className={`map-info-rotation-${mapId}`} sx={[memoSxClasses.arrow, { transform: `rotate(${rotationAngle}deg)` }]}>
           <NorthArrowIcon width={30} height={30} />
         </Box>
       </Box>

@@ -44,7 +44,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
 
     '& .layer-icon': {
       padding: theme.spacing(0.5),
-      borderRadius: 0,
+      borderRadius: theme.shape.borderRadiusNone,
       border: '1px solid',
       borderColor: theme.palette.geoViewColor?.grey.dark[100],
       boxShadow: 2,
@@ -68,11 +68,11 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     },
     '& *::-webkit-scrollbar-track': {
       background: theme.palette.geoViewColor?.secondary.darken(0.5, 0.5),
-      borderRadius: '5px',
+      borderRadius: theme.shape.borderRadiusMd,
     },
     '& *::-webkit-scrollbar-thumb': {
       background: theme.palette.geoViewColor?.secondary.darken(0.5),
-      borderRadius: '5px',
+      borderRadius: theme.shape.borderRadiusMd,
     },
 
     '.bordered': {

@@ -110,7 +110,7 @@ export default function Version(): JSX.Element {
           aria-label={t('appbar.version')}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
-          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
+          className={`${interaction === 'dynamic' ? 'buttonFilled' : 'appBarButtonStatic'} ${open ? 'active' : ''}`}
         >
           <SvgIcon viewBox="-4 -2 38 36">
             <GeoCaIcon />
