@@ -429,8 +429,8 @@ export function SingleLayer({
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
-    // Reload layer
-    layerCreatorController.reloadLayer(layerPath);
+    // Reload layer (void because reloadLayer() returns a Promise<void>)
+    void layerCreatorController.reloadLayer(layerPath);
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 
   /**
@@ -446,7 +446,7 @@ export function SingleLayer({
         reloadRequestedRef.current = true;
 
         // Reload layer
-        layerCreatorController.reloadLayer(layerPath);
+        void layerCreatorController.reloadLayer(layerPath);
 
         // Prevent double-firing via native button click event
         event.preventDefault();
