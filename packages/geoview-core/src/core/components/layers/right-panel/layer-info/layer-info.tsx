@@ -32,6 +32,7 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
+  useStoreLayerWMSGetStylesFullUrl,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -77,6 +78,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const url = useStoreLayerUrl(layerPath);
   const ogcVersion = useStoreLayerOgcVersion(layerPath);
+  const wmsGetStylesFullUrl = useStoreLayerWMSGetStylesFullUrl(layerPath);
   const bounds = useStoreLayerBounds(layerPath);
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
@@ -209,6 +211,14 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
             </Box>
           )}
           {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
+          {wmsGetStylesFullUrl && (
+            <Box className="info-container">
+              {`${t('layers.layerWmsGetStylesFullUrl')}`}
+              <a href={wmsGetStylesFullUrl} target="_blank" rel="noopener noreferrer">
+                {wmsGetStylesFullUrl}
+              </a>
+            </Box>
+          )}
           <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
