@@ -464,7 +464,11 @@
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
     "changeDisplayTheme": "Theme unsupported",
     "changeDisplayProjection": "Projection unsupported",
-    "invalidConfig": "Invalid JSON config, default configuration applied."
+    "invalidConfig": "Invalid JSON config, default configuration applied.",
+    "wfsRenderer": {
+      "getStylesInvalidResponse": "Invalid StyledLayerDescriptor (SLD). Check the 'GetStyles' response.",
+      "getStylesNotSupported": "Not Supported Styles: {{cause}}"
+    }
   },
   "exportModal": {
     "title": "Map preview",

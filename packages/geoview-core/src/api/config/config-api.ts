@@ -415,6 +415,13 @@ export class ConfigApi {
    *
    * @param xmlContent - An XML representation of the WMS renderer
    * @returns The corresponding layer style configuration, or undefined if parsing or conversion fails
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   * @throws {GetStylesInvalidResponseError} When the GetStyles input schema is invalid
+   * @throws {GetStylesNotSupportedError} When the symbolizer type in a rule is unsupported
    */
   static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig {
     // Read styles as json

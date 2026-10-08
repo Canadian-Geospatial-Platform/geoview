@@ -42,6 +42,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
+import { GetStylesNotSupportedError } from '@/core/exceptions/wfs-renderer-exceptions';
 import { generateId, normalizeDatacubeAccessPath, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
@@ -1006,7 +1007,13 @@ export class WMS extends AbstractGeoViewRaster {
    * @param url - The WMS service URL used to fetch styles. If a proxy should be used, it has to be part of the URL here.
    * @param geomType - Optional geometry type
    * @returns A promise that resolves to a record mapping geometry types to layer style settings
-   * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   * @throws {GetStylesInvalidResponseError} When the GetStyles input schema is invalid
+   * @throws {GetStylesNotSupportedError} When the symbolizer type in a rule is unsupported
    */
   static async createLayerStyleFromWMS(
     url: string,
@@ -1075,15 +1082,18 @@ export class WMS extends AbstractGeoViewRaster {
         const tweakedUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
 
         try {
+          // Keep the GetStyles url that was attempted
+          layerConfig.setWmsGetStylesFullUrl(tweakedUrl);
+
           // Create the layer style and await
           const style = await this.createLayerStyleFromWMS(tweakedUrlProxied, geometryType);
-
-          // Keep the url that was used
-          layerConfig.setWmsGetStylesFullUrl(tweakedUrl);
 
           // Return the style
           return style;
         } catch (error: unknown) {
+          // If it's a GetStylesNotSupportedError, the GetStyles query worked and the error is in the style itself, stop there
+          if (error instanceof GetStylesNotSupportedError) throw error;
+
           // MapServer may advertise an `ms:` WFS layer ID while GetStyles expects the unprefixed WMS ID.
           if (!wmsLayerId.startsWith('ms:')) throw error;
 
@@ -1095,16 +1105,22 @@ export class WMS extends AbstractGeoViewRaster {
           // Proxy the url if necessary
           const retryUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
 
-          // Create the layer style and await
-          const style = await this.createLayerStyleFromWMS(retryUrlProxied, geometryType);
-
           // Keep the url that was used
           layerConfig.setWmsGetStylesFullUrl(retryUrl);
+
+          // Create the layer style and await
+          const style = await this.createLayerStyleFromWMS(retryUrlProxied, geometryType);
 
           // Return the style
           return style;
         }
       } catch (error: unknown) {
+        // If it's not a GetStylesNotSupportedError, the GetStyles query were simply unreachable, likely invalid url
+        if (!(error instanceof GetStylesNotSupportedError)) {
+          // Don't keep the full url in the layer config so that it doesn't show in the UI eventually
+          layerConfig.setWmsGetStylesFullUrl(undefined);
+        }
+
         // Log warning
         logger.logWarning(`Failed to create a style for the WFS using the WMS styles for '${layerConfig.layerPath}'.`, error);
       }
@@ -1575,15 +1591,21 @@ export class WMS extends AbstractGeoViewRaster {
       // Apply the layer proxy after constructing the complete service request
       const stylesUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(stylesUrl);
 
-      // Parse the WMS style, allowing the SLD renderer to infer geometry when WMS metadata does not expose it
-      const style = await this.createLayerStyleFromWMS(stylesUrlProxied, layerConfig.getGeometryType());
-
       // Keep the url that was used
       layerConfig.setWmsGetStylesFullUrl(stylesUrl);
+
+      // Parse the WMS style, allowing the SLD renderer to infer geometry when WMS metadata does not expose it
+      const style = await this.createLayerStyleFromWMS(stylesUrlProxied, layerConfig.getGeometryType());
 
       // Return the style
       return style;
     } catch (error: unknown) {
+      // If it's not a GetStylesNotSupportedError, the GetStyles query were unreachable, likely invalid url
+      if (!(error instanceof GetStylesNotSupportedError)) {
+        // Don't keep the full url in the layer config so that it doesn't show in the UI eventually
+        layerConfig.setWmsGetStylesFullUrl(undefined);
+      }
+
       // Best-effort enrichment boundary: a style failure must not prevent the WMS layer from rendering
       logger.logDebug(`Failed to create vectorial styles for the WMS ${layerConfig.layerPath}`, error);
       return undefined;

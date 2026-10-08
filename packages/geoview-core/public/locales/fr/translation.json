@@ -464,7 +464,11 @@
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
     "changeDisplayTheme": "Theme non supporté",
     "changeDisplayProjection": "Projection non supportée",
-    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée."
+    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée.",
+    "wfsRenderer": {
+      "getStylesInvalidResponse": "Descriptor de couche stylée (SLD) invalide. Vérifiez la réponse 'GetStyles'.",
+      "getStylesNotSupported": "Styles non supportés : {{cause}}"
+    }
   },
   "exportModal": {
     "title": "Aperçu de la carte",
