@@ -201,15 +201,21 @@ export class OgcFeature extends AbstractGeoViewVector {
     const layerConfigOgcFeature = layerConfig as OgcFeatureLayerEntryConfig;
 
     // The metadata url
-    const metadataUrl = layerConfigOgcFeature.getMetadataAccessPath();
+    const metadataUrl = layerConfigOgcFeature.getMetadataAccessPath(true);
+
+    // The url suffix
+    const urlSuffix = `collections/${layerConfigOgcFeature.layerId}/queryables?f=json`;
 
     // If there is a metadata url
     if (metadataUrl) {
       // The query url
-      const queryUrl = `${layerConfigOgcFeature.getMetadataAccessPathProxiedWhenNecessary(true)}collections/${layerConfigOgcFeature.layerId}/queryables?f=json`;
+      const queryUrl = `${layerConfigOgcFeature.getMetadataAccessPathProxiedWhenNecessary(true)}${urlSuffix}`;
 
       // Query the metadata for the queryables
       const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl, { signal: abortSignal });
+
+      // Keep the non-proxied full URL of the queryables request
+      layerConfigOgcFeature.setQueryablesFullUrl(`${metadataUrl}${urlSuffix}`);
 
       // Init the layer metadata
       OgcFeature.initLayerMetadata(layerConfigOgcFeature, queryResultData);
