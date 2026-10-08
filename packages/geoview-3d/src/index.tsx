@@ -9,6 +9,9 @@ import type { TypeGeoView3DConfig } from './geoview-3d-types';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geoview-3d.json';
 
+/** Plugin id: the config app-bar id, the loader's registration key and the app-bar tab (button) id. */
+const TILES_3D_TAB_ID = 'tiles-3d';
+
 /**
  * GeoView 3D Tiles (deck.gl) plugin.
  */
@@ -44,6 +47,7 @@ class GeoView3DPlugin extends AppBarPlugin {
           canvasLabel:
             '3D view of the configured 3D Tiles tileset. Use the arrow keys to pan, = and - to zoom, Shift with arrow keys to rotate and tilt.',
           canvasRole: '3D map',
+          overlayHint: 'The 3D view covers the map while this panel is open. Close the panel to return to the 2D map.',
           status: {
             invalidUrl: 'No valid tileset URL is configured (set tilesetUrl to an http(s) tileset.json).',
             loading: 'Loading 3D tileset…',
@@ -58,6 +62,7 @@ class GeoView3DPlugin extends AppBarPlugin {
           canvasLabel:
             'Vue 3D du jeu de tuiles 3D configuré. Utilisez les flèches pour vous déplacer, = et - pour zoomer, Maj avec les flèches pour pivoter et incliner.',
           canvasRole: 'Carte 3D',
+          overlayHint: 'La vue 3D recouvre la carte tant que ce panneau est ouvert. Fermez le panneau pour revenir à la carte 2D.',
           status: {
             invalidUrl: "Aucune URL de jeu de tuiles valide n'est configurée (définir tilesetUrl vers un tileset.json http(s)).",
             loading: 'Chargement du jeu de tuiles 3D…',
@@ -87,7 +92,7 @@ class GeoView3DPlugin extends AppBarPlugin {
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
-      id: 'tiles-3d',
+      id: TILES_3D_TAB_ID,
       'aria-label': 'GeoView3D.title',
       tooltipPlacement: 'right',
       children: <PublicIcon />,
@@ -116,7 +121,7 @@ class GeoView3DPlugin extends AppBarPlugin {
    * @returns The 3D panel content
    */
   override onCreateContent = (): JSX.Element => {
-    return <GeoView3DPanel config={this.getConfig()} />;
+    return <GeoView3DPanel config={this.getConfig()} tabId={TILES_3D_TAB_ID} />;
   };
 
   /**
@@ -133,5 +138,5 @@ export default GeoView3DPlugin;
 if (React === window.cgpv.reactUtilities.react) {
   // Keep a reference to the GeoView3DPlugin as part of the geoviewPlugins property stored in the window object
   window.geoviewPlugins = window.geoviewPlugins || {};
-  window.geoviewPlugins['tiles-3d'] = GeoView3DPlugin;
+  window.geoviewPlugins[TILES_3D_TAB_ID] = GeoView3DPlugin;
 } // Else ignore, don't keep it on the window, wait for the right react load

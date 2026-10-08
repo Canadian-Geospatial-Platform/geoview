@@ -7,6 +7,7 @@ import { load } from '@loaders.gl/core';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { SafeTile3DLayer } from './safe-tile-3d-layer';
+import type { TypeSyncedViewport } from './viewport-sync';
 
 /** The tileset object handed to Tile3DLayer's onTilesetLoad callback. */
 type TypeTileset3D = Parameters<NonNullable<Tile3DLayerProps['onTilesetLoad']>>[0];
@@ -56,6 +57,9 @@ export class TilesetRenderer {
   /** Whether the renderer was destroyed. */
   #destroyed = false;
 
+  /** The camera currently shown, kept in step with user interaction so syncs preserve pitch and bearing. */
+  #viewState: MapViewState = DEFAULT_VIEW_STATE;
+
   /**
    * Creates the renderer and its deck.gl instance on the given canvas.
    *
@@ -69,11 +73,24 @@ export class TilesetRenderer {
       initialViewState: DEFAULT_VIEW_STATE,
       controller: true,
       layers: [],
+      onViewStateChange: ({ viewState }): void => {
+        this.#viewState = viewState;
+      },
       onError: (error: Error): void => this.#reportError(error.message),
     });
   }
 
   // #region PUBLIC METHODS
+
+  /**
+   * Moves the 3D camera to the 2D map's centre and zoom, keeping the current pitch and bearing.
+   *
+   * @param viewport - The 2D map viewport converted to deck.gl terms
+   */
+  setViewport(viewport: TypeSyncedViewport): void {
+    if (this.#destroyed) return;
+    this.#jumpTo({ ...this.#viewState, ...viewport });
+  }
 
   /**
    * Sets the tileset to render, replacing any previous one.
@@ -190,13 +207,21 @@ export class TilesetRenderer {
 
     const center = tileset.cartographicCenter;
     if (center) {
-      // Deck only resets the camera when initialViewState deep-changes; clear it so a repeated centre still recentres.
-      this.#deck.setProps({ initialViewState: null });
-      this.#deck.setProps({
-        initialViewState: { longitude: center[0], latitude: center[1], zoom: tileset.zoom, pitch: TILESET_VIEW_PITCH, bearing: 0 },
-      });
+      this.#jumpTo({ longitude: center[0], latitude: center[1], zoom: tileset.zoom, pitch: TILESET_VIEW_PITCH, bearing: 0 });
     }
     this.#callbacks.onTilesetLoad?.(tilesetUrl);
+  }
+
+  /**
+   * Moves the camera to a view state.
+   *
+   * @param viewState - The view state to show
+   */
+  #jumpTo(viewState: MapViewState): void {
+    this.#viewState = viewState;
+    // Deck only resets the camera when initialViewState deep-changes; clear it so a repeated view still applies.
+    this.#deck.setProps({ initialViewState: null });
+    this.#deck.setProps({ initialViewState: viewState });
   }
 
   /**

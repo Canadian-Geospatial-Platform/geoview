@@ -3,17 +3,29 @@ import { geoViewColors as defaultGeoViewColors } from 'geoview-core/ui/style/def
 import { getFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
 
 /**
- * Gets the styles for the 3D panel.
+ * Gets the styles for the 3D panel and its map overlay.
  *
  * @param theme - The MUI theme
- * @returns The panel styles
+ * @returns The panel and overlay styles
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   container: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    minHeight: '320px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
+    padding: theme.spacing(1),
+  },
+  status: {
+    padding: theme.spacing(0.5, 1),
+    borderRadius: theme.spacing(0.5),
+    backgroundColor: theme.palette.background.default,
+  },
+  overlay: {
+    position: 'absolute',
+    inset: 0,
+    // Above the OpenLayers viewport, which is positioned absolutely inside the same map target element.
+    zIndex: 1,
+    backgroundColor: theme.palette.background.default,
   },
   canvas: {
     position: 'absolute',
@@ -21,13 +33,5 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     height: '100%',
     '&:focus-visible': getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
-  },
-  status: {
-    position: 'absolute',
-    left: theme.spacing(1),
-    bottom: theme.spacing(1),
-    padding: theme.spacing(0.5, 1),
-    borderRadius: theme.spacing(0.5),
-    backgroundColor: theme.palette.background.paper,
   },
 });
