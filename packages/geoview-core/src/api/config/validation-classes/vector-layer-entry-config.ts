@@ -17,6 +17,9 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /** Max number of records for query */
   maxRecordCount?: number;
 
+  /** The GetStyles full url that was used to generate the style, if any */
+  #wmsGetStylesFullUrl?: string;
+
   /**
    * Creates an instance of VectorLayerEntryConfig.
    *
@@ -50,6 +53,24 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    */
   getShouldFetchStylesFromWMS(): boolean {
     return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig | TypeOgcFeatureLayerConfig).fetchStylesOnWMS ?? true; // default: true
+  }
+
+  /**
+   * Gets the full WMS GetStyles URL used to generate the style.
+   *
+   * @returns The recorded WMS GetStyles URL, or undefined if none was recorded
+   */
+  getWmsGetStylesFullUrl(): string | undefined {
+    return this.#wmsGetStylesFullUrl;
+  }
+
+  /**
+   * Stores the full WMS GetStyles URL used to generate the style.
+   *
+   * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
+   */
+  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string): void {
+    this.#wmsGetStylesFullUrl = wmsGetStylesFullUrl;
   }
 
   /**
