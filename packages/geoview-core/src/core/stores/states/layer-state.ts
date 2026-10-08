@@ -1778,10 +1778,23 @@ export const useStoreLayerStyleSettings = (layerPath: string): string[] => {
 };
 
 /**
- * React hook that returns if the temporal mode of the dates for the layer.
+ * Selects the URL used to retrieve a layer's vector structure.
  *
- * @param layerPath - Unique path identifying the layer in the legend state
- * @returns The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE
+ * @param layerPath - The layer path to look up
+ * @returns The vector structure URL, or undefined if the layer or URL is unavailable
+ */
+export const useStoreLayerVectorStructureFullUrl = (layerPath: string | undefined): string | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.vectorStructureFullUrl;
+  });
+};
+
+/**
+ * Selects the WMS GetStyles request URL recorded for a layer.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The WMS GetStyles URL, or undefined if the layer or URL is unavailable
  */
 export const useStoreLayerWMSGetStylesFullUrl = (layerPath: string | undefined): string | undefined => {
   // Hook

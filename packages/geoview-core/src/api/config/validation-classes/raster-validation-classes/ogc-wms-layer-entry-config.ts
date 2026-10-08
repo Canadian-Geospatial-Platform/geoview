@@ -30,6 +30,9 @@ export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 
 /** Type used to define a GeoView image layer to display on the map. */
 export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+  /** The GetStyles full url that was used to generate the style, if any */
+  #wmsGetStylesFullUrl?: string;
+
   /** The associated WFS layer config, if any */
   #wfsLayerConfig?: OgcWfsLayerEntryConfig;
 
@@ -362,6 +365,24 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Really not found
     return undefined;
+  }
+
+  /**
+   * Gets the full WMS GetStyles URL used to generate the style.
+   *
+   * @returns The recorded WMS GetStyles URL, or undefined if none was recorded
+   */
+  getWmsGetStylesFullUrl(): string | undefined {
+    return this.#wmsGetStylesFullUrl;
+  }
+
+  /**
+   * Stores the full WMS GetStyles URL used to generate the style.
+   *
+   * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
+   */
+  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string): void {
+    this.#wmsGetStylesFullUrl = wmsGetStylesFullUrl;
   }
 
   /**
