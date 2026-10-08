@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Package - 3D Tiles (deck.gl, spike) - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Package - 3D Tiles (deck.gl, spike)</h4>
+        <p>This page showcases the tiles-3d package: click the 3D button in the app bar to show a deck.gl 3D Tiles view over the map. The tileset URL is read from configs/demo-3d-config-tiles-3d.json, where REPLACE_ME must be replaced by the URL of a 3D Tiles 1.1 tileset.json served with CORS enabled.</p>
+      </div>
+    </div>
+
+    <div
+      id="map3D"
+      class="geoview-map"
+      data-lang="en"
+      data-config-url="./configs/demo-3d-config.json"
+    ></div>
+
+    <script src="./js/page-header.js"></script>
+    <script>
+      cgpv.init();
+    </script>
+  </body>
+</html>

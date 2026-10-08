@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
@@ -48,6 +48,8 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   const getElementById = useGVElementById();
   const [status, setStatus] = useState<TypeTilesetStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  // Survives overlay remounts: the panel stays mounted while closed.
+  const framedTilesetUrlsRef = useRef<Set<string>>(new Set());
 
   const isPanelOpen = activeAppBarTab.isOpen && activeAppBarTab.tabId === tabId;
   const isUrlValid = TilesetRenderer.isValidTilesetUrl(config.tilesetUrl);
@@ -63,6 +65,18 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
     setErrorMessage(message ?? '');
   }, []);
 
+  /**
+   * Allows framing the camera on a tileset only the first time it is shown; later openings keep the synced 2D view.
+   *
+   * @param tilesetUrl - The URL of the loaded tileset
+   * @returns Whether the overlay should frame the camera on the tileset
+   */
+  const shouldFrameTileset = useCallback((tilesetUrl: string): boolean => {
+    if (framedTilesetUrlsRef.current.has(tilesetUrl)) return false;
+    framedTilesetUrlsRef.current.add(tilesetUrl);
+    return true;
+  }, []);
+
   // #endregion
 
   const displayedStatus: TypeTilesetStatus = isUrlValid ? status : 'invalidUrl';
@@ -73,7 +87,11 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
       <Box sx={memoSxClasses.status} role="status" aria-live="polite">
         <Typography variant="body2">{t(`GeoView3D.status.${displayedStatus}`, { message: errorMessage })}</Typography>
       </Box>
-      {mapTarget && createPortal(<GeoView3DOverlay tilesetUrl={config.tilesetUrl} onStatusChange={handleStatusChange} />, mapTarget)}
+      {mapTarget &&
+        createPortal(
+          <GeoView3DOverlay tilesetUrl={config.tilesetUrl} onStatusChange={handleStatusChange} shouldFrameTileset={shouldFrameTileset} />,
+          mapTarget
+        )}
     </Box>
   );
 }

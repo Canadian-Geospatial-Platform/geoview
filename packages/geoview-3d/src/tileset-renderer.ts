@@ -14,10 +14,12 @@ type TypeTileset3D = Parameters<NonNullable<Tile3DLayerProps['onTilesetLoad']>>[
 
 /** Callbacks reporting the tileset loading lifecycle. */
 export interface TilesetRendererCallbacks {
-  /** Called once the root tileset.json is loaded and the view is centred on it. */
+  /** Called once the root tileset.json is loaded (and, if framed, the view is centred on it). */
   onTilesetLoad?: (tilesetUrl: string) => void;
   /** Called when the tileset or one of its tiles fails to load. */
   onError?: (message: string) => void;
+  /** Decides whether to frame the camera on a freshly loaded tileset; frames when omitted. */
+  shouldFrameTileset?: (tilesetUrl: string) => boolean;
 }
 
 /** Initial camera before any tileset is loaded (Canada-wide, tilted). */
@@ -191,7 +193,7 @@ export class TilesetRenderer {
   }
 
   /**
-   * Centres the view on a loaded tileset, or destroys it if its request was superseded meanwhile.
+   * Frames the view on a loaded tileset (when the owner allows it), or destroys it if its request was superseded meanwhile.
    *
    * A layer finalized before its tileset finished loading never destroys that tileset itself.
    *
@@ -206,7 +208,7 @@ export class TilesetRenderer {
     }
 
     const center = tileset.cartographicCenter;
-    if (center) {
+    if (center && (this.#callbacks.shouldFrameTileset?.(tilesetUrl) ?? true)) {
       this.#jumpTo({ longitude: center[0], latitude: center[1], zoom: tileset.zoom, pitch: TILESET_VIEW_PITCH, bearing: 0 });
     }
     this.#callbacks.onTilesetLoad?.(tilesetUrl);

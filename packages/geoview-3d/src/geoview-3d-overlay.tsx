@@ -22,6 +22,8 @@ interface GeoView3DOverlayProps {
   tilesetUrl: string;
   /** Called whenever the tileset loading status changes. */
   onStatusChange: (status: TypeTilesetStatus, message?: string) => void;
+  /** Decides whether to frame the camera on the loaded tileset rather than keep the synced 2D view. */
+  shouldFrameTileset: (tilesetUrl: string) => boolean;
 }
 
 /**
@@ -35,7 +37,7 @@ interface GeoView3DOverlayProps {
 export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   logger.logTraceRender('geoview-3d/geoview-3d-overlay > GeoView3DOverlay');
 
-  const { tilesetUrl, onStatusChange } = props;
+  const { tilesetUrl, onStatusChange, shouldFrameTileset } = props;
   const { t } = useTranslation<string>();
   const theme = (window as TypeWindow).cgpv.ui.useTheme();
 
@@ -47,6 +49,8 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   const rendererRef = useRef<TilesetRenderer | undefined>(undefined);
   const onStatusChangeRef = useRef(onStatusChange);
   onStatusChangeRef.current = onStatusChange;
+  const shouldFrameTilesetRef = useRef(shouldFrameTileset);
+  shouldFrameTilesetRef.current = shouldFrameTileset;
 
   const mapController = useMapController();
   const mapCenter = useStoreMapCenterCoordinates();
@@ -64,6 +68,7 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
     const renderer = new TilesetRenderer(canvasRef.current, {
       onTilesetLoad: (): void => onStatusChangeRef.current('loaded'),
       onError: (message: string): void => onStatusChangeRef.current('error', message),
+      shouldFrameTileset: (url: string): boolean => shouldFrameTilesetRef.current(url),
     });
     rendererRef.current = renderer;
 

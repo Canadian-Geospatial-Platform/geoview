@@ -13,7 +13,8 @@
     },
     "tilesetUrl": {
       "description": "URL of the 3D Tiles 1.1 tileset.json to render. Use REPLACE_ME as a placeholder until a real tileset is provided.",
-      "type": "string"
+      "type": "string",
+      "default": "REPLACE_ME"
     },
     "version": {
       "type": "string",
