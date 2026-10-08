@@ -16,6 +16,7 @@ import {
   setStoreReorderLegendLayers,
   utilFindLayerAndChildrenPaths,
 } from './states/layer-state';
+import { getStoreUIActiveFooterBarTab } from './states/ui-state';
 
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
@@ -51,6 +52,15 @@ export class StateApi {
   getLegendCollapsedState(layerPath: string): boolean {
     // Get from store
     return getStoreLayerLegendCollapsed(this.#layerController.getMapId(), layerPath);
+  }
+
+  /**
+   * Gets whether the footer bar panel is open.
+   *
+   * @returns True when the footer bar panel is open
+   */
+  getFooterBarIsOpen(): boolean {
+    return getStoreUIActiveFooterBarTab(this.#layerController.getMapId()).isOpen;
   }
 
   /**

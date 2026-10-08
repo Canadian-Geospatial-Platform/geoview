@@ -87,7 +87,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 18  | [18-global-settings.md](18-global-settings.md)                 | Coord info, theme, highlight color, date mode, URLs                   | 15 min       | 22 (0/8/14)          |
 | 19  | [19-integration-flows.md](19-integration-flows.md)             | Multi-step workflows and cross-panel interactions                     | 25 min       | 18 (0/7/11)          |
 | 19b | [19b-store-verification.md](19b-store-verification.md)         | Zustand store state assertions (automation candidates)                | 10 min       | 13 (0/13/0)          |
-| 20  | [20-edge-cases.md](20-edge-cases.md)                           | Edge cases, outliers, overlays, sandbox, mobile                       | 25 min       | 26 (0/0/26)          |
+| 20  | [20-edge-cases.md](20-edge-cases.md)                           | Edge cases, outliers, overlays, sandbox, mobile                       | 25 min       | 27 (0/0/27)          |
 | 21  | [21-wcag-accessibility.md](21-wcag-accessibility.md)           | WCAG, keyboard nav, focus trap, screen reader                         | 30 min       | 74 (0/0/74)          |
 | 22  | [22-api-programmatic.md](22-api-programmatic.md)               | API functions, events, controllers, geometry, panels                  | 25 min       | 54 (0/13/41)         |
 | 23  | [23-config-loading-methods.md](23-config-loading-methods.md)   | Config loading (URL params, div attrs, function call)                 | 15 min       | 21 (0/0/21)          |
@@ -95,7 +95,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                               | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests                    | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator                      | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                                       | **~445 min** | **913 (60/169/684)** |
+|     | **TOTAL**                                                      |                                                                       | **~445 min** | **914 (60/169/685)** |
 
 **Test breakdown:**
 
@@ -103,8 +103,8 @@ Each release gets its own issue. Previous release test results are preserved as 
 | ----------------- | ------- | ---------------------------------------------------------- |
 | **A** — Automated | 60      | Covered by `geoview-test-suite` (no manual effort needed)  |
 | **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 684     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **913** | All tests across all files                                 |
+| **M** — Manual    | 685     | Requires manual verification (UI, visual, interaction)     |
+| **Total**         | **914** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 

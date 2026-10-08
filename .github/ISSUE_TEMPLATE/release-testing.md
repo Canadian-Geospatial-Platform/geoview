@@ -272,6 +272,7 @@ labels: ["testing", "release"]
 - [ ] [Overlay Objects](../docs/programming/release-testing/20-edge-cases.md#overlay-objects) (3 tests)
 - [ ] [Config Sandbox](../docs/programming/release-testing/20-edge-cases.md#config-sandbox) (3 tests)
 - [ ] [Mobile / Responsive Layout](../docs/programming/release-testing/20-edge-cases.md#mobile--responsive-layout) (3 tests)
+- [ ] [Resizable Host Container](../docs/programming/release-testing/20-edge-cases.md#resizable-host-container) (1 test)
 
 ## 21 — WCAG Accessibility
 
