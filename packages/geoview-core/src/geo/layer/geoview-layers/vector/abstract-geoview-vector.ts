@@ -9,16 +9,16 @@ import type { ReadOptions } from 'ol/format/Feature';
 import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError } from '@/core/exceptions/core-exceptions';
+import { formatError, InvalidDateError } from '@/core/exceptions/core-exceptions';
 import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { EMPTY_FETCH_RESULT, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 
 /**
  * The AbstractGeoViewVector class.
@@ -123,7 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
 
           // Normalize the date fields
-          AbstractGeoViewVector.#normalizeDateFields(features, layerConfig);
+          AbstractGeoViewVector.#normalizeDateFields(featuresFiltered, layerConfig);
 
           // If the strategy is 'bbox'
           if (sourceOptions.strategy === bbox) {
@@ -338,24 +338,73 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param layerConfig - The layer configuration containing metadata about the date fields.
    */
   static #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
-    // Get all fields declared as type 'date' in the feature info config
-    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
-    if (!dateFields?.length) return;
+    // The outfields identify which feature properties have date metadata.
+    const outfields = layerConfig.getOutfields();
+    if (!outfields) return;
 
-    // Iterate over each feature to normalize its date fields
-    features.forEach((feature) => {
-      dateFields.forEach((field) => {
-        // Read the value
-        const value = feature.get(field.name);
+    // Leave non-date fields untouched; only date-typed fields need timestamp normalization.
+    const dateFields = outfields.filter((field) => field.type === 'date');
+    if (!dateFields.length) return;
 
-        // If the value is defined and not null
-        if (value && value !== null) {
-          feature.set(
-            field.name,
-            DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone()),
-            true
-          );
+    // Stage each field separately so conversion is committed only if all its values are valid.
+    dateFields.forEach((field) => {
+      // Retain source values for the string fallback and timestamps for a possible commit.
+      const originalValues: { feature: Feature; value: DateLike | null | undefined }[] = [];
+      const normalizedValues: (number | undefined)[] = [];
+      let hasInvalidDate = false;
+      let invalidDateValue: DateLike | null | undefined;
+
+      // Stop scanning this field at the first invalid date; later features need no date parsing.
+      for (const feature of features) {
+        // Unwrap GML temporal values before validating or storing the original value.
+        const value = GeoUtilities.readFeatureField(feature, field.name) as DateLike | null | undefined;
+
+        // Keep the feature paired with its source value for the fallback path.
+        originalValues.push({ feature, value });
+
+        // Empty values remain empty and do not count as invalid dates.
+        if (value === undefined || value === null || value === '') {
+          normalizedValues.push(undefined);
+        } else {
+          try {
+            // Attempt to convert the value to a millisecond timestamp
+            normalizedValues.push(
+              DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone())
+            );
+          } catch (error: unknown) {
+            if (!(error instanceof InvalidDateError)) throw error;
+            hasInvalidDate = true;
+            invalidDateValue = value;
+            normalizedValues.push(undefined);
+            // The staged values are sufficient for fallback; don't inspect remaining features.
+            break;
+          }
         }
+      }
+
+      // One invalid value makes the field non-date, so discard staged timestamps and keep visited values as text.
+      if (hasInvalidDate) {
+        // Log warning
+        logger.logWarning(
+          `Invalid date detected '${String(invalidDateValue)}' in field '${field.name}'. Downgrading field type to 'string'.`
+        );
+
+        // eslint-disable-next-line no-param-reassign
+        field.type = 'string';
+
+        // Rollback the original values in the features
+        originalValues.forEach(({ feature, value }) => {
+          if (value !== undefined && value !== null) feature.set(field.name, String(value), true);
+        });
+
+        // Skip timestamp commits for this field and continue with the next date field.
+        return;
+      }
+
+      // No invalid values were found, so commit the complete set of staged timestamps.
+      features.forEach((feature, index) => {
+        const dateValue = normalizedValues[index];
+        if (dateValue !== undefined) feature.set(field.name, dateValue, true);
       });
     });
   }

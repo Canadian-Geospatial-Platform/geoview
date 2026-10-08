@@ -15,6 +15,7 @@ import type { TemporalMode, TimeDimension, TimeIANA } from '@/core/utils/date-mg
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -41,17 +42,17 @@ import type {
   TypeLegend,
 } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { SnackbarType } from '@/core/utils/notifications';
+import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { SnackbarType } from '@/core/utils/notifications';
-import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, doTimeout, isObjectNonEmpty, type DelayJob } from '@/core/utils/utilities';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -2632,7 +2633,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       if (fieldEntry.name === 'geometry') continue;
 
       // Get the field value from the feature
-      const fieldValue = feature.get(fieldEntry.name);
+      const fieldValue = GeoUtilities.readFeatureField(feature, fieldEntry.name);
 
       // Skip nested objects (but allow arrays)
       // eslint-disable-next-line no-continue
@@ -2690,14 +2691,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined
   ): unknown {
-    const fieldValue = feature.get(fieldName);
+    // Read the value
+    const fieldValue = GeoUtilities.readFeatureField(feature, fieldName);
+
+    // If the field data type is 'date'
     if (fieldType === 'date') {
       // If the value is null or undefined, return it as-is instead of trying to parse it as a date
       // GV Some services have date fields with 'Null' in their data.. e.g. https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer/6
       if (fieldValue === null || fieldValue === undefined || fieldValue === 'Null') return fieldValue;
 
       // Read the date
-      return DateMgt.createDate(fieldValue, inputFormat, inputTimezone, inputTemporalMode);
+      return DateMgt.createDate(fieldValue as string, inputFormat, inputTimezone, inputTemporalMode);
     }
 
     // If the field has a domain

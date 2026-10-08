@@ -457,7 +457,7 @@ async function onConfigChange(mapId, e) {
     // update description from configMeta if available
     const descriptionElem = document.getElementById('configDescription');
     if (descriptionElem) {
-      descriptionElem.textContent =
+      descriptionElem.innerHTML =
         data.configMeta?.description || 'This map loads its configuration from the selected configuration file.';
     }
 
