@@ -26,6 +26,7 @@ Complete API reference for interacting with GeoView:
 Layer types, configuration, and management:
 
 - **[Layers Overview](app/layers/layers.md)** - Layer types, configuration, and concepts
+- **[OGC Raster and Vector Interoperability](app/layers/ogc-raster-vector-interoperability.md)** - Associate WMS layers with WFS or OGC API Features records and styles
 - **[Layer Sets](app/layers/layersets.md)** - Layer set architecture and management
 
 ### Events

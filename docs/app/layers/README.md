@@ -5,6 +5,7 @@ Documentation for GeoView layer types, configuration, and layer set management.
 ## Layer Documentation
 
 - **[Layers Overview](layers.md)** - Layer types, configuration, and core concepts
+- **[OGC Raster and Vector Interoperability](ogc-raster-vector-interoperability.md)** - WMS-associated vector records, WMS-derived vector styling, and time filtering
 - **[Layer Sets](layersets.md)** - Layer set architecture and management
 
 ## Related Documentation

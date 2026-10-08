@@ -6,6 +6,8 @@
 
 GeoView Layers are the primary way to display spatial data on your map. This guide explains layer concepts, types, configuration, and usage.
 
+For connecting WMS map layers with WFS or OGC API Features records and styles, see [OGC Raster and Vector Interoperability](ogc-raster-vector-interoperability.md).
+
 ## What is a GeoView Layer?
 
 A **GeoView Layer** is an abstraction that wraps OpenLayers layers and provides a consistent API across different data sources. Each GeoView Layer:

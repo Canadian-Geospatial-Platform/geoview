@@ -19,6 +19,7 @@
 
 - **Layers**
   - [Layers Guide](app/layers/layers.md)
+  - [OGC Raster and Vector Interoperability](app/layers/ogc-raster-vector-interoperability.md)
   - [Layer Sets](app/layers/layersets.md)
 
 - **Events**
