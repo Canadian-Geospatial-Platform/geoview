@@ -381,7 +381,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
    */
-  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string): void {
+  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string | undefined): void {
     this.#wmsGetStylesFullUrl = wmsGetStylesFullUrl;
   }
 

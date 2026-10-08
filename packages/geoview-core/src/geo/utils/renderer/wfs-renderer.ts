@@ -25,8 +25,9 @@ import type {
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
 import { isNumeric, isObjectEmpty, toArray } from '@/core/utils/utilities';
-import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { GetStylesInvalidResponseError, GetStylesNotSupportedError } from '@/core/exceptions/wfs-renderer-exceptions';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
@@ -51,7 +52,8 @@ export abstract class WfsRenderer {
    * @param styles - A WMS SLD styles object to parse
    * @param geomTypeMetadata - Optional geometry type from metadata
    * @returns A record mapping geometry types to their layer style settings
-   * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
+   * @throws {GetStylesInvalidResponseError} When the GetStyles input schema is invalid
+   * @throws {GetStylesNotSupportedError} When the symbolizer type in a rule is unsupported
    */
   static buildLayerStyleInfo(
     styles: TypeStylesWMS,
@@ -61,7 +63,7 @@ export abstract class WfsRenderer {
     const featureTypeStyleRaw = styles.StyledLayerDescriptor?.NamedLayer?.UserStyle?.['se:FeatureTypeStyle'];
 
     // If couldn't read
-    if (!featureTypeStyleRaw) throw new NotSupportedError(`Invalid StyledLayerDescriptor (SLD). Check the 'GetStyles' response.`);
+    if (!featureTypeStyleRaw) throw new GetStylesInvalidResponseError();
 
     // SLD allows several feature type styles. Preserve all rules because a later style can
     // contain symbolizers that complement the first style rather than replace it.
@@ -69,7 +71,7 @@ export abstract class WfsRenderer {
     const rules = featureTypeStyles.flatMap((featureTypeStyle) => toArray(featureTypeStyle['se:Rule']));
 
     // If no rules
-    if (rules.length === 0) throw new NotSupportedError('No rules were found in the SLD.');
+    if (rules.length === 0) throw new GetStylesNotSupportedError('No rules were found in the SLD.');
 
     const infosByGeometry: Partial<Record<TypeStyleGeometry, TypeLayerStyleConfigInfo[]>> = {};
     const fields: string[] = [];
@@ -109,7 +111,7 @@ export abstract class WfsRenderer {
 
       // If no symbolizers are defined for this rule, throw error
       if (!pointSymbolizer && !lineSymbolizer && !polygonSymbolizer) {
-        throw new NotSupportedError(`No valid symbolizers were found in the rule '${label}'.`);
+        throw new GetStylesNotSupportedError(`No valid symbolizers were found in the rule '${label}'.`);
       }
 
       if (polygonSymbolizer && lineSymbolizer) {
@@ -147,7 +149,9 @@ export abstract class WfsRenderer {
     const geometryTypes = Object.keys(infosByGeometry) as TypeStyleGeometry[];
 
     // If no geometry types were determined by the style, throw an error
-    if (geometryTypes.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
+    if (geometryTypes.length === 0) {
+      throw new GetStylesNotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
+    }
 
     // Read the type from the symbolizers
     const type = this.#readTypeFromSymbolizers(rules, hasClassBreaks, fields);
@@ -259,7 +263,7 @@ export abstract class WfsRenderer {
       const funcInfo = this.#tryParseConcatFunction(filter);
       if (funcInfo) return funcInfo;
 
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         'Function-based filters are only partially supported. Currently only supports simple concat functions with string literals.'
       );
     }
@@ -279,7 +283,7 @@ export abstract class WfsRenderer {
           return { ...filterOption, propertyName: propertyNames[0] };
         }
 
-        throw new NotSupportedError('OR filters are only supported when all equality predicates use the same property.');
+        throw new GetStylesNotSupportedError('OR filters are only supported when all equality predicates use the same property.');
       }
     }
 
@@ -292,7 +296,7 @@ export abstract class WfsRenderer {
     }
 
     // Throw
-    throw new NotSupportedError(`Couldn't read the filter information.`);
+    throw new GetStylesNotSupportedError(`Couldn't read the filter information.`);
   }
 
   /**
@@ -333,14 +337,14 @@ export abstract class WfsRenderer {
     // Check all separators are identical
     const uniqueSeparators = [...new Set(separators)];
     if (uniqueSeparators.length !== 1) {
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         'Concat functions with multiple different separators are not supported. All separators must be identical.'
       );
     }
 
     // Validate structural correctness: N fields need N-1 separators
     if (separators.length !== fields.length - 1) {
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         `Concat function structure mismatch: found ${fields.length} fields but ${separators.length} separators. Expected ${fields.length - 1} separators.`
       );
     }
@@ -351,7 +355,7 @@ export abstract class WfsRenderer {
 
     // Validate field count matches value count
     if (fields.length !== values.length) {
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         `Concat function has ${fields.length} fields but the comparison value splits into ${values.length} parts.`
       );
     }
@@ -492,13 +496,13 @@ export abstract class WfsRenderer {
 
     // If the style type is unique value but we couldn't find any fields to filter on
     if (type === 'uniqueValue' && fields.length === 0)
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         `The styles read from the service seem to support unique value rendering (different rules were read), but no fields could be determined to filter the data.`
       );
 
     // If the style type is unique value but we couldn't find any fields to filter on
     if (type === 'classBreaks' && fields.length === 0)
-      throw new NotSupportedError(
+      throw new GetStylesNotSupportedError(
         `The styles read from the service seem to support class breaks rendering (styling is done on range of numbers), but no fields could be determined to filter the data.`
       );
 
@@ -1144,7 +1148,7 @@ export abstract class WfsRenderer {
     }
 
     // Unsupported
-    throw new NotSupportedError('Unsupported graphic type');
+    throw new GetStylesNotSupportedError('Unsupported graphic type');
   }
 
   /**
