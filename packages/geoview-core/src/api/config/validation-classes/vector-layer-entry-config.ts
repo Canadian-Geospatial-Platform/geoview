@@ -69,7 +69,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    *
    * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
    */
-  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string): void {
+  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string | undefined): void {
     this.#wmsGetStylesFullUrl = wmsGetStylesFullUrl;
   }
 
