@@ -140,7 +140,7 @@ _(Fixes discovered or applied during this cycle)_
 
 - Fixed large ESRI Feature layers (~30k+ features) failing to load on the first attempt: `EsriFeature.#fetchEsriFeaturesByChunk` fired every paged chunk request at once with no concurrency cap or retry, so a single load-induced `500 | Error performing query operation` on one chunk dropped the entire layer (it only worked on reload once the ArcGIS server had cached the queries). The loader now throttles concurrent chunk requests (`Math.min(10, hardwareConcurrency * 2)`, mirroring the ESRI worker) and retries transient failures (HTTP 5xx / ESRI embedded query error / network / timeout) with exponential backoff, so the layer loads reliably on the first try (#3613)
 - Fixed missing loading indicator when opening the data table for a vector layer: on the first click there was no visual feedback (no layer-box progress bar, no skeleton) while the table built, because vector layers have no real query (features are already downloaded) and the heavy synchronous table build blocked the first paint. Clicking a layer now sets a loading state that shows the left-panel progress bar and the right-panel skeleton, the table mount is deferred a frame so the skeleton paints first, and a table-rendered callback clears the indicator once the table is ready
-- Fixed viewer crash when opening the data table for a layer that exposes an empty/blank field name (e.g. a GeoPackage/GDAL unnamed column): Material React Table threw `Columns require an id when using an accessorFn`. Inferred vector layers (GeoJSON/CSV) now skip empty field names at outfield creation (`AbstractGeoViewVector.processFeatureInfoConfig`); the data-table column builders guard against blank keys (which is what protects GeoPackage, whose outfields are built by `GeoPackageReader` and bypass that inference); and the details panel drops label-less fields (#3621)
+- Fixed viewer crash when opening the data table for a layer that exposes an empty/blank field name (e.g. a GeoPackage/GDAL unnamed column): Material React Table threw `Columns require an id when using an accessorFn`. Inferred vector layers (GeoJSON/CSV) now skip empty field names at outfield creation (`AbstractGeoViewVector.processFeatureInfoConfig`); the data-table column builders guard against blank keys (which is what protects GeoPackage, whose outfields are built by `GeoPackageReader` and bypass that inference); and the details panel drops label-less fields
 - Fixed WMS layer querying through WFS to also consider filtering when layer has style but feature is not symbolized (Cities query) without breaking behavior when no symbologies could be read for WFS (Major Projects query) (#3555)
 - Improved projection information reading from metadata for all layer types — now stored in store for layer-info panel (#3555)
 - Greatly improved `Projection` class flexibility in function parameters and stability (#3555)
@@ -181,6 +181,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
 - Fixed initial extent being slightly off vertically vs the home view extent, causing the home view button to shift the map (#3562)
 - Fixed configured `geoview-map` height being exceeded when the collapsed footer bar is rendered (#3601)
+- Fixed maps retaining their initial height when the host or parent container is resized: the shell now observes host, parent, and viewport size changes, updates the stored viewer height, and recalculates the OpenLayers size. The authored host height is measured while the footer layout temporarily uses `fit-content`, while content-sized hosts and fullscreen maps are excluded to prevent resize feedback loops (#3621)
 - Fixed CESI layer in outlier-style.html template to point to a valid layer id (#3562)
 - Fixed Permafrost by Ecoprovince in outlier-metadata template to point to a valid layer URL (#3562)
 - Fixed broken layer in performance.json template demo (#3562)
@@ -335,6 +336,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Added a swiper rendering-isolation regression test covering descendant path resolution, per-target OL render handlers, CSS clip-path removal, and listener cleanup
 - Added `suite-time-slider` with reset-to-default and dual-handle overlap constraint regression tests, plus a dedicated temporal-layer test map
 - Added fixed-height map layout tests for maps with and without a footer bar (#3601)
+- Added a manual resizable-host-container test and demo covering width/height resizing, footer-panel sizing, and fullscreen transitions (`20-edge-cases.md`; manual test total 684 → 685)
 - Audited suite totals against active full-suite tester calls: corrected `suite-map-config` to 39; debug-only and commented-out calls remain excluded
 - Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
 - Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
@@ -364,10 +366,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 916   |
+| Total tests   | 901    | 917   |
 | Automated (A) | 60     | 62    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 685   |
+| Manual (M)    | 672    | 686   |
 
 ## Notes for Release Notes Author
 

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .resizable-container {
+        resize: both;
+        /* The viewer grows past the container when the footer panel opens, so scroll instead of clipping */
+        overflow: auto;
+        width: 80%;
+        height: 500px;
+        min-width: 300px;
+        min-height: 250px;
+        border: 2px dashed #888;
+        padding: 4px;
+        box-sizing: border-box;
+      }
+
+      .split-pane {
+        display: flex;
+        flex-direction: column;
+        width: 80%;
+        height: 600px;
+        border: 2px dashed #888;
+        box-sizing: border-box;
+      }
+
+      .split-pane-top {
+        height: 60%;
+        min-height: 100px;
+        overflow: auto;
+      }
+
+      .split-pane-divider {
+        flex: 0 0 8px;
+        background: #ccc;
+        cursor: row-resize;
+      }
+
+      .split-pane-bottom {
+        flex: 1;
+        min-height: 50px;
+        padding: 8px;
+        overflow: auto;
+      }
+
+      /* Override style.css margin and content-box border so the map fits its parent exactly */
+      .geoview-map.fill-parent {
+        height: 100%;
+        margin-bottom: 0;
+        box-sizing: border-box;
+      }
+
+      /* The map and the open footer panel share the container height, so nothing overflows or scrolls */
+      .resizable-container.split-container {
+        overflow: hidden;
+      }
+
+      .split-container .geoview-map.fill-parent {
+        height: calc(100% - var(--panel-height, 0px));
+      }
+
+      .size-readout {
+        font-family: monospace;
+        white-space: pre;
+        margin: 8px 0;
+      }
+
+      .code-snippet {
+        width: 80%;
+        margin: 8px 0 24px;
+      }
+
+      .code-snippet summary {
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .code-snippet pre {
+        margin: 8px 0 0;
+        padding: 12px;
+        overflow: auto;
+        background: #f5f5f5;
+        border: 1px solid #ccc;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page-header">Resizable Container Demo</div>
+    <div class="back-to-main">
+      <a href="./index.html?tab=demos">← Back to Main</a>
+    </div>
+
+    <div class="demo-section">
+      <h4 id="HMap1">1. Map with footer bar filling a resizable container</h4>
+      <p>
+        The <code>.geoview-map</code> div uses <code>height: 100%</code>. Drag the bottom-right corner of the dashed container to resize it
+        horizontally and vertically. The map should follow both dimensions. When the footer panel is opened, the viewer grows taller than the
+        container, so scroll the container to reach the panel content.
+      </p>
+      <textarea id="configTextArea1" cols="100" rows="6" readonly="">
+&lt;div class="resizable-container" style="resize: both; overflow: auto; height: 500px;"&gt;
+  &lt;div id="Map1" class="geoview-map" style="height: 100%"
+    data-lang="en"
+    data-config-url="../configs/footer-tabs-config.json"&gt;&lt;/div&gt;
+&lt;/div&gt;
+      </textarea>
+      <div id="sizesMap1" class="size-readout"></div>
+    </div>
+    <div class="resizable-container">
+      <div id="Map1" class="geoview-map fill-parent" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div>
+    </div>
+
+    <div class="demo-section">
+      <h4 id="HMap2">2. Map with default footer bar in a split pane</h4>
+      <p>
+        Drag the grey divider up or down to change the height of the top pane containing the map. The map uses the default footer bar, so
+        scroll the top pane to reach the panel content when the footer panel is opened.
+      </p>
+      <div id="sizesMap2" class="size-readout"></div>
+    </div>
+    <div class="split-pane">
+      <div id="splitPaneTop" class="split-pane-top">
+        <div
+          id="Map2"
+          class="geoview-map fill-parent"
+          data-lang="en"
+          data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': { 'projection': 3978 },
+              'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
+              'listOfGeoviewLayerConfig': []
+            },
+            'theme': 'geo.ca',
+            'footerBar': { 'tabs': { 'core': [] } }
+          }"
+        ></div>
+      </div>
+      <div
+        id="splitPaneDivider"
+        class="split-pane-divider"
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label="Resize map pane"
+      ></div>
+      <div class="split-pane-bottom">Bottom pane content</div>
+    </div>
+
+    <details class="code-snippet">
+      <summary>Show the code used to resize map 2</summary>
+      <pre><code>&lt;!-- The map div fills the top pane; GeoView follows the pane height --&gt;
+&lt;style&gt;
+  .split-pane { display: flex; flex-direction: column; height: 600px; }
+  .split-pane-top { height: 60%; min-height: 100px; overflow: auto; }
+  .split-pane-divider { flex: 0 0 8px; background: #ccc; cursor: row-resize; }
+  .split-pane-bottom { flex: 1; min-height: 50px; overflow: auto; }
+  .geoview-map.fill-parent { height: 100%; margin-bottom: 0; box-sizing: border-box; }
+&lt;/style&gt;
+
+&lt;div class="split-pane"&gt;
+  &lt;div id="splitPaneTop" class="split-pane-top"&gt;
+    &lt;div id="Map2" class="geoview-map fill-parent" data-lang="en" data-config-url="./configs/footer-tabs-config.json"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="splitPaneDivider" class="split-pane-divider" role="separator"&gt;&lt;/div&gt;
+  &lt;div class="split-pane-bottom"&gt;Bottom pane content&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  // Dragging the divider only changes the height of the top pane; GeoView detects the change on its own
+  const splitPaneTop = document.getElementById('splitPaneTop');
+  const splitPaneDivider = document.getElementById('splitPaneDivider');
+  splitPaneDivider.addEventListener('pointerdown', (downEvent) =&gt; {
+    downEvent.preventDefault();
+    splitPaneDivider.setPointerCapture(downEvent.pointerId);
+    const startY = downEvent.clientY;
+    const startHeight = splitPaneTop.getBoundingClientRect().height;
+    const onMove = (moveEvent) =&gt; {
+      splitPaneTop.style.height = `${Math.max(100, startHeight + moveEvent.clientY - startY)}px`;
+    };
+    const onUp = () =&gt; {
+      splitPaneDivider.removeEventListener('pointermove', onMove);
+      splitPaneDivider.removeEventListener('pointerup', onUp);
+    };
+    splitPaneDivider.addEventListener('pointermove', onMove);
+    splitPaneDivider.addEventListener('pointerup', onUp);
+  });
+&lt;/script&gt;</code></pre>
+    </details>
+
+    <div class="demo-section">
+      <h4 id="HMap3">3. Map and footer panel sharing a resizable container</h4>
+      <p>
+        Same as map 1, but the container keeps a fixed height and the page splits it between the map and the footer panel while the panel
+        is open (<code>uiController.getFooterBarIsOpen()</code>): the panel gets 40% of the container through the
+        <code>data-footer-height</code> attribute and the map gets the rest through a CSS variable. Both stay visible while you resize,
+        with no scroll bar.
+      </p>
+      <div id="sizesMap3" class="size-readout"></div>
+    </div>
+    <div class="resizable-container split-container">
+      <div id="Map3" class="geoview-map fill-parent" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div>
+    </div>
+
+    <details class="code-snippet">
+      <summary>Show the code used to resize map 3</summary>
+      <pre><code>&lt;style&gt;
+  .resizable-container { resize: both; overflow: hidden; width: 80%; height: 500px; padding: 4px; box-sizing: border-box; }
+  .geoview-map.fill-parent { height: 100%; margin-bottom: 0; box-sizing: border-box; }
+  /* The map takes what the open footer panel does not use */
+  .split-container .geoview-map.fill-parent { height: calc(100% - var(--panel-height, 0px)); }
+&lt;/style&gt;
+
+&lt;div class="resizable-container split-container"&gt;
+  &lt;div id="Map3" class="geoview-map fill-parent" data-lang="en" data-config-url="./configs/footer-tabs-config.json"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  // Splits a fixed-height container between the map and the open footer panel.
+  // GeoView sizes the panel from the data-footer-height attribute and the map from the host CSS height.
+  function splitContainerWithFooter(mapViewer) {
+    const host = document.getElementById(mapViewer.mapId);
+    const container = host.parentElement;
+    const { uiController } = mapViewer.controllers;
+    // The tabs panel content is 56px shorter than its data-footer-height value
+    const PANEL_HEADER = 56;
+    const PANEL_SHARE = 0.4;
+    let appliedPanel = 0;
+    let frameId;
+
+    const update = () =&gt; {
+      frameId = undefined;
+
+      const style = getComputedStyle(container);
+      const contentHeight = container.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      const panel = uiController.getFooterBarIsOpen() ? Math.max(100, Math.round(contentHeight * PANEL_SHARE)) : 0;
+      if (panel === appliedPanel) return;
+      appliedPanel = panel;
+
+      container.style.setProperty('--panel-height', `${panel}px`);
+      if (panel &gt; 0) host.setAttribute('data-footer-height', `${panel + PANEL_HEADER}px`);
+      else host.removeAttribute('data-footer-height');
+
+      // Makes GeoView measure the host height again with the new CSS height
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    // Changing the host size inside the observer callback triggers the ResizeObserver loop error, so defer it
+    const scheduleUpdate = () =&gt; {
+      if (frameId === undefined) frameId = requestAnimationFrame(update);
+    };
+
+    const observer = new ResizeObserver(scheduleUpdate);
+    observer.observe(host);
+    observer.observe(container);
+    scheduleUpdate();
+  }
+
+  cgpv.onMapReady((mapViewer) =&gt; {
+    if (mapViewer.mapId === 'Map3') splitContainerWithFooter(mapViewer);
+  });
+&lt;/script&gt;</code></pre>
+    </details>
+
+    <div>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      // Shows the host, map target element and OpenLayers viewport sizes for a map
+      function displaySizes(mapId) {
+        const host = document.getElementById(mapId);
+        const target = document.getElementById(`${mapId}-mapTargetElement`);
+        const viewport = host.querySelector('.ol-viewport');
+        const format = (element) => (element ? `${element.clientWidth} x ${element.clientHeight}` : 'n/a');
+        const olSize = cgpv.api.getMapViewer(mapId).controllers.mapController.getMapSize();
+        document.getElementById(`sizes${mapId}`).textContent = [
+          `Host (.geoview-map):     ${format(host)}`,
+          `Map target element:      ${format(target)}`,
+          `OpenLayers viewport:     ${format(viewport)}`,
+          `OpenLayers map size:     ${olSize ? olSize.join(' x ') : 'n/a'}`,
+        ].join('\n');
+      }
+
+      // Splits a fixed-height container between the map and the open footer panel (uiController.getFooterBarIsOpen()).
+      // GeoView sizes the panel from the data-footer-height attribute and the map from the host CSS height, so both fit the container.
+      function splitContainerWithFooter(mapViewer) {
+        const host = document.getElementById(mapViewer.mapId);
+        const container = host.parentElement;
+        const { uiController } = mapViewer.controllers;
+        // The tabs panel content is 56px shorter than its data-footer-height value
+        const PANEL_HEADER = 56;
+        const PANEL_SHARE = 0.4;
+        let appliedPanel = 0;
+        let frameId;
+
+        const update = () => {
+          frameId = undefined;
+
+          const style = getComputedStyle(container);
+          const contentHeight = container.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+          const panel = uiController.getFooterBarIsOpen() ? Math.max(100, Math.round(contentHeight * PANEL_SHARE)) : 0;
+          if (panel === appliedPanel) return;
+          appliedPanel = panel;
+
+          container.style.setProperty('--panel-height', `${panel}px`);
+          if (panel > 0) host.setAttribute('data-footer-height', `${panel + PANEL_HEADER}px`);
+          else host.removeAttribute('data-footer-height');
+
+          // Makes GeoView measure the host height again with the new CSS height
+          window.dispatchEvent(new Event('resize'));
+        };
+
+        // Changing the host size inside the observer callback triggers the ResizeObserver loop error, so defer it
+        const scheduleUpdate = () => {
+          if (frameId === undefined) frameId = requestAnimationFrame(update);
+        };
+
+        const observer = new ResizeObserver(scheduleUpdate);
+        observer.observe(host);
+        observer.observe(container);
+        scheduleUpdate();
+      }
+
+      // cgpv.onMapReady keeps a single callback (a later call replaces an earlier one), so one handler serves all maps
+      cgpv.onMapReady((mapViewer) => {
+        const { mapId } = mapViewer;
+        if (mapId === 'Map3') splitContainerWithFooter(mapViewer);
+
+        const target = document.getElementById(`${mapId}-mapTargetElement`);
+        const observer = new ResizeObserver(() => displaySizes(mapId));
+        observer.observe(document.getElementById(mapId).parentElement);
+        if (target) observer.observe(target);
+        mapViewer.map.on('change:size', () => displaySizes(mapId));
+        displaySizes(mapId);
+      });
+
+      // Simple split pane: drag the divider to resize the top pane height
+      const splitPaneTop = document.getElementById('splitPaneTop');
+      const splitPaneDivider = document.getElementById('splitPaneDivider');
+      splitPaneDivider.addEventListener('pointerdown', (downEvent) => {
+        downEvent.preventDefault();
+        splitPaneDivider.setPointerCapture(downEvent.pointerId);
+        const startY = downEvent.clientY;
+        const startHeight = splitPaneTop.getBoundingClientRect().height;
+        const onMove = (moveEvent) => {
+          splitPaneTop.style.height = `${Math.max(100, startHeight + moveEvent.clientY - startY)}px`;
+        };
+        const onUp = () => {
+          splitPaneDivider.removeEventListener('pointermove', onMove);
+          splitPaneDivider.removeEventListener('pointerup', onUp);
+        };
+        splitPaneDivider.addEventListener('pointermove', onMove);
+        splitPaneDivider.addEventListener('pointerup', onUp);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+    </script>
+  </body>
+</html>
