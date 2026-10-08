@@ -1096,6 +1096,34 @@ export abstract class GeoUtilities {
 
   // #endregion LEGEND
 
+  // #region PARSING FEATURE PUBLIC
+
+  /**
+   * Extracts a scalar time position from a parsed GML temporal value.
+   *
+   * @param feature - Feature containing the date field.
+   * @param fieldName - Name of the date field to read.
+   * @returns A date-compatible value, or its string representation when the value is an unsupported object
+   */
+  static readFeatureField(feature: Feature, fieldName: string): unknown {
+    // Read the value in the field
+    let value = feature.get(fieldName);
+
+    // GML TimeInstant values can be represented as a parsed _content_.timePosition object.
+    if (typeof value === 'object' && value !== null && '_content_' in value) {
+      // eslint-disable-next-line no-underscore-dangle
+      const content = value._content_;
+      if (typeof content === 'object' && content !== null && 'timePosition' in content) {
+        value = content.timePosition;
+      }
+    }
+
+    // Return the value
+    return value;
+  }
+
+  // #endregion PARSING FEATURE PUBLIC
+
   // #region GEOMETRY PUBLIC
 
   /**

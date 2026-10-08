@@ -549,6 +549,7 @@ export class LayerSetController extends AbstractMapViewerController {
       if (layer instanceof AbstractGVVector) {
         legendLayerEntry.hasText = !!layer.getTextOLLayer();
         legendLayerEntry.textVisible = layer.getTextVisible();
+        legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
       }
 
       // If the layer is GVEsriImage

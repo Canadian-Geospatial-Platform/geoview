@@ -282,6 +282,7 @@
     "layerPath": "Chemin de la couche",
     "layerType": "Type : ",
     "layerOgcVersion": "Version OGC",
+    "layerWmsGetStylesFullUrl": "Get Styles : ",
     "layerBounds": "Étendu ({{mapProjectionEPSG}})",
     "layerBounds4326": "Étendu (EPSG:4326)",
     "layerMaxScale": "Échelle maximale",

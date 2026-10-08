@@ -1777,6 +1777,19 @@ export const useStoreLayerStyleSettings = (layerPath: string): string[] => {
   });
 };
 
+/**
+ * React hook that returns if the temporal mode of the dates for the layer.
+ *
+ * @param layerPath - Unique path identifying the layer in the legend state
+ * @returns The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE
+ */
+export const useStoreLayerWMSGetStylesFullUrl = (layerPath: string | undefined): string | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.wmsGetStylesFullUrl;
+  });
+};
+
 // #endregion STATE GETTERS & HOOKS - SPECIALIZED
 
 // #region STATE ADAPTORS

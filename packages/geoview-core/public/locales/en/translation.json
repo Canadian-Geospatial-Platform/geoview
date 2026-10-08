@@ -282,6 +282,7 @@
     "layerPath": "Layer Path",
     "layerType": "Type: ",
     "layerOgcVersion": "OGC Version",
+    "layerWmsGetStylesFullUrl": "WMS GetStyles: ",
     "layerBounds": "Bounds ({{mapProjectionEPSG}})",
     "layerBounds4326": "Bounds (EPSG:4326)",
     "layerMaxScale": "Max Scale",

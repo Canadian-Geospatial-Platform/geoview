@@ -1,0 +1,131 @@
+{
+  "configMeta": {
+    "description": "WFS vector layer examples from multiple services including feature-info overrides and BBOX loading. This demo page showcases WFS services without an associated WMS layer.<ul><li>Cities Experimental: Test of a WFS using their associated WMS.</li><li>Débit de circulation: Test of a WFS with incomplete ogc Filters for some class rendering styling</li><li>Condition routière hivernale du réseau routier: Test of a WFS with incomplete ogc Filters for some class rendering styling</li><li>Élement de drainage: Test of a WFS using their associated WMS with linear style</li><li>Réseau routier - RTSS: Test of a WFS with class rendering style acting strangely depending on the zoom level, explanation?</li><li>Sous-ministériat aux territoires: Test of a WFS using their associated WMS with polygon style</li><li>Radar photo: Test of a WFS failing to use their associated WMS with point style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Site d'investigation géotechnique: Test of a WFS failing to use their associated WMS with point style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Sortie d'autoroute: Test of a WFS failing to use their associated WMS with point style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Aéroport: Test of a WFS failing to use their associated WMS with point style due to incomplete PointSymbolizer information in the GetStyles.</li><li>vg_observation_v_inondation_embacle_wmst: Test of a WFS only partly successing in creating the style from the incomplete style information in the GetStyles of the WMS.</li><li>CASERNE: Test of a WFS failing to use their associated WMS with point style due to incomplete PointSymbolizer information in the GetStyles.</li></ul>"
+  },
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          10,
+          [
+            -75.370748,
+            45.001058
+          ]
+        ]
+      },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "transports",
+        "geoviewLayerName": "Transports",
+        "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:circulation_routier"
+          },
+          {
+            "layerId": "ms:conditions_routieres"
+          },
+          {
+            "layerId": "ms:iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "ms:bgr_v_sous_route_res_sup_act"
+          },
+          {
+            "layerId": "ms:bgr_v_dirct_genrl_geomt_act"
+          },
+          {
+            "layerId": "ms:radars_photos"
+          },
+          {
+            "layerId": "ms:site_inv_geotech_p"
+          },
+          {
+            "layerId": "ms:sortie_aut"
+          },
+          {
+            "layerId": "ms:aeroport"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gouv-ouvert",
+        "geoviewLayerName": "Gouv Ouvert (proxied)",
+        "metadataAccessPath": "https://geoegl.msp.gouv.qc.ca/ws/igo_gouvouvert.fcgi",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:vg_observation_v_inondation_embacle_wmst"
+          },
+          {
+            "layerId": "ms:CASERNE"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

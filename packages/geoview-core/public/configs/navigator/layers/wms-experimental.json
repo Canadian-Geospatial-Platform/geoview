@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "WMS vector layer examples covering SLD styles, unique-value rules, and vector time filters."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
@@ -33,9 +36,6 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "bgr_v_sous_route_res_sup_act"
-          },
-          {
             "layerId": "circulation_routier"
           },
           {
@@ -43,6 +43,9 @@
           },
           {
             "layerId": "iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "bgr_v_sous_route_res_sup_act"
           },
           {
             "layerId": "bgr_v_dirct_genrl_geomt_act"
