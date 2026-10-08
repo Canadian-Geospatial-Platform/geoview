@@ -1075,8 +1075,14 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         try {
-          // Create the layer style, await, and return
-          return await this.createLayerStyleFromWMS(tweakedUrl, geometryType);
+          // Create the layer style and await
+          const style = await this.createLayerStyleFromWMS(tweakedUrl, geometryType);
+
+          // Keep the url that was used
+          layerConfig.setWmsGetStylesFullUrl(tweakedUrl);
+
+          // Return the style
+          return style;
         } catch (error: unknown) {
           // MapServer may advertise an `ms:` WFS layer ID while GetStyles expects the unprefixed WMS ID.
           if (!wmsLayerId.startsWith('ms:')) throw error;
@@ -1087,12 +1093,18 @@ export class WMS extends AbstractGeoViewRaster {
           retryUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(retryUrl, unprefixedLayerId);
           retryUrl = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
 
-          // Create the layer style, await, and return
-          return await this.createLayerStyleFromWMS(retryUrl, geometryType);
+          // Create the layer style and await
+          const style = await this.createLayerStyleFromWMS(retryUrl, geometryType);
+
+          // Keep the url that was used
+          layerConfig.setWmsGetStylesFullUrl(retryUrl);
+
+          // Return the style
+          return style;
         }
       } catch (error: unknown) {
         // Log warning
-        logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
+        logger.logWarning(`Failed to create a style for the WFS using the WMS styles for '${layerConfig.layerPath}'.`, error);
       }
     }
 
