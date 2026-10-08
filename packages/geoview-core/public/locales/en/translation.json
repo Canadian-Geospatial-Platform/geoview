@@ -282,6 +282,7 @@
     "layerPath": "Layer Path",
     "layerType": "Type: ",
     "layerOgcVersion": "OGC Version",
+    "layerVectorStructureFullUrl": "Vector Structure: ",
     "layerWmsGetStylesFullUrl": "WMS GetStyles: ",
     "layerBounds": "Bounds ({{mapProjectionEPSG}})",
     "layerBounds4326": "Bounds (EPSG:4326)",

@@ -7,6 +7,7 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -565,12 +566,8 @@ export class LayerSetController extends AbstractMapViewerController {
       if (layer instanceof GVWMS) {
         legendLayerEntry.wmsStyle = layer.getWmsStyle();
         legendLayerEntry.vectorTimeField = layer.getLayerConfig().getVectorTimeField();
+        legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
       }
-    }
-
-    // If the layer config is WMS
-    if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-      legendLayerEntry.wmsStyles = layerConfig.getStylesMetadata();
     }
 
     // If layer config is OGC
@@ -580,6 +577,24 @@ export class LayerSetController extends AbstractMapViewerController {
       layerConfig instanceof OgcWmtsLayerEntryConfig
     ) {
       legendLayerEntry.ogcVersion = layerConfig.getVersion(); // Don't use getVersionOrDefault() here - we want the truth
+    }
+
+    // If the layer config is WMS
+    if (layerConfig instanceof OgcWmsLayerEntryConfig) {
+      legendLayerEntry.wmsStyles = layerConfig.getStylesMetadata();
+      legendLayerEntry.vectorStructureFullUrl =
+        layerConfig.getWfsLayerConfig?.()?.getDescribeFeatureTypeFullUrl() ??
+        layerConfig.getOGCApiFeaturesLayerConfig?.()?.getQueryablesFullUrl();
+    }
+
+    // If the layer config is WFS
+    if (layerConfig instanceof OgcWfsLayerEntryConfig) {
+      legendLayerEntry.vectorStructureFullUrl = layerConfig.getDescribeFeatureTypeFullUrl();
+    }
+
+    // If the layer config is OGC Feature API
+    if (layerConfig instanceof OgcFeatureLayerEntryConfig) {
+      legendLayerEntry.vectorStructureFullUrl = layerConfig.getQueryablesFullUrl();
     }
 
     // If non existing in the store yet

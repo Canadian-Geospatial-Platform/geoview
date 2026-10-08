@@ -249,6 +249,9 @@ export class WFS extends AbstractGeoViewVector {
       outputFormat
     );
 
+    // Keep track of the describe feature type URL that was used for the layer
+    layerConfigWFS.setDescribeFeatureTypeFullUrl(describeFeatureUrl);
+
     // Tweak url with the proxy if necessary
     describeFeatureUrl = layerConfigWFS.getUrlWithProxyWhenNeeded(describeFeatureUrl);
 

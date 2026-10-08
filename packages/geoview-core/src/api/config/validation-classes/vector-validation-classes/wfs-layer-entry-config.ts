@@ -17,6 +17,9 @@ import { toArray } from '@/core/utils/utilities';
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
+  /** The DescribeFeatureType full URL that was used for the layer, if any */
+  #describeFeatureTypeFullUrl?: string;
+
   /**
    * Creates an instance of OgcWfsLayerEntryConfig.
    *
@@ -186,6 +189,24 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    */
   getVersionIsHigherThan2(): boolean {
     return this.getVersionOrDefault().startsWith('2.');
+  }
+
+  /**
+   * Gets the full DescribeFeatureType URL used for the layer.
+   *
+   * @returns The recorded DescribeFeatureType URL, or undefined if none was recorded
+   */
+  getDescribeFeatureTypeFullUrl(): string | undefined {
+    return this.#describeFeatureTypeFullUrl;
+  }
+
+  /**
+   * Stores the full DescribeFeatureType URL used for the layer.
+   *
+   * @param describeFeatureTypeFullUrl - Full URL of the DescribeFeatureType request
+   */
+  setDescribeFeatureTypeFullUrl(describeFeatureTypeFullUrl: string): void {
+    this.#describeFeatureTypeFullUrl = describeFeatureTypeFullUrl;
   }
 
   // #endregion METHODS

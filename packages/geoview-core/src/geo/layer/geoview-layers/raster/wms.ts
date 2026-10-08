@@ -1052,18 +1052,6 @@ export class WMS extends AbstractGeoViewRaster {
     // If should fetch styles from the WMS (default)
     if (layerConfig.getShouldFetchStylesFromWMS()) {
       try {
-        // Tweak url when switching from WFS to WMS
-        let tweakedUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getWmsStylesUrlOrDefault());
-
-        // Get the layer id equivalent for the WMS
-        const wmsLayerId = layerConfig.getWmsStylesLayerIdOrDefault();
-
-        // Make sure the URL has necessary information
-        tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(tweakedUrl, wmsLayerId);
-
-        // Tweak url with the proxy if necessary
-        tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
-
         // A generic WFS geometry metadata type is recoverable because the WMS SLD can infer the geometry.
         // GV Sometimes, the metadata is vague about the type of geometry, let it continue (in this try/catch) and it'll be inferred later
         let geometryType: TypeStyleGeometry | undefined;
@@ -1074,9 +1062,21 @@ export class WMS extends AbstractGeoViewRaster {
           if (!(error instanceof NotSupportedError)) throw error;
         }
 
+        // Tweak url when switching from WFS to WMS
+        let tweakedUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getWmsStylesUrlOrDefault());
+
+        // Get the layer id equivalent for the WMS
+        const wmsLayerId = layerConfig.getWmsStylesLayerIdOrDefault();
+
+        // Make sure the URL has necessary information
+        tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(tweakedUrl, wmsLayerId);
+
+        // Proxy the url if necessary
+        const tweakedUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
+
         try {
           // Create the layer style and await
-          const style = await this.createLayerStyleFromWMS(tweakedUrl, geometryType);
+          const style = await this.createLayerStyleFromWMS(tweakedUrlProxied, geometryType);
 
           // Keep the url that was used
           layerConfig.setWmsGetStylesFullUrl(tweakedUrl);
@@ -1091,10 +1091,12 @@ export class WMS extends AbstractGeoViewRaster {
           const unprefixedLayerId = ServicesManagement.toggleMsLayerIdPrefix(wmsLayerId);
           let retryUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getWmsStylesUrlOrDefault());
           retryUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(retryUrl, unprefixedLayerId);
-          retryUrl = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
+
+          // Proxy the url if necessary
+          const retryUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(retryUrl);
 
           // Create the layer style and await
-          const style = await this.createLayerStyleFromWMS(retryUrl, geometryType);
+          const style = await this.createLayerStyleFromWMS(retryUrlProxied, geometryType);
 
           // Keep the url that was used
           layerConfig.setWmsGetStylesFullUrl(retryUrl);
@@ -1568,13 +1570,19 @@ export class WMS extends AbstractGeoViewRaster {
 
     try {
       // Build the GetStyles request for this WMS layer
-      let stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(layerConfig.getDataAccessPath(), layerConfig.layerId);
+      const stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(layerConfig.getDataAccessPath(), layerConfig.layerId);
 
       // Apply the layer proxy after constructing the complete service request
-      stylesUrl = layerConfig.getUrlWithProxyWhenNeeded(stylesUrl);
+      const stylesUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(stylesUrl);
 
       // Parse the WMS style, allowing the SLD renderer to infer geometry when WMS metadata does not expose it
-      return await this.createLayerStyleFromWMS(stylesUrl, layerConfig.getGeometryType());
+      const style = await this.createLayerStyleFromWMS(stylesUrlProxied, layerConfig.getGeometryType());
+
+      // Keep the url that was used
+      layerConfig.setWmsGetStylesFullUrl(stylesUrl);
+
+      // Return the style
+      return style;
     } catch (error: unknown) {
       // Best-effort enrichment boundary: a style failure must not prevent the WMS layer from rendering
       logger.logDebug(`Failed to create vectorial styles for the WMS ${layerConfig.layerPath}`, error);
