@@ -262,6 +262,29 @@ mapViewer.layer.removeLayerUsingPath(layerPath);
 mapViewer.layer.removeAllGeoviewLayers();
 ```
 
+### Reload Layers
+
+When a layer (or one of its sublayers) shows as **error** — a bad id, a transient service failure, or a request that was too large on first load — the Layers panel shows a reload button. Reload rebuilds the failed layer and works even when it **never loaded once** (unlike a plain re-create, which needs an existing layer to copy).
+
+Reload uses a **two-tier strategy**, picking the least disruptive option:
+
+| Case                                                                                 | Strategy                                         | Behavior                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Errored leaf whose parent group and siblings are healthy**                         | Surgical child reload (`reprocessOneLayerEntry`) | Re-validates and reprocesses only that one entry against the already-fetched service metadata, then slots the recreated layer back into its existing group. Loaded siblings are never torn down, and the layer keeps its position in the list because its path never left the ordered layers. |
+| **Errored root, a whole group, or a layer whose service metadata was never fetched** | Whole-layer rebuild                              | Rebuilds the entire GeoView layer from a snapshot of its original config (re-fetching metadata and re-validating), then restores its original position in the layer list.                                                                                                                     |
+
+Why both are needed:
+
+- The **surgical** path is the common case (one invalid sublayer among healthy ones). It is cheaper, avoids flicker, and preserves sibling state and list order for free. It only applies when the owning GeoView layer still exists with its fetched metadata and the parent group is on the map.
+- The **whole-layer rebuild** is the fallback for failures where there is no structure or metadata to reuse (the service was unreachable, the root config itself was invalid, or every child failed). This path genuinely needs to re-fetch and re-validate from the original config.
+
+If a surgical child reload fails again (e.g. the id still does not exist), it reports the error and leaves the reload button — it does **not** fall back to a full rebuild, so healthy siblings are preserved.
+
+```typescript
+// Reload is triggered from the Layers panel, or programmatically via the controller:
+controllerRegistry.layerCreatorController.reloadLayer(layerPath);
+```
+
 ## Layer Events
 
 Listen to layer lifecycle events:

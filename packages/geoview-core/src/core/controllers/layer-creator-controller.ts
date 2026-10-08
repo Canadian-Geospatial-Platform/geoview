@@ -78,6 +78,7 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 export class LayerCreatorController extends AbstractMapViewerController {
   /** Reference on the UI domain. */
@@ -456,6 +457,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @returns A promise that resolves after the full layer reload finishes
    */
   async reloadLayer(layerPath: string): Promise<void> {
+    // Prefer reloading only the errored child when its parent group and siblings are healthy.
+    if (await this.#tryReloadSingleErroredChild(layerPath)) return;
+
     // Use the root layer ID to retrieve the configuration snapshot required to reload the layer.
     const rootLayerId = layerPath.split('/')[0];
     const configSnapshot = this.#geoviewLayerConfigSnapshots[rootLayerId];
@@ -515,6 +519,68 @@ export class LayerCreatorController extends AbstractMapViewerController {
       this.showLayerError(error, rootLayerId, configSnapshot.geoviewLayerName);
       this.#restoreOrderedLayerPaths(rootLayerId, originalOrderedPaths, originalRootPaths);
     }
+  }
+
+  /**
+   * Reloads only a single errored child entry when its parent group and siblings are healthy.
+   *
+   * Rebuilds just the errored leaf by reusing the owning GeoView layer's already-fetched metadata and slotting the
+   * recreated GV layer back into its existing parent group, so loaded siblings are never torn down. Falls through
+   * (returns false) when the scenario does not apply, letting the caller rebuild the whole GeoView layer instead.
+   *
+   * @param layerPath - The path to the errored child to reload
+   * @returns A promise that resolves with true when the child reload was handled, false to fall back to a full reload
+   */
+  async #tryReloadSingleErroredChild(layerPath: string): Promise<boolean> {
+    const { layerController } = this.getControllersRegistry();
+    const layerEntryConfig = layerController.getLayerEntryConfigIfExists(layerPath);
+
+    // Only applies to an errored leaf entry whose parent group is not itself in error.
+    if (!layerEntryConfig || layerEntryConfig.layerStatus !== 'error' || layerEntryConfig.getEntryTypeIsGroup()) return false;
+    if (!(layerEntryConfig instanceof AbstractBaseLayerEntryConfig)) return false;
+    const parentConfig = layerEntryConfig.getParentLayerConfig();
+    if (!parentConfig || parentConfig.layerStatus === 'error') return false;
+
+    // The owning GeoView layer must still exist with its fetched metadata to reuse.
+    const geoviewLayer = this.#geoviewLayers[layerEntryConfig.getGeoviewLayerId()];
+    if (!geoviewLayer || !geoviewLayer.getMetadata()) return false;
+
+    // The parent group GV layer must be on the map to receive the recreated child.
+    const parentGVLayer = layerController.getGeoviewLayerIfExists(parentConfig.layerPath);
+    if (!(parentGVLayer instanceof GVGroupLayer)) return false;
+
+    // Remove any stale GV layer for this exact path before recreating it, keeping its config registered.
+    const existingGVLayer = layerController.getGeoviewLayerIfExists(layerPath);
+    if (existingGVLayer) {
+      const existingOLLayer = existingGVLayer.getOLLayer();
+      if (existingOLLayer) parentGVLayer.getOLLayer().getLayers().remove(existingOLLayer);
+      this.#layerDomain.deleteGVLayer(existingGVLayer);
+    }
+
+    // Reprocess just this entry, reusing the already-fetched service metadata.
+    const gvLayer = await geoviewLayer.reprocessOneLayerEntry(
+      layerEntryConfig,
+      this.#uiDomain.getDisplayDateMode(),
+      this.getMapViewer().getProjection()
+    );
+
+    // The entry is still invalid; report it and stop (do not tear down the healthy siblings with a full rebuild).
+    if (!gvLayer) {
+      this.showLayerError(
+        new LayerFailedToLoadError(layerEntryConfig.getLayerNameCascade()),
+        layerEntryConfig.getGeoviewLayerId(),
+        layerEntryConfig.getLayerNameCascade()
+      );
+      return true;
+    }
+
+    // Slot the recreated child into its parent group and refresh the z-order.
+    parentGVLayer.addLayer(gvLayer);
+    layerController.setLayerZIndices();
+
+    // Show success of the layer reload.
+    this.getMapViewer().notifications.showSuccess('layers.layerReloaded', { layerName: gvLayer.getLayerName() });
+    return true;
   }
 
   /**
