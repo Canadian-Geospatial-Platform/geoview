@@ -1779,11 +1779,11 @@
         },
         "wmsUrl": {
           "type": "string",
-          "description": "The url of the WMS layer associated with the vector layer."
+          "description": "The WMS service URL associated with this vector layer. GeoView uses it to request the WMS GetStyles definition and style WFS or OGC API Features records like their WMS counterpart. If omitted, the vector layer's data access path is used and GeoView attempts to derive the WMS endpoint when the URL follows a known WFS service pattern. Style retrieval is enabled by default and is best-effort, so failure to retrieve a style does not prevent the vector layer from loading."
         },
         "wmsLayerId": {
           "type": "string",
-          "description": "The id of the WMS layer associated with the vector layer."
+          "description": "The layer name to use in the WMS GetStyles request for this vector layer. Set this when the matching WMS layer identifier differs from the vector layer's layerId. If omitted, GeoView uses layerId."
         },
         "layerName": {
           "type": "string",
@@ -1927,23 +1927,23 @@
         },
         "wfsUrl": {
           "type": "string",
-          "description": "The url of the WFS layer associated with the WMS layer."
+          "description": "The WFS service URL for retrieving vector features associated with this WMS layer. GeoView uses the associated vector service for feature information and all-record queries, including the Data Table, while the WMS remains the layer rendered on the map. If omitted, the WMS layer's data access path is reused and GeoView attempts to convert a known WMS endpoint to its WFS equivalent. GeoView tries WFS first, then falls back to OGC API Features if WFS cannot be initialized; this enrichment is best-effort and does not prevent the WMS from rendering."
         },
         "wfsLayerId": {
           "type": "string",
-          "description": "The id of the WFS layer associated with the WMS layer."
+          "description": "The WFS feature type name to query for this WMS layer. Set this when the WFS name differs from the WMS layer's layerId. If omitted, GeoView uses layerId and retries with or without the MapServer ms: prefix when needed."
         },
         "ogcApiFeaturesUrl": {
           "type": "string",
-          "description": "The id of the OGC API Feature layer associated with the WMS layer."
+          "description": "The OGC API Features service URL for retrieving vector features associated with this WMS layer. GeoView uses it as a fallback when the WFS counterpart cannot be initialized, for feature information and all-record queries such as the Data Table. If omitted, the WMS layer's data access path is reused. The WMS remains the layer rendered on the map, and vector-service discovery is best-effort."
         },
         "ogcApiFeaturesLayerId": {
           "type": "string",
-          "description": "The id of the OGC API Feature layer associated with the WMS layer."
+          "description": "The OGC API Features collection identifier to query for this WMS layer. Set this when the collection ID differs from the WMS layer's layerId. If omitted, GeoView uses layerId."
         },
         "vectorTimeField": {
           "type": "string",
-          "description": "The field name from the vector layer data that should be used when filtering vector features the same way the WMS filters by time."
+          "description": "The exact attribute name in the associated WFS or OGC API Features records that corresponds to the WMS time dimension. GeoView uses it to apply the WMS time selection to vector records in client-side filtering, including the Data Table, when the WMS time field name is absent from the returned records. If omitted or unavailable, GeoView can infer a replacement only when the returned vector data contains exactly one date-typed field; otherwise, the time filter is not applied to those vector records. This setting does not change the WMS TIME request."
         },
         "isLayerGroup": {
           "description": "Flag used to distinguish layer group nodes.",
