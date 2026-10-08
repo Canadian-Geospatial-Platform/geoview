@@ -69,7 +69,7 @@ export abstract class WfsRenderer {
     const rules = featureTypeStyles.flatMap((featureTypeStyle) => toArray(featureTypeStyle['se:Rule']));
 
     // If no rules
-    if (rules.length === 0) throw new NotSupportedError('Unsupported Layer styling: no rules were found in the SLD');
+    if (rules.length === 0) throw new NotSupportedError('No rules were found in the SLD.');
 
     const infosByGeometry: Partial<Record<TypeStyleGeometry, TypeLayerStyleConfigInfo[]>> = {};
     const fields: string[] = [];
@@ -107,6 +107,11 @@ export abstract class WfsRenderer {
       let polygonSymbolizer: Partial<TypeLayerStyleConfigInfo> | undefined = undefined;
       polygonSymbolizer = this.#buildLayerStyleInfoPolygonSymbolizer(userRule['se:PolygonSymbolizer']);
 
+      // If no symbolizers are defined for this rule, throw error
+      if (!pointSymbolizer && !lineSymbolizer && !polygonSymbolizer) {
+        throw new NotSupportedError(`No valid symbolizers were found in the rule '${label}'.`);
+      }
+
       if (polygonSymbolizer && lineSymbolizer) {
         // A polygon rule can carry both a fill and an outline. Preserve the line's stroke
         // on the polygon while still retaining the line entry for mixed geometries.
@@ -138,7 +143,10 @@ export abstract class WfsRenderer {
       });
     });
 
+    // Get the geometry types determined by the style
     const geometryTypes = Object.keys(infosByGeometry) as TypeStyleGeometry[];
+
+    // If no geometry types were determined by the style, throw an error
     if (geometryTypes.length === 0) throw new NotSupportedError('Unsupported Layer styling for the WFS layer from the WMS styles metadata');
 
     // Read the type from the symbolizers
