@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "WMS vector layer examples covering SLD styles, unique-value rules, and vector time filters."
+    "description": "Experimental: WMS vector layer examples covering SLD styles, unique-value rules, and vector time filters.<ul><li>Cities: Cities WMS on the map with filtering and DataTable capabilities using the vector information from the WFS.</li><li>Débit de circulation: Test of a WMS with incomplete ogc Filters for some class rendering styling.</li><li>Condition routière hivernale du réseau routier: Test of a WMS with incomplete ogc Filters for some class rendering styling.</li><li>Élement de drainage: Test of a WMS using their associated WFS for vector data queries.</li><li>Réseau routier - RTSS: Test of a WMS with class rendering style acting strangely depending on the zoom level, explanation?</li><li>Sous-ministériat aux territoires: Test of a WMS using their associated WFS for vector data queries.</li><li>Radar photo: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Site d'investigation géotechnique: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Sortie d'autoroute: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Aéroport: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Potential de glissement - Surface: Test of WMS with working class filters based on vector data.</li><li>Potential de glissement - Ligne: Test of WMS with working class filters based on vector data. Investigate why the records are filtered by default in the DataTable?</li><li>Potential de glissement - Index: Test of WMS with working class filters based on vector data.</li><li>Couche publique des historiques d'embâcle: Test of a WMS only partly successing in creating the style from the incomplete style information in the GetStyles. This layer also has a very particular combination of features, because it also has a time-dimension on the WMS. In order to make it work (vector-time) combining the filtering happening in the time-slider together with the filtering happening in the DataTable, the 'real' vector field used for the 'time' filtering of the WMS has to be explicited in the configuration. This is done with the 'vectorTimeField' configuration.</li><li>Desserte 9-1-1: This layer doesn't seem to be working well and when toggling the class filters the layer fails to load.</li><li>Caserne de pompier: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>AHCCD stations: Test of a WMS layer fetching its vector information from an OGC API Feature instead of a WFS. This is done by providing 'ogcApiFeaturesUrl' and 'ogcApiFeaturesLayerId' configurations in the layer entry.</li><li>Major Projects Inventory: Test of a WMS failing to create their style due to the GetStyles endpoint not found or not existing.</li><li>BC Kelowna Wells: Test of a WMS failing to create their style due to the GetStyles endpoint not found or not existing.</li></ul>"
   },
   "map": {
     "viewSettings": {
@@ -54,9 +54,6 @@
             "layerId": "radars_photos"
           },
           {
-            "layerId": "zpegt"
-          },
-          {
             "layerId": "site_inv_geotech_p"
           },
           {
@@ -64,6 +61,9 @@
           },
           {
             "layerId": "aeroport"
+          },
+          {
+            "layerId": "zpegt"
           }
         ]
       },

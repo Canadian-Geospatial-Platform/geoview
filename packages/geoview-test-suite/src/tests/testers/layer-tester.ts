@@ -910,6 +910,49 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests WMS metadata group names when ZPEGT is selected alongside a sibling layer.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSZpegtGroupWithSiblingLayer(): Promise<Test<AbstractBaseGVLayer>> {
+    return this.#testAddWMSZpegtGroup(
+      'Test WMS ZPEGT metadata names with a sibling layer...',
+      'Transports',
+      true,
+      'Zone potentiellement exposée aux glissements de terrain (ZPEGT)',
+      'Transports'
+    );
+  }
+
+  /**
+   * Tests the configured GeoView layer name when ZPEGT is the only selected WMS group.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSZpegtGroupWithGeoviewLayerName(): Promise<Test<AbstractBaseGVLayer>> {
+    return this.#testAddWMSZpegtGroup(
+      'Test WMS ZPEGT group name with a configured GeoView layer name...',
+      'Transports',
+      false,
+      'Transports'
+    );
+  }
+
+  /**
+   * Tests the metadata-derived GeoView layer name when no configured name is provided for the ZPEGT group.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSZpegtGroupWithoutGeoviewLayerName(): Promise<Test<AbstractBaseGVLayer>> {
+    return this.#testAddWMSZpegtGroup(
+      'Test WMS ZPEGT group name without a configured GeoView layer name...',
+      undefined,
+      false,
+      'Zone potentiellement exposée aux glissements de terrain (ZPEGT)'
+    );
+  }
+
   // #endregion WMS
 
   // #region WMTS
@@ -3173,4 +3216,99 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion HELPERS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Adds the ZPEGT WMS group and verifies its resolved name and metadata-derived sublayer names.
+   *
+   * @param description - Test description shown in the test results
+   * @param geoviewLayerName - Optional configured display name for the GeoView layer
+   * @param includeAirport - Whether to include the airport layer as a sibling of ZPEGT
+   * @param expectedGroupName - Expected runtime name of the resolved ZPEGT group
+   * @param expectedParentName - Optional expected name of the immediate parent group
+   * @returns A promise that resolves when the test completes
+   */
+  #testAddWMSZpegtGroup(
+    description: string,
+    geoviewLayerName: string | undefined,
+    includeAirport: boolean,
+    expectedGroupName: string,
+    expectedParentName?: string
+  ): Promise<Test<AbstractBaseGVLayer>> {
+    // Keep runtime paths for this test separate from any other configured layers.
+    const gvLayerId = generateId();
+    const zpegtLayerId = GVAbstractTester.TRANSPORTS_WMS_ZPEGT_LAYER_ID;
+    let layerPathToRemove = '';
+
+    return this.test(
+      description,
+      async (test) => {
+        test.addStep('Creating the ZPEGT WMS configuration...');
+        // Include the airport as a sibling in the variant that checks group resolution with multiple entries.
+        const layerEntries = includeAirport
+          ? [{ id: GVAbstractTester.TRANSPORTS_WMS_AIRPORT_LAYER_ID }, { id: zpegtLayerId }]
+          : [{ id: zpegtLayerId }];
+        const gvConfig = WMS.createGeoviewLayerConfig(
+          gvLayerId,
+          geoviewLayerName,
+          GVAbstractTester.TRANSPORTS_WMS_URL,
+          undefined,
+          false,
+          layerEntries
+        );
+
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        if (includeAirport) {
+          // Resolve by root and layer ID because WMS metadata can add group segments to the runtime path.
+          const airportLayerPath = this.getControllersRegistry()
+            .layerController.getGeoviewLayerPaths()
+            .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${GVAbstractTester.TRANSPORTS_WMS_AIRPORT_LAYER_ID}`));
+          if (!airportLayerPath) throw new Error(`The airport layer was not registered under '${gvLayerId}'.`);
+          // Wait for the sibling to finish loading before verifying the registered group structure.
+          await this.helperStepCheckLayerAtLayerPath(test, airportLayerPath, true);
+        }
+
+        test.addStep('Finding the registered ZPEGT group...');
+        // Match the requested terminal ID without assuming how WMS metadata nests the group.
+        const zpegtLayerPath = this.getControllersRegistry()
+          .layerController.getGeoviewLayerPaths()
+          .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${zpegtLayerId}`));
+        if (!zpegtLayerPath) throw new Error(`The ZPEGT layer was not registered under '${gvLayerId}'.`);
+
+        const zpegtLayer = await this.helperStepCheckLayerAtLayerPath(test, zpegtLayerPath, true);
+        // Removing the parent root cleans up the full configured WMS subtree, including a sibling when present.
+        layerPathToRemove = zpegtLayer.getParentRoot()?.getLayerPath() ?? zpegtLayer.getLayerPath();
+        return zpegtLayer;
+      },
+      (test, result) => {
+        test.addStep('Verifying the resolved ZPEGT group name and metadata-derived sublayer names...');
+        Test.assertIsInstance(result, GVGroupLayer);
+        Test.assertIsEqual(result.getLayerName(), expectedGroupName);
+
+        // Each direct child should have a metadata name, and those names should identify distinct sublayers.
+        const children = result.getLayers();
+        const childMetadataNames = children.map((childLayer) => childLayer.getLayerConfig().getLayerName());
+        Test.assertIsArrayLengthMinimal(childMetadataNames, 2);
+        childMetadataNames.forEach((name, index) => Test.assertIsDefined(`childMetadataNames[${index}]`, name));
+        Test.assertIsEqual(new Set(childMetadataNames).size, childMetadataNames.length);
+
+        const parents = result.getParents();
+        if (expectedParentName) {
+          // The sibling variant places ZPEGT beneath the named Transports group.
+          Test.assertIsArrayLengthEqual(parents, 1);
+          Test.assertIsEqual(parents[0].getLayerName(), expectedParentName);
+        } else {
+          Test.assertIsArrayLengthEqual(parents, 0);
+        }
+      },
+      (test) => {
+        // A failed setup may leave no path to remove; otherwise remove the registered subtree.
+        if (layerPathToRemove) this.finalizeStepRemoveLayerAndAssert(test, layerPathToRemove);
+      }
+    );
+  }
+
+  // #endregion PRIVATE METHODS
 }
