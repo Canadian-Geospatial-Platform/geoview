@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Simple WMS layers examples so of which have time-enabled capabilities."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
