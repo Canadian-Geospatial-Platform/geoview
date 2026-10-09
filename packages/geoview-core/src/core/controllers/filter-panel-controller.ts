@@ -1,10 +1,12 @@
 import type { Extent } from 'ol/extent';
 
 import type { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
 import { DateMgt, type ManipulateType } from '@/core/utils/date-mgt';
+import { formatCurrencyValue, formatMeasurementValue } from '@/core/utils/utilities';
 import {
   getStoreFilterPanelLayerConfig,
   getStoreFilterPanelFilterState,
@@ -627,18 +629,15 @@ export class FilterPanelController extends AbstractMapViewerController {
    * Formats a numeric value for display, grouped by thousands and locale-aware.
    *
    * @param value - The numeric value to format
-   * @param attribute - The attribute configuration (controls currency vs plain number)
-   * @returns The formatted value, as a currency string if numberFormat is 'currency'
+   * @param attribute - The filter attribute containing number format and currency information
+   * @returns The formatted number value as a string
    */
-  formatNumberForDisplay(value: number, attribute: TypeFilterAttribute): string {
-    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
-    const locale = displayLanguage === 'fr' ? 'fr-CA' : 'en-US';
-
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string {
     if (attribute.numberFormat === 'currency') {
-      return new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(value);
+      return formatCurrencyValue(value, displayLanguage, attribute.currency);
     }
-
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+    return formatMeasurementValue(value, displayLanguage);
   }
 
   /**
@@ -649,8 +648,8 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param timestamp - Milliseconds since epoch
    * @returns Formatted date string (e.g., "Jan 15, 2020")
    */
-  formatDateForDisplay(timestamp: number): string {
-    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string {
     return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT[displayLanguage], displayLanguage, DateMgt.TIME_UTC);
   }
 

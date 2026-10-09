@@ -118,9 +118,12 @@ Currency
   "displayLabel": "Assessed Value",
   "filterType": "range",
   "enabled": true,
-  "numberFormat": "currency"
+  "numberFormat": "currency",
+  "currency": "CAD"
 }
 ```
+
+`currency` accepts any [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code (e.g. `"CAD"`, `"USD"`, `"JPY"`, `"EUR"`) and defaults to `"USD"` when omitted.
 
 ### Date
 Date range selection

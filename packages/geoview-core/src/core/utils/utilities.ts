@@ -11,7 +11,7 @@ import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
-import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX } from '@/core/utils/constant';
+import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX, DISPLAY_LANGUAGE_LOCALE } from '@/core/utils/constant';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
@@ -1874,10 +1874,19 @@ export function isLocalhost(): boolean {
  * @param displayLanguage - The display language ('en' or 'fr')
  * @returns The formatted value
  */
-export function formatMeasurementValue(value: number, displayLanguage: string): string {
-  return displayLanguage === 'fr'
-    ? value.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatMeasurementValue(value: number, displayLanguage: TypeDisplayLanguage): string {
+  return value.toLocaleString(DISPLAY_LANGUAGE_LOCALE[displayLanguage], { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/**
+ * Formats a numeric value as currency according to the display language.
+ *
+ * @param value - The numeric value to format as currency
+ * @param displayLanguage - The display language ('en' or 'fr')
+ * @returns The formatted currency string
+ */
+export function formatCurrencyValue(value: number, displayLanguage: TypeDisplayLanguage, currency = 'USD'): string {
+  return value.toLocaleString(DISPLAY_LANGUAGE_LOCALE[displayLanguage], { style: 'currency', currency });
 }
 
 /**
@@ -1887,7 +1896,7 @@ export function formatMeasurementValue(value: number, displayLanguage: string): 
  * @param displayLanguage - The display language
  * @returns The formatted length string
  */
-export function formatLength(length: number, displayLanguage: string): string {
+export function formatLength(length: number, displayLanguage: TypeDisplayLanguage): string {
   if (length > 100) {
     const value = Math.round((length / 1000) * 100) / 100;
     return `${formatMeasurementValue(value, displayLanguage)} km`;
@@ -1903,7 +1912,7 @@ export function formatLength(length: number, displayLanguage: string): string {
  * @param displayLanguage - The display language
  * @returns The formatted area string
  */
-export function formatArea(area: number, displayLanguage: string): string {
+export function formatArea(area: number, displayLanguage: TypeDisplayLanguage): string {
   if (area > 10000) {
     const value = Math.round((area / 1000000) * 100) / 100;
     return `${formatMeasurementValue(value, displayLanguage)} km<sup>2</sup>`;

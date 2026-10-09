@@ -3,6 +3,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeRangeValue } from '../../types';
 import { getSxClasses } from './control-styles';
@@ -49,6 +50,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   const activeThumbRef = useRef<number>(1);
 
   const controller = useFilterPanelController();
+  const displayLanguage = useStoreAppDisplayLanguage();
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -143,7 +145,10 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   /**
    * Formats the slider value for display using the controller's formatting logic.
    */
-  const formatValue = useCallback((val: number): string => controller.formatNumberForDisplay(val, attribute), [controller, attribute]);
+  const formatValue = useCallback(
+    (val: number): string => controller.formatNumberForDisplay(val, attribute, displayLanguage),
+    [controller, attribute, displayLanguage]
+  );
 
   if (loading) {
     return (

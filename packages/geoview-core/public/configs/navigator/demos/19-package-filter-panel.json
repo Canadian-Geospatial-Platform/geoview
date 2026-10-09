@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "Filter Panel package configuration with two layers and multiple attributes for filtering for each of the filter types (select, multiselect, range, date). The filter panel is open by default in this demo."
+    "description": "Filter Panel package configuration with three layers and multiple attributes for filtering for each of the filter types (select, multiselect, range, date). The filter panel is open by default in this demo."
   },
   "map": {
     "viewSettings": {
@@ -170,7 +170,8 @@
                   "min": 0,
                   "max": 1005920
                 },
-                "numberFormat": "currency"
+                "numberFormat": "currency",
+                "currency": "CAD"
               }
             ]
           }
