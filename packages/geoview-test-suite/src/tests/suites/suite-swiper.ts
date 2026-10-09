@@ -85,6 +85,8 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
     // Run sequentially because both tests modify shared swiper state
     await this.#swiperTester.testSwiperRenderIsolation();
     await this.#swiperTester.testSwiperLifecycle();
+    // TODO: CHECK - This test was omitted from being called, normal?
+    // await this.#swiperTester.testSwiperHoverSuppression();
     await this.#swiperTester.testSwiperPerLayerSides();
     await this.#swiperTester.testSwiperProgressiveRegistration();
     await this.#swiperTester.testSwiperConfigPersistence();
