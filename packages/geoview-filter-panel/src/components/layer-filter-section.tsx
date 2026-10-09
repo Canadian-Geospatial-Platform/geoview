@@ -11,8 +11,8 @@ import {
 import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { useStoreLayerStatus, useStoreLayerName } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-
 import { RequestAbortedError } from 'geoview-core/core/exceptions/core-exceptions';
+
 import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
 import type { TypeFilterLayer, TypeFilterValue } from '../types';
 import { getSxClasses } from './filter-panel-style';
