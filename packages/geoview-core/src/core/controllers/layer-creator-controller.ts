@@ -38,7 +38,7 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import { generateId, isValidUUID } from '@/core/utils/utilities';
-import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { formatError, NotSupportedError, PromiseRejectErrorWrapper } from '@/core/exceptions/core-exceptions';
 import { GeoViewError, LayerEntryConfigLayerIdMissingError, LayerFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
@@ -525,8 +525,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * Reloads only a single errored child entry when its parent group and siblings are healthy.
    *
    * Rebuilds just the errored leaf by reusing the owning GeoView layer's already-fetched metadata and slotting the
-   * recreated GV layer back into its existing parent group, so loaded siblings are never torn down. Falls through
-   * (returns false) when the scenario does not apply, letting the caller rebuild the whole GeoView layer instead.
+   * recreated GV layer back into its existing parent group, so loaded siblings are never torn down. Records and
+   * reports a reprocessing failure without disturbing healthy siblings. Falls through (returns false) when the
+   * scenario does not apply, letting the caller rebuild the whole GeoView layer instead.
    *
    * @param layerPath - The path to the errored child to reload
    * @returns A promise that resolves with true when the child reload was handled, false to fall back to a full reload
@@ -558,11 +559,20 @@ export class LayerCreatorController extends AbstractMapViewerController {
     }
 
     // Reprocess just this entry, reusing the already-fetched service metadata.
-    const gvLayer = await geoviewLayer.reprocessOneLayerEntry(
-      layerEntryConfig,
-      this.#uiDomain.getDisplayDateMode(),
-      this.getMapViewer().getProjection()
-    );
+    let gvLayer: AbstractGVLayer | undefined;
+    try {
+      gvLayer = await geoviewLayer.reprocessOneLayerEntry(
+        layerEntryConfig,
+        this.#uiDomain.getDisplayDateMode(),
+        this.getMapViewer().getProjection()
+      );
+    } catch (error: unknown) {
+      // Reprocessing is best-effort here; retain the same layer-error state while keeping healthy siblings in place.
+      const loadError = error instanceof PromiseRejectErrorWrapper ? error.error : formatError(error);
+      const failedConfig =
+        error instanceof PromiseRejectErrorWrapper && error.object instanceof ConfigBaseClass ? error.object : layerEntryConfig;
+      geoviewLayer.addLayerLoadError(loadError, failedConfig);
+    }
 
     // The entry is still invalid; report it and stop (do not tear down the healthy siblings with a full rebuild).
     if (!gvLayer) {

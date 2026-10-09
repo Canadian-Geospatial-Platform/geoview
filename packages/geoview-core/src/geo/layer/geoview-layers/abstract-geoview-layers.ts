@@ -755,13 +755,15 @@ export abstract class AbstractGeoViewLayer {
    * Re-validates the entry (re-raising its error when still invalid), reprocesses its metadata, and recreates its
    * GV layer — emitting the same events as the initial load so the entry re-registers in the domain and layer sets.
    * Used to reload one errored child without rebuilding the whole GeoView layer; the caller slots the returned GV
-   * layer into its parent group.
+   * layer into its parent group and records any processing errors.
    *
    * @param layerConfig - The leaf layer entry config to reprocess
    * @param displayDateMode - The display date mode used to process time dimensions in the metadata
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the reprocessing
    * @returns A promise that resolves with the recreated GV layer, or undefined when the entry is still invalid
+   * @throws {PromiseRejectErrorWrapper} When metadata processing fails (propagated from `#processLayerMetadata()`)
+   * @throws {Error} When recreating the GV layer fails
    */
   async reprocessOneLayerEntry(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -779,20 +781,13 @@ export abstract class AbstractGeoViewLayer {
     this.validateListOfLayerEntryConfig([layerConfig]);
     if (this.getLayerLoadErrors().length > errorCountBefore) return undefined;
 
-    try {
-      // Reprocess the entry metadata (throws on failure), then signal the processed phase so the layer sets pick it up again.
-      await this.#processLayerMetadata(layerConfig, displayDateMode, mapProjection, abortSignal);
-      layerConfig.setLayerStatusProcessed();
-      this.#emitLayerEntryProcessed({ config: layerConfig });
+    // Reprocess the entry metadata (throws on failure), then signal the processed phase so the layer sets pick it up again.
+    await this.#processLayerMetadata(layerConfig, displayDateMode, mapProjection, abortSignal);
+    layerConfig.setLayerStatusProcessed();
+    this.#emitLayerEntryProcessed({ config: layerConfig });
 
-      // Recreate the GV layer (emits the GV-created event so the controller re-registers it).
-      return await this.#processOneLayerEntry(layerConfig);
-    } catch (error: unknown) {
-      // Mirror the full-load error path: unwrap the wrapped reject and record the layer load error.
-      const reason = error as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
-      this.addLayerLoadError(reason.error ?? formatError(error), reason.object ?? layerConfig);
-      return undefined;
-    }
+    // Recreate the GV layer (emits the GV-created event so the controller re-registers it).
+    return this.#processOneLayerEntry(layerConfig);
   }
 
   // #endregion PUBLIC METHODS
