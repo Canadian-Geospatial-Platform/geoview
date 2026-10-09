@@ -4,18 +4,28 @@ import { Box, Button, IconButton, Typography } from 'geoview-core/ui';
 import { CopyIcon, DownloadIcon, VisibilityIcon, VisibilityOffIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
+import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 
-import type { StacItem, StacAsset } from './stac-browser-types';
+import type { StacAsset, StacItem, StacItemDisplayOptions } from './stac-browser-types';
 import { ITEM_COLOR } from './stac-api-service';
+import { StacAssetUtils } from './stac-asset-utils';
+import { resolveStacItemDisplayOptions } from './stac-config-utils';
+import { StacFieldUtils } from './stac-field-utils';
+import { StacMetadataView } from './stac-metadata-view';
 import { getSxClasses } from './stac-browser-style';
+
+/** Geometry group used for the item footprint. */
+const FOOTPRINT_GROUP = 'stac-item-footprint';
+
+/** Overlay id used for the asset preview of the item detail. */
+const PREVIEW_OVERLAY_ID = 'stac-item-detail-preview';
 
 /** Props for the StacItemDetail component. */
 interface StacItemDetailProps {
   /** The STAC item to display. */
   item: StacItem;
-  /** The map ID. */
-  mapId: string;
+  /** Display options shared with the item cards. */
+  display: StacItemDisplayOptions;
   /** Callback to go back to the previous view. */
   onBack: () => void;
   /** Optional callback to navigate up to the item's collection. */
@@ -32,20 +42,20 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-item-detail');
 
-  const { item, mapId, onBack, onGoToCollection } = props;
+  const { item, display, onBack, onGoToCollection } = props;
+  const effectiveDisplay = resolveStacItemDisplayOptions(display, item.collection);
+  const { itemView, actions, isPreviewEnabled } = effectiveDisplay;
+  const previewOpacity = effectiveDisplay.preview?.opacity;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const mapViewer = cgpv.api.getMapViewer(mapId);
-  const olMap = mapViewer.map;
-  const geometryApi = mapViewer.geometry;
+  const stacController = useStacBrowserController();
 
   const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
-  const previewLayerRef = useRef<unknown | undefined>(undefined);
 
   /**
    * Auto-shows the item footprint in orange on mount and cleans up on unmount.
@@ -53,39 +63,22 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-ITEM-DETAIL - Auto-show footprint', item.id);
 
-    if (item.geometry) {
-      StacLayerHelper.addFootprintLayer(geometryApi, { geometry: item.geometry }, ITEM_COLOR, 0.15, 'stac-item-footprint');
-    } else if (item.bbox && item.bbox.length >= 4) {
-      StacLayerHelper.addFootprintLayer(
-        geometryApi,
-        { bbox: [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]] },
-        ITEM_COLOR,
-        0.15,
-        'stac-item-footprint'
-      );
-    }
+    stacController.addFootprints(FOOTPRINT_GROUP, [item], ITEM_COLOR, 0.15);
 
     return (): void => {
-      StacLayerHelper.clearFootprints(geometryApi, 'stac-item-footprint');
-      // Also remove any preview/asset layer on unmount
-      if (previewLayerRef.current) {
-        StacLayerHelper.removeStacLayer(olMap, previewLayerRef.current);
-        previewLayerRef.current = undefined;
-      }
+      stacController.clearFootprints(FOOTPRINT_GROUP);
+      stacController.removeOverlay(PREVIEW_OVERLAY_ID);
     };
-  }, [geometryApi, olMap, item]);
+  }, [stacController, item]);
 
   // #region Handlers
 
   /**
-   * Handles zoom to item extent.
+   * Handles navigating up to the item's collection.
    */
-  const handleZoomTo = useCallback((): void => {
-    if (item.bbox && item.bbox.length >= 4) {
-      const extent = StacLayerHelper.transformBboxToMapProjection(mapId, [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]]);
-      void olMap.getView().fit(extent, { maxZoom: 12, duration: 500, padding: [100, 100, 100, 100] });
-    }
-  }, [mapId, olMap, item.bbox]);
+  const handleGoToCollection = useCallback((): void => {
+    if (onGoToCollection && item.collection) onGoToCollection(item.collection);
+  }, [onGoToCollection, item.collection]);
 
   /**
    * Handles toggling asset visibility on the map.
@@ -99,11 +92,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       const asset = item.assets?.[assetKey];
       if (!asset) return;
 
-      // Remove previous preview layer if any
-      if (previewLayerRef.current) {
-        StacLayerHelper.removeStacLayer(olMap, previewLayerRef.current);
-        previewLayerRef.current = undefined;
-      }
+      stacController.removeOverlay(PREVIEW_OVERLAY_ID);
 
       // If clicking the same asset, toggle it off
       if (selectedAssetKey === assetKey) {
@@ -111,16 +100,17 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
         return;
       }
 
-      const addAsset = async (): Promise<void> => {
-        const layer = await StacLayerHelper.addGeoTiffLayer(olMap, asset.href);
-        if (layer) {
-          previewLayerRef.current = layer;
-          setSelectedAssetKey(assetKey);
-        }
-      };
-      void addAsset();
+      stacController
+        .addGeoTiffOverlay(PREVIEW_OVERLAY_ID, asset.href, previewOpacity)
+        .then((isAdded) => {
+          if (isAdded) setSelectedAssetKey(assetKey);
+          else stacController.showError('stacBrowser.errorPreview');
+        })
+        .catch((error: unknown) => {
+          logger.logError('STAC-ITEM-DETAIL - Failed to show asset on map', error);
+        });
     },
-    [olMap, selectedAssetKey, item.assets]
+    [stacController, selectedAssetKey, item.assets, previewOpacity]
   );
 
   /**
@@ -144,21 +134,6 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   // #endregion
 
   /**
-   * Checks if an asset is a GeoTIFF by media type or file extension.
-   *
-   * @param asset - The STAC asset to check
-   * @returns Whether the asset is a GeoTIFF
-   */
-  const isGeoTiffAsset = useCallback((asset: StacAsset): boolean => {
-    const geotiffTypes = ['image/tiff', 'image/geotiff', 'image/x-geotiff', 'application/x-geotiff'];
-    if (asset.type) {
-      return geotiffTypes.some((mediaType) => asset.type!.toLowerCase().startsWith(mediaType));
-    }
-    const url = asset.href.toLowerCase().split('?')[0];
-    return url.endsWith('.tif') || url.endsWith('.tiff');
-  }, []);
-
-  /**
    * Filters assets to only include displayable ones (excludes thumbnail, overview, and metadata-only assets).
    */
   const memoVisibleAssets = useMemo((): [string, StacAsset][] => {
@@ -174,153 +149,67 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
     });
   }, [item.assets]);
 
-  /**
-   * Gets the thumbnail or overview URL from item assets.
-   *
-   * @returns The preview image URL, or undefined if no suitable asset exists
-   */
-  const getPreviewUrl = useCallback((): string | undefined => {
-    if (!item.assets) return undefined;
-    const overview = Object.values(item.assets).find((asset) => asset.roles?.includes('overview'));
-    if (overview) return overview.href;
-    const thumbnail = Object.values(item.assets).find((asset) => asset.roles?.includes('thumbnail'));
-    return thumbnail?.href;
-  }, [item.assets]);
-
-  const previewUrl = getPreviewUrl();
-  const title = String(item.properties.title ?? item.id);
-  const datetime = String(item.properties.datetime ?? item.properties.start_datetime ?? '');
-  const created = item.properties.created ? String(item.properties.created) : undefined;
-  const updated = item.properties.updated ? String(item.properties.updated) : undefined;
-  const projEpsg = item.properties['proj:epsg'] as number | undefined;
-  const projShape = item.properties['proj:shape'] as number[] | undefined;
-  const projTransform = item.properties['proj:transform'] as number[] | undefined;
+  const thumbnailUrl = StacAssetUtils.getThumbnailUrl(item);
+  const title = StacFieldUtils.getTitle(item, itemView?.titleField);
 
   return (
-    <Box sx={sxClasses.panelContent}>
+    <Box sx={memoSxClasses.panelContent}>
       {/* Sticky navigation links */}
-      <Box sx={sxClasses.stickyNav}>
+      <Box sx={memoSxClasses.stickyNav}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.back')}
         </Button>
         {onGoToCollection && item.collection && (
-          <Button type="text" size="small" onClick={(): void => onGoToCollection(item.collection!)}>
+          <Button type="text" size="small" onClick={handleGoToCollection}>
             ↑ {t('stacBrowser.goToCollection')}
           </Button>
         )}
       </Box>
 
       {/* Title */}
-      <Typography sx={[sxClasses.detailTitle, sxClasses.detailSection] as SxProps}>{title}</Typography>
+      <Typography sx={[memoSxClasses.detailTitle, memoSxClasses.detailSection] as SxProps}>{title}</Typography>
 
-      {/* Preview image */}
-      {previewUrl && (
-        <Box sx={sxClasses.detailSection}>
-          <Box component="img" src={previewUrl} alt={title} sx={sxClasses.previewImage} />
-        </Box>
-      )}
-
-      {/* Zoom to Extent control */}
-      <Button type="text" variant="outlined" size="small" onClick={handleZoomTo} sx={sxClasses.zoomButton}>
-        {t('stacBrowser.zoomToExtent')}
-      </Button>
-
-      {/* General & Projection Metadata — side-by-side when wide enough */}
-      <Box sx={sxClasses.metadataColumnsRow}>
-        {/* General Metadata */}
-        <Box sx={sxClasses.metadataColumn}>
-          <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.general')}</Typography>
-          {datetime && (
-            <Box sx={sxClasses.metadataRow}>
-              <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.datetime')}</Typography>
-              <Typography sx={sxClasses.resultMeta}>{new Date(datetime).toLocaleString()}</Typography>
-            </Box>
-          )}
-          {item.collection && (
-            <Box sx={sxClasses.metadataRow}>
-              <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.collection')}</Typography>
-              <Typography sx={sxClasses.resultMeta}>{item.collection}</Typography>
-            </Box>
-          )}
-          {created && (
-            <Box sx={sxClasses.metadataRow}>
-              <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.created')}</Typography>
-              <Typography sx={sxClasses.resultMeta}>{new Date(created).toLocaleString()}</Typography>
-            </Box>
-          )}
-          {updated && (
-            <Box sx={sxClasses.metadataRow}>
-              <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.updated')}</Typography>
-              <Typography sx={sxClasses.resultMeta}>{new Date(updated).toLocaleString()}</Typography>
-            </Box>
-          )}
-          {item.properties.description && <Typography sx={sxClasses.detailDescription}>{String(item.properties.description)}</Typography>}
-        </Box>
-
-        {/* Projection Metadata */}
-        {(projEpsg || projShape || projTransform) && (
-          <Box sx={sxClasses.metadataColumn}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.projection')}</Typography>
-            {projEpsg && (
-              <Box sx={sxClasses.metadataRow}>
-                <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.epsgCode')}</Typography>
-                <Typography sx={sxClasses.resultMeta}>EPSG:{projEpsg}</Typography>
-              </Box>
-            )}
-            {projShape && projShape.length >= 2 && (
-              <Box sx={sxClasses.metadataRow}>
-                <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.imageDimensions')}</Typography>
-                <Typography sx={sxClasses.resultMeta}>
-                  {projShape[1].toLocaleString()} × {projShape[0].toLocaleString()}
-                </Typography>
-              </Box>
-            )}
-            {projTransform && projTransform.length >= 6 && (
-              <Box sx={sxClasses.metadataRow}>
-                <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.transform')}</Typography>
-                <Typography sx={sxClasses.resultMeta}>
-                  [{projTransform[0]}; {projTransform[1]}; {projTransform[2]}] [{projTransform[3]}; {projTransform[4]}; {projTransform[5]}]
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        )}
+      {/* Metadata */}
+      <Box sx={memoSxClasses.metadataSection}>
+        <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.metadata')}</Typography>
+        {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={title} sx={memoSxClasses.previewImage} />}
+        <StacMetadataView item={item} itemView={itemView} sxClasses={memoSxClasses} />
       </Box>
 
       {/* Assets - clickable GeoTIFF assets to display on map */}
       {memoVisibleAssets.length > 0 && (
-        <Box sx={sxClasses.detailSection}>
-          <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.assets')}</Typography>
-          <Box sx={sxClasses.assetList}>
+        <Box sx={memoSxClasses.detailSection}>
+          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.assets')}</Typography>
+          <Box sx={memoSxClasses.assetList}>
             {memoVisibleAssets.map(([key, asset]) => {
-              const isGeotiff = isGeoTiffAsset(asset);
+              const isGeotiff = StacAssetUtils.isGeoTiff(asset);
               const isSelected = selectedAssetKey === key;
               const roles = asset.roles?.filter((r) => r !== 'thumbnail' && r !== 'overview') ?? [];
               return (
                 <Box
                   key={key}
                   sx={{
-                    ...sxClasses.assetItem,
+                    ...memoSxClasses.assetItem,
                     backgroundColor: isSelected ? theme.palette.action.selected : 'transparent',
                   }}
                 >
-                  <Box sx={sxClasses.itemRowText}>
-                    <Typography sx={{ ...sxClasses.resultMeta, fontWeight: isSelected ? 600 : 400 }}>{asset.title ?? key}</Typography>
-                    <Box sx={sxClasses.assetBadgeRow}>
+                  <Box sx={memoSxClasses.itemRowText}>
+                    <Typography sx={{ ...memoSxClasses.resultMeta, fontWeight: isSelected ? 600 : 400 }}>{asset.title ?? key}</Typography>
+                    <Box sx={memoSxClasses.assetBadgeRow}>
                       {roles.map((role) => (
-                        <Box key={role} component="span" sx={sxClasses.assetRoleBadge}>
+                        <Box key={role} component="span" sx={memoSxClasses.assetRoleBadge}>
                           {role.toUpperCase()}
                         </Box>
                       ))}
                       {isGeotiff && (
-                        <Box component="span" sx={sxClasses.assetTypeBadge}>
+                        <Box component="span" sx={memoSxClasses.assetTypeBadge}>
                           COG
                         </Box>
                       )}
                     </Box>
                   </Box>
-                  <Box sx={sxClasses.assetActions}>
-                    {isGeotiff && (
+                  <Box sx={memoSxClasses.assetActions}>
+                    {isGeotiff && isPreviewEnabled && actions?.showOnMap !== false && (
                       <IconButton
                         aria-label={t('stacBrowser.showOnMap')}
                         size="small"
@@ -331,12 +220,16 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
                         {isSelected ? <VisibilityIcon fontSize="small" /> : <VisibilityOffIcon fontSize="small" />}
                       </IconButton>
                     )}
-                    <IconButton aria-label={t('stacBrowser.copyUrl')} size="small" data-asset-href={asset.href} onClick={handleCopyUrl}>
-                      <CopyIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton aria-label={t('stacBrowser.download')} size="small" data-asset-href={asset.href} onClick={handleDownload}>
-                      <DownloadIcon fontSize="small" />
-                    </IconButton>
+                    {actions?.copyUrl !== false && (
+                      <IconButton aria-label={t('stacBrowser.copyUrl')} size="small" data-asset-href={asset.href} onClick={handleCopyUrl}>
+                        <CopyIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                    {actions?.download !== false && (
+                      <IconButton aria-label={t('stacBrowser.download')} size="small" data-asset-href={asset.href} onClick={handleDownload}>
+                        <DownloadIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Box>
                 </Box>
               );

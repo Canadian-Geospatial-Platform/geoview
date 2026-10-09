@@ -88,6 +88,7 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
     await this.#swiperTester.testSwiperPerLayerSides();
     await this.#swiperTester.testSwiperProgressiveRegistration();
     await this.#swiperTester.testSwiperConfigPersistence();
+    await this.#swiperTester.testSwiperHoverSuppression();
     return this.#swiperTester.testSwiperSettingsGating();
   }
 }

@@ -21,9 +21,17 @@
       <div class="demo-section">
         <h4>Package - STAC Browser (beta)</h4>
         <p>This page is used to showcase the "STAC Browser" package for browsing and filtering STAC API catalogs.</p>
+        <ul class="demo-list" style="display: flex; flex-direction: column">
+          <li><a href="#HLCONF1">1. Stac browser for datacube</a></li>
+          <li><a href="#HLCONF2">2. Stac browser for NAPL</a></li>
+        </ul>
       </div>
     </div>
 
+    <div class="demo-section">
+      <h4 id="HLCONF1">1. Stac browser for datacube</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
     <div
       id="mapSTAC"
       class="geoview-map"
@@ -56,10 +64,96 @@
               'collections': true,
               'temporal': true,
               'spatial': true,
-              'keyword': true
+              'keyword': true,
+              'sort': true,
+              'properties': true
             },
             'defaults': {
-              'limit': 20
+              'limit': 20,
+              'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"
+    ></div>
+
+     <div class="demo-section">
+      <h4 id="HLCONF2">2. Stac browser for NAPL</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="mapSTAC2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+            'zoomAndCenter': [4, [-90, 60]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'navBar': ['zoom', 'fullscreen', 'home'],
+        'appBar': {
+          'tabs': {
+            'core': ['stac-browser']
+          }
+        },
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://eodms-sgdot.nrcan-rncan.gc.ca/search',
+            'collections': {
+              'include': ['NAPL'],
+              'default': 'NAPL'
+            },
+            'filters': {
+              'collections': true,
+              'temporal': true,
+              'spatial': true,
+              'keyword': true,
+              'sort': true,
+              'properties': [
+                { 'field': 'scale', 'label': 'Scale' },
+                { 'field': 'altitude', 'label': 'Altitude' },
+                { 'field': 'roll_number', 'label': 'Roll number' },
+                { 'field': 'order_key', 'label': 'Order key' },
+                { 'field': 'delivery_date', 'label': 'Delivery date' }
+              ]
+            },
+            'defaults': {
+              'limit': 50,
+              'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
+            },
+            'collectionOverrides': {
+              'NAPL': {
+                'footprintStyles': {
+                  'collection': { 'color': '#90CAF9', 'fillOpacity': 0.05 }
+                },
+                'itemView': {
+                  'titleField': 'properties.order_key',
+                  'summaryFields': [
+                    { 'field': 'properties.datetime', 'label': 'Date', 'format': 'date' },
+                    { 'field': 'properties.scale', 'label': 'Scale', 'format': 'number' },
+                    { 'field': 'properties.nts_map', 'label': 'NTS' },
+                    { 'field': 'properties.altitude', 'label': 'Altitude', 'format': 'number' }
+                  ],
+                  'metadataFields': 'all',
+                  'excludeFields': ['properties.thumbnail']
+                },
+                'preview': {
+                  'mode': 'thumbnail',
+                  'opacity': 0.8
+                }
+              }
             },
             'displayPreview': true,
             'isOpen': true

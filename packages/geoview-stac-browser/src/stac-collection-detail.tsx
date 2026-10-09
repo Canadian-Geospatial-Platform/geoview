@@ -1,13 +1,24 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Button, Typography } from 'geoview-core/ui';
+import { Box, Button, Select, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
-import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
+import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 
-import type { StacCollection, StacItem } from './stac-browser-types';
-import { COLLECTION_COLOR, ITEM_COLOR, StacApiService } from './stac-api-service';
+import type {
+  StacCollection,
+  StacFootprintStyleConfig,
+  StacItem,
+  StacItemDisplayOptions,
+  StacItemInteractions,
+  StacSortBy,
+} from './stac-browser-types';
+import { COLLECTION_COLOR, COLLECTION_FILL_OPACITY, ITEM_COLOR, StacApiService } from './stac-api-service';
+import { StacItemList } from './stac-item-list';
 import { getSxClasses } from './stac-browser-style';
+
+/** Geometry group used for the collection and its items footprints. */
+const FOOTPRINT_GROUP = 'stac-collection-footprints';
 
 /** Props for the StacCollectionDetail component. */
 interface StacCollectionDetailProps {
@@ -15,12 +26,20 @@ interface StacCollectionDetailProps {
   collection: StacCollection;
   /** The STAC API service instance. */
   apiService: StacApiService;
-  /** The map ID. */
-  mapId: string;
-  /** Callback when an item is clicked. */
-  onItemClick: (item: StacItem) => void;
-  /** Callback to go back to the collections list. */
-  onBack: () => void;
+  /** Collections that can be selected without leaving the items view. */
+  collections: StacCollection[];
+  /** Number of items per page. */
+  limit: number;
+  /** Optional sort criteria, only set when the server supports sorting. */
+  sortby?: StacSortBy[];
+  /** Display options of the item cards. */
+  display: StacItemDisplayOptions;
+  /** Selection/preview state and callbacks of the item cards. */
+  interactions: StacItemInteractions;
+  /** Callback to switch to another collection. */
+  onCollectionChange: (collectionId: string) => void;
+  /** Optional callback to go back to the collections list, hidden when undefined. */
+  onBack?: () => void;
 }
 
 /**
@@ -33,17 +52,26 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-collection-detail');
 
-  const { collection, apiService, mapId, onItemClick, onBack } = props;
+  const { collection, apiService, collections, limit, sortby, display, interactions, onCollectionChange, onBack } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const mapViewer = cgpv.api.getMapViewer(mapId);
-  const olMap = mapViewer.map;
-  const geometryApi = mapViewer.geometry;
+  const stacController = useStacBrowserController();
+  /**
+   * Resolves the collection-specific footprint style over package defaults.
+   */
+  const memoCollectionFootprintStyle = useMemo((): StacFootprintStyleConfig => {
+    logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoCollectionFootprintStyle', display.footprintStyles, collection.id);
+    return {
+      ...display.footprintStyles?.collection,
+      ...display.collectionOverrides?.[collection.id]?.footprintStyles?.collection,
+    };
+  }, [display.footprintStyles, display.collectionOverrides, collection.id]);
+  const collectionItemFootprintStyle = display.collectionOverrides?.[collection.id]?.footprintStyles?.collection;
 
   /** Items for the current page. */
   const [items, setItems] = useState<StacItem[]>([]);
@@ -53,6 +81,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const [nextUrl, setNextUrl] = useState<string | undefined>(undefined);
   /** Previous page URL for pagination. */
   const [prevUrl, setPrevUrl] = useState<string | undefined>(undefined);
+  /** Total number of items matched by the server, when reported. */
+  const [numberMatched, setNumberMatched] = useState<number | undefined>(undefined);
   /** Whether the description is expanded. */
   const [descExpanded, setDescExpanded] = useState(false);
 
@@ -83,55 +113,70 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Show footprints', items.length);
 
     // Clean previous footprints
-    StacLayerHelper.clearFootprints(geometryApi, 'stac-collection-footprints');
+    stacController.clearFootprints(FOOTPRINT_GROUP);
 
     // Draw collection footprint with union extent (blue)
     if (memoUnionExtent) {
-      StacLayerHelper.addFootprintLayer(geometryApi, { bbox: memoUnionExtent }, COLLECTION_COLOR, 0.08, 'stac-collection-footprints');
+      stacController.addFootprints(
+        FOOTPRINT_GROUP,
+        [{ bbox: memoUnionExtent }],
+        memoCollectionFootprintStyle.color ?? COLLECTION_COLOR,
+        memoCollectionFootprintStyle.fillOpacity ?? COLLECTION_FILL_OPACITY
+      );
     }
 
-    // Draw individual item footprints (orange)
-    for (const item of items) {
-      if (item.geometry) {
-        StacLayerHelper.addFootprintLayer(geometryApi, { geometry: item.geometry }, ITEM_COLOR, 0.15, 'stac-collection-footprints');
-      } else if (item.bbox && item.bbox.length >= 4) {
-        StacLayerHelper.addFootprintLayer(
-          geometryApi,
-          { bbox: [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]] },
-          ITEM_COLOR,
-          0.15,
-          'stac-collection-footprints'
-        );
-      }
-    }
+    // Use a collection-specific style for its item footprints, falling back to orange item styling.
+    stacController.addFootprints(
+      FOOTPRINT_GROUP,
+      items,
+      collectionItemFootprintStyle?.color ?? ITEM_COLOR,
+      collectionItemFootprintStyle?.fillOpacity ?? 0.15
+    );
 
     return (): void => {
-      StacLayerHelper.clearFootprints(geometryApi, 'stac-collection-footprints');
+      stacController.clearFootprints(FOOTPRINT_GROUP);
     };
-  }, [geometryApi, items, memoUnionExtent]);
+  }, [stacController, items, memoUnionExtent, memoCollectionFootprintStyle, collectionItemFootprintStyle]);
 
   /**
-   * Fetches items for the collection on mount.
+   * Loads a page of items, from the first page or from a pagination link.
+   *
+   * @param pageUrl - Optional pagination link URL
+   * @returns A promise that resolves when the page is loaded or the error is reported
+   */
+  const loadItems = useCallback(
+    async (pageUrl?: string): Promise<void> => {
+      try {
+        setIsLoading(true);
+        if (!pageUrl) {
+          setItems([]);
+          setNextUrl(undefined);
+          setPrevUrl(undefined);
+          setNumberMatched(undefined);
+        }
+        const response = await apiService.fetchCollectionItems(collection.id, limit, sortby, pageUrl);
+        setItems(response.features);
+        setNextUrl(StacApiService.getPageLink(response, 'next')?.href);
+        setPrevUrl(StacApiService.getPageLink(response, 'prev')?.href);
+        setNumberMatched(response.numberMatched);
+      } catch (error: unknown) {
+        // UI boundary: report the failed request to the user
+        logger.logError(`STAC-COLLECTION-DETAIL - Failed to fetch items for collection ${collection.id}`, error);
+        stacController.showError('stacBrowser.errorRequest');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [apiService, collection.id, limit, sortby, stacController]
+  );
+
+  /**
+   * Fetches the first page of items when the collection changes.
    */
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Fetch items on mount', collection.id);
-
-    let cancelled = false;
-    const fetchItems = async (): Promise<void> => {
-      setIsLoading(true);
-      const response = await apiService.fetchCollectionItems(collection.id, 10);
-      if (!cancelled) {
-        setItems(response.features);
-        setNextUrl(StacApiService.getNextPageUrl(response));
-        setPrevUrl(StacApiService.getPrevPageUrl(response));
-        setIsLoading(false);
-      }
-    };
-    void fetchItems();
-    return (): void => {
-      cancelled = true;
-    };
-  }, [apiService, collection.id]);
+    void loadItems();
+  }, [collection.id, loadItems]);
 
   // #region Handlers
 
@@ -139,33 +184,15 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * Handles navigating to the next page of items.
    */
   const handleNextPage = useCallback((): void => {
-    if (!nextUrl) return;
-    const doFetch = async (): Promise<void> => {
-      setIsLoading(true);
-      const response = await apiService.fetchCollectionItems(collection.id, undefined, nextUrl);
-      setItems(response.features);
-      setNextUrl(StacApiService.getNextPageUrl(response));
-      setPrevUrl(StacApiService.getPrevPageUrl(response));
-      setIsLoading(false);
-    };
-    void doFetch();
-  }, [nextUrl, apiService, collection.id]);
+    if (nextUrl) void loadItems(nextUrl);
+  }, [nextUrl, loadItems]);
 
   /**
    * Handles navigating to the previous page of items.
    */
   const handlePrevPage = useCallback((): void => {
-    if (!prevUrl) return;
-    const doFetch = async (): Promise<void> => {
-      setIsLoading(true);
-      const response = await apiService.fetchCollectionItems(collection.id, undefined, prevUrl);
-      setItems(response.features);
-      setNextUrl(StacApiService.getNextPageUrl(response));
-      setPrevUrl(StacApiService.getPrevPageUrl(response));
-      setIsLoading(false);
-    };
-    void doFetch();
-  }, [prevUrl, apiService, collection.id]);
+    if (prevUrl) void loadItems(prevUrl);
+  }, [prevUrl, loadItems]);
 
   /**
    * Handles toggling the description expanded state.
@@ -178,37 +205,20 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * Handles zoom to the collection spatial extent (union of collection bbox + loaded items).
    */
   const handleZoomToExtent = useCallback((): void => {
-    if (memoUnionExtent) {
-      const extent = StacLayerHelper.transformBboxToMapProjection(mapId, memoUnionExtent);
-      void olMap.getView().fit(extent, { maxZoom: 12, duration: 500, padding: [100, 100, 100, 100] });
-    }
-  }, [mapId, olMap, memoUnionExtent]);
+    if (!memoUnionExtent) return;
+    stacController.zoomToLonLatBbox(memoUnionExtent).catch((error: unknown) => {
+      logger.logError('STAC-COLLECTION-DETAIL - Failed to zoom to collection extent', error);
+    });
+  }, [stacController, memoUnionExtent]);
 
   /**
-   * Handles click on an item card.
+   * Handles switching the active collection from the item browser.
    */
-  const handleItemCardClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>): void => {
-      const { itemId } = event.currentTarget.dataset;
-      const item = items.find((i) => i.id === itemId);
-      if (item) onItemClick(item);
+  const handleCollectionChange = useCallback(
+    (event: { target: { value: unknown } }): void => {
+      if (typeof event.target.value === 'string') onCollectionChange(event.target.value);
     },
-    [items, onItemClick]
-  );
-
-  /**
-   * Handles keyboard activation on an item card.
-   */
-  const handleItemCardKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        const { itemId } = event.currentTarget.dataset;
-        const item = items.find((i) => i.id === itemId);
-        if (item) onItemClick(item);
-      }
-    },
-    [items, onItemClick]
+    [onCollectionChange]
   );
 
   // #endregion
@@ -221,52 +231,39 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
     return StacApiService.formatTemporalExtent(collection);
   }, [collection]);
 
-  /**
-   * Gets the asset type badge for an item (e.g., "COG").
-   *
-   * @param item - The STAC item
-   * @returns The asset type label
-   */
-  const getAssetTypeBadge = useCallback((item: StacItem): string => {
-    if (!item.assets) return '';
-    const dataAsset = Object.values(item.assets).find((a) => a.roles?.includes('data'));
-    if (dataAsset?.type?.includes('geotiff') || dataAsset?.type?.includes('tiff')) return 'COG';
-    return '';
-  }, []);
-
-  /**
-   * Gets the thumbnail URL from item assets.
-   *
-   * @param item - The STAC item
-   * @returns The thumbnail URL, or undefined
-   */
-  const getThumbnailUrl = useCallback((item: StacItem): string | undefined => {
-    if (!item.assets) return undefined;
-    const thumbnail = Object.values(item.assets).find((asset) => asset.roles?.includes('thumbnail'));
-    return thumbnail?.href;
-  }, []);
-
   const description = collection.description ?? '';
   const isDescLong = description.length > 200;
   const displayDesc = descExpanded || !isDescLong ? description : `${description.substring(0, 200)}...`;
 
   return (
-    <Box sx={sxClasses.panelContent}>
+    <Box sx={memoSxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={sxClasses.backLink}>
-        <Button type="text" size="small" onClick={onBack}>
-          ← {t('stacBrowser.backToCollections')}
-        </Button>
-      </Box>
+      {onBack && (
+        <Box sx={memoSxClasses.backLink}>
+          <Button type="text" size="small" onClick={onBack}>
+            ← {t('stacBrowser.backToCollections')}
+          </Button>
+        </Box>
+      )}
 
       {/* Collection Header */}
-      <Box sx={sxClasses.detailSection}>
-        <Typography sx={sxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
+      <Box sx={memoSxClasses.detailSection}>
+        {collections.length > 1 ? (
+          <Select
+            aria-label={t('stacBrowser.collection')}
+            value={collection.id}
+            onChange={handleCollectionChange}
+            fullWidth
+            menuItems={collections.map((entry) => ({ item: { value: entry.id, children: entry.title ?? entry.id } }))}
+          />
+        ) : (
+          <Typography sx={memoSxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
+        )}
 
         {/* Description with Read more */}
         {description && (
           <Box>
-            <Typography sx={sxClasses.detailDescription}>{displayDesc}</Typography>
+            <Typography sx={memoSxClasses.detailDescription}>{displayDesc}</Typography>
             {isDescLong && (
               <Button type="text" size="small" onClick={handleToggleDescription}>
                 {descExpanded ? t('stacBrowser.readLess') : t('stacBrowser.readMore')}
@@ -277,14 +274,14 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       </Box>
 
       {/* Metadata Section */}
-      <Box sx={sxClasses.metadataSection}>
+      <Box sx={memoSxClasses.metadataSection}>
         {/* Keywords */}
         {collection.keywords && collection.keywords.length > 0 && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
-            <Box sx={sxClasses.keywordChipsRow}>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
+            <Box sx={memoSxClasses.keywordChipsRow}>
               {collection.keywords.map((keyword) => (
-                <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
+                <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
                   {keyword}
                 </Box>
               ))}
@@ -294,78 +291,54 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
         {/* License */}
         {collection.license && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
-            <Typography sx={sxClasses.resultMeta}>{collection.license}</Typography>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
+            <Typography sx={memoSxClasses.resultMeta}>{collection.license}</Typography>
           </Box>
         )}
 
         {/* Temporal extent */}
         {memoTemporalDisplay && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
-            <Typography sx={sxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
+            <Typography sx={memoSxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
           </Box>
         )}
 
         {/* Zoom to collection extent */}
         {memoUnionExtent && (
-          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={sxClasses.zoomButton}>
+          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={memoSxClasses.zoomButton}>
             {t('stacBrowser.zoomToExtent')}
           </Button>
         )}
       </Box>
 
       {/* Items Section */}
-      <Box sx={sxClasses.detailSection}>
-        <Typography sx={sxClasses.itemsSectionTitle}>{t('stacBrowser.items')}</Typography>
+      <Box sx={memoSxClasses.detailSection}>
+        <Typography sx={memoSxClasses.itemsSectionTitle}>
+          {t('stacBrowser.items')}
+          {numberMatched !== undefined ? ` (${numberMatched.toLocaleString()})` : ''}
+        </Typography>
 
         {isLoading && (
-          <Box sx={sxClasses.loading}>
+          <Box sx={memoSxClasses.loading}>
             <Typography>{t('stacBrowser.loading')}</Typography>
           </Box>
         )}
 
         {!isLoading && items.length === 0 && (
-          <Box sx={sxClasses.noResults}>
+          <Box sx={memoSxClasses.noResults}>
             <Typography>{t('stacBrowser.noResults')}</Typography>
           </Box>
         )}
 
-        {!isLoading &&
-          items.map((item) => {
-            const thumbnailUrl = getThumbnailUrl(item);
-            const badge = getAssetTypeBadge(item);
-            const datetime = item.properties.datetime ?? item.properties.start_datetime;
-            return (
-              <Box
-                key={item.id}
-                data-item-id={item.id}
-                sx={sxClasses.itemRow}
-                onClick={handleItemCardClick}
-                onKeyDown={handleItemCardKeyDown}
-                role="button"
-                tabIndex={0}
-              >
-                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={item.id} sx={sxClasses.itemThumbnail} />}
-                <Box sx={sxClasses.itemRowText}>
-                  <Typography sx={sxClasses.resultTitle}>{item.properties.title ?? item.id}</Typography>
-                  <Typography sx={sxClasses.resultMeta}>
-                    {badge && (
-                      <Box component="span" sx={sxClasses.assetTypeBadge}>
-                        {badge}
-                      </Box>
-                    )}
-                    {datetime ? new Date(datetime).toLocaleDateString() : ''}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
+        {!isLoading && items.length > 0 && (
+          <StacItemList items={items} display={display} interactions={interactions} sxClasses={memoSxClasses} />
+        )}
 
         {/* Pagination */}
         {!isLoading && (prevUrl || nextUrl) && (
-          <Box sx={sxClasses.paginationBar}>
+          <Box sx={memoSxClasses.paginationBar}>
             <Button type="text" size="small" disabled={!prevUrl} onClick={handlePrevPage}>
               ← {t('stacBrowser.previous')}
             </Button>

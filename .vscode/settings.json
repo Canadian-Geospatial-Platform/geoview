@@ -21,13 +21,15 @@
   "files.associations": {
     "*.json": "json"
   },
-  "typescript.preferences.autoImportFileExcludePatterns": [
+  "js/ts.preferences.autoImportFileExcludePatterns": [
     "packages/geoview-core/src/core/types/external-types.ts",
     "packages/geoview-core/src/ui/index.ts",
     "packages/geoview-core/src/geo/index.ts",
     "packages/geoview-core/src/api/index.ts",
     "packages/geoview-core/src/ui/index.ts"
   ],
+  "github.com.copilot.chat.agentDebugLog.enabled": true,
+  "github.copilot.chat.agentDebugLog.fileLogging.enabled": true,
   "better-comments.tags": [
     {
       "tag": "!",
@@ -118,6 +120,6 @@
       "backgroundColor": "transparent",
       "bold": true,
       "italic": false
-    },
+    }
   ]
 }

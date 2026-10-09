@@ -63,6 +63,7 @@ export {
   Highlight as HighlightIcon,
   Home as HomeIcon,
   Height as HeightIcon,
+  Image as ImageIcon,
   ImageNotSupported as ImageNotSupportedIcon,
   ImportExport as ReorderIcon,
   Info as InfoIcon,
