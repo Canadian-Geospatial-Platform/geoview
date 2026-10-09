@@ -2,9 +2,15 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 
-import type { StacCollection, StacItem, StacSearchResult } from './stac-browser-types';
+import type { StacCollection, StacItem, StacItemDisplayOptions, StacItemInteractions, StacSearchResult } from './stac-browser-types';
+import { ITEM_COLOR, SEARCH_FILL_OPACITY } from './stac-api-service';
+import { StacItemList } from './stac-item-list';
 import { getSxClasses } from './stac-browser-style';
+
+/** Geometry group used for the search result footprints. */
+const FOOTPRINT_GROUP = 'stac-search-footprints';
 
 /** Props for the StacSearchResults component. */
 interface StacSearchResultsProps {
@@ -12,8 +18,12 @@ interface StacSearchResultsProps {
   results: StacSearchResult;
   /** Available collections for resolving titles. */
   collections: StacCollection[];
-  /** Callback when an item is clicked. */
-  onItemClick: (item: StacItem) => void;
+  /** Display options of the item cards. */
+  display: StacItemDisplayOptions;
+  /** Selection/preview state and callbacks of the item cards. */
+  interactions: StacItemInteractions;
+  /** Number of items per page. */
+  pageSize: number;
   /** Callback to go back to the search panel. */
   onBack: () => void;
   /** Whether there is a next page of results. */
@@ -38,13 +48,41 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-search-results');
 
-  const { results, collections, onItemClick, onBack, hasNext, hasPrev, onNextPage, onPrevPage, currentPage } = props;
+  const { results, collections, display, interactions, pageSize, onBack, hasNext, hasPrev, onNextPage, onPrevPage, currentPage } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useMemo } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { useCallback, useEffect, useMemo } = cgpv.reactUtilities.react;
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  const stacController = useStacBrowserController();
+
+  /**
+   * Shows the footprints of the result items.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('STAC-SEARCH-RESULTS - Show footprints', results.features.length);
+
+    stacController.clearFootprints(FOOTPRINT_GROUP);
+    results.features.forEach((item) => {
+      const overrideFootprintStyles = display.collectionOverrides?.[item.collection ?? '']?.footprintStyles;
+      const searchFootprintStyle = {
+        ...display.footprintStyles?.search,
+        ...(overrideFootprintStyles?.search ?? overrideFootprintStyles?.collection),
+      };
+      stacController.addFootprints(
+        FOOTPRINT_GROUP,
+        [item],
+        searchFootprintStyle?.color ?? ITEM_COLOR,
+        searchFootprintStyle?.fillOpacity ?? SEARCH_FILL_OPACITY
+      );
+    });
+
+    return (): void => {
+      stacController.clearFootprints(FOOTPRINT_GROUP);
+    };
+  }, [stacController, results.features, display]);
 
   /**
    * Groups items by their collection ID.
@@ -78,119 +116,34 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
     [collections]
   );
 
-  // #region Handlers
-
-  /**
-   * Handles click on an item card.
-   */
-  const handleItemClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>): void => {
-      const { itemId } = event.currentTarget.dataset;
-      const item = results.features.find((i) => i.id === itemId);
-      if (item) onItemClick(item);
-    },
-    [results.features, onItemClick]
-  );
-
-  /**
-   * Handles keyboard activation on an item card.
-   */
-  const handleItemKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        const { itemId } = event.currentTarget.dataset;
-        const item = results.features.find((i) => i.id === itemId);
-        if (item) onItemClick(item);
-      }
-    },
-    [results.features, onItemClick]
-  );
-
-  // #endregion
-
-  /**
-   * Gets the thumbnail URL from item assets.
-   *
-   * @param item - The STAC item
-   * @returns The thumbnail URL, or undefined
-   */
-  const getThumbnailUrl = useCallback((item: StacItem): string | undefined => {
-    if (!item.assets) return undefined;
-    const thumbnail = Object.values(item.assets).find((asset) => asset.roles?.includes('thumbnail'));
-    return thumbnail?.href;
-  }, []);
-
-  /**
-   * Gets the asset type badge for an item.
-   *
-   * @param item - The STAC item
-   * @returns The asset type label
-   */
-  const getAssetTypeBadge = useCallback((item: StacItem): string => {
-    if (!item.assets) return '';
-    const dataAsset = Object.values(item.assets).find((a) => a.roles?.includes('data'));
-    if (dataAsset?.type?.includes('geotiff') || dataAsset?.type?.includes('tiff')) return 'COG';
-    return '';
-  }, []);
-
   return (
-    <Box sx={sxClasses.panelContent}>
+    <Box sx={memoSxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={sxClasses.backLink}>
+      <Box sx={memoSxClasses.backLink}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.backToSearch')}
         </Button>
       </Box>
 
-      <Box sx={sxClasses.resultsList}>
+      <Box sx={memoSxClasses.resultsList}>
         {Array.from(memoGroupedItems.entries()).map(([collectionId, groupItems]) => (
-          <Box key={collectionId} sx={sxClasses.collectionGroup}>
+          <Box key={collectionId} sx={memoSxClasses.collectionGroup}>
             {/* Collection header */}
-            <Typography sx={sxClasses.collectionGroupTitle}>
+            <Typography sx={memoSxClasses.collectionGroupTitle}>
               {getCollectionTitle(collectionId)} ({groupItems.length})
             </Typography>
 
             {/* Items within collection */}
-            {groupItems.map((item) => {
-              const thumbnailUrl = getThumbnailUrl(item);
-              const badge = getAssetTypeBadge(item);
-              const datetime = item.properties.datetime ?? item.properties.start_datetime;
-              return (
-                <Box
-                  key={item.id}
-                  data-item-id={item.id}
-                  sx={sxClasses.itemRow}
-                  onClick={handleItemClick}
-                  onKeyDown={handleItemKeyDown}
-                  role="button"
-                  tabIndex={0}
-                >
-                  {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={item.id} sx={sxClasses.itemThumbnail} />}
-                  <Box sx={sxClasses.itemRowText}>
-                    <Typography sx={sxClasses.resultTitle}>{item.properties.title ?? item.id}</Typography>
-                    <Typography sx={sxClasses.resultMeta}>
-                      {badge && (
-                        <Box component="span" sx={sxClasses.assetTypeBadge}>
-                          {badge}
-                        </Box>
-                      )}
-                      {datetime ? new Date(datetime).toLocaleDateString() : ''}
-                    </Typography>
-                  </Box>
-                </Box>
-              );
-            })}
+            <StacItemList items={groupItems} display={display} interactions={interactions} sxClasses={memoSxClasses} />
           </Box>
         ))}
 
         {(hasPrev || hasNext) &&
           (() => {
-            const pageSize = 20;
             const startItem = (currentPage - 1) * pageSize + 1;
             const endItem = startItem + results.features.length - 1;
             return (
-              <Box sx={sxClasses.pagination}>
+              <Box sx={memoSxClasses.pagination}>
                 {hasPrev && (
                   <Button type="text" variant="outlined" onClick={onPrevPage}>
                     ← {t('stacBrowser.previous')}

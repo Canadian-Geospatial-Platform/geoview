@@ -1,16 +1,57 @@
 import type OlMap from 'ol/Map';
+import ImageLayer from 'ol/layer/Image';
 import WebGLTile from 'ol/layer/WebGLTile';
+import { transform as transformCoordinate } from 'ol/proj';
+import type OlProjection from 'ol/proj/Projection';
 import GeoTIFF from 'ol/source/GeoTIFF';
+import ImageCanvas from 'ol/source/ImageCanvas';
+import type { Extent } from 'ol/extent';
+import type { Size } from 'ol/size';
 
-import { logger } from '@/core/utils/logger';
 import { getStoreMapCurrentProjectionEPSG, getStoreMapExtent } from '@/core/stores/states/map-state';
+import { logger } from '@/core/utils/logger';
 import { extractGeotiffColorMap, type RGBA } from '@/core/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Projection } from '@/geo/utils/projection';
 
 /** Property key used to tag layers added by the STAC browser plugin. */
 const STAC_BROWSER_TAG = 'gv-stac-browser';
+
+/** Two-dimensional coordinate used while fitting a static preview to its footprint. */
+type TypePoint2D = [number, number];
+
+/**
+ * Extracts polygon rings from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
+ *
+ * @param geometry - GeoJSON geometry value
+ * @returns Valid rings in longitude/latitude order
+ */
+function getGeoJsonRings(geometry: unknown): TypePoint2D[][] {
+  if (!geometry || typeof geometry !== 'object') return [];
+  const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
+
+  if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+    return geoJson.geometries.flatMap(getGeoJsonRings);
+  }
+
+  if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
+    return geoJson.coordinates.flatMap((ring) => {
+      if (!Array.isArray(ring)) return [];
+      const coordinates = ring.filter(
+        (coordinate): coordinate is TypePoint2D =>
+          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
+      );
+      return coordinates.length >= 4 ? [coordinates] : [];
+    });
+  }
+
+  if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
+    return geoJson.coordinates.flatMap((polygon) => getGeoJsonRings({ type: 'Polygon', coordinates: polygon }));
+  }
+
+  return [];
+}
 
 /**
  * Helper class for managing ol-stac layers on an OpenLayers map.
@@ -28,12 +69,11 @@ export abstract class StacLayerHelper {
    *
    * @param map - The OpenLayers map instance
    * @param geotiffUrl - URL to the Cloud-Optimized GeoTIFF file
+   * @param opacity - Optional layer opacity (0-1), defaults to 1
    * @returns A promise that resolves with the created WebGLTile layer, or null on failure
    */
-  static async addGeoTiffLayer(map: OlMap, geotiffUrl: string): Promise<WebGLTile | null> {
+  static async addGeoTiffLayer(map: OlMap, geotiffUrl: string, opacity?: number): Promise<WebGLTile | null> {
     try {
-      // Try to extract embedded colormap — it affects source configuration.
-      // This can fail (CORS, network, malformed TIFF) so we catch and fall back to default rendering.
       let palette: RGBA[] | undefined;
       try {
         palette = await extractGeotiffColorMap(geotiffUrl);
@@ -51,43 +91,64 @@ export abstract class StacLayerHelper {
 
       const source = new GeoTIFF({
         sources: [{ url: geotiffUrl }],
-        // When an embedded color map exists, disable normalization so raw integer pixel values can index the palette
         normalize: !hasColorMap,
-        // Use nearest-neighbor interpolation for palette data to avoid blending between class indices
         interpolate: !hasColorMap,
-        // Auto-detect multi-band RGB/RGBA COGs and render in color (only when no palette)
         convertToRGB: hasColorMap ? undefined : 'auto',
       });
 
-      // Read the TIFF headers to discover the source projection and register it if missing.
-      // Without this, OL cannot transform between the GeoTIFF's native CRS and the map projection.
       const sourceView = await source.getView();
       if (sourceView.projection) {
         const epsgCode = Projection.readEPSGNumber(sourceView.projection);
-        if (epsgCode) {
-          await Projection.addProjectionIfMissing(epsgCode);
-        }
+        if (epsgCode) await Projection.addProjectionIfMissing(epsgCode);
       }
 
-      const layer = new WebGLTile({ source });
-
-      // Tag the layer so we can find/remove it later
+      const layer = new WebGLTile({ source, opacity });
       layer.set(STAC_BROWSER_TAG, true);
-
-      // Render above GeometryApi footprint layers (z-index 9999)
       layer.setZIndex(10000);
-
-      // Apply colormap palette style if present
-      if (palette) {
-        StacLayerHelper.#applyPaletteStyle(layer, palette);
-      }
+      if (palette) StacLayerHelper.#applyPaletteStyle(layer, palette);
       map.addLayer(layer);
-
       return layer;
     } catch (error: unknown) {
       logger.logError(`StacLayerHelper.addGeoTiffLayer - Failed to add GeoTIFF layer: ${geotiffUrl}`, error);
       return null;
     }
+  }
+
+  /**
+   * Adds a non-georeferenced image clipped and rotated to fit its STAC item footprint.
+   *
+   * If the item has no polygon geometry, its axis-aligned bbox is used as the footprint.
+   *
+   * @param map - The OpenLayers map instance
+   * @param imageUrl - URL of the image
+   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
+   * @param opacity - Optional overlay opacity (0-1), defaults to 1
+   * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
+   * @returns The created image layer
+   */
+  static addImageLayer(
+    map: OlMap,
+    imageUrl: string,
+    bbox: [number, number, number, number],
+    opacity?: number,
+    geometry?: unknown
+  ): ImageLayer<ImageCanvas> {
+    const image = new Image();
+    // NAPL browse images do not expose Access-Control-Allow-Origin; this canvas is only drawn for display, never pixel-read.
+    const source = new ImageCanvas({
+      ratio: 1,
+      canvasFunction: (extent, resolution, pixelRatio, size, projection): HTMLCanvasElement =>
+        StacLayerHelper.#renderFootprintImage(image, bbox, geometry, extent, resolution, pixelRatio, size, projection),
+    });
+    image.onload = (): void => source.changed();
+    image.onerror = (): void => logger.logWarning(`StacLayerHelper.addImageLayer - Failed to load image: ${imageUrl}`);
+    image.src = imageUrl;
+
+    const layer = new ImageLayer({ source, opacity });
+    layer.set(STAC_BROWSER_TAG, true);
+    layer.setZIndex(10000);
+    map.addLayer(layer);
+    return layer;
   }
 
   /**
@@ -98,7 +159,7 @@ export abstract class StacLayerHelper {
    */
   static removeStacLayer(map: OlMap, layer: unknown): void {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type not statically available
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type is not statically available
       map.removeLayer(layer as any);
     } catch (error: unknown) {
       logger.logError('StacLayerHelper.removeStacLayer - Failed to remove STAC layer', error);
@@ -152,9 +213,7 @@ export abstract class StacLayerHelper {
    * @param groupId - The geometry group ID to clear
    */
   static clearFootprints(geometryApi: GeometryApi, groupId: string): void {
-    if (geometryApi.hasGeometryGroup(groupId)) {
-      geometryApi.deleteGeometryGroup(groupId);
-    }
+    if (geometryApi.hasGeometryGroup(groupId)) geometryApi.deleteGeometryGroup(groupId);
   }
 
   /**
@@ -186,7 +245,7 @@ export abstract class StacLayerHelper {
    * Returns the map's current extent as a WGS84 bbox.
    *
    * @param mapId - The map identifier
-   * @returns The map extent as [west, south, east, north] in EPSG:4326, clamped to valid bounds
+   * @returns The map extent as [west, south, east, north], clamped to valid bounds
    */
   static getMapExtentAsWgs84Bbox(mapId: string): [number, number, number, number] {
     const extent = getStoreMapExtent(mapId);
@@ -207,15 +266,96 @@ export abstract class StacLayerHelper {
   static #densifyBboxRing(bbox: [number, number, number, number], stops = 25): number[][] {
     const [west, south, east, north] = bbox;
     const ring: number[][] = [];
-    // South edge: SW → SE
     for (let i = 0; i <= stops; i++) ring.push([west + (east - west) * (i / stops), south]);
-    // East edge: SE → NE
     for (let i = 1; i <= stops; i++) ring.push([east, south + (north - south) * (i / stops)]);
-    // North edge: NE → NW
     for (let i = 1; i <= stops; i++) ring.push([east - (east - west) * (i / stops), north]);
-    // West edge: NW → SW (closes the ring)
     for (let i = 1; i <= stops; i++) ring.push([west, north - (north - south) * (i / stops)]);
     return ring;
+  }
+
+  /**
+   * Applies an affine image transform from the footprint's first, second, and fourth vertices.
+   *
+   * @param image - The loaded thumbnail image
+   * @param bbox - Fallback item bbox in EPSG:4326
+   * @param geometry - Optional GeoJSON footprint in EPSG:4326
+   * @param extent - Current map image extent
+   * @param resolution - Current map units per pixel
+   * @param pixelRatio - Current device pixel ratio
+   * @param size - Canvas dimensions in CSS pixels
+   * @param projection - Current map projection
+   * @returns The canvas containing the footprint-aligned image
+   */
+  static #renderFootprintImage(
+    image: HTMLImageElement,
+    bbox: [number, number, number, number],
+    geometry: unknown,
+    extent: Extent,
+    resolution: number,
+    pixelRatio: number,
+    size: Size,
+    projection: OlProjection
+  ): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(size[0] * pixelRatio);
+    canvas.height = Math.round(size[1] * pixelRatio);
+    if (!image.complete || image.naturalWidth === 0 || image.naturalHeight === 0 || resolution <= 0) return canvas;
+
+    const rings = getGeoJsonRings(geometry);
+    const fallbackRing: TypePoint2D[] = [
+      [bbox[0], bbox[3]],
+      [bbox[0], bbox[1]],
+      [bbox[2], bbox[1]],
+      [bbox[2], bbox[3]],
+      [bbox[0], bbox[3]],
+    ];
+    const footprintRings = rings.length ? rings : [fallbackRing];
+    const projectedRings = footprintRings.map((ring) =>
+      ring.map((coordinate) => transformCoordinate(coordinate, 'EPSG:4326', projection) as TypePoint2D)
+    );
+    const imageRing = projectedRings[0];
+    const hasClosedRing =
+      imageRing.length > 1 &&
+      imageRing[0][0] === imageRing[imageRing.length - 1][0] &&
+      imageRing[0][1] === imageRing[imageRing.length - 1][1];
+    const cornerCount = hasClosedRing ? imageRing.length - 1 : imageRing.length;
+    if (cornerCount < 4) return canvas;
+
+    const context = canvas.getContext('2d');
+    if (!context) return canvas;
+    context.imageSmoothingEnabled = true;
+    const toCanvasPixel = (coordinate: TypePoint2D): TypePoint2D => [
+      ((coordinate[0] - extent[0]) / resolution) * pixelRatio,
+      ((extent[3] - coordinate[1]) / resolution) * pixelRatio,
+    ];
+
+    context.beginPath();
+    projectedRings.forEach((ring) => {
+      ring.forEach((coordinate, index) => {
+        const [pixelX, pixelY] = toCanvasPixel(coordinate);
+        if (index === 0) context.moveTo(pixelX, pixelY);
+        else context.lineTo(pixelX, pixelY);
+      });
+      context.closePath();
+    });
+    context.clip('evenodd');
+
+    // EODMS maps NAPL image pixels to its ordered footprint vertices: 0=top-left, 1=bottom-left, 3=top-right.
+    const topLeft = toCanvasPixel(imageRing[0]);
+    const bottomLeft = toCanvasPixel(imageRing[1]);
+    const topRight = toCanvasPixel(imageRing[3]);
+
+    context.setTransform(
+      (topRight[0] - topLeft[0]) / image.naturalWidth,
+      (topRight[1] - topLeft[1]) / image.naturalWidth,
+      (bottomLeft[0] - topLeft[0]) / image.naturalHeight,
+      (bottomLeft[1] - topLeft[1]) / image.naturalHeight,
+      topLeft[0],
+      topLeft[1]
+    );
+    context.drawImage(image, 0, 0);
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    return canvas;
   }
 
   /**
@@ -225,14 +365,9 @@ export abstract class StacLayerHelper {
    * @param palette - Array of RGBA color tuples from the GeoTIFF color map
    */
   static #applyPaletteStyle(layer: WebGLTile, palette: RGBA[]): void {
-    // Make nodata index (0) fully transparent
     const adjustedPalette = [...palette];
     adjustedPalette[0] = [0, 0, 0, 0];
-
-    // Convert RGBA tuples to CSS color strings
     const colorStrings = adjustedPalette.map(([r, g, b, a]) => `rgba(${r},${g},${b},${a / 255})`);
-
-    // Apply the palette style
     layer.setStyle({
       color: ['palette', ['band', 1], colorStrings],
     });

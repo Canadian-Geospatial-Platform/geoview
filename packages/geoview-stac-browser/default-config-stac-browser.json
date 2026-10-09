@@ -4,10 +4,21 @@
     "collections": true,
     "temporal": true,
     "spatial": true,
-    "keyword": true
+    "keyword": true,
+    "sort": true
   },
   "defaults": {
     "limit": 20
+  },
+  "footprintStyles": {
+    "collection": {
+      "color": "#1976d2",
+      "fillOpacity": 0.2
+    },
+    "search": {
+      "color": "#FF8C00",
+      "fillOpacity": 0.25
+    }
   },
   "displayPreview": true,
   "isOpen": false,

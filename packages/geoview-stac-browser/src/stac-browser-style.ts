@@ -81,6 +81,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   searchButton: {
     marginTop: 'auto',
   },
+  filterActions: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: theme.spacing(1),
+    marginTop: 'auto',
+    '& > button': {
+      flex: 1,
+    },
+  },
   filterRow: {
     display: 'flex',
     flexDirection: 'column',
@@ -91,8 +100,24 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.geoViewColor?.textColor.main,
   },
+  propertyFilterRow: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
+    gap: theme.spacing(0.75),
+    alignItems: 'center',
+    '& > select, & > input': {
+      minWidth: 0,
+      maxWidth: '100%',
+      padding: theme.spacing(0.5),
+    },
+  },
   resultsList: {
     padding: theme.spacing(1),
+  },
+  itemList: {
+    listStyle: 'none',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0),
   },
   resultCard: {
     display: 'flex',
@@ -244,22 +269,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     padding: theme.spacing(0, 1.5, 1),
   },
-  metadataColumnsRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-    padding: theme.spacing(0, 1.5, 1),
-    '@media (min-width: 500px)': {
-      flexDirection: 'row',
-    },
-  },
-  metadataColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(1),
-    flex: 1,
-    minWidth: 0,
-  },
   metadataRow: {
     display: 'flex',
     flexDirection: 'column',
@@ -281,17 +290,79 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor?.textColor.main,
     marginBottom: theme.spacing(0.5),
   },
-  itemRow: {
+  itemCard: {
     display: 'flex',
+    flexDirection: 'column',
     gap: theme.spacing(0.5),
-    padding: theme.spacing(0.75, 0.5),
-    marginBottom: theme.spacing(2),
+    padding: theme.spacing(0.75, 1, 0.5, 0.5),
+    marginBottom: theme.spacing(1),
     border: `1px solid ${theme.palette.divider}`,
-    cursor: 'pointer',
-    alignItems: 'center',
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
+    borderLeftWidth: 5,
+  },
+  itemCardHeader: {
+    display: 'flex',
+    gap: theme.spacing(1),
+    alignItems: 'flex-start',
+  },
+  itemCheckbox: {
+    padding: theme.spacing(0.25),
+  },
+  itemSummary: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    columnGap: theme.spacing(1.5),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.light[200],
+  },
+  itemSummaryLabel: {
+    fontWeight: 600,
+  },
+  itemCardActions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(0.25, 0.5),
+    '& .MuiButton-root': {
+      fontSize: theme.palette.geoViewFontSize?.sm,
+      minWidth: 0,
+      padding: theme.spacing(0.25, 0.75),
     },
+  },
+  itemActionActive: {
+    backgroundColor: theme.palette.action.selected,
+  },
+  selectionBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.5, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.action.hover,
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    flexShrink: 0,
+  },
+
+  // Metadata key/value view
+  metadataGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(90px, 35%) 1fr',
+    columnGap: theme.spacing(1),
+    rowGap: theme.spacing(0.25),
+    margin: theme.spacing(0),
+    padding: theme.spacing(0.5, 0.5, 0.5, 1),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+  metadataKey: {
+    fontWeight: 600,
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.main,
+    overflowWrap: 'anywhere',
+  },
+  metadataValue: {
+    margin: theme.spacing(0),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    overflowWrap: 'anywhere',
   },
   itemRowText: {
     display: 'flex',
