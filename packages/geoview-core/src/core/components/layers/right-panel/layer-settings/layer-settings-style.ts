@@ -131,7 +131,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.action.hover,
     },
     '&:focus-visible': {
-      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      ...(!theme.focusVisible && getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors)),
       outlineOffset: 0,
       boxShadow: 'none',
     },
