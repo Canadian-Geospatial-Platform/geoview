@@ -1929,25 +1929,24 @@ aria-label={layerVisible
   : t('layers.showLayer', { name: layer.layerName })}
 ```
 
-- **`role="button"` on non-button interactive elements** must always be paired with `tabIndex={0}` and a keyboard handler for Enter/Space:
+- **Never hand-roll `role="button"` + `tabIndex={0}` + Enter/Space `onKeyDown` on `Box`/`div`/`Card`** — use an interactive MUI primitive: `Button` (text action), `IconButton` (icon-only), `ButtonBase` (card/tile/row that must keep its layout), `ListItemButton` (list row; other controls go in `secondaryAction`), `Link` (navigation). jsx-a11y ESLint rules flag click handlers on non-interactive elements without a role/keyboard support; a fully hand-rolled `role="button"` + `tabIndex` + `onKeyDown` passes them and only raises a `no-restricted-syntax` **warning**, so check for it in review:
 
 ```typescript
-const handleToggle = useCallback((): void => {
-  setExpanded((prev) => !prev);
-}, []);
+const handleCardClick = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+  const { itemId } = event.currentTarget.dataset;
+  if (itemId === undefined) return;
+  onSelect(itemId);
+}, [onSelect]);
 
-const handleToggleKeyDown = useCallback(
-  (e: React.KeyboardEvent<HTMLDivElement>): void => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleToggle();
-    }
-  },
-  [handleToggle]
-);
-
-<Box onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+// ButtonBase content must be phrasing content → render children as spans
+<ButtonBase data-item-id={item.id} onClick={handleCardClick} disableRipple sx={sxClasses.card}>
+  <Typography component="span">{item.title}</Typography>
+</ButtonBase>
 ```
+
+- Neutralize button defaults in sx (`width: '100%'`, `justifyContent: 'flex-start'`, `textAlign: 'left'`, `font: 'inherit'`, `color: 'inherit'`); never set `outline: 'none'` — focus comes from the theme's `focusVisible` option, applied by MUI through `.Mui-focusVisible`.
+- To detect keyboard activation in an `onClick`, use `event.detail === 0` instead of a parallel `onKeyDown` handler.
+- A container `onClick` meant to react to clicks bubbling from real child controls (delegation; clicks on its empty space must stay harmless) is allowed with a justified `eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events`.
 
 - `role="checkbox"` with `aria-checked` for toggle-visibility buttons
 - `role="search"` on `<form>` elements containing search inputs

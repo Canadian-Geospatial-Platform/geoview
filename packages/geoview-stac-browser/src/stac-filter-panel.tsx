@@ -33,7 +33,11 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useId, useMemo, useState } = cgpv.reactUtilities.react;
+  const baseId = useId();
+  const keywordInputId = `${baseId}-keyword-input`;
+  const keywordLabelId = `${baseId}-keyword-label`;
+  const temporalLabelId = `${baseId}-temporal-label`;
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
@@ -113,18 +117,30 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
     <Box sx={sxClasses.filterPanel}>
       {/* Text search */}
       <Box sx={sxClasses.filterRow}>
-        <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.textSearch')}</Typography>
-        <TextField size="small" placeholder={t('stacBrowser.keywords')} value={keyword} onChange={handleKeywordChange} fullWidth />
+        <Typography id={keywordLabelId} sx={sxClasses.filterLabel}>
+          {t('stacBrowser.textSearch')}
+        </Typography>
+        <TextField
+          id={keywordInputId}
+          aria-labelledby={keywordLabelId}
+          size="small"
+          placeholder={t('stacBrowser.keywords')}
+          value={keyword}
+          onChange={handleKeywordChange}
+          fullWidth
+        />
       </Box>
 
       {/* Temporal filter */}
       {config.filters?.temporal !== false && (
-        <Box sx={sxClasses.filterRow}>
-          <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.temporal')}</Typography>
+        <Box role="group" aria-labelledby={temporalLabelId} sx={sxClasses.filterRow}>
+          <Typography id={temporalLabelId} sx={sxClasses.filterLabel}>
+            {t('stacBrowser.temporal')}
+          </Typography>
           <Box sx={sxClasses.dateInputRow}>
-            <input type="date" value={startDate} onChange={handleStartDateChange} />
-            <Typography>—</Typography>
-            <input type="date" value={endDate} onChange={handleEndDateChange} />
+            <input type="date" aria-label={t('stacBrowser.startDate')} value={startDate} onChange={handleStartDateChange} />
+            <Typography aria-hidden="true">—</Typography>
+            <input type="date" aria-label={t('stacBrowser.endDate')} value={endDate} onChange={handleEndDateChange} />
           </Box>
         </Box>
       )}

@@ -233,6 +233,22 @@ id={`${mapId}-layer-${layerPath.replace(/[/.\s]/g, '-')}`}
 
 Clickable `<div>` and `<span>` elements are inaccessible by default — they receive no keyboard focus, emit no semantic role, and are invisible to assistive technologies. Native `<button>` and `<a>` elements come with built-in keyboard support, appropriate ARIA roles, and browser-managed focus behaviour at no extra cost. In MUI, use Button, IconButton, and Link components over attaching onClick handlers to arbitrary elements.
 
+Pick the primitive by what the element does:
+
+| Need                                      | Use                        | Notes                                                                                                                                  |
+| ----------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Action with a text label                  | `Button`                   | Default MUI button styling                                                                                                             |
+| Icon-only action                          | `IconButton` (from `@/ui`) | `aria-label` is required and is the fallback tooltip text when no `tooltip` prop is given                                              |
+| Card, tile or row that triggers an action | `ButtonBase`               | No padding/typography; keeps the existing card layout. Render children as `component="span"` (button content must be phrasing content) |
+| Clickable row in a `List`                 | `ListItemButton`           | Put other controls in `ListItem secondaryAction` so they are not nested in the button                                                  |
+| Navigation to a URL                       | `Link` / `<a href>`        | Prefer a real link over a button that calls `window.open` (some existing download buttons still do; migrate when touched)              |
+
+**Do not** hand-roll `role="button"` + `tabIndex={0}` + `onKeyDown` on a `Box`/`div`/`Card` — `ButtonBase` provides focus, Enter/Space activation, disabled semantics and the theme focus-visible indicator. ESLint jsx-a11y rules (`no-static-element-interactions`, `click-events-have-key-events`, `interactive-supports-focus`) flag click handlers on non-interactive elements that lack a role or keyboard support. A fully hand-rolled `role="button"` + `tabIndex` + `onKeyDown` passes those rules, so it is only caught by a `no-restricted-syntax` **warning** on `role="button"` — reviewers must still look for it.
+
+When a `ButtonBase` replaces a styled `Box`, neutralize button defaults in the sx (`width: '100%'`, `justifyContent: 'flex-start'`, `textAlign: 'left'`, `font: 'inherit'`, `color: 'inherit'`) and use `disableRipple` if the ripple does not suit the design. Never remove the focus outline (`outline: 'none'`); focus styles come from the theme's `focusVisible` option (`themeOptionsGenerator.ts`), which MUI applies through `.Mui-focusVisible`.
+
+**Delegated listeners** — An `onClick` on a container whose purpose is to react to clicks bubbling from real child controls (e.g. scrolling the shell into view) is not a control; clicks on the container's empty space also trigger it, which must stay harmless. Keep it, and add a justified `// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events` explaining the delegation.
+
 ### 3. Use IconButton for buttons without labels (🔴 HIGH PRIORITY)
 
 The IconButton component in GeoView has built-in accessibility support. Use IconButton instead of Button when a button does not have a text label.
@@ -659,21 +675,21 @@ This section helps branch reviewers spot common accessibility issues. Like other
 <div onClick={handleClick}>Click me</div>
 <span onClick={handleClick}>Click me</span>
 
-// CORRECT — use Button or add full keyboard support
+// CORRECT — use a semantic MUI primitive
 <Button onClick={handleClick}>Click me</Button>
 
-// OR (if Box is required for styling)
-<Box
-  onClick={handleClick}
-  onKeyDown={handleKeyDown}  // Must handle Enter/Space
-  role="button"
-  tabIndex={0}
->
+// CORRECT (if the element must keep a card/Box layout)
+<ButtonBase onClick={handleClick} disableRipple sx={sxClasses.card}>
+  <Typography component="span">Click me</Typography>
+</ButtonBase>
+
+// VIOLATION — hand-rolled button semantics
+<Box onClick={handleClick} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
   Click me
 </Box>
 ```
 
-**Search pattern:** `onClick` on `<div>`, `<span>`, `<Box>` without `role="button"` and `tabIndex`
+**Search pattern:** `onClick`/`onMouseDown`/`onPointerDown` or `role="button"` on `<div>`, `<span>`, `<Box>`, `<Card>`, `<Typography>`, `<ListItem>`, `<img>` (click handlers without a role/keyboard support are flagged by ESLint jsx-a11y rules; hand-rolled `role="button"` only raises a warning)
 
 **Why this matters:** Keyboard users cannot activate clickable divs/spans — they are not focusable and do not respond to Enter/Space keys.
 

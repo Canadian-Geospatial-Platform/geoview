@@ -47,7 +47,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const { ui } = cgpv;
   const { useCallback } = cgpv.reactUtilities.react;
 
-  const { Card, Box } = ui.elements;
+  const { ButtonBase, Box } = ui.elements;
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
@@ -63,7 +63,10 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
    * Handles when the user clicks on an AOI card.
    */
   const handleOnClick = useCallback(
-    (aoiItem: AoiItem): void => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      const aoiItem = aoiList[Number(event.currentTarget.dataset.aoiIndex)];
+      if (!aoiItem) return;
+
       // Project the extent from lonlat to map projection
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,
@@ -83,43 +86,29 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
         });
     },
-    [mapProjectionEPSG, mapController]
-  );
-
-  /**
-   * Handles keyboard events on AOI cards.
-   */
-  const handleKeyDown = useCallback(
-    (aoiItem: AoiItem): ((event: React.KeyboardEvent<HTMLDivElement>) => void) =>
-      (event: React.KeyboardEvent<HTMLDivElement>): void => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handleOnClick(aoiItem);
-        }
-      },
-    [handleOnClick]
+    [aoiList, mapProjectionEPSG, mapController]
   );
 
   // #endregion
 
   return (
     <Box sx={sxClasses.aoiCard}>
-      {aoiList.map((aoiItem: AoiItem) => (
-        <Card
+      {aoiList.map((aoiItem: AoiItem, index: number) => (
+        <ButtonBase
           key={aoiItem.aoiTitle}
-          role="button"
+          data-aoi-index={index}
           aria-label={t('aio.zoomToHighlight', { name: aoiItem.aoiTitle })}
-          tabIndex={0}
-          className="aoiCardThumbnail"
-          onClick={() => handleOnClick(aoiItem)}
-          onKeyDown={handleKeyDown(aoiItem)}
-          title={aoiItem.aoiTitle}
-          headerComponent="h3"
+          onClick={handleOnClick}
+          disableRipple={true}
           sx={sxClasses.aoiCardButton}
-          contentCard={
-            typeof aoiItem.imageUrl === 'string' && <Box component="img" src={aoiItem.imageUrl} alt="" className="aoiCardThumbnail" />
-          }
-        />
+        >
+          <Box component="span" className="aoiCardMedia">
+            {typeof aoiItem.imageUrl === 'string' && <Box component="img" src={aoiItem.imageUrl} alt="" className="aoiCardThumbnail" />}
+          </Box>
+          <Box component="span" className="aoiCardTitle">
+            {aoiItem.aoiTitle}
+          </Box>
+        </ButtonBase>
       ))}
     </Box>
   );

@@ -1,7 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
-import { GEOVIEW_SHAPE } from '@/ui/style/default';
 import { FOCUS_HALO_SIZE, FOCUS_OUTLINE_WIDTH, getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 
@@ -88,7 +87,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       maxWidth: '200px',
       padding: theme.spacing(1, 0),
       '& .MuiInputBase-root': {
-        borderRadius: '4px',
+        borderRadius: theme.shape.borderRadiusSm,
       },
       '& .MuiSelect-select': {
         padding: `${theme.spacing(1, 1.5)} !important`,

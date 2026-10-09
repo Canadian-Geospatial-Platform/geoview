@@ -558,7 +558,7 @@ onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQ
 
 **Quick reference — Common issues to check during code review:**
 
-- `onClick` on `<div>`, `<span>`, `<Box>` without `role="button"` + `tabIndex={0}` + keyboard handler for Enter/Space
+- `onClick` or `role="button"` on `<div>`, `<span>`, `<Box>`, `<Card>`, `<ListItem>` (use `Button`, `IconButton`, `ButtonBase` or `ListItemButton` instead of hand-rolled `role`/`tabIndex`/`onKeyDown`)
 - Ternary operator in `aria-label` on toggle buttons (use stable label + `aria-pressed` instead)
 - `disabled={state}` on buttons that toggle between enabled/disabled (use `aria-disabled` to prevent focus loss)
 - Modal/Dialog/Drawer without `onKeyDown` handler calling `handleEscapeKey(event.key, onClose)` from `@/core/utils/utilities`

@@ -137,7 +137,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeFooterBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
     navBarComponents: [],
     navBarButtonPanelVersion: 0,
-    activeTrapGeoView: true,
+    activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['data-table', 'time-slider', 'geochart'],

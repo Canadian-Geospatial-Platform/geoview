@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,6 @@ const sxClasses = getSxClasses();
 interface UndoButtonProps {
   progressValue: number;
   onUndo: (event: MouseEvent) => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
   iconRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -27,13 +26,13 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const { progressValue, onUndo, handleKeyDown, iconRef } = props;
+  const { progressValue, onUndo, iconRef } = props;
 
   return (
-    <Box sx={sxClasses.undoButtonContainer} onClick={onUndo}>
+    <Box sx={sxClasses.undoButtonContainer}>
       <CircularProgressBase variant="determinate" size={40} value={progressValue} sx={sxClasses.progressNoTransition} />
       <Box sx={sxClasses.undoIconOverlay}>
-        <IconButton iconRef={iconRef} aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={handleKeyDown}>
+        <IconButton iconRef={iconRef} aria-label={t('layers.undoLayer')} edge="end" size="small" onClick={onUndo}>
           <UndoIcon />
         </IconButton>
       </Box>
@@ -117,26 +116,20 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
   };
 
+  /**
+   * Handles when the user activates the delete button.
+   */
   const handleDeleteClick = (event: MouseEvent): void => {
-    performDelete(false);
+    // A click with detail 0 was synthesized from the keyboard (Enter/Space), so focus must be managed
+    performDelete(event.detail === 0);
   };
 
+  /**
+   * Handles when the user activates the undo button.
+   */
   const handleUndoClick = (event: MouseEvent): void => {
-    performUndo(false);
-  };
-
-  const handleDeleteKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      performDelete(true);
-    }
-  };
-
-  const handleUndoDeleteKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      performUndo(true);
-    }
+    // A click with detail 0 was synthesized from the keyboard (Enter/Space), so focus must be managed
+    performUndo(event.detail === 0);
   };
 
   useEffect(() => {
@@ -170,13 +163,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Never hide the remove icon, so user can remove forever loading/processing layers.
   if (layerRemovable && !layerDeletionStartTime) {
     return (
-      <IconButton
-        iconRef={deleteButtonRef}
-        onClick={handleDeleteClick}
-        className="buttonOutline"
-        onKeyDown={handleDeleteKeyDown}
-        aria-label={t('layers.deleteLayer')}
-      >
+      <IconButton iconRef={deleteButtonRef} onClick={handleDeleteClick} className="buttonOutline" aria-label={t('layers.deleteLayer')}>
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );
@@ -194,12 +181,5 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       </IconButton>
     );
   }
-  return (
-    <UndoButtonWithProgress
-      iconRef={undoButtonRef}
-      progressValue={progress}
-      onUndo={handleUndoClick}
-      handleKeyDown={handleUndoDeleteKeyDown}
-    />
-  );
+  return <UndoButtonWithProgress iconRef={undoButtonRef} progressValue={progress} onUndo={handleUndoClick} />;
 }

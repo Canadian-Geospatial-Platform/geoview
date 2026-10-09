@@ -36,11 +36,11 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useId, useMemo, useRef, useState } = cgpv.reactUtilities.react;
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // State
-  const [mode, setMode] = useState<BrowseMode | string>('browse');
+  const [mode, setMode] = useState<BrowseMode>('browse');
   const [view, setView] = useState<PanelView>('collections');
   const [collections, setCollections] = useState<StacCollection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<StacCollection | null>(null);
@@ -52,6 +52,11 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [currentPage, setCurrentPage] = useState(1);
   /** Tracks which view the item-detail was opened from. */
   const [itemDetailOrigin, setItemDetailOrigin] = useState<PanelView>('collections');
+  const modeTabRefs = useRef<Record<BrowseMode, HTMLDivElement | null>>({ browse: null, search: null });
+  const baseId = useId();
+  const browseTabId = `${baseId}-tab-browse`;
+  const searchTabId = `${baseId}-tab-search`;
+  const modePanelId = `${baseId}-mode-panel`;
 
   /** The STAC API service instance. */
   const memoApiService = useMemo((): StacApiService => {
@@ -81,7 +86,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   /**
    * Handles switching between browse and search modes.
    */
-  const handleModeChange = useCallback((newMode: BrowseMode | string): void => {
+  const handleModeChange = useCallback((newMode: BrowseMode): void => {
     setMode(newMode);
     if (newMode === 'browse') {
       setView('collections');
@@ -99,23 +104,37 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleModeClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
-      if (event.currentTarget.dataset.mode) {
-        handleModeChange(event.currentTarget.dataset.mode);
-      }
+      const { mode: newMode } = event.currentTarget.dataset;
+      if (newMode === 'browse' || newMode === 'search') handleModeChange(newMode);
     },
     [handleModeChange]
   );
 
   /**
-   * Handles keyboard activation for browse/search mode tabs.
+   * Handles keyboard navigation and activation for browse/search mode tabs.
    */
   const handleModeKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      if (event.currentTarget.dataset.mode) {
-        handleModeChange(event.currentTarget.dataset.mode);
+      const { mode: currentMode } = event.currentTarget.dataset;
+      if (currentMode !== 'browse' && currentMode !== 'search') return;
+
+      let nextMode: BrowseMode | undefined;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        nextMode = currentMode === 'browse' ? 'search' : 'browse';
+      } else if (event.key === 'Home') {
+        nextMode = 'browse';
+      } else if (event.key === 'End') {
+        nextMode = 'search';
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleModeChange(currentMode);
+        return;
       }
+
+      if (!nextMode) return;
+      event.preventDefault();
+      handleModeChange(nextMode);
+      modeTabRefs.current[nextMode]?.focus();
     },
     [handleModeChange]
   );
@@ -379,23 +398,35 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     <Box sx={memoSxClasses.mainContainer}>
       {/* Mode toggle — Browse / Search (hide when in item-detail) */}
       {view !== 'item-detail' && (
-        <Box sx={memoSxClasses.modeToggle}>
+        <Box sx={memoSxClasses.modeToggle} role="tablist" aria-label={t('stacBrowser.title')}>
           <Box
             sx={[memoSxClasses.modeButton, mode === 'browse' && memoSxClasses.modeButtonActive] as SxProps}
+            id={browseTabId}
             data-mode="browse"
             onClick={handleModeClick}
             role="tab"
-            tabIndex={0}
+            aria-selected={mode === 'browse'}
+            aria-controls={modePanelId}
+            tabIndex={mode === 'browse' ? 0 : -1}
+            ref={(element: HTMLDivElement | null): void => {
+              modeTabRefs.current.browse = element;
+            }}
             onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.browse')}
           </Box>
           <Box
             sx={[memoSxClasses.modeButton, mode === 'search' && memoSxClasses.modeButtonActive] as SxProps}
+            id={searchTabId}
             data-mode="search"
             onClick={handleModeClick}
             role="tab"
-            tabIndex={0}
+            aria-selected={mode === 'search'}
+            aria-controls={modePanelId}
+            tabIndex={mode === 'search' ? 0 : -1}
+            ref={(element: HTMLDivElement | null): void => {
+              modeTabRefs.current.search = element;
+            }}
             onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.search')}
@@ -403,7 +434,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         </Box>
       )}
 
-      {renderContent()}
+      {view === 'item-detail' ? (
+        renderContent()
+      ) : (
+        <Box role="tabpanel" id={modePanelId} aria-labelledby={mode === 'browse' ? browseTabId : searchTabId}>
+          {renderContent()}
+        </Box>
+      )}
     </Box>
   );
 }

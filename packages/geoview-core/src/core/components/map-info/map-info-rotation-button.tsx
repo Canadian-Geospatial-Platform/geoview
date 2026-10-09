@@ -54,7 +54,13 @@ export function MapInfoRotationButton(): JSX.Element {
 
   return (
     <Tooltip title={tooltipText} placement="top">
-      <Box sx={memoSxClasses.container} tabIndex={0} role="note" aria-label={tooltipText}>
+      <Box
+        sx={memoSxClasses.container}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can reach the rotation tooltip; it has no button/role semantics yet (follow-up)
+        tabIndex={0}
+        role="note"
+        aria-label={tooltipText}
+      >
         <Box className={`map-info-rotation-${mapId}`} sx={[memoSxClasses.arrow, { transform: `rotate(${rotationAngle}deg)` }]}>
           <NorthArrowIcon width={30} height={30} />
         </Box>
