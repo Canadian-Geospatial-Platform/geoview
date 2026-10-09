@@ -249,7 +249,7 @@
     "errorNoBounds": "Impossible de trouver les limites pour la couche '{{layerPath}}'.",
     "errorNoExtent": "Aucune étendue définie pour la couche '{{layerPath}}'.",
     "errorInvalidExtent": "Étendue invalide '{{extent}}'.",
-    "errorNonreloadableLayer": "Cette couche ne peut être rechargée. Assurez-vous qu'elle a déjà été chargée au moins une fois.",
+    "errorNonreloadableLayer": "Cette couche ne peut pas être rechargée, car sa configuration d’origine est introuvable.",
     "layerReloaded": "La couche '{{layerName}}' a été rechargée avec succès.",
     "fetchProgress": "Téléchargement des données pour « {{layerName}} »... Téléchargé {{processed}} de {{total}} enregistrements.",
     "fetchDone": "Données téléchargées pour « {{layerName}} » - {{total}} enregistrements.",

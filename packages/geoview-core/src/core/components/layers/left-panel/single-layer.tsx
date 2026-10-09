@@ -425,12 +425,14 @@ export function SingleLayer({
     [layerPath, layerController, selectLayerIfNeeded, isZoomToVisibleScaleCapable]
   );
 
+  /**
+   * Handles clicking the reload button.
+   */
   const handleReload = useCallback((): void => {
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
-    // Reload layer
-    layerCreatorController.reloadLayer(layerPath);
+    void layerCreatorController.reloadLayer(layerPath);
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 
   /**
@@ -446,7 +448,7 @@ export function SingleLayer({
         reloadRequestedRef.current = true;
 
         // Reload layer
-        layerCreatorController.reloadLayer(layerPath);
+        void layerCreatorController.reloadLayer(layerPath);
 
         // Prevent double-firing via native button click event
         event.preventDefault();
