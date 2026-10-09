@@ -1180,6 +1180,11 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Redirect to helper to add the layer to the map and wait
         await this.helperStepAddLayerOnMap(test, gvConfig);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
