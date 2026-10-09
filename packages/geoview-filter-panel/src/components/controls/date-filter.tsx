@@ -2,6 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeDateRangeValue } from '../../types';
@@ -46,6 +47,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const controller = useFilterPanelController();
+  const displayLanguage = useStoreAppDisplayLanguage();
 
   // Track which thumb (0 = start, 1 = end) was last interacted with
   const activeThumbRef = useRef<number>(1);
@@ -174,9 +176,9 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
    */
   const formatValue = useCallback(
     (timestamp: number): string => {
-      return controller.formatDateForDisplay(timestamp);
+      return controller.formatDateForDisplay(timestamp, displayLanguage);
     },
-    [controller]
+    [controller, displayLanguage]
   );
 
   if (loading) {

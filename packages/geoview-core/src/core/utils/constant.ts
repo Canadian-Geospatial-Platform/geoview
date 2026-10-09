@@ -1,3 +1,4 @@
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { FitOptions } from 'ol/View';
 
 /** Repository URL for GitHub. */
@@ -7,6 +8,12 @@ export const GITHUB_REPO = 'https://github.com/Canadian-Geospatial-Platform/geov
 export const GEO_URL_TEXT = {
   url: 'https://geo.ca/',
   text: 'Geo.ca',
+};
+
+/** Maps a display language to its BCP-47 locale tag for Intl-based number/currency/date formatting. */
+export const DISPLAY_LANGUAGE_LOCALE: Record<TypeDisplayLanguage, string> = {
+  en: 'en-CA',
+  fr: 'fr-CA',
 };
 
 /**

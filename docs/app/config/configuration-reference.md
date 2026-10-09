@@ -3200,7 +3200,8 @@ type DateFilterAttribute = {
 **Range filter-specific properties:**
 
 - **rangeStep** (optional): Keyboard arrow key increment for range slider navigation (default: 1). Useful for large ranges (e.g., 0-100000 with step of 1000) or small/decimal ranges (e.g., 0.0-1.0 with step of 0.01). Must be a positive number.
-- **numberFormat** (optional): Display formatting for the slider's value labels, one of `"number"` (default, plain numbers with thousand separators) or `"currency"` (adds a currency symbol, currently fixed to CAD, and two decimal places). Locale-aware based on the viewer's display language.
+- **numberFormat** (optional): Display formatting for the slider's value labels, one of `"number"` (default, plain numbers with thousand separators) or `"currency"` (adds a currency symbol and two decimal places). Locale-aware based on the viewer's display language.
+- **currency** (optional): [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code used when `numberFormat` is `"currency"` (e.g., `"CAD"`, `"USD"`, `"JPY"`, `"EUR"`); defaults to `"USD"`.
 - **defaultValues** (optional): Object with `min` and `max` numeric properties
 
 #### Filter Types
