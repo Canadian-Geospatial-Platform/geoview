@@ -206,6 +206,12 @@
               "description": "Step interval for range filter keyboard navigation",
               "default": 1
             },
+            "numberFormat": {
+              "type": "string",
+              "enum": ["number", "currency"],
+              "description": "Number formatting style. 'number' shows plain numbers with thousand separators (default). 'currency' adds a currency symbol, thousand separators, and two decimal places.",
+              "default": "number"
+            },
             "defaultValues": {
               "oneOf": [
                 {

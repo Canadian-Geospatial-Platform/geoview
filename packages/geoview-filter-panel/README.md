@@ -110,6 +110,18 @@ Numeric min/max range
 }
 ```
 
+Currency
+
+```json
+{
+  "fieldName": "assessed_value",
+  "displayLabel": "Assessed Value",
+  "filterType": "range",
+  "enabled": true,
+  "numberFormat": "currency"
+}
+```
+
 ### Date
 Date range selection
 

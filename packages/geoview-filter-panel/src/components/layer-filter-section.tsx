@@ -12,6 +12,7 @@ import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { useStoreLayerStatus, useStoreLayerName } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
+import { RequestAbortedError } from 'geoview-core/core/exceptions/core-exceptions';
 import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
 import type { TypeFilterLayer, TypeFilterValue } from '../types';
 import { getSxClasses } from './filter-panel-style';
@@ -42,7 +43,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useState, useEffect, useCallback, useMemo, useId } = cgpv.reactUtilities.react;
+  const { useState, useRef, useEffect, useCallback, useMemo, useId } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Typography, Collapse, Button, IconButton, List, ListItem } = ui.elements;
   const { ExpandMoreIcon, CloseIcon, ZoomInSearchIcon } = ui.elements;
@@ -68,7 +69,9 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const [fieldValues, setFieldValues] = useState<Record<string, (string | number)[]>>({});
 
   // Determine if this layer is ready for filtering
-  const layerIsReady = layerStatus === 'processed' || layerStatus === 'loaded';
+  const hasBeenReadyRef = useRef(false);
+  if (layerStatus === 'processed' || layerStatus === 'loaded') hasBeenReadyRef.current = true;
+  const layerIsReady = hasBeenReadyRef.current;
 
   // Collapse ID
   const collapseId = useId();
@@ -126,7 +129,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Gets unique values for layer attributes once the layer is ready and registered.
    */
   useEffect((): void => {
-    logger.logTraceUseEffect('LAYER FILTER SECTION - Get unique values', layer.layerPath, layerStatus);
+    logger.logTraceUseEffect('LAYER FILTER SECTION - Get unique values', layer.layerPath, layerIsReady);
 
     // Only fetch unique values when the layer is ready
     if (!layer.enabled || !layerIsReady) return;
@@ -156,6 +159,12 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
         setFieldValues(values);
       } catch (error: unknown) {
+        // A newer query for this layer superseded this one; that call will populate the values
+        if (error instanceof RequestAbortedError) {
+          logger.logDebug(`Query for layer ${layer.layerPath} was superseded by a newer one`);
+          return;
+        }
+
         logger.logError(`Error ensuring layer queried for ${layer.layerPath}:`, error);
         // Set empty values on error so loading state clears
         const emptyValues: Record<string, (string | number)[]> = {};
@@ -171,7 +180,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     getUniqueValues().catch((err: unknown) => {
       logger.logError('Error in getUniqueValues:', err);
     });
-  }, [controller, layer, layerIsReady, layerStatus]);
+  }, [controller, layer, layerIsReady]);
 
   /**
    * Renders a filter control based on attribute type.

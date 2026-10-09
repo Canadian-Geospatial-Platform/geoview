@@ -22,6 +22,7 @@ import {
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
+import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { LayerFilterPanelClearError, LayerFilterPanelQueryError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 // #region TYPES (minimal config types for reading filter panel configuration)
@@ -623,6 +624,24 @@ export class FilterPanelController extends AbstractMapViewerController {
   }
 
   /**
+   * Formats a numeric value for display, grouped by thousands and locale-aware.
+   *
+   * @param value - The numeric value to format
+   * @param attribute - The attribute configuration (controls currency vs plain number)
+   * @returns The formatted value, as a currency string if numberFormat is 'currency'
+   */
+  formatNumberForDisplay(value: number, attribute: TypeFilterAttribute): string {
+    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
+    const locale = displayLanguage === 'fr' ? 'fr-CA' : 'en-US';
+
+    if (attribute.numberFormat === 'currency') {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: 'CAD' }).format(value);
+    }
+
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+  }
+
+  /**
    * Formats a timestamp value for display in the UI.
    *
    * Uses DateMgt to format timestamps consistently across the application.
@@ -630,9 +649,9 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param timestamp - Milliseconds since epoch
    * @returns Formatted date string (e.g., "Jan 15, 2020")
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   formatDateForDisplay(timestamp: number): string {
-    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT.en, 'en', DateMgt.TIME_UTC);
+    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
+    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT[displayLanguage], displayLanguage, DateMgt.TIME_UTC);
   }
 
   /**
@@ -643,9 +662,9 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param timestamp - Milliseconds since epoch
    * @returns Date string in YYYY-MM-DD format
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   formatDateForFilter(timestamp: number): string {
-    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, 'en', DateMgt.TIME_UTC);
+    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
+    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, displayLanguage, DateMgt.TIME_UTC);
   }
 
   /**

@@ -1,6 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeRangeValue } from '../../types';
@@ -46,6 +47,8 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   // Reference to which slider thumb (0 = start, 1 = end) was last interacted with
   const activeThumbRef = useRef<number>(1);
+
+  const controller = useFilterPanelController();
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -138,12 +141,9 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   );
 
   /**
-   * Formats the slider value for display.
+   * Formats the slider value for display using the controller's formatting logic.
    */
-  const formatValue = useCallback((val: number): string => {
-    // Format with appropriate precision
-    return Number.isInteger(val) ? val.toString() : val.toFixed(2);
-  }, []);
+  const formatValue = useCallback((val: number): string => controller.formatNumberForDisplay(val, attribute), [controller, attribute]);
 
   if (loading) {
     return (
@@ -165,7 +165,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          {t('FilterPanel.noNumericValuesAvailable')}
+          {t('FilterPanel.noNumericValues')}
         </Typography>
       </Box>
     );
