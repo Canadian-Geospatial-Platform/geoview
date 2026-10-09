@@ -12,6 +12,7 @@ import {
   bumpStoreUINavBarButtonPanelVersion,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
+  getStoreUIActiveFooterBarTab,
   hideStoreUITabButton,
   removeStoreUIAppBarPanelId,
   removeStoreUIFooterTab,
@@ -239,6 +240,15 @@ export class UIController extends AbstractMapViewerController {
   setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {
     // Save in the store
     setStoreUIActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
+  }
+
+  /**
+   * Gets whether the footer bar panel is open.
+   *
+   * @returns True when the footer bar panel is open
+   */
+  getFooterBarIsOpen(): boolean {
+    return getStoreUIActiveFooterBarTab(this.getMapId()).isOpen;
   }
 
   /**

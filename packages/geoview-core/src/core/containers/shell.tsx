@@ -37,6 +37,7 @@ import type { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from
 import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
+import { useHostResizeSync } from './use-host-resize-sync';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement, getGVVisibleTabbable } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
@@ -115,7 +116,7 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [theme, appHeight]);
 
   // Ref for container height
-  const { mapShellContainerRef } = useMapResize({
+  const { mapShellContainerRef, hostOriginalHeightRef } = useMapResize({
     isMapFullScreen,
     isFooterBarOpen: isOpen,
     footerPanelResizeValue,
@@ -291,7 +292,26 @@ export function Shell(props: ShellProps): JSX.Element {
     handleSkipLinkClick('toplink');
   }, [handleSkipLinkClick]);
 
+  /**
+   * Handles when the host element is resized by an external layout.
+   */
+  const handleHostHeightChange = useCallback(
+    (height: number): void => {
+      uiController.resizeMapHeight(height);
+    },
+    [uiController]
+  );
+
   // #endregion HANDLERS
+
+  // Keep the viewer height in sync when an external layout resizes the host (e.g. 100% height in a resizable parent)
+  useHostResizeSync({
+    mapId,
+    geoviewElement,
+    isMapFullScreen,
+    hostOriginalHeightRef,
+    onHostHeightChange: handleHostHeightChange,
+  });
 
   /**
    * Registers map viewer event listeners on mount and cleans up on unmount.
