@@ -111,6 +111,10 @@
             "layerName": "Couche publique des historiques d'embâcle répertorié au MSP"
           },
           {
+            "layerId": "MSP_DIRECTION_REG_COG_S",
+            "layerName": "Limites territoriales (MSP)"
+          },
+          {
             "layerId": "ms:CASERNE",
             "layerName": "Casernes de pompiers"
           }

@@ -82,6 +82,9 @@ export abstract class ConfigBaseClass {
   /** Callback delegates for the layer status changed event */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
+  /** Callback delegates for the layer name changed event. */
+  #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
+
   // The layer status weigths
   static #layerStatusWeight = {
     newInstance: 10,
@@ -182,6 +185,9 @@ export abstract class ConfigBaseClass {
     // Validate the input is indeed a string (it happened that this was garbage)
     if (typeof layerName === 'string') {
       this.#layerName = layerName;
+
+      // Notify listeners after updating the stored name.
+      this.#emitLayerNameChanged({ layerName });
     } // else skip
   }
 
@@ -1359,6 +1365,37 @@ export abstract class ConfigBaseClass {
   // #region EVENTS
 
   /**
+   * Emits a layer name changed event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerNameChanged(event: LayerNameChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer name changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
+   */
+  onLayerNameChanged(callback: LayerNameChangedDelegate): LayerNameChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer name changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerNameChanged(callback: LayerNameChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    *
    * @param event - The event to emit
@@ -1437,5 +1474,14 @@ export interface LayerStatusChangedEvent {
 
 /** Defines a delegate for the event handler function signature. */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+
+/** Defines a layer name changed event. */
+export interface LayerNameChangedEvent {
+  /** The new layer name. */
+  layerName: string;
+}
+
+/** Defines a delegate for the event handler function signature. */
+export type LayerNameChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerNameChangedEvent, void>;
 
 // #endregion

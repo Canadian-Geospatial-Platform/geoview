@@ -1,5 +1,7 @@
 import type {
   ConfigBaseClass,
+  LayerNameChangedDelegate,
+  LayerNameChangedEvent,
   LayerStatusChangedDelegate,
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
@@ -17,6 +19,7 @@ import {
   getStoreLayerLegendQueryStatus,
   getStoreLayerLegendSchemaTag,
   getStoreLayerStyleConfig,
+  setStoreLayerName,
   setStoreLayerStatus,
   setStoreLegendQueryStatus,
 } from '@/core/stores/states/layer-state';
@@ -46,6 +49,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /** A bounded reference to the handle layer style changed */
   #boundedHandleLayerStyleChanged: StyleChangedDelegate;
 
+  /** A bounded reference to the handle layer name changed */
+  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
+
   /** A bounded reference to the handle layer style applied */
   #boundedHandleLayerStyleApplied: StyleAppliedDelegate;
 
@@ -62,6 +68,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
     super(mapViewer, controllerRegistry, layerDomain);
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
+    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
   }
@@ -104,6 +111,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Register the layer status changed handler
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
+    // Register the layer status changed handler
+    layerConfig.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     // Propagate to the store as the config has been registered
     this.controllerRegistry.layerSetController.propagateLegendToStore(layerConfig.layerPath);
   }
@@ -116,6 +126,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   protected override onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
     // Call parent
     super.onUnregisterLayerConfig(layerConfig);
+
+    // Register the layer status changed handler
+    layerConfig?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Unregister the layer status changed handler
     layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
@@ -361,6 +374,21 @@ export class LegendsLayerSet extends AbstractLayerSet {
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', sender.layerPath, error);
+    }
+  }
+
+  /**
+   * Handles when a layer name changes on a layer config.
+   * @param sender - The layer config that changed its name
+   * @param layerNameChangedEvent - The layer name changed event
+   */
+  #handleLayerNameChanged(sender: ConfigBaseClass, layerNameChangedEvent: LayerNameChangedEvent): void {
+    try {
+      // Save to the store
+      setStoreLayerName(this.getMapId(), sender.layerPath, layerNameChangedEvent.layerName);
+    } catch (error: unknown) {
+      // Log
+      logger.logError('CAUGHT in handleLayerNameChanged', sender.layerPath, error);
     }
   }
 
