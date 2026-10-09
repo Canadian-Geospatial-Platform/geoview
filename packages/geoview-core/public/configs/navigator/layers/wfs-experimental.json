@@ -85,7 +85,7 @@
           {
             "entryType": "group",
             "layerId": "glissements-terrain",
-            "layerName": "Glissements de terrain",
+            "layerName": "Zone potentiellement exposée aux glissements de terrain (ZPEGT)",
             "listOfLayerEntryConfig": [
               {
                 "layerId": "ms:zpegt_cgt_s"
