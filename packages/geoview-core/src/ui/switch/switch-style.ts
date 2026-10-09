@@ -30,6 +30,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       outlineColor: 'transparent',
       boxShadow: 'none',
     },
+    // This wrapper indicates focus on the whole label, not on the native track as well.
+    '& .MuiSwitch-switchBase.Mui-focusVisible ~ .MuiSwitch-track': {
+      outline: 'none',
+      boxShadow: 'none',
+    },
     '& .MuiFormControlLabel-label': {
       fontSize: theme.palette.geoViewFontSize?.default,
       color: 'inherit',

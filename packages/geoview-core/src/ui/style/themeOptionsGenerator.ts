@@ -27,14 +27,13 @@ export const FOCUS_OUTLINE_OFFSET = '2px';
 export const FOCUS_HALO_SIZE = '6px';
 
 /**
- * WCAG-compliant focus indicator styles for keyboard navigation.
+ * Gets shared focus indicator styles for keyboard navigation.
  *
- * Returns a CSSObject for use in MUI component styleOverrides.
- * Component-level application is required because MUI's ButtonBase sets outline: 0
- * with higher CSS specificity than CssBaseline global styles.
+ * Covers non-MUI controls, composite indicators and wrappers whose external theme
+ * has not enabled MUI's focusVisible option. Native Material indicators are owned by the theme.
  *
  * @param geoViewColors - GeoView color palette for focus indicator colors
- * @returns Focus indicator style object for .Mui-focusVisible selector
+ * @returns Focus indicator styles for the caller's keyboard-focus selector
  */
 export const getFocusIndicatorStyles = (geoViewColors: IGeoViewColors): CSSObject => ({
   outline: `${FOCUS_OUTLINE_WIDTH} solid ${geoViewColors.focusIndicator.outline}`,
@@ -59,7 +58,7 @@ export const getFormControlFocusIndicatorStyles = (geoViewColors: IGeoViewColors
 /**
  * Generates button style overrides for all button variants.
  *
- * Note: Focus indicators are applied via MuiButtonBase (parent component) to avoid duplication.
+ * Note: Material focus indicators are owned by theme.focusVisible to avoid duplication.
  *
  * @param geoViewColors - GeoView color palette to derive button styles from
  * @returns Style override object for MUI Button component
@@ -182,6 +181,13 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
   };
 
   const themeOptions: ThemeOptions = {
+    focusVisible: {
+      outlineWidth: FOCUS_OUTLINE_WIDTH,
+      outlineStyle: 'solid',
+      outlineColor: geoViewColors.focusIndicator.outline,
+      outlineOffset: FOCUS_OUTLINE_OFFSET,
+      boxShadow: `0 0 0 ${FOCUS_HALO_SIZE} ${geoViewColors.focusIndicator.halo}`,
+    },
     palette: {
       geoViewColor: geoViewColors,
       geoViewFontSize: geoViewFontSizes,
@@ -387,23 +393,13 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
-      MuiButtonBase: {
+      MuiMenuItem: {
         styleOverrides: {
           root: {
-            // WCAG-compliant focus indicator for all ButtonBase descendants
-            // (Button, IconButton, Tab, MenuItem, Checkbox, Radio, Switch, Chip, ListItemButton, etc.)
-            '&.Mui-focusVisible': getFocusIndicatorStyles(geoViewColors),
-            // Custom focus indicator for MenuItem within ButtonBase
-            '&.MuiMenuItem-root.Mui-focusVisible': {
-              ...getFocusIndicatorStyles(geoViewColors),
-              outlineOffset: '-3px', // sit inside the item
-              boxShadow: 'none', // drop the halo for dense menu rows
-            },
-            // Checkbox root is small — tighten the outline instead of the default offset
-            '&.MuiCheckbox-root.Mui-focusVisible': {
-              ...getFocusIndicatorStyles(geoViewColors),
-              outlineOffset: '-6px', // sit inside the item
-              boxShadow: 'none', // drop the halo for dense menu rows
+            // Keep the 3px outline fully inside dense/clipped rows without repeating the native ring.
+            '&.Mui-focusVisible': {
+              outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
+              boxShadow: 'none',
             },
           },
         },

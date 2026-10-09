@@ -1956,11 +1956,13 @@ const handleToggleKeyDown = useCallback(
 
 Focus indicators are generated centrally in `packages/geoview-core/src/ui/style/themeOptionsGenerator.ts` — never hand-roll a `boxShadow`/`outline` focus style on a component.
 
-- **`getFocusIndicatorStyles(geoViewColors)`** — Outline + halo (`boxShadow`) combo applied globally to `.Mui-focusVisible` on all `ButtonBase` descendants (Button, IconButton, Tab, MenuItem, Checkbox, Radio, Switch, Chip, ListItemButton) and to the Slider thumb.
+- **`theme.focusVisible`** — MUI 9.4 owns Material indicators using the existing 3px outline, 2px offset and 6px halo tokens. Let MUI choose native inset/outset placement; do not reintroduce a broad ButtonBase override. Checkbox/Radio indicators attach to the first SVG, so custom icons must render SVG.
+- **`getFocusIndicatorStyles(geoViewColors)`** — Retained for non-MUI/composite controls and disabled-feature external-theme fallbacks. Tabs/Slider defer to native indicators when enabled; Switch keeps its whole-label indicator and suppresses the native track ring. Slider hover must not replace the keyboard halo.
 - **`getFormControlFocusIndicatorStyles(geoViewColors)`** — Reuses `getFocusIndicatorStyles` but drops the halo (`boxShadow: 'none'`), since `InputBase`-derived controls (TextField, Select, Autocomplete, date-pickers) already render their own border/underline.
 - **`.geoview-keyboard-active` scoping** — Form-control focus styles are scoped to `.geoview-keyboard-active &:has(:focus-visible)` instead of a bare `:focus-visible` selector, because `:focus-visible` alone still matches text inputs on mouse click. `Shell` (`shell.tsx`) toggles `geoview-keyboard-active` / `geoview-keyboard-inactive` on the map root based on `activeTrapGeoView`, so mouse users never see the outline while keyboard users always do.
 - **Do not reintroduce JS-managed focus-tracking classes** (e.g. the removed `.keyboard-focused`, formerly set by `API.#manageKeyboardFocus`) — focus styling relies entirely on native `:focus-visible`/MUI `.Mui-focusVisible` now. `API.#manageMapCrosshairOnFocus` (the method that replaced it) only activates the map crosshair on Tab focus; it does not manage generic focus styling.
-- Per-component overrides (e.g. tighter `outlineOffset` for dense `MenuItem`/`Checkbox` rows, or dropping the halo) should still call `getFocusIndicatorStyles`/`getFormControlFocusIndicatorStyles` and spread the result, only overriding the specific properties that differ.
+- For native Material indicators, keep only proven local deltas (e.g. a fully inset dense MenuItem outline with no halo), not another full helper-based ring. Retain InputBase, non-MUI and composite coverage. Preserve initial app/nav suppression pending a separate accessibility decision.
+- Keep a real outline for forced colors and explicitly verify SVG indicators on Windows High Contrast; browser emulation alone is insufficient. Re-pass the raw `focusVisible` configuration when recomposing themes with palette changes.
 
 ### Snackbar & Notification Panel (WCAG)
 

@@ -1,4 +1,6 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+import { geoViewColors as defaultGeoViewColors } from 'geoview-core/ui/style/default';
+import { getFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
 
 /**
  * Returns the sx style classes for the Custom Legend components.
@@ -176,12 +178,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:hover': {
       backgroundColor: 'transparent',
     },
-    '&:focus-visible': {
-      border: 'none !important',
-      outline: '2px solid',
-      color: theme.palette.geoViewColor?.textColor.dark[200],
-      outlineOffset: '2px',
-    },
+    ...(!theme.focusVisible && {
+      '&:focus-visible': {
+        ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+        border: 'none !important',
+      },
+    }),
   },
 
   descriptionText: {

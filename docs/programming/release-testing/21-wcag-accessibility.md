@@ -145,11 +145,55 @@ When WCAG mode is enabled and a panel opens, focus should be trapped within it.
 
 ## Contrast & Visual Indicators
 
+Verify using live keyboard navigation, computed styles and written observations; no screenshots
+or visual snapshots are required. Allow focus transitions to settle before inspecting styles.
+Existing app-bar/nav-bar ring suppression is a separately tracked accessibility/design exception,
+not a passing result for the universal focus-indicator check.
+
 | Test                          | Description                | Steps                                                  | Expected Result                                          | Auto |
 | ----------------------------- | -------------------------- | ------------------------------------------------------ | -------------------------------------------------------- | ---- |
 | Focus indicators visible      | Focus ring on all elements | 1. Tab through all elements                            | Every focused element has a visible focus ring/outline   | M    |
-| Focus indicator in all themes | Focus visible in all theme | 1. Switch to to every theme<br>2. Tab through elements | Focus indicators are still visible (sufficient contrast) | M    |
+| Focus indicator in all themes | Focus visible in all theme | 1. Switch to every theme<br>2. Tab through elements | Focus indicators are still visible (sufficient contrast) | M    |
 | Color is not sole indicator   | Status uses icons/text too | 1. Check layer status changes (loaded/error/loading)   | Icons or text are used in addition to color              | M    |
+
+### MUI Theme Focus Adoption
+
+| Test | Steps | Expected Result | Auto |
+| ---- | ----- | --------------- | ---- |
+| Native geometry | Tab through buttons, footer tabs, menus, lists and Checkbox/Radio controls in all four themes | Token-colored 3px outline; native inset placement; one indicator per control (SVG for Checkbox/Radio) | M |
+| Switch composite | Tab to a Switch, then toggle with Space | Whole-label ring remains; no additional track ring; checked state changes | M |
+| Slider hover and keyboard | Tab to a Slider, change value with arrows, then hover the focused thumb | Value changes; keyboard outline and halo remain instead of the hover shadow | M |
+| Input modality | Mouse-click inputs, then enter keyboard mode and Tab to them | Whole-input outline follows keyboard mode; not bare text-input `:focus-visible` | M |
+| Dense/clipped contexts | Tab through table toolbars, menus and settings cards | Indicator is not obscured; dense MenuItem outline stays fully inside its row without a halo | M |
+| Portal/fullscreen | Keyboard-highlight Autocomplete options and open fullscreen panels | Native option indicators and focus traps work in portaled content | M |
+| External theme | Render Tabs/Slider/Switch under standard MUI themes with `focusVisible` enabled and disabled | Native ownership when enabled; fallback rings when disabled; no custom-palette crashes or duplicate Switch ring | M |
+| Settings and layer rows | Tab through WMS/raster settings cards and selected/unselected layer-list rows | Settings cards retain zero-offset/no-halo indicators and selected borders/backgrounds; rows retain inset/no-halo treatment and selected behavior | M |
+| Custom Legend description | Tab to Show/Hide Description in each theme, then activate with Enter/Space | Shared 3px token-colored indicator; description toggles and ARIA expansion state changes | M |
+| Forced colors | Use Windows High Contrast and also record browser emulation separately | Real outline remains distinguishable; explicitly verify SVG Checkbox/Radio slots, not just HTML roots | M |
+
+#### Retained Exceptions and Focused Test Handoff
+
+These are deliberate migration boundaries, not confirmed accessibility passes. Do not remove
+an exception solely because the theme option is enabled.
+
+| Surface / source | Why retained | Verification before further cleanup |
+| ---------------- | ------------ | ----------------------------------- |
+| [Data-table styles](../../../packages/geoview-core/src/core/components/data-table/data-table-style.ts) | Pinned-column, sort/action, toolbar and lightbox controls have local inset/no-halo deltas, not another full outline definition. [Viewer CSS](../../../packages/geoview-core/src/ui/style/style.css) applies paint containment to table containers. | Load a layer with feature data. Tab through header sort/action controls, pinned-column buttons, filters, toolbar and image/lightbox buttons. Repeat with horizontal scroll, narrow width, fullscreen, and keyboard focus plus pointer hover. Check the full outline, not just computed color. |
+| [Guide search styles](../../../packages/geoview-core/src/core/components/guide/guide-style.ts) | Previous/next/clear buttons sit in a compact input adornment and retain -3px/no-halo deltas. Input-root focus is separately gated by keyboard mode. | Use a guide containing searchable content, type a matching term, and Tab to previous/next/clear. Verify arrow/Enter navigation, clearing and announcements. Repeat in fullscreen and with keyboard focus plus hover. An empty guide does not exercise these controls. |
+| [Responsive layout styles](../../../packages/geoview-core/src/core/components/common/responsive-grid-layout-style.ts) | Panel-control button groups retain -2px/no-halo treatment and active styling. MUI does not automatically inset every ordinary Button in a group. | Exercise Enlarge/Reduce, Guide, Close and Fullscreen in normal/narrow layouts. Confirm indicators do not overlap adjacent controls or clip, and selected/active backgrounds remain distinguishable. With a 3px outline, a -2px offset still extends 1px outward. |
+| [Scale styles](../../../packages/geoview-core/src/core/components/scale/scale-style.ts) / [mouse-position styles](../../../packages/geoview-core/src/core/components/mouse-position/mouse-position-style.ts) | Hidden Radio icons are not the visible indicator; the containing group owns the expanded-control outline. Collapsed controls retain zero-offset/no-halo deltas. | Expand each control, Tab/arrow through options, and verify one visible group indicator, unchanged selection, and no stray SVG ring. Repeat with both maps on the page. |
+| [OpenLayers map styles](../../../packages/geoview-core/src/core/components/map/map-style.ts), [AOI styles](../../../packages/geoview-aoi-panel/src/area-of-interest-style.ts), [CardMedia](../../../packages/geoview-core/src/ui/card-media/card-media.tsx) and [vendor CSS](../../../packages/geoview-core/src/ui/style/vendor.css) | Native DOM, focusable cards/media and vendor controls are not uniformly covered by Material's theme option. Existing non-MUI treatments remain; their consistency is a separate review. | Exercise overview-map controls, AOI cards, focusable media and every lightbox control. Check themes, contrast, clipping, and focus return. Do not treat the presence of a MUI control in a vendor overlay as proof of native-style precedence. |
+
+For each walkthrough, record the browser/OS, display theme, viewport, layer/content used,
+keyboard-mode state, normal/fullscreen context, control, observed result and pass/fail/blocker.
+Distinguish a pre-existing exception from a new migration regression. Do not mark network-blocked
+or content-empty scenarios as passed. Test English and French layouts, all four themes, and
+Windows High Contrast; browser emulation must be recorded separately.
+
+Use a visible browser tab for real keyboard testing. If Tab does not move focus, or focus
+transitions are suspended in a hidden page, stop that run; programmatic activation can aid
+inspection but is not a keyboard-interaction pass. No screenshots or fabricated
+`.Mui-focusVisible` classes are needed.
 
 ## Multi-Map WCAG
 

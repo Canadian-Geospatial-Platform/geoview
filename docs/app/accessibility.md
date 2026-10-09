@@ -13,6 +13,49 @@ On first tab into the map, users are prompted to enable keyboard navigation mode
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M to focus on the crosshair within the map
 
+#### Keyboard Focus Indicators
+
+GeoView enables [MUI's theme-level `focusVisible`](https://mui.com/material-ui/customization/focus-visible/)
+in [the theme generator](../../packages/geoview-core/src/ui/style/themeOptionsGenerator.ts).
+The shared design uses a 3px outline, a 2px outward offset and a 6px contrasting halo:
+black/white in light themes, white/translucent black in the dark theme.
+
+MUI owns placement for Material controls: Tabs use an inset indicator, Checkbox/Radio indicators
+follow the first SVG icon, and other clip-prone controls use native inset placement. Dense
+MenuItems keep a fully inset outline without a halo. The Switch wrapper intentionally indicates
+focus around the whole label, suppressing the additional native track ring. Slider hover styling
+does not replace its keyboard indicator.
+
+Enabling this option removes MUI's focus-only backgrounds/overlays on several components,
+including menu/list items, Chip, AccordionSummary, CardActionArea, Autocomplete options and
+Slider. Independent hover, selected and active styling remains.
+
+Input roots still use GeoView's keyboard-mode scope and outline-only treatment; MUI's new option
+does not replace this. Shared helper styling also remains for non-MUI and composite controls.
+Tabs and Slider retain fallback indicators when an external MUI theme does not enable the option.
+Custom Checkbox/Radio icons must render SVG for the native indicator to appear. When recomposing
+a theme with palette changes, re-pass the intended raw `focusVisible` configuration rather than
+relying on the previously resolved colors.
+
+Layer settings selection cards use the native outline with their existing zero-offset/no-halo
+treatment. Layer-list rows retain their no-halo and selected-background treatment but use MUI's
+native inset offset when enabled. Custom Legend description buttons follow the shared native
+indicator instead of their former 2px text-colored outline. These styles preserve their previous
+fallback behavior when an external theme disables the feature.
+
+The initial adoption preserves existing app-bar/nav-bar ring suppression and local component
+exceptions; these are separate accessibility/design review items, not evidence of compliance.
+Verify contrast and clipping in each context, including portals and fullscreen. Keep the real
+outline for forced-colors mode: browser emulation is not Windows High Contrast sign-off, and
+SVG Checkbox/Radio indicators require explicit platform verification.
+
+The remaining table, Guide and compact panel-control overrides are local inset/no-halo
+treatments, not a second universal ring. Native MUI does not remove the need to verify clipping,
+including paint-contained tables and adjacent button groups. Scale/mouse-position groups,
+OpenLayers controls, AOI cards, media and vendor overlays retain their separate coverage.
+See the [focused release-test handoff](../programming/release-testing/21-wcag-accessibility.md#retained-exceptions-and-focused-test-handoff)
+before removing further exceptions or treating adoption as accessibility sign-off.
+
 #### Focus Traps for Enhanced Navigation
 
 Opening a panel (e.g., Layers, Legend, Details) triggers a focus trap that confines keyboard navigation within that panel:

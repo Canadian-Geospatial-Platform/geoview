@@ -26,18 +26,24 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '&:before': {
         boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
       },
-      '&:hover': {
+      '&:hover:not(.Mui-focusVisible)': {
         boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
       },
-      '&.Mui-focusVisible': {
-        ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
-      },
+      ...(!theme.focusVisible && {
+        '&.Mui-focusVisible': getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      }),
+      ...(theme.focusVisible && {
+        // MUI's hover/active variants otherwise replace the theme's keyboard halo.
+        '&.Mui-focusVisible:hover, &.Mui-focusVisible.Mui-active': {
+          boxShadow: theme.focusVisible.boxShadow,
+        },
+      }),
       '&.Mui-active': {
         width: 30,
         height: 30,
       },
     },
-    '& .MuiSlider-thumb:hover': {
+    '& .MuiSlider-thumb:hover:not(.Mui-focusVisible)': {
       boxShadow: 'rgba(1, 0, 155, 0.7) 0px 0px 0px 3px !important',
     },
     '& .MuiSlider-valueLabel': {

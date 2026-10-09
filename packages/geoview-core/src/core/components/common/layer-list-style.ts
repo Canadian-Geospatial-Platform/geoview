@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: 'inherit',
     },
     '&.Mui-focusVisible': {
-      outlineOffset: '-2px',
+      ...(!theme.focusVisible && { outlineOffset: '-2px' }),
       boxShadow: 'none',
     },
   },
