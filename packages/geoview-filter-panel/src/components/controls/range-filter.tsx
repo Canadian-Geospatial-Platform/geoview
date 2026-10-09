@@ -22,6 +22,8 @@ interface RangeFilterProps {
   uniqueValues: number[];
   /** Whether the filter is loading. */
   loading: boolean;
+  /** Indicates if the layer is a raster layer. */
+  isRasterLayer: boolean;
 }
 
 /**
@@ -34,11 +36,11 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/range-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading } = props;
+  const { attribute, value, onChange, uniqueValues, loading, isRasterLayer } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useMemo, useCallback, useRef } = cgpv.reactUtilities.react;
+  const { useMemo, useCallback, useRef, useState } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Slider, Typography } = ui.elements;
 
@@ -51,6 +53,8 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   const controller = useFilterPanelController();
   const displayLanguage = useStoreAppDisplayLanguage();
+
+  const [draggingValue, setDraggingValue] = useState<[number, number] | undefined>(undefined);
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -92,6 +96,8 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
     return [memoRangeValue.min ?? memoBounds.min, memoRangeValue.max ?? memoBounds.max];
   }, [memoRangeValue, memoBounds]);
 
+  const sliderValue = draggingValue ?? memoSliderValue;
+
   /**
    * Handles when the slider value changes.
    */
@@ -101,13 +107,34 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
       const [minValue, maxValue] = newValue as number[];
       activeThumbRef.current = activeThumb;
 
+      if (isRasterLayer) {
+        setDraggingValue([minValue, maxValue]);
+        return;
+      }
+
       onChange({
         min: minValue,
         max: maxValue,
       });
     },
 
-    [onChange]
+    [isRasterLayer, onChange]
+  );
+
+  /**
+   * Commits the slider value for raster layers once dragging ends
+   */
+  const handleSliderChangeCommitted = useCallback(
+    (newValue: number | number[]): void => {
+      if (!isRasterLayer) return;
+      const [minValue, maxValue] = newValue as number[];
+      setDraggingValue(undefined);
+      onChange({
+        min: minValue,
+        max: maxValue,
+      });
+    },
+    [isRasterLayer, onChange]
   );
 
   /**
@@ -184,8 +211,9 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
       <Box sx={memoSxClasses.filterSliderContainer}>
         <Slider
-          value={memoSliderValue}
+          value={sliderValue}
           onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
           onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
           onValueLabelFormat={formatValue}

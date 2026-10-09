@@ -2,7 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 import type { SxStyles, SxProps, Theme } from 'geoview-core/ui/style/types';
 
-import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { useFilterPanelController, useLayerController } from 'geoview-core/core/controllers/use-controllers';
 import {
   useStoreFilterPanelLayerFilterState,
   useStoreFilterPanelLayerCollapsed,
@@ -47,7 +47,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const { ui } = cgpv;
   const { Box, Typography, Collapse, Button, IconButton, List, ListItem } = ui.elements;
   const { ExpandMoreIcon, CloseIcon, ZoomInSearchIcon } = ui.elements;
-  const controller = useFilterPanelController();
+  const filterPanelController = useFilterPanelController();
+  const layerController = useLayerController();
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
@@ -57,6 +58,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const mapId = useStoreGeoViewMapId();
   const filterState = useStoreFilterPanelLayerFilterState(layer.layerPath);
   const isCollapsed = useStoreFilterPanelLayerCollapsed(layer.layerPath);
+  const isRasterLayer = layerController.isRasterLayer(layer.layerPath);
 
   // Indicate if there are filters
   const hasFilter = Object.keys(filterState).length > 0;
@@ -106,11 +108,11 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Handles zooming to the extent of the features currently matching this layer's active filters.
    */
   const handleZoomToFiltered = useCallback((): void => {
-    controller.zoomToFilteredExtent(layer.layerPath).catch((error: unknown) => {
+    filterPanelController.zoomToFilteredExtent(layer.layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in controller.zoomToFilteredExtent in layer-filter-section.handleZoomToFiltered', error);
     });
-  }, [controller, layer.layerPath]);
+  }, [filterPanelController, layer.layerPath]);
 
   /**
    * Auto-applies filters when the layer becomes ready or when filter state changes.
@@ -122,8 +124,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     if (!layerIsReady) return;
 
     // Apply this layer's filters via the controller
-    controller.applyLayerFilter(layer.layerPath);
-  }, [controller, layer.layerPath, layerIsReady, filterState]);
+    filterPanelController.applyLayerFilter(layer.layerPath);
+  }, [filterPanelController, layer.layerPath, layerIsReady, filterState]);
 
   /**
    * Gets unique values for layer attributes once the layer is ready and registered.
@@ -137,7 +139,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     const getUniqueValues = async (): Promise<void> => {
       try {
         // First, ensure the layer is registered and queried
-        await controller.ensureLayerQueried(layer.layerPath);
+        await filterPanelController.ensureLayerQueried(layer.layerPath);
 
         // Now we can safely get unique values
         const values: Record<string, (string | number)[]> = {};
@@ -145,7 +147,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         const enabledAttributes = layer.attributes.filter((attr) => attr.enabled);
         const results = enabledAttributes.map((attr) => {
           try {
-            const uniqueValues = controller.getLayerFieldUniqueValues(layer.layerPath, attr);
+            const uniqueValues = filterPanelController.getLayerFieldUniqueValues(layer.layerPath, attr);
             return { fieldName: attr.fieldName, values: uniqueValues };
           } catch (err) {
             logger.logError(`Error fetching values for ${attr.fieldName}:`, err);
@@ -180,7 +182,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     getUniqueValues().catch((err: unknown) => {
       logger.logError('Error in getUniqueValues:', err);
     });
-  }, [controller, layer, layerIsReady]);
+  }, [filterPanelController, layer, layerIsReady]);
 
   /**
    * Renders a filter control based on attribute type.
@@ -232,6 +234,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues as number[]}
               loading={loading}
+              isRasterLayer={isRasterLayer}
             />
           );
           break;
@@ -245,6 +248,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues}
               loading={loading}
+              isRasterLayer={isRasterLayer}
             />
           );
           break;
@@ -259,7 +263,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         </ListItem>
       );
     },
-    [layer, filterState, fieldValues, ListItem, layerName, onFilterChange]
+    [layer, filterState, fieldValues, ListItem, layerName, onFilterChange, isRasterLayer]
   );
 
   if (!layer.enabled) return null;
