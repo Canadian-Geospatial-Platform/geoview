@@ -189,6 +189,9 @@ export class WMS extends AbstractGeoViewRaster {
       return;
     }
 
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    layerConfig.initLayerNameFromMetadata(layerFound.Title);
+
     // If a group
     if (layerFound.Layer) {
       // Make sure it's an array
@@ -221,9 +224,6 @@ export class WMS extends AbstractGeoViewRaster {
       this.validateListOfLayerEntryConfig(layerConfigGroup.listOfLayerEntryConfig);
       return;
     }
-
-    // Initialize the layer name by filling the blanks with the name from the metadata
-    layerConfig.initLayerNameFromMetadata(layerFound.Title);
   }
 
   /**
