@@ -41,7 +41,7 @@ export const getSxClasses = (theme: Theme): SxStyles => {
       height: '50px',
       background: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
       width: 'fit-content',
-      borderRadius: '70px',
+      borderRadius: theme.shape.borderRadiusFull,
     },
     mouseScaleControlsContainer: {
       marginLeft: 'auto',

@@ -16,7 +16,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     border: '2px solid rgba(255,255,255,0.25)',
-    borderRadius: '6px',
     boxShadow: 'none',
     margin: theme.spacing(2),
     transition: 'all 0.3s ease-in-out',

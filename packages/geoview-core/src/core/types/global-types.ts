@@ -126,4 +126,4 @@ export type ClassType<T> = RegularClassType<T> | AbstractClassType<T>;
  * `TypeWindow` but never directly reference `material-ui.d.ts` would not see
  * the augmented MUI types during `tsc --build`.
  */
-export type { Shape as GeoViewMUIShape } from './material-ui.d';
+export type { GeoViewShapeTokens } from './material-ui.d';

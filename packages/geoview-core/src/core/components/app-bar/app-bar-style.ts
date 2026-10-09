@@ -26,12 +26,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       paddingBottom: theme.spacing(0),
       '&>nav': {
         border: 'unset !important',
-        '&>div>ul>li': {
+        '&>ul>li': {
           backgroundColor: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
           padding: theme.spacing(0),
-          borderRadius: '50%',
+          borderRadius: theme.shape.borderRadiusFull,
         },
-        '&>div>ul>li::before': {
+        '&>ul>li::before': {
           display: 'none',
         },
       },
@@ -67,7 +67,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       width: '48px',
       alignContent: 'center',
       padding: theme.spacing(0),
-      borderRadius: 0,
+      borderRadius: theme.shape.borderRadiusNone,
       backgroundColor: 'transparent',
       color: theme.palette.geoViewColor?.primary.main,
       transition: 'background-color 0.3s ease-in-out',

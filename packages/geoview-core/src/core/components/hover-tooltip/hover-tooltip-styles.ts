@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     opacity: 0.9,
     fontSize: theme.palette.geoViewFontSize?.default,
     padding: theme.spacing(0.5, 1),
-    borderRadius: '5px',
+    borderRadius: theme.shape.borderRadiusMd,
     textAlign: 'center',
     maxWidth: '350px',
     maxHeight: '60px',

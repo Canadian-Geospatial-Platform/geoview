@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     left: -3,
     top: -3,
     padding: theme.spacing(0),
-    borderRadius: 0,
+    borderRadius: theme.shape.borderRadiusNone,
     boxShadow: 2,
     transition: 'transform .3s ease-in-out',
     '&:hover': {
@@ -39,7 +39,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing(0),
-    borderRadius: 0,
+    borderRadius: theme.shape.borderRadiusNone,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
     boxShadow: 2,
@@ -60,14 +60,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.geoViewColor?.white,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
-    borderRadius: 0.5,
+    borderRadius: theme.shape.borderRadiusSm,
   },
   titleIcon: {
     '&.MuiSvgIcon-root': {
       border: '1px solid',
       backgroundColor: theme.palette.geoViewColor?.white,
       borderColor: theme.palette.geoViewColor?.primary.main,
-      borderRadius: 0.5,
+      borderRadius: theme.shape.borderRadiusSm,
       '& path': {
         fill: theme.palette.geoViewColor?.bgColor.dark[800],
       },
@@ -82,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.geoViewColor?.white,
     border: '1px solid',
     borderColor: theme.palette.geoViewColor?.primary.main,
-    borderRadius: '4px',
+    borderRadius: theme.shape.borderRadiusSm,
   },
   groupIcon: {
     transform: 'scaleX(-1)',
@@ -100,7 +100,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     alignItems: 'center',
     padding: theme.spacing(0),
-    borderRadius: 0,
+    borderRadius: theme.shape.borderRadiusNone,
     boxShadow: 2,
     '&:focus': {
       border: 'revert',

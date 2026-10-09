@@ -51,7 +51,6 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
     [iconData]
   );
 
-  // TODO: WCAG Issue #3109 - Add meaningful alt text to image icons if needed
   const renderIconContent = useCallback((): JSX.Element | null => {
     if (iconImage === 'annotation') {
       return (

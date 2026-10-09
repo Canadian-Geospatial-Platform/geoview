@@ -1,7 +1,7 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
-import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { GEOVIEW_SHAPE, geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the switch component.
@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
     margin: theme.spacing(0, 0.5),
     padding: theme.spacing(0, 0.5),
-    borderRadius: '6px',
+    borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
     gap: theme.spacing(0.5),
     '&:has(.Mui-focusVisible)': {
       ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),

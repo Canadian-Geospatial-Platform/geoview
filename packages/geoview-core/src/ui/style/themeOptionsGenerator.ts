@@ -1,7 +1,7 @@
 import type { ThemeOptions } from '@mui/material';
 import type { CSSObject } from '@mui/system';
 import type { IGeoViewColors } from '@/ui/style/types';
-import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from '@/ui/style/default';
+import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes, GEOVIEW_SHAPE } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -141,10 +141,9 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
       color: `${geoViewColors.bgColor.dark[450]}`,
     },
   },
-  '&.style4': {
+  '&.appBarButtonStatic': {
     // used for app-bar buttons
-    boxShadow: 1,
-    borderRadius: 25,
+    borderRadius: GEOVIEW_SHAPE.borderRadiusFull,
     height: 40,
     width: 40,
     '&:hover, &:active, &.active': {
@@ -155,6 +154,11 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
     },
     '&:disabled': {
       color: `${geoViewColors.bgColor.dark[450]}`,
+    },
+    '&:focus-visible': {
+      ...getFocusIndicatorStyles(geoViewColors),
+      outlineOffset: 0,
+      boxShadow: 'none',
     },
   },
 });
@@ -339,10 +343,9 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       },
     },
     shape: {
-      borderRadius: 6,
-      center: '50%',
-      right: '100%',
-      left: '0%',
+      // Numeric base read by MUI components (must stay a number), derived from the Md token (a px string)
+      borderRadius: parseInt(GEOVIEW_SHAPE.borderRadiusMd, 10),
+      ...GEOVIEW_SHAPE,
     },
     components: {
       MuiTooltip: {
@@ -373,7 +376,6 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       MuiPaper: {
         styleOverrides: {
           root: {
-            borderRadius: 5,
             borderWidth: '1px',
             borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
             borderStyle: 'solid',
@@ -413,12 +415,12 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               boxShadow: 'none',
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
                 background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
-                borderRadius: '5px',
+                borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
                 marginBottom: '10px',
               },
 
               '&[data-layer-depth] &:not([data-layer-depth="0"])': {
-                borderRadius: '0px',
+                borderRadius: GEOVIEW_SHAPE.borderRadiusNone,
                 border: 'unset',
                 backgroundColor: 'unset',
               },

@@ -18,6 +18,7 @@ import type { StyleLike } from 'ol/style/Style';
 import { DrawerIcon } from '@/geo/style/drawer-icon';
 import { DrawerText } from '@/geo/style/drawer-text';
 import { DrawerStyle } from '@/geo/style/drawer-style';
+import { GEOVIEW_SHAPE } from '@/ui/style/default';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
@@ -1176,7 +1177,7 @@ export class DrawerController extends AbstractMapViewerController {
     height: 12px;
     background: rgba(255, 165, 0, 0.4);
     border: 2px solid rgba(255, 165, 0, 0.8);
-    border-radius: 50%;
+    border-radius: ${GEOVIEW_SHAPE.borderRadiusFull};
     pointer-events: none;
   `;
 

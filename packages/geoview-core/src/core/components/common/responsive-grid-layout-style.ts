@@ -51,8 +51,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiButtonBase-root': {
       borderTop: 0,
       borderBottom: 0,
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
+      borderBottomLeftRadius: theme.shape.borderRadiusNone,
+      borderBottomRightRadius: theme.shape.borderRadiusNone,
       '&.active': {
         backgroundColor: theme.palette.geoViewColor?.primary.main,
         color: theme.palette.geoViewColor?.white,
@@ -118,7 +118,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.geoViewColor?.white,
       minHeight: '0',
       border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-      borderRadius: '5px 0 5px 5px',
+      borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd}`,
       overflow: 'auto',
     },
   },
@@ -131,7 +131,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   guideButtonGroup: {
     border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
     borderBottom: 'none',
-    borderRadius: '8px 8px 0 0',
+    borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusNone}`,
   },
   gridLeftMain: {
     height: '100%',
