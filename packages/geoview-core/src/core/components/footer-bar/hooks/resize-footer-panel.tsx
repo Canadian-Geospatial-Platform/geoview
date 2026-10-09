@@ -274,6 +274,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
                 <CloseIcon />
               </IconButton>
             </Box>
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- wrapper handles drag start and key snapping/close for the inner Slider, which is the interactive control */}
             <Box sx={memoSxClasses.sliderWrapper} onKeyDown={handleSliderKeyDown} onPointerDown={handleSliderPointerDown}>
               <Slider
                 orientation="vertical"

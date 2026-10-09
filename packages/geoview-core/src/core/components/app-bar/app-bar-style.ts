@@ -92,6 +92,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  appBarButtonsNotScrollable: {
+    paddingTop: theme.spacing(1),
+  },
   appBarSeparator: {
     position: 'relative',
     marginTop: theme.spacing(1),

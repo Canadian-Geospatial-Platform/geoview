@@ -331,7 +331,7 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
           aria-label={ariaLabel}
         >
           <Box sx={memoSxClasses.rightPanelContainer} className="guidebox-container" data-map-id={mapId}>
-            <Box className="guideBox">{memoCurrentGuideContent}</Box>
+            <Box sx={memoSxClasses.guideBox}>{memoCurrentGuideContent}</Box>
           </Box>
         </Layout>
       </Box>

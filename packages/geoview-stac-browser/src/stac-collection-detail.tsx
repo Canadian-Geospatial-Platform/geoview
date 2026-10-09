@@ -1,5 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Button, Typography } from 'geoview-core/ui';
+import { Box, Button, ButtonBase, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
@@ -188,25 +188,10 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * Handles click on an item card.
    */
   const handleItemCardClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>): void => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
       const { itemId } = event.currentTarget.dataset;
       const item = items.find((i) => i.id === itemId);
       if (item) onItemClick(item);
-    },
-    [items, onItemClick]
-  );
-
-  /**
-   * Handles keyboard activation on an item card.
-   */
-  const handleItemCardKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>): void => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        const { itemId } = event.currentTarget.dataset;
-        const item = items.find((i) => i.id === itemId);
-        if (item) onItemClick(item);
-      }
     },
     [items, onItemClick]
   );
@@ -338,19 +323,13 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
             const badge = getAssetTypeBadge(item);
             const datetime = item.properties.datetime ?? item.properties.start_datetime;
             return (
-              <Box
-                key={item.id}
-                data-item-id={item.id}
-                sx={sxClasses.itemRow}
-                onClick={handleItemCardClick}
-                onKeyDown={handleItemCardKeyDown}
-                role="button"
-                tabIndex={0}
-              >
-                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={item.id} sx={sxClasses.itemThumbnail} />}
-                <Box sx={sxClasses.itemRowText}>
-                  <Typography sx={sxClasses.resultTitle}>{item.properties.title ?? item.id}</Typography>
-                  <Typography sx={sxClasses.resultMeta}>
+              <ButtonBase key={item.id} data-item-id={item.id} sx={sxClasses.itemRow} onClick={handleItemCardClick} disableRipple>
+                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
+                <Box component="span" sx={sxClasses.itemRowText}>
+                  <Typography component="span" sx={sxClasses.resultTitle}>
+                    {item.properties.title ?? item.id}
+                  </Typography>
+                  <Typography component="span" sx={sxClasses.resultMeta}>
                     {badge && (
                       <Box component="span" sx={sxClasses.assetTypeBadge}>
                         {badge}
@@ -359,7 +338,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
                     {datetime ? new Date(datetime).toLocaleDateString() : ''}
                   </Typography>
                 </Box>
-              </Box>
+              </ButtonBase>
             );
           })}
 

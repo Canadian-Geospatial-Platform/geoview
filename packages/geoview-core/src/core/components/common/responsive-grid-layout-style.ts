@@ -82,25 +82,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiPaper-root': {
       border: 'none',
     },
-    '& .guideBox': {
-      position: 'relative',
-      color: `${theme.palette.geoViewColor?.grey.dark[800]}  !important`,
-      padding: theme.spacing(2),
-      img: {
-        maxWidth: '100%',
-      },
-      td: {
-        width: 'auto',
-        paddingLeft: theme.spacing(2),
-      },
-      th: {
-        textAlign: 'left',
-        paddingLeft: theme.spacing(2),
-      },
-      '& h4': {
-        borderBottom: 'none',
-      },
-    },
     '&.fullscreen-mode': {
       a: {
         color: theme.palette.geoViewColor?.primary.main,

@@ -1,4 +1,6 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+import { geoViewColors as defaultGeoViewColors } from 'geoview-core/ui/style/default';
+import { getFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
 
 /**
  * Gets the sx classes for the STAC browser components.
@@ -41,12 +43,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     marginBottom: theme.spacing(1),
   },
-  mapControls: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: theme.spacing(1),
-    alignItems: 'center',
-  },
   modeToggle: {
     display: 'flex',
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -64,6 +60,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textAlign: 'center',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
+    },
+    '&:focus-visible': {
+      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      boxShadow: 'none',
+      outlineOffset: '-6px',
     },
   },
   modeButtonActive: {
@@ -92,20 +93,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor?.textColor.main,
   },
   resultsList: {
-    padding: theme.spacing(1),
-  },
-  resultCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(0.5),
-    padding: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadiusMd,
-    cursor: 'pointer',
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-    },
+    padding: theme.spacing(2),
   },
   resultTitle: {
     fontWeight: 600,
@@ -176,17 +164,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   containedInExtentCheckbox: {
     marginLeft: theme.spacing(0.25),
   },
-  dateInput: {
-    flex: 1,
-    '& input': {
-      fontSize: theme.palette.geoViewFontSize?.sm,
-      padding: theme.spacing(0.75),
-    },
-  },
-  collectionsListBox: {
-    maxHeight: 150,
-    overflow: 'auto',
-  },
   detailSection: {
     padding: theme.spacing(0, 1.5),
   },
@@ -198,14 +175,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   // Collection card styles
+  collectionCardList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
+  },
   collectionCard: {
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(0.5),
     padding: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
     border: `1px solid ${theme.palette.divider}`,
-    cursor: 'pointer',
+    borderRadius: theme.shape.borderRadiusSm,
+    justifyContent: 'flex-start',
+    textAlign: 'left',
+    font: 'inherit',
+    color: 'inherit',
+    alignItems: 'stretch',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
       borderColor: theme.palette.geoViewColor?.primary.main,
@@ -287,7 +273,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.75, 0.5),
     marginBottom: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
-    cursor: 'pointer',
+    // ButtonBase resets: keep the card layout/typography of the former Box (cursor comes from ButtonBase)
+    width: '100%',
+    justifyContent: 'flex-start',
+    textAlign: 'left',
+    font: 'inherit',
+    color: 'inherit',
     alignItems: 'center',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,

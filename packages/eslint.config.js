@@ -62,6 +62,24 @@ export default [
     },
     settings: {
       react: { version: 'detect' },
+      // Map MUI / @/ui components to the DOM element they render so jsx-a11y can see them
+      'jsx-a11y': {
+        polymorphicPropName: 'component',
+        components: {
+          Box: 'div',
+          Stack: 'div',
+          Grid: 'div',
+          Paper: 'div',
+          Card: 'div',
+          CardContent: 'div',
+          Avatar: 'div',
+          Typography: 'p',
+          List: 'ul',
+          ListItem: 'li',
+          SvgIcon: 'svg',
+          CardMedia: 'img',
+        },
+      },
       'import/resolver': {
         node: {
           alias: {
@@ -165,6 +183,29 @@ export default [
         },
       ],
       'jsx-a11y/no-noninteractive-tabindex': 'error',
+      // Only pointer/click-style handlers count as "interactions"; keyboard delegation, blur, hover and drag/drop containers are legitimate
+      'jsx-a11y/no-static-element-interactions': [
+        'error',
+        { handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onPointerDown', 'onPointerUp', 'onKeyPress'] },
+      ],
+      'jsx-a11y/no-noninteractive-element-interactions': [
+        'error',
+        { handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onPointerDown', 'onPointerUp', 'onKeyPress'] },
+      ],
+      'jsx-a11y/click-events-have-key-events': 'error',
+      'jsx-a11y/interactive-supports-focus': 'error',
+      // Same allowances as jsx-a11y recommended so valid ARIA composites (e.g. List role="listbox") are not flagged
+      'jsx-a11y/no-noninteractive-element-to-interactive-role': [
+        'error',
+        {
+          ul: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
+          ol: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
+          li: ['menuitem', 'menuitemradio', 'menuitemcheckbox', 'option', 'row', 'tab', 'treeitem'],
+          table: ['grid'],
+          td: ['gridcell'],
+          fieldset: ['radiogroup', 'presentation'],
+        },
+      ],
 
       // General rules
       'no-plusplus': 'off',
@@ -209,6 +250,11 @@ export default [
           selector: "CallExpression[callee.object.name='document'][callee.property.name=/^querySelector(All)?$/]",
           message:
             'Do not use document.querySelector(All) directly. Use queryGVSelector(mapId, selector) / queryGVSelectorAll(mapId, selector) from @/core/utils/dom-helper. This keeps DOM queries map-scoped and avoids cross-map collisions.',
+        },
+        {
+          selector: "JSXAttribute[name.name='role'][value.value='button']",
+          message:
+            'Do not hand-roll role="button". Use ButtonBase (cards/rows), ListItemButton (list rows), IconButton (icons) or Button from @/ui, which provide focus, Enter/Space and disabled semantics natively. See "Use Semantic Elements for Interactions" in docs/app/accessibility.md.',
         },
         {
           selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > Literal',

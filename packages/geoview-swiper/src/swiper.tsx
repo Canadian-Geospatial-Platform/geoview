@@ -472,6 +472,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         >
           <Box
             sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar] as SxProps}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- draggable swiper bar is keyboard-operable via arrow keys; it has no slider role/ARIA values yet (follow-up)
             tabIndex={0}
             ref={swiperRef}
             onKeyDown={handleKeyDown}

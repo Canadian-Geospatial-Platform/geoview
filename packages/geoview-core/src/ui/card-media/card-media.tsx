@@ -1,3 +1,4 @@
+// GV: THIS UI COMPONENT IS NOT USED
 import { useCallback } from 'react';
 import type { CardMediaProps } from '@mui/material';
 import { CardMedia as MaterialCardMedia } from '@mui/material';
