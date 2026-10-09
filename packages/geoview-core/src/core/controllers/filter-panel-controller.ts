@@ -1,10 +1,12 @@
 import type { Extent } from 'ol/extent';
 
 import type { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
 import { DateMgt, type ManipulateType } from '@/core/utils/date-mgt';
+import { formatCurrencyValue, formatMeasurementValue } from '@/core/utils/utilities';
 import {
   getStoreFilterPanelLayerConfig,
   getStoreFilterPanelFilterState,
@@ -22,6 +24,7 @@ import {
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
+import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { LayerFilterPanelClearError, LayerFilterPanelQueryError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 // #region TYPES (minimal config types for reading filter panel configuration)
@@ -623,6 +626,21 @@ export class FilterPanelController extends AbstractMapViewerController {
   }
 
   /**
+   * Formats a numeric value for display, grouped by thousands and locale-aware.
+   *
+   * @param value - The numeric value to format
+   * @param attribute - The filter attribute containing number format and currency information
+   * @returns The formatted number value as a string
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string {
+    if (attribute.numberFormat === 'currency') {
+      return formatCurrencyValue(value, displayLanguage, attribute.currency);
+    }
+    return formatMeasurementValue(value, displayLanguage);
+  }
+
+  /**
    * Formats a timestamp value for display in the UI.
    *
    * Uses DateMgt to format timestamps consistently across the application.
@@ -631,8 +649,8 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @returns Formatted date string (e.g., "Jan 15, 2020")
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  formatDateForDisplay(timestamp: number): string {
-    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT.en, 'en', DateMgt.TIME_UTC);
+  formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string {
+    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT[displayLanguage], displayLanguage, DateMgt.TIME_UTC);
   }
 
   /**
@@ -643,9 +661,9 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param timestamp - Milliseconds since epoch
    * @returns Date string in YYYY-MM-DD format
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   formatDateForFilter(timestamp: number): string {
-    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, 'en', DateMgt.TIME_UTC);
+    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
+    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, displayLanguage, DateMgt.TIME_UTC);
   }
 
   /**
