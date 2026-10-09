@@ -77,7 +77,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 15         | Parallel                    |
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
-| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 46         | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
@@ -515,6 +515,16 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | #   | Method                                   | Type | Description                                                                                                        |
 | --- | ---------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
 | 36  | `testEsriDynamicJunctionGeometryPairing` | test | Test ESRI Dynamic junction: each returned feature's geometry pairs to its own OBJECTID, not a neighbour (#3636)... |
+
+#### 2.1.17 WMS Group Layer Name Resolution
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                          | Type | Description                                                                    |
+| --- | ----------------------------------------------- | ---- | ------------------------------------------------------------------------------ |
+| 37  | `testAddWMSZpegtGroupWithSiblingLayer`          | test | Test WMS ZPEGT metadata names with a sibling layer...                           |
+| 38  | `testAddWMSZpegtGroupWithGeoviewLayerName`      | test | Test WMS ZPEGT group name with a configured GeoView layer name...               |
+| 39  | `testAddWMSZpegtGroupWithoutGeoviewLayerName`   | test | Test WMS ZPEGT group name without a configured GeoView layer name...            |
 
 ---
 

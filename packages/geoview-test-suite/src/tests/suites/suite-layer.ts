@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 46;
+    return 49;
   }
 
   /**
@@ -69,11 +69,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    // Test DEBUG
-    const pDevTest0 = this.#layerTester.testInitialSettingsCascade();
+    const pDevTest0 = this.#layerTester.testAddWMSZpegtGroupWithSiblingLayer();
+    const pDevTest1 = this.#layerTester.testAddWMSZpegtGroupWithGeoviewLayerName();
+    const pDevTest2 = this.#layerTester.testAddWMSZpegtGroupWithoutGeoviewLayerName();
 
     // Resolve when all
-    return Promise.all([pDevTest0]);
+    return Promise.all([pDevTest0, pDevTest1, pDevTest2]);
   }
 
   /**
@@ -142,6 +143,18 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test adding layer
     const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
     if (isRunningSequentially) await pLayerNonnaWithCors;
+
+    // Test WMS metadata and configured names for the ZPEGT group with aeroport sibling
+    const pLayerZpegtSibling = this.#layerTester.testAddWMSZpegtGroupWithSiblingLayer();
+    if (isRunningSequentially) await pLayerZpegtSibling;
+
+    // Test WMS metadata and configured names for the ZPEGT group with Geoview layer name
+    const pLayerZpegtGVLayerName = this.#layerTester.testAddWMSZpegtGroupWithGeoviewLayerName();
+    if (isRunningSequentially) await pLayerZpegtGVLayerName;
+
+    // Test WMS metadata and configured names for the ZPEGT group without Geoview layer name
+    const pLayerZpegtGVLayerNameMissing = this.#layerTester.testAddWMSZpegtGroupWithoutGeoviewLayerName();
+    if (isRunningSequentially) await pLayerZpegtGVLayerNameMissing;
 
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
@@ -265,6 +278,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerWMSLandcoverGroupDimension,
       pLayerWMSLandcoverGroupDimensionNegative,
       pLayerNonnaWithCors,
+      pLayerZpegtSibling,
+      pLayerZpegtGVLayerName,
+      pLayerZpegtGVLayerNameMissing,
       pLayerWMSBadUrl,
       pLayerWFSWithGeometCurrentConditions,
       pLayerWFSBadUrl,
