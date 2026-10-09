@@ -116,6 +116,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
@@ -745,6 +746,17 @@ export class LayerController extends AbstractMapViewerController {
   // #endregion PUBLIC METHODS - UI RELATED
 
   // #region PUBLIC METHODS
+
+  /**
+   * Checks if the specified layer is a raster layer.
+   *
+   * @param layerPath - The layer path to check
+   * @returns True if the layer is a raster layer, false otherwise
+   */
+  isRasterLayer(layerPath: string): boolean {
+    const layer = this.getGeoviewLayerRegularIfExists(layerPath);
+    return layer instanceof AbstractGVRaster;
+  }
 
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
