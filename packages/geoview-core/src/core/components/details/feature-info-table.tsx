@@ -1,11 +1,10 @@
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import linkifyHtml from 'linkify-html';
 
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui';
-import { isImage, stringify, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
+import { isImage, stringify, sanitizeHtmlContent, linkifyAndSanitizeHtml } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
@@ -141,11 +140,7 @@ export const FeatureItem = memo(
 
     return (
       <Box sx={memoSxClasses.featureInfoItemValue}>
-        <UseHtmlToReact
-          htmlContent={sanitizeHtmlContent(
-            enhanceLinksAccessibility(linkifyHtml(item.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
-          )}
-        />
+        <UseHtmlToReact htmlContent={linkifyAndSanitizeHtml(item.toString(), t('general.opensInNewTab'), memoLinkifyOptions)} />
       </Box>
     );
   }

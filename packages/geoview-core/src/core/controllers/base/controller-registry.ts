@@ -12,6 +12,7 @@ import { TimeSliderController } from '@/core/controllers/time-slider-controller'
 import { SwiperController } from '@/core/controllers/swiper-controller';
 import { GeoChartController } from '@/core/controllers/geochart-controller';
 import { FilterPanelController } from '@/core/controllers/filter-panel-controller';
+import { StacBrowserController } from '@/core/controllers/stac-browser-controller';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import {
@@ -21,6 +22,7 @@ import {
   hasSwiperPlugin,
   hasTimeSliderPlugin,
   hasFilterPanelPlugin,
+  hasStacBrowserPlugin,
 } from '@/core/stores/stores-managers';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
@@ -70,6 +72,9 @@ export class ControllerRegistry {
 
   /** The filter panel controller used to interact with the filter panel. Only present when the filter panel plugin is configured. */
   readonly filterPanelController?: FilterPanelController;
+
+  /** The STAC browser controller used to interact with the map from the STAC browser. Only present when the STAC browser plugin is configured. */
+  readonly stacBrowserController?: StacBrowserController;
 
   /** All controllers registered in this registry. */
   readonly allControllers: AbstractController[] = [];
@@ -123,6 +128,11 @@ export class ControllerRegistry {
       this.filterPanelController = new FilterPanelController(mapViewer, this);
     }
 
+    // If the STAC browser plugin is present (we know via the store)
+    if (hasStacBrowserPlugin(getGeoViewStore(mapViewer.mapId))) {
+      this.stacBrowserController = new StacBrowserController(mapViewer, this);
+    }
+
     // Add all controllers to the registry
     this.allControllers.push(
       this.uiController,
@@ -138,6 +148,7 @@ export class ControllerRegistry {
     if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
     if (this.geoChartController) this.allControllers.push(this.geoChartController);
     if (this.filterPanelController) this.allControllers.push(this.filterPanelController);
+    if (this.stacBrowserController) this.allControllers.push(this.stacBrowserController);
 
     // Hook the controllers
     this.hookControllers();

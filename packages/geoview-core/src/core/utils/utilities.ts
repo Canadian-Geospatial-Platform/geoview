@@ -1,6 +1,7 @@
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
+import linkifyHtml from 'linkify-html';
 import { fromUrl } from 'geotiff';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
@@ -1017,6 +1018,27 @@ export function enhanceLinksAccessibility(html: string, announcementText: string
     logger.logWarning('Failed to enhance links accessibility', error);
     return html;
   }
+}
+
+/**
+ * Converts URLs in text to accessible external links and sanitizes the resulting HTML.
+ *
+ * @param content - Plain text content that may contain URLs
+ * @param announcementText - Screen reader announcement for links opening in a new tab
+ * @param options - Optional caller-specific link display options
+ * @returns Sanitized HTML with URLs rendered as accessible links
+ */
+export function linkifyAndSanitizeHtml(content: string, announcementText: string, options?: Parameters<typeof linkifyHtml>[1]): string {
+  const linkified = linkifyHtml(content, {
+    attributes: {
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
+    defaultProtocol: 'https',
+    ignoreTags: ['script', 'style', 'img'],
+    ...options,
+  });
+  return sanitizeHtmlContent(enhanceLinksAccessibility(linkified, announcementText));
 }
 
 /**
