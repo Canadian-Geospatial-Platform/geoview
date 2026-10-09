@@ -85,8 +85,8 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
-| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 2          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **250**    |                             |
+| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
+| **Total**         |                         |                                                                                                 | **251**    |                             |
 
 ---
 
