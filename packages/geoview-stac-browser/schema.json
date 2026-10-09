@@ -5,10 +5,154 @@
   "version": "1.0",
   "comments": "Configuration for GeoView STAC Browser package.",
   "additionalProperties": false,
+  "definitions": {
+    "TypeStacFieldConfig": {
+      "description": "A STAC item field to display",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "description": "Dot path of the field in the STAC item (e.g. 'properties.scale', 'collection', 'assets.thumbnail.href')",
+          "type": "string"
+        },
+        "label": {
+          "description": "Label (plain text or translation key). Defaults to the last segment of the field path",
+          "type": "string"
+        },
+        "format": {
+          "description": "Display format of the value",
+          "type": "string",
+          "enum": ["text", "date", "datetime", "number", "epsg", "url", "json"],
+          "default": "text"
+        }
+      },
+      "required": ["field"]
+    },
+    "TypeStacPropertyFilterConfig": {
+      "description": "A queryable property to expose as a CQL2 filter",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": { "description": "Queryable property name", "type": "string" },
+        "label": { "description": "Optional display label", "type": "string" }
+      },
+      "required": ["field"]
+    },
+    "TypeStacItemView": {
+      "description": "Item display options",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "titleField": {
+          "description": "Dot path of the field used as the item title. Defaults to 'properties.title' then 'id'",
+          "type": "string"
+        },
+        "summaryFields": {
+          "description": "Fields shown on the item cards (light view)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/TypeStacFieldConfig" }
+        },
+        "metadataFields": {
+          "description": "Fields shown in the metadata view, 'all' for every item property",
+          "oneOf": [
+            { "type": "string", "enum": ["all"] },
+            { "type": "array", "items": { "$ref": "#/definitions/TypeStacFieldConfig" } }
+          ],
+          "default": "all"
+        },
+        "excludeFields": {
+          "description": "Dot paths of fields never shown in the metadata view",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "TypeStacPreview": {
+      "description": "Item preview options; previews are map overlays, not legend layers",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "type": "string", "enum": ["auto", "cog", "thumbnail", "none"], "default": "auto" },
+        "assetPriority": {
+          "description": "Asset roles or keys used to choose a preview",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["visual", "overview", "data", "thumbnail"]
+        },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 }
+      }
+    },
+    "TypeStacFootprintStyle": {
+      "description": "Style options for STAC extent footprints drawn on the map",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": { "type": "string" },
+        "fillOpacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "TypeStacFootprintStyles": {
+      "description": "Styles for collection extents and search result footprints",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collection": { "$ref": "#/definitions/TypeStacFootprintStyle" },
+        "search": { "$ref": "#/definitions/TypeStacFootprintStyle" }
+      }
+    },
+    "TypeStacActions": {
+      "description": "Actions available on an item",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zoom": { "type": "boolean", "default": true },
+        "showOnMap": { "type": "boolean", "default": true },
+        "download": { "type": "boolean", "default": true },
+        "copyUrl": { "type": "boolean", "default": true }
+      }
+    },
+    "TypeStacCollectionOverride": {
+      "description": "Per-collection item presentation overrides",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemView": { "$ref": "#/definitions/TypeStacItemView" },
+        "preview": { "$ref": "#/definitions/TypeStacPreview" },
+        "actions": { "$ref": "#/definitions/TypeStacActions" },
+        "footprintStyles": { "$ref": "#/definitions/TypeStacFootprintStyles" }
+      }
+    }
+  },
   "properties": {
     "stacUrl": {
       "description": "Base URL of the STAC API",
       "type": "string"
+    },
+    "collections": {
+      "description": "Restricts the collections available in the browser",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": {
+          "description": "Collection IDs to show (all collections when omitted)",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "exclude": {
+          "description": "Collection IDs to hide",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "default": {
+          "description": "Collection ID opened directly when the browser starts. When only one collection is allowed, it is opened automatically",
+          "type": "string"
+        },
+        "restrictSearch": {
+          "description": "When include or exclude is set, searches are always restricted to the allowed collections",
+          "type": "boolean",
+          "default": true
+        }
+      }
     },
     "filters": {
       "description": "Filter panel options",
@@ -31,9 +175,26 @@
           "default": true
         },
         "keyword": {
-          "description": "Enable keyword/text search",
+          "description": "Enable keyword/text search (hidden when the server does not support free-text search)",
           "type": "boolean",
           "default": true
+        },
+        "sort": {
+          "description": "Show interactive sort controls when the server supports sorting",
+          "type": "boolean",
+          "default": true
+        },
+        "properties": {
+          "description": "Enable CQL2 filters for all queryable properties, or allow only the listed property names",
+          "oneOf": [
+            { "type": "boolean" },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/TypeStacPropertyFilterConfig" }]
+              }
+            }
+          ]
         }
       }
     },
@@ -48,25 +209,67 @@
           "items": { "type": "string" }
         },
         "bbox": {
-          "description": "Default bbox [west, south, east, north]",
+          "description": "Default bbox [west, south, east, north] in EPSG:4326, applied to searches when the map extent is not used",
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
           "items": { "type": "number" }
         },
         "datetime": {
-          "description": "Default datetime filter (ISO 8601 interval)",
+          "description": "Default datetime filter (ISO 8601 interval, e.g. '1920-01-01T00:00:00Z/..')",
           "type": "string"
         },
         "limit": {
           "description": "Items per page",
           "type": "number",
           "default": 20
+        },
+        "sortBy": {
+          "description": "Sort criteria, only applied when the server supports sorting",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "description": "Field to sort on (e.g. 'datetime', 'properties.scale')",
+                "type": "string"
+              },
+              "direction": {
+                "description": "Sort direction",
+                "type": "string",
+                "enum": ["asc", "desc"]
+              }
+            },
+            "required": ["field", "direction"]
+          }
         }
       }
     },
+    "itemView": {
+      "$ref": "#/definitions/TypeStacItemView"
+    },
+    "preview": {
+      "$ref": "#/definitions/TypeStacPreview"
+    },
+    "footprintStyles": {
+      "description": "Styles for collection extents and search result footprints",
+      "$ref": "#/definitions/TypeStacFootprintStyles",
+      "default": {
+        "collection": { "color": "#1976d2", "fillOpacity": 0.2 },
+        "search": { "color": "#FF8C00", "fillOpacity": 0.25 }
+      }
+    },
+    "actions": {
+      "$ref": "#/definitions/TypeStacActions"
+    },
+    "collectionOverrides": {
+      "description": "Overrides of item display, preview, and actions keyed by STAC collection ID",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/TypeStacCollectionOverride" }
+    },
     "displayPreview": {
-      "description": "Show preview thumbnails on map",
+      "description": "Master switch to show previews on map",
       "type": "boolean",
       "default": true
     },

@@ -600,6 +600,43 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 
 > **Note:** Several panels (`legend`, `layers`, `details`, `data-table`, `guide`) are valid in both `appBar` and `footerBar`. If the same panel is declared in **both** bars, the viewer keeps the **app bar** occurrence, removes the duplicate from the **footer bar**, and shows a warning naming the removed panel(s). Declare each panel in only one bar to avoid this.
 
+#### STAC Browser package configuration
+
+The STAC Browser's service and display settings belong in `corePackagesConfig`, not directly in `appBar`. Full package configuration options are documented in the [STAC Browser README](../../../packages/geoview-stac-browser/README.md#configuration).
+
+```json
+{
+  "appBar": { "tabs": { "core": ["stac-browser"] } },
+  "corePackagesConfig": [
+    {
+      "stac-browser": {
+        "stacUrl": "https://eodms-sgdot.nrcan-rncan.gc.ca/search",
+        "collections": { "include": ["NAPL"], "default": "NAPL" },
+        "filters": {
+          "properties": ["scale", "altitude", "delivery_date"],
+          "sort": true
+        },
+        "defaults": {
+          "limit": 50,
+          "sortBy": [{ "field": "datetime", "direction": "desc" }]
+        },
+        "collectionOverrides": {
+          "NAPL": {
+            "itemView": {
+              "titleField": "properties.order_key",
+              "metadataFields": "all"
+            },
+            "preview": { "mode": "thumbnail" }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+Property filters are generated from the STAC API's `/queryables` endpoints and sent as CQL2 JSON. When multiple collections are selected, only queryable properties common to all of them are offered. `collectionOverrides` applies collection-specific item fields, preview selection, and actions over their package-level values.
+
 ---
 
 #### footerBar (Optional)
