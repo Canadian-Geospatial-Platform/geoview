@@ -11,7 +11,7 @@ export class GetStylesInvalidResponseError extends GeoViewError {
    * Creates an instance of GetStylesInvalidResponseError.
    */
   constructor() {
-    super('validation.wfsrenderer.getStylesInvalidResponse');
+    super('validation.wfsRenderer.getStylesInvalidResponse');
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GetStylesInvalidResponseError';
@@ -29,7 +29,7 @@ export class GetStylesNotSupportedError extends GeoViewError {
    * Creates an instance of GetStylesNotSupportedError.
    */
   constructor(cause: string) {
-    super('validation.wfsrenderer.getStylesNotSupported', { cause });
+    super('validation.wfsRenderer.getStylesNotSupported', { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GetStylesNotSupportedError';

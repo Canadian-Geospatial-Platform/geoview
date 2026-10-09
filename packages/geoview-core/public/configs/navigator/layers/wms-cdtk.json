@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Experimental: WMS layer examples from multiple CDTK (VPN required) services with associated WFS layers."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857

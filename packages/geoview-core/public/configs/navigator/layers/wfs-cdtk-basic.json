@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "WFS layer examples from multiple CDTK (VPN required) services without an associated WMS layer (or forced to not use their associated WMS layer via the 'fetchStylesOnWMS' config)."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857

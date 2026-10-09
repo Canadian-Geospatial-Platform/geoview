@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "WMS layer examples from multiple CDTK (VPN required) services without an associated WFS layer (or forced to not use their associated WFS layer via the 'fetchVectorsExternally' config)."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
