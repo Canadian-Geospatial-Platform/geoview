@@ -860,6 +860,11 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly CANIMAGE_WMS_GROUP_ID: string = 'canimage';
   static readonly CANIMAGE_WMS_LEAF_ID: string = 'canimage.natural-colour.overview8';
 
+  /** WMS — Quebec transport service with the ZPEGT group. */
+  static readonly TRANSPORTS_WMS_URL: string = 'https://ws.mapserver.transports.gouv.qc.ca/swtq';
+  static readonly TRANSPORTS_WMS_AIRPORT_LAYER_ID: string = 'aeroport';
+  static readonly TRANSPORTS_WMS_ZPEGT_LAYER_ID: string = 'zpegt';
+
   static readonly CBMT_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/CBMT?REQUEST=GetCapabilities&SERVICE=WMS';
   static readonly CBMT_WMS_LAYER_ID: string = 'National';
 
