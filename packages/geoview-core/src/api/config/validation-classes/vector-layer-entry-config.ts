@@ -2,6 +2,7 @@ import type { TypeGeoviewLayerType, TypeBaseVectorSourceInitialConfig } from '@/
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 
@@ -13,11 +14,12 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
-export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
   /** Max number of records for query */
   maxRecordCount?: number;
 
   /** The GetStyles full url that was used to generate the style, if any */
+  // GV Attribute is duplicated in the OGC WMS entry config to keep this state off unrelated base-layer entries.
   #wmsGetStylesFullUrl?: string;
 
   /**

@@ -15,6 +15,7 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 import { normalizeDatacubeAccessPath, sortByNameDefaultFirst } from '@/core/utils/utilities';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
@@ -29,8 +30,9 @@ export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 }
 
 /** Type used to define a GeoView image layer to display on the map. */
-export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
   /** The GetStyles full url that was used to generate the style, if any */
+  // GV Attribute is duplicated in the Vector entry config to keep this state off unrelated base-layer entries.
   #wmsGetStylesFullUrl?: string;
 
   /** The associated WFS layer config, if any */
