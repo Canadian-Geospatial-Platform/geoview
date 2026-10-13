@@ -539,7 +539,7 @@ export class FilterPanelController extends AbstractMapViewerController {
 
     filterPanelConfig.layers.forEach((layerConfig: TypeFilterLayerConfig) => {
       // Skip disabled layers
-      if (!layerConfig.enabled) return;
+      if (layerConfig.enabled === false) return;
 
       const { layerPath } = layerConfig;
 

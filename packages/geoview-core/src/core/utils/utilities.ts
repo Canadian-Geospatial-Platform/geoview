@@ -1885,7 +1885,7 @@ export function formatMeasurementValue(value: number, displayLanguage: TypeDispl
  * @param displayLanguage - The display language ('en' or 'fr')
  * @returns The formatted currency string
  */
-export function formatCurrencyValue(value: number, displayLanguage: TypeDisplayLanguage, currency = 'USD'): string {
+export function formatCurrencyValue(value: number, displayLanguage: TypeDisplayLanguage, currency = 'CAD'): string {
   return value.toLocaleString(DISPLAY_LANGUAGE_LOCALE[displayLanguage], { style: 'currency', currency });
 }
 

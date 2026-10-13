@@ -108,7 +108,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
       <Box sx={memoSxClasses.filterLayerContent}>
         <List>
           {config.layers
-            .filter((layer) => layer.enabled)
+            .filter((layer) => layer.enabled !== false)
             .map((layer) => (
               <ListItem key={layer.layerPath} sx={memoSxClasses.filterLayerListItem}>
                 <LayerFilterSection

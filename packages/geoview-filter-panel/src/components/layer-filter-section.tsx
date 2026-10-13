@@ -144,7 +144,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         // Now we can safely get unique values
         const values: Record<string, (string | number)[]> = {};
 
-        const enabledAttributes = layer.attributes.filter((attr) => attr.enabled);
+        const enabledAttributes = layer.attributes.filter((attr) => attr.enabled !== false);
         const results = enabledAttributes.map((attr) => {
           try {
             const uniqueValues = filterPanelController.getLayerFieldUniqueValues(layer.layerPath, attr);
@@ -171,7 +171,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         // Set empty values on error so loading state clears
         const emptyValues: Record<string, (string | number)[]> = {};
         layer.attributes.forEach((attr) => {
-          if (attr.enabled) {
+          if (attr.enabled !== false) {
             emptyValues[attr.fieldName] = [];
           }
         });
@@ -189,7 +189,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    */
   const renderFilterControl = useCallback(
     (attr: (typeof layer.attributes)[0]): JSX.Element | null => {
-      if (!attr.enabled) return null;
+      if (attr.enabled === false) return null;
 
       const value = filterState[attr.fieldName];
       const uniqueValues = fieldValues[attr.fieldName] || [];
@@ -266,7 +266,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     [layer, filterState, fieldValues, ListItem, layerName, onFilterChange, isRasterLayer]
   );
 
-  if (!layer.enabled) return null;
+  if (layer.enabled === false) return null;
 
   return (
     <Box sx={memoSxClasses.filterLayerSection}>

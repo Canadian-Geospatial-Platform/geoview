@@ -99,7 +99,7 @@ export interface TypeFilterLayerConfig {
   /** Display name for the layer. */
   layerName?: string;
   /** Whether filtering is enabled for this layer. */
-  enabled: boolean;
+  enabled?: boolean;
   /** Default collapsed state for layer sections. */
   defaultCollapsed?: boolean;
   /** Array of filterable attributes. */
@@ -175,7 +175,7 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
 
       // Initialize state only for enabled layers
       filterPanelConfig.layers.forEach((layer) => {
-        if (!layer.enabled) return; // Skip disabled layers
+        if (layer.enabled === false) return; // Skip disabled layers
 
         // Initialize with empty filter state (or default values from config)
         initialFilterState[layer.layerPath] = {};
@@ -192,7 +192,7 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
 
       // Initialize collapsed state from defaultCollapsed config
       filterPanelConfig.layers.forEach((layer) => {
-        if (!layer.enabled) return;
+        if (layer.enabled === false) return;
 
         // Set the collapsed state based on the defaultCollapsed config.
         initialCollapsedState[layer.layerPath] = layer.defaultCollapsed ?? false;
