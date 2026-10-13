@@ -1783,7 +1783,7 @@
         },
         "wmsLayerId": {
           "type": "string",
-          "description": "The layer name to use in the WMS GetStyles request for this vector layer. Set this when the matching WMS layer identifier differs from the vector layer's layerId. If omitted, GeoView uses layerId."
+          "description": "The layer name to use in the WMS GetStyles request for this vector layer. Set this when the matching WMS layer identifier differs from the vector layer's layerId. If omitted, GeoView uses layerId. If the ID starts with the MapServer ms: prefix and the first GetStyles attempt fails, GeoView retries once without the prefix; this is the reverse of the WFS wfsLayerId fallback, which adds the prefix on retry."
         },
         "layerName": {
           "type": "string",
@@ -1943,7 +1943,7 @@
         },
         "vectorTimeField": {
           "type": "string",
-          "description": "The exact attribute name in the associated WFS or OGC API Features records that corresponds to the WMS time dimension. GeoView uses it to apply the WMS time selection to vector records in client-side filtering, including the Data Table, when the WMS time field name is absent from the returned records. If omitted or unavailable, GeoView can infer a replacement only when the returned vector data contains exactly one date-typed field; otherwise, the time filter is not applied to those vector records. This setting does not change the WMS TIME request."
+          "description": "The exact attribute name in the associated WFS or OGC API Features records that corresponds to the WMS time dimension. GeoView uses it to apply the WMS time selection (notably the Time Slider) to vector records in client-side filtering, including the Data Table, when the WMS time field name is absent from the returned records. If omitted or unavailable, GeoView can infer a replacement only when the returned vector data contains exactly one date-typed field; otherwise, the time filter is not applied to those vector records."
         },
         "isLayerGroup": {
           "description": "Flag used to distinguish layer group nodes.",

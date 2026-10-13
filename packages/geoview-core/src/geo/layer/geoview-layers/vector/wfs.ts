@@ -431,7 +431,7 @@ export class WFS extends AbstractGeoViewVector {
       // For each field
       fields.forEach((fieldEntry) => {
         // If field entry is gml geometry type
-        if (this.isGmlGeometryField(fieldEntry)) {
+        if (GeoUtilities.isGmlGeometryField(fieldEntry.type)) {
           // Keep the geometry field for future use
           layerConfig.setGeometryField(fieldEntry);
 
@@ -595,38 +595,6 @@ export class WFS extends AbstractGeoViewVector {
   ): Promise<FetchWithProxyResult<TypeMetadataWFSCapabilities>> {
     // Redirect
     return GeoUtilities.getWFSServiceMetadata(url, configProxyUrl, abortSignal);
-  }
-
-  /**
-   * Determines whether a given WFS feature type field represents a geometry property.
-   *
-   * Checks if the field's type string starts with the `"gml:"` prefix, which indicates
-   * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
-   *
-   * @param field - The feature type field definition to evaluate
-   * @returns `true` if the field is a geometry field; otherwise, `false`
-   */
-  static isGmlGeometryField(field: TypeOutfields): boolean {
-    // Cast
-    const fieldType = field.type as string;
-
-    // Check if the field type matches any known GML geometry property types
-    return (
-      fieldType === 'gml:PointPropertyType' ||
-      fieldType === 'gml:MultiPointPropertyType' ||
-      fieldType === 'gml:CurvePropertyType' ||
-      fieldType === 'gml:MultiCurvePropertyType' ||
-      fieldType === 'gml:LineStringPropertyType' ||
-      fieldType === 'gml:MultiLineStringPropertyType' ||
-      fieldType === 'gml:SurfacePropertyType' ||
-      fieldType === 'gml:MultiSurfacePropertyType' ||
-      fieldType === 'gml:PolygonPropertyType' ||
-      fieldType === 'gml:MultiPolygonPropertyType' ||
-      fieldType === 'gml:SolidPropertyType' ||
-      fieldType === 'gml:MultiSolidPropertyType' ||
-      fieldType === 'gml:GeometryPropertyType' ||
-      fieldType === 'gml:MultiGeometryPropertyType'
-    );
   }
 
   /**
