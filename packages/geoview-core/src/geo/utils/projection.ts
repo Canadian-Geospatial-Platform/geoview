@@ -774,7 +774,8 @@ function initLCCProjection(): void {
  */
 function initCSRSProjection(): void {
   // define 4617 projection
-  proj4.defs(Projection.PROJECTION_NAMES.CSRS, '+proj=longlat +ellps=GRS80 +no_defs +type=crs');
+  // This shared setting enables north/east GML parsing for all EPSG:4617 layers; services sending x/y may need per-service handling.
+  proj4.defs(Projection.PROJECTION_NAMES.CSRS, '+proj=longlat +ellps=GRS80 +axis=neu +no_defs +type=crs');
   register(proj4);
 
   const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.CSRS);
