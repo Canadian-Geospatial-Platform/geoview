@@ -683,11 +683,11 @@ export async function validateAndPingUrlOGC(
     .replace(/\{x\}/gi, '1')
     .replace(/\{-?y\}/gi, '1');
 
-  // Build OGC GetCapabilities check URLs
+  // Build OGC GetCapabilities check URLs. Note the empty string as the fourth parameter for each service type, because we don't want to specify a version in this ping test
   const ogcCheckUrls = [
-    ensureServiceRequestUrl(resolvedUrl, 'WMS', 'GetCapabilities'),
-    ensureServiceRequestUrl(resolvedUrl, 'WFS', 'GetCapabilities'),
-    ensureServiceRequestUrl(resolvedUrl, 'WMTS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WMS', 'GetCapabilities', ''),
+    ensureServiceRequestUrl(resolvedUrl, 'WFS', 'GetCapabilities', ''),
+    ensureServiceRequestUrl(resolvedUrl, 'WMTS', 'GetCapabilities', ''),
   ];
 
   // If server responded with 4xx/5xx (status is set), try OGC GetCapabilities directly
