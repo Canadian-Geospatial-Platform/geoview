@@ -1126,13 +1126,27 @@ export type TypeMetadataWFS = {
 };
 
 export type TypeMetadataWFSCapabilities = {
+  '@attributes': TypeMetadataWFSAttributes;
   FeatureTypeList: TypeMetadataWFSFeatureTypeList;
   'wfs:FeatureTypeList'?: TypeMetadataWFSFeatureTypeList;
-  '@attributes': TypeMetadataWFSAttributes;
-  'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
+
+  'ows:OperationsMetadata'?: TypeMetadataWFSOperationMetadata; // Support WFS 1.1.0 and 2.0.0
+
+  Capability?: TypeMetadataWFSCapability; // Legacy support for WFS 1.0.0
 
   version?: string;
   serverType?: TypeOfServer;
+};
+
+export type TypeMetadataWFSCapability = {
+  Request: TypeMetadataWFSCapabilityRequest;
+};
+
+export type TypeMetadataWFSCapabilityRequest = {
+  // Define the structure of the WFS Capability Request here
+  GetCapabilities: unknown;
+  DescribeFeatureType: TypeMetadataWFSOperationMetadataOperation | undefined;
+  GetFeature: unknown;
 };
 
 export type TypeMetadataWFSFeatureTypeList = {
