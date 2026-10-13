@@ -1,7 +1,9 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeRangeValue } from '../../types';
 import { getSxClasses } from './control-styles';
@@ -20,6 +22,8 @@ interface RangeFilterProps {
   uniqueValues: number[];
   /** Whether the filter is loading. */
   loading: boolean;
+  /** Indicates if the layer is a raster layer. */
+  isRasterLayer: boolean;
 }
 
 /**
@@ -32,11 +36,11 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/range-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading } = props;
+  const { attribute, value, onChange, uniqueValues, loading, isRasterLayer } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useMemo, useCallback, useRef } = cgpv.reactUtilities.react;
+  const { useMemo, useCallback, useRef, useState } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Slider, Typography } = ui.elements;
 
@@ -46,6 +50,11 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   // Reference to which slider thumb (0 = start, 1 = end) was last interacted with
   const activeThumbRef = useRef<number>(1);
+
+  const controller = useFilterPanelController();
+  const displayLanguage = useStoreAppDisplayLanguage();
+
+  const [draggingValue, setDraggingValue] = useState<[number, number] | undefined>(undefined);
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -87,6 +96,8 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
     return [memoRangeValue.min ?? memoBounds.min, memoRangeValue.max ?? memoBounds.max];
   }, [memoRangeValue, memoBounds]);
 
+  const sliderValue = draggingValue ?? memoSliderValue;
+
   /**
    * Handles when the slider value changes.
    */
@@ -96,13 +107,34 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
       const [minValue, maxValue] = newValue as number[];
       activeThumbRef.current = activeThumb;
 
+      if (isRasterLayer) {
+        setDraggingValue([minValue, maxValue]);
+        return;
+      }
+
       onChange({
         min: minValue,
         max: maxValue,
       });
     },
 
-    [onChange]
+    [isRasterLayer, onChange]
+  );
+
+  /**
+   * Commits the slider value for raster layers once dragging ends
+   */
+  const handleSliderChangeCommitted = useCallback(
+    (newValue: number | number[]): void => {
+      if (!isRasterLayer) return;
+      const [minValue, maxValue] = newValue as number[];
+      setDraggingValue(undefined);
+      onChange({
+        min: minValue,
+        max: maxValue,
+      });
+    },
+    [isRasterLayer, onChange]
   );
 
   /**
@@ -138,12 +170,12 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
   );
 
   /**
-   * Formats the slider value for display.
+   * Formats the slider value for display using the controller's formatting logic.
    */
-  const formatValue = useCallback((val: number): string => {
-    // Format with appropriate precision
-    return Number.isInteger(val) ? val.toString() : val.toFixed(2);
-  }, []);
+  const formatValue = useCallback(
+    (val: number): string => controller.formatNumberForDisplay(val, attribute, displayLanguage),
+    [controller, attribute, displayLanguage]
+  );
 
   if (loading) {
     return (
@@ -165,7 +197,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          {t('FilterPanel.noNumericValuesAvailable')}
+          {t('FilterPanel.noNumericValues')}
         </Typography>
       </Box>
     );
@@ -179,8 +211,9 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
       <Box sx={memoSxClasses.filterSliderContainer}>
         <Slider
-          value={memoSliderValue}
+          value={sliderValue}
           onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
           onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
           onValueLabelFormat={formatValue}

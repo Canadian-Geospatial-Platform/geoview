@@ -68,6 +68,10 @@ export interface TypeFilterAttribute {
   dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
   /** Optional step interval for range filters. Only applies when filterType is 'range'. */
   rangeStep?: number;
+  /** Number formatting style for range filters. 'currency' adds a symbol and two decimals. Only applies when filterType is 'range'. */
+  numberFormat?: 'number' | 'currency';
+  /** Currency code for formatting range values when numberFormat is 'currency'. Only applies when filterType is 'range'. */
+  currency?: string;
   /** Optional flag indicating if the attribute is searchable. Multiselect only. */
   searchable?: boolean;
 }
@@ -95,7 +99,7 @@ export interface TypeFilterLayerConfig {
   /** Display name for the layer. */
   layerName?: string;
   /** Whether filtering is enabled for this layer. */
-  enabled: boolean;
+  enabled?: boolean;
   /** Default collapsed state for layer sections. */
   defaultCollapsed?: boolean;
   /** Array of filterable attributes. */
@@ -171,7 +175,7 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
 
       // Initialize state only for enabled layers
       filterPanelConfig.layers.forEach((layer) => {
-        if (!layer.enabled) return; // Skip disabled layers
+        if (layer.enabled === false) return; // Skip disabled layers
 
         // Initialize with empty filter state (or default values from config)
         initialFilterState[layer.layerPath] = {};
@@ -188,7 +192,7 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
 
       // Initialize collapsed state from defaultCollapsed config
       filterPanelConfig.layers.forEach((layer) => {
-        if (!layer.enabled) return;
+        if (layer.enabled === false) return;
 
         // Set the collapsed state based on the defaultCollapsed config.
         initialCollapsedState[layer.layerPath] = layer.defaultCollapsed ?? false;

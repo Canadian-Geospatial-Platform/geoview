@@ -2,6 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeDateRangeValue } from '../../types';
@@ -21,6 +22,8 @@ interface DateFilterProps {
   uniqueValues: (string | number)[];
   /** Whether the filter is loading. */
   loading: boolean;
+  /** Indicates if the layer is a raster layer. */
+  isRasterLayer: boolean;
 }
 
 /**
@@ -33,11 +36,11 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/date-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading } = props;
+  const { attribute, value, onChange, uniqueValues, loading, isRasterLayer } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useMemo, useCallback, useRef } = cgpv.reactUtilities.react;
+  const { useMemo, useCallback, useRef, useState } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Slider, Typography } = ui.elements;
 
@@ -46,9 +49,11 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const controller = useFilterPanelController();
+  const displayLanguage = useStoreAppDisplayLanguage();
 
   // Track which thumb (0 = start, 1 = end) was last interacted with
   const activeThumbRef = useRef<number>(1);
+  const [draggingValue, setDraggingValue] = useState<[number, number] | undefined>(undefined);
 
   /**
    * Memoized date value to prevent dependency changes on every render.
@@ -106,6 +111,8 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
     return [startTimestamp, endTimestamp];
   }, [memoDateValue, memoBounds]);
 
+  const sliderValue = draggingValue ?? memoSliderValue;
+
   /**
    * Handles when the slider value changes.
    */
@@ -117,13 +124,34 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
       // Assert that newValue is number[] since this is a range slider
       const [start, end] = newValue as number[];
 
+      if (isRasterLayer) {
+        setDraggingValue([start, end]);
+        return;
+      }
+
       // Convert timestamps to YYYY-MM-DD strings using the controller
       onChange({
         start: controller.formatDateForFilter(start),
         end: controller.formatDateForFilter(end),
       });
     },
-    [controller, onChange]
+    [controller, onChange, isRasterLayer]
+  );
+
+  /**
+   * Commits the slider value for raster layers once dragging ends.
+   */
+  const handleSliderChangeCommitted = useCallback(
+    (newValue: number | number[]): void => {
+      if (!isRasterLayer) return;
+      const [start, end] = newValue as number[];
+      setDraggingValue(undefined);
+      onChange({
+        start: controller.formatDateForFilter(start),
+        end: controller.formatDateForFilter(end),
+      });
+    },
+    [isRasterLayer, controller, onChange]
   );
 
   /**
@@ -174,9 +202,9 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
    */
   const formatValue = useCallback(
     (timestamp: number): string => {
-      return controller.formatDateForDisplay(timestamp);
+      return controller.formatDateForDisplay(timestamp, displayLanguage);
     },
-    [controller]
+    [controller, displayLanguage]
   );
 
   if (loading) {
@@ -213,8 +241,9 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
 
       <Box sx={memoSxClasses.filterSliderContainer}>
         <Slider
-          value={memoSliderValue}
+          value={sliderValue}
           onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
           onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
           valueLabelFormat={formatValue}

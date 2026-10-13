@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "Filter Panel package configuration with two layers and multiple attributes for filtering for each of the filter types (select, multiselect, range, date). The filter panel is open by default in this demo."
+    "description": "Filter Panel package configuration with three layers and multiple attributes for filtering for each of the filter types (select, multiselect, range, date). The filter panel is open by default in this demo."
   },
   "map": {
     "viewSettings": {
@@ -36,6 +36,22 @@
             "layerId": "0"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "dwelling-values",
+        "geoviewLayerName": "Average value of dwelling (dollars) by census division, 2016",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/cd_socioeconomic_variables_2016_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
       }
     ]
   },
@@ -142,6 +158,49 @@
                   "end": "2007-08-20"
                 },
                 "dateStep": "year"
+              }
+            ]
+          },
+          {
+            "layerPath": "dwelling-values/2",
+            "enabled": true,
+            "attributes": [
+              {
+                "fieldName": "AVG_DWELLING_EN",
+                "displayLabel": "Average Dwelling Value",
+                "filterType": "range",
+                "enabled": true,
+                "rangeStep": 10000,
+                "defaultValues": {
+                  "min": 0,
+                  "max": 1005920
+                },
+                "numberFormat": "currency",
+                "currency": "CAD"
+              }
+            ]
+          },
+          {
+            "layerPath": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b/pub:WHSE_HUMAN_CULTURAL_ECONOMIC.MPI_ECON_MAJOR_PROJECTS_POINT",
+            "enabled": true,
+            "attributes": [
+              {
+                "fieldName": "PROJECT_TYPE",
+                "displayLabel": "Project Type",
+                "filterType": "multiselect",
+                "searchable": true
+              },
+              {
+                "fieldName": "PROJECT_NAME",
+                "displayLabel": "Project Name",
+                "filterType": "multiselect",
+                "searchable": true
+              },
+              {
+                "fieldName": "DEVELOPER",
+                "displayLabel": "Developer",
+                "filterType": "multiselect",
+                "searchable": true
               }
             ]
           }

@@ -1701,6 +1701,8 @@ type RangeFilterAttribute = {
   filterType: "range";
   enabled?: boolean;
   rangeStep?: number;
+  numberFormat?: "number" | "currency";
+  currency?: string;
   defaultValues?: { min: number | null; max: number | null } | null;
 };
 
@@ -1757,6 +1759,8 @@ type DateFilterAttribute = {
 
 - **defaultValues** (object | null): Initial range with `min` and `max` properties (e.g., `{ "min": 0, "max": 100 }`)
 - **rangeStep** (number, default: 1): Keyboard arrow key increment for range slider navigation. Useful for large ranges (e.g., 0-100000 with step of 1000) or small/decimal ranges (e.g., 0.0-1.0 with step of 0.01). Must be a positive number.
+- **numberFormat** (string, default: "number"): Display formatting for the slider's value labels. `"number"` shows plain numbers grouped with thousand separators; `"currency"` adds a currency symbol and two decimal places. Formatting is locale-aware based on the viewer's display language (e.g., `1,234.56` in English vs `1 234,56` in French).
+- **currency** (string, default: "USD"): [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code used when `numberFormat` is `"currency"` (e.g., `"CAD"`, `"USD"`, `"JPY"`, `"EUR"`).
 
 **Date filter properties:**
 
