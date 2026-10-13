@@ -218,7 +218,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig impleme
    */
   getSupportsGetStyles(): boolean {
     return (
-      !!this.getServiceMetadata()?.Capability.Request['qgs:GetStyles'] || !!this.getServiceMetadata()?.Capability.Request['ms:GetStyles']
+      !!this.getServiceMetadata()?.Capability.Request['qgs:GetStyles'] ||
+      !!this.getServiceMetadata()?.Capability.Request['ms:GetStyles'] ||
+      !!this.getServiceMetadata()?.Capability.Request['esri_wms:GetStyles']
     );
   }
 
