@@ -26,10 +26,10 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { TemporalMode } from '@/core/utils/date-mgt';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
+import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
@@ -221,7 +221,7 @@ export class GVEsriImage extends AbstractGVRaster {
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
+    GVLayerUtilities.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
   /**

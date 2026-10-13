@@ -1,7 +1,7 @@
 import ImageLayer from 'ol/layer/Image';
 import type { Options as ImageOptions } from 'ol/layer/BaseImage';
 import type { Coordinate } from 'ol/coordinate';
-import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { ImageWMS } from 'ol/source';
 import type { ImageSourceEvent } from 'ol/source/Image';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
@@ -14,9 +14,8 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type {
@@ -37,11 +36,7 @@ import {
   MIME_TYPE_FORMAT_TEXT,
   MIME_TYPE_FORMAT_TEXT_XML,
 } from '@/api/types/layer-schema-types';
-import {
-  LayerConfigWFSMissingError,
-  LayerInvalidFeatureInfoFormatWMSError,
-  LayerInvalidLayerFilterError,
-} from '@/core/exceptions/layer-exceptions';
+import { LayerConfigWFSMissingError, LayerInvalidFeatureInfoFormatWMSError } from '@/core/exceptions/layer-exceptions';
 import {
   LayerImageFailedNoImageError,
   LayerImageFailedToLoadHeightTooBigError,
@@ -52,14 +47,12 @@ import {
 } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
-import { DateMgt } from '@/core/utils/date-mgt';
 import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
@@ -628,7 +621,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
+    GVLayerUtilities.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
   // #endregion OVERRIDES
@@ -1084,178 +1077,9 @@ export class GVWMS extends AbstractGVRaster {
 
   // #region STATIC PUBLIC METHODS
 
-  /**
-   * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
-   *
-   * This function is responsible for generating the appropriate filter expression based on the layer configuration,
-   * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
-   *
-   * @param layerConfig - The configuration object for the WMS or Esri Image layer
-   * @param source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied
-   * @param filter - The raw filter string input (defaults to an empty string if not provided)
-   * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied
-   */
-  static applyViewFilterOnSource(
-    layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig,
-    source: ImageWMS | ImageArcGISRest,
-    filter: LayerFilters | undefined
-  ): void {
-    // Create the source parameter to update
-    const sourceParams: { TIME?: string; FILTER?: string } = {};
-
-    // Parse
-    let currentDataFilter: string | undefined;
-    let currentDatetimeFilter: string | undefined;
-    let newDataFilter: string | undefined;
-    let newDatetimeFilter: string | undefined;
-    try {
-      // Get the current data filter
-      currentDataFilter = source.getParams()['FILTER'];
-
-      // Get the current datetime filter
-      currentDatetimeFilter = source.getParams()['TIME'];
-
-      // If working with a WMS layer entry config, it's possible that it's filtered based on its style, which is no possible with Esri Image
-      if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-        // Init to nothing
-        sourceParams.FILTER = undefined;
-
-        // Get the data filters if any
-        newDataFilter = filter?.getDataRelatedFilters();
-
-        // If filtering
-        if (newDataFilter) {
-          // Build a OGC Filter for the filter
-          const ogcXmlFilter = WfsRenderer.sqlToOlFilterXml(
-            newDataFilter,
-            layerConfig.getVersionOrDefault(),
-            layerConfig.getOutfields()?.[0]?.name!
-          );
-
-          // Wrap the ogc filter request
-          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', false);
-        }
-      }
-
-      // Init to nothing
-      sourceParams.TIME = undefined;
-
-      // Check the time filter
-      newDatetimeFilter = filter?.getTimeFilter();
-      if (newDatetimeFilter) {
-        if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-          sourceParams.TIME = GVWMS.#parseTimeFilterForWms(newDatetimeFilter, layerConfig.getServiceDateTimezone());
-        } else {
-          sourceParams.TIME = GVWMS.#parseTimeFilterForEsriImage(newDatetimeFilter);
-        }
-      }
-
-      // Determine if we should update the filter
-      const shouldUpdateFilter = sourceParams.FILTER !== currentDataFilter || sourceParams.TIME !== currentDatetimeFilter;
-
-      // If should update the filtering
-      if (shouldUpdateFilter) {
-        // Update the source param
-        source.updateParams(sourceParams);
-      }
-    } catch (error: unknown) {
-      // Failed
-      throw new LayerInvalidLayerFilterError(
-        layerConfig.layerPath,
-        layerConfig.getLayerNameCascade(),
-        `data: ${newDataFilter}, datetime: ${newDatetimeFilter}`,
-        `data: ${currentDataFilter}, datetime: ${currentDatetimeFilter}`,
-        formatError(error)
-      );
-    }
-  }
-
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
-
-  /**
-   * Converts a reusable time filter predicate into a WMS TIME parameter value.
-   *
-   * @param timeFilter - Time filter predicate to convert
-   * @param timezone - Optional service timezone used to normalize date values
-   * @returns The WMS TIME parameter value
-   * @throws {Error} When the time filter does not use a supported predicate
-   */
-  static #parseTimeFilterForWms(timeFilter: string, timezone?: string): string {
-    // Preserve support for the previous WMS-specific syntax while existing callers migrate.
-    const legacyQueryElements = timeFilter.split(/(?<=\b)\s*=/);
-    if (legacyQueryElements.length > 1 && /\bdate\s*'/i.test(legacyQueryElements[1])) {
-      return GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(legacyQueryElements[1].trim(), timezone).replace(/\s*/g, '');
-    }
-
-    const normalizeDate = (date: string): string => {
-      return GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(`date '${date}'`, timezone);
-    };
-    const timeValues = GVWMS.#parseCanonicalTimeFilterValues(timeFilter);
-
-    return timeValues.map(normalizeDate).join('/');
-  }
-
-  /**
-   * Converts a reusable time filter predicate into an Esri Image TIME parameter value.
-   *
-   * @param timeFilter - Time filter predicate to convert
-   * @returns The Esri Image TIME parameter value
-   * @throws {Error} When the time filter does not use a supported predicate
-   */
-  static #parseTimeFilterForEsriImage(timeFilter: string): string {
-    // Preserve support for the previous ImageServer-specific syntax while existing callers migrate.
-    const legacyTimeMatch = /^\s*time\s*=\s*(\d+)(?:\s*,\s*(\d+))?\s*$/i.exec(timeFilter);
-    if (legacyTimeMatch)
-      return legacyTimeMatch
-        .slice(1)
-        .filter((value) => value !== undefined)
-        .join(',');
-
-    return GVWMS.#parseCanonicalTimeFilterValues(timeFilter)
-      .map((date) => DateMgt.convertToMilliseconds(date))
-      .join(',');
-  }
-
-  /**
-   * Extracts date values from a reusable equality or bounded-range time predicate.
-   *
-   * @param timeFilter - Time filter predicate to parse
-   * @returns The selected date values in predicate order
-   * @throws {Error} When the time filter does not use a supported predicate
-   */
-  static #parseCanonicalTimeFilterValues(timeFilter: string): string[] {
-    const filterEquation = GeoviewRenderer.createFilterNodeFromFilter(timeFilter);
-
-    const isSingleDate =
-      filterEquation.length === 3 &&
-      filterEquation[0].nodeType === NodeType.variable &&
-      filterEquation[1].nodeType === NodeType.binary &&
-      filterEquation[1].nodeValue === '=' &&
-      filterEquation[2].nodeType === NodeType.string &&
-      typeof filterEquation[2].nodeValue === 'string';
-    if (isSingleDate) return [filterEquation[2].nodeValue as string];
-
-    const isDateRange =
-      filterEquation.length === 7 &&
-      filterEquation[0].nodeType === NodeType.variable &&
-      filterEquation[1].nodeType === NodeType.binary &&
-      ['>', '>='].includes(filterEquation[1].nodeValue as string) &&
-      filterEquation[2].nodeType === NodeType.string &&
-      typeof filterEquation[2].nodeValue === 'string' &&
-      filterEquation[3].nodeType === NodeType.binary &&
-      filterEquation[3].nodeValue === 'and' &&
-      filterEquation[4].nodeType === NodeType.variable &&
-      filterEquation[4].nodeValue === filterEquation[0].nodeValue &&
-      filterEquation[5].nodeType === NodeType.binary &&
-      ['<', '<='].includes(filterEquation[5].nodeValue as string) &&
-      filterEquation[6].nodeType === NodeType.string &&
-      typeof filterEquation[6].nodeValue === 'string';
-    if (isDateRange) return [filterEquation[2].nodeValue as string, filterEquation[6].nodeValue as string];
-
-    throw new Error(`Unsupported time filter syntax`);
-  }
 
   /**
    * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),

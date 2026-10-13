@@ -283,12 +283,17 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       // If the layer is WMS and it has a WFS associated but that WFS has no layerStyle
       let forceAcceptWithoutSymbol = false;
       if (layer instanceof GVWMS) {
+        // If the WMS has a WFS layer config associated with it
         const wfsLayerConfig = layer.getLayerConfig().getWfsLayerConfig();
-
-        // TODO: CHECK - Should we also consider the OGC Feature API layer config here?
-        // If it has a WFS layer config associated with it
         if (wfsLayerConfig && !wfsLayerConfig.getLayerStyle()) {
           // The WFS layer config has no layer style defined, it means the vectorial features are unsymbolized and we shouldn't filter out their featureIcon
+          forceAcceptWithoutSymbol = true;
+        }
+
+        // If the WMS has an OGC Feature API layer config associated with it
+        const ogcApiFeatureLayerConfig = layer.getLayerConfig().getOGCApiFeaturesLayerConfig();
+        if (ogcApiFeatureLayerConfig && !ogcApiFeatureLayerConfig.getLayerStyle()) {
+          // The OGC API Feature layer config has no layer style defined, it means the vectorial features are unsymbolized and we shouldn't filter out their featureIcon
           forceAcceptWithoutSymbol = true;
         }
       }
