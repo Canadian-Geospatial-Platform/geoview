@@ -158,6 +158,19 @@
             "wmsLayerId": "0"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "beaufort-mackenzie-1-0",
+        "geoviewLayerName": "Beaufort_Mackenzie 1.0.0",
+        "metadataAccessPath": "https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WFSServer?version=1.0.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "esri:Grille_de_référence___Reference_Grid",
+            "wmsUrl": "https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WMSServer",
+            "wmsLayerId": "0"
+          }
+        ]
       }
     ]
   },

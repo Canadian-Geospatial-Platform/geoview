@@ -69,6 +69,23 @@ interface EsriJSONReadResult {
   dataProjection?: ProjectionLike;
 }
 
+/** GML elements whose srsName controls OpenLayers axis-order parsing. */
+const GML_GEOMETRY_ELEMENT_NAMES = new Set([
+  'Point',
+  'MultiPoint',
+  'LineString',
+  'MultiLineString',
+  'LinearRing',
+  'Polygon',
+  'MultiPolygon',
+  'Surface',
+  'MultiSurface',
+  'Curve',
+  'MultiCurve',
+  'Envelope',
+  'Box',
+]);
+
 // #region FETCH METADATA - PUBLIC METHODS
 
 export abstract class GeoUtilities {
@@ -1406,13 +1423,17 @@ export abstract class GeoUtilities {
     outProjection?: ProjectionLike
   ): Promise<SourceFeaturesInfo> {
     const format = new WFS({ version });
+    const wfsSource = typeof wfs === 'string' ? new DOMParser().parseFromString(wfs, 'text/xml') : wfs;
 
     // Read the EPSG from the GML content
-    const interpretedProjection = GeoUtilities.readEPSGOfGML(wfs);
+    const interpretedProjection = GeoUtilities.readEPSGOfGML(wfsSource);
 
     // If the projection was interpreted from the data, use that
-    // eslint-disable-next-line no-param-reassign
-    if (interpretedProjection) inProjection = interpretedProjection;
+    if (interpretedProjection) {
+      // eslint-disable-next-line no-param-reassign
+      inProjection = interpretedProjection;
+      GeoUtilities.#applyGmlProjectionFallback(wfsSource, inProjection);
+    }
 
     // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
     // or fall back to format-detected projection when no inProjection is available
@@ -1425,7 +1446,7 @@ export abstract class GeoUtilities {
     }
 
     // Read the features
-    const features = format.readFeatures(wfs, { dataProjection, featureProjection: outProjection });
+    const features = format.readFeatures(wfsSource, { dataProjection, featureProjection: outProjection });
 
     // Return the features and the interpreted source projection
     return { features, dataProjection };
@@ -1546,6 +1567,32 @@ export abstract class GeoUtilities {
   // #region GEOMETRY - PRIVATE METHODS
 
   /**
+   * Adds an srsName to GML geometry elements that do not declare one.
+   *
+   * OpenLayers reads axis order from the geometry element's srsName, but some WFS responses declare the CRS only on an ancestor. This copies the
+   * nearest ancestor's srsName, or uses the response's detected CRS when no ancestor declares one. Existing geometry-level values are preserved.
+   * Only GML 3.1 and 3.2 geometry elements are updated.
+   *
+   * @param gml - XML document or element containing the GML geometries
+   * @param srsName - Detected response CRS used when no ancestor declares an srsName
+   */
+  static #applyGmlProjectionFallback(gml: unknown, srsName: string): void {
+    if (typeof gml !== 'object' || gml === null || !('querySelectorAll' in gml)) return;
+
+    const xml = gml as Document | Element;
+    for (const geometry of xml.querySelectorAll('*')) {
+      const isGmlGeometry =
+        (geometry.namespaceURI === 'http://www.opengis.net/gml' || geometry.namespaceURI === 'http://www.opengis.net/gml/3.2') &&
+        GML_GEOMETRY_ELEMENT_NAMES.has(geometry.localName);
+
+      if (isGmlGeometry && !geometry.hasAttribute('srsName')) {
+        const inheritedSrsName = geometry.parentElement?.closest('[srsName]')?.getAttribute('srsName');
+        geometry.setAttribute('srsName', inheritedSrsName || srsName);
+      }
+    }
+  }
+
+  /**
    * Extracts an EPSG code from a SRS/CRS standard string.
    *
    * Supports common formats used in GeoJSON/WFS/GML.
@@ -1557,11 +1604,11 @@ export abstract class GeoUtilities {
     // "http://www.opengis.net/gml/srs/epsg.xml#4326" -> EPSG:4326
     // "urn:x-ogc:def:crs:EPSG:6.6:4326" -> EPSG:4326
 
-    // Direct "EPSG:xxxx"
-    if (name.startsWith('EPSG:')) return name;
+    const epsgIndex = name.toLowerCase().lastIndexOf('epsg');
+    if (epsgIndex === -1) return undefined;
 
-    // URN formats
-    const match = name.match(/EPSG[:/]+(\d+)/i);
+    // CRS URNs can include an EPSG database version before the actual code.
+    const match = name.slice(epsgIndex + 'EPSG'.length).match(/(?:^|[:/#])(\d+)$/);
     if (match) return `EPSG:${match[1]}`;
 
     return undefined;
