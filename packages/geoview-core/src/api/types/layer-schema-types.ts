@@ -897,6 +897,7 @@ export type TypeMetadataWMSCapabilityRequest = {
   'sld:DescribeLayer'?: unknown;
   'qgs:GetStyles'?: unknown; // QGIS GetStyles
   'ms:GetStyles'?: unknown; // MapServer GetStyles
+  'esri_wms:GetStyles'?: unknown; // Esri WMS GetStyles
 };
 
 export type TypeMetadataWMSCapabilityRequestGetMap = {
@@ -1126,6 +1127,7 @@ export type TypeMetadataWFS = {
 
 export type TypeMetadataWFSCapabilities = {
   FeatureTypeList: TypeMetadataWFSFeatureTypeList;
+  'wfs:FeatureTypeList'?: TypeMetadataWFSFeatureTypeList;
   '@attributes': TypeMetadataWFSAttributes;
   'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
 
@@ -1135,13 +1137,20 @@ export type TypeMetadataWFSCapabilities = {
 
 export type TypeMetadataWFSFeatureTypeList = {
   FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
+  'wfs:FeatureType'?: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
 };
 
 export type TypeMetadataWFSFeatureTypeListFeatureType = {
   Name: string | TypeMetadataWFSTextOnly;
+  'wfs:Name'?: string | TypeMetadataWFSTextOnly;
   Title: string | TypeMetadataWFSTextOnly;
+  'wfs:Title'?: string | TypeMetadataWFSTextOnly;
   DefaultSRS: string | TypeMetadataWFSTextOnly;
+  DefaultCRS?: string | TypeMetadataWFSTextOnly;
+  'wfs:DefaultSRS'?: string | TypeMetadataWFSTextOnly;
+  'wfs:DefaultCRS'?: string | TypeMetadataWFSTextOnly;
   OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
+  'wfs:OutputFormats'?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
   'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
 };
 
@@ -1156,6 +1165,7 @@ export type TypeMetadataWFSTextOnly = {
 
 export type TypeMetadataWFSFeatureTypeListFeatureOutputFormat = {
   Format?: string | (string | TypeMetadataWFSTextOnly)[];
+  'wfs:Format'?: string | (string | TypeMetadataWFSTextOnly)[];
 };
 
 export type TypeMetadataWFSAttributes = {

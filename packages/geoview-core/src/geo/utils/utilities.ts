@@ -69,7 +69,7 @@ interface EsriJSONReadResult {
   dataProjection?: ProjectionLike;
 }
 
-// #region FETCH METADATA
+// #region FETCH METADATA - PUBLIC METHODS
 
 export abstract class GeoUtilities {
   /**
@@ -370,11 +370,14 @@ export abstract class GeoUtilities {
 
     // If it's an array, find the best object in the array
     if (Array.isArray(metadataResult)) {
-      metadataResult = metadataResult.find((obj) => obj.FeatureTypeList);
+      metadataResult = metadataResult.find((obj) => obj.FeatureTypeList || obj['wfs:FeatureTypeList']);
     }
 
     // Validate and extend metadata result
     metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(data, metadataResult);
+
+    // Normalize the Json to make it more uniform,
+    this.#helperParseCapabilityWFS(metadataResult);
 
     // Return it
     return { data: metadataResult, proxyUsed };
@@ -590,10 +593,6 @@ export abstract class GeoUtilities {
     return result;
   }
 
-  // #endregion FETCH METADATA
-
-  // #region FETCH METADATA - PRIVATE METHODS
-
   /**
    * Validates the Esri proxy error in the parsed metadata.
    *
@@ -625,6 +624,55 @@ export abstract class GeoUtilities {
       xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
     ) {
       throw new NetworkError('The Esri proxy returned an error with the underlying url.', '500');
+    }
+  }
+
+  // #endregion FETCH METADATA - PUBLIC METHODS
+
+  // #region FETCH METADATA - PRIVATE METHODS
+
+  /**
+   * Normalizes WFS capabilities property names and CRS aliases.
+   *
+   * @param metadataResult - Parsed WFS capabilities to normalize
+   */
+  static #helperParseCapabilityWFS(metadataResult: TypeMetadataWFSCapabilities): void {
+    this.#helperNormalizeWfsNamespaceRec(metadataResult);
+
+    const featureTypes = metadataResult.FeatureTypeList?.FeatureType;
+    if (!featureTypes) return;
+
+    const featureTypeList = Array.isArray(featureTypes) ? featureTypes : [featureTypes];
+    featureTypeList.forEach((featureType) => {
+      if (featureType.DefaultSRS === undefined && featureType.DefaultCRS !== undefined) {
+        // eslint-disable-next-line no-param-reassign
+        featureType.DefaultSRS = featureType.DefaultCRS;
+      }
+      // eslint-disable-next-line no-param-reassign
+      delete featureType.DefaultCRS;
+    });
+  }
+
+  /**
+   * Normalizes WFS-prefixed property names recursively.
+   *
+   * @param value - Value to normalize
+   */
+  static #helperNormalizeWfsNamespaceRec(value: unknown): void {
+    if (Array.isArray(value)) {
+      for (const item of value) this.#helperNormalizeWfsNamespaceRec(item);
+      return;
+    }
+    if (typeof value !== 'object' || value === null) return;
+
+    const properties = value as Record<string, unknown>;
+    for (const [key, propertyValue] of Object.entries(properties)) {
+      this.#helperNormalizeWfsNamespaceRec(propertyValue);
+      if (key.startsWith('wfs:')) {
+        const normalizedKey = key.slice('wfs:'.length);
+        if (properties[normalizedKey] === undefined) properties[normalizedKey] = propertyValue;
+        delete properties[key];
+      }
     }
   }
 
@@ -1096,7 +1144,7 @@ export abstract class GeoUtilities {
 
   // #endregion LEGEND
 
-  // #region PARSING FEATURE PUBLIC
+  // #region PARSING FEATURE
 
   /**
    * Extracts a scalar time position from a parsed GML temporal value.
@@ -1122,9 +1170,9 @@ export abstract class GeoUtilities {
     return value;
   }
 
-  // #endregion PARSING FEATURE PUBLIC
+  // #endregion PARSING FEATURE
 
-  // #region GEOMETRY PUBLIC
+  // #region GEOMETRY - PUBLIC METHODS
 
   /**
    * Returns the WKT representation of a given geometry.
@@ -1493,9 +1541,9 @@ export abstract class GeoUtilities {
     });
   }
 
-  // #endregion GEOMETRY PUBLIC
+  // #endregion GEOMETRY - PUBLIC METHODS
 
-  // #region GEOMETRY PRIVATE
+  // #region GEOMETRY - PRIVATE METHODS
 
   /**
    * Extracts an EPSG code from a SRS/CRS standard string.
@@ -1575,7 +1623,7 @@ export abstract class GeoUtilities {
     return cleanedFeatures;
   }
 
-  // #endregion GEOMETRY PRIVATE
+  // #endregion GEOMETRY - PRIVATE METHODS
 
   // #region VARIA
 
