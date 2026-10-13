@@ -25,13 +25,15 @@ interface UseMapResizeProps {
 type TypeUseMapResize = {
   /** The ref for the map shell container. */
   mapShellContainerRef: React.RefObject<HTMLDivElement | null>;
+  /** The host inline height captured before it was overridden with 'fit-content', if overridden. */
+  hostOriginalHeightRef: React.RefObject<string | undefined>;
 };
 
 /**
  * Hook that manages map shell container resizing based on fullscreen and footer panel state.
  *
  * @param props - The resize hook configuration properties
- * @returns An object containing the mapShellContainerRef
+ * @returns An object containing the mapShellContainerRef and hostOriginalHeightRef
  */
 export const useMapResize = ({
   isMapFullScreen,
@@ -43,6 +45,7 @@ export const useMapResize = ({
   appHeight,
 }: UseMapResizeProps): TypeUseMapResize => {
   const mapShellContainerRef = useRef<HTMLDivElement>(null);
+  const hostOriginalHeightRef = useRef<string | undefined>(undefined);
 
   /**
    * Updates map height when toggling fullscreen and changing footer panel size.
@@ -93,6 +96,9 @@ export const useMapResize = ({
 
     // Update mapDiv height to accomodate the footerbar
     if (isFooterBar) {
+      // Keep the authored height so host resize sync can still resolve it (e.g. 100%) after the override
+      if (geoviewElement.style.height !== 'fit-content') hostOriginalHeightRef.current = geoviewElement.style.height;
+
       Object.assign(geoviewElement.style, {
         height: 'fit-content',
         transition: 'height 0.2s ease-out 0.2s',
@@ -100,7 +106,7 @@ export const useMapResize = ({
     }
   }, [geoviewElement, isFooterBar]);
 
-  return { mapShellContainerRef };
+  return { mapShellContainerRef, hostOriginalHeightRef };
 };
 
 // #endregion USE MAP RESIZE
