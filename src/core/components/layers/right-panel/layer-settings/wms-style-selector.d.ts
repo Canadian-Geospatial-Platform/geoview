@@ -1,15 +1,16 @@
+/** Properties for the WMS style settings panel. */
 interface WmsStylePanelProps {
     /** The layer path to configure WMS styles for. */
     layerPath: string;
 }
 /**
- * Inline panel section for selecting WMS styles.
+ * Creates the inline WMS style settings panel.
  *
  * Displays available styles as cards within a collapsible section,
  * consistent with the raster function panel pattern.
  *
- * @param layerPath - The layer path to configure WMS styles for.
- * @returns A JSX element representing the WMS style panel.
+ * @param props - Properties defined in WmsStylePanelProps interface
+ * @returns The WMS style panel
  */
 export declare function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element;
 export {};

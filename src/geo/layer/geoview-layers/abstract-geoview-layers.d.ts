@@ -346,6 +346,23 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getAllLayerEntryConfigs(): ConfigBaseClass[];
     /**
+     * Reprocesses a single leaf layer entry in place, reusing the already-fetched service metadata.
+     *
+     * Re-validates the entry (re-raising its error when still invalid), reprocesses its metadata, and recreates its
+     * GV layer — emitting the same events as the initial load so the entry re-registers in the domain and layer sets.
+     * Used to reload one errored child without rebuilding the whole GeoView layer; the caller slots the returned GV
+     * layer into its parent group and records any processing errors.
+     *
+     * @param layerConfig - The leaf layer entry config to reprocess
+     * @param displayDateMode - The display date mode used to process time dimensions in the metadata
+     * @param mapProjection - Optional map projection
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the reprocessing
+     * @returns A promise that resolves with the recreated GV layer, or undefined when the entry is still invalid
+     * @throws {PromiseRejectErrorWrapper} When metadata processing fails (propagated from `#processLayerMetadata()`)
+     * @throws {Error} When recreating the GV layer fails
+     */
+    reprocessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<AbstractGVLayer | undefined>;
+    /**
      * Fetches and validates service metadata for layers that use the `?f=json` convention.
      *
      * This helper builds the metadata URL by appending `?f=json` to the `metadataAccessPath`, then fetches it

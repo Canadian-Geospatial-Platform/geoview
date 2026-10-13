@@ -89,6 +89,16 @@ export declare function queryGVSelector<T extends Element = HTMLElement>(mapId: 
  */
 export declare function queryGVSelectorAll<T extends Element = HTMLElement>(mapId: string, selector: string): T[];
 /**
+ * Returns visible tabbable elements in keyboard order within a map's focus trap.
+ *
+ * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.
+ *
+ * @param mapId - The map containing the focus trap
+ * @param root - The viewer shell containing the focusable elements
+ * @returns The currently visible and enabled elements in tab order
+ */
+export declare function getGVVisibleTabbable(mapId: string, root: HTMLElement): HTMLElement[];
+/**
  * Resolves a map's OpenLayers map target element (the canvas container).
  *
  * Thin named getter over {@link getGVElementById} for the heavily-reused `mapTargetElement` landmark, so

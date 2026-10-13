@@ -63,7 +63,7 @@ export type AccordionItem = {
  *   className="custom-accordion"
  *   sx={{
  *     backgroundColor: '#f5f5f5',
- *     borderRadius: '8px'
+ *     borderRadius: GEOVIEW_SHAPE.borderRadiusLg
  *   }}
  * />
  * ```

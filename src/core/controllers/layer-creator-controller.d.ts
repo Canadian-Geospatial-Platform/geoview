@@ -54,11 +54,12 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      */
     reloadGeocoreLayers(): void;
     /**
-     * Attempts to reload a layer.
+     * Reloads the owning GeoView layer from its original config and restores its ordered position.
      *
      * @param layerPath - The path to the layer to reload
+     * @returns A promise that resolves after the full layer reload finishes
      */
-    reloadLayer(layerPath: string): void;
+    reloadLayer(layerPath: string): Promise<void>;
     /**
      * Removes all geoview layers from the map.
      */

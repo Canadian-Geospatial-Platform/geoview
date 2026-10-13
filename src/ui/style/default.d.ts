@@ -3,6 +3,20 @@ import type { IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
 export declare const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 /** Default base font size multiplier in rem units */
 export declare const defaultFontSize = 1;
+/**
+ * Named border-radius tokens, spread onto `theme.shape`.
+ *
+ * Values are px strings so they render identically in `sx`, `styleOverrides` and inline styles
+ * (a numeric `borderRadius` in `sx` is multiplied by the base). `@/ui` components and `cssText`
+ * strings import this constant directly because they may run under an external theme.
+ */
+export declare const GEOVIEW_SHAPE: {
+    readonly borderRadiusNone: "0";
+    readonly borderRadiusSm: "4px";
+    readonly borderRadiusMd: "6px";
+    readonly borderRadiusLg: "8px";
+    readonly borderRadiusFull: "9999px";
+};
 /** Heading typography styles with bold weight */
 export declare const headingStyles: {
     fontFamily: string;
