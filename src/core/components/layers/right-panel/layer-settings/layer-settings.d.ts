@@ -1,15 +1,17 @@
+/** Properties for the layer settings panel. */
 interface LayerSettingsPanelProps {
     /** The layer path to configure settings for. */
     layerPath: string;
 }
 /**
- * Panel view for layer settings content.
+ * Creates the panel view for layer settings content.
  *
  * Displays available settings (raster function, mosaic rule, WMS styles,
  * interaction toggles) as inline collapsible sections. The header and
  * back navigation are handled by the parent.
  *
- * @param layerPath - The layer path to configure.
+ * @param props - Properties defined in LayerSettingsPanelProps interface
+ * @returns The layer settings panel
  */
 export declare function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.Element;
 export {};

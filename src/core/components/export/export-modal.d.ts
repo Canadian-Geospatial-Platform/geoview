@@ -4,7 +4,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 /** Properties for file export configuration. */
 export interface FileExportProps {
-    /** The language */
+    /** The language used for exported content. */
     language: TypeDisplayLanguage;
     /** The export title text. */
     exportTitle: string;

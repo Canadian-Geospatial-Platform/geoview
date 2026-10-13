@@ -1,9 +1,10 @@
+/** Properties for the mosaic rule settings panel. */
 interface MosaicRulePanelProps {
     /** The layer path to configure mosaic rules for. */
     layerPath: string;
 }
 /**
- * Inline panel section for configuring mosaic rules on ArcGIS ImageServer layers.
+ * Creates the inline mosaic rule settings panel for ArcGIS ImageServer layers.
  *
  * Displays method, operation, and ascending controls directly within
  * the settings panel instead of a floating menu.
@@ -14,8 +15,9 @@ interface MosaicRulePanelProps {
  * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values).
  *
  * @see {@link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule}
- * @param layerPath - The layer path to configure mosaic rules for.
- * @returns A JSX element representing the MosaicRulePanel component.
+ *
+ * @param props - Properties defined in MosaicRulePanelProps interface
+ * @returns The mosaic rule panel
  */
 export declare function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Element;
 export {};
