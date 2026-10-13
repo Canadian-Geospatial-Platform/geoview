@@ -2003,6 +2003,31 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Determines whether a field type represents a GML geometry property.
+   *
+   * @param fieldType - The field type string to inspect
+   * @returns `true` if the field type is a GML geometry type; otherwise, `false`
+   */
+  static isGmlGeometryField(fieldType: string): boolean {
+    return (
+      fieldType === 'gml:PointPropertyType' ||
+      fieldType === 'gml:MultiPointPropertyType' ||
+      fieldType === 'gml:CurvePropertyType' ||
+      fieldType === 'gml:MultiCurvePropertyType' ||
+      fieldType === 'gml:LineStringPropertyType' ||
+      fieldType === 'gml:MultiLineStringPropertyType' ||
+      fieldType === 'gml:SurfacePropertyType' ||
+      fieldType === 'gml:MultiSurfacePropertyType' ||
+      fieldType === 'gml:PolygonPropertyType' ||
+      fieldType === 'gml:MultiPolygonPropertyType' ||
+      fieldType === 'gml:SolidPropertyType' ||
+      fieldType === 'gml:MultiSolidPropertyType' ||
+      fieldType === 'gml:GeometryPropertyType' ||
+      fieldType === 'gml:MultiGeometryPropertyType'
+    );
+  }
+
+  /**
    * Converts a WFS geometry type string to a TypeStyleGeometry.
    *
    * @param wfsGeometryType - The wfs geometry type to convert
