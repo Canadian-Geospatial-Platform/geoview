@@ -56,7 +56,7 @@ export function MapInfoRotationButton(): JSX.Element {
     <Tooltip title={tooltipText} placement="top">
       <Box
         sx={memoSxClasses.container}
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can reach the rotation tooltip; it has no button/role semantics yet (follow-up)
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can reach the rotation tooltip
         tabIndex={0}
         role="note"
         aria-label={tooltipText}
