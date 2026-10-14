@@ -40,6 +40,11 @@ class SwiperPlugin extends MapPlugin {
       en: {
         swiper: {
           tooltip: 'Drag to see underlying layer',
+          positionLabel: 'Map comparison position',
+          positionFromLeft: 'Divider {{percent}} percent from the left',
+          positionFromTop: 'Divider {{percent}} percent from the top',
+          instructionsHorizontal: 'Use the Left and Right arrow keys to move the comparison divider.',
+          instructionsVertical: 'Use the Up and Down arrow keys to move the comparison divider.',
           menu: 'Swiper',
           settingsTitle: 'Swiper',
           useWithSwiper: 'Use with swiper bar',
@@ -53,6 +58,11 @@ class SwiperPlugin extends MapPlugin {
       fr: {
         swiper: {
           tooltip: 'Faites glisser pour voir les couches sous-jacentes',
+          positionLabel: 'Position de comparaison de la carte',
+          positionFromLeft: 'Séparateur à {{percent}} pour cent depuis la gauche',
+          positionFromTop: 'Séparateur à {{percent}} pour cent depuis le haut',
+          instructionsHorizontal: 'Utilisez les touches fléchées Gauche et Droite pour déplacer le séparateur de comparaison.',
+          instructionsVertical: 'Utilisez les touches fléchées Haut et Bas pour déplacer le séparateur de comparaison.',
           menu: 'Balayage',
           settingsTitle: 'Balayage',
           useWithSwiper: 'Utiliser avec la barre de balayage',
