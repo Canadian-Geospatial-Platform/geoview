@@ -14,12 +14,22 @@ import { getSxClasses } from './delete-undo-button-style';
 /** Sx classes for this component. No theme dependency, so computed once at module scope. */
 const sxClasses = getSxClasses();
 
+/** Props for the UndoButtonWithProgress component. */
 interface UndoButtonProps {
+  /** Elapsed percentage of the layer deletion undo window. */
   progressValue: number;
+  /** Callback invoked when the undo button is activated. */
   onUndo: (event: MouseEvent) => void;
+  /** Ref used to focus the undo button after keyboard activation of delete. */
   iconRef: React.RefObject<HTMLButtonElement | null>;
 }
 
+/**
+ * Creates the undo button with a progress indicator for the remaining undo window.
+ *
+ * @param props - Properties defined in UndoButtonProps interface
+ * @returns The undo button and deletion progress indicator
+ */
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/delete-undo-button/UndoButtonWithProgress');
@@ -40,12 +50,22 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   );
 }
 
+/** Props for the DeleteUndoButton component. */
 interface DeleteUndoButtonProps {
+  /** Path of the layer to delete or restore. */
   layerPath: string;
+  /** Whether the layer permits removal. */
   layerRemovable: boolean;
+  /** Optional map-scoped element ID to focus after deletion completes. */
   focusTargetIdAfterDelete?: string;
 }
 
+/**
+ * Creates the layer delete button with a temporary undo action and keyboard focus restoration.
+ *
+ * @param props - Properties defined in DeleteUndoButtonProps interface
+ * @returns The delete or undo button for the layer
+ */
 export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/delete-undo-button/DeleteUndoButton');
@@ -71,7 +91,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   /**
    * Performs the delete operation on the layer.
    *
-   * @param wasKeyboardActivated - Indicates if the delete was activated via the keyboard or not.
+   * @param wasKeyboardActivated - Whether deletion was activated via the keyboard
    */
   const performDelete = (wasKeyboardActivated: boolean): void => {
     // If was keyboard activated on clicking
@@ -103,7 +123,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   /**
    * Performs the undo operation on the layer.
    *
-   * @param wasKeyboardActivated - Indicates if the delete was activated via the keyboard or not.
+   * @param wasKeyboardActivated - Whether undo was activated via the keyboard
    */
   const performUndo = (wasKeyboardActivated: boolean): void => {
     // Call the action
@@ -115,6 +135,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       requestAnimationFrame(() => deleteButtonRef.current?.focus());
     }
   };
+
+  // #region Handlers
 
   /**
    * Handles when the user activates the delete button.
@@ -132,9 +154,14 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     performUndo(event.detail === 0);
   };
 
+  // #endregion Handlers
+
+  /**
+   * Animates deletion progress while the undo window is active and cancels the animation on cleanup.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('components/layers/delete-undo-button/DeleteUndoButton', layerDeletionStartTime);
+    logger.logTraceUseEffect('components/layers/delete-undo-button/DeleteUndoButton: DELETION PROGRESS ANIMATION', layerDeletionStartTime);
 
     // If no deletion happening
     if (!layerDeletionStartTime) return undefined;

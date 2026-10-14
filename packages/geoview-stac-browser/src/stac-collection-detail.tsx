@@ -1,4 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, ButtonBase, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -39,7 +40,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const mapViewer = cgpv.api.getMapViewer(mapId);
   const olMap = mapViewer.map;
@@ -236,22 +237,22 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const displayDesc = descExpanded || !isDescLong ? description : `${description.substring(0, 200)}...`;
 
   return (
-    <Box sx={sxClasses.panelContent}>
+    <Box sx={memoSxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={sxClasses.backLink}>
+      <Box sx={memoSxClasses.backLink}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.backToCollections')}
         </Button>
       </Box>
 
       {/* Collection Header */}
-      <Box sx={sxClasses.detailSection}>
-        <Typography sx={sxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
+      <Box sx={memoSxClasses.detailSection}>
+        <Typography sx={memoSxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
 
         {/* Description with Read more */}
         {description && (
           <Box>
-            <Typography sx={sxClasses.detailDescription}>{displayDesc}</Typography>
+            <Typography sx={memoSxClasses.detailDescription}>{displayDesc}</Typography>
             {isDescLong && (
               <Button type="text" size="small" onClick={handleToggleDescription}>
                 {descExpanded ? t('stacBrowser.readLess') : t('stacBrowser.readMore')}
@@ -262,14 +263,14 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       </Box>
 
       {/* Metadata Section */}
-      <Box sx={sxClasses.metadataSection}>
+      <Box sx={memoSxClasses.metadataSection}>
         {/* Keywords */}
         {collection.keywords && collection.keywords.length > 0 && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
-            <Box sx={sxClasses.keywordChipsRow}>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
+            <Box sx={memoSxClasses.keywordChipsRow}>
               {collection.keywords.map((keyword) => (
-                <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
+                <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
                   {keyword}
                 </Box>
               ))}
@@ -279,40 +280,40 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
         {/* License */}
         {collection.license && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
-            <Typography sx={sxClasses.resultMeta}>{collection.license}</Typography>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
+            <Typography sx={memoSxClasses.resultMeta}>{collection.license}</Typography>
           </Box>
         )}
 
         {/* Temporal extent */}
         {memoTemporalDisplay && (
-          <Box sx={sxClasses.metadataRow}>
-            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
-            <Typography sx={sxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
+          <Box sx={memoSxClasses.metadataRow}>
+            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
+            <Typography sx={memoSxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
           </Box>
         )}
 
         {/* Zoom to collection extent */}
         {memoUnionExtent && (
-          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={sxClasses.zoomButton}>
+          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={memoSxClasses.zoomButton}>
             {t('stacBrowser.zoomToExtent')}
           </Button>
         )}
       </Box>
 
       {/* Items Section */}
-      <Box sx={sxClasses.detailSection}>
-        <Typography sx={sxClasses.itemsSectionTitle}>{t('stacBrowser.items')}</Typography>
+      <Box sx={memoSxClasses.detailSection}>
+        <Typography sx={memoSxClasses.itemsSectionTitle}>{t('stacBrowser.items')}</Typography>
 
         {isLoading && (
-          <Box sx={sxClasses.loading}>
+          <Box sx={memoSxClasses.loading}>
             <Typography>{t('stacBrowser.loading')}</Typography>
           </Box>
         )}
 
         {!isLoading && items.length === 0 && (
-          <Box sx={sxClasses.noResults}>
+          <Box sx={memoSxClasses.noResults}>
             <Typography>{t('stacBrowser.noResults')}</Typography>
           </Box>
         )}
@@ -323,15 +324,15 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
             const badge = getAssetTypeBadge(item);
             const datetime = item.properties.datetime ?? item.properties.start_datetime;
             return (
-              <ButtonBase key={item.id} data-item-id={item.id} sx={sxClasses.itemRow} onClick={handleItemCardClick} disableRipple>
-                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
-                <Box component="span" sx={sxClasses.itemRowText}>
-                  <Typography component="span" sx={sxClasses.resultTitle}>
+              <ButtonBase key={item.id} data-item-id={item.id} sx={memoSxClasses.itemRow} onClick={handleItemCardClick} disableRipple>
+                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={memoSxClasses.itemThumbnail} />}
+                <Box component="span" sx={memoSxClasses.itemRowText}>
+                  <Typography component="span" sx={memoSxClasses.resultTitle}>
                     {item.properties.title ?? item.id}
                   </Typography>
-                  <Typography component="span" sx={sxClasses.resultMeta}>
+                  <Typography component="span" sx={memoSxClasses.resultMeta}>
                     {badge && (
-                      <Box component="span" sx={sxClasses.assetTypeBadge}>
+                      <Box component="span" sx={memoSxClasses.assetTypeBadge}>
                         {badge}
                       </Box>
                     )}
@@ -344,7 +345,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
         {/* Pagination */}
         {!isLoading && (prevUrl || nextUrl) && (
-          <Box sx={sxClasses.paginationBar}>
+          <Box sx={memoSxClasses.paginationBar}>
             <Button type="text" size="small" disabled={!prevUrl} onClick={handlePrevPage}>
               ← {t('stacBrowser.previous')}
             </Button>

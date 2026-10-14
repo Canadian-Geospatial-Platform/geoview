@@ -1,5 +1,5 @@
 // GV: THIS UI COMPONENT IS NOT USE
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -7,11 +7,11 @@ import { useTheme } from '@mui/material/styles';
 import { Typography } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
+import { ListItemButton } from '@/ui';
 import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
 
@@ -52,6 +52,9 @@ export type CheckboxListItem = {
  * @returns CheckboxList component with selectable checkbox items
  */
 function CheckboxListUI(props: CheckboxListProps): JSX.Element {
+  // Log
+  logger.logTraceRenderDetailed('ui/list/checkbox-list/checkbox-list');
+
   const { listItems, checkedValues, multiselect, onChecked = null } = props;
 
   const theme = useTheme();
@@ -66,32 +69,37 @@ function CheckboxListUI(props: CheckboxListProps): JSX.Element {
   /**
    * Handles when the user toggles a checkbox item
    */
-  const handleToggle = (event: React.MouseEvent<HTMLDivElement>): void => {
-    const value = event.currentTarget.dataset.value ?? '';
-    let newCheckedValues: string[];
-    if (multiselect) {
-      const currentIndex = checked.indexOf(value);
-      newCheckedValues = [...checked];
+  const handleToggle = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      const value = event.currentTarget.dataset.value ?? '';
+      let newCheckedValues: string[];
+      if (multiselect) {
+        const currentIndex = checked.indexOf(value);
+        newCheckedValues = [...checked];
 
-      if (currentIndex === -1) {
-        newCheckedValues.push(value);
+        if (currentIndex === -1) {
+          newCheckedValues.push(value);
+        } else {
+          newCheckedValues.splice(currentIndex, 1);
+        }
       } else {
-        newCheckedValues.splice(currentIndex, 1);
+        newCheckedValues = [value];
       }
-    } else {
-      newCheckedValues = [value];
-    }
 
-    // Set state
-    setChecked(newCheckedValues);
+      // Set state
+      setChecked(newCheckedValues);
 
-    // Callback
-    onChecked?.(value, newCheckedValues.indexOf(value) >= 0, newCheckedValues);
-  };
+      // Callback
+      onChecked?.(value, newCheckedValues.indexOf(value) >= 0, newCheckedValues);
+    },
+    [checked, multiselect, onChecked]
+  );
 
   // #endregion
 
-  // Effect triggered when the checked values changes
+  /**
+   * Syncs the internal checked state when the checked values prop changes.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('CHECKBOX-LIST - checkedValues', checkedValues);

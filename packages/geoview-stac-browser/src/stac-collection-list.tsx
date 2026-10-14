@@ -1,4 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { TypeTextFieldProps } from 'geoview-core/ui/panel/panel-types';
 import { Box, ButtonBase, IconButton, TextField, Typography } from 'geoview-core/ui';
 import { SortByAlphaIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -33,12 +35,22 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   /** Whether alphabetical sort is active. */
   const [sortAsc, setSortAsc] = useState(false);
   /** Search text for filtering collections. */
   const [searchText, setSearchText] = useState('');
+
+  const searchLabel = t('stacBrowser.searchCollections');
+
+  /**
+   * Builds the slot props that label the collection search input.
+   */
+  const memoSearchSlotProps = useMemo((): TypeTextFieldProps['slotProps'] => {
+    logger.logTraceUseMemo('STAC-COLLECTION-LIST - memoSearchSlotProps', searchLabel);
+    return { htmlInput: { 'aria-label': searchLabel } };
+  }, [searchLabel]);
 
   /**
    * Filters and sorts collections based on search text and sort toggle.
@@ -99,13 +111,13 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   // #endregion
 
   return (
-    <Box sx={sxClasses.resultsList}>
+    <Box sx={memoSxClasses.resultsList}>
       {/* Search box and sort button */}
-      <Box sx={sxClasses.browseToolbar}>
+      <Box sx={memoSxClasses.browseToolbar}>
         <TextField
           size="small"
-          aria-label={t('stacBrowser.searchCollections')}
-          placeholder={t('stacBrowser.searchCollections')}
+          slotProps={memoSearchSlotProps}
+          placeholder={searchLabel}
           value={searchText}
           onChange={handleSearchChange}
           sx={{ flex: 1 }}
@@ -129,39 +141,39 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
         {resultsAnnouncement}
       </Box>
 
-      <Box sx={sxClasses.collectionCardList}>
+      <Box sx={memoSxClasses.collectionCardList}>
         {memoFilteredCollections.map((collection) => {
           const temporal = StacApiService.formatTemporalExtent(collection, true);
           return (
             <ButtonBase
               key={collection.id}
               data-collection-id={collection.id}
-              sx={sxClasses.collectionCard}
+              sx={memoSxClasses.collectionCard}
               onClick={handleCardClick}
               disableRipple
             >
-              <Typography component="span" sx={sxClasses.collectionTitle}>
+              <Typography component="span" sx={memoSxClasses.collectionTitle}>
                 {collection.title ?? collection.id}
               </Typography>
               {collection.description && (
-                <Typography component="span" sx={sxClasses.collectionDescription}>
+                <Typography component="span" sx={memoSxClasses.collectionDescription}>
                   {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
                 </Typography>
               )}
               {temporal && (
-                <Typography component="span" sx={sxClasses.resultMeta}>
+                <Typography component="span" sx={memoSxClasses.resultMeta}>
                   {temporal}
                 </Typography>
               )}
               {collection.keywords && collection.keywords.length > 0 && (
-                <Box component="span" sx={sxClasses.keywordChipsRow}>
+                <Box component="span" sx={memoSxClasses.keywordChipsRow}>
                   {collection.keywords.slice(0, 5).map((keyword) => (
-                    <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
+                    <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
                       {keyword}
                     </Box>
                   ))}
                   {collection.keywords.length > 5 && (
-                    <Box component="span" sx={sxClasses.keywordChip}>
+                    <Box component="span" sx={memoSxClasses.keywordChip}>
                       +{collection.keywords.length - 5}
                     </Box>
                   )}
