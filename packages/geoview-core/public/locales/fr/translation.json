@@ -644,6 +644,8 @@
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '{{mapId}}' est introuvable.",
+      "invalidViewportMidpoints": "Impossible d'ajuster la zone de la carte. Fournissez quatre milieux de bord avec des coordonnées de longitude et latitude finies, dans l'ordre ouest, sud, est, nord, avec des points opposés distincts et des directions cohérentes.",
+      "viewportUnavailable": "Impossible de lire la zone visible de la carte '{{mapId}}'. Assurez-vous que la carte est visible et que son affichage est terminé, puis réessayez.",
       "mapIdAlreadyExists": "La carte avec l'identifiant '{{mapId}}' existe déjà.",
       "geoviewStoreNotFound": "Le 'React Store' sur la carte '{{mapId}}' est introuvable.",
       "errorGeometryGroupId": "Identifiant de groupe de géométrie '{{geometryGroupId}}' est introuvable.",
