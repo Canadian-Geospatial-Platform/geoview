@@ -1,6 +1,7 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxProps, SxStyles } from '@/ui/style/types';
 import { ellipsisOverflow } from '@/ui/style/default';
+import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Sx for truncated, single-line cell content (tooltip wrapper).
@@ -86,7 +87,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   pinnedColumnButton: {
     '&.Mui-focusVisible': {
-      outlineOffset: `-3px`,
+      outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
       boxShadow: 'none',
     },
   },
@@ -106,7 +107,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '&.Mui-focusVisible': {
         backgroundColor: theme.palette.action.focus,
         borderRadius: theme.shape.borderRadiusFull,
-        outlineOffset: `-3px`,
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
         '> svg': {
           opacity: 1,
@@ -145,7 +146,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '&:focus-visible': {
         backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
         borderRadius: theme.shape.borderRadiusFull,
-        outlineOffset: `-3px`,
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },
@@ -156,9 +157,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         '&:hover': {
           border: `2px solid ${theme.palette.divider}`,
         },
-        '&:focus-visible': {
+        '&.Mui-focusVisible': {
           borderRadius: theme.shape.borderRadiusFull,
-          outlineOffset: `-3px`,
+          outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
           boxShadow: 'none',
         },
       },
@@ -218,7 +219,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(0.25),
     '& .MuiIconButton-root': {
       '&.Mui-focusVisible': {
-        outlineOffset: '-3px',
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },
@@ -242,7 +243,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingRight: theme.spacing(1),
     textTransform: 'none',
     '&.Mui-focusVisible': {
-      outlineOffset: '-3px',
+      outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
       boxShadow: 'none',
     },
   },

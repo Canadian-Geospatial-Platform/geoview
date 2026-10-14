@@ -99,7 +99,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           data-aoi-index={index}
           aria-label={t('aio.zoomToHighlight', { name: aoiItem.aoiTitle })}
           onClick={handleOnClick}
-          disableRipple={true}
+          disableRipple
           sx={sxClasses.aoiCardButton}
         >
           <Box component="span" className="aoiCardMedia">

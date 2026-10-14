@@ -17,6 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   aoiCardButton: {
     overflow: 'hidden',
+    flexShrink: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'stretch',

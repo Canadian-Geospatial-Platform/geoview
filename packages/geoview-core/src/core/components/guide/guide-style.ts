@@ -1,6 +1,7 @@
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
+import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets reusable guide box styles for guide content.
@@ -118,11 +119,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      '& .responsive-layout-right-main-content': {
-        '&:focus-visible': {
-          border: '2px solid inherit',
-        },
-      },
     },
     rightPanelContainer: {
       color: theme.palette.geoViewColor?.textColor.main,
@@ -186,7 +182,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     searchNavigationButton: {
       '&.Mui-focusVisible': {
-        outlineOffset: '-3px',
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },
@@ -195,7 +191,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     searchClearButton: {
       '&.Mui-focusVisible': {
-        outlineOffset: '-3px',
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },

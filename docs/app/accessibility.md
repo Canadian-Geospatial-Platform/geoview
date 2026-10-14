@@ -73,7 +73,8 @@ treatments, not a second universal ring. Native MUI does not remove the need to 
 including paint-contained tables and adjacent button groups. Scale/mouse-position groups,
 OpenLayers controls, AOI cards, media and vendor overlays retain their separate coverage.
 See the [focused release-test handoff](../programming/release-testing/21-wcag-accessibility.md#retained-exceptions-and-focused-test-handoff)
-before removing further exceptions or treating adoption as accessibility sign-off.
+before removing further exceptions or treating adoption as accessibility sign-off. For authoring
+selector and override conventions, see [styling best practices](../programming/styling-best-practices.md#4--keyboard-focus-indicators).
 
 #### Focus Traps for Enhanced Navigation
 

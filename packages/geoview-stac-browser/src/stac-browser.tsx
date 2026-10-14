@@ -100,6 +100,24 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, []);
 
   /**
+   * Stores the browse mode tab element for roving focus.
+   *
+   * @param element - The browse tab element, or null when unmounted
+   */
+  const setBrowseTabRef = useCallback((element: HTMLDivElement | null): void => {
+    modeTabRefs.current.browse = element;
+  }, []);
+
+  /**
+   * Stores the search mode tab element for roving focus.
+   *
+   * @param element - The search tab element, or null when unmounted
+   */
+  const setSearchTabRef = useCallback((element: HTMLDivElement | null): void => {
+    modeTabRefs.current.search = element;
+  }, []);
+
+  /**
    * Handles clicking a browse/search mode tab.
    */
   const handleModeClick = useCallback(
@@ -408,9 +426,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             aria-selected={mode === 'browse'}
             aria-controls={modePanelId}
             tabIndex={mode === 'browse' ? 0 : -1}
-            ref={(element: HTMLDivElement | null): void => {
-              modeTabRefs.current.browse = element;
-            }}
+            ref={setBrowseTabRef}
             onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.browse')}
@@ -424,9 +440,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             aria-selected={mode === 'search'}
             aria-controls={modePanelId}
             tabIndex={mode === 'search' ? 0 : -1}
-            ref={(element: HTMLDivElement | null): void => {
-              modeTabRefs.current.search = element;
-            }}
+            ref={setSearchTabRef}
             onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.search')}
@@ -437,7 +451,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       {view === 'item-detail' ? (
         renderContent()
       ) : (
-        <Box role="tabpanel" id={modePanelId} aria-labelledby={mode === 'browse' ? browseTabId : searchTabId}>
+        <Box role="tabpanel" id={modePanelId} aria-labelledby={mode === 'browse' ? browseTabId : searchTabId} sx={memoSxClasses.modePanel}>
           {renderContent()}
         </Box>
       )}
