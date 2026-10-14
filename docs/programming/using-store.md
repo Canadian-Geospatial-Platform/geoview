@@ -22,6 +22,13 @@ useEffect hook
 
 ## Three Function Types per Store Slice
 
+When a `useStore*` hook has no getter but non-React code needs it, create a dedicated `getStore*`
+getter in the same slice, with the hook's return type and `mapId` first. Do not work around it with
+`getStoreMapStateJson(mapId).property`. Getters are also valid point-in-time reads in React.
+Keep matched getter/hook pairs together, getter first, in `STATE GETTERS & HOOKS`.
+The `STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)` region contains hook-only orphans;
+move the hook out of OTHERS when adding its getter.
+
 Each store state file in `src/core/stores/states/` exports three types of functions:
 
 ### Selector Hooks (`useStore*`) — React components only
@@ -30,11 +37,9 @@ Fine-grained hooks that trigger re-renders when the selected state changes.
 
 ```ts
 // Pattern: useStore[SliceName][PropertyName]
-export const useStoreMapZoom = (): number =>
-  useStore(useGeoViewStore(), (state) => state.mapState.zoom);
+export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-export const useStoreMapClickMarker = (): TypeClickMarker | undefined =>
-  useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
+export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 ```
 
 ### Getter Functions (`getStore*`) — controllers and non-React code
@@ -42,12 +47,9 @@ export const useStoreMapClickMarker = (): TypeClickMarker | undefined =>
 Point-in-time snapshots. Takes `mapId` as first parameter.
 
 ```ts
-export const getStoreMapZoom = (mapId: string): number =>
-  getStoreMapState(mapId).zoom;
+export const getStoreMapZoom = (mapId: string): number => getStoreMapState(mapId).zoom;
 
-export const getStoreMapOrderedLayerInfo = (
-  mapId: string,
-): TypeOrderedLayerInfo[] => getStoreMapState(mapId).orderedLayerInfo;
+export const getStoreMapOrderedLayerInfo = (mapId: string): TypeOrderedLayerInfo[] => getStoreMapState(mapId).orderedLayerInfo;
 ```
 
 ### Setter Functions (`setStore*`) — controllers only
@@ -59,10 +61,7 @@ export const setStoreMapZoom = (mapId: string, zoom: number): void => {
   getStoreMapState(mapId).actions.setZoom(zoom);
 };
 
-export const setStoreMapClickMarker = (
-  mapId: string,
-  marker: TypeClickMarker,
-): void => {
+export const setStoreMapClickMarker = (mapId: string, marker: TypeClickMarker): void => {
   getStoreMapState(mapId).actions.showClickMarker(marker);
 };
 ```
@@ -95,14 +94,17 @@ export function MyComponent(): JSX.Element {
 
 ### Controllers — read via getters, mutate via setters
 
+Batch operations that suppress domain handlers must explicitly synchronize the store afterward,
+including derived class/time/table filters. Re-enable handlers in `finally`; do not rely on suppressed
+events to refresh feature counts or "Active Filters".
+For legend toggle-all (#3447), update each item's visibility and its layer's class filter via
+`setStoreLayerItemVisibility` after `Promise.all`. Add narrow batch setters when appropriate
+(`setStoreLayerClassFilter`, `setStoreDataTableFilter`) rather than duplicating business logic in the store.
+
 Controllers import `getStore*` and `setStore*` functions directly. They contain the validation and business logic.
 
 ```ts
-import {
-  getStoreMapZoom,
-  setStoreMapZoom,
-  setStoreMapProjection,
-} from "@/core/stores/states/map-state";
+import { getStoreMapZoom, setStoreMapZoom, setStoreMapProjection } from '@/core/stores/states/map-state';
 
 export class MapController extends AbstractMapViewerController {
   zoomToLevel(zoom: number): void {
@@ -123,9 +125,7 @@ Inside a controller, access other controllers through `this.getControllersRegist
 
 ```ts
 // Inside a controller method
-this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(
-  layerPath,
-);
+this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
@@ -133,12 +133,8 @@ this.getControllersRegistry().uiController.setCircularProgress(true);
 
 ```ts
 // In a plugin
-const layerPaths =
-  this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
-this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(
-  layer,
-  config,
-);
+const layerPaths = this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
+this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, config);
 ```
 
 ## Summary Table

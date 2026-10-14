@@ -17,6 +17,7 @@
   "scripts": {
     "format": "prettier --write \"geoview-**/src/**/*.{ts,tsx,js}\"",
     "lint": "eslint \"geoview-**/src/**/*.{ts,tsx,js}\"",
+    "ai:check": "node ../scripts/ai-health-check.cjs",
     "fix": "eslint \"geoview-**/src/**/*.{ts,tsx,js}\" --fix"
   },
   "devDependencies": {

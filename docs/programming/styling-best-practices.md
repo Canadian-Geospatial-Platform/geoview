@@ -4,6 +4,31 @@ This document collects GeoView-specific conventions for styling, CSS, and themin
 
 ## 1- Spacing: `theme.spacing()` in style modules, no `sx` shorthand
 
+Non-trivial component styles live in a companion `*-style.ts` exporting `getSxClasses(theme): SxStyles`.
+Document `theme` and the returned styles. `SxStyles` comes from `@/ui/style/types`.
+Components use `const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme])`;
+this standardized style memo needs neither JSDoc nor trace logging.
+Combine conditional styles using `[styles.base, condition && styles.extra] as SxProps`.
+Use `geoViewColor` and `geoViewFontSize` tokens rather than hard-coded colors/font sizes.
+
+Reusable `@/ui` and `core/components/ui` components may receive a standard external MUI theme.
+Access custom extensions with optional chaining (`theme.palette.geoViewColor?.primary.main`,
+likewise other non-standard extensions); do not assume GeoView theme fields exist.
+UI components and icons come from the `@/ui` barrel; only MUI hooks, utilities and types import directly from MUI.
+
+All user-visible text and labels use `t('domain.key')`; add each key to both en/fr translation files.
+Namespaces are case-sensitive (for example `appbar`, `mapctrl`, `dataTable`) and interpolation uses
+i18next `{{name}}`. Reuse existing keys before adding new ones, and verify meaningful French text.
+IconButton's wrapper requires aria-label, uses it as tooltip fallback, and exposes additional tooltip,
+ref and visibility props; inspect the wrapper instead of assuming the MUI interface.
+
+Display themes must be registered consistently in `TypeDisplayTheme`, `VALID_DISPLAY_THEME`,
+the schema enum, `getThemeOptions`, MapViewer JSDoc, public theme docs, sandbox help, navigator selectors,
+and release-testing maps. Palette modules spread `defaultGeoViewColors` before overrides.
+Pass a custom theme font to `generateThemeOptions` so base typography and heading fonts agree.
+For `rt-18-global-settings.html`, add a scenario rather than replacing one; renumber each following
+map's ID, heading and snippet target together and update the plan's map numbers.
+
 GeoView uses MUI's default 8px spacing scale: `theme.spacing(n) = n × 8px`. There is no custom spacing scale override today; if this ever changes, update the conversion table in Section 2 accordingly, since the tie-break rules there are derived from the 8px assumption.
 
 **In-scope properties:** `padding`/`margin` and all directional variants (`paddingTop`, `mx`, etc.), `gap`, `rowGap`, `columnGap`.

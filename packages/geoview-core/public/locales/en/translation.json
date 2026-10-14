@@ -661,9 +661,5 @@
     "geolocator": {
       "noService": "Geolocator service not available"
     }
-  },
-  "templates": {
-    "firstSnackbar": "This is my first snackbar!",
-    "canApplyFunction": "I can even apply a function"
   }
 }

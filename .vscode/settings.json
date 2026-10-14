@@ -18,6 +18,16 @@
   "eslint.probe": ["typescript", "typescriptreact"],
   "eslint.workingDirectories": ["packages"],
   "window.title": "${activeEditorMedium}${separator}${rootName}${separator}${profileName}",
+  "github.copilot.chat.agentDebugLog.fileLogging.enabled": true,
+  "chat.agentHost.agentDebugLog.enabled": true,
+  "search.exclude": {
+    "**/public/builds": true,
+    "common/temp": true
+  },
+  "files.watcherExclude": {
+    "**/public/builds/**": true,
+    "common/temp/**": true
+  },
   "files.associations": {
     "*.json": "json"
   },

@@ -59,6 +59,13 @@ class LayerState {
 
 Use `property: Type | undefined` only when that distinction is intentional and required by behavior (for example: serialization differences, merge semantics, or APIs that depend on checking whether a key exists).
 
+Do not annotate inferrable literals (`const count = 0`, not `const count: number = 0`).
+Prefer `undefined` for internal absent values; convert external OpenLayers `null` returns at the API boundary.
+Keep `null` for React node returns, React-managed DOM refs, external APIs that require it, or explicit JSON clearing.
+React 19 refs require an initial value: `useRef<T>(null)` for DOM refs and
+`useRef<T | undefined>(undefined)` for mutable data. Props accepting DOM refs must accept `React.RefObject<T | null>`.
+Use named component exports and template literals rather than `+` for string concatenation.
+
 ## 2- Avoid using variable names that are too short.
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts
@@ -79,6 +86,30 @@ is thus cleared up.
 
 ## 4- Use inheritance whenever possible.
 
+### Shared helpers and error boundaries
+
+Shared helpers are preferable to duplicate logic: `GeoUtilities` for geo operations,
+`DateUtilities` for dates, `constant.ts` for extensions/regex/enums, and `Fetch` for HTTP.
+Share constants from one source; extract repeated logic to the nearest shared plugin service or core utility.
+
+Use `Fetch` from `@/core/utils/fetch-helper`, never raw `fetch()`. It handles timeouts, aborts,
+signal merging and typed errors. Choose `fetchJson`, `fetchEsriJson` (embedded ESRI errors),
+`fetchText`, `fetchTextPermissive` (non-2xx probing), `fetchBlobImage`, `fetchBlob`,
+`fetchArrayBuffer`, `fetchXMLToJson`, `fetchHeadWithTimeout`, or `fetchProbeUrl` as appropriate.
+`fetchWithTimeout` is a legacy JSON alias. Workers instead use `fetchWithTimeout` from
+`@/core/utils/fetch-worker-helper`; importing `Fetch` into a worker breaks the build.
+
+Use `delay(ms)`, cancellable `doTimeout(ms)` and event-driven `waitFor*` methods instead of raw `setTimeout`
+or polling. React timer refs cleaned up with `clearTimeout` are the callback-style exception.
+Use `whenThisThen` only when no suitable event exists.
+
+Catch only the intended recoverable error: check `instanceof`, handle that type, and rethrow all others.
+Broad suppression is reserved for documented best-effort boundaries such as optional legend enrichment.
+`GeoViewError.throwIfAborted(error)` rethrows aborts during format fallback. Update `@throws` for errors
+that now propagate; do not silently replace real failures with warnings.
+
+### Inheritance and narrowing
+
 Inheritance eliminates the repetitive code needed to create disjoint classes that have basically the same characteristics. A base
 class, whether abstract or not, can be used as a parent at the root of the inheritance tree to provide a starting template for child
 classes. Inheritance also allows to exploit polymorphism. To do this, you just need to define a variable with a base class as type,
@@ -94,8 +125,8 @@ When you spread two objects in the same object, sooner or later you run the risk
 object to an attribute in order to partition their contents rather than cramming everything in the same level.
 
 ```ts
-const object1 = { a: "a", collision: 1 };
-const object2 = { b: "b", collision: 2 };
+const object1 = { a: 'a', collision: 1 };
+const object2 = { b: 'b', collision: 2 };
 
 // Here, we have a collision and loose value of object1.collision
 const spredingCollision = { ...object1, ...object2 };
@@ -124,20 +155,20 @@ We do the import statement in the following order
 We add an empty line between each group of import from different category
 
 ```ts
-import { useRef, useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import { useRef, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from '@mui/material/styles';
 
-import View, { ViewOptions } from "ol/View";
+import View, { ViewOptions } from 'ol/View';
 
-import { Box, Card, CardHeader, CardContent, Divider, IconButton } from "@/ui";
-import { CloseIcon } from "@/ui";
-import { logger } from "@/core/utils/logger";
-import type { EsriBaseRenderer } from "@/geo/utils/renderer/esri-renderer";
-import { Plugin } from "@/api/plugin/plugin";
+import { Box, Card, CardHeader, CardContent, Divider, IconButton } from '@/ui';
+import { CloseIcon } from '@/ui';
+import { logger } from '@/core/utils/logger';
+import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { Plugin } from '@/api/plugin/plugin';
 ```
 
 **Note:** MUI UI components (`Box`, `Typography`, `IconButton`, etc.) and icons must be imported from `@/ui`, never directly from `@mui/material` or `@mui/icons-material`. MUI hooks and utilities (`useTheme`, `useMediaQuery`) are imported directly from `@mui/material` or `@mui/material/styles`.
@@ -145,7 +176,7 @@ import { Plugin } from "@/api/plugin/plugin";
 **Note:** For import from a packacge outside of core use
 
 ```ts
-import { logger } from "geoview-core/core/utils/logger";
+import { logger } from 'geoview-core/core/utils/logger';
 ```
 
 ## 8- How we order code at the beginning of a component
@@ -179,6 +210,31 @@ const [scaleMode, setScaleMode] = useState<number>(0);
 
 ## 9- How we format JSDOC
 
+### Documentation conventions
+
+Summaries use third-person singular ("Creates", "Handles", "Checks") and end with a period.
+Always leave a blank line before tags. Do not repeat TypeScript types in `@param` or `@returns`;
+only `@throws` keeps `{ErrorType}`. Tag descriptions have no trailing period.
+Optional parameters say "Optional"; promise returns start with "A promise that resolves...";
+omit `@returns` for void methods and mention absent values when applicable.
+Document all override parameters. Prefer interface references for wrapper props rather than expanding library interfaces.
+Do not use redundant visibility/lifecycle tags (`@private`, `@public`, `@protected`, `@readonly`,
+`@override`, `@static`, `@exports`, `@class`, `@abstract`, `@async`, `@description`, `@fires`, `@extends`);
+use `@returns`, not `@return`.
+
+- Class properties, interface/type members, module constants and simple type/interface declarations use specific
+  single-line `/** ... */` comments, not `//` or unnecessarily expanded blocks.
+- Components document `@param props - Properties defined in XProps interface` and a semantic `@returns`;
+  mention `null` when it can be returned.
+- Handlers have one-sentence JSDoc without tags and are grouped in `// #region Handlers` / `// #endregion`.
+  Non-handler `useCallback` functions have full parameter/return documentation.
+- `useEffect` and `useMemo` have one-sentence JSDoc. The standardized `memoSxClasses` style memo is exempt.
+- When `memo()` is used, its JSDoc explains the concrete re-render saving.
+- Preserve existing `TODO`, `NOTE`, `FIXME`, `WCAG`, `TO.DOCONT` and eslint-disable comments.
+  Remove issue notes only when the issue is resolved; never convert `// GV` implementation notes to JSDoc.
+
+See [logger trace conventions](logging.md#characteristics-to-know-when-using-logger).
+
 Golden Rule of JSDoc in TypeScript Projects
 
 - Explain why
@@ -196,15 +252,12 @@ It should NOT:
 /**
  * Fetches layer metadata from GeoCore.
  *
- * @param geoviewLayerId - UUID of the GeoView layer.
- * @param signal - Optional abort signal for request cancellation.
- * @returns Parsed layer metadata object.
+ * @param geoviewLayerId - UUID of the GeoView layer
+ * @param signal - Optional abort signal for request cancellation
+ * @returns A promise that resolves with the parsed layer metadata object
  * @throws {LayerNotGeoJsonError} When an error to ...
  */
-async function fetchMetadata(
-  geoviewLayerId: string,
-  signal?: AbortSignal,
-): Promise<LayerMetadata> {}
+async function fetchMetadata(geoviewLayerId: string, signal?: AbortSignal): Promise<LayerMetadata> {}
 ```
 
 Tags Worth Using
@@ -241,9 +294,9 @@ Advanced Best Practice
  * Given the layerPath, this function retrieves a
  * layer from the domain and set its visibility.
  *
- * @param layerPath - Target layer path.
- * @param visible - New visibility state.
- * @throws {LayerNotFoundError} When a layer with the provided layer path cannot be found.
+ * @param layerPath - Target layer path
+ * @param visible - New visibility state
+ * @throws {LayerNotFoundError} When a layer with the provided layer path cannot be found
  */
 ```
 
@@ -365,9 +418,7 @@ export class MyController extends AbstractMapViewerController {
 
 // #region EVENT TYPES
 type MyDelegate = EventDelegateBase<MyController, MyEvent, void>;
-export type MyEvent = {
-  /* … */
-};
+export type MyEvent = {/* … */};
 // #endregion EVENT TYPES
 ```
 
@@ -400,7 +451,7 @@ This naming is required for consistency and readability across the codebase. The
 ```ts
 // ✅ Good: EventHelper delegate naming convention
 this.getMapViewer().onMapMoveEnd((sender, event): void => {
-  logger.logDebug("Map moved", event.lonlat);
+  logger.logDebug('Map moved', event.lonlat);
 });
 
 // ✅ Also good when one parameter is intentionally unused
@@ -442,6 +493,14 @@ export type LayerApiLayerVisibleChangedEvent = { ... };
 **Rationale:** Delegates are type aliases by nature (they alias a function signature via `EventDelegateBase<Sender, Event, Return>`). Event payloads are plain data shapes — `interface` gives them declaration merging capability, inheritance capabilities and clearer intent.
 
 ## 14- React Performance Patterns
+
+Use `useCallback` for stable event handlers; derive parameters from `event.currentTarget` IDs/data attributes
+rather than inline arrow closures. Keep module constants outside components.
+Remove unused dependencies, state setters and ref objects from hook dependency arrays.
+A value used only as a re-execution trigger is allowed with an explicit "trigger token" comment.
+
+Use `memo()` only for a measurable benefit, commonly list items in `.map()` where only one item's selection changes.
+Inline `children` and props that change on every interaction defeat shallow comparison; do not wrap those components by habit.
 
 ### useMemo Naming Convention
 
@@ -585,9 +644,9 @@ Multiple GeoView maps can live on the same HTML page. Every DOM id must therefor
 DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Build ids through the helper so the convention lives in one place:
 
 ```ts
-import { buildGVElementId } from "@/core/utils/dom-helper";
+import { buildGVElementId } from '@/core/utils/dom-helper';
 
-const id = buildGVElementId(mapId, "shell"); // → "map1-shell"
+const id = buildGVElementId(mapId, 'shell'); // → "map1-shell"
 ```
 
 ### The wrappers (`@/core/utils/dom-helper`)
@@ -609,13 +668,9 @@ const el = document.getElementById(`${mapId}-appBar`);
 const tab = document.querySelector('[role="tab"][aria-selected="true"]');
 
 // ✅ Good: map-scoped wrappers
-import {
-  getGVElementById,
-  getGVElementByFullId,
-  queryGVSelector,
-} from "@/core/utils/dom-helper";
+import { getGVElementById, getGVElementByFullId, queryGVSelector } from '@/core/utils/dom-helper';
 
-const el = getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
+const el = getGVElementById(mapId, 'appBar'); // suffix → builds "map1-appBar", scoped
 const btn = getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
 const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 ```
@@ -625,11 +680,11 @@ const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 In React components, prefer the reactive hook, which is backed by the store's root element (`useStoreAppGeoviewHTMLElement`). It returns a stable `(suffix) => HTMLElement | undefined` function:
 
 ```tsx
-import { useGVElementById } from "@/core/stores/states/app-state";
+import { useGVElementById } from '@/core/stores/states/app-state';
 
 const getElementById = useGVElementById();
 // ...later, in an effect/handler:
-getElementById("footerbar-header")?.focus();
+getElementById('footerbar-header')?.focus();
 ```
 
 ### Root element vs. specific descendant — which API?

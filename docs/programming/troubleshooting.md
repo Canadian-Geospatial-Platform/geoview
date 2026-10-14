@@ -65,6 +65,19 @@ Files: `geotiff.ts` (`createGeoTIFFSource`, `onProcessLayerMetadata`), `gv-geoti
 
 ## WMS
 
+### Duplicate names in nested groups
+
+> Issue #3521
+
+WMS allows a parent and child to share `<Name>` (`canimage → canimage → canimage-030`).
+Bare-ID first-match lookup can re-resolve the outer group and expand indefinitely.
+Walk full paths segment-by-segment (`UtilAddLayer.findLayerByPath`), use the same lookup for
+name/config builders, and guard recursive UI walkers with `visited: Set<string>` keyed by full path.
+`generateOrderedLayerPaths` must append every segment, not collapse `endsWith('/' + layerId)`.
+In WMS validation use `#findLayerMetadataForConfig` → `#buildLayerIdPath` →
+`#findLayerMetadataInCapabilityByPath` **only when an ancestor name is duplicated**.
+Keep lenient whole-tree lookup for ordinary services.
+
 ### Inherited TIME Dimension Breaks GetFeatureInfo
 
 > [GitHub Issue #3234](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3234)
