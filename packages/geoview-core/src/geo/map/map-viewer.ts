@@ -8,6 +8,8 @@ import OLMap from 'ol/Map';
 import type { ViewOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import MultiPoint from 'ol/geom/MultiPoint';
 import type { Extent } from 'ol/extent';
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import type { Projection as OLProjection } from 'ol/proj';
@@ -31,6 +33,7 @@ import type {
   TypeMapViewSettings,
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
+  TypeViewportBoundaryLonLat,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -87,7 +90,8 @@ import {
 } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
+import { InvalidExtentError, InvalidViewportMidpointsError, MapViewportUnavailableError } from '@/core/exceptions/geoview-exceptions';
+import { CancelledError } from '@/core/exceptions/core-exceptions';
 import { Notifications } from '@/core/utils/notifications';
 import {
   getStoreMapCurrentBasemapOptionsOrInitial,
@@ -1808,6 +1812,132 @@ export class MapViewer {
   }
 
   /**
+   * Samples the rendered viewport corners and edge midpoints in longitude/latitude.
+   *
+   * Excludes OL View padding (the map-info bar in dynamic mode). Labels refer to screen positions,
+   * not geographic directions after rotation. This is a rendered-view snapshot, not an envelope.
+   * Call after map readiness and after rendering completes following programmatic view changes.
+   *
+   * @returns Fresh boundary coordinates in [longitude, latitude] degrees
+   * @throws {MapViewportUnavailableError} When the viewport has no usable size, pixel transform, or finite boundary coordinates
+   */
+  getViewportBoundaryLonLat(): TypeViewportBoundaryLonLat {
+    const size = this.map?.getSize();
+    if (!size) throw new MapViewportUnavailableError(this.mapId);
+    const padding = this.getView().padding ?? [0, 0, 0, 0];
+    if (
+      padding.length !== 4 ||
+      ![...size, ...padding].every(Number.isFinite) ||
+      padding.some((value) => value < 0) ||
+      size[0] <= 0 ||
+      size[1] <= 0
+    )
+      throw new MapViewportUnavailableError(this.mapId);
+
+    // Work in the unpadded CSS-pixel rectangle so the map-info overlay is not counted as visible map.
+    const [top, rightPadding, bottomPadding, left] = padding;
+    const right = size[0] - rightPadding;
+    const bottom = size[1] - bottomPadding;
+    if (right <= left || bottom <= top) throw new MapViewportUnavailableError(this.mapId);
+
+    const midX = (left + right) / 2;
+    const midY = (top + bottom) / 2;
+    const projection = this.getProjection();
+    // Pixel sampling follows the rendered rotation; calculateExtent() would instead enclose the rotated viewport.
+    const toLonLat = (pixel: Pixel): Coordinate => {
+      const coordinate = this.map.getCoordinateFromPixel(pixel);
+      if (!coordinate || !coordinate.every(Number.isFinite)) throw new MapViewportUnavailableError(this.mapId);
+      // Unlike toLonLat(), transform() preserves longitudes outside [-180, 180] in wrapped worlds.
+      const lonlat = Projection.transform(coordinate, projection, Projection.getProjectionLonLat());
+      if (!lonlat.every(Number.isFinite)) throw new MapViewportUnavailableError(this.mapId);
+      return [lonlat[0], lonlat[1]];
+    };
+
+    const n = toLonLat([midX, top]);
+    const e = toLonLat([right, midY]);
+    const s = toLonLat([midX, bottom]);
+    const w = toLonLat([left, midY]);
+
+    return {
+      corners: {
+        nw: toLonLat([left, top]),
+        ne: toLonLat([right, top]),
+        se: toLonLat([right, bottom]),
+        sw: toLonLat([left, bottom]),
+      },
+      midpoints: {
+        n,
+        e,
+        s,
+        w,
+      },
+      midpointWSENCoords: [w, s, e, n],
+    };
+  }
+
+  /**
+   * Rotates and fits longitude/latitude edge midpoints inside the padded viewport.
+   *
+   * Adds no extra margin. Existing view constraints apply; different projections or aspect ratios
+   * may prevent all points from landing exactly on their corresponding edges. Rotation aligns the
+   * west-to-east and south-to-north pairs to the screen axes with equal directional influence.
+   * Longitudes are preserved as supplied; no antimeridian unwrapping is performed.
+   *
+   * @param midpointWSENCoords - Four [longitude, latitude] coordinates in west, south, east, north screen-edge order
+   * @param useAnimation - Optional animation flag, defaults to true
+   * @returns A promise that resolves after fitting and rendering complete
+   * @throws {InvalidViewportMidpointsError} When coordinates are invalid or their opposing pairs cannot define an orientation
+   * @throws {MapViewportUnavailableError} When the viewport cannot be sampled (propagated from `getViewportBoundaryLonLat()`)
+   * @throws {CancelledError} When another interaction interrupts the fit animation
+   */
+  async fitViewportToMidpointsLonLat(midpointWSENCoords: readonly Coordinate[], useAnimation = true): Promise<void> {
+    // Reject malformed input before changing the view, while allowing unwrapped longitudes beyond +/-180.
+    if (
+      !Array.isArray(midpointWSENCoords) ||
+      midpointWSENCoords.length !== 4 ||
+      !Array.from(midpointWSENCoords).every(
+        (coordinate) =>
+          Array.isArray(coordinate) &&
+          coordinate.length === 2 &&
+          Number.isFinite(coordinate[0]) &&
+          Number.isFinite(coordinate[1]) &&
+          Math.abs(coordinate[1]) <= 90
+      )
+    )
+      throw new InvalidViewportMidpointsError();
+
+    // Require a usable rendered viewport before projecting points or starting either animation.
+    this.getViewportBoundaryLonLat();
+    const projection = this.getProjection();
+    const coordinates = midpointWSENCoords.map((coordinate) => Projection.transformFromLonLat(coordinate, projection));
+    if (coordinates.some((coordinate) => !coordinate.every(Number.isFinite))) throw new InvalidViewportMidpointsError();
+
+    const rotation = MapViewer.#getViewportMidpointRotation(coordinates);
+    const view = this.getView();
+    // Finish rotating before fitting: OpenLayers computes the fit against the view's current rotation.
+    if (useAnimation) {
+      // Fit the points, not their map-axis bounding extent, to avoid extra space around rotated geometry.
+      await new Promise<void>((resolve, reject) => {
+        view.animate({ rotation, duration: OL_ZOOM_DURATION }, (complete): void => {
+          if (complete) resolve();
+          else reject(new CancelledError('Viewport midpoint rotation was interrupted.'));
+        });
+      });
+    } else view.setRotation(rotation);
+    await new Promise<void>((resolve, reject) => {
+      view.fit(new MultiPoint(coordinates), {
+        duration: useAnimation ? OL_ZOOM_DURATION : 0,
+        callback: (complete): void => {
+          if (complete) resolve();
+          else reject(new CancelledError('Viewport midpoint fit was interrupted.'));
+        },
+      });
+    });
+    // Resolve only once pixel-based boundary queries can observe the fitted view.
+    await this.waitForRender();
+  }
+
+  /**
    * Transforms extent from LonLat to the current projection of the map.
    *
    * @param extent - The LonLat extent
@@ -2037,6 +2167,33 @@ export class MapViewer {
       default:
         return Projection.transformExtentFromProj(maxExtent, Projection.getProjectionLonLat(), projection);
     }
+  }
+
+  /**
+   * Finds the closest rotation aligning the opposing midpoint directions to the screen axes.
+   *
+   * Normalizing the two directions gives each pair equal influence regardless of viewport aspect ratio.
+   *
+   * @param coordinates - Projected midpoint coordinates in west, south, east, north order
+   * @returns The target view rotation in radians
+   * @throws {InvalidViewportMidpointsError} When an opposing pair coincides or the two direction estimates cancel
+   */
+  static #getViewportMidpointRotation(coordinates: Coordinate[]): number {
+    const [west, south, east, north] = coordinates;
+    const eastX = east[0] - west[0];
+    const eastY = east[1] - west[1];
+    const northX = north[0] - south[0];
+    const northY = north[1] - south[1];
+    const eastLength = Math.hypot(eastX, eastY);
+    const northLength = Math.hypot(northX, northY);
+    if (!eastLength || !northLength || !Number.isFinite(eastLength) || !Number.isFinite(northLength))
+      throw new InvalidViewportMidpointsError();
+    // Average unit directions: east points along screen X, while north is offset by a quarter-turn.
+    const cos = eastX / eastLength + northY / northLength;
+    const sin = eastY / eastLength - northX / northLength;
+    // Opposing direction estimates cancel out and cannot define a unique best-fit rotation.
+    if (Math.hypot(cos, sin) < 1e-10) throw new InvalidViewportMidpointsError();
+    return Math.atan2(sin, cos);
   }
 
   /**

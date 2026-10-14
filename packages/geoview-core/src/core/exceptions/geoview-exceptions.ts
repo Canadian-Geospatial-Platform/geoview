@@ -195,6 +195,32 @@ export class MapViewerNotFoundError extends GeoViewError {
   }
 }
 
+/** Error thrown when a map cannot provide finite samples of its visible viewport boundary. */
+export class MapViewportUnavailableError extends GeoViewError {
+  /**
+   * Creates an instance of MapViewportUnavailableError.
+   *
+   * @param mapId - The map whose viewport could not be sampled
+   */
+  constructor(mapId: string) {
+    super('error.map.viewportUnavailable', { mapId });
+    this.name = 'MapViewportUnavailableError';
+    Object.setPrototypeOf(this, MapViewportUnavailableError.prototype);
+  }
+}
+
+/** Error thrown when viewport fitting is given invalid longitude/latitude midpoints. */
+export class InvalidViewportMidpointsError extends GeoViewError {
+  /**
+   * Creates an instance of InvalidViewportMidpointsError.
+   */
+  constructor() {
+    super('error.map.invalidViewportMidpoints');
+    this.name = 'InvalidViewportMidpointsError';
+    Object.setPrototypeOf(this, InvalidViewportMidpointsError.prototype);
+  }
+}
+
 /**
  * Error thrown when a map viewer with a specified ID already exists.
  */

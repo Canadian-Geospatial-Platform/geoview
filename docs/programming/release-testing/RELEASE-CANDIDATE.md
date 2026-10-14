@@ -121,6 +121,7 @@ _(User-facing features added or enabled)_
 - New `waitForLayerConfigRegistered` in layer-domain and enhanced `waitForLayerRegistered` with optional timeout (#3562)
 - New `waitForLoadedOnce` lifecycle wait on GV layers; group layers wait for all descendant leaf layers before resolving
 - New `getRendererContainer` function on `AbstractBaseGVLayer` (#3562)
+- Added `MapViewer.getViewportBoundaryLonLat()` to sample the rendered viewport corners and edge midpoints, and `MapViewer.fitViewportToMidpointsLonLat()` to rotate and fit a captured set of west/south/east/north midpoint coordinates
 - New `waitForDomElement`, `waitForDomContent`, and `waitForDomChange` test utilities for explicit React UI tracking (#3562)
 - Map view now uses `viewOptions.padding` to account for the map-info bar height (#3562)
 - New `MapViewer.updateViewPadding()` and `mapController.updateViewPadding()` for dynamic map-info bar padding (#3562)
@@ -340,7 +341,7 @@ _(Tests added, moved, removed, or reorganized)_
 - Added `suite-time-slider` with reset-to-default and dual-handle overlap constraint regression tests, plus a dedicated temporal-layer test map
 - Added fixed-height map layout tests for maps with and without a footer bar (#3601)
 - Added a manual resizable-host-container test and demo covering width/height resizing, footer-panel sizing, and fullscreen transitions (`20-edge-cases.md`; manual test total 684 → 685)
-- Audited suite totals against active full-suite tester calls: corrected `suite-map-config` to 39; debug-only and commented-out calls remain excluded
+- Added 30 automated viewport boundary and midpoint-fitting regression tests to `suite-map-config`, covering projections, rotations, padding, resizing, invalid inputs, and interrupted animations. Updated the suite total from 39 to 69, the test catalog from 249 to 279 declared tests, and the automated release checklist from 295 to 325 executions
 - Fixed sequential execution in `suite-core` so the XYZ tile URL test is awaited before the following test
 - Added 3 manual layers tests for WMS services with duplicate group `<Name>` values at different nesting levels (#3521): Add Layer UI selection of the `canimage` group (no `RangeError`) plus a new config-based Map 10 (`rt-08-layers.html`) verifying the `canimage`/`canimage` duplicate group loads and renders without hanging
 - Added automated `suite-layer` test `testAddWMSDuplicateGroupNames` (LayerTester) guarding issue #3521 — loads the `canimage_en` WMS by its duplicate top group id, asserts the nested `canimage/canimage` path is built and a deep leaf loads without infinite-looping (`suite-layer` total 41 → 43: +1 for the new test and +1 for correctly counting the heavy-conditional test that was previously excluded)

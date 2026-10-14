@@ -26,6 +26,15 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-88.31, 51.97];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
 
+  /** Far-west Canada center for viewport boundary tests. */
+  static readonly VIEWPORT_WEST_CANADA_LONLAT: Coordinate = [-135, 60];
+  /** Far-east Canada center for viewport boundary tests. */
+  static readonly VIEWPORT_EAST_CANADA_LONLAT: Coordinate = [-55, 60];
+  /** Center whose Web Mercator viewport crosses the antimeridian. */
+  static readonly VIEWPORT_ANTIMERIDIAN_LONLAT: Coordinate = [179, 60];
+  /** Near-pole center for finite LCC viewport sampling. */
+  static readonly VIEWPORT_POLAR_LONLAT: Coordinate = [-95, 85];
+
   /** Extent covering Ontario province in lonlat [minX, minY, maxX, maxY]. */
   static readonly ONTARIO_EXTENT: [number, number, number, number] = [-100, 50, -80, 57];
 
