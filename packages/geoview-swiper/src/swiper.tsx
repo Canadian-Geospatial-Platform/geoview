@@ -1,5 +1,6 @@
 import type { SxProps } from 'geoview-core/ui/style/types';
 import Draggable from 'react-draggable';
+import type { DraggableData, DraggableEvent } from 'react-draggable';
 import { useMemo } from 'react';
 
 import type RenderEvent from 'ol/render/Event';
@@ -14,7 +15,8 @@ import {
 } from 'geoview-core/core/stores/states/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { delay } from 'geoview-core/core/utils/utilities';
-import { debounce } from 'geoview-core/core/utils/debounce';
+import { debounce, type DebouncedFunction } from 'geoview-core/core/utils/debounce';
+import { visuallyHidden } from 'geoview-core/ui/style/default';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreMapSize } from 'geoview-core/core/stores/states/map-state';
 import { useStoreUIActiveTrapGeoView } from 'geoview-core/core/stores/states/ui-state';
@@ -76,8 +78,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const { cgpv } = window;
   const { ui, reactUtilities } = cgpv;
-  const { useEffect, useState, useRef, useCallback } = reactUtilities.react;
+  const { useEffect, useState, useRef, useCallback, useId } = reactUtilities.react;
   const { Box, Tooltip, HandleIcon } = ui.elements;
+  const instructionsId = useId();
 
   // Refs
   const mapSize = useRef<number[]>(mapController.getMapSize() || [0, 0]);
@@ -101,6 +104,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const [yPositionVertical, setYPositionVertical] = useState(0);
   const [xPositionHorizontal, setXPositionHorizontal] = useState(0);
   const [yPositionHorizontal, setYPositionHorizontal] = useState(mapSize.current[1] / 2);
+  const [accessiblePositionVertical, setAccessiblePositionVertical] = useState(50);
+  const [accessiblePositionHorizontal, setAccessiblePositionHorizontal] = useState(50);
   // Bumped on map resize (while not dragging) to remount the Draggable and reapply its defaultPosition
   const [resizeToken, setResizeToken] = useState(0);
 
@@ -111,6 +116,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const visibleLayers = useStoreLayerVisibleLayers();
   const orientation = useStoreSwiperOrientation();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const movesHorizontally = orientation === 'vertical';
+  const accessiblePosition = movesHorizontally ? accessiblePositionVertical : accessiblePositionHorizontal;
 
   // #region Handlers
 
@@ -119,11 +126,25 @@ export function Swiper(props: SwiperProps): JSX.Element {
    *
    * @returns The array of value for x and y position for the swiper bar
    */
-  const getSwiperStyle = (): number[] => {
+  const getSwiperStyle = useCallback((): number[] => {
     const style = window.getComputedStyle(swiperRef.current as HTMLElement);
     const matrix = new DOMMatrixReadOnly(style.transform);
     return [matrix.m41, matrix.m42];
-  };
+  }, []);
+
+  /**
+   * Synchronizes the announced position without rerendering for sub-percent movements.
+   *
+   * @param position - The divider percentage along the current movement axis
+   */
+  const updateAccessiblePosition = useCallback(
+    (position: number): void => {
+      const roundedPosition = Math.max(0, Math.min(100, Math.round(position)));
+      if (orientation === 'vertical') setAccessiblePositionVertical(roundedPosition);
+      else setAccessiblePositionHorizontal(roundedPosition);
+    },
+    [orientation]
+  );
 
   /**
    * Handles the start of a drag by flagging the drag and disabling map interaction under the bar.
@@ -138,29 +159,47 @@ export function Swiper(props: SwiperProps): JSX.Element {
   /**
    * Handles drag events and requests a render at the updated swiper position.
    */
-  const onDrag = debounce(() => {
-    if (!layerPaths.length) return;
+  const memoRenderOnDrag = useMemo((): DebouncedFunction<() => void> => {
+    logger.logTraceUseMemo('SWIPER - debounced drag rendering', layerPaths.length, orientation);
+    return debounce((): void => {
+      if (!layerPaths.length || !swiperRef.current) return;
 
-    // Get map size
-    mapSize.current = mapController.getMapSize() || [0, 0];
+      // Get map size
+      mapSize.current = mapController.getMapSize() || [0, 0];
+      if (mapSize.current[orientation === 'vertical' ? 0 : 1] <= 0) return;
 
-    // Update refs ONLY
-    if (orientation === 'vertical') {
-      const [x] = getSwiperStyle();
-      swiperValueVertical.current = (x / mapSize.current[0]) * 100;
-    } else {
-      const [, y] = getSwiperStyle();
-      swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
-    }
+      // Update refs ONLY
+      if (orientation === 'vertical') {
+        const [x] = getSwiperStyle();
+        swiperValueVertical.current = (x / mapSize.current[0]) * 100;
+      } else {
+        const [, y] = getSwiperStyle();
+        swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
+      }
 
-    // Render the map so the target layers use the updated clip position
-    mapController.forceMapToRender();
-  }, 100);
+      // Render the map so the target layers use the updated clip position
+      mapController.forceMapToRender();
+    }, 100);
+  }, [layerPaths.length, mapController, orientation, getSwiperStyle]);
+
+  /**
+   * Handles dragging by exposing the current position immediately while retaining debounced map rendering.
+   */
+  const handleDrag = useCallback(
+    (event: DraggableEvent, data: DraggableData): void => {
+      const currentMapSize = mapController.getMapSize();
+      const size = currentMapSize?.[orientation === 'vertical' ? 0 : 1];
+      if (size && size > 0) updateAccessiblePosition(((orientation === 'vertical' ? data.x : data.y) / size) * 100);
+      memoRenderOnDrag();
+    },
+    [mapController, orientation, updateAccessiblePosition, memoRenderOnDrag]
+  );
 
   /**
    * Handles drag stop - sync everything to React state and store.
    */
   const onStop = useCallback((): void => {
+    memoRenderOnDrag.cancel();
     isDraggingRef.current = false;
 
     // Re-enable map interaction now that the swiper drag is over
@@ -170,17 +209,20 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // Get map size
     mapSize.current = mapController.getMapSize() || [0, 0];
+    if (mapSize.current[orientation === 'vertical' ? 0 : 1] <= 0) return;
 
     // Update refs, React state, and controller/store
     if (orientation === 'vertical') {
       const [x] = getSwiperStyle();
       swiperValueVertical.current = (x / mapSize.current[0]) * 100;
+      updateAccessiblePosition(swiperValueVertical.current);
       setXPositionVertical(x);
       setYPositionVertical(0);
       controllerRegistry.swiperController?.setSwiperPosition(swiperValueVertical.current);
     } else {
       const [, y] = getSwiperStyle();
       swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
+      updateAccessiblePosition(swiperValueHorizontal.current);
       setXPositionHorizontal(0);
       setYPositionHorizontal(y);
       controllerRegistry.swiperController?.setSwiperPosition(swiperValueHorizontal.current);
@@ -188,7 +230,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // Render the map so the target layers use the updated clip position
     mapController.forceMapToRender();
-  }, [layerPaths.length, mapController, orientation, controllerRegistry.swiperController]);
+  }, [
+    layerPaths.length,
+    mapController,
+    orientation,
+    controllerRegistry.swiperController,
+    getSwiperStyle,
+    updateAccessiblePosition,
+    memoRenderOnDrag,
+  ]);
 
   /**
    * Handles arrow-key presses on the focused swiper bar while in WCAG keyboard navigation mode.
@@ -226,10 +276,18 @@ export function Swiper(props: SwiperProps): JSX.Element {
           logger.logPromiseFailed('handleKeyDown in Swiper', error);
         }); // Wait for the DOM to update
     },
-    [activeTrapGeoView, layerPaths, orientation, onStop]
+    [activeTrapGeoView, layerPaths, orientation, onStop, getSwiperStyle]
   );
 
   // #endregion
+
+  /**
+   * Cancels pending drag rendering when its dependencies change or the swiper unmounts.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SWIPER - drag rendering cleanup', memoRenderOnDrag);
+    return () => memoRenderOnDrag.cancel();
+  }, [memoRenderOnDrag]);
 
   /**
    * Restores map interactivity if the swiper unmounts while a drag is in progress.
@@ -458,6 +516,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Use a swiper
     return (
       <Box sx={memoSxClasses.layerSwipe}>
+        <Box id={instructionsId} sx={visuallyHidden}>
+          {t(movesHorizontally ? 'swiper.instructionsHorizontal' : 'swiper.instructionsVertical')}
+        </Box>
         <Draggable
           nodeRef={swiperRef}
           key={`${orientation}-${resizeToken}`} // Recreate on orientation change or a resize-at-rest (never mid-drag)
@@ -468,17 +529,24 @@ export function Swiper(props: SwiperProps): JSX.Element {
           }
           onStart={onStart}
           onStop={onStop}
-          onDrag={onDrag}
+          onDrag={handleDrag}
         >
           <Box
             sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar] as SxProps}
-            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- draggable swiper bar is keyboard-operable via arrow keys; it has no slider role/ARIA values yet (follow-up)
+            role="slider"
+            aria-label={t('swiper.positionLabel')}
+            aria-describedby={instructionsId}
+            aria-orientation={movesHorizontally ? 'horizontal' : 'vertical'}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={accessiblePosition}
+            aria-valuetext={t(movesHorizontally ? 'swiper.positionFromLeft' : 'swiper.positionFromTop', { percent: accessiblePosition })}
             tabIndex={0}
             ref={swiperRef}
             onKeyDown={handleKeyDown}
           >
             <Tooltip title={t('swiper.tooltip')}>
-              <Box className="handleContainer">
+              <Box className="handleContainer" aria-hidden="true">
                 <HandleIcon sx={memoSxClasses.handle} className="handleL" />
                 <HandleIcon sx={memoSxClasses.handle} className="handleR" />
               </Box>
