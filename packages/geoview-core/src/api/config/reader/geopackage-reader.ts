@@ -205,7 +205,8 @@ export class GeoPackageReader {
   static async #getGeoPackageData(url: string, layerName: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
     // Kick off the SqlJs init in parallel with the GeoPackage fetch
     const sqlPromise = initSqlJs({
-      locateFile: () => `https://sql.js.org/dist/sql-wasm.wasm`,
+      // The loader and WASM must come from the same installed SQL.js version.
+      locateFile: () => new URL('sql.js/dist/sql-wasm.wasm', import.meta.url).href,
     });
 
     // Fetch the GeoPackage; surface a specific message if the source can't be loaded (e.g. unreachable/404)

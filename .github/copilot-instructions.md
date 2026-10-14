@@ -246,6 +246,16 @@ const isVisible =
 
 **CSS transitions on show/hide elements** — When a component is hidden via CSS `visibility: hidden` and shown via `visibility: visible`, always compute the correct transform values even while hidden. Otherwise, CSS transitions animate from a stale/default value (e.g., `rotate(0deg)`) to the target value when the element becomes visible, causing a visual glitch at viewport edges.
 
+### Visible Viewport Boundary & Midpoint Fitting
+
+- **Current API location and shape:** `MapViewer.getViewportBoundaryLonLat()` returns `corners`, `midpoints`, and `midpointWSENCoords`. The latter is four `[longitude, latitude]` pairs in **west, south, east, north screen-edge order**, not a four-number bbox. These APIs currently live directly on MapViewer, not MapController; React components must still use controllers. See [map-viewer-api.md](../docs/app/api/map-viewer-api.md#visible-viewport-boundary).
+- **Sample pixels, not an extent:** `calculateExtent()` encloses a rotated viewport and cannot supply its actual corners or edge midpoints. Sample the unpadded CSS-pixel rectangle with `getCoordinateFromPixel()`, excluding all four OL View padding values. `updateViewPadding()` reserves the map-info bar height at the bottom in dynamic mode and zero in static mode.
+- **Screen labels are not geographic extrema:** After rotation, `n/e/s/w` mean top/right/bottom/left, not geographic north/east/south/west. A midpoint-derived bbox is an integration policy, not a guaranteed ordered extent or containing envelope. Keep `convertExtentMapProjToLonLat()` for the separate densified-envelope use case.
+- **Preserve wrapped-world coordinates:** Boundary sampling uses `Projection.transform()` rather than `transformToLonLat()` because OpenLayers' `toLonLat()` wraps longitude into `[-180, 180]`. Preserve unwrapped longitudes for same-world Web Mercator round trips; antimeridian and polar box policies belong to the integration.
+- **Rendered snapshots and errors:** Sample after readiness and rendering following view/layout changes. Results are fresh snapshots, not new store or move-end payload fields. Unusable size, padding, pixel transforms, or non-finite samples throw `MapViewportUnavailableError` rather than returning partial results.
+- **Fit the points themselves:** `fitViewportToMidpointsLonLat()` rotates first using the equal-weight circular mean of the projected west-to-east direction and perpendicular south-to-north direction, then fits an OL `MultiPoint`, not its axis-aligned extent. Existing padding and view constraints apply; changed projection/aspect ratio can prevent exact edge alignment. Animation interruption rejects with `CancelledError`.
+- **Fixture placement matters:** Viewport tests use `MapTester` but run sequentially in `suite-map-config`, reusing `replaceMap()` and the suite's existing host. Do not destroy the configured layers of `suite-map` just to test a fresh static/dynamic viewport.
+
 ### Layer Architecture
 
 **Two-tier system** — both tiers are mandatory for every layer:

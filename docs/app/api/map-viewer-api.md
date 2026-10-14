@@ -96,6 +96,106 @@ const lonLatExtent = mapViewer.convertExtentMapProjToLonLat(mapExtent);
 const angle = mapViewer.getNorthArrowAngle();
 ```
 
+### Visible Viewport Boundary
+
+Use `getViewportBoundaryLonLat()` after map readiness to obtain the four corners and four
+edge midpoints of the **rendered viewport**, in `[longitude, latitude]` degrees.
+See [MapViewer — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/MapViewer.html)
+for the complete contract and errors. Boundary sampling and midpoint fitting are exposed directly on MapViewer for integrations.
+
+```typescript
+const mapViewer = await cgpv.api.getMapViewerAsync("mapId");
+await mapViewer.waitForMapReady();
+await mapViewer.waitForRender();
+const { corners, midpoints } = mapViewer.getViewportBoundaryLonLat();
+
+// OSDP WENS order: [west, east, north, south].
+const wens = [midpoints.w[0], midpoints.e[0], midpoints.n[1], midpoints.s[1]];
+// Standard bbox order is different: [west, south, east, north].
+const midpointBox = [
+  midpoints.w[0],
+  midpoints.s[1],
+  midpoints.e[0],
+  midpoints.n[1],
+];
+```
+
+In LCC (EPSG:3978), straight viewport edges become curves in lon/lat. Corner latitudes
+therefore do not describe the latitude at an edge midpoint. This API returns both sets
+of points so integrators can choose their own representative-box policy, including
+combining corners and midpoints at the far east/west of Canada. It does **not** return
+a bounding envelope or guarantee that a midpoint-derived box contains the whole viewport.
+`convertExtentMapProjToLonLat()` remains the separate, densified envelope conversion.
+
+The rectangle excludes all OpenLayers View padding. In dynamic mode its bottom edge
+is the top of the map-info bar; in static mode the bar does not overlay the canvas and
+the bottom edge is the canvas bottom. Arbitrary panels and other overlays are not subtracted.
+Pixels are CSS viewport pixels, independent of device pixel ratio.
+
+Labels are **screen-relative**: `nw/ne/se/sw` mean top-left/top-right/bottom-right/bottom-left,
+and `n/e/s/w` mean top/right/bottom/left. Rotation is respected, but after rotation these
+labels need not correspond to geographic directions. Consequently, the example box
+is a representative policy for suitable views, not a guaranteed ordered geographic extent.
+Longitudes are not wrapped or clamped; antimeridian-crossing and polar views require
+an integration-specific policy before using a box in another projection.
+
+Results are fresh snapshots with no store or event payload changes. Recompute on
+“Search this Area”, or use existing move-end and size-change events:
+
+```typescript
+mapViewer.onMapMoveEnd((sender, event) => {
+  const boundary = sender.getViewportBoundaryLonLat();
+  // Pass boundary to the integration's area-selection logic.
+});
+```
+
+After programmatic projection, rotation, padding, or size changes, wait for rendering
+before sampling. A missing/zero-sized viewport, invalid padding, unavailable pixel
+transform, or non-finite boundary throws `MapViewportUnavailableError` rather than
+returning partial coordinates.
+
+#### Fitting the Viewport to Captured Midpoints
+
+`midpointWSENCoords` contains **four coordinate pairs** in west, south, east, north
+screen-edge order. It is not the four-number `[west, south, east, north]` bbox.
+Pass it directly to `fitViewportToMidpointsLonLat()` on the viewer:
+
+```typescript
+const { midpointWSENCoords } = mapViewer.getViewportBoundaryLonLat();
+
+// Later, restore the view from the captured coordinates.
+await mapViewer.fitViewportToMidpointsLonLat(midpointWSENCoords);
+
+// Without animation:
+await mapViewer.fitViewportToMidpointsLonLat(midpointWSENCoords, false);
+```
+
+The method rotates the map to align west/east toward the left/right edges and south/north
+toward the bottom/top edges, then fits **the four points themselves**, not their
+axis-aligned extent. It chooses the equal-weight circular mean of the projected
+west-to-east direction and the perpendicular south-to-north direction. Each pair has
+equal directional influence regardless of its length.
+
+For coordinates from the same projection and viewport aspect ratio, this restores
+the original center, resolution, and rotation (subject to existing view constraints).
+After a projection or aspect-ratio change, it chooses the closest matching orientation
+and keeps all four points inside the padded visible rectangle when constraints permit;
+they need not all land exactly on the edge midpoints. This is not an unconstrained
+minimum-area rotation search and does not guarantee coverage of the original corners.
+
+No additional zoom margin is added. Current View padding (including the dynamic map-info
+bar), zoom limits, extent constraints, and rotation constraints apply. Longitudes are
+used as supplied, without antimeridian wrapping; preserve the unwrapped longitudes
+returned by the boundary API when using Web Mercator across the antimeridian.
+The input array is not modified.
+
+Animation defaults to enabled: rotation completes first, then the view fits the points.
+The promise resolves after the fit and rendering complete. Interruption rejects with
+`CancelledError`; it does not roll back any movement already made.
+Invalid coordinates or opposing pairs that cannot define an orientation reject with
+`InvalidViewportMidpointsError`, and an unavailable viewport rejects with
+`MapViewportUnavailableError`.
+
 ### Map Interactions
 
 ```typescript
