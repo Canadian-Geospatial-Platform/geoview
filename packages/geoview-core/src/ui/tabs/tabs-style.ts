@@ -1,8 +1,7 @@
 import { alpha } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
-import { FOCUS_HALO_SIZE, FOCUS_OUTLINE_WIDTH, getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
-import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { FOCUS_HALO_SIZE, FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets custom sx classes for the tabs component.
@@ -61,16 +60,11 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
         marginRight: theme.spacing(1),
         maxWidth: '18px',
       },
-      ...(!theme.focusVisible && {
-        '&.Mui-focusVisible': {
-          ...getFocusIndicatorStyles({
-            ...(theme.palette.geoViewColor ?? defaultGeoViewColors),
-            focusIndicator,
-          }),
-          outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
-          boxShadow: `inset 0 0 0 ${FOCUS_HALO_SIZE} ${focusIndicator.halo}`,
-        },
-      }),
+      '&.Mui-focusVisible': {
+        outline: `${FOCUS_OUTLINE_WIDTH} solid ${focusIndicator.outline}`,
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
+        boxShadow: `inset 0 0 0 ${FOCUS_HALO_SIZE} ${focusIndicator.halo}`,
+      },
       transition: 'background-color 0.3s ease-in-out',
       '&:hover': {
         backgroundColor: theme.palette.geoViewColor?.primary.light[200],

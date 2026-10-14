@@ -15,6 +15,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     overflow: 'hidden',
   },
+  modePanel: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+  },
   panelContent: {
     display: 'flex',
     flexDirection: 'column',
