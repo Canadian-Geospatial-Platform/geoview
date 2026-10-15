@@ -1,6 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
-import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
+import { Box, Button, Checkbox, CircularProgressBase, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
@@ -24,6 +24,10 @@ interface StacFilterPanelProps {
   isPropertyFilterSupported: boolean;
   /** Whether the server supports search sorting. */
   isSortSupported: boolean;
+  /** Whether a search request is pending. */
+  isSearching: boolean;
+  /** Whether the last completed search returned no items. */
+  hasNoResults: boolean;
   /** Current values shown in the filter form. */
   filterState: StacFilterPanelState;
   /** Updates the current filter form values. */
@@ -51,6 +55,8 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
     isFreeTextSupported,
     isPropertyFilterSupported,
     isSortSupported,
+    isSearching,
+    hasNoResults,
     filterState,
     setFilterState,
     onClearFilters,
@@ -290,6 +296,12 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.filterPanel}>
+      {config.searchDescription && (
+        <Typography component="p" sx={memoSxClasses.detailDescription}>
+          {t(config.searchDescription)}
+        </Typography>
+      )}
+
       {/* Text search */}
       {showKeyword && (
         <Box sx={memoSxClasses.filterRow}>
@@ -452,11 +464,23 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       )}
 
       {/* Search button */}
+      <Box role="status" aria-live="polite">
+        {isSearching && (
+          <Box sx={memoSxClasses.loading}>
+            <CircularProgressBase aria-label={t('stacBrowser.loading')} />
+          </Box>
+        )}
+        {!isSearching && hasNoResults && (
+          <Box sx={memoSxClasses.noResults}>
+            <Typography>{t('stacBrowser.noResults')}</Typography>
+          </Box>
+        )}
+      </Box>
       <Box sx={memoSxClasses.filterActions}>
-        <Button type="text" variant="outlined" onClick={onClearFilters}>
+        <Button type="text" variant="outlined" onClick={onClearFilters} disabled={isSearching}>
           {t('stacBrowser.clearFilters')}
         </Button>
-        <Button type="text" variant="contained" onClick={handleSearchClick}>
+        <Button type="text" variant="contained" onClick={handleSearchClick} disabled={isSearching}>
           {t('stacBrowser.search')}
         </Button>
       </Box>

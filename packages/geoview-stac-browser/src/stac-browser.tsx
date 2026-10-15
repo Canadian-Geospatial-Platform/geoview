@@ -4,6 +4,7 @@ import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
+import type { TypeStacMapExtentSnapshot } from 'geoview-core/core/controllers/stac-browser-controller';
 
 import type {
   BrowseMode,
@@ -39,11 +40,11 @@ const SELECTED_FOOTPRINT_ZINDEX = 10001;
 /**
  * Gets the overlay id of an item map preview.
  *
- * @param itemId - The item id
+ * @param itemKey - The stable item identity
  * @returns The overlay id
  */
-function getPreviewOverlayId(itemId: string): string {
-  return `stac-preview-${itemId}`;
+function getPreviewOverlayId(itemKey: string): string {
+  return `stac-preview-${itemKey}`;
 }
 
 /**
@@ -58,8 +59,8 @@ function getDefaultFilterPanelState(config: StacBrowserConfig): StacFilterPanelS
 
   return {
     selectedCollections: config.defaults?.collections ?? [],
-    useMapExtent: false,
-    containedInExtent: false,
+    useMapExtent: config.filters?.spatial !== false && (config.defaults?.useMapExtent ?? false),
+    containedInExtent: config.defaults?.containedInExtent ?? false,
     startDate: getDate(datetime[0]),
     endDate: getDate(datetime[1]),
     keyword: '',
@@ -95,9 +96,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
   const stacController = useStacBrowserController();
 
+  const browseEnabled = config.browseEnabled !== false;
+  const initialMode: BrowseMode = browseEnabled ? (config.defaultMode ?? 'browse') : 'search';
+
   // State
-  const [mode, setMode] = useState<BrowseMode | string>('browse');
-  const [view, setView] = useState<PanelView>('collections');
+  const [mode, setMode] = useState<BrowseMode>(initialMode);
+  const [view, setView] = useState<PanelView>(initialMode === 'search' ? 'search' : 'collections');
   const [capabilities, setCapabilities] = useState<StacCapabilities | undefined>(undefined);
   const [collections, setCollections] = useState<StacCollection[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -110,6 +114,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [searchParams, setSearchParams] = useState<StacSearchParams | undefined>(undefined);
   /** Extent used to enforce strict item containment in a search. */
   const [searchContainedExtent, setSearchContainedExtent] = useState<[number, number, number, number] | undefined>(undefined);
+  /** Visible map extent captured at search submission, preserved while paging and inspecting items. */
+  const [searchMapExtent, setSearchMapExtent] = useState<TypeStacMapExtentSnapshot | undefined>(undefined);
   /** Search form values are lifted here so navigation back from results preserves them. */
   const [filterPanelState, setFilterPanelState] = useState<StacFilterPanelState>(() => getDefaultFilterPanelState(config));
   const [isLoading, setIsLoading] = useState(false);
@@ -118,9 +124,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [currentPage, setCurrentPage] = useState(1);
   /** Tracks which view the item-detail was opened from. */
   const [itemDetailOrigin, setItemDetailOrigin] = useState<PanelView>('collections');
-  /** Selected items with their footprint color, keyed by item id. */
+  /** Selected items with their footprint color, keyed by stable item identity. */
   const [selectedItems, setSelectedItems] = useState<Record<string, { item: StacItem; color: string }>>({});
-  /** Items previewed on the map, keyed by item id. */
+  /** Items previewed on the map, keyed by stable item identity. */
   const [previewedIds, setPreviewedIds] = useState<Record<string, boolean>>({});
 
   const limit = config.defaults?.limit ?? DEFAULT_PAGE_LIMIT;
@@ -158,8 +164,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         setCollections(allowedCollections);
         if (startCollection) {
           setDefaultCollection(startCollection);
-          setSelectedCollection(startCollection);
-          setView('collection-detail');
+          if (initialMode === 'browse') {
+            setSelectedCollection(startCollection);
+            setView('collection-detail');
+          }
         }
       } catch (error: unknown) {
         // UI boundary: report the failed request to the user
@@ -174,7 +182,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     return (): void => {
       cancelled = true;
     };
-  }, [memoApiService, config.collections, stacController]);
+  }, [memoApiService, config.collections, initialMode, stacController]);
 
   /**
    * Draws the selected item footprints in their selection color.
@@ -240,7 +248,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles switching between browse and search modes.
    */
   const handleModeChange = useCallback(
-    (newMode: BrowseMode | string): void => {
+    (newMode: BrowseMode): void => {
+      if (newMode === 'browse' && !browseEnabled) return;
       setMode(newMode);
       if (newMode === 'browse') {
         setView(defaultCollection ? 'collection-detail' : 'collections');
@@ -253,8 +262,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       setSearchResult(null);
       setSearchResultPages([]);
       setSearchContainedExtent(undefined);
+      setSearchMapExtent(undefined);
     },
-    [defaultCollection]
+    [browseEnabled, defaultCollection]
   );
 
   /**
@@ -262,8 +272,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleModeClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
-      if (event.currentTarget.dataset.mode) {
-        handleModeChange(event.currentTarget.dataset.mode);
+      const newMode = event.currentTarget.dataset.mode;
+      if (newMode === 'browse' || newMode === 'search') {
+        handleModeChange(newMode);
       }
     },
     [handleModeChange]
@@ -321,10 +332,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleSearch = useCallback(
     (filters: StacFilterValues): void => {
+      if (isLoading) return;
       const doSearch = async (): Promise<void> => {
         try {
           setIsLoading(true);
           setSelectedItem(null);
+          setSearchResult(null);
+          setSearchMapExtent(stacController.captureMapExtent());
 
           const collectionIds = resolveSearchCollections(filters.collections);
           const containedExtent = filters.containedInExtent ? filters.bbox : undefined;
@@ -336,6 +350,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             const emptyResult: StacSearchResult = { type: 'FeatureCollection', features: [] };
             setSearchResultPages([emptyResult]);
             applySearchResult(emptyResult, 1);
+            setView('search');
           } else {
             const params: StacSearchParams = {
               collections: collectionIds,
@@ -354,9 +369,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             setSearchContainedExtent(containedExtent);
             setSearchResultPages([result]);
             applySearchResult(result, 1);
+            setView(result.features.length > 0 ? 'search-results' : 'search');
           }
-
-          setView('search-results');
         } catch (error: unknown) {
           // UI boundary: report the failed request to the user
           logger.logError('STAC-BROWSER - Search failed:', error);
@@ -367,7 +381,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       };
       void doSearch();
     },
-    [resolveSearchCollections, limit, searchSortBy, memoApiService, applySearchResult, stacController]
+    [isLoading, resolveSearchCollections, limit, searchSortBy, memoApiService, applySearchResult, stacController]
   );
 
   /**
@@ -450,6 +464,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleClearFilters = useCallback((): void => {
     setFilterPanelState(getDefaultFilterPanelState(config));
+    setSearchResult(null);
   }, [config]);
 
   /**
@@ -457,31 +472,34 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleGoToCollection = useCallback(
     (collectionId: string): void => {
+      if (!browseEnabled) return;
       const collection = collections.find((c) => c.id === collectionId);
       if (collection) {
+        setMode('browse');
         setSelectedItem(null);
         setSelectedCollection(collection);
         setView('collection-detail');
       }
     },
-    [collections]
+    [browseEnabled, collections]
   );
 
   /**
    * Handles toggling the selection (colored footprint) of an item.
    */
   const handleToggleSelected = useCallback((item: StacItem): void => {
+    const itemKey = StacFieldUtils.getItemKey(item);
     setSelectedItems((prev) => {
-      if (prev[item.id]) {
+      if (prev[itemKey]) {
         const next = { ...prev };
-        delete next[item.id];
+        delete next[itemKey];
         return next;
       }
       const usedColors = new Set(Object.values(prev).map((entry) => entry.color));
       const color =
         SELECTION_COLORS.find((candidate) => !usedColors.has(candidate)) ??
         SELECTION_COLORS[Object.keys(prev).length % SELECTION_COLORS.length];
-      return { ...prev, [item.id]: { item, color } };
+      return { ...prev, [itemKey]: { item, color } };
     });
   }, []);
 
@@ -490,12 +508,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleTogglePreview = useCallback(
     (item: StacItem): void => {
-      const overlayId = getPreviewOverlayId(item.id);
+      const itemKey = StacFieldUtils.getItemKey(item);
+      const overlayId = getPreviewOverlayId(itemKey);
       if (stacController.hasOverlay(overlayId)) {
         stacController.removeOverlay(overlayId);
         setPreviewedIds((prev) => {
           const next = { ...prev };
-          delete next[item.id];
+          delete next[itemKey];
           return next;
         });
         return;
@@ -508,16 +527,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
       if (previewAsset.kind === 'image') {
         if (!bbox) return;
-        stacController.addImageOverlay(overlayId, previewAsset.href, bbox, preview.opacity, item.geometry);
-        setPreviewedIds((prev) => ({ ...prev, [item.id]: true }));
+        stacController
+          .addImageOverlay(overlayId, previewAsset.href, bbox, preview.opacity, item.geometry)
+          .then((isAdded) => {
+            if (isAdded) setPreviewedIds((prev) => ({ ...prev, [itemKey]: true }));
+          })
+          .catch((error: unknown) => {
+            logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
+          });
         return;
       }
 
       stacController
         .addGeoTiffOverlay(overlayId, previewAsset.href, preview.opacity)
         .then((isAdded) => {
-          if (isAdded) setPreviewedIds((prev) => ({ ...prev, [item.id]: true }));
-          else stacController.showError('stacBrowser.errorPreview');
+          if (isAdded) setPreviewedIds((prev) => ({ ...prev, [itemKey]: true }));
         })
         .catch((error: unknown) => {
           logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
@@ -541,10 +565,20 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   );
 
   /**
+   * Restores the map extent captured when the current search was submitted.
+   */
+  const handleZoomToSearch = useCallback((): void => {
+    if (!searchMapExtent) return;
+    stacController.zoomToMapExtent(searchMapExtent).catch((error: unknown) => {
+      logger.logError('STAC-BROWSER - Failed to restore the search extent', error);
+    });
+  }, [stacController, searchMapExtent]);
+
+  /**
    * Handles clearing every item selection and map preview.
    */
   const handleClearSelection = useCallback((): void => {
-    Object.keys(previewedIds).forEach((itemId) => stacController.removeOverlay(getPreviewOverlayId(itemId)));
+    Object.keys(previewedIds).forEach((itemKey) => stacController.removeOverlay(getPreviewOverlayId(itemKey)));
     setPreviewedIds({});
     setSelectedItems({});
   }, [stacController, previewedIds]);
@@ -599,7 +633,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
           item={selectedItem}
           display={memoDisplay}
           onBack={handleBackFromItemDetail}
-          onGoToCollection={handleGoToCollection}
+          onGoToCollection={browseEnabled ? handleGoToCollection : undefined}
         />
       );
     }
@@ -624,33 +658,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     // Search results — search mode
     if (view === 'search-results' && searchResult) {
       return (
-        <>
-          {isLoading && (
-            <Box sx={memoSxClasses.loading}>
-              <Typography>{t('stacBrowser.loading')}</Typography>
-            </Box>
-          )}
-          {!isLoading && searchResult.features.length === 0 && (
-            <Box sx={memoSxClasses.noResults}>
-              <Typography>{t('stacBrowser.noResults')}</Typography>
-            </Box>
-          )}
-          {!isLoading && searchResult.features.length > 0 && (
-            <StacSearchResults
-              results={searchResult}
-              collections={collections}
-              display={memoDisplay}
-              interactions={memoInteractions}
-              pageSize={limit}
-              onBack={handleBackToSearch}
-              hasNext={!!nextPageLink}
-              hasPrev={currentPage > 1}
-              onNextPage={handleNextPage}
-              onPrevPage={handlePrevPage}
-              currentPage={currentPage}
-            />
-          )}
-        </>
+        <StacSearchResults
+          results={searchResult}
+          collections={collections}
+          display={memoDisplay}
+          interactions={memoInteractions}
+          pageSize={limit}
+          isLoading={isLoading}
+          onBack={handleBackToSearch}
+          onZoomToSearch={searchMapExtent ? handleZoomToSearch : undefined}
+          hasNext={!!nextPageLink}
+          hasPrev={currentPage > 1}
+          onNextPage={handleNextPage}
+          onPrevPage={handlePrevPage}
+          currentPage={currentPage}
+        />
       );
     }
 
@@ -665,6 +687,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             isFreeTextSupported={!!capabilities?.freeText}
             isPropertyFilterSupported={!!capabilities?.cql2Json}
             isSortSupported={!!capabilities?.searchSort}
+            isSearching={isLoading}
+            hasNoResults={searchResult?.features.length === 0}
             filterState={filterPanelState}
             setFilterState={setFilterPanelState}
             onClearFilters={handleClearFilters}
@@ -701,12 +725,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.mainContainer}>
       {/* Mode toggle — Browse / Search (hide when in item-detail) */}
-      {view !== 'item-detail' && (
+      {browseEnabled && view !== 'item-detail' && (
         <Box sx={memoSxClasses.modeToggle} role="group" aria-label={t('stacBrowser.modeSelector')}>
           <Button
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'browse' && memoSxClasses.modeButtonActive] as SxProps}
             data-mode="browse"
+            disabled={isLoading}
             onClick={handleModeClick}
             aria-pressed={mode === 'browse'}
           >
@@ -716,6 +741,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'search' && memoSxClasses.modeButtonActive] as SxProps}
             data-mode="search"
+            disabled={isLoading}
             onClick={handleModeClick}
             aria-pressed={mode === 'search'}
           >

@@ -332,6 +332,12 @@ export interface StacActionsConfig {
 export interface StacBrowserConfig {
   /** Base URL of the STAC API. */
   stacUrl: string;
+  /** Whether collection browsing is available, defaults to true. */
+  browseEnabled?: boolean;
+  /** Initial mode, defaults to browse; search is always used when browsing is disabled. */
+  defaultMode?: BrowseMode;
+  /** Optional text or translation key displayed above the search filters. */
+  searchDescription?: string;
   /** Collections restriction options. */
   collections?: StacCollectionsConfig;
   /** Filter panel options. */
@@ -348,6 +354,10 @@ export interface StacBrowserConfig {
   /** Default filter values. */
   defaults?: {
     collections?: string[];
+    /** Pre-selects the current map extent checkbox, defaults to false. */
+    useMapExtent?: boolean;
+    /** Pre-selects full containment within the map extent, defaults to false. */
+    containedInExtent?: boolean;
     bbox?: [number, number, number, number];
     datetime?: string;
     limit?: number;
@@ -387,9 +397,9 @@ export interface StacItemDisplayOptions {
 
 /** Item selection and preview state with the callbacks acting on it. */
 export interface StacItemInteractions {
-  /** Colors of the selected items, keyed by item id. */
+  /** Colors of selected items, keyed by stable item identity. */
   selectedColors: Record<string, string>;
-  /** Ids of the items previewed on the map. */
+  /** Stable identities of items previewed on the map. */
   previewedIds: Record<string, boolean>;
   /** Toggles the selection (colored footprint) of an item. */
   onToggleSelected: (item: StacItem) => void;

@@ -124,7 +124,7 @@ export abstract class StacLayerHelper {
    * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
    * @param opacity - Optional overlay opacity (0-1), defaults to 1
    * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
-   * @returns The created image layer
+   * @returns A promise that resolves with the created image layer after the image loads
    */
   static addImageLayer(
     map: OlMap,
@@ -132,7 +132,7 @@ export abstract class StacLayerHelper {
     bbox: [number, number, number, number],
     opacity?: number,
     geometry?: unknown
-  ): ImageLayer<ImageCanvas> {
+  ): Promise<ImageLayer<ImageCanvas>> {
     const image = new Image();
     // NAPL browse images do not expose Access-Control-Allow-Origin; this canvas is only drawn for display, never pixel-read.
     const source = new ImageCanvas({
@@ -140,15 +140,29 @@ export abstract class StacLayerHelper {
       canvasFunction: (extent, resolution, pixelRatio, size, projection): HTMLCanvasElement =>
         StacLayerHelper.#renderFootprintImage(image, bbox, geometry, extent, resolution, pixelRatio, size, projection),
     });
-    image.onload = (): void => source.changed();
-    image.onerror = (): void => logger.logWarning(`StacLayerHelper.addImageLayer - Failed to load image: ${imageUrl}`);
-    image.src = imageUrl;
-
     const layer = new ImageLayer({ source, opacity });
     layer.set(STAC_BROWSER_TAG, true);
     layer.setZIndex(10000);
-    map.addLayer(layer);
-    return layer;
+
+    return new Promise((resolve, reject) => {
+      image.onload = (): void => {
+        image.onload = null;
+        image.onerror = null;
+        try {
+          source.changed();
+          map.addLayer(layer);
+          resolve(layer);
+        } catch (error: unknown) {
+          reject(error);
+        }
+      };
+      image.onerror = (): void => {
+        image.onload = null;
+        image.onerror = null;
+        reject(new Error(`StacLayerHelper.addImageLayer - Failed to load image: ${imageUrl}`));
+      };
+      image.src = imageUrl;
+    });
   }
 
   /**

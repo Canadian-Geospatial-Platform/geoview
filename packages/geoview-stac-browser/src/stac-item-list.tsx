@@ -5,6 +5,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import type { StacItem, StacItemDisplayOptions, StacItemInteractions } from './stac-browser-types';
 import { StacItemCard } from './stac-item-card';
+import { StacFieldUtils } from './stac-field-utils';
 
 /** Props for the StacItemList component. */
 interface StacItemListProps {
@@ -40,7 +41,7 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
    */
   const handleToggleSelected = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const item = items.find((listItem) => listItem.id === event.target.name);
+      const item = items.find((listItem) => StacFieldUtils.getItemKey(listItem) === event.target.name);
       if (item) onToggleSelected(item);
     },
     [items, onToggleSelected]
@@ -51,8 +52,8 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
    */
   const handleAction = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
-      const { itemId, action } = event.currentTarget.dataset;
-      const item = items.find((listItem) => listItem.id === itemId);
+      const { itemKey, action } = event.currentTarget.dataset;
+      const item = items.find((listItem) => StacFieldUtils.getItemKey(listItem) === itemKey);
       if (!item) return;
       if (action === 'zoom') onZoom(item);
       else if (action === 'preview') onTogglePreview(item);
@@ -65,18 +66,22 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
 
   return (
     <Box component="ul" sx={sxClasses.itemList}>
-      {items.map((item) => (
-        <StacItemCard
-          key={item.id}
-          item={item}
-          display={display}
-          selectedColor={selectedColors[item.id]}
-          isPreviewed={!!previewedIds[item.id]}
-          sxClasses={sxClasses}
-          onToggleSelected={handleToggleSelected}
-          onAction={handleAction}
-        />
-      ))}
+      {items.map((item) => {
+        const itemKey = StacFieldUtils.getItemKey(item);
+        return (
+          <StacItemCard
+            key={itemKey}
+            item={item}
+            itemKey={itemKey}
+            display={display}
+            selectedColor={selectedColors[itemKey]}
+            isPreviewed={!!previewedIds[itemKey]}
+            sxClasses={sxClasses}
+            onToggleSelected={handleToggleSelected}
+            onAction={handleAction}
+          />
+        );
+      })}
     </Box>
   );
 }

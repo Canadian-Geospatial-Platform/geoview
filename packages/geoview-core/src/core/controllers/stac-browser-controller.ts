@@ -1,13 +1,25 @@
 import type BaseLayer from 'ol/layer/Base';
+import type { Extent } from 'ol/extent';
 
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import { getStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
+import { getGVElementById, getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
+import { Projection } from '@/geo/utils/projection';
 
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
+
+/** A visible map extent saved with its source projection. */
+export interface TypeStacMapExtentSnapshot {
+  /** Visible extent in the source projection. */
+  extent: Extent;
+  /** Source projection code. */
+  projection: string;
+}
 
 /** A STAC footprint, either a GeoJSON geometry or a lon/lat bounding box. */
 export interface TypeStacFootprint {
@@ -23,14 +35,14 @@ export interface TypeStacFootprint {
  * Preview overlays are raw OpenLayers layers: they are not part of the GeoView layer system (no legend, no store entry).
  */
 export class StacBrowserController extends AbstractMapViewerController {
-  /** Maximum zoom level used when zooming to a STAC extent. */
-  static readonly ZOOM_MAX_ZOOM = 12;
-
   /** Padding (in pixels) used when zooming to a STAC extent. */
   static readonly ZOOM_PADDING = [100, 100, 100, 100];
 
   /** Preview overlays currently on the map, keyed by a caller-provided id. */
   #overlays = new Map<string, BaseLayer>();
+
+  /** Pending preview requests, used to discard stale layers after replacement or unhook. */
+  #overlayRequests = new Map<string, symbol>();
 
   /** Footprint keys already drawn in each geometry group, used to avoid painting exact duplicates. */
   #footprintKeysByGroup = new Map<string, Set<string>>();
@@ -107,7 +119,8 @@ export class StacBrowserController extends AbstractMapViewerController {
   }
 
   /**
-   * Zooms the map to a lon/lat bounding box, densifying the edges for curvilinear projections.
+   * Zooms to a lon/lat bounding box in the unobscured map area without a STAC-specific zoom cap.
+   * Densifies edges for curvilinear projections and offsets the fit for the open STAC panel.
    *
    * @param bbox - The bounding box in EPSG:4326 [west, south, east, north]
    * @returns A promise that resolves when the zoom animation is complete
@@ -116,9 +129,40 @@ export class StacBrowserController extends AbstractMapViewerController {
   zoomToLonLatBbox(bbox: TypeLonLatBbox): Promise<void> {
     const extent = StacLayerHelper.transformBboxToMapProjection(this.getMapId(), bbox);
     return this.getControllersRegistry().mapController.zoomToExtent(extent, true, {
-      maxZoom: StacBrowserController.ZOOM_MAX_ZOOM,
-      padding: StacBrowserController.ZOOM_PADDING,
+      padding: this.#getZoomPadding(),
     });
+  }
+
+  /**
+   * Captures the visible map extent without converting it through lon/lat.
+   *
+   * @returns The saved extent and projection, or undefined when the map has no usable size or extent
+   */
+  captureMapExtent(): TypeStacMapExtentSnapshot | undefined {
+    const mapViewer = this.getMapViewer();
+    const size = mapViewer.map.getSize();
+    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
+
+    const extent = mapViewer.getView().calculateExtent(size);
+    if (!extent.every(Number.isFinite)) return undefined;
+    return { extent: [...extent], projection: mapViewer.getProjectionEPSG() };
+  }
+
+  /**
+   * Restores a saved map extent without extra padding, transforming it when the map projection has changed.
+   *
+   * @param snapshot - The saved extent and source projection
+   * @returns A promise that resolves when the zoom animation is complete
+   * @throws {InvalidExtentError} When the saved extent is invalid
+   */
+  zoomToMapExtent(snapshot: TypeStacMapExtentSnapshot): Promise<void> {
+    const extent = Projection.transformExtentFromProj(
+      [...snapshot.extent],
+      Projection.getProjectionFromStringOrNumber(snapshot.projection),
+      this.getMapViewer().getProjection(),
+      20
+    );
+    return this.getControllersRegistry().mapController.zoomToExtent(extent, true, { padding: [0, 0, 0, 0] });
   }
 
   /**
@@ -140,13 +184,34 @@ export class StacBrowserController extends AbstractMapViewerController {
    */
   async addGeoTiffOverlay(overlayId: string, geotiffUrl: string, opacity?: number): Promise<boolean> {
     this.removeOverlay(overlayId);
+    const requestId = Symbol(overlayId);
+    this.#overlayRequests.set(overlayId, requestId);
+    const { map } = this.getMapViewer();
 
-    const layer = await StacLayerHelper.addGeoTiffLayer(this.getMapViewer().map, geotiffUrl, opacity);
-    if (!layer) return false;
+    try {
+      const layer = await StacLayerHelper.addGeoTiffLayer(map, geotiffUrl, opacity);
+      if (this.#overlayRequests.get(overlayId) !== requestId) {
+        if (layer) StacLayerHelper.removeStacLayer(map, layer);
+        return false;
+      }
 
-    this.#overlays.set(overlayId, layer);
-    logger.logInfo('STAC browser - Added GeoTIFF overlay:', overlayId, geotiffUrl);
-    return true;
+      this.#overlayRequests.delete(overlayId);
+      if (!layer) {
+        this.showError('stacBrowser.errorPreview');
+        return false;
+      }
+
+      this.#overlays.set(overlayId, layer);
+      logger.logInfo('STAC browser - Added GeoTIFF overlay:', overlayId, geotiffUrl);
+      return true;
+    } catch (error: unknown) {
+      if (this.#overlayRequests.get(overlayId) === requestId) {
+        this.#overlayRequests.delete(overlayId);
+        logger.logError(`STAC browser - Failed to add GeoTIFF overlay: ${overlayId}`, error);
+        this.showError('stacBrowser.errorPreview');
+      }
+      return false;
+    }
   }
 
   /**
@@ -157,11 +222,33 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @param bbox - The bounding box in EPSG:4326 [west, south, east, north]
    * @param opacity - Optional overlay opacity (0-1)
    * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
+   * @returns A promise that resolves with true when the image overlay was added
    */
-  addImageOverlay(overlayId: string, imageUrl: string, bbox: TypeLonLatBbox, opacity?: number, geometry?: unknown): void {
+  async addImageOverlay(overlayId: string, imageUrl: string, bbox: TypeLonLatBbox, opacity?: number, geometry?: unknown): Promise<boolean> {
     this.removeOverlay(overlayId);
-    this.#overlays.set(overlayId, StacLayerHelper.addImageLayer(this.getMapViewer().map, imageUrl, bbox, opacity, geometry));
-    logger.logInfo('STAC browser - Added image overlay:', overlayId, imageUrl);
+    const requestId = Symbol(overlayId);
+    this.#overlayRequests.set(overlayId, requestId);
+    const { map } = this.getMapViewer();
+
+    try {
+      const layer = await StacLayerHelper.addImageLayer(map, imageUrl, bbox, opacity, geometry);
+      if (this.#overlayRequests.get(overlayId) !== requestId) {
+        StacLayerHelper.removeStacLayer(map, layer);
+        return false;
+      }
+
+      this.#overlayRequests.delete(overlayId);
+      this.#overlays.set(overlayId, layer);
+      logger.logInfo('STAC browser - Added image overlay:', overlayId, imageUrl);
+      return true;
+    } catch (error: unknown) {
+      if (this.#overlayRequests.get(overlayId) === requestId) {
+        this.#overlayRequests.delete(overlayId);
+        logger.logError(`STAC browser - Failed to add image overlay: ${overlayId}`, error);
+        this.showError('stacBrowser.errorPreview');
+      }
+      return false;
+    }
   }
 
   /**
@@ -180,6 +267,7 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @param overlayId - The id of the overlay to remove
    */
   removeOverlay(overlayId: string): void {
+    this.#overlayRequests.delete(overlayId);
     const layer = this.#overlays.get(overlayId);
     if (!layer) return;
 
@@ -191,6 +279,7 @@ export class StacBrowserController extends AbstractMapViewerController {
    * Removes all preview overlays from the map.
    */
   removeAllOverlays(): void {
+    this.#overlayRequests.clear();
     Array.from(this.#overlays.keys()).forEach((overlayId) => this.removeOverlay(overlayId));
   }
 
@@ -205,6 +294,48 @@ export class StacBrowserController extends AbstractMapViewerController {
   }
 
   // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Gets fit padding that reserves the visible STAC panel overlap on the left of the map.
+   *
+   * Falls back to normal padding when the panel is closed, unavailable, or leaves no usable fit area.
+   *
+   * @returns Padding in map pixels ordered as top, right, bottom, left
+   */
+  #getZoomPadding(): [number, number, number, number] {
+    const [top, right, bottom, left] = StacBrowserController.ZOOM_PADDING;
+    const padding: [number, number, number, number] = [top, right, bottom, left];
+    const mapId = this.getMapId();
+    const activeTab = getStoreUIActiveAppBarTab(mapId);
+    if (!activeTab.isOpen || activeTab.tabId !== 'stac-browser') return padding;
+
+    const panel = getGVElementById(mapId, 'appBar-stac-browser-panel');
+    const mapTarget = getGVMapTargetElement(mapId);
+    const mapSize = this.getMapViewer().map.getSize();
+    if (!panel || !mapTarget || !mapSize || panel.getAttribute('aria-hidden') === 'true') return padding;
+
+    const panelRect = panel.getBoundingClientRect();
+    const mapRect = mapTarget.getBoundingClientRect();
+    if (
+      mapRect.width <= 0 ||
+      panelRect.width <= 0 ||
+      panelRect.bottom <= mapRect.top ||
+      panelRect.top >= mapRect.bottom ||
+      panelRect.left >= mapRect.right ||
+      panelRect.right <= mapRect.left
+    )
+      return padding;
+
+    // Convert CSS overlap into map pixels, including when the host applies CSS scaling.
+    const overlap = Math.min(mapRect.width, panelRect.right - mapRect.left) * (mapSize[0] / mapRect.width);
+    if (mapSize[0] <= left + overlap + right || mapSize[1] <= top + bottom) return padding;
+
+    return [top, right, bottom, left + overlap];
+  }
+
+  // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
 

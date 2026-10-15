@@ -1,5 +1,7 @@
 {
   "stacUrl": "https://datacube.services.geo.ca/stac/api",
+  "browseEnabled": true,
+  "defaultMode": "browse",
   "filters": {
     "collections": true,
     "temporal": true,
@@ -8,6 +10,8 @@
     "sort": true
   },
   "defaults": {
+    "useMapExtent": false,
+    "containedInExtent": false,
     "limit": 20
   },
   "footprintStyles": {
