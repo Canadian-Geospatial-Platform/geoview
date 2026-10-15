@@ -12,11 +12,17 @@ A GeoView plugin that provides a STAC (SpatioTemporal Asset Catalog) browser pan
 - Zoom to item/collection extents
 - Bilingual support (EN/FR)
 
+While a search is pending, the filters remain visible with a circular loading indicator. Searches with no matches show "No results" on the filter page; only non-empty results open the results view. The results view always provides a Back to search button, including during pagination and on empty result pages, and preserves the entered filter values.
+
+Item and collection zooms fit their extent in the map area beside the open STAC panel, using its rendered width, without a STAC-specific maximum zoom level (configured map limits still apply). When the panel covers the entire map, zoom uses normal padding instead. **Zoom to search** in the results toolbar restores the visible map extent saved when the search was submitted without adding a panel offset, even when spatial filtering was off. Pagination and item zoom do not replace that saved extent.
+
 ## Configuration
 
 ```json
 {
   "stacUrl": "https://datacube.services.geo.ca/stac/api",
+  "browseEnabled": true,
+  "defaultMode": "browse",
   "filters": {
     "collections": true,
     "temporal": true,
@@ -27,6 +33,8 @@ A GeoView plugin that provides a STAC (SpatioTemporal Asset Catalog) browser pan
   },
   "defaults": {
     "collections": [],
+    "useMapExtent": false,
+    "containedInExtent": false,
     "limit": 20,
     "sortBy": [{ "field": "datetime", "direction": "desc" }]
   },
@@ -40,6 +48,9 @@ A GeoView plugin that provides a STAC (SpatioTemporal Asset Catalog) browser pan
 | Property                     | Type               | Default       | Description                                                                                |
 | ---------------------------- | ------------------ | ------------- | ------------------------------------------------------------------------------------------ |
 | `stacUrl`                    | string             | (required)    | Base URL of the STAC API                                                                   |
+| `browseEnabled`              | boolean            | `true`        | Enable collection browsing; when false, only search mode is available                      |
+| `defaultMode`                | string             | `"browse"`    | Initial `browse` or `search` view; search is always used when browsing is disabled         |
+| `searchDescription`          | string             | -             | Optional plain text or translation key displayed above the search filters                  |
 | `collections.include`        | string[]           | -             | Collection IDs to show (all when omitted)                                                  |
 | `collections.exclude`        | string[]           | -             | Collection IDs to hide                                                                     |
 | `collections.default`        | string             | -             | Collection opened at startup (opened automatically when only one collection is allowed)    |
@@ -51,6 +62,8 @@ A GeoView plugin that provides a STAC (SpatioTemporal Asset Catalog) browser pan
 | `filters.sort`               | boolean            | `true`        | Show interactive sort controls when the server supports sorting                            |
 | `filters.properties`         | boolean / array    | unset         | Show CQL2 filters for all queryables (`true`) or an allowlist of field names/configs       |
 | `defaults.collections`       | string[]           | `[]`          | Pre-selected collection IDs                                                                |
+| `defaults.useMapExtent`      | boolean            | `false`       | Pre-select Use current map extent when spatial filtering is enabled                        |
+| `defaults.containedInExtent` | boolean            | `false`       | Pre-select Fully contained in extent; applies only when Use current map extent is selected |
 | `defaults.bbox`              | number[]           | -             | Default bbox [west, south, east, north], applied when the map extent is not used           |
 | `defaults.datetime`          | string             | -             | Default ISO 8601 datetime interval (pre-fills the temporal filter)                         |
 | `defaults.limit`             | number             | `20`          | Items per page                                                                             |
@@ -71,11 +84,19 @@ A GeoView plugin that provides a STAC (SpatioTemporal Asset Catalog) browser pan
 
 Field paths use dot notation into the STAC item (`id`, `collection`, `properties.scale`, `assets.thumbnail.href`). Supported `format` values: `text`, `date`, `datetime`, `number`, `epsg`, `url`, `json`. A `label` can be plain text or a translation key.
 
+### Initial view and spatial defaults
+
+Set `browseEnabled: false` for search-only catalogs. This hides the mode selector and collection-browsing navigation, even if `defaultMode` is `"browse"`. With browsing enabled, `defaultMode: "search"` opens the search form without opening the default collection.
+
+Set `searchDescription` to custom guidance shown at the top of the search form; omit it or use an empty string to hide it. Plain text and translation keys are supported. The built-in `stacBrowser.geolocatorSearchDescription` key provides EN/FR guidance to use the geolocator to search within a predefined extent.
+
+`defaults.useMapExtent` and `defaults.containedInExtent` pre-select the spatial checkboxes without submitting a search. The current map extent is read when the user searches, so moving the map before searching uses the new extent. Users can change either checkbox; Clear filters restores the configured defaults. When `filters.spatial` is false, the map extent is not selected.
+
 ### Queryable property filters and sorting
 
 When the STAC API advertises CQL2 JSON and `filters.properties` is enabled, the browser loads catalog `/queryables` or the selected collections' `/queryables` endpoints. It creates type-aware controls for scalar fields and sends them as a CQL2 JSON `filter` with `filter-lang: cql2-json`. With multiple collections selected, only fields shared by every selected collection are offered. Geometry queryables are omitted; use the map extent control for spatial searches.
 
-`filters.properties: true` exposes every scalar queryable. To limit the UI, provide field names or labeled objects:
+`filters.properties: true` exposes every scalar queryable in server order. To limit the UI and set the display order, provide field names or labeled objects. Fields appear in the configured array order; unavailable and geometry fields are skipped:
 
 ```json
 "filters": {
@@ -115,12 +136,20 @@ The STAC `datetime` parameter filters item acquisition time. A service field suc
 ```json
 {
   "stacUrl": "https://eodms-sgdot.nrcan-rncan.gc.ca/search",
+  "browseEnabled": false,
+  "defaultMode": "search",
+  "searchDescription": "stacBrowser.geolocatorSearchDescription",
   "collections": { "include": ["NAPL"], "default": "NAPL" },
   "filters": {
     "sort": true,
     "properties": ["scale", "altitude", "roll_number", "delivery_date"]
   },
-  "defaults": { "limit": 50, "sortBy": [{ "field": "datetime", "direction": "desc" }] },
+  "defaults": {
+    "useMapExtent": true,
+    "containedInExtent": true,
+    "limit": 50,
+    "sortBy": [{ "field": "datetime", "direction": "desc" }]
+  },
   "collectionOverrides": {
     "NAPL": {
       "itemView": {

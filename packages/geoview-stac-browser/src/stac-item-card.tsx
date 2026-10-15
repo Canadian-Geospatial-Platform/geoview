@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
-import { Box, Button, Checkbox, Typography } from 'geoview-core/ui';
+import { Box, Button, Checkbox, Tooltip, Typography } from 'geoview-core/ui';
 import { ChevronRightIcon, MapIcon, VisibilityIcon, ZoomInSearchIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -15,6 +15,8 @@ import { StacFieldUtils } from './stac-field-utils';
 interface StacItemCardProps {
   /** The STAC item to display. */
   item: StacItem;
+  /** Stable item identity used by list keys and event routing. */
+  itemKey: string;
   /** Display options shared by all cards. */
   display: StacItemDisplayOptions;
   /** Color of the item when selected, undefined when not selected. */
@@ -23,9 +25,9 @@ interface StacItemCardProps {
   isPreviewed: boolean;
   /** The sx classes object. */
   sxClasses: SxStyles;
-  /** Callback when the selection checkbox changes; the item id is the checkbox name. */
+  /** Callback when the selection checkbox changes; the stable item identity is the checkbox name. */
   onToggleSelected: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  /** Callback for the map/detail actions; the item id and action are read from data-item-id and data-action. */
+  /** Callback for the map/detail actions; the item identity and action are read from data-item-key and data-action. */
   onAction: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -41,12 +43,13 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-item-card');
 
-  const { item, display, selectedColor, isPreviewed, sxClasses, onToggleSelected, onAction } = props;
+  const { item, itemKey, display, selectedColor, isPreviewed, sxClasses, onToggleSelected, onAction } = props;
   const effectiveDisplay = resolveStacItemDisplayOptions(display, item.collection);
   const { itemView, actions } = effectiveDisplay;
   const { t } = useTranslation();
 
   const title = StacFieldUtils.getTitle(item, itemView?.titleField);
+  const footprintLabel = t(selectedColor ? 'stacBrowser.removeFootprintHighlight' : 'stacBrowser.highlightFootprint', { title });
   const thumbnailUrl = StacAssetUtils.getThumbnailUrl(item);
   const badge = StacAssetUtils.getAssetTypeBadge(item);
   const datetime = item.properties.datetime ?? item.properties.start_datetime;
@@ -57,14 +60,16 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
   return (
     <Box component="li" sx={[sxClasses.itemCard, !!selectedColor && { borderLeftColor: selectedColor }] as SxProps}>
       <Box sx={sxClasses.itemCardHeader}>
-        <Checkbox
-          name={item.id}
-          checked={!!selectedColor}
-          onChange={onToggleSelected}
-          size="small"
-          sx={[sxClasses.itemCheckbox, !!selectedColor && { '&.Mui-checked': { color: selectedColor } }] as SxProps}
-          slotProps={{ input: { 'aria-label': t('stacBrowser.selectItem', { title }) } }}
-        />
+        <Tooltip title={footprintLabel}>
+          <Checkbox
+            name={itemKey}
+            checked={!!selectedColor}
+            onChange={onToggleSelected}
+            size="small"
+            sx={[sxClasses.itemCheckbox, !!selectedColor && { '&.Mui-checked': { color: selectedColor } }] as SxProps}
+            slotProps={{ input: { 'aria-label': footprintLabel } }}
+          />
+        </Tooltip>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
         <Box sx={sxClasses.itemRowText}>
           <Typography sx={sxClasses.resultTitle}>{title}</Typography>
@@ -103,7 +108,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             type="text"
             size="small"
             startIcon={<ZoomInSearchIcon fontSize="small" />}
-            data-item-id={item.id}
+            data-item-key={itemKey}
             data-action="zoom"
             onClick={onAction}
           >
@@ -115,7 +120,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             type="text"
             size="small"
             startIcon={isPreviewed ? <VisibilityIcon fontSize="small" /> : <MapIcon fontSize="small" />}
-            data-item-id={item.id}
+            data-item-key={itemKey}
             data-action="preview"
             onClick={onAction}
             aria-pressed={isPreviewed}
@@ -128,7 +133,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
           type="text"
           size="small"
           endIcon={<ChevronRightIcon fontSize="small" />}
-          data-item-id={item.id}
+          data-item-key={itemKey}
           data-action="detail"
           onClick={onAction}
         >

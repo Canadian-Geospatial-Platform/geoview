@@ -17,6 +17,9 @@ const GEOTIFF_MEDIA_TYPES = ['image/tiff', 'image/geotiff', 'image/x-geotiff', '
 /** File extensions recognized as browser-displayable images. */
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
+/** Non-image media types that should not be reclassified using a misleading URL extension. */
+const NON_IMAGE_MEDIA_TYPES = ['application/geo+json', 'application/json', 'application/pdf', 'application/xml', 'application/zip'];
+
 /**
  * Utility functions to inspect STAC item assets.
  */
@@ -28,7 +31,11 @@ export abstract class StacAssetUtils {
    * @returns True when the asset is a GeoTIFF
    */
   static isGeoTiff(asset: StacAsset): boolean {
-    if (asset.type) return GEOTIFF_MEDIA_TYPES.some((mediaType) => asset.type!.toLowerCase().startsWith(mediaType));
+    const mediaType = asset.type?.split(';')[0].trim().toLowerCase();
+    if (mediaType && GEOTIFF_MEDIA_TYPES.includes(mediaType)) return true;
+    if (mediaType?.startsWith('image/')) return false;
+    if (mediaType && (mediaType.startsWith('audio/') || mediaType.startsWith('video/') || mediaType.startsWith('text/'))) return false;
+    if (mediaType && NON_IMAGE_MEDIA_TYPES.includes(mediaType)) return false;
     const url = asset.href.toLowerCase().split('?')[0];
     return url.endsWith('.tif') || url.endsWith('.tiff');
   }
@@ -42,7 +49,11 @@ export abstract class StacAssetUtils {
    * @returns True when the asset can be displayed as an image
    */
   static isImage(asset: StacAsset): boolean {
-    if (asset.type) return asset.type.toLowerCase().startsWith('image/') && !StacAssetUtils.isGeoTiff(asset);
+    const mediaType = asset.type?.split(';')[0].trim().toLowerCase();
+    if (mediaType?.startsWith('image/')) return !StacAssetUtils.isGeoTiff(asset);
+    if (mediaType && (mediaType.startsWith('audio/') || mediaType.startsWith('video/') || mediaType.startsWith('text/'))) return false;
+    if (mediaType && NON_IMAGE_MEDIA_TYPES.includes(mediaType)) return false;
+    if (StacAssetUtils.isGeoTiff(asset)) return false;
     const url = asset.href.toLowerCase().split('?')[0];
     return IMAGE_EXTENSIONS.some((extension) => url.endsWith(extension)) || !!asset.roles?.includes('thumbnail');
   }
