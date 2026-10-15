@@ -45,6 +45,65 @@ All categories extend `AbstractGVLayer`, which extends `AbstractBaseGVLayer`.
 
 ## Architecture
 
+For display names use `ConfigBaseClass.getLayerNameCascade()` (entry name → GeoView name → root ID → path).
+`getLayerName()` is only an own-name check and may be undefined.
+Groups require `entryType: 'group'`; without it nested entries are ignored by validation.
+
+### Runtime invariants
+
+**Proxy:** Each `AbstractBaseLayerEntryConfig` owns its proxy; there is no shared mutable static.
+`setProxyUrl` snapshots the original data path. Runtime load/feature-info callbacks prepend
+`${layerConfig.getProxyUrl()}?` only when `getIsUsingProxy()`.
+Source construction uses `getDataAccessPathBeforeProxy()` to avoid applying the proxy twice.
+`getProxyUrl` may return undefined; `getIsUsingEsriProxy` / `GeoUtilities.isEsriProxy` recognize
+`executeFromProxy` and require double-encoding OGC `LAYERS`.
+LayerCreatorController passes service URLs to the GeoView layer, and metadata retry assigns the
+proxy actually used to each entry.
+
+**Opacity:** `AbstractBaseGVLayer.onSetOpacity` caps at `Math.min(parentOpacity, requestedOpacity)`.
+Boost ancestors top-down before a leaf. `GVGroupLayer.onSetOpacity` cascades to every child,
+including siblings of a highlighted leaf. Snapshot the whole map's groups and leaves in a
+`Map<string, number>` and restore exact values, rather than repeated multiplication/division.
+`getLayersAllLeafs()` excludes intermediate groups; use `getLayersAll()` for snapshots.
+`GVGroupLayer.addLayer` sets the parent then calls `setOpacity(getOpacity(), false)` to apply the cap
+that OL constructor options bypassed, without construction-time events.
+
+**Visibility:** `getVisible()` is the individual OL flag; `getVisibleIncludingParents()` includes
+the ancestor chain. Hiding a parent preserves child flags. Turning a child back on requires
+`LayerController.setLayerVisibleIncludingParents`, not just setting its own flag.
+
+**Scale:** `MapViewer.getMapScaleFromZoom` rounds denominators. `computeEffectiveLayerScales`
+combines config and zoom-derived limits using maximum maxScale and minimum minScale.
+Round effective values; `EFFECTIVE_SCALE_VISIBILITY_BUFFER` (currently 0.11) generates
+`round(maxScale * (1 + buffer))` and `round(minScale * (1 - buffer))` tolerance values.
+Current LayerController rendering/UI limits use the effective max/min scales converted to OL
+min/max resolution, excluding GVGroupLayer (children already carry their limits).
+Both UI and feature queries call `isInVisibleRange(currentResolution)`, which checks inclusive OL
+resolution bounds. Do not reintroduce zoom-only checks or pass obsolete scale arguments.
+The helper's tolerance values are not an additional gate in this current resolution-only path.
+
+**Partial success:** Set `olRootLayer` before checking aggregate errors in `createGeoViewLayers`.
+Throw aggregate errors only when there is no root layer; otherwise record per-entry errors and report
+through `getLayerLoadErrors` / `showLayerError`.
+Validation failures must call `updateLayerStatusParent` themselves because no GV lifecycle hook runs.
+Any loading child keeps the parent loading; all-loaded or mixed loaded/error means loaded;
+all-error means error. A group with one working child is valid.
+Skip error children in toggle-all, treat them as "don't care" in `utilAllChildrenVisible`, and
+disable/uncheck their individual checkboxes with grey/italic labels.
+`#processListOfLayerEntryConfig` skips error leaves but still processes groups: multiple-entry
+recursion returns even empty groups; a single group can therefore retain an empty recursive group.
+Do not infer successful child creation merely from a truthy group return.
+
+**GeoPackage fields:** GeoPackageReader converts to WKB and independently infers outfields from the
+first feature's properties. Because featureInfo is already populated, AbstractGeoViewVector inference
+is skipped; fixing that branch does not fix GeoPackage.
+WKB preserves blank property keys, and the reader checks falsy values, not empty keys.
+For deterministic table paths specify a nested table entry (`railwaysEmptyField/carto_fer_debarcadere`),
+rather than relying on the single-table file ID.
+MRT crashes on `{ id: '', accessorFn }`: guard trimmed keys both in vector inference and the
+data-table/data-table-modal column consumers. Consumer guards cover GeoPackage too.
+Details filters `geoviewID` and blank aliases. A source-only guard is not sufficient.
+
 ### GeoView Layer Hierarchy (Config & Metadata Tier)
 
 ```
@@ -129,8 +188,8 @@ You need to create **both** classes — one in each tier:
 ```typescript
 // packages/geoview-core/src/geo/layer/geoview-layers/raster/image-static.ts
 
-import { AbstractGeoViewRaster } from "./abstract-geoview-raster";
-import { GVImageStatic } from "@/geo/layer/gv-layers/raster/gv-image-static";
+import { AbstractGeoViewRaster } from './abstract-geoview-raster';
+import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 /**
  * Manages metadata fetching and config validation for Image Static layers.
@@ -139,9 +198,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Creates the GV layer instance that will be used at runtime.
    */
-  protected override onCreateGVLayer(
-    layerConfig: ImageStaticLayerEntryConfig,
-  ): GVImageStatic {
+  protected override onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic {
     const source = ImageStatic.createImageStaticSource(layerConfig);
     return new GVImageStatic(source, layerConfig);
   }
@@ -155,7 +212,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
 ```typescript
 // packages/geoview-core/src/geo/layer/gv-layers/raster/gv-image-static.ts
 
-import { AbstractGVRaster } from "./abstract-gv-raster";
+import { AbstractGVRaster } from './abstract-gv-raster';
 
 /**
  * GV layer wrapper for Image Static layers. Holds the OpenLayers layer on the map.
@@ -170,25 +227,18 @@ export class GVImageStatic extends AbstractGVRaster {
 Create type guard functions to validate layer types:
 
 ```typescript
-export const layerConfigIsImageStatic = (
-  verifyIfLayer: TypeGeoviewLayerConfig,
-): verifyIfLayer is TypeImageStaticLayerConfig => {
+export const layerConfigIsImageStatic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeImageStaticLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
-export const geoviewLayerIsImageStatic = (
-  verifyIfGeoViewLayer: AbstractGeoViewLayer,
-): verifyIfGeoViewLayer is ImageStatic => {
+export const geoviewLayerIsImageStatic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is ImageStatic => {
   return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 export const geoviewEntryIsImageStatic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig,
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig => {
-  return (
-    verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType ===
-    CONST_LAYER_TYPES.IMAGE_STATIC
-  );
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 ```
 
@@ -197,18 +247,12 @@ export const geoviewEntryIsImageStatic = (
 Create configuration types for your layer:
 
 ```typescript
-export interface TypeImageStaticLayerEntryConfig extends Omit<
-  TypeImageLayerEntryConfig,
-  "source"
-> {
+export interface TypeImageStaticLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageStaticInitialConfig;
 }
 
-export interface TypeImageStaticLayerConfig extends Omit<
-  TypeGeoviewLayerConfig,
-  "listOfLayerEntryConfig"
-> {
-  geoviewLayerType: "imageStatic";
+export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+  geoviewLayerType: 'imageStatic';
   listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
 }
 ```
@@ -222,9 +266,7 @@ Add your source type to `packages/geoview-core/src/api/types/layer-schema-types.
  * Initial settings for image sources.
  */
 export type TypeSourceImageInitialConfig =
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig; // Add your new type
+  TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig; // Add your new type
 
 /**
  * Initial settings for static image sources.
@@ -243,10 +285,10 @@ Update `packages/geoview-core/src/api/types/layer-schema-types.ts`:
 
 ```typescript
 export type LayerTypesKey =
-  | "esriDynamic"
-  | "esriFeature"
-  | "imageStatic" // Add here
-  | "GeoJSON";
+  | 'esriDynamic'
+  | 'esriFeature'
+  | 'imageStatic' // Add here
+  | 'GeoJSON';
 // ... other types
 ```
 
@@ -254,10 +296,10 @@ export type LayerTypesKey =
 
 ```typescript
 export type TypeGeoviewLayerType =
-  | "esriDynamic"
-  | "esriFeature"
-  | "imageStatic" // Add here
-  | "GeoJSON";
+  | 'esriDynamic'
+  | 'esriFeature'
+  | 'imageStatic' // Add here
+  | 'GeoJSON';
 // ... other types
 ```
 
@@ -266,7 +308,7 @@ export type TypeGeoviewLayerType =
 ```typescript
 export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   // ... existing entries
-  IMAGE_STATIC: "imageStatic",
+  IMAGE_STATIC: 'imageStatic',
 };
 ```
 
@@ -277,7 +319,7 @@ Update the non-exported `DEFAULT_LAYER_NAMES` constant in `packages/geoview-core
 ```typescript
 const DEFAULT_LAYER_NAMES: Record<string, string> = {
   // ... existing entries
-  imageStatic: "Static Image",
+  imageStatic: 'Static Image',
 };
 ```
 
@@ -319,9 +361,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Fetches service metadata (not needed for static images).
    */
-  protected async onFetchServiceMetadata<T>(
-    abortSignal?: AbortSignal,
-  ): Promise<T> {
+  protected async onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Static images don't have service metadata
     return Promise.resolve(undefined as T);
   }
@@ -341,7 +381,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     layerConfig: AbstractBaseLayerEntryConfig,
     displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
-    abortSignal?: AbortSignal,
+    abortSignal?: AbortSignal
   ): Promise<AbstractBaseLayerEntryConfig> {
     // Process metadata for this layer entry
     return layerConfig;
@@ -350,9 +390,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Creates the GV layer instance for runtime use.
    */
-  protected onCreateGVLayer(
-    layerConfig: AbstractBaseLayerEntryConfig,
-  ): GVImageStatic {
+  protected onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): GVImageStatic {
     const source = ImageStatic.createImageStaticSource(layerConfig);
     return new GVImageStatic(source, layerConfig);
   }
@@ -446,7 +484,7 @@ Export your new types and classes from the appropriate index files:
 ### In `packages/geoview-core/src/geo/layer/geoview-layers/raster/index.ts`
 
 ```typescript
-export * from "./image-static";
+export * from './image-static';
 ```
 
 ### In `packages/geoview-core/src/api/types/layer-schema-types.ts`
@@ -460,54 +498,33 @@ export type { TypeSourceImageStaticInitialConfig };
 
 ### Unit Tests
 
-Create unit tests in `__tests__` folder:
-
-```typescript
-import {
-  ImageStatic,
-  layerConfigIsImageStatic,
-} from "@/geo/layer/geoview-layers/raster/image-static";
-
-describe("ImageStatic Layer", () => {
-  it("should validate layer config correctly", () => {
-    const config = {
-      geoviewLayerId: "test",
-      geoviewLayerType: "imageStatic",
-      // ... other config
-    };
-
-    expect(layerConfigIsImageStatic(config)).toBe(true);
-  });
-
-  it("should create layer successfully", async () => {
-    const imageStatic = new ImageStatic("mapId", validConfig);
-    await imageStatic.createGeoViewLayers();
-
-    expect(imageStatic.olLayers.length).toBeGreaterThan(0);
-  });
-});
-```
+GeoView uses `geoview-test-suite`, a custom in-browser framework, not Jest/Vitest/Mocha.
+Add config validation in ConfigTester and happy-path/expected-error lifecycle tests in LayerTester.
+Use the [config template](../app/testing/test-templates.md#template-b--config-validation-test)
+and [layer lifecycle template](../app/testing/test-templates.md#template-c--layer-lifecycle-test-happy-path);
+register calls and audit suite/catalog/checklist counts using the
+[suite authoring rules](../app/testing/creating-tests.md#step-2-create-a-test-suite).
 
 ### Integration Tests
 
 Test in a real map:
 
 ```typescript
-const mapViewer = cgpv.api.createMapFromConfig("mapId", {
+const mapViewer = cgpv.api.createMapFromConfig('mapId', {
   map: {
     // ... map config
   },
   layers: [
     {
-      geoviewLayerId: "testImageStatic",
-      geoviewLayerType: "imageStatic",
-      metadataAccessPath: "https://example.com/image.png",
+      geoviewLayerId: 'testImageStatic',
+      geoviewLayerType: 'imageStatic',
+      metadataAccessPath: 'https://example.com/image.png',
       listOfLayerEntryConfig: [
         {
-          layerId: "image",
+          layerId: 'image',
           source: {
             extent: [-180, -90, 180, 90],
-            projection: "EPSG:4326",
+            projection: 'EPSG:4326',
           },
         },
       ],
@@ -516,7 +533,7 @@ const mapViewer = cgpv.api.createMapFromConfig("mapId", {
 });
 
 mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
-  console.log("Layer loaded successfully:", payload.layer.getLayerPath());
+  console.log('Layer loaded successfully:', payload.layer.getLayerPath());
 });
 ```
 

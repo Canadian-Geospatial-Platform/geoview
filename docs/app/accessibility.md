@@ -8,6 +8,25 @@ Accessibility is a priority in GeoView's development. The application follows WC
 
 #### Keyboard Navigation Mode
 
+The `.geoview-map` viewer wrapper contains the shell and focusable controls; the
+`#{mapId}-mapTargetElement` map element is the OL canvas container.
+Dynamic maps give that element `tabIndex=0`; static maps use `-1` and block Ctrl+M,
+but still show focusable about/notification controls and attribution/scale.
+Static maps do not render layer/legend/details/table/nav controls.
+
+Ctrl+M focuses the dynamic map element and **activates**, not toggles, the crosshair.
+Mouse focus leaving the map or Ctrl+Q deactivates it; Escape does nothing while it is active.
+Arrow keys pan by 128px by default. Shift+ArrowUp increases the step by 10px;
+Shift+ArrowDown decreases it by 10px (minimum 10px).
+
+Focus indicators are centralized in `themeOptionsGenerator.ts`.
+`getFocusIndicatorStyles` supplies outline plus halo on MUI `.Mui-focusVisible` controls and slider thumbs.
+`getFormControlFocusIndicatorStyles` removes the halo for border/underline inputs.
+Form-control selectors use `.geoview-keyboard-active &:has(:focus-visible)` so mouse clicks do not
+show keyboard outlines. Shell toggles keyboard-active/inactive using `activeTrapGeoView`.
+Do not reintroduce JS-managed `.keyboard-focused`; `API.#manageMapCrosshairOnFocus` only activates the
+crosshair. Component overrides spread the shared helper and change only required metrics.
+
 On first tab into the map, users are prompted to enable keyboard navigation mode, which enables a focus trap within the map, and activates crosshair-based map interaction.
 
 - Press Ctrl + Q to exit keyboard navigation mode

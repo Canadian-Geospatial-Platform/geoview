@@ -138,7 +138,7 @@ testMyLayerConfigValidation(): Promise<Test<TypeGeoviewLayerConfig>> {
       test.addStep('Verifying config properties...');
       Test.assertIsDefined('geoviewLayerConfig', result);
       Test.assertIsEqual(result.geoviewLayerId, gvLayerId);
-      Test.assertIsEqual(result.geoviewLayerName!.en, gvLayerName);
+      Test.assertIsEqual(result.geoviewLayerName, gvLayerName);
       Test.assertIsEqual(result.geoviewLayerType, 'myLayerType');
       Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
     }
@@ -275,11 +275,10 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
       await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
       test.addStep('Waiting for allFeatureInfoLayerSet registration...');
-      // prettier-ignore
-      await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS);
+      await this.getMapViewer().layer.allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
 
       test.addStep('Setting zoom level...');
-      await this.getMapViewer().setMapZoomLevel(REQUIRED_ZOOM);
+      await this.getControllersRegistry().mapController.zoomMap(REQUIRED_ZOOM, GVAbstractTester.USE_ZOOM_ANIMATION);
 
       test.addStep('Triggering getAllFeatureInfo query...');
       return this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
@@ -298,10 +297,10 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
 
 ### Key Rules
 
-- Use `await this.getMapViewer().setMapZoomLevel()` for direct (non-animated) zoom, or `await this.getControllersRegistry().mapController.zoomMap()` for animated zoom
-- Wait for `allFeatureInfoLayerSet` registration using `whenThisThen()` before querying
+- Await `mapController.zoomMap()` when querying depends on zoom completion; `setMapZoomLevel()` returns void
+- Wait for `allFeatureInfoLayerSet` registration using `waitForLayerToGetRegistered()` before querying
 - Run sequentially AFTER parallel tests (they change zoom level)
-- The layer must be visible and within its min/max zoom range for queries to return results
+- The layer and its ancestors must be visible, and current resolution must be within its OL limits
 
 ---
 
@@ -371,7 +370,7 @@ testMapViewerZoom(): Promise<Test<number>> {
     'Test MapViewer setMapZoomLevel...',
     async (test) => {
       test.addStep('Setting zoom via MapViewer (immediate, no animation)...');
-      await this.getMapViewer().setMapZoomLevel(8);
+      this.getMapViewer().setMapZoomLevel(8);
 
       test.addStep('Reading current zoom...');
       return this.getMapViewer().getView().getZoom()!;
@@ -518,23 +517,28 @@ testMyPluginBehavior(): Promise<Test<ResultType>> {
 Controllers are the preferred path for map operations. MapViewer provides low-level OL access for cases where immediate (non-animated) manipulation is needed:
 
 - **`await this.getControllersRegistry().mapController.zoomMap(zoom, duration)`** — Preferred. Animated zoom with validation. Returns a Promise that resolves when the animation completes
-- **`await this.getMapViewer().setMapZoomLevel(zoom)`** — Low-level. Sets the OL view zoom directly (no animation). Returns a Promise that resolves on `rendercomplete`
+- **`this.getMapViewer().setMapZoomLevel(zoom)`** — Low-level. Sets the OL view zoom directly and returns void (no completion signal)
 
-Use `setMapZoomLevel()` only when you need an immediate zoom without animation (e.g., before querying features that have visibility range constraints).
+Use `setMapZoomLevel()` only for an immediate non-awaited change.
+When the next step depends on zoom completion, await `mapController.zoomMap`.
 
 ### `queryLayerFeatures()` Visibility Guards
 
 Before querying, `queryLayerFeatures()` checks:
 
 1. `geoviewLayer.getVisibleIncludingParents()` — layer and all parents must be visible
-2. `geoviewLayer.getInVisibleRange(currentZoom)` — current zoom must be within layer's min/max zoom
+2. `geoviewLayer.isInVisibleRange(currentResolution)` — current resolution must be within the layer's OL resolution limits
 
 If either check fails, it returns `{ results: [] }` silently (no error thrown). **Set the zoom to a level within the layer's visible range** before calling `triggerGetAllFeatureInfo()`.
 
 ### `whenThisThen()` for Async Conditions
 
+Prefer the existing event-driven `allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath)`
+before querying. Use `whenThisThen` only for conditions with no suitable event; the polling example
+below remains a fallback, not the default registration pattern.
+
 ```typescript
-import { whenThisThen } from "geoview-core/core/utils/utilities";
+import { whenThisThen } from 'geoview-core/core/utils/utilities';
 
 // Wait for a layer to be registered before querying
 // prettier-ignore

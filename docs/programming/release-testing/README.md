@@ -17,11 +17,89 @@ This folder contains the **manual release testing checklist** for GeoView. It co
 
 ## Release Testing Process
 
+### Maintaining the plan
+
+When contributing a test-plan change, update the test definitions, tracking-issue template, and this
+index together. Each section needs one issue checkbox linked to its heading and labelled with the
+actual number of test rows (`(1 test)` for a single row).
+
+Renaming a section changes its heading link. Adding, removing, or renaming a file affects both the
+index and template; changing a time estimate affects the index. Keep tests that move to automation
+in the plan and change their Auto flag to `A`, so readers can still find the coverage. Record new
+automation candidates in `27-automation-candidates.md`, which stays last in the plan.
+
+Summarize completed test, page, configuration, and infrastructure changes in the release candidate
+tracker. Update its count tables when the underlying totals change.
+
+### Release candidate maintenance
+
+[RELEASE-CANDIDATE.md](./RELEASE-CANDIDATE.md) is the cumulative record of completed changes for the
+current release cycle. It provides the material for release notes and relevant PR descriptions.
+
+Add concise, evidence-backed entries under the tracker's existing categories. Describe the impact
+and reference the issue, PR, or commit. Record completed changes, not proposals or unresolved review
+findings. For incompatible schema, API, or behavior changes, explain the old-to-new mapping and any
+known migration steps.
+
+Before adding an entry, check whether the same change is already recorded and update that entry
+instead of duplicating it. Preserve unrelated entries and the current release version.
+
+For AI-assisted updates, see [Using AI Assistants](../using-ai.md#skills-workflows). The agent-specific
+review, approval, and reporting procedure lives in the repository's AI reference, not in this guide.
+
+#### Using the tracker for PR notes
+
+Use the relevant verified entries to draft PR notes, not necessarily the entire release-cycle history. Inspect and preserve the repository PR template, its headings and checklists, and include actual validation results; the tracker does not prove tests passed or changes were merged.
+
+#### Starting a new release cycle
+
+Archive and reset the tracker when the team starts a new release cycle, not during ordinary PR review:
+
+1. Confirm the completed version, next version, and archive destination. A versioned file such as `RELEASE-CANDIDATE-v2.3.0.md` beside the active tracker is suitable; do not overwrite an existing archive.
+2. Preserve the completed tracker in the archive before changing the active file.
+3. Create a fresh `RELEASE-CANDIDATE.md` with the next version and the same reusable instructions/category structure, but no prior-cycle entries or stale counts.
+4. Verify the archive retains the completed contents and the fresh tracker is ready for new entries. Link the archive from this guide so developers can find past release cycles.
+
+### Maintaining automated coverage and counts
+
+Automated changes also update the catalog and automated checklist; new suites/testers update
+available-suites and architecture, while new helpers/assertions update authoring/API/templates.
+
+Count A/C/M flags and compare with each index row and TOTAL; exclude the automated checklist and
+candidate list from manual totals:
+
+```powershell
+Get-ChildItem 'docs\programming\release-testing\[0-2]*.md' |
+  Where-Object { $_.Name -notin @('00-automated-suite.md', '27-automation-candidates.md') } |
+  ForEach-Object {
+    $a = (Select-String -Path $_.FullName -Pattern '\| A\s*\|?\s*$').Count
+    $c = (Select-String -Path $_.FullName -Pattern '\| C\s*\|?\s*$').Count
+    $m = (Select-String -Path $_.FullName -Pattern '\| M\s*\|?\s*$').Count
+    "$($_.Name): A=$a C=$c M=$m Total=$($a+$c+$m)"
+  }
+```
+
+### Definition and test-page format
+
+Each `##` section uses a table with **Test | Description | Steps | Expected Result | Auto**.
+Separate numbered steps with `<br>`; Auto is M (manual), C (candidate), or A (automated).
+Do not add Status or Issues Found to definitions: pass/fail and issues belong in the tracking issue.
+Use config references such as ``Config: `configs/navigator/demos/XX-name.json` `` and
+section links for tests covered elsewhere.
+Put a progress-tracking template link at the top of each plan; a dedicated `> **Test page**:` link
+immediately follows it when available.
+
+Every test row referencing a dedicated HTML page must have the needed map scenario on that page.
+Steps name specific maps ("On Map 1..."), not generic sandbox/all-layers/load-a-config instructions.
+Keep maps minimal, use inline `data-config` except for very large/shared navigator configs, and give
+every map its corresponding collapsible configuration-snippet button and `mapNCS` pre element.
+Add/renumber the map ID, heading, snippet target and matching markdown steps together.
+
 Test definitions (this folder) are separated from pass/fail tracking (GitHub Issues). This keeps test cases clean and version-controlled, while providing interactive checkboxes and collaboration features for tracking.
 
 ### Starting a Release Test Cycle
 
-1. **Create a new issue** from the [Release Testing template](../../.github/ISSUE_TEMPLATE/release-testing.md)
+1. **Create a new issue** from the [Release Testing template](../../../.github/ISSUE_TEMPLATE/release-testing.md)
 2. **Fill in the header**: version number, RC branch/tag link, test environment URL, start date
 3. **Assign testers**: Edit the assignee table to split sections across team members
 4. **Test**: Each tester works through their assigned test definition files, checking off sections in the issue as they pass

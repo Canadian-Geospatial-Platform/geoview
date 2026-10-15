@@ -4,10 +4,10 @@
 >
 > - Append entries as you work — each AI session, branch review, or test run should add its findings here.
 > - Use the sections below to categorize entries.
-> - At release time, use this file to generate the final release notes, then clear it for the next cycle.
+> - Use verified entries to prepare PR notes and final release notes. At release time, archive the completed file before creating a fresh tracker for the next version; never discard the completed cycle.
 > - This file is the source of truth for "what changed since the last release" — the git log is too noisy.
-> - **BranchReview agent** appends commit-based entries (bug fix, feature, breaking change) in Phase 6.
-> - **TestCreator agent** appends test plan changes (tests added/moved/removed, HTML maps) in Phase 6.
+> - Use `/update-release-candidate` after branch/PR reviews or completed testing changes.
+> - Follow the [canonical maintenance and archive procedure](./README.md#release-candidate-maintenance).
 
 ---
 

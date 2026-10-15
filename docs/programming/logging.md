@@ -7,6 +7,13 @@ There are 2 ways to log to help debugging.
 
 ## Characteristics to know when using `logger`
 
+Use `logger`, not direct `console.log`. Every business component starts with
+`logger.logTraceRender('components/path/file')`; subcomponents append ` > SubName`.
+UI wrappers use `logTraceRenderDetailed('ui/path/file')`; plugins use package-relative paths.
+The first statement inside `useEffect` / `useMemo` is `logTraceUseEffect` / `logTraceUseMemo`,
+with a capitalized component description and watched dependencies.
+The lightweight `memoSxClasses` style memo is exempt from hook trace logging and JSDoc.
+
 The logger class can be found here: [https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/logger.ts](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/logger.ts)
 
 The `logger` provides functions for high-level logging abstraction following best-practices concepts and the following constants:
@@ -62,7 +69,7 @@ Another neat feature of the `logger` is the possibility to track an object and l
 
 ```ts
 let toto = 1;
-logger.logTrackerStart("test", () => toto);
+logger.logTrackerStart('test', () => toto);
 ```
 
 Remember to call `logTrackerStop` to stop tracking.
@@ -100,11 +107,7 @@ The `useWhatChanged` function provides a way to monitor dependencies of `useEffe
 
 ```ts
 // Debug the below useEffect to help figure out which dependency triggered the useEffect
-useWhatChanged(
-  "{SOME_CUSTOM_ID}",
-  [pointerPosition, t],
-  ["pointerPosition", "t"],
-);
+useWhatChanged('{SOME_CUSTOM_ID}', [pointerPosition, t], ['pointerPosition', 't']);
 
 // Hook on a useEffect to do something when pointerPosition changes
 useEffect(() => {

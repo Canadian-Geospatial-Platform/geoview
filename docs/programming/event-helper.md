@@ -40,16 +40,8 @@ EventHelper.emitEvent(sender, handlersList, event);
 Define typed delegate aliases at the bottom of your file (or in a shared types file):
 
 ```ts
-export type LayerNameChangedDelegate = EventDelegateBase<
-  AbstractBaseGVLayer,
-  LayerNameChangedEvent,
-  void
->;
-export type LayerVisibleChangedDelegate = EventDelegateBase<
-  AbstractBaseGVLayer,
-  LayerVisibleChangedEvent,
-  void
->;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerNameChangedEvent, void>;
+export type LayerVisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerVisibleChangedEvent, void>;
 ```
 
 ### Step 2 — Define event payload types
@@ -123,6 +115,12 @@ export class MyLayer extends AbstractBaseGVLayer {
 
 ### MapViewer Events
 
+For the global initialization API, register `cgpv.onMapInit` / `cgpv.onMapReady` **before** calling
+`cgpv.init()`. Init reads HTML data-config/data-config-url attributes and creates each map;
+onMapInit indicates the map is initialized while layers can still be loading, whereas onMapReady
+indicates map/UI readiness. Use `cgpv.api.getMapViewer(mapId)` for an existing map and
+`getMapViewerAsync(mapId)` when waiting for availability.
+
 `MapViewer` defines map-level events (`packages/geoview-core/src/geo/map/map-viewer.ts`):
 
 ```ts
@@ -169,7 +167,7 @@ override onUnhook(): void {
 
 ```ts
 useEffect(() => {
-  logger.logTraceUseEffect("COMPONENT - subscribe to map move end");
+  logger.logTraceUseEffect('COMPONENT - subscribe to map move end');
 
   const handleMoveEnd = (sender: MapViewer, event: MapMoveEndEvent): void => {
     setCenter(event.center);

@@ -2,9 +2,69 @@
 
 This document collects GeoView-specific conventions for styling, CSS, and theming. See [best-practices.md](./best-practices.md) for general coding conventions.
 
-## 1- Spacing: `theme.spacing()` in style modules, no `sx` shorthand
+## Contents
 
-GeoView uses MUI's default 8px spacing scale: `theme.spacing(n) = n × 8px`. There is no custom spacing scale override today; if this ever changes, update the conversion table in Section 2 accordingly, since the tie-break rules there are derived from the 8px assumption.
+- [1- Organizing component styles](#1--organizing-component-styles)
+- [2- Theme tokens and external-theme safety](#2--theme-tokens-and-external-theme-safety)
+- [3- UI wrappers and translated labels](#3--ui-wrappers-and-translated-labels)
+- [4- Registering display themes](#4--registering-display-themes)
+- [5- Spacing in style modules](#5--spacing-themespacing-in-style-modules-no-sx-shorthand)
+- [6- Converting legacy spacing](#6--handling-legacy-values-that-dont-land-on-the-8px-grid)
+- [7- Border-radius tokens](#7--border-radius-named-tokens-on-themeshape)
+
+## 1- Organizing component styles
+
+Keep non-trivial component styles in a companion `*-style.ts` module. This separates the component's
+rendering and interaction logic from its visual presentation and makes theme-dependent styles reusable.
+
+Export `getSxClasses(theme): SxStyles` from the style module, with JSDoc describing the `theme`
+parameter and returned styles. Import `SxStyles` from `@/ui/style/types`. In the component, use:
+
+```ts
+const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+```
+
+This standardized style memo needs neither JSDoc nor trace logging. Combine conditional styles with
+the MUI array syntax, for example `[memoSxClasses.base, condition && memoSxClasses.extra] as SxProps`.
+
+## 2- Theme tokens and external-theme safety
+
+Use `geoViewColor` and `geoViewFontSize` tokens rather than hard-coded colors and font sizes.
+Spacing and border radius have their own conventions in the sections below.
+
+Reusable `@/ui` and `core/components/ui` components may receive a standard external MUI theme,
+which does not contain GeoView's custom extensions. Access those extensions with optional chaining,
+for example `theme.palette.geoViewColor?.primary.main`. Apply the same protection to other
+non-standard extensions rather than assuming every caller supplies a GeoView theme.
+
+## 3- UI wrappers and translated labels
+
+Import UI components and icons from the `@/ui` barrel. Only MUI hooks, utilities, and types are
+imported directly from MUI. GeoView wrappers provide additional behavior: for example, IconButton
+requires `aria-label`, uses it as the fallback tooltip, and exposes additional tooltip, ref, and
+visibility props. Inspect the wrapper rather than assuming it has the same interface as MUI.
+
+All user-visible text and labels use `t('domain.key')`; add each key to both en/fr translation files.
+Namespaces are case-sensitive (for example `appbar`, `mapctrl`, `dataTable`) and interpolation uses
+i18next `{{name}}`. Reuse existing keys before adding new ones, and verify meaningful French text.
+For interaction semantics and focus behavior, see the [accessibility guide](../app/accessibility.md).
+
+## 4- Registering display themes
+
+A display theme is more than a palette: configuration validation, UI selectors, and documentation
+must all recognize the same theme name. When adding or renaming a theme:
+
+1. Update `TypeDisplayTheme`, `VALID_DISPLAY_THEME`, the schema enum, and `getThemeOptions`.
+2. Keep MapViewer JSDoc, public theme documentation, sandbox help, and navigator selectors consistent.
+3. Spread `defaultGeoViewColors` before palette overrides. If the theme has a custom font, pass it
+   to `generateThemeOptions` so base typography and heading fonts agree.
+4. Add a release-testing scenario in `rt-18-global-settings.html` instead of replacing an existing
+   one. Renumber each following map's ID, heading, and snippet target together, and update the
+   corresponding map numbers in the release-testing plan.
+
+## 5- Spacing: `theme.spacing()` in style modules, no `sx` shorthand
+
+GeoView uses MUI's default 8px spacing scale: `theme.spacing(n) = n × 8px`. There is no custom spacing scale override today; if this ever changes, update the conversion guidance in [Section 6](#6--handling-legacy-values-that-dont-land-on-the-8px-grid) accordingly, since its tie-break rules are derived from the 8px assumption.
 
 **In-scope properties:** `padding`/`margin` and all directional variants (`paddingTop`, `mx`, etc.), `gap`, `rowGap`, `columnGap`.
 
@@ -43,11 +103,11 @@ margin: '0px',
 - **Searchability:** `theme.spacing(` is a single, unambiguous grep target for every spacing value in the codebase. Shorthand aliases require matching against a fixed list of MUI spacing-aware keys (`p`, `m`, `px`, `py`, `pt`, `pr`, `pb`, `pl`, `mx`, `my`, `mt`, `mr`, `mb`, `ml`, `gap`, `rowGap`, `columnGap`), which is easy to get wrong and harder to mass find/replace later.
 - **Multi-value declarations:** the `sx` shorthand has no way to express a single declaration with distinct top/right/bottom/left values (CSS's 2/3/4-value shorthand). Only the full property name with `theme.spacing(t, r, b, l)` supports this — e.g. `padding: theme.spacing(0.5, 1, 0.25, 0.75)`.
 
-**Out of scope for spacing-scale conversion:** `border-radius` (follow [§3](#3--border-radius-named-tokens-on-themeshape) for radius values), `border-width`, fixed control `width`/`height`, icon/graphic sizing, focus-indicator metrics, map-canvas/OpenLayers overlay position offsets (`top`/`left`/`right`/`bottom` used for absolute positioning).
+**Out of scope for spacing-scale conversion:** `border-radius` (follow [§7](#7--border-radius-named-tokens-on-themeshape) for radius values), `border-width`, fixed control `width`/`height`, icon/graphic sizing, focus-indicator metrics, map-canvas/OpenLayers overlay position offsets (`top`/`left`/`right`/`bottom` used for absolute positioning).
 
 **`rem`/`em`-based spacing should be converted too.** Treat an existing `rem`/`em` value on an in-scope property (`padding`, `margin`, `gap`, etc.) as a legacy inconsistency, not an intentional exception — convert it to `theme.spacing()` like any other value, using the px-equivalent at the default root font size (16px) to pick the nearest factor. Only keep a value in `rem`/`em` when it's deliberately coupled to font-size (e.g. spacing meant to scale with adjacent text for WCAG text-resize behavior), and mark that case with a one-line comment explaining why it's exempt.
 
-## 2- Handling legacy values that don't land on the 8px grid
+## 6- Handling legacy values that don't land on the 8px grid
 
 **Always prefer a standard scale factor.** New and edited code should use values that land exactly on the 8px grid — `0.25`(2px), `0.5`(4px), `0.75`(6px), `1`(8px), `1.25`(10px), `1.5`(12px), `1.75`(14px), `2`(16px), `2.25`(18px), `2.5`(20px), `2.75`(22px), `3`(24px), `3.75`(30px), `4`(32px), etc. Any value expressible in exact 2px increments (a `0.25` factor step) converts exactly and requires no judgment call (e.g. `10px` → `theme.spacing(1.25)`, `20px` → `theme.spacing(2.5)`).
 
@@ -66,7 +126,7 @@ marginTop: theme.spacing(2), // snapped from 15px
 
 **Do not silently guess on a tie.** If a snap decision affects a value used in more than one place (a recurring rhythm — for example, the same `15px` legacy value appearing in both a card header and a panel header), confirm the direction once and apply it consistently across the affected files rather than deciding file-by-file.
 
-## 3- Border radius: named tokens on `theme.shape`
+## 7- Border radius: named tokens on `theme.shape`
 
 Use one of the five border-radius tokens. Never use a literal px/% value or a bare number.
 

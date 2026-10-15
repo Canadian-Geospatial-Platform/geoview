@@ -28,6 +28,12 @@ Complete reference for GeoView configuration objects. This guide covers all conf
 
 ## Schema Validation
 
+Runtime defaults are authoritative in `DEFAULT_MAP_FEATURE_CONFIG` (`api/types/map-schema-types.ts`).
+`MapFeatureConfig` deep-merges user values over them. Keep these values synchronized with the
+advisory `"default"` annotations in `schema.json` and the reference template `schema-default-config.json`.
+Core owns full schema validation; plugins have package schemas and use core configuration APIs.
+`geoviewLayerName` and `metadataAccessPath` are plain strings, not `{ en, fr }` objects.
+
 GeoView uses JSON Schema validation to ensure configuration objects are valid before creating maps and layers.
 
 ### Checking for Validation Errors
@@ -179,7 +185,7 @@ interface TypeMapConfig {
 Map interaction mode.
 
 ```typescript
-interaction: "dynamic" | "static";
+interaction: 'dynamic' | 'static';
 ```
 
 **Valid Values:**
@@ -1331,6 +1337,19 @@ listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 
 ## Initial Settings
 
+Settings cascade through `ConfigValidation.#processLayerEntryConfig`: `deepMerge(parent, child)`
+lets explicit child values win. Root entries inherit the GeoView layer's settings; nested entries inherit
+their group's merged settings. Two post-merge rules are important:
+
+- A hidden parent deletes the child's merged `states.visible`; the child defaults to individually visible
+  while the parent OpenLayers group masks rendering.
+- A parent `controls.remove === false` writes `false` to the child's **source** settings for the next
+  recursion level. An explicit child `remove: true` still wins for that child's current merged result,
+  but a grandchild without an override inherits the modified `false`.
+
+Test three-level groups with both inherited and explicit intermediate values; do not assume the
+intermediate group's effective value is always the same as its source settings.
+
 Display and behavior settings applied when the layer is created.
 
 ### TypeLayerInitialSettings
@@ -1678,17 +1697,9 @@ interface TypeFeatureInfoLayerConfig {
   outfields?: TypeOutfields[];
 }
 
-type TypeVectorSourceFormats =
-  | "GeoJSON"
-  | "EsriJSON"
-  | "KML"
-  | "WFS"
-  | "featureAPI"
-  | "CSV"
-  | "MVT"
-  | "WKB";
+type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'MVT' | 'WKB';
 
-type VectorStrategy = "all" | "bbox";
+type VectorStrategy = 'all' | 'bbox';
 ```
 
 **Example:**
@@ -1713,14 +1724,11 @@ type VectorStrategy = "all" | "bbox";
 
 ```typescript
 // Union type for different image sources
-type TypeSourceImageInitialConfig =
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig;
+type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
 
 // WMS Image Source
 interface TypeSourceImageWmsInitialConfig {
-  serverType?: "mapserver" | "geoserver" | "qgis";
+  serverType?: 'mapserver' | 'geoserver' | 'qgis';
   wmsStyle?: string | string[];
   featureInfo?: TypeFeatureInfoLayerConfig;
   crossOrigin?: string;
@@ -1729,7 +1737,7 @@ interface TypeSourceImageWmsInitialConfig {
 
 // ESRI Image Source
 interface TypeSourceImageEsriInitialConfig {
-  format?: "PNG" | "PNG8" | "PNG24" | "PNG32" | "JPG" | "GIF" | "BMP";
+  format?: 'PNG' | 'PNG8' | 'PNG24' | 'PNG32' | 'JPG' | 'GIF' | 'BMP';
   transparent?: boolean; // Default = true
   crossOrigin?: string;
   projection?: 3978 | 3857 | 4326;
@@ -1785,7 +1793,7 @@ Static Image source:
 ```typescript
 interface TypeSourceCSVInitialConfig {
   dataAccessPath: string;
-  format: "CSV";
+  format: 'CSV';
   latitudeField?: string;
   longitudeField?: string;
   delimiter?: string;
@@ -1814,7 +1822,7 @@ Styling configuration for vector layers.
 
 ```typescript
 interface TypeLayerStyle {
-  styleType?: "simple" | "uniqueValue" | "classBreaks";
+  styleType?: 'simple' | 'uniqueValue' | 'classBreaks';
 
   // Simple style
   fillColor?: string;
@@ -2359,6 +2367,21 @@ Configuration schemas for GeoView packages. Packages are loaded and configured t
 
 ### Package Configuration Methods
 
+Drawer loads through `navBar`; time-slider/geochart through `footerBar.tabs.core`;
+custom-legend, aoi-panel, stac-browser and about-panel through `appBar.tabs.core`.
+Swiper is the map-overlay package loaded through `corePackages` (the test-suite uses it as test infrastructure).
+Do not load drawer/time-slider/geochart through `corePackages`.
+Panels supported by both bars (`legend`, `layers`, `details`, `data-table`, `guide`) must not appear in both.
+`MapFeatureConfig` keeps the app-bar instance and removes the footer duplicate, recording
+`duplicatedPanelsRemovedFromFooter` and logging a warning (#3648 / #3221).
+`app.tsx` displays `warning.config.duplicatedPanels` once notifications are available.
+Keep config correction in `api/config`, not in React notification code.
+
+Swiper's customization flag is `interactive` (default `false`), not `allowUserCustomization`.
+Its `layers` value is `{ layerPath, side }[]`, not a string array.
+Sides are left/right for vertical and up/down for horizontal orientation.
+Schema changes must migrate all demos/configs and bump the package schema version.
+
 #### Method 1: Core Packages (Swiper only)
 
 ```json
@@ -2390,10 +2413,10 @@ Layer comparison package using a swipe control.
 ```typescript
 interface SwiperConfig {
   // Required
-  orientation: "vertical" | "horizontal";
+  orientation: 'vertical' | 'horizontal';
   layers: Array<{
     layerPath: string;
-    side: "left" | "right" | "up" | "down";
+    side: 'left' | 'right' | 'up' | 'down';
   }>;
 
   // Optional
@@ -2451,7 +2474,7 @@ interface GeochartConfig {
 
 interface ChartConfig {
   // Chart-specific properties defined in schema-chart.json
-  type: "line" | "bar" | "pie" | "area" | "scatter";
+  type: 'line' | 'bar' | 'pie' | 'area' | 'scatter';
   title?: string;
   data?: object;
   // Additional chart properties...
@@ -2508,11 +2531,11 @@ interface SliderConfig {
   timeDimension?: {
     field?: string;
     default?: Array<string>;
-    nearestValues?: "discrete" | "continuous";
+    nearestValues?: 'discrete' | 'continuous';
     singleHandle?: boolean;
     displayPattern?: Array<{
-      datePrecision?: "" | "year" | "month" | "day";
-      timePrecision?: "" | "hour" | "minute" | "second";
+      datePrecision?: '' | 'year' | 'month' | 'day';
+      timePrecision?: '' | 'hour' | 'minute' | 'second';
     }>;
     rangeItems?: {
       type?: string;
@@ -2750,20 +2773,20 @@ interface CustomLegendConfig {
 type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 
 interface TypeLegendLayer {
-  type: "layer";
+  type: 'layer';
   layerPath: string;
 }
 
 interface TypeHeaderLayer {
-  type: "header";
+  type: 'header';
   text: string;
   description?: TypeDescription;
   fontSize?: number;
-  fontWeight?: "normal" | "bold";
+  fontWeight?: 'normal' | 'bold';
 }
 
 interface TypeGroupLayer {
-  type: "group";
+  type: 'group';
   text: string;
   description?: TypeDescription;
   collapsed?: boolean;
@@ -3144,12 +3167,7 @@ interface FilterPanelConfig {
     filterName?: string;
     enabled?: boolean;
     defaultCollapsed?: boolean;
-    attributes?: Array<
-      | SelectFilterAttribute
-      | MultiselectFilterAttribute
-      | RangeFilterAttribute
-      | DateFilterAttribute
-    >;
+    attributes?: Array<SelectFilterAttribute | MultiselectFilterAttribute | RangeFilterAttribute | DateFilterAttribute>;
   }>;
 }
 
@@ -3157,9 +3175,9 @@ interface FilterPanelConfig {
 type DateFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: "date";
+  filterType: 'date';
   enabled?: boolean;
-  dateStep?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
+  dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
   defaultValues?: { start: string | null; end: string | null } | null;
 };
 // ... (similar types for select, multiselect, range)
@@ -3578,12 +3596,57 @@ GeoView automatically validates configurations:
 
 ### Error Handling
 
+Invalid root `geoviewLayerType` values are report-and-skip: `Config.prevalidateGeoviewLayersConfig`
+reports `LayerInvalidGeoviewLayerTypeError` through `onErrorCallback` and filters out the layer,
+preserving initialization of the basemap, UI and valid layers.
+
+GeoCore duplicate UUIDs receive `:generateId(8)` suffixes. Strip the suffix for the API request
+and strict `isValidUUID()` checks, but preserve it in every returned config (including the
+merged/prevalidated branch), ordered path and placeholder replacement.
+Resolved sub-entry `layerPath` values can be stale: `generateOrderedLayerPaths` must build paths
+from the suffixed root `geoviewLayerId`. Initial loading must use the filtered valid configs and
+remove just-added ordered paths when `addGeoviewLayer` throws; runtime UUID add replaces its placeholder
+when the GV layer registers.
+
+A GeoCore `selectedLayersLayerPath` can be a bare UUID. Rewrite it to the first resolved path
+inside `LayerCreatorController.loadListOfGeoviewLayer`, immediately after path generation.
+Do not defer this to `MapViewer.#readyMap`: GV sublayers are not registered yet.
+The public `getGeoviewLayerByRootId` convenience resolver on LayerDomain/LayerController/LayerApi
+is not used for this rewrite; it returns the first exact-root or descendant match, throws
+`LayerNotFoundError`, and has an `IfExists` companion returning `undefined`.
+
+VCS package configs come from `response.gcs[].{lang}.packages`.
+`UUIDmapConfigReader` uses package-specific extraction (geochart transforms `.layers` and trims;
+time-slider passes through). It carries `customListOfLayerEntryConfig` separately from RCS `layers`;
+legacy GCS `layers` is unsupported. `GeoCore.createLayerConfigFromUUID` alone chooses a complete list:
+inline entries > GCS custom entries > RCS defaults, without mixing entries across sources.
+Name-only inline overrides remain a separate compatibility branch: `layerName` becomes
+`geoviewLayerName` and, for a single entry, that entry's name too.
+
+Adding VCS support requires all three consumption paths: initial load conversion callback,
+runtime UUID add, and Add Layer UI state/merge before `addGeoviewLayer`.
+The UI must also call `doneAdding()` and show `layers.errorNotLoaded` when conversion fails
+before layer creation, so the spinner does not trap the user.
+Read merged package config from `mapViewer.mapFeaturesConfig.corePackagesConfig` during registration,
+not the possibly stale store snapshot.
+
+Time-slider registration can run first through `tryRegisterLayer` domain events and later
+`initTimeSliderPlugin`; skip already registered layers in the latter.
+Accept a slider config OR metadata time dimension. Overlay VCS timeDimension on metadata:
+configured `rangeItems` wins, otherwise metadata supplies range/validity; preserve the metadata field
+unless the configured replacement exists in outfields.
+
+URL validation uses HEAD → OGC GetCapabilities → Range GET file probe on both direct and proxy paths.
+Reuse `VALID_FILE_EXTENSIONS`, `VALID_FILE_EXTENSIONS_REGEX` and `VALID_FILE_EXTENSIONS_ACCEPT`
+from `constant.ts`. `ConfigApi.guessLayerType` extension regexes must accept query strings
+(`(?:$|\?)`), not rely on `endsWith`.
+
 ```typescript
 try {
   mapViewer.layer.addGeoviewLayer(config);
 } catch (error) {
   if (error instanceof LayerMissingGeoviewLayerIdError) {
-    console.error("Layer ID is required");
+    console.error('Layer ID is required');
   }
 }
 ```

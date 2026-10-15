@@ -17,32 +17,32 @@ Create a new file in `src/tests/testers/`:
 
 ```typescript
 // my-feature-tester.ts
-import { Test } from "../core/test";
-import { GVAbstractTester } from "./abstract-gv-tester";
+import { Test } from '../core/test';
+import { GVAbstractTester } from './abstract-gv-tester';
 
 export class MyFeatureTester extends GVAbstractTester {
   override getName(): string {
-    return "MyFeatureTester";
+    return 'MyFeatureTester';
   }
 
   testSomething(): Promise<Test<string>> {
     return this.test(
-      "Test something works...",
+      'Test something works...',
       async (test) => {
         // EXECUTION: perform the action
-        test.addStep("Doing something...");
+        test.addStep('Doing something...');
         const result = await someOperation();
         return result;
       },
       (test, result) => {
         // ASSERTIONS: verify the result
-        Test.assertIsDefined("result", result);
-        Test.assertIsEqual(result, "expected-value");
+        Test.assertIsDefined('result', result);
+        Test.assertIsEqual(result, 'expected-value');
       },
       (test) => {
         // CLEANUP (optional): always runs
         cleanupResources();
-      },
+      }
     );
   }
 }
@@ -174,26 +174,27 @@ Create a new file in `src/tests/suites/`:
 
 ```typescript
 // suite-my-feature.ts
-import type { API } from "geoview-core/api/api";
-import type { MapViewer } from "geoview-core/geo/map/map-viewer";
-import { GVAbstractTestSuite } from "./abstract-gv-test-suite";
-import { MyFeatureTester } from "../testers/my-feature-tester";
+import type { API } from 'geoview-core/api/api';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
+import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { MyFeatureTester } from '../testers/my-feature-tester';
 
 export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   #tester: MyFeatureTester;
 
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
-    this.#tester = new MyFeatureTester(api, mapViewer);
+  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(api, mapViewer, controllerRegistry);
+    this.#tester = new MyFeatureTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#tester);
   }
 
   override getName(): string {
-    return "My Feature Test Suite";
+    return 'My Feature Test Suite';
   }
 
   override getDescriptionAsHtml(): string {
-    return "Tests for My Feature.";
+    return 'Tests for My Feature.';
   }
 
   override getTestsTotalFinal(): number {
@@ -209,7 +210,13 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 }
 ```
 
-`getTestsTotalFinal()` is required for every concrete suite. Its numeric return value must match the number of tester test calls in the full `onLaunchTestSuite()` implementation, such as `this.#tester.testSomething()` and `this.#tester.testSomethingElse()` above. Do not count calls made only by `onLaunchTestSuiteDEBUG()`, and update the value whenever tests are added, removed, or renamed.
+`getTestsTotalFinal()` is required for every concrete suite. Count each `testXXXX()` / `testErrorXXXX()`
+call in the full `onLaunchTestSuite()`, including heavy tests gated by `getIsRunningHeavyTests()`.
+Exclude debug-only and commented-out calls. On every automated test addition/removal/rename, audit
+**all registered suites**, not just the changed suite: reconcile actual calls, TS totals,
+`test-catalog.md` summary rows, and `00-automated-suite.md` rows. The release checklist runs suite-layer
+twice (LCC and WM); the catalog counts it once. Recompute each document's total from its own rows.
+Update individual catalog entries as well as summary counts; do not blindly increment already-drifted totals.
 
 ### Conditional Execution
 
@@ -248,7 +255,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 // In onAdd():
 } else if (suite === 'suite-my-feature') {
-  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer));
+  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer, this.controllerRegistry));
 }
 ```
 
@@ -277,17 +284,6 @@ In `packages/geoview-core/public/templates/tests.html`, create a map div:
 4.  **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
 5.  **Add constants to `GVAbstractTester`** — URLs, expected icon lists go there
 6.  **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
-    return result;
-    }
-
-          Test.assertIsEqual(result, expectedValue);
-          return result!;
-        }
-
-    );
-    }
-
-````
 
 ## Best Practices
 
@@ -317,7 +313,7 @@ testIsolated(): Promise<Test<void>> {
     },
     (test) => {
       // Assertions
-      Test.assert IsEqual(resourceWasUsed(), true);
+      Test.assertIsEqual(resourceWasUsed(), true);
     },
     (test) => {
       // Cleanup - always runs
@@ -328,7 +324,17 @@ testIsolated(): Promise<Test<void>> {
     }
   );
 }
-````
+```
+
+Map configuration tests belong in `MapConfigTester` and run sequentially in `suite-map-config`.
+`#helperCreateMapConfig(test, mapId, overrides)` deletes the previous viewer, creates a new one with
+`createMapFromConfigFast`, reassigns the tester's viewer **and controllers** using
+`reassignMapViewerAndControllers`, and waits for layer loading.
+Overrides are dot-path/value pairs; `null` removes a property to test absence/defaults.
+Use `#helperCreateMapConfigWithInitialSettings` for a flat layer,
+`#helperCreateMapConfigWithGroupInitialSettings` for parent/child states, and
+`#helperCreateMapConfigWithNestedGroupInitialSettings` for full three-level settings.
+Never retain controllers from the destroyed map.
 
 ### Descriptive Test Names
 
@@ -357,18 +363,18 @@ Add steps that help users understand progress:
 ✅ **Good**:
 
 ```typescript
-test.addStep("Creating GeoView Layer Configuration...");
-test.addStep("Adding layer to the map...");
-test.addStep("Waiting for layer to be ready...");
-test.addStep("Verifying layer exists at path...");
+test.addStep('Creating GeoView Layer Configuration...');
+test.addStep('Adding layer to the map...');
+test.addStep('Waiting for layer to be ready...');
+test.addStep('Verifying layer exists at path...');
 ```
 
 ❌ **Bad**:
 
 ```typescript
-test.addStep("Step 1");
-test.addStep("Doing stuff");
-test.addStep("Done");
+test.addStep('Step 1');
+test.addStep('Doing stuff');
+test.addStep('Done');
 ```
 
 ### Error Messages
@@ -387,7 +393,7 @@ if (!layer) {
 
 ```typescript
 if (!layer) {
-  throw new Error("Not found");
+  throw new Error('Not found');
 }
 ```
 
@@ -406,7 +412,7 @@ if (!layer) {
 
 ## Next Steps
 
-- Review [Test Architecture](app/testing/test-architecture.md) for deeper understanding
-- See [API Reference](app/testing/api-reference.md) for complete API documentation
+- Review [Test Architecture](test-architecture.md#class-hierarchy) for deeper understanding
+- See [API Reference](api-reference.md) for complete API documentation
 - Study existing testers in `src/tests/testers/` for more examples
-- Read about [Available Test Suites](app/testing/available-suites.md) for real-world examples
+- Read about [Available Test Suites](available-suites.md) for real-world examples
