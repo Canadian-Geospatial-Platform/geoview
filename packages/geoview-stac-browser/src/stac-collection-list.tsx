@@ -1,11 +1,8 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { SxStyles } from 'geoview-core/ui/style/types';
-import type { TypeTextFieldProps } from 'geoview-core/ui/panel/panel-types';
-import { Box, ButtonBase, IconButton, TextField, Typography } from 'geoview-core/ui';
+import { Box, IconButton, TextField, Typography } from 'geoview-core/ui';
 import { SortByAlphaIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { visuallyHidden } from 'geoview-core/ui/style/default';
 
 import type { StacCollection } from './stac-browser-types';
 import { StacApiService } from './stac-api-service';
@@ -35,22 +32,12 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   /** Whether alphabetical sort is active. */
   const [sortAsc, setSortAsc] = useState(false);
   /** Search text for filtering collections. */
   const [searchText, setSearchText] = useState('');
-
-  const searchLabel = t('stacBrowser.searchCollections');
-
-  /**
-   * Builds the slot props that label the collection search input.
-   */
-  const memoSearchSlotProps = useMemo((): TypeTextFieldProps['slotProps'] => {
-    logger.logTraceUseMemo('STAC-COLLECTION-LIST - memoSearchSlotProps', searchLabel);
-    return { htmlInput: { 'aria-label': searchLabel } };
-  }, [searchLabel]);
 
   /**
    * Filters and sorts collections based on search text and sort toggle.
@@ -73,12 +60,6 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
     }
     return filtered;
   }, [collections, searchText, sortAsc]);
-  const filteredCollectionCount = memoFilteredCollections.length;
-  const collectionCountMessageKey = filteredCollectionCount === 1 ? 'collectionCount' : 'collectionsCount';
-  const resultsAnnouncement =
-    filteredCollectionCount === 0
-      ? t('stacBrowser.noCollectionsFound')
-      : t(`stacBrowser.${collectionCountMessageKey}`, { count: filteredCollectionCount });
 
   // #region Handlers
 
@@ -100,7 +81,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
    * Handles click on a collection card.
    */
   const handleCardClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>): void => {
+    (event: React.MouseEvent<HTMLDivElement>): void => {
       const { collectionId } = event.currentTarget.dataset;
       const collection = memoFilteredCollections.find((c) => c.id === collectionId);
       if (collection) onCollectionClick(collection);
@@ -108,23 +89,36 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
     [memoFilteredCollections, onCollectionClick]
   );
 
+  /**
+   * Handles keyboard activation on a collection card.
+   */
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { collectionId } = event.currentTarget.dataset;
+        const collection = memoFilteredCollections.find((c) => c.id === collectionId);
+        if (collection) onCollectionClick(collection);
+      }
+    },
+    [memoFilteredCollections, onCollectionClick]
+  );
+
   // #endregion
 
   return (
-    <Box sx={memoSxClasses.resultsList}>
+    <Box sx={sxClasses.resultsList}>
       {/* Search box and sort button */}
-      <Box sx={memoSxClasses.browseToolbar}>
+      <Box sx={sxClasses.browseToolbar}>
         <TextField
           size="small"
-          slotProps={memoSearchSlotProps}
-          placeholder={searchLabel}
+          placeholder={t('stacBrowser.searchCollections')}
           value={searchText}
           onChange={handleSearchChange}
           sx={{ flex: 1 }}
         />
         <IconButton
           aria-label={t('stacBrowser.sortAlphabetical')}
-          aria-pressed={sortAsc}
           onClick={handleToggleSort}
           size="small"
           sx={{
@@ -137,52 +131,42 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
         </IconButton>
       </Box>
 
-      <Box role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
-        {resultsAnnouncement}
-      </Box>
-
-      <Box sx={memoSxClasses.collectionCardList}>
-        {memoFilteredCollections.map((collection) => {
-          const temporal = StacApiService.formatTemporalExtent(collection, true);
-          return (
-            <ButtonBase
-              key={collection.id}
-              data-collection-id={collection.id}
-              sx={memoSxClasses.collectionCard}
-              onClick={handleCardClick}
-              disableRipple
-            >
-              <Typography component="span" sx={memoSxClasses.collectionTitle}>
-                {collection.title ?? collection.id}
+      {memoFilteredCollections.map((collection) => {
+        const temporal = StacApiService.formatTemporalExtent(collection, true);
+        return (
+          <Box
+            key={collection.id}
+            data-collection-id={collection.id}
+            sx={sxClasses.collectionCard}
+            onClick={handleCardClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+          >
+            <Typography sx={sxClasses.collectionTitle}>{collection.title ?? collection.id}</Typography>
+            {collection.description && (
+              <Typography sx={sxClasses.collectionDescription}>
+                {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
               </Typography>
-              {collection.description && (
-                <Typography component="span" sx={memoSxClasses.collectionDescription}>
-                  {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
-                </Typography>
-              )}
-              {temporal && (
-                <Typography component="span" sx={memoSxClasses.resultMeta}>
-                  {temporal}
-                </Typography>
-              )}
-              {collection.keywords && collection.keywords.length > 0 && (
-                <Box component="span" sx={memoSxClasses.keywordChipsRow}>
-                  {collection.keywords.slice(0, 5).map((keyword) => (
-                    <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
-                      {keyword}
-                    </Box>
-                  ))}
-                  {collection.keywords.length > 5 && (
-                    <Box component="span" sx={memoSxClasses.keywordChip}>
-                      +{collection.keywords.length - 5}
-                    </Box>
-                  )}
-                </Box>
-              )}
-            </ButtonBase>
-          );
-        })}
-      </Box>
+            )}
+            {temporal && <Typography sx={sxClasses.resultMeta}>{temporal}</Typography>}
+            {collection.keywords && collection.keywords.length > 0 && (
+              <Box sx={sxClasses.keywordChipsRow}>
+                {collection.keywords.slice(0, 5).map((keyword) => (
+                  <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
+                    {keyword}
+                  </Box>
+                ))}
+                {collection.keywords.length > 5 && (
+                  <Box component="span" sx={sxClasses.keywordChip}>
+                    +{collection.keywords.length - 5}
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+        );
+      })}
     </Box>
   );
 }

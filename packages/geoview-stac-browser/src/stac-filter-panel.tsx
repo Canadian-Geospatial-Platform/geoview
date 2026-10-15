@@ -1,6 +1,4 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { SxStyles } from 'geoview-core/ui/style/types';
-import type { TypeTextFieldProps } from 'geoview-core/ui/panel/panel-types';
 
 import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -35,20 +33,8 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useId, useMemo, useState } = cgpv.reactUtilities.react;
-  const baseId = useId();
-  const keywordInputId = `${baseId}-keyword-input`;
-  const keywordLabelId = `${baseId}-keyword-label`;
-  const temporalLabelId = `${baseId}-temporal-label`;
-  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
-
-  /**
-   * Builds the slot props that label the keyword input from its visible heading.
-   */
-  const memoKeywordSlotProps = useMemo((): TypeTextFieldProps['slotProps'] => {
-    logger.logTraceUseMemo('STAC-FILTER-PANEL - memoKeywordSlotProps', keywordLabelId);
-    return { htmlInput: { 'aria-labelledby': keywordLabelId } };
-  }, [keywordLabelId]);
+  const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [useMapExtent, setUseMapExtent] = useState<boolean>(false);
@@ -124,40 +110,28 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   // #endregion
 
   return (
-    <Box sx={memoSxClasses.filterPanel}>
+    <Box sx={sxClasses.filterPanel}>
       {/* Text search */}
-      <Box sx={memoSxClasses.filterRow}>
-        <Typography id={keywordLabelId} sx={memoSxClasses.filterLabel}>
-          {t('stacBrowser.textSearch')}
-        </Typography>
-        <TextField
-          id={keywordInputId}
-          slotProps={memoKeywordSlotProps}
-          size="small"
-          placeholder={t('stacBrowser.keywords')}
-          value={keyword}
-          onChange={handleKeywordChange}
-          fullWidth
-        />
+      <Box sx={sxClasses.filterRow}>
+        <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.textSearch')}</Typography>
+        <TextField size="small" placeholder={t('stacBrowser.keywords')} value={keyword} onChange={handleKeywordChange} fullWidth />
       </Box>
 
       {/* Temporal filter */}
       {config.filters?.temporal !== false && (
-        <Box role="group" aria-labelledby={temporalLabelId} sx={memoSxClasses.filterRow}>
-          <Typography id={temporalLabelId} sx={memoSxClasses.filterLabel}>
-            {t('stacBrowser.temporal')}
-          </Typography>
-          <Box sx={memoSxClasses.dateInputRow}>
-            <input type="date" aria-label={t('stacBrowser.startDate')} value={startDate} onChange={handleStartDateChange} />
-            <Typography aria-hidden="true">—</Typography>
-            <input type="date" aria-label={t('stacBrowser.endDate')} value={endDate} onChange={handleEndDateChange} />
+        <Box sx={sxClasses.filterRow}>
+          <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.temporal')}</Typography>
+          <Box sx={sxClasses.dateInputRow}>
+            <input type="date" value={startDate} onChange={handleStartDateChange} />
+            <Typography>—</Typography>
+            <input type="date" value={endDate} onChange={handleEndDateChange} />
           </Box>
         </Box>
       )}
 
       {/* Spatial filter */}
       {config.filters?.spatial !== false && (
-        <Box sx={memoSxClasses.filterRow}>
+        <Box sx={sxClasses.filterRow}>
           <FormControlLabel
             control={<Checkbox checked={useMapExtent} onChange={handleUseMapExtentChange} size="small" />}
             label={t('stacBrowser.useMapExtent')}
@@ -166,14 +140,14 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
             <FormControlLabel
               control={<Checkbox checked={containedInExtent} onChange={handleContainedInExtentChange} size="small" />}
               label={t('stacBrowser.containedInExtent')}
-              sx={memoSxClasses.containedInExtentCheckbox}
+              sx={sxClasses.containedInExtentCheckbox}
             />
           )}
         </Box>
       )}
 
       {/* Search button */}
-      <Button type="text" variant="contained" onClick={handleSearchClick} sx={memoSxClasses.searchButton}>
+      <Button type="text" variant="contained" onClick={handleSearchClick} sx={sxClasses.searchButton}>
         {t('stacBrowser.search')}
       </Button>
     </Box>

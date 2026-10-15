@@ -1,6 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { SxStyles } from 'geoview-core/ui/style/types';
-import { Box, Button, ButtonBase, Typography } from 'geoview-core/ui';
+import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
@@ -40,7 +39,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const mapViewer = cgpv.api.getMapViewer(mapId);
   const olMap = mapViewer.map;
@@ -189,10 +188,25 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * Handles click on an item card.
    */
   const handleItemCardClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>): void => {
+    (event: React.MouseEvent<HTMLDivElement>): void => {
       const { itemId } = event.currentTarget.dataset;
       const item = items.find((i) => i.id === itemId);
       if (item) onItemClick(item);
+    },
+    [items, onItemClick]
+  );
+
+  /**
+   * Handles keyboard activation on an item card.
+   */
+  const handleItemCardKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { itemId } = event.currentTarget.dataset;
+        const item = items.find((i) => i.id === itemId);
+        if (item) onItemClick(item);
+      }
     },
     [items, onItemClick]
   );
@@ -237,22 +251,22 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const displayDesc = descExpanded || !isDescLong ? description : `${description.substring(0, 200)}...`;
 
   return (
-    <Box sx={memoSxClasses.panelContent}>
+    <Box sx={sxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={memoSxClasses.backLink}>
+      <Box sx={sxClasses.backLink}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.backToCollections')}
         </Button>
       </Box>
 
       {/* Collection Header */}
-      <Box sx={memoSxClasses.detailSection}>
-        <Typography sx={memoSxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
+      <Box sx={sxClasses.detailSection}>
+        <Typography sx={sxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
 
         {/* Description with Read more */}
         {description && (
           <Box>
-            <Typography sx={memoSxClasses.detailDescription}>{displayDesc}</Typography>
+            <Typography sx={sxClasses.detailDescription}>{displayDesc}</Typography>
             {isDescLong && (
               <Button type="text" size="small" onClick={handleToggleDescription}>
                 {descExpanded ? t('stacBrowser.readLess') : t('stacBrowser.readMore')}
@@ -263,14 +277,14 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       </Box>
 
       {/* Metadata Section */}
-      <Box sx={memoSxClasses.metadataSection}>
+      <Box sx={sxClasses.metadataSection}>
         {/* Keywords */}
         {collection.keywords && collection.keywords.length > 0 && (
-          <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
-            <Box sx={memoSxClasses.keywordChipsRow}>
+          <Box sx={sxClasses.metadataRow}>
+            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
+            <Box sx={sxClasses.keywordChipsRow}>
               {collection.keywords.map((keyword) => (
-                <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
+                <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
                   {keyword}
                 </Box>
               ))}
@@ -280,40 +294,40 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
         {/* License */}
         {collection.license && (
-          <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
-            <Typography sx={memoSxClasses.resultMeta}>{collection.license}</Typography>
+          <Box sx={sxClasses.metadataRow}>
+            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
+            <Typography sx={sxClasses.resultMeta}>{collection.license}</Typography>
           </Box>
         )}
 
         {/* Temporal extent */}
         {memoTemporalDisplay && (
-          <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
-            <Typography sx={memoSxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
+          <Box sx={sxClasses.metadataRow}>
+            <Typography sx={sxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
+            <Typography sx={sxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
           </Box>
         )}
 
         {/* Zoom to collection extent */}
         {memoUnionExtent && (
-          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={memoSxClasses.zoomButton}>
+          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={sxClasses.zoomButton}>
             {t('stacBrowser.zoomToExtent')}
           </Button>
         )}
       </Box>
 
       {/* Items Section */}
-      <Box sx={memoSxClasses.detailSection}>
-        <Typography sx={memoSxClasses.itemsSectionTitle}>{t('stacBrowser.items')}</Typography>
+      <Box sx={sxClasses.detailSection}>
+        <Typography sx={sxClasses.itemsSectionTitle}>{t('stacBrowser.items')}</Typography>
 
         {isLoading && (
-          <Box sx={memoSxClasses.loading}>
+          <Box sx={sxClasses.loading}>
             <Typography>{t('stacBrowser.loading')}</Typography>
           </Box>
         )}
 
         {!isLoading && items.length === 0 && (
-          <Box sx={memoSxClasses.noResults}>
+          <Box sx={sxClasses.noResults}>
             <Typography>{t('stacBrowser.noResults')}</Typography>
           </Box>
         )}
@@ -324,28 +338,34 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
             const badge = getAssetTypeBadge(item);
             const datetime = item.properties.datetime ?? item.properties.start_datetime;
             return (
-              <ButtonBase key={item.id} data-item-id={item.id} sx={memoSxClasses.itemRow} onClick={handleItemCardClick} disableRipple>
-                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={memoSxClasses.itemThumbnail} />}
-                <Box component="span" sx={memoSxClasses.itemRowText}>
-                  <Typography component="span" sx={memoSxClasses.resultTitle}>
-                    {item.properties.title ?? item.id}
-                  </Typography>
-                  <Typography component="span" sx={memoSxClasses.resultMeta}>
+              <Box
+                key={item.id}
+                data-item-id={item.id}
+                sx={sxClasses.itemRow}
+                onClick={handleItemCardClick}
+                onKeyDown={handleItemCardKeyDown}
+                role="button"
+                tabIndex={0}
+              >
+                {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={item.id} sx={sxClasses.itemThumbnail} />}
+                <Box sx={sxClasses.itemRowText}>
+                  <Typography sx={sxClasses.resultTitle}>{item.properties.title ?? item.id}</Typography>
+                  <Typography sx={sxClasses.resultMeta}>
                     {badge && (
-                      <Box component="span" sx={memoSxClasses.assetTypeBadge}>
+                      <Box component="span" sx={sxClasses.assetTypeBadge}>
                         {badge}
                       </Box>
                     )}
                     {datetime ? new Date(datetime).toLocaleDateString() : ''}
                   </Typography>
                 </Box>
-              </ButtonBase>
+              </Box>
             );
           })}
 
         {/* Pagination */}
         {!isLoading && (prevUrl || nextUrl) && (
-          <Box sx={memoSxClasses.paginationBar}>
+          <Box sx={sxClasses.paginationBar}>
             <Button type="text" size="small" disabled={!prevUrl} onClick={handlePrevPage}>
               ← {t('stacBrowser.previous')}
             </Button>

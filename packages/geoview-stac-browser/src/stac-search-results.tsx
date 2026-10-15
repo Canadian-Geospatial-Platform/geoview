@@ -1,6 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { SxStyles } from 'geoview-core/ui/style/types';
-import { Box, Button, ButtonBase, Typography } from 'geoview-core/ui';
+import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
@@ -45,7 +44,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   /**
    * Groups items by their collection ID.
@@ -85,10 +84,25 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
    * Handles click on an item card.
    */
   const handleItemClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>): void => {
+    (event: React.MouseEvent<HTMLDivElement>): void => {
       const { itemId } = event.currentTarget.dataset;
       const item = results.features.find((i) => i.id === itemId);
       if (item) onItemClick(item);
+    },
+    [results.features, onItemClick]
+  );
+
+  /**
+   * Handles keyboard activation on an item card.
+   */
+  const handleItemKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { itemId } = event.currentTarget.dataset;
+        const item = results.features.find((i) => i.id === itemId);
+        if (item) onItemClick(item);
+      }
     },
     [results.features, onItemClick]
   );
@@ -121,19 +135,19 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   }, []);
 
   return (
-    <Box sx={memoSxClasses.panelContent}>
+    <Box sx={sxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={memoSxClasses.backLink}>
+      <Box sx={sxClasses.backLink}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.backToSearch')}
         </Button>
       </Box>
 
-      <Box sx={memoSxClasses.resultsList}>
+      <Box sx={sxClasses.resultsList}>
         {Array.from(memoGroupedItems.entries()).map(([collectionId, groupItems]) => (
-          <Box key={collectionId} sx={memoSxClasses.collectionGroup}>
+          <Box key={collectionId} sx={sxClasses.collectionGroup}>
             {/* Collection header */}
-            <Typography sx={memoSxClasses.collectionGroupTitle}>
+            <Typography sx={sxClasses.collectionGroupTitle}>
               {getCollectionTitle(collectionId)} ({groupItems.length})
             </Typography>
 
@@ -143,22 +157,28 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
               const badge = getAssetTypeBadge(item);
               const datetime = item.properties.datetime ?? item.properties.start_datetime;
               return (
-                <ButtonBase key={item.id} data-item-id={item.id} sx={memoSxClasses.itemRow} onClick={handleItemClick} disableRipple>
-                  {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={memoSxClasses.itemThumbnail} />}
-                  <Box component="span" sx={memoSxClasses.itemRowText}>
-                    <Typography component="span" sx={memoSxClasses.resultTitle}>
-                      {item.properties.title ?? item.id}
-                    </Typography>
-                    <Typography component="span" sx={memoSxClasses.resultMeta}>
+                <Box
+                  key={item.id}
+                  data-item-id={item.id}
+                  sx={sxClasses.itemRow}
+                  onClick={handleItemClick}
+                  onKeyDown={handleItemKeyDown}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={item.id} sx={sxClasses.itemThumbnail} />}
+                  <Box sx={sxClasses.itemRowText}>
+                    <Typography sx={sxClasses.resultTitle}>{item.properties.title ?? item.id}</Typography>
+                    <Typography sx={sxClasses.resultMeta}>
                       {badge && (
-                        <Box component="span" sx={memoSxClasses.assetTypeBadge}>
+                        <Box component="span" sx={sxClasses.assetTypeBadge}>
                           {badge}
                         </Box>
                       )}
                       {datetime ? new Date(datetime).toLocaleDateString() : ''}
                     </Typography>
                   </Box>
-                </ButtonBase>
+                </Box>
               );
             })}
           </Box>
@@ -170,7 +190,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
             const startItem = (currentPage - 1) * pageSize + 1;
             const endItem = startItem + results.features.length - 1;
             return (
-              <Box sx={memoSxClasses.pagination}>
+              <Box sx={sxClasses.pagination}>
                 {hasPrev && (
                   <Button type="text" variant="outlined" onClick={onPrevPage}>
                     ← {t('stacBrowser.previous')}
