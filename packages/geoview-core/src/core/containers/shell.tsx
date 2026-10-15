@@ -216,7 +216,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a SnackBar needs to close.
    */
   const handleSnackBarClose = useCallback(
-    (event?: React.SyntheticEvent | Event, reason?: string): void => {
+    (event?: React.SyntheticEvent | Event | null, reason?: string): void => {
       // Remove displayed message from queue
       mapViewer.notifications.snackbarMessageQueue.shift();
       if (reason === 'clickaway') {

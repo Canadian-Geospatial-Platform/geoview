@@ -142,6 +142,10 @@ this.getGeometryApi(); // Geometry API
 
 **Instance helpers** (inherited from `GVAbstractTester`):
 
+Subclasses can use the protected `getViewportHost()` helper to access their suite's existing
+map root. It throws `TestError` if the container is missing; reuse this root rather than
+appending fixture maps to the runner page.
+
 ```typescript
 this.helperStepAddLayerOnMap(test, gvConfig); // Add layer and wait
 this.helperStepAddLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID

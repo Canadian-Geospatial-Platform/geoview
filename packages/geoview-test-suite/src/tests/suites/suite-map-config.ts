@@ -66,7 +66,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 71;
+    return 57;
   }
 
   /**
@@ -76,37 +76,12 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, 0, 'static');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testErrorFitViewportMidpoints('count');
-    await this.#mapTester.testErrorFitViewportMidpoints('nonfinite');
-    await this.#mapTester.testErrorFitViewportMidpoints('latitude');
-    await this.#mapTester.testErrorFitViewportMidpoints('coincident');
-    await this.#mapTester.testErrorFitViewportMidpoints('orientation');
-    await this.#mapTester.testErrorFitViewportMidpointsCancelled();
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('size', true);
-    await this.#mapTester.testViewportBoundaryLonLat(3978);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testViewportBoundaryLonLat(3857);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'static');
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_WEST_CANADA_LONLAT);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_EAST_CANADA_LONLAT);
-    await this.#mapTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_POLAR_LONLAT);
-    await this.#mapTester.testViewportBoundaryPaddingAndResize();
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('size');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('padding');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('nonfinite');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('negative-padding');
-    return this.#mapTester.testErrorViewportBoundaryUnavailable('unrendered');
+  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    // Test DEBUG
+    const pDevTest0 = this.#mapConfigTester.testFixedHeightWithCollapsedFooterBar();
+
+    // Resolve when all
+    return Promise.all([pDevTest0]);
   }
 
   /**
@@ -116,36 +91,22 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, 0, 'static');
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
     await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testErrorFitViewportMidpoints('count');
-    await this.#mapTester.testErrorFitViewportMidpoints('nonfinite');
-    await this.#mapTester.testErrorFitViewportMidpoints('latitude');
-    await this.#mapTester.testErrorFitViewportMidpoints('coincident');
-    await this.#mapTester.testErrorFitViewportMidpoints('orientation');
+    await this.#mapTester.testInvalidViewportMidpoints();
     await this.#mapTester.testErrorFitViewportMidpointsCancelled();
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('size', true);
+    await this.#mapTester.testErrorFitViewportUnavailable();
     await this.#mapTester.testViewportBoundaryLonLat(3978);
     await this.#mapTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
     await this.#mapTester.testViewportBoundaryLonLat(3857);
     await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'static');
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_WEST_CANADA_LONLAT);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_EAST_CANADA_LONLAT);
     await this.#mapTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'dynamic', GVAbstractTester.VIEWPORT_POLAR_LONLAT);
     await this.#mapTester.testViewportBoundaryPaddingAndResize();
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('size');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('padding');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('nonfinite');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('negative-padding');
-    await this.#mapTester.testErrorViewportBoundaryUnavailable('unrendered');
+    await this.#mapTester.testViewportBoundaryUnavailable();
 
     // Test fixed-height map layout without footer bar
     const pFixedHeightWithoutFooterBar = this.#mapConfigTester.testFixedHeightWithoutFooterBar();

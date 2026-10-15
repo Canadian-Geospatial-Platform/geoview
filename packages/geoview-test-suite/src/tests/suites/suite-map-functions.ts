@@ -70,7 +70,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    return this.#mapTester.testMapZoom(7);
+    return Promise.resolve();
   }
 
   /**

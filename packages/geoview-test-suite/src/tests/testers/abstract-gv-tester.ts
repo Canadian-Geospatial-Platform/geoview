@@ -2,6 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
@@ -10,6 +11,7 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
+import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -1071,6 +1073,18 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   getMapId(): string {
     return this.getMapViewer().mapId;
+  }
+
+  /**
+   * Gets the suite's existing map container instead of adding maps to the test runner page.
+   *
+   * @returns The current suite's map root
+   * @throws {TestError} When the suite's map container is missing
+   */
+  protected getViewportHost(): HTMLElement {
+    const host = getGVRootElement(this.getMapId());
+    if (!host) throw new TestError('Viewport test suite has no map container');
+    return host;
   }
 
   /**

@@ -17,7 +17,7 @@ interface SnackBarProps {
   open: boolean;
   type: SnackbarType;
   closeButtonText?: string;
-  onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
+  onClose?: (event?: React.SyntheticEvent | Event | null, reason?: string) => void;
 }
 
 /**
