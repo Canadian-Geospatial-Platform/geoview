@@ -167,10 +167,17 @@ const { midpointWSENCoords } = mapViewer.getViewportBoundaryLonLat();
 await mapViewer.fitViewportToMidpointsLonLat(midpointWSENCoords);
 
 // Without animation:
+await mapViewer.fitViewportToMidpointsLonLat(midpointWSENCoords, true, false);
+
+// Preserve the current rotation while fitting (animation remains enabled):
 await mapViewer.fitViewportToMidpointsLonLat(midpointWSENCoords, false);
 ```
 
-The method rotates the map to align west/east toward the left/right edges and south/north
+The second argument, `useRotation`, defaults to `true`; set it to `false` to preserve the
+current map rotation. The third argument, `useAnimation`, also defaults to `true`.
+Calls that previously passed an animation flag in second position must move it to third.
+
+With rotation enabled, the method rotates the map to align west/east toward the left/right edges and south/north
 toward the bottom/top edges, then fits **the four points themselves**, not their
 axis-aligned extent. It chooses the equal-weight circular mean of the projected
 west-to-east direction and the perpendicular south-to-north direction. Each pair has

@@ -66,7 +66,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 69;
+    return 71;
   }
 
   /**
@@ -78,6 +78,8 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978);
+    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
+    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3857);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, 0, 'static');
@@ -115,6 +117,8 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978);
+    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
+    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3857);
     await this.#mapTester.testFitViewportToMidpointsLonLat(3978, 0, 'static');

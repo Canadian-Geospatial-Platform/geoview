@@ -109,6 +109,7 @@ export class MapTester extends GVAbstractTester {
    * @param change - Optional change to viewport aspect ratio or projection before fitting
    * @param useAnimation - Optional animation flag
    * @param center - Optional source center in longitude/latitude
+   * @param useRotation - Whether the fit should restore the source rotation or preserve the changed rotation
    * @returns A promise that resolves with the fit outcome
    */
   testFitViewportToMidpointsLonLat(
@@ -117,12 +118,13 @@ export class MapTester extends GVAbstractTester {
     interaction: TypeInteraction = 'dynamic',
     change: 'none' | 'resize' | 'projection' = 'none',
     useAnimation = false,
-    center: Coordinate = MAP_CENTER[projection]
+    center: Coordinate = MAP_CENTER[projection],
+    useRotation = true
   ): Promise<Test<TypeViewportMidpointFitResult>> {
     const host = this.#getViewportHost();
     const originalWidth = host.style.width;
     return this.test(
-      `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}`,
+      `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
       async (test): Promise<TypeViewportMidpointFitResult> => {
         const viewer = await this.#createViewportFixture(test, host, projection, interaction, center, rotation);
         viewer.getView().padding = interaction === 'dynamic' ? [15, 25, 60, 35] : [0, 0, 0, 0];
@@ -145,7 +147,7 @@ export class MapTester extends GVAbstractTester {
         view.setCenter([currentCenter[0] + view.getResolution()! * 100, currentCenter[1]]);
         viewer.map.renderSync();
         test.addStep('Fitting the captured coordinates through the public viewer API...');
-        await viewer.fitViewportToMidpointsLonLat(input, useAnimation);
+        await viewer.fitViewportToMidpointsLonLat(input, useRotation, useAnimation);
         return {
           snapshot: MapTester.#captureViewportBoundary(viewer),
           original,
@@ -158,7 +160,8 @@ export class MapTester extends GVAbstractTester {
       (test, result): void => {
         test.addStep('Verifying containment, rotation, input preservation, and exact compatible-view round trip...');
         Test.assertIsArrayEqualJsons(result.input, result.original);
-        if (change !== 'projection') Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation, 1e-9);
+        if (!useRotation) Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation + 0.7, 1e-9);
+        else if (change !== 'projection') Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation, 1e-9);
         else {
           const [west, south, east, north] = result.pixels;
           Test.assertIsDefined('west', west);
@@ -175,7 +178,7 @@ export class MapTester extends GVAbstractTester {
           Test.assertIsDefined('pixel', pixel);
           Test.assertIsEqual(pixel[0] >= left - 0.5 && pixel[0] <= right + 0.5, true);
           Test.assertIsEqual(pixel[1] >= top - 0.5 && pixel[1] <= bottom + 0.5, true);
-          if (change === 'none')
+          if (change === 'none' && useRotation)
             pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, result.originalPixels[index][axis], 0.5));
         });
         const pixels = result.pixels.filter((pixel) => pixel !== null);
@@ -220,7 +223,7 @@ export class MapTester extends GVAbstractTester {
         else if (condition === 'latitude') input[0][1] = 91;
         else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
         else input.fill(input[0]);
-        await viewer.fitViewportToMidpointsLonLat(input, false);
+        await viewer.fitViewportToMidpointsLonLat(input, true, false);
       },
       (): void => {
         Test.assertIsDefined('viewer', viewer);
@@ -383,7 +386,7 @@ export class MapTester extends GVAbstractTester {
         else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
         else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
         else viewer.map.setTarget(undefined);
-        if (fit) await viewer.fitViewportToMidpointsLonLat(input, false);
+        if (fit) await viewer.fitViewportToMidpointsLonLat(input, true, false);
         else viewer.getViewportBoundaryLonLat();
       },
       undefined,
