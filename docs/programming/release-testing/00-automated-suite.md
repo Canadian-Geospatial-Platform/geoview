@@ -40,14 +40,14 @@ The checklist counts release executions rather than unique test methods. `suite-
 | 5   | `suite-layer` (WM — EPSG:3857)           | 46      | [ ] Pass |
 | 6   | `suite-layer-functions` (WM — EPSG:3857) | 9       | [ ] Pass |
 | 7   | `suite-map`                              | 16      | [ ] Pass |
-| 8   | `suite-map-config`                       | 71      | [ ] Pass |
+| 8   | `suite-map-config`                       | 57      | [ ] Pass |
 | 9   | `suite-ui`                               | 2       | [ ] Pass |
 | 10  | `suite-details`                          | 6       | [ ] Pass |
 | 11  | `suite-data-table`                       | 13      | [ ] Pass |
 | 12  | `suite-geochart`                         | 2       | [ ] Pass |
 | 13  | `suite-swiper`                           | 6       | [ ] Pass |
 | 14  | `suite-time-slider`                      | 3       | [ ] Pass |
-|     | **Total**                                | **327** |          |
+|     | **Total**                                | **313** |          |
 
 ## What to Do if a Suite Fails
 

@@ -14,6 +14,20 @@ Read only the linked section of each doc: search for its heading and read to the
 | Config view shape and plugin loading                                      | [View settings](../../docs/app/config/configuration-reference.md#viewsettings-required), [Package loading](../../docs/app/config/configuration-reference.md#package-configuration-methods) |
 | Controller/store synchronization                                          | [Store access](../../docs/programming/using-store.md#store-access-patterns)                                                                                                                |
 | Awaitable test zoom versus immediate MapViewer call                       | [Test zoom gotcha](../../docs/app/testing/test-templates.md#controllers-vs-mapviewer-for-zoom)                                                                                             |
+| Viewport boundary sampling and midpoint fitting                           | [Visible Viewport Boundary](../../docs/app/api/map-viewer-api.md#visible-viewport-boundary)                                                                                                |
+
+## Viewport boundary and midpoint fitting
+
+Public integration behavior and usage examples are documented in [Visible Viewport Boundary](../../docs/app/api/map-viewer-api.md#visible-viewport-boundary).
+Keep that section canonical for callers; this section records source-level implementation details only.
+
+- `getViewportBoundaryLonLat()` samples the padded viewport rectangle using pixel-to-coordinate conversion, then transforms samples to lon/lat without wrapping longitudes. This preserves wrapped-world coordinates for integrations.
+- `midpointWSENCoords` is assembled in west, south, east, north order. Do not treat the four coordinate pairs as an extent tuple.
+- `fitViewportToMidpointsLonLat()` validates input and requires a usable rendered viewport before changing the view. It projects all four points, optionally updates rotation, fits a `MultiPoint`, and waits for rendering.
+- The private rotation helper normalizes the projected west-to-east and south-to-north directions before combining them, so each direction has equal influence independent of length. Opposing estimates that cancel cannot define a unique rotation and raise `InvalidViewportMidpointsError`.
+- Animated rotation completes before the fit because OpenLayers calculates the fit against the current view rotation. Either animation may be interrupted; cancellation rejects without rolling back view changes already applied.
+
+Source: [`map-viewer.ts`](../../packages/geoview-core/src/geo/map/map-viewer.ts), especially `getViewportBoundaryLonLat()`, `fitViewportToMidpointsLonLat()`, and `#getViewportMidpointRotation()`.
 
 ## Source navigation and guardrails
 

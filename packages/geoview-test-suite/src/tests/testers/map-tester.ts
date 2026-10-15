@@ -34,7 +34,7 @@ import {
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { getGVRootElement, getGVMapTargetElement } from 'geoview-core/core/utils/dom-helper';
+import { getGVMapTargetElement } from 'geoview-core/core/utils/dom-helper';
 
 /** Captured boundary samples and independent pixel/coordinate expectations. */
 interface TypeViewportBoundarySnapshot {
@@ -121,7 +121,7 @@ export class MapTester extends GVAbstractTester {
     center: Coordinate = MAP_CENTER[projection],
     useRotation = true
   ): Promise<Test<TypeViewportMidpointFitResult>> {
-    const host = this.#getViewportHost();
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
     return this.test(
       `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
@@ -200,34 +200,46 @@ export class MapTester extends GVAbstractTester {
   /**
    * Tests that invalid midpoint input rejects without modifying the view.
    *
-   * @param condition - Invalid input condition
-   * @returns A promise that resolves with the expected typed error
+   * @returns A promise that resolves with errors and unchanged boundaries for each invalid input
    */
-  testErrorFitViewportMidpoints(
-    condition: 'count' | 'nonfinite' | 'latitude' | 'coincident' | 'orientation'
-  ): Promise<Test<InvalidViewportMidpointsError>> {
-    const host = this.#getViewportHost();
+  testInvalidViewportMidpoints(): Promise<
+    Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
+  > {
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
-    let viewer: MapViewer | undefined;
     let original: TypeViewportBoundaryLonLat | undefined;
-    return this.testError(
-      `Test invalid viewport midpoint input: ${condition}`,
-      InvalidViewportMidpointsError,
-      async (test): Promise<void> => {
-        viewer = await this.#createViewportFixture(test, host, 3978, 'dynamic', MAP_CENTER[3978], 0);
+    return this.test(
+      'Test invalid viewport midpoint inputs without recreating the map',
+      async (test): Promise<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]> => {
+        const viewer = await this.#createViewportFixture(test, host, 3978, 'dynamic', MAP_CENTER[3978], 0);
         original = viewer.getViewportBoundaryLonLat();
-        const input = original.midpointWSENCoords.map((coordinate) => [...coordinate]);
-        test.addStep(`Passing invalid midpoint coordinates (${condition})...`);
-        if (condition === 'count') input.pop();
-        else if (condition === 'nonfinite') input[0][0] = Number.NaN;
-        else if (condition === 'latitude') input[0][1] = 91;
-        else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
-        else input.fill(input[0]);
-        await viewer.fitViewportToMidpointsLonLat(input, true, false);
+        const results: { error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[] = [];
+        for (const condition of ['count', 'nonfinite', 'latitude', 'coincident', 'orientation']) {
+          const input = original.midpointWSENCoords.map((coordinate) => [...coordinate]);
+          test.addStep(`Passing invalid midpoint coordinates (${condition})...`);
+          if (condition === 'count') input.pop();
+          else if (condition === 'nonfinite') input[0][0] = Number.NaN;
+          else if (condition === 'latitude') input[0][1] = 91;
+          else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
+          else input.fill(input[0]);
+          let error: InvalidViewportMidpointsError | undefined;
+          try {
+            // eslint-disable-next-line no-await-in-loop -- Verify each rejection and unchanged view before reusing the fixture.
+            await viewer.fitViewportToMidpointsLonLat(input, true, false);
+          } catch (caught: unknown) {
+            if (!(caught instanceof InvalidViewportMidpointsError)) throw caught;
+            error = caught;
+          }
+          results.push({ error, boundary: viewer.getViewportBoundaryLonLat() });
+        }
+        return results;
       },
-      (): void => {
-        Test.assertIsDefined('viewer', viewer);
-        Test.assertJsonObject(viewer.getViewportBoundaryLonLat(), original!);
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((result): void => {
+          Test.assertIsInstance(result.error, InvalidViewportMidpointsError);
+          Test.assertJsonObject(result.boundary, original);
+        });
       },
       (): void => {
         this.#resetViewportFixture(host, originalWidth);
@@ -241,7 +253,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the expected cancellation error
    */
   testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
-    const host = this.#getViewportHost();
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
     return this.testError(
       'Test viewport midpoint fit interrupted by another interaction',
@@ -279,7 +291,7 @@ export class MapTester extends GVAbstractTester {
     interaction: TypeInteraction = 'dynamic',
     center: Coordinate = MAP_CENTER[projection]
   ): Promise<Test<TypeViewportBoundarySnapshot>> {
-    const host = this.#getViewportHost();
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
     return this.test(
       `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
@@ -322,7 +334,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the boundary snapshots before and after each change
    */
   testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
-    const host = this.#getViewportHost();
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
     return this.test(
       'Test viewport boundary after map-info height, padding, and size changes',
@@ -362,32 +374,66 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
-   * Tests explicit failure instead of partial boundary results.
+   * Tests unavailable viewport conditions using one fixture, restoring it after every condition.
    *
-   * @param condition - Unavailable viewport condition to exercise
-   * @param fit - Optional flag to exercise the fit API instead of the boundary getter
+   * @returns A promise that resolves with the captured typed errors
+   */
+  testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
+    const host = this.getViewportHost();
+    const originalWidth = host.style.width;
+    return this.test(
+      'Test unavailable viewport conditions without recreating the map',
+      async (test): Promise<(MapViewportUnavailableError | undefined)[]> => {
+        const viewer = await this.#createViewportFixture(test, host, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const results: (MapViewportUnavailableError | undefined)[] = [];
+        for (const condition of ['size', 'padding', 'nonfinite', 'negative-padding', 'unrendered']) {
+          viewer.getViewportBoundaryLonLat();
+          test.addStep(`Making viewport unavailable (${condition}) and sampling...`);
+          let error: MapViewportUnavailableError | undefined;
+          try {
+            if (condition === 'size') viewer.map.setSize([0, 0]);
+            else if (condition === 'padding') viewer.getView().padding = [0, 0, viewer.map.getSize()![1], 0];
+            else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
+            else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
+            else viewer.map.setTarget(undefined);
+            viewer.getViewportBoundaryLonLat();
+          } catch (caught: unknown) {
+            if (!(caught instanceof MapViewportUnavailableError)) throw caught;
+            error = caught;
+          } finally {
+            this.#resetViewportFixture(host, '800px');
+          }
+          results.push(error);
+        }
+        return results;
+      },
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((error): void => Test.assertIsInstance(error, MapViewportUnavailableError));
+      },
+      (): void => {
+        this.#resetViewportFixture(host, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that fitting propagates an unavailable viewport error.
+   *
    * @returns A promise that resolves with the expected typed error
    */
-  testErrorViewportBoundaryUnavailable(
-    condition: 'size' | 'padding' | 'unrendered' | 'nonfinite' | 'negative-padding',
-    fit = false
-  ): Promise<Test<MapViewportUnavailableError>> {
-    const host = this.#getViewportHost();
+  testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
+    const host = this.getViewportHost();
     const originalWidth = host.style.width;
     return this.testError(
-      `Test viewport ${fit ? 'fit' : 'boundary'} unavailable: ${condition}`,
+      'Test fitting an unavailable viewport',
       MapViewportUnavailableError,
       async (test): Promise<void> => {
         const viewer = await this.#createViewportFixture(test, host, 3978, 'dynamic', MAP_CENTER[3978], 0);
         const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
-        test.addStep(`Making viewport unavailable (${condition}) and invoking the API...`);
-        if (condition === 'size') viewer.map.setSize([0, 0]);
-        else if (condition === 'padding') viewer.getView().padding = [0, 0, viewer.map.getSize()![1], 0];
-        else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
-        else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
-        else viewer.map.setTarget(undefined);
-        if (fit) await viewer.fitViewportToMidpointsLonLat(input, true, false);
-        else viewer.getViewportBoundaryLonLat();
+        test.addStep('Removing the usable viewport size and fitting...');
+        viewer.map.setSize([0, 0]);
+        await viewer.fitViewportToMidpointsLonLat(input, true, false);
       },
       undefined,
       (): void => {
@@ -1241,18 +1287,6 @@ export class MapTester extends GVAbstractTester {
   }
 
   // #region PRIVATE METHODS - VIEWPORT BOUNDARY
-
-  /**
-   * Gets the suite's existing map container instead of adding maps to the test runner page.
-   *
-   * @returns The current suite's map root
-   * @throws {TestError} When the suite's map container is missing
-   */
-  #getViewportHost(): HTMLElement {
-    const host = getGVRootElement(this.getMapId());
-    if (!host) throw new TestError('Viewport test suite has no map container');
-    return host;
-  }
 
   /**
    * Restores layout and a usable viewport after a test, including detached and invalid-size cases.

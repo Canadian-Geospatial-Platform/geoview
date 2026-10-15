@@ -80,14 +80,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 46         | Mixed parallel + sequential |
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
-| 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 71         | Fully sequential            |
+| 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 6          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **281**    |                             |
+| **Total**         |                         |                                                                                                 | **267**    |                             |
 
 ---
 
@@ -607,41 +607,28 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 #### Viewport Boundary and Fitting
 
-These 30 cases use `MapTester` with the map-config lifecycle. Finalizers restore the host width,
-map target, and usable viewport after resize, padding, and failure cases.
+These 16 executions use `MapTester` with the map-config lifecycle. Each validation group shares
+one fixture across five conditions; unexpected errors propagate, and every condition must produce
+its expected error. Finalizers restore the host width, map target, and usable viewport.
 
-| #   | Method                                                           | Type      | Description                                                                            |
-| --- | ---------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------- |
-| 1   | `testFitViewportToMidpointsLonLat(3978)`                         | test      | Restores LCC center, resolution, and orientation from captured WSEN pairs              |
-| 2   | `testFitViewportToMidpointsLonLat(3978, PI/4)`                   | test      | Restores a rotated LCC viewport                                                        |
-| 3   | `testFitViewportToMidpointsLonLat(3857)`                         | test      | Restores a Web Mercator viewport                                                       |
-| 4   | `testFitViewportToMidpointsLonLat` (static)                      | test      | Fits without dynamic map-info padding                                                  |
-| 5   | `testFitViewportToMidpointsLonLat` (resize)                      | test      | Fits all points after an aspect-ratio change with asymmetric padding                   |
-| 6   | `testFitViewportToMidpointsLonLat` (projection)                  | test      | Fits LCC samples in Web Mercator with balanced WSEN alignment                          |
-| 7   | `testFitViewportToMidpointsLonLat` (animated antimeridian)       | test      | Preserves unwrapped longitudes and caller input during animated fitting                |
-| 8   | `testErrorFitViewportMidpoints('count')`                         | testError | Rejects an incorrect number of points without changing the view                        |
-| 9   | `testErrorFitViewportMidpoints('nonfinite')`                     | testError | Rejects non-finite coordinates                                                         |
-| 10  | `testErrorFitViewportMidpoints('latitude')`                      | testError | Rejects latitudes outside [-90, 90]                                                    |
-| 11  | `testErrorFitViewportMidpoints('coincident')`                    | testError | Rejects coincident opposing points                                                     |
-| 12  | `testErrorFitViewportMidpoints('orientation')`                   | testError | Rejects contradictory opposing directions                                              |
-| 13  | `testErrorFitViewportMidpointsCancelled`                         | testError | Rejects interrupted animated rotation                                                  |
-| 14  | `testErrorViewportBoundaryUnavailable('size', true)`             | testError | Rejects fitting a zero-sized viewport                                                  |
-| 15  | `testViewportBoundaryLonLat(3978)`                               | test      | Checks default Canada LCC geometry and fresh snapshots                                 |
-| 16  | `testViewportBoundaryLonLat(3978, PI/4)`                         | test      | Checks rotated LCC against independent geometry and CSS pixels                         |
-| 17  | `testViewportBoundaryLonLat(3857)`                               | test      | Checks midpoint sides against corner sides in Web Mercator                             |
-| 18  | `testViewportBoundaryLonLat(3978, 0, 'static')`                  | test      | Uses the full canvas bottom in static mode                                             |
-| 19  | `testViewportBoundaryLonLat` (west Canada)                       | test      | Checks far-west Canada samples                                                         |
-| 20  | `testViewportBoundaryLonLat` (east Canada)                       | test      | Checks far-east Canada samples                                                         |
-| 21  | `testViewportBoundaryLonLat` (antimeridian)                      | test      | Preserves longitude beyond 180 degrees                                                 |
-| 22  | `testViewportBoundaryLonLat` (near pole)                         | test      | Checks finite LCC samples below the projection singularity                             |
-| 23  | `testViewportBoundaryPaddingAndResize`                           | test      | Checks map-info height changes, four-sided padding, and resizing                       |
-| 24  | `testErrorViewportBoundaryUnavailable('size')`                   | testError | Rejects a zero-sized viewport                                                          |
-| 25  | `testErrorViewportBoundaryUnavailable('padding')`                | testError | Rejects padding consuming the viewport                                                 |
-| 26  | `testErrorViewportBoundaryUnavailable('nonfinite')`              | testError | Rejects non-finite map dimensions                                                      |
-| 27  | `testErrorViewportBoundaryUnavailable('negative-padding')`       | testError | Rejects negative padding                                                               |
-| 28  | `testErrorViewportBoundaryUnavailable('unrendered')`             | testError | Rejects a detached viewport without a pixel transform                                  |
-| 29  | `testFitViewportToMidpointsLonLat` (LCC, rotation disabled)      | test      | Preserves the current rotation while tightly fitting all four points without animation |
-| 30  | `testFitViewportToMidpointsLonLat` (Mercator, rotation disabled) | test      | Preserves the current rotation during animated fitting                                 |
+| #   | Method                                                           | Type      | Description                                                                                                        |
+| --- | ---------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------ |
+| 1   | `testFitViewportToMidpointsLonLat` (LCC, rotation disabled)      | test      | Preserves rotation while tightly fitting without animation                                                         |
+| 2   | `testFitViewportToMidpointsLonLat` (Mercator, rotation disabled) | test      | Preserves rotation during animated fitting                                                                         |
+| 3   | `testFitViewportToMidpointsLonLat(3978, PI/4)`                   | test      | Restores rotated LCC center, resolution, orientation, and input                                                    |
+| 4   | `testFitViewportToMidpointsLonLat` (resize)                      | test      | Fits after an aspect-ratio change with asymmetric padding                                                          |
+| 5   | `testFitViewportToMidpointsLonLat` (projection)                  | test      | Fits LCC samples in Web Mercator with balanced WSEN alignment                                                      |
+| 6   | `testFitViewportToMidpointsLonLat` (animated antimeridian)       | test      | Restores Mercator samples while preserving unwrapped longitudes                                                    |
+| 7   | `testInvalidViewportMidpoints`                                   | test      | Rejects count, non-finite, latitude, coincident, and orientation errors without changing the view                  |
+| 8   | `testErrorFitViewportMidpointsCancelled`                         | testError | Rejects interrupted animated rotation                                                                              |
+| 9   | `testErrorFitViewportUnavailable`                                | testError | Rejects fitting a zero-sized viewport                                                                              |
+| 10  | `testViewportBoundaryLonLat(3978)`                               | test      | Checks default Canada LCC geometry, dynamic padding, and fresh snapshots                                           |
+| 11  | `testViewportBoundaryLonLat(3978, PI/4)`                         | test      | Checks rotated LCC against independent geometry and CSS pixels                                                     |
+| 12  | `testViewportBoundaryLonLat(3857)`                               | test      | Checks midpoint sides against corner sides in Web Mercator                                                         |
+| 13  | `testViewportBoundaryLonLat(3978, 0, 'static')`                  | test      | Uses the full canvas bottom in static mode                                                                         |
+| 14  | `testViewportBoundaryLonLat` (antimeridian)                      | test      | Preserves longitude beyond 180 degrees                                                                             |
+| 15  | `testViewportBoundaryPaddingAndResize`                           | test      | Checks map-info height changes, four-sided padding, and resizing                                                   |
+| 16  | `testViewportBoundaryUnavailable`                                | test      | Rejects zero/non-finite size, excessive/negative padding, and detached viewport; restores state between conditions |
 
 #### 3.2.1 Footer Bar / App Bar / Nav Bar
 
