@@ -2,86 +2,47 @@
 
 Accessibility is a priority in GeoView's development. The application follows WCAG 2.1 Level AA guidelines whenever possible, and this section highlights the key features implemented for visual, keyboard, and screen reader users.
 
+For viewer users, start with the [features overview](#001-accessibility-features-overview), [interaction patterns](#002-intentional-interaction-patterns), and [known limitations](#006-constraints-and-limitations). For developers and reviewers, see the [best practices](#003-best-practices), [ARIA guidance](#004-aria-best-practices), and [review checklist](#code-review-checklist).
+
 ## 001. Accessibility Features Overview
 
 ### 1. For Keyboard Users
 
 #### Keyboard Navigation Mode
 
-The `.geoview-map` viewer wrapper contains the shell and focusable controls; the
-`#{mapId}-mapTargetElement` map element is the OL canvas container.
-Dynamic maps give that element `tabIndex=0`; static maps use `-1` and block Ctrl+M,
-but still show focusable about/notification controls and attribution/scale.
-Static maps do not render layer/legend/details/table/nav controls.
+Dynamic maps support keyboard focus and crosshair-based map interaction. Static maps do not offer
+these interactions or the layer, legend, details, table, and navigation controls, but retain
+about/notification controls and attribution/scale.
 
-Ctrl+M focuses the dynamic map element and **activates**, not toggles, the crosshair.
-Mouse focus leaving the map or Ctrl+Q deactivates it; Escape does nothing while it is active.
+With focus inside a dynamic viewer, Ctrl+M (or Cmd+M on macOS) focuses the map element
+and **activates**, not toggles, the crosshair. Ctrl+Q exits keyboard navigation mode and
+deactivates the crosshair. Tabbing to another control within the viewer also deactivates it.
+Escape is not a general crosshair-exit shortcut; drawer editing can use it to cancel a grabbed transform.
 Arrow keys pan by 128px by default. Shift+ArrowUp increases the step by 10px;
 Shift+ArrowDown decreases it by 10px (minimum 10px).
 
-Focus indicators are centralized in `themeOptionsGenerator.ts`.
-`getFocusIndicatorStyles` supplies outline plus halo on MUI `.Mui-focusVisible` controls and slider thumbs.
-`getFormControlFocusIndicatorStyles` removes the halo for border/underline inputs.
-Form-control selectors use `.geoview-keyboard-active &:has(:focus-visible)` so mouse clicks do not
-show keyboard outlines. Shell toggles keyboard-active/inactive using `activeTrapGeoView`.
-Do not reintroduce JS-managed `.keyboard-focused`; `API.#manageMapCrosshairOnFocus` only activates the
-crosshair. Component overrides spread the shared helper and change only required metrics.
-
-On first tab into the map, users are prompted to enable keyboard navigation mode, which enables a focus trap within the map, and activates crosshair-based map interaction.
+On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. This mode enables a focus trap within the viewer; focusing the map activates crosshair-based interaction.
 
 - Press Ctrl + Q to exit keyboard navigation mode
-- Press Ctrl + M to focus on the crosshair within the map
+- Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair
 
 #### Keyboard Focus Indicators
 
-GeoView enables [MUI's theme-level `focusVisible`](https://mui.com/material-ui/customization/focus-visible/)
-in [the theme generator](../../packages/geoview-core/src/ui/style/themeOptionsGenerator.ts).
-The shared design uses a 3px outline, a 2px outward offset and a 6px contrasting halo:
-black/white in light themes, white/translucent black in the dark theme.
+Keyboard focus is shown with a contrasting outline, usually with an additional halo. Placement
+varies by control so the indicator fits its shape and available space. Form inputs use an
+outline without the halo in keyboard navigation mode.
 
-MUI owns placement for Material controls: Tabs use an inset indicator, Checkbox/Radio indicators
-follow the first SVG icon, and other clip-prone controls use native inset placement. Dense
-MenuItems keep a fully inset outline without a halo. The Switch wrapper intentionally indicates
-focus around the whole label, suppressing the additional native track ring. Slider hover styling
-does not replace its keyboard indicator.
-
-Enabling this option removes MUI's focus-only backgrounds/overlays on several components,
-including menu/list items, Chip, AccordionSummary, CardActionArea, Autocomplete options and
-Slider. Independent hover, selected and active styling remains.
-
-Input roots still use GeoView's keyboard-mode scope and outline-only treatment; MUI's new option
-does not replace this. Shared helper styling also remains for non-MUI and composite controls.
-Tabs and Slider retain fallback indicators when an external MUI theme does not enable the option.
-Custom Checkbox/Radio icons must render SVG for the native indicator to appear. When recomposing
-a theme with palette changes, re-pass the intended raw `focusVisible` configuration rather than
-relying on the previously resolved colors.
-
-Layer settings selection cards use the native outline with their existing zero-offset/no-halo
-treatment. Layer-list rows retain their no-halo and selected-background treatment but use MUI's
-native inset offset when enabled. Custom Legend description buttons follow the shared native
-indicator instead of their former 2px text-colored outline. These styles preserve their previous
-fallback behavior when an external theme disables the feature.
-
-The initial adoption preserves existing app-bar/nav-bar ring suppression and local component
-exceptions; these are separate accessibility/design review items, not evidence of compliance.
-Verify contrast and clipping in each context, including portals and fullscreen. Keep the real
-outline for forced-colors mode: browser emulation is not Windows High Contrast sign-off, and
-SVG Checkbox/Radio indicators require explicit platform verification.
-
-The remaining table, Guide and compact panel-control overrides are local inset/no-halo
-treatments, not a second universal ring. Native MUI does not remove the need to verify clipping,
-including paint-contained tables and adjacent button groups. Scale/mouse-position groups,
-OpenLayers controls, AOI cards, media and vendor overlays retain their separate coverage.
-See the [focused release-test handoff](../programming/release-testing/21-wcag-accessibility.md#retained-exceptions-and-focused-test-handoff)
-before removing further exceptions or treating adoption as accessibility sign-off. For authoring
-selector and override conventions, see [styling best practices](../programming/styling-best-practices.md#4--keyboard-focus-indicators).
+Some app-bar/nav-bar controls still suppress the standard ring; this remains an accessibility/design
+review item. See the [contrast and visual-indicator release tests](../programming/release-testing/21-wcag-accessibility.md#contrast--visual-indicators)
+for verification, and [styling best practices](../programming/styling-best-practices.md#4--keyboard-focus-indicators)
+for developer guidance.
 
 #### Focus Traps for Enhanced Navigation
 
-Opening a panel (e.g., Layers, Legend, Details) triggers a focus trap that confines keyboard navigation within that panel:
+In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a focus trap that confines keyboard navigation within that panel. Auto-opened panels may remain outside the active trap.
 
-- Speeds up navigation by preventing focus from cycling through the entire map
-- Close the panel by pressing **Esc** — focus automatically returns to the button that opened it
+- This speeds up navigation by preventing focus from cycling through the entire map
+- Close the active panel or selection by pressing **Esc** — focus returns to the associated button
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
 Sub-panels provide similar functionality.
@@ -93,11 +54,13 @@ The Esc key intelligently handles different scenarios:
 - Closes the active panel and restores focus to the triggering button, or
 - Closes modal dialogs (lightbox, export, etc.) and restores focus to the triggering button
 
+Nested content, time-slider deferred closing, and browser fullscreen can affect which action happens first. See [intentional interaction patterns](#002-intentional-interaction-patterns) and [fullscreen constraints](#fullscreen-api-and-esc-key-priority).
+
 ### 2. For Screen Reader Users
 
 #### Semantic Landmarks
 
-Semantic landmarks are included for each important section of the app to enable quick navigation.
+Semantic landmarks and named regions, including the map region, support quick navigation with a screen reader.
 
 #### ARIA Live Regions
 
@@ -109,24 +72,11 @@ Real-time announcements for events such as:
 
 #### Descriptive Labels
 
-All interactive elements include context-specific aria-label attributes:
+Interactive elements use context-specific accessible names through visible text, `aria-labelledby`, or `aria-label`:
 
 - Icon buttons: "Zoom in", "Toggle visibility, Layer Name", "Close panel"
 - Panels: "Layers panel", "Legend panel", "Details panel"
-- Toggle states: Communicated via `aria-pressed` (stable labels, not dynamic text changes)
-
-The custom `Select` wrapper requires exactly one naming prop: a non-empty visible `label` or
-`aria-label`. Use translated text (or the configured attribute display label for filter controls).
-TypeScript requires exactly one naming prop, but accepts empty strings. At runtime, the wrapper
-logs an error to the browser console for missing, conflicting, empty, or whitespace-only naming
-props without interrupting rendering. These diagnostics are available in development and
-production, subject to the configured logging level; they do not display an in-app notification.
-Logging does not correct the accessible name: callers must fix invalid naming props.
-For visible labels, the wrapper generates and connects the label ID automatically; supply
-`labelId` only when another element or integration needs a specific ID. Optional `inputLabel`
-props customize the label but cannot override its `id`. With `aria-label`, no InputLabel is
-rendered and no label ID is connected to the Select. The visible `label` is also passed to
-Material UI so outlined selects render their notch correctly.
+- Button toggle states: Communicated via `aria-pressed` with stable labels; checkbox controls use checkbox semantics
 
 ---
 
@@ -139,18 +89,18 @@ Material UI so outlined selects render their notch correctly.
 When the time slider panel is open and either animation is playing OR layers are loading, pressing Esc initiates a deferred close:
 
 1. Animation stops immediately (if playing)
-2. The Esc key press is blocked from propagating
+2. The same Esc press does not also close an enclosing panel
 3. The panel remains open until both conditions clear (animation stopped AND layers finished loading)
-4. During this brief period, tabbing through the right panel remains possible
+4. During this period, tabbing through the right panel remains possible
 5. Once conditions stabilize, the panel auto-closes and focus returns to the layer button in the left panel
 
 **Esc key behaviour in fullscreen mode:**
 
-When the time slider is in fullscreen mode, Esc stops any active animation and immediately closes the fullscreen dialog. Focus management is handled by the dialog component.
+When the time slider is in a panel fullscreen view, Esc stops any active animation and closes the fullscreen dialog. Focus returns to the surrounding panel after closing. This differs from [browser fullscreen](#fullscreen-api-and-esc-key-priority), which can consume Escape first.
 
 **Rationale:**
 
-This deferred-close pattern prevents focus trap corruption that occurs when the panel DOM is removed mid-animation or while layers are still loading.
+Waiting for playback and loading to finish keeps keyboard focus stable while the panel closes.
 
 ### 2. Multi-Panel Auto-Open and Focus Priority
 
@@ -158,49 +108,45 @@ This deferred-close pattern prevents focus trap corruption that occurs when the 
 
 When a map interaction (such as clicking a feature) triggers multiple panels to auto-open simultaneously (e.g., Details panel in the app-bar and Chart panel in the footer-bar), only one panel can receive the focus trap at a time.
 
-Only focus-trapped panels display a close button. This means that only the panel receiving focus will display a close button.
+Close buttons depend on the layout and content, not just the active focus trap. App-bar toggle layouts and mobile layouts can show a close button even when the panel is not focus-trapped.
 
 **Behavior:**
 
-1. **Priority order** — One panel will be prioritized to receive the focus trap, while other auto-opened panels remain accessible without focus trap
-2. **Non-focused panels remain keyboard-accessible** — Users can Tab through auto-opened panels that aren't focus-trapped, but these panels won't display a close button until explicitly activated (by pressing on a layer in that panel, for example)
-3. **Activating a non-focused panel** — Navigate to the panel with Tab, then press Enter or Space on a layer in the left panel list. This enables the focus trap and reveals the close button.
+1. **Focus priority** — One panel receives the focus trap, while other auto-opened panels remain open without it
+2. **Other panels** — An active trap restricts Tab navigation to its own content. Other open panels are not necessarily reachable by Tab until that trap is exited
+3. **Changing panels** — Use the current panel's Close or Exit control to return to its associated control, then navigate to another panel. Activating a layer entry can move focus into that panel's content
 
 **Rationale:**
 
-This mutual exclusion pattern balances WCAG requirements with multi-panel workflows:
+This mutual exclusion pattern supports multi-panel workflows:
 
 - Prevents multiple simultaneous traps (which are disorienting for keyboard users)
-- Maintains keyboard access to all auto-opened content (users can explore without being trapped)
-- Requires explicit activation (Enter/Space on a layer) to enable panel-level focus management
-
-This is intentional architectural behaviour, not a bug.
+- Provides exit controls so users can return to the surrounding viewer navigation
+- Supports explicit activation (Enter/Space on a layer) to enter panel content
 
 ### 3. Mouse Movement Can Disrupt WCAG Mode
 
 **Behavior:**
 
-In keyboard navigation (WCAG) mode, mouse movement or placement can cause unexpected behavior that is difficult to reproduce. For example:
+Moving the mouse over the viewer after entering the keyboard-navigation flow exits keyboard mode and dismisses the entry prompt if it is still open. Pointer placement alone does not trigger this transition.
 
-- Some buttons may become unresponsive.
-- Pressing certain buttons may not trigger the expected action.
-- Focus traps, which intentionally restrict where you can tab to, may not function as intended.
+To stay in keyboard navigation mode:
 
-To avoid these issues:
-
-- Before tabbing into the viewer to enter keyboard navigation (WCAG) mode, move your mouse away from the browser window.
-- Avoid moving your mouse after enabling keyboard navigation mode.
-- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+- Move the pointer away from the viewer before entering keyboard mode
+- Avoid moving the mouse while navigating with the keyboard
 
 **Rationale:**
 
-This is a deliberate WCAG-compliance safeguard — if the user's real interaction mode is the mouse, WCAG/keyboard mode should not be silently forced on them.
-
-This is intentional architectural behaviour, not a bug.
+Mouse movement is treated as a return to mouse interaction, so the viewer releases its keyboard focus trap. This explains the mode change; unresponsive buttons or broken focus traps are not intended behavior.
 
 ---
 
 ## 003. Best Practices
+
+These sections explain shared developer conventions. Source-specific maintenance notes cover
+[keyboard/panel focus](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#keyboard-mode-and-panel-focus),
+[focus indicators](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#focus-indicator-maintenance), and
+[wrapper diagnostics](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#wrapper-naming-and-diagnostics).
 
 **Guidance for code review:**
 
@@ -208,19 +154,21 @@ These guidelines help catch common accessibility issues during branch review. Th
 
 **Priority levels:**
 
-- 🔴 **HIGH PRIORITY** — WCAG violation, should be addressed before release
+- 🔴 **HIGH PRIORITY** — Accessibility issue, should be addressed before release
 - 🟡 **MEDIUM PRIORITY** — Accessibility gap, worth fixing when feasible
 - 🔵 **ENHANCEMENT** — Best practice, improves user experience
 
 ---
 
+<a id="unique-element-ids"></a>
+
 ### 1. Use unique and valid element IDs (🔴 HIGH PRIORITY)
 
 Every element id in the DOM must be unique. Duplicate IDs break label-input associations (htmlFor), invalidate ARIA relationships (aria-labelledby, aria-describedby), and cause screen readers to behave unpredictably.
 
-- Ensure IDs are always unique across the entire map viewer
+- Ensure IDs are unique across the whole page, including multiple viewer instances
 - Use kebab-case (as much as possible)
-- **Layer paths can generate invalid IDs** because they may contain special characters (`/`, `.`, spaces) that are not valid in HTML id attributes
+- IDs must be non-empty and contain no ASCII whitespace. `/` and `.` are valid in HTML IDs, but require escaping when used in CSS selectors
 
 **ID naming patterns** (from least specific to most specific):
 
@@ -234,24 +182,20 @@ Every element id in the DOM must be unique. Duplicate IDs break label-input asso
 // Example: "mapA-footer-layers-panel-close-button"
 
 // Pattern 3: When a truly unique ID is required
-// Generate uniqueId using React's useId() or generateId(8)
+// Prefer React's useId() for stable label/control associations
 `${mapId}-${containerType}-${elementName}-${uniqueId}`;
 // Example: "mapA-footer-layer-item-k8j3n2m9"
 ```
 
-**Sanitizing layer paths for IDs:**
+**Layer paths and generated IDs:**
 
-```typescript
-// ❌ Bad: using raw layer path
-id={layerPath}  // Could be "group/sublayer.json" — invalid!
+Replacing punctuation can create duplicate IDs: `group/a.b` and `group/a/b` both become `group-a-b`. Use map and component-instance identifiers to keep IDs unique, and use the same ID in the associated label and ARIA references. If an ID contains special characters, escape it before using it in a CSS selector.
 
-// ✅ Good: sanitized
-id={`${mapId}-layer-${layerPath.replace(/[/.\s]/g, '-')}`}
-```
+<a id="semantic-controls"></a>
 
 ### 2. Use Semantic Elements for Interactions (🔴 HIGH PRIORITY)
 
-Clickable `<div>` and `<span>` elements are inaccessible by default — they receive no keyboard focus, emit no semantic role, and are invisible to assistive technologies. Native `<button>` and `<a>` elements come with built-in keyboard support, appropriate ARIA roles, and browser-managed focus behaviour at no extra cost. In MUI, use Button, IconButton, and Link components over attaching onClick handlers to arbitrary elements.
+Clickable `<div>` and `<span>` elements do not provide button semantics, keyboard focus, or Enter/Space activation by default. Native `<button>` and `<a href>` elements come with built-in keyboard support, appropriate semantics, and browser-managed focus behaviour. Use Button, IconButton, and Link from `@/ui` over attaching onClick handlers to arbitrary elements.
 
 Pick the primitive by what the element does:
 
@@ -263,15 +207,34 @@ Pick the primitive by what the element does:
 | Clickable row in a `List`                 | `ListItemButton`           | Put other controls in `ListItem secondaryAction` so they are not nested in the button                                                  |
 | Navigation to a URL                       | `Link` / `<a href>`        | Prefer a real link over a button that calls `window.open` (some existing download buttons still do; migrate when touched)              |
 
-**Do not** hand-roll `role="button"` + `tabIndex={0}` + `onKeyDown` on a `Box`/`div`/`Card` — `ButtonBase` provides focus, Enter/Space activation, disabled semantics and the theme focus-visible indicator. ESLint jsx-a11y rules (`no-static-element-interactions`, `click-events-have-key-events`, `interactive-supports-focus`) flag click handlers on non-interactive elements that lack a role or keyboard support. A fully hand-rolled `role="button"` + `tabIndex` + `onKeyDown` passes those rules, so it is only caught by a `no-restricted-syntax` **warning** on `role="button"` — reviewers must still look for it.
+**Do not** hand-roll `role="button"` + `tabIndex={0}` + `onKeyDown` on a `Box`/`div`/`Card` — `ButtonBase` provides focus, Enter/Space activation, disabled semantics and the theme focus-visible indicator.
 
-When a `ButtonBase` replaces a styled `Box`, neutralize button defaults in the sx (`width: '100%'`, `justifyContent: 'flex-start'`, `textAlign: 'left'`, `font: 'inherit'`, `color: 'inherit'`) and use `disableRipple` if the ripple does not suit the design. Never remove the focus outline (`outline: 'none'`); focus styles come from the theme's `focusVisible` option (`themeOptionsGenerator.ts`), which MUI applies through `.Mui-focusVisible`.
+```typescript
+<ButtonBase onClick={handleClick} disableRipple sx={sxClasses.card}>
+  <Typography component="span">{title}</Typography>
+</ButtonBase>
+```
 
-**Delegated listeners** — An `onClick` on a container whose purpose is to react to clicks bubbling from real child controls (e.g. scrolling the shell into view) is not a control; clicks on the container's empty space also trigger it, which must stay harmless. Keep it, and add a justified `// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events` explaining the delegation.
+Preserve the keyboard focus indicator when adapting the control's appearance to an existing layout.
+
+**Delegated listeners** — An `onClick` on a container that reacts to clicks bubbling from real child controls (e.g. scrolling the viewer into view) does not make the container a control. Clicking its empty space must remain harmless.
+
+<a id="icon-buttons"></a>
 
 ### 3. Use IconButton for buttons without labels (🔴 HIGH PRIORITY)
 
 The IconButton component in GeoView has built-in accessibility support. Use IconButton instead of Button when a button does not have a text label.
+
+Its `aria-label` prop is required by TypeScript. The compiler catches a missing prop, but reviewers
+should still check that the value is non-empty, translated, and describes the action and target.
+
+```typescript
+<IconButton aria-label={t('general.close')} onClick={handleClose}>
+  <CloseIcon />
+</IconButton>
+```
+
+<a id="wcag-checks"></a>
 
 ### 4. Ensure WCAG 2.1 Level AA Compliance (🟡 MEDIUM PRIORITY)
 
@@ -281,7 +244,10 @@ The IconButton component in GeoView has built-in accessibility support. Use Icon
 - ✅ Form inputs are associated with labels (via `<label>` or `aria-labelledby`)
 - ✅ Color is not the only means of conveying information
 - ✅ Focus indicators are visible and meet 3:1 contrast ratio
-- ✅ Interactive elements have minimum 44×44px touch target (WCAG 2.2 AAA, but GeoView target)
+- ✅ Aim for at least 44×44 CSS pixel touch targets (SC 2.5.5, WCAG 2.1 AAA; an enhanced GeoView design goal rather than an AA requirement)
+
+Measure the clickable area, not just the icon. Small targets are difficult for users with motor
+impairments or touch screen users.
 
 **Testing tools (post-implementation):**
 
@@ -289,13 +255,16 @@ The IconButton component in GeoView has built-in accessibility support. Use Icon
 - [axe DevTools](https://www.deque.com/axe/devtools/) browser extension
 - Lighthouse accessibility audit in Chrome DevTools
 
+<a id="disabled-states"></a>
+
 ### 5. Focus management: Use aria-disabled instead of disabled on UI elements that toggle between enabled/disabled states (🟡 MEDIUM PRIORITY)
 
-When a button has keyboard focus and becomes disabled on press, focus is lost and jumps unpredictably to another element, disorienting keyboard users who lose track of their position in the interface.
+When a focused button becomes natively disabled, focus behavior can vary by browser and the button is removed from sequential keyboard navigation. For transient states where users need to retain their position, consider `aria-disabled` instead.
 
-- Use aria-disabled instead of disabled
-- Style the aria-disabled element to look like it would if disabled
-- Add early return in event handler to prevent action when aria-disabled is true
+- Native `disabled` remains appropriate when a control should not be operable or in the Tab sequence
+- `aria-disabled` communicates unavailability but does not prevent focus or activation
+- Style the unavailable state
+- Add an early return in each activation handler to prevent the action while `aria-disabled` is true. The attribute communicates unavailability but does not block activation itself
 
 ```typescript
 const handleClick = (e) => {
@@ -311,15 +280,19 @@ const handleClick = (e) => {
 </button>
 ```
 
+<a id="removed-controls"></a>
+
 ### 6. Focus management: Avoid removing buttons from the DOM (🟡 MEDIUM PRIORITY)
 
 - After a button is pressed, if it is removed from the DOM it causes focus management issues.
 - From a UI perspective, often the most predictable thing to do is to leave the element in the DOM and keep focus on it after it's been pressed. See section 5 above
 - If removing elements from the DOM, ensure that focus is placed somewhere that is logical to keyboard users.
 
+<a id="escape-dismissal"></a>
+
 ### 7. Handle Esc key for dismissible UI elements (🔴 HIGH PRIORITY)
 
-All modal dialogs, panels, and popups that can be closed must respond to the Esc key.
+Dismissible modal dialogs, panels, and popups should respond to Esc. MUI Dialog provides Escape handling through `onClose`; custom components may need their own handler. Nested content handles Escape first, and the time slider can defer closing as described above.
 
 **Pattern 1: GeoView Popper component (simplest)**
 
@@ -338,69 +311,54 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 </Popper>
 ```
 
-**Pattern 2: Other components (Panel, Dialog, native elements)**
+**Pattern 2: MUI Dialog dismissal**
 
-For components with `onKeyDown` props or native event listeners, extract `event.key`:
+MUI Dialog handles Escape and calls `onClose` with the `escapeKeyDown` reason unless Escape dismissal is disabled. GeoView's fullscreen dialog uses this behavior; an explicit `onKeyDown` is not required:
 
 ```typescript
-import { handleEscapeKey } from '@/core/utils/utilities';
-
-// Inline usage (simplest)
-<Panel
-  onKeyDown={(event: KeyboardEvent) => {
-    handleEscapeKey(event.key, () => {
-      onClose();
-    });
-  }}
->
-  {/* content */}
-</Panel>
-
-// Or with useCallback (if reused or in dependency arrays)
-const handleKeyDown = useCallback((event: KeyboardEvent): void => {
-  handleEscapeKey(event.key, onClose);
-}, [onClose]);
-
-<Dialog onKeyDown={handleKeyDown}>
+<Dialog open={isOpen} onClose={handleClose}>
   {/* content */}
 </Dialog>
 ```
 
-**Critical detail:** `handleEscapeKey` expects a **key string** (`event.key`), not the event object itself.
+**Pattern 3: Custom keyboard dismissal**
+
+For custom content that owns dismissal and must keep a parent panel open, handle propagation at the event boundary:
+
+```typescript
+import { handleEscapeKey } from '@/core/utils/utilities';
+
+<Box
+  onKeyDown={(event) => {
+    if (event.key !== 'Escape') return;
+    event.stopPropagation();
+    handleEscapeKey(event.key, handleClose);
+  }}
+>
+  {/* content */}
+</Box>
+```
+
+**Critical detail:** `handleEscapeKey` expects a **key string** (`event.key`), not the event object itself. It does not stop propagation. If closing nested content must leave its parent open, call `event.stopPropagation()` in the nested handler.
 
 **What to check in code review:**
 
-- ❌ **VIOLATION**: Modal/panel/popup with no keyboard handler
-- ❌ **VIOLATION**: Custom Esc key handling that doesn't prevent propagation
+- ❌ **ISSUE**: Dismissible content with no effective keyboard dismissal path
+- ❌ **ISSUE**: A single Escape unintentionally closes both nested content and its parent
 - ❌ **VIOLATION**: Passing entire event object to `handleEscapeKey` instead of `event.key`
-- ✅ **CORRECT**: Using `handleEscapeKey` utility from `@/core/utils/utilities` with `event.key`
+- ✅ **CORRECT**: Built-in or custom Escape handling closes the intended content and restores focus
 
 ### 8. Announce loading states and progress updates using ARIA live regions (🟡 MEDIUM PRIORITY)
 
-Avoid "Loader Fatigue" by not using aria-live or role="status" when using <ProgressBar>s while layers are loading. Let the user discover them via navigation.
+Avoid "loader fatigue" by not announcing every incremental progress update. Keep the named ProgressBar available to assistive technology and use a separate status message for meaningful milestones, completion, or errors when needed.
 
-Do not use aria-live for content changes that are the direct and expected result of a user-initiated action on a clearly labelled control. For example, when pressing a layer button updates a panel's content.
+See [aria-live](#aria-live) for announcement rules, atomic messages, and the shared implementation example.
 
-Otherwise, use as follows:
-
-- aria-atomic="true" is appropriate for short updates. Use false if updates are longer.
-
-```typescript
-{/* WCAG - ARIA live region for screen reader announcements */}
-<Box sx={sxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
-  {statusMessage}
-</Box>
-
-{isLoading && (
-  <Box sx={sxClasses.progressBar}>
-    <ProgressBar aria-label={t('geolocator.loadingResults')} />
-  </Box>
-)}
-```
+<a id="keyboard-tooltips"></a>
 
 ### 9. Avoid Tooltips on Non-Interactive Elements (🟡 MEDIUM PRIORITY)
 
-Tooltips should not be placed on non-interactive elements like ListItem because assistive technologies such as screen readers cannot focus on them, making the tooltip content completely inaccessible to keyboard-only users and those using screen readers.
+Tooltips on non-focusable elements like ListItem are not available through keyboard focus. For an action, attach the tooltip to an interactive control such as ListItemButton. For static content, provide essential information as visible text rather than a hover-only tooltip.
 
 ```typescript
 // Bad
@@ -413,6 +371,23 @@ Tooltips should not be placed on non-interactive elements like ListItem because 
   <ListItemButton>layer xyz</ListItemButton>
 </Tooltip>
 ```
+
+### 10. Provide Text Alternatives for Images (🟡 MEDIUM PRIORITY)
+
+Informative images need a meaningful text alternative. Decorative images, or images whose
+information is already conveyed by adjacent text, use `alt=""` so screen readers can ignore them.
+Use translated descriptions for images authored by the application.
+
+```typescript
+// Decorative or redundant with adjacent text
+<img src={imageUrl} alt="" />
+
+// Informative
+<img src={imageUrl} alt={imageDescription} />
+```
+
+Some legend and map imagery lacks descriptive source metadata; see the
+[non-text content limitations](#sc-111-non-text-content).
 
 ---
 
@@ -450,22 +425,36 @@ ARIA labels should clearly describe an element's purpose, not just its type or l
 <Button aria-label="Learn more about Industrialisation" />
 ```
 
+#### Select Naming
+
+GeoView's `Select` wrapper requires exactly one naming prop: a non-empty visible `label` or
+`aria-label`. Use translated text, or the configured attribute display label for filter controls.
+The wrapper connects visible labels automatically; provide `labelId` only when an integration
+needs a specific label ID.
+
+```typescript
+<Select label={fieldLabel} value={value} onChange={handleChange} menuItems={menuItems} />
+
+<Select aria-label={fieldLabel} value={value} onChange={handleChange} menuItems={menuItems} />
+```
+
 ### aria-live
 
 Announce loading states and progress updates using ARIA live regions
 
 **When to use aria-live**
 
-Use aria-live to announce state changes that a screen reader user would otherwise have no way of knowing about — such as a background process completing, an error appearing off-screen, or an asynchronous result arriving.
-Do not use aria-live when:
+Use aria-live to announce state changes that a screen reader user might otherwise miss — such as a background process completing, an error appearing off-screen, or an asynchronous result arriving.
+Avoid duplicate or excessively frequent announcements:
 
-- The change is the direct and expected result of a user action on a clearly labelled control. For example, pressing a layer button that visibly updates a panel — the user initiated the action and expects a response, so no announcement is needed.
-- Content is updating incrementally and frequently (e.g. a progress bar advancing during a layer load). Announcing every update creates a noisy, disruptive experience. Instead, let the user discover the progress bar via navigation, and use aria-live only to announce the final outcome (e.g. "14 layers loaded").
+- When focus moves to updated content or a control already announces its changed state/value, an extra live announcement may be unnecessary. A user action can still need a status announcement, such as the number of search results
+- When content updates frequently (e.g. a progress bar advancing during a layer load), announce meaningful milestones or the final outcome rather than every update. Users can also inspect the named progress bar
 
 **aria-atomic**
 
 - aria-atomic="true": the entire region is read as a single unit when any part of it changes. Use this for self-contained messages like "3 of 10 layers loaded" or "Search complete — 5 results found".
 - aria-atomic="false": only the changed node is announced. Use this when the region contains multiple independent pieces of information that update separately.
+- `role="status"` already implies `aria-live="polite"` and `aria-atomic="true"`, so these attributes do not need to be repeated.
 
 **Pattern**
 
@@ -496,6 +485,8 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 - When a label changes on toggle, screen readers announce the entire new label on every state change — users hear "Hide Layer Name button" / "Show Layer Name button" instead of a clean state update.
 - aria-pressed provides a dedicated semantic state (pressed / not pressed) that is announced separately from the label, which is more predictable and easier to maintain.
 
+GeoView uses stable labels with `aria-pressed` for button toggles. A changing action label without `aria-pressed` is a different valid pattern, but is not the convention used here. Checkbox controls use checked state instead. See the [WAI-ARIA button pattern](https://www.w3.org/WAI/ARIA/apg/patterns/button/).
+
 ```typescript
 // Bad — label changes on toggle, causing verbose and repetitive announcements
 <IconButton
@@ -515,9 +506,12 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 
 ## 005. Quick Testing Tips and Notes
 
+These are quick checks for human testers. The [accessibility release tests](../programming/release-testing/21-wcag-accessibility.md)
+cover keyboard navigation, focus traps, screen-reader behavior, and visual indicators.
+
 ### SC 1.4.4 - Resize text
 
-- Set browser zoom level to 200%
+- Set browser zoom to 200%. Verify that text remains readable and that no content or functionality is lost.
 
 ### SC 1.4.5 - Images of Text
 
@@ -526,40 +520,42 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 
 ### SC 1.4.10 - Reflow
 
-- Resize browser window to 1280 pixels wide and set zoom level to 400%
+- Set the browser's content area to 1280 CSS pixels wide, then zoom to 400%. Verify that content fits the resulting 320 CSS pixel width without loss of content or functionality
+- The map itself can require two-dimensional scrolling; surrounding controls, text, and panels should still reflow
 
-### SC 1.4.11 - Text Spacing
+### SC 1.4.12 - Text Spacing
 
 - [Text spacing bookmarklet](https://www.html5accessibility.com/tests/tsbookmarklet.html)
+- Verify no loss of content or functionality with line height at 1.5 times font size, paragraph spacing at 2 times font size, letter spacing at 0.12 times font size, and word spacing at 0.16 times font size
 
 ---
 
 ## 006. Constraints and Limitations
 
-GeoView is built to meet WCAG 2.1 Level AA. Where full conformance is not technically achievable — due to the nature of the app's content or its reliance on third-party data sources — the constraint is documented with a rationale. **These are not failures;** they are considered exceptions within the bounds of what the WCAG specification allows, and will be revisited as the app evolves.
+GeoView is built to meet WCAG 2.1 Level AA. Some requirements are limited by the nature of map content, missing descriptions from external data providers, or browser behavior. This section explains those limitations, their impact, and how the relevant WCAG criteria have been interpreted. Where a limitation remains an accessibility gap rather than a permitted exception, it is identified below.
 
 ### Fullscreen API and ESC Key Priority
 
-**ESC exits browser fullscreen first, closes panels second — one press at a time, no exceptions.** When the Fullscreen API is active (entire browser window in fullscreen), the browser intercepts ESC as a user-safety mechanism before any application JavaScript runs. This is a security feature of the Fullscreen API spec, not something GeoView controls. It's not something to design around; it's something to design _with_.
+When the Fullscreen API is active, browsers commonly use Esc to exit fullscreen before the application receives the key. GeoView cannot override the browser's exit mechanism.
 
-**Implication for UI design:** If a user has both browser fullscreen active AND a panel open, they'll need two ESC presses: one to exit browser fullscreen, another to close the panel. This two-step sequence cannot be collapsed into one.
+**Implication for UI design:** If browser fullscreen and a panel are both open, users may need two Esc presses: one to exit browser fullscreen and another to close the panel. The exact behavior depends on the browser and operating system.
 
 **Note:** This constraint applies only to browser fullscreen via the Fullscreen API, not panel "fullscreen views".
 
 ### SC 1.1.1 Non-text Content
 
-Providing programmatically determinable alt text is not always possible for all image types within GeoView. In these cases, the app uses an empty alt attribute (alt=""), in accordance with WCAG sufficient technique H67, which applies to the following content categories:
+Providing meaningful alternative text is not always possible for all image types within GeoView:
 
-- **Decorative imagery:** Images that are purely presentational and convey no information relevant to the page content.
-- **Dynamic or generated content:** Map tiles, rendered layers, and other programmatically generated visuals whose content cannot be reliably described at runtime.
-- **User-supplied imagery:** Images uploaded or linked by external data providers, where the originating source has not supplied descriptive metadata.
+- **Decorative imagery:** Images that convey no information, or whose information is already provided in adjacent text, use empty alternative text (`alt=""`) so assistive technology can ignore them. This follows [technique H67](https://www.w3.org/WAI/WCAG22/Techniques/html/H67)
+- **Dynamic or generated content:** Map tiles and rendered layers may contain complex visual information that GeoView cannot reliably describe at runtime
+- **Provider-supplied imagery:** Images uploaded or linked by external data providers may arrive without descriptive metadata. In these cases, the missing description is a source-data limitation, not information GeoView has discarded. A meaningful alternative may require additional information from the provider
 
-Empty alt is not used as a substitute for informative images where a meaningful text alternative could reasonably be authored.
+Empty alt text does not describe informative imagery. Where information is unavailable in text, this remains an accessibility limitation rather than an H67 exception.
 
 #### Examples:
 
-- The legend symbol images cannot be programmatically described at this time.
-- Images that appear in the legend panel (and their corresponding light boxes) do not have descriptive text available for them. Therefore, they have been made to use empty alt attributes.
+- Some legend-item and layer-detail symbol images use `alt=""` because no visual description is available. Adjacent names identify the items, but do not describe their colour, shape, or other visual properties
+- WMS legend images and their lightboxes use a translated legend label and the title when available. This identifies the image, but does not describe the symbols within it
 
 #### References:
 
@@ -569,9 +565,9 @@ Empty alt is not used as a substitute for informative images where a meaningful 
 
 #### Symbology Images
 
-This gap is a consequence of the **same issue described under SC 1.1.1 above.** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
+This limitation is related to the **missing symbol descriptions discussed under SC 1.1.1 above.** Where a legend relies on colour, size, or shape to connect a symbol to a map feature, users of assistive technology may not have an equivalent text description of that relationship.
 
-**Impact** for users: AT users are not blocked from interacting with map symbology — they can show and hide map elements by name — but cannot independently interpret what the associated symbols look like. This is a partial gap rather than a complete barrier to use.
+**Impact** for users: Users can show and hide map elements by name, but may be unable to independently interpret the associated symbols. Named controls preserve access to visibility actions; they do not resolve the missing descriptions.
 
 ##### Examples:
 
@@ -580,11 +576,9 @@ This gap is a consequence of the **same issue described under SC 1.1.1 above.** 
 
 #### Select Components
 
-MUI Select components may be flagged by automated WCAG validators (such as axe or Lighthouse) as having orphaned form labels, even when the component is correctly implemented. This occurs because some scanners expect a `<label>`'s `for` attribute to target a native HTML form element (`<input>`, `<select>`, etc.), and do not recognize a `<div role="combobox">` as a valid target.
+Non-native MUI Select controls use ARIA labelling rather than a native `<label for>` association. GeoView's wrapper connects a visible label through `labelId`, or accepts an `aria-label` when no visible label is provided.
 
-In practice, MUI's rendered output correctly pairs the label's `for` attribute with the combobox `id`, and sets `aria-labelledby` on the interactive element — meaning screen readers will announce the label as expected.
-
-These validator warnings can be treated as false positives and suppressed or documented as known exceptions in your accessibility audit, provided the `FormControl`, `InputLabel`, and `Select` components are composed together as intended by MUI.
+If an automated validator reports an orphaned label, check the rendered control's accessible name and label references. A warning can be documented as a false positive when the association works correctly, including with a screen reader; do not suppress it solely because the control uses MUI.
 
 #### References:
 
@@ -594,13 +588,13 @@ These validator warnings can be treated as false positives and suppressed or doc
 
 Some content within the GeoView app may not include a lang attribute to identify passages in a language other than the page default. This is a known limitation with the following rationale:
 
-- Third-party content: Some data displayed in the app is sourced from external providers. Language tagging of that content is outside the app's direct control and is the responsibility of the originating data owner.
-- Technical data without a defined language: Certain scientific, geospatial, or domain-specific values (coordinates, codes, identifiers) do not belong to a natural language and cannot be reliably tagged.
+- Third-party content: External providers may not supply language metadata for their content, so GeoView cannot reliably tag it without additional information. Untagged natural-language passages remain a limitation
+- Technical data without a defined language: Coordinates, codes, and identifiers may not belong to a natural language. SC 3.1.2 allows exceptions for proper names, technical terms, words of indeterminate language, and words or phrases that have become part of the surrounding vernacular
 
 #### Examples:
 
-- Geolocator search results
-- Layer names
+- Geolocator place names can fall under the proper-name exception
+- Layer names and descriptions may contain passages in another language without provider-supplied language metadata
 
 #### References:
 
@@ -634,314 +628,28 @@ Some content within the GeoView app may not include a lang attribute to identify
 
 ## <a id="code-review-checklist"></a>008. Code Review Checklist — Common Accessibility Patterns
 
-This section helps branch reviewers spot common accessibility issues. Like other [best practices](programming/best-practices.md) in GeoView, these guidelines **rely on the goodwill of our programmers** and are not enforced automatically.
+This section helps branch reviewers spot common accessibility issues. Some checks are supported by TypeScript or ESLint; others require human judgment and runtime testing. See the related [best practices](../programming/best-practices.md#accessibility).
 
 **Purpose:** Assist developers during branch review by flagging patterns that commonly lead to accessibility issues. These are **not merge blockers** — they help catch mistakes early, but WIP and incremental improvements are welcome.
 
-**For concise code review patterns, see [best-practices.md Section 17](programming/best-practices.md#accessibility).**
-
-**TypeScript Enforcement:** Some accessibility rules are enforced at compile time by TypeScript and **do not need manual review**. These are marked with ✅ **TypeScript-enforced**.
-
-**Manual review patterns** that benefit from human/AI review are marked with ⚠️ **Manual check helpful**.
-
-### Summary: What to Check in Code Review
-
-| Pattern                             | TypeScript-enforced? | Review Recommendation                  |
-| ----------------------------------- | -------------------- | -------------------------------------- |
-| IconButton missing `aria-label`     | ✅ Yes               | **Skip** — compiler prevents this      |
-| onClick on non-semantic element     | ❌ No                | **Check** — common accessibility issue |
-| Dynamic aria-label on toggles       | ❌ No                | **Check** — common accessibility issue |
-| `disabled` prop causing focus loss  | ❌ No                | **Check** — common accessibility issue |
-| Modal without Esc key handler       | ❌ No                | **Check** — common accessibility issue |
-| Missing `alt` attribute             | ❌ No                | **Check** — common accessibility issue |
-| Tooltip on non-interactive element  | ❌ No                | **Check** — common accessibility issue |
-| aria-live on user-initiated updates | ❌ No                | **Consider** — may be unnecessary      |
-| Duplicate element IDs               | ❌ No                | **Check** — common accessibility issue |
-| Generic aria-labels                 | ❌ No                | **Consider** — enhancement             |
-| Missing aria-atomic                 | ❌ No                | **Consider** — enhancement             |
-| Small touch targets                 | ❌ No                | **Consider** — enhancement             |
-
----
-
-### **HIGH PRIORITY PATTERNS** (Common issues worth addressing)
-
-#### ✅ IconButton missing `aria-label` — **TypeScript-enforced** (no review needed)
-
-**Status:** This is automatically caught by TypeScript at compile time. The code will not compile without an `aria-label` prop on `IconButton`.
-
-```typescript
-// ❌ Will NOT compile — TypeScript error
-<IconButton onClick={handleClick}>
-  <CloseIcon />
-</IconButton>
-// Error: Property 'aria-label' is missing in type '...'
-
-// ✅ CORRECT — required by TypeScript
-<IconButton aria-label={t('general.close')} onClick={handleClick}>
-  <CloseIcon />
-</IconButton>
-```
-
-**Implementation detail:** GeoView's `IconButton` component extends MUI's `IconButtonProps` with `Omit<IconButtonProps, 'aria-label'>` and adds `'aria-label': string` (not optional), making it a required prop enforced by the type system.
-
-**For code reviewers:** You do not need to check for missing `aria-label` on `IconButton` — TypeScript already prevents this violation.
-
----
-
-#### ⚠️ onClick on non-semantic element without accessibility support — **Manual check helpful**
-
-```typescript
-// VIOLATION — clickable div with no keyboard support
-<div onClick={handleClick}>Click me</div>
-<span onClick={handleClick}>Click me</span>
-
-// CORRECT — use a semantic MUI primitive
-<Button onClick={handleClick}>Click me</Button>
-
-// CORRECT (if the element must keep a card/Box layout)
-<ButtonBase onClick={handleClick} disableRipple sx={sxClasses.card}>
-  <Typography component="span">Click me</Typography>
-</ButtonBase>
-
-// VIOLATION — hand-rolled button semantics
-<Box onClick={handleClick} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
-  Click me
-</Box>
-```
-
-**Search pattern:** `onClick`/`onMouseDown`/`onPointerDown` or `role="button"` on `<div>`, `<span>`, `<Box>`, `<Card>`, `<Typography>`, `<ListItem>`, `<img>` (click handlers without a role/keyboard support are flagged by ESLint jsx-a11y rules; hand-rolled `role="button"` only raises a warning)
-
-**Why this matters:** Keyboard users cannot activate clickable divs/spans — they are not focusable and do not respond to Enter/Space keys.
-
----
-
-#### ⚠️ Dynamic aria-label on toggle buttons — **Manual check helpful**
-
-```typescript
-// VIOLATION — label changes on every toggle
-<IconButton
-  aria-label={isVisible ? 'Hide layer' : 'Show layer'}
-/>
-
-// CORRECT — stable label + aria-pressed
-<IconButton
-  aria-label="Toggle visibility, Layer Name"
-  aria-pressed={isVisible}
-/>
-```
-
-**Search pattern:** `aria-label=` with ternary operator (`? :`) on buttons that toggle state
-
-**Why this matters:** Changing labels create verbose announcements ("Hide layer button" / "Show layer button") instead of clean state updates.
-
----
-
-#### ⚠️ `disabled` prop causing focus loss — **Manual check helpful**
-
-```typescript
-// VIOLATION — button becomes disabled on click, loses focus
-<Button disabled={isProcessing} onClick={handleClick}>
-  Submit
-</Button>
-
-// CORRECT — aria-disabled keeps focus
-<Button
-  aria-disabled={isProcessing}
-  onClick={(e) => {
-    if (isProcessing) return;
-    handleClick(e);
-  }}
-  sx={{
-    // Style to look disabled when aria-disabled is true
-    opacity: isProcessing ? 0.5 : 1,
-    cursor: isProcessing ? 'not-allowed' : 'pointer',
-  }}
->
-  Submit
-</Button>
-```
-
-**Search pattern:** `disabled={` on buttons that toggle between enabled/disabled based on state
-
-**Why this matters:** When a button becomes disabled while focused, focus jumps unpredictably to another element, disorienting keyboard users.
-
----
-
-#### ⚠️ Modal/panel without Esc key handler — **Manual check helpful**
-
-```typescript
-// VIOLATION — no keyboard close
-<Dialog open={isOpen}>
-  <Button onClick={onClose}>Close</Button>
-</Dialog>
-
-// CORRECT — responds to Esc key (inline)
-import { handleEscapeKey } from '@/core/utils/utilities';
-
-<Dialog
-  open={isOpen}
-  onKeyDown={(event) => handleEscapeKey(event.key, onClose)}
->
-  <Button onClick={onClose}>Close</Button>
-</Dialog>
-
-// CORRECT — responds to Esc key (useCallback)
-import { handleEscapeKey } from '@/core/utils/utilities';
-
-const handleKeyDown = useCallback((event: KeyboardEvent): void => {
-  handleEscapeKey(event.key, onClose);
-}, [onClose]);
-
-<Dialog open={isOpen} onKeyDown={handleKeyDown}>
-  <Button onClick={onClose}>Close</Button>
-</Dialog>
-```
-
-**Search pattern:** `<Dialog`, `<Modal`, `<Drawer`, panel components without `onKeyDown` handler
-
-**Why this matters:** Keyboard users expect Esc to close modal content — without it, they may be trapped.
-
----
-
-### **MEDIUM PRIORITY PATTERNS** (Worth reviewing when feasible)
-
-#### ⚠️ Missing alt attribute on images — **Manual check helpful**
-
-```typescript
-// CHECK — is this image decorative or informative?
-<img src={imageUrl} />
-
-// If decorative (per SC 1.1.1 exceptions):
-<img src={imageUrl} alt="" />
-
-// If informative:
-<img src={imageUrl} alt={t('layer.symbolDescription')} />
-```
-
-**Search pattern:** `<img` without `alt=` attribute
-
-**Why this matters:** Screen readers announce "image" with no context. Decorative images should use `alt=""`, informative images need descriptive text.
-
-**Known exceptions:** Legend symbol images, map tiles (see section 006).
-
----
-
-#### ⚠️ Tooltip on non-interactive element — **Manual check helpful**
-
-```typescript
-// VIOLATION
-<Tooltip title="Layer info">
-  <ListItem>Layer name</ListItem>
-</Tooltip>
-
-// CORRECT
-<Tooltip title="Layer info">
-  <ListItemButton>Layer name</ListItemButton>
-</Tooltip>
-```
-
-**Search pattern:** `<Tooltip>` wrapping non-interactive elements like `ListItem`, `Box`, `Typography`
-
-**Why this matters:** Tooltips require focus/hover — non-interactive elements cannot receive focus, making tooltips inaccessible to keyboard users.
-
----
-
-#### ⚠️ aria-live on user-initiated content updates — **Manual check helpful**
-
-```typescript
-// UNNECESSARY — user clicked the button, expects content to update
-<Button onClick={() => setContent('new')}>Update</Button>
-<Box role="status" aria-live="polite">{content}</Box>
-
-// aria-live should only announce unexpected/background changes
-```
-
-**Search pattern:** `aria-live` on content that updates as the direct result of a user action
-
-**Why this matters:** Announcing expected results creates noise. Reserve `aria-live` for background/async changes users wouldn't otherwise know about.
-
----
-
-#### ⚠️ Duplicate element IDs — **Manual check helpful**
-
-```typescript
-// VIOLATION — same ID used in a loop
-{layers.map(layer => (
-  <Box key={layer.id} id="layer-item">  {/* All items get same ID! */}
-    {layer.name}
-  </Box>
-))}
-
-// CORRECT — unique IDs
-{layers.map(layer => (
-  <Box key={layer.id} id={`${mapId}-layer-${layer.id}`}>
-    {layer.name}
-  </Box>
-))}
-```
-
-**Search pattern:** IDs generated in loops without unique suffixes
-
-**Why this matters:** Duplicate IDs break ARIA relationships, label associations, and cause unpredictable screen reader behavior.
-
----
-
-### **ENHANCEMENTS** (Nice-to-have improvements)
-
-#### ℹ️ Generic aria-label lacking context — **Manual check helpful**
-
-```typescript
-// IMPROVEMENT OPPORTUNITY
-<Button aria-label="Learn more">...</Button>
-<Button aria-label="Learn more">...</Button>  {/* Same label! */}
-
-// BETTER — each label is unique and contextual
-<Button aria-label="Learn more about layer filtering">...</Button>
-<Button aria-label="Learn more about time slider">...</Button>
-```
-
-**Search pattern:** Multiple elements with identical `aria-label` values
-
-**Why this matters:** Generic labels don't distinguish between elements when users navigate by button list in screen readers.
-
----
-
-#### ℹ️ Missing aria-atomic on aria-live region — **Manual check helpful**
-
-```typescript
-// INCOMPLETE — missing aria-atomic
-<Box role="status" aria-live="polite">
-  {statusMessage}
-</Box>
-
-// COMPLETE — specifies announcement behavior
-<Box role="status" aria-live="polite" aria-atomic="true">
-  {statusMessage}
-</Box>
-```
-
-**Search pattern:** `aria-live` without `aria-atomic`
-
-**Why this matters:** Without `aria-atomic`, screen reader behavior is undefined — some may announce only changed nodes, some may announce the entire region.
-
----
-
-#### ℹ️ Interactive element with insufficient touch target size — **Manual check helpful**
-
-```typescript
-// SUBOPTIMAL — small touch target
-<IconButton sx={{ width: '20px', height: '20px' }}>
-  <CloseIcon />
-</IconButton>
-
-// BETTER — meets 44×44px target
-<IconButton sx={{ minWidth: '44px', minHeight: '44px' }}>
-  <CloseIcon />
-</IconButton>
-```
-
-**Search pattern:** Interactive elements with `width`/`height` < 44px
-
-**Why this matters:** Small targets are difficult for users with motor impairments or touch screen users.
-
----
+The explanations and examples are maintained once in [Best Practices](#003-best-practices) and
+[ARIA Best Practices](#004-aria-best-practices). Use this checklist as a review aid:
+
+| Check              | What to verify                                                                               | Guidance                                           |
+| ------------------ | -------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Icon buttons       | The required label is non-empty, translated, and meaningful                                  | [Use IconButton](#icon-buttons)                    |
+| Semantic controls  | Actions use buttons and navigation uses links; no hand-rolled buttons                        | [Semantic controls](#semantic-controls)            |
+| Toggle state       | Button toggles have stable labels and `aria-pressed`; checkboxes use checked state           | [aria-pressed](#aria-pressed)                      |
+| Disabled states    | Temporary unavailability preserves focus where appropriate; activation handlers return early | [Disabled states](#disabled-states)                |
+| Removed controls   | Focus moves to a logical target when an element is removed                                   | [Removed controls](#removed-controls)              |
+| Escape dismissal   | Built-in or custom handlers close the intended content and restore focus                     | [Escape dismissal](#escape-dismissal)              |
+| Image alternatives | Informative images have descriptions; decorative images use empty alt text                   | [Non-text content](#sc-111-non-text-content)       |
+| Tooltips           | Essential information is available to keyboard users                                         | [Keyboard-accessible tooltips](#keyboard-tooltips) |
+| Live announcements | Necessary results are announced without duplicating focus or control feedback                | [aria-live](#aria-live)                            |
+| IDs                | IDs and label references remain unique across loops and viewer instances                     | [Unique element IDs](#unique-element-ids)          |
+| Contextual names   | Labels distinguish the action and its target                                                 | [aria-label](#aria-label)                          |
+| Atomic messages    | Announcements include enough context; account for the implicit behavior of `role="status"`   | [aria-live](#aria-live)                            |
+| Touch targets      | Measure the clickable area against the 44×44 CSS pixel design goal                           | [WCAG checks](#wcag-checks)                        |
+
+For source-search patterns and enforcement details, see the
+[accessibility review procedure](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#accessibility-review-procedure).
