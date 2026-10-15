@@ -104,7 +104,6 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
         .addGeoTiffOverlay(PREVIEW_OVERLAY_ID, asset.href, previewOpacity)
         .then((isAdded) => {
           if (isAdded) setSelectedAssetKey(assetKey);
-          else stacController.showError('stacBrowser.errorPreview');
         })
         .catch((error: unknown) => {
           logger.logError('STAC-ITEM-DETAIL - Failed to show asset on map', error);

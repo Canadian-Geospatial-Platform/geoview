@@ -24,11 +24,11 @@ export function resolveStacItemDisplayOptions(display: StacItemDisplayOptions, c
 }
 
 /**
- * Chooses queryable fields allowed by the configured property-filter list.
+ * Chooses queryable fields in the configured property-filter order, or server order when all fields are enabled.
  *
  * @param queryables - Server queryable definitions
  * @param config - Optional filter configuration
- * @returns Queryable field names and definitions allowed in the UI
+ * @returns Queryable field names and definitions in display order
  */
 export function getStacPropertyFilterFields(
   queryables: Record<string, StacQueryableField>,
@@ -39,18 +39,16 @@ export function getStacPropertyFilterFields(
   const configuredFields = Array.isArray(config)
     ? new Map(config.map((entry) => [typeof entry === 'string' ? entry : entry.field, entry]))
     : undefined;
-  return Object.entries(queryables)
-    .filter(([field, queryable]) => {
-      const isScalar = queryable.type !== 'geometry' && queryable.format !== 'geometry-any' && queryable.format !== 'geometry';
-      return isScalar && (configuredFields === undefined || configuredFields.has(field));
-    })
-    .map(([field, queryable]) => {
-      const configured = configuredFields?.get(field);
-      return [
-        field,
-        configured && typeof configured !== 'string' && configured.label ? { ...queryable, title: configured.label } : queryable,
-      ];
-    });
+  const fields = configuredFields ? Array.from(configuredFields.keys()) : Object.keys(queryables);
+  return fields.flatMap((field): [string, StacQueryableField][] => {
+    const queryable = queryables[field];
+    if (!queryable || queryable.type === 'geometry' || queryable.format === 'geometry-any' || queryable.format === 'geometry') return [];
+
+    const configured = configuredFields?.get(field);
+    return [
+      [field, configured && typeof configured !== 'string' && configured.label ? { ...queryable, title: configured.label } : queryable],
+    ];
+  });
 }
 
 /**

@@ -1,5 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Button, Typography } from 'geoview-core/ui';
+import { Box, Button, CircularProgressBase, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
@@ -24,8 +24,12 @@ interface StacSearchResultsProps {
   interactions: StacItemInteractions;
   /** Number of items per page. */
   pageSize: number;
+  /** Whether a result page request is pending. */
+  isLoading: boolean;
   /** Callback to go back to the search panel. */
   onBack: () => void;
+  /** Optional callback to restore the map extent captured at search submission. */
+  onZoomToSearch?: () => void;
   /** Whether there is a next page of results. */
   hasNext: boolean;
   /** Whether there is a previous page of results. */
@@ -48,7 +52,21 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-search-results');
 
-  const { results, collections, display, interactions, pageSize, onBack, hasNext, hasPrev, onNextPage, onPrevPage, currentPage } = props;
+  const {
+    results,
+    collections,
+    display,
+    interactions,
+    pageSize,
+    isLoading,
+    onBack,
+    onZoomToSearch,
+    hasNext,
+    hasPrev,
+    onNextPage,
+    onPrevPage,
+    currentPage,
+  } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
@@ -119,10 +137,28 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.panelContent}>
       {/* Back link */}
-      <Box sx={memoSxClasses.backLink}>
+      <Box sx={memoSxClasses.stickyNav}>
         <Button type="text" size="small" onClick={onBack}>
           ← {t('stacBrowser.backToSearch')}
         </Button>
+        {onZoomToSearch && (
+          <Button type="text" size="small" onClick={onZoomToSearch}>
+            {t('stacBrowser.zoomToSearch')}
+          </Button>
+        )}
+      </Box>
+
+      <Box role="status" aria-live="polite">
+        {isLoading && (
+          <Box sx={memoSxClasses.loading}>
+            <CircularProgressBase aria-label={t('stacBrowser.loading')} />
+          </Box>
+        )}
+        {!isLoading && results.features.length === 0 && (
+          <Box sx={memoSxClasses.noResults}>
+            <Typography>{t('stacBrowser.noResults')}</Typography>
+          </Box>
+        )}
       </Box>
 
       <Box sx={memoSxClasses.resultsList}>
@@ -145,18 +181,20 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
             return (
               <Box sx={memoSxClasses.pagination}>
                 {hasPrev && (
-                  <Button type="text" variant="outlined" onClick={onPrevPage}>
+                  <Button type="text" variant="outlined" onClick={onPrevPage} disabled={isLoading}>
                     ← {t('stacBrowser.previous')}
                   </Button>
                 )}
                 {hasNext && (
-                  <Button type="text" variant="outlined" onClick={onNextPage}>
+                  <Button type="text" variant="outlined" onClick={onNextPage} disabled={isLoading}>
                     {t('stacBrowser.next')} →
                   </Button>
                 )}
-                <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: '0.85rem' }}>
-                  {startItem}–{endItem}
-                </Typography>
+                {results.features.length > 0 && (
+                  <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: '0.85rem' }}>
+                    {startItem}–{endItem}
+                  </Typography>
+                )}
               </Box>
             );
           })()}

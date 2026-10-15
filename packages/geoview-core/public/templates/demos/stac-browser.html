@@ -54,7 +54,7 @@
         'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
         'appBar': {
           'tabs': {
-            'core': ['stac-browser']
+            'core': ['geolocator', 'stac-browser']
           }
         },
         'corePackagesConfig': [{
@@ -78,6 +78,8 @@
         }]
       }"
     ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapSTACCS" class="panel"></pre>
 
      <div class="demo-section">
       <h4 id="HLCONF2">2. Stac browser for NAPL</h4>
@@ -105,32 +107,32 @@
         'navBar': ['zoom', 'fullscreen', 'home'],
         'appBar': {
           'tabs': {
-            'core': ['stac-browser']
+            'core': ['geolocator', 'stac-browser']
           }
         },
         'corePackagesConfig': [{
           'stac-browser': {
             'stacUrl': 'https://eodms-sgdot.nrcan-rncan.gc.ca/search',
+            'browseEnabled': false,
+            'defaultMode': 'search',
+            'searchDescription': 'stacBrowser.geolocatorSearchDescription',
             'collections': {
               'include': ['NAPL'],
               'default': 'NAPL'
             },
             'filters': {
-              'collections': true,
               'temporal': true,
               'spatial': true,
-              'keyword': true,
               'sort': true,
               'properties': [
-                { 'field': 'scale', 'label': 'Scale' },
-                { 'field': 'altitude', 'label': 'Altitude' },
                 { 'field': 'roll_number', 'label': 'Roll number' },
-                { 'field': 'order_key', 'label': 'Order key' },
                 { 'field': 'delivery_date', 'label': 'Delivery date' }
               ]
             },
             'defaults': {
               'limit': 50,
+              'useMapExtent': true,
+              'containedInExtent': true,
               'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
             },
             'collectionOverrides': {
@@ -161,10 +163,18 @@
         }]
       }"
     ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapSTAC2CS" class="panel"></pre>
 
     <script src="./js/page-header.js"></script>
+    <script src="codedoc.js"></script>
     <script>
       cgpv.init();
+
+      // Create configuration snippets for both demos.
+      window.addEventListener('load', () => {
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>

@@ -128,6 +128,21 @@
       "description": "Base URL of the STAC API",
       "type": "string"
     },
+    "browseEnabled": {
+      "description": "Enable collection browsing. When false, only search mode is available",
+      "type": "boolean",
+      "default": true
+    },
+    "defaultMode": {
+      "description": "Initial view. Search is always used when browseEnabled is false",
+      "type": "string",
+      "enum": ["browse", "search"],
+      "default": "browse"
+    },
+    "searchDescription": {
+      "description": "Optional plain text or translation key displayed above the search filters. Hidden when omitted or empty",
+      "type": "string"
+    },
     "collections": {
       "description": "Restricts the collections available in the browser",
       "type": "object",
@@ -207,6 +222,16 @@
           "description": "Pre-selected collection IDs",
           "type": "array",
           "items": { "type": "string" }
+        },
+        "useMapExtent": {
+          "description": "Pre-select Use current map extent when spatial filtering is enabled; the extent is read when searching",
+          "type": "boolean",
+          "default": false
+        },
+        "containedInExtent": {
+          "description": "Pre-select Fully contained in extent; applies only when Use current map extent is selected",
+          "type": "boolean",
+          "default": false
         },
         "bbox": {
           "description": "Default bbox [west, south, east, north] in EPSG:4326, applied to searches when the map extent is not used",

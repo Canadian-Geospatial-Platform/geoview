@@ -20,6 +20,18 @@ const DATETIME_KEYS = ['datetime', 'start_datetime', 'end_datetime', 'created', 
  */
 export abstract class StacFieldUtils {
   /**
+   * Gets a stable key for an item that is unique across collections.
+   *
+   * @param item - The STAC item
+   * @returns The collection-scoped item key, or a self-link/id fallback when its collection is unavailable
+   */
+  static getItemKey(item: StacItem): string {
+    if (item.collection !== undefined) return JSON.stringify(['collection', item.collection, item.id]);
+    const selfLink = item.links?.find((link) => link.rel === 'self')?.href;
+    return selfLink ? JSON.stringify(['self', selfLink]) : JSON.stringify(['id', item.id]);
+  }
+
+  /**
    * Reads a value in a STAC item using a dot path (e.g., "properties.scale", "assets.thumbnail.href").
    *
    * @param item - The STAC item
