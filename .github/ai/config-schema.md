@@ -38,5 +38,4 @@ Read only the linked section of each doc: search for its heading and read to the
 | Cascading tests                     | Three levels distinguish merged intermediate state from source state mutated for grandchildren                                                         |
 | Partial success                     | `createGeoViewLayers`, `ConfigBaseClass.#updateLayerStatusParentRec`, then layer-details error checkboxes/toggle-all                                   |
 
-For malformed HTML, see the [LayerController boundary note](../../docs/programming/controller-architecture.md#layercontroller);
-catching around JSX does not catch child render failures.
+For malformed HTML, see [Shared HTML rendering and error boundaries](../../docs/programming/best-practices.md#shared-html-rendering-and-error-boundaries).

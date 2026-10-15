@@ -1,7 +1,7 @@
 ---
 name: DepUpdate
-description: '[Workflow] Use when: auditing dependencies, checking for outdated packages, evaluating upgrade risks, planning a specific dependency migration, reviewing security vulnerabilities in node_modules. Analyzes package.json files across the Rush monorepo to assess dependency health and provide upgrade guidance.'
-tools: [read, search, execute, edit, web, askQuestions]
+description: '[Workflow] Use when: auditing dependencies, checking for outdated packages, evaluating Node.js/Rush/pnpm toolchain upgrades, planning a specific dependency migration, reviewing security vulnerabilities in node_modules. Assesses dependency health and provides upgrade guidance across the Rush monorepo.'
+tools: [read, search, execute, edit, web, vscode/askQuestions]
 argument-hint: 'describe the problem or feature'
 ---
 
@@ -19,8 +19,7 @@ GeoView is a **Rush monorepo** (`rush.json`) with multiple packages under `packa
 
 - Rush manages dependencies — **never** suggest `npm install` directly; always use `rush update`
 - `ensureConsistentVersions: true` in `rush.json` — all packages must use the same version of shared dependencies
-- pnpm 8.x is the package manager under Rush
-- Node.js >=20.11.0 is required
+- Read `pnpmVersion`, `rushVersion`, and `nodeSupportedVersionRange` from `rush.json`; do not assume fixed toolchain versions
 - Plugins import geoview-core APIs — core dependency changes cascade to all plugins
 
 ## Task Modes
@@ -40,6 +39,19 @@ You operate in two modes depending on the user's request.
 3. Read package.json files for each plugin under `packages/geoview-*/package.json`
 4. Run `npx npm-check-updates --packageFile packages/geoview-core/package.json` to see available updates (do NOT apply them)
 5. Run `rush list --json` to get all managed packages
+
+#### Phase 1a — Check Toolchain Health
+
+1. Read the configured Node.js range, Rush version, and pnpm version from `rush.json`. Inspect any Node.js version files, package `engines`, and relevant CI workflows for conflicting requirements.
+2. Compare configuration with `node --version` and `rush --version`. Determine the pnpm version actually used by Rush from its output or managed executable; a global `pnpm --version` is not proof of Rush's version. Report unavailable commands or unverified versions explicitly.
+3. Check current official Node.js release/support dates and Rush/pnpm release notes and compatibility guidance. Cite sources and the audit date; do not infer compatibility from version numbers alone.
+4. Recommend a supported Node.js LTS release rather than automatically selecting the newest major. Check whether the configured minimum still admits EOL releases and whether CI tests the recommended version.
+5. Verify the pinned Rush release supports the proposed Node.js and pnpm versions. If a Rush upgrade is necessary, include it in the coordinated recommendation; mark unsupported or undocumented combinations as blocked or unverified.
+6. Assess pnpm major-upgrade risks: lockfile format, overrides/hooks, install behavior, and effects on CI. Identify any required changes to `rush.json`, Node.js version files, CI, and development documentation.
+7. Treat npm as secondary because Rush uses pnpm. Recommend an npm upgrade only when a concrete repository workflow requires it.
+8. Report Node.js, Rush, and pnpm as **configured / observed / recommended**, with support status, justification, compatibility evidence, migration risks, and validation commands. Use "keep current" when appropriate, not an automatic upgrade.
+
+Do not install tools, regenerate lockfiles, or modify versions during this check. Obtain approval before implementing a coordinated toolchain migration. Its validation plan must cover `rush update`, `rush build`, relevant browser tests, and CI under the proposed Node.js version; report commands as planned, not passed, until executed.
 
 #### Phase 2 — Classify Dependencies
 
@@ -125,6 +137,13 @@ Present a structured report:
 ### Recommended Update Order
 1. ...
 2. ...
+
+### Toolchain Health
+| Tool | Configured | Observed | Recommended | Support / Compatibility / Risk |
+|------|------------|----------|-------------|--------------------------------|
+| Node.js / Rush / pnpm | ... | ... | ... | ... |
+- Official sources and audit date: ...
+- Required configuration/CI/docs changes and validation plan: ...
 ```
 
 #### Phase 7 — Suggest Plan
@@ -167,6 +186,7 @@ Use the ask-questions tool to clarify:
    - Configuration files that reference it (webpack configs, tsconfig, etc.)
 3. Fetch the dependency's changelog or migration guide if available (use web fetch for the npm page or GitHub releases)
 4. Identify breaking changes between the current and target versions
+5. Run **Phase 1a — Check Toolchain Health** only if the dependency requires a different Node.js/package-manager version, or the user explicitly requests a toolchain assessment. Include any required coordinated toolchain changes in the migration recommendation; otherwise do not expand into a full toolchain audit.
 
 #### Step 3 — Impact Analysis
 

@@ -23,10 +23,4 @@ Read only the linked section of each doc: search for its heading and read to the
 - Use pixel-space direction/containment; do not replace it with singular geographic bearings.
 - MapViewer/OL access stays in controllers/plugin lifecycle, never rendered React components.
 
-### Swiper Runtime
-
-Read the [canonical runtime rules](../../docs/programming/controller-architecture.md#mapcontroller).
-Entry points: SwiperController render listeners/registration, LayerSetController pointer-stop gating,
-and swiper component drag cleanup. Verify selected descendant handlers, non-target independence,
-progressive loading, hover hit bands, diagonal drag and resize/unmount restoration.
-Never CSS-clip shared OL renderer containers or wait for every descendant before clipping the first.
+For Swiper render clipping and drag isolation, follow [package-specific runtime routing](packages.md#swiper-runtime).

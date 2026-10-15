@@ -83,14 +83,21 @@ const aiFiles = [
 // Section links route agents into public docs, so a renamed heading must fail just like a missing file.
 // Anchors follow GitHub's heading slugs (what agents and GitHub resolve); the published docs site may differ
 // for headings with unusual punctuation.
-const slugify = (heading) =>
-  heading
-    .replace(/<[^>]+>/g, '')
+const slugify = (heading) => {
+  let plainHeading = heading;
+  let previousHeading;
+  // Removing a tag can expose another tag in malformed nested markup; normalize to a fixed point.
+  do {
+    previousHeading = plainHeading;
+    plainHeading = plainHeading.replace(/<[^>]+>/g, '');
+  } while (plainHeading !== previousHeading);
+  return plainHeading
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .trim()
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s_-]/gu, '')
     .replace(/ /g, '-');
+};
 const anchorCache = new Map();
 const getAnchors = (file) => {
   if (anchorCache.has(file)) return anchorCache.get(file);

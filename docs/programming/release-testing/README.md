@@ -19,27 +19,33 @@ This folder contains the **manual release testing checklist** for GeoView. It co
 
 ### Maintaining the plan
 
-Keep test definitions, the issue template and this index synchronized in the same edit session.
-Every section gets one issue checkbox with a working heading link and actual test-row count
-(`(1 test)` for singular). Section renames change anchors; file additions/removals/renames change both
-the index and template; time estimates change the index.
-Do not delete tests moved to automation: change their Auto flag to `A`.
-Record new automation candidates in `27-automation-candidates.md`, which stays last in the plan.
+When contributing a test-plan change, update the test definitions, tracking-issue template, and this
+index together. Each section needs one issue checkbox linked to its heading and labelled with the
+actual number of test rows (`(1 test)` for a single row).
 
-After test/page/config/infrastructure changes, append a summary to `RELEASE-CANDIDATE.md` under
-Breaking Changes, New Features, Bug Fixes, Test Plan Changes or Config Schema Changes as appropriate;
-update its counts table when totals change.
+Renaming a section changes its heading link. Adding, removing, or renaming a file affects both the
+index and template; changing a time estimate affects the index. Keep tests that move to automation
+in the plan and change their Auto flag to `A`, so readers can still find the coverage. Record new
+automation candidates in `27-automation-candidates.md`, which stays last in the plan.
+
+Summarize completed test, page, configuration, and infrastructure changes in the release candidate
+tracker. Update its count tables when the underlying totals change.
 
 ### Release candidate maintenance
 
-[RELEASE-CANDIDATE.md](./RELEASE-CANDIDATE.md) is the active, cumulative record for the current release cycle. Developers and AI agents use it to prepare PR notes and release notes. Run `/update-release-candidate` to maintain it; review agents use the same procedure rather than keeping separate instructions.
+[RELEASE-CANDIDATE.md](./RELEASE-CANDIDATE.md) is the cumulative record of completed changes for the
+current release cycle. It provides the material for release notes and relevant PR descriptions.
 
-1. **Establish scope.** Read the tracker version and the branch or PR being reviewed. Default to `upstream/develop` unless the user explicitly specifies another base. Refresh the base when possible, use a merge-base diff (`git diff <base>...<head>`), and report the base and any refresh limitation. Never silently substitute another base. Distinguish committed changes from staged, unstaged, and untracked work; record completed uncommitted changes only when they are in the requested scope, identifying their status.
-2. **Gather evidence.** Read the PR description, linked issues, branch commits (`git log <base>..<head> --oneline --no-merges`), and relevant diff. Commit prefixes help classify intent but do not prove behavior. Verify entries against actual changes; do not turn review violations, proposals, failed experiments, or speculation into completed release changes. Do not invent issue/PR numbers; use a branch/commit reference when no PR exists.
-3. **Check compatibility.** Inspect changed schemas, config types/defaults, public APIs/controllers, events, and store interfaces used by plugins. Distinguish additive changes from incompatible removals, renames, signature changes, or behavior shifts. For breaking changes, record the old-to-new mapping and migration guidance when known.
-4. **Reconcile before appending.** Search existing entries by PR/issue, affected feature, and meaning. Update an existing entry for the same change instead of adding a duplicate. Preserve unrelated entries, the current version, section structure, and formatting.
-5. **Write verified entries.** Use the existing categories: features, fixes, user-facing/internal breaking changes, build/dependencies, architecture/performance, accessibility, documentation/cleanup, and test/config changes as available. Describe the impact concisely and include evidence references. If classification or impact remains materially unclear, ask rather than guess. Update tracker count tables only when the underlying totals changed.
-6. **Verify and report.** Check that each entry has evidence, appears in the appropriate category, and is not duplicated. State what was added/updated, what was excluded, or that no release-note entry was warranted. An explicit read-only review proposes entries instead of editing the tracker.
+Add concise, evidence-backed entries under the tracker's existing categories. Describe the impact
+and reference the issue, PR, or commit. Record completed changes, not proposals or unresolved review
+findings. For incompatible schema, API, or behavior changes, explain the old-to-new mapping and any
+known migration steps.
+
+Before adding an entry, check whether the same change is already recorded and update that entry
+instead of duplicating it. Preserve unrelated entries and the current release version.
+
+For AI-assisted updates, see [Using AI Assistants](../using-ai.md#skills-workflows). The agent-specific
+review, approval, and reporting procedure lives in the repository's AI reference, not in this guide.
 
 #### Using the tracker for PR notes
 
@@ -47,7 +53,7 @@ Use the relevant verified entries to draft PR notes, not necessarily the entire 
 
 #### Starting a new release cycle
 
-Archive and reset the tracker **only when explicitly requested**, never during an ordinary PR review:
+Archive and reset the tracker when the team starts a new release cycle, not during ordinary PR review:
 
 1. Confirm the completed version, next version, and archive destination. A versioned file such as `RELEASE-CANDIDATE-v2.3.0.md` beside the active tracker is suitable; do not overwrite an existing archive.
 2. Preserve the completed tracker in the archive before changing the active file.

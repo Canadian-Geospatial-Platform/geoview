@@ -34,8 +34,8 @@ Outside `src`, `packages/geoview-core/public/locales/{en,fr}/translation.json` h
 
 `geoview-{aoi-panel,custom-legend,drawer,geochart,swiper,time-slider}` consume core APIs via `ControllerRegistry`. `geoview-test-suite/src/tests/{core,suites,testers}` holds the in-browser test engine.
 
-For package integration, see [Creating a core package](../../docs/app/packages/core-packages.md#creating-a-core-package)
-and [Available core packages](../../docs/app/packages/core-packages.md#available-core-packages).
+For package integration, schema/defaults, lifecycle, translations, and package-specific runtime,
+use the [package reference](packages.md#shared-integration).
 The [JavaScript package overview](../../docs/app/packages/javascript-packages.md#overview) describes a legacy external-plugin approach.
 
 ## Typical entry points

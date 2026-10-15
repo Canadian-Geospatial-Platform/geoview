@@ -33,7 +33,7 @@ tools:
     search/listDirectory,
     search/textSearch,
     search/usages,
-    askQuestions,
+    vscode/askQuestions,
     todo,
   ]
 argument-hint: "describe the test to create, 'review' to scan a branch for missing tests, 'review-manual' to audit release-testing checklists against codebase, or 'create-release-issue' to prepare a new release testing cycle"

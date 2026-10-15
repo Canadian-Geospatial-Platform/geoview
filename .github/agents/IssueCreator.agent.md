@@ -1,7 +1,7 @@
 ---
 name: IssueCreator
 description: '[Workflow] Use when: creating a GitHub issue, drafting a bug report, drafting a feature request, preparing an issue for submission. Generates a ready-to-paste GitHub issue from a problem description or feature idea.'
-tools: [read, search, edit]
+tools: [read, search, edit, vscode/askQuestions]
 argument-hint: 'describe the problem or feature'
 ---
 
@@ -16,6 +16,8 @@ You are an issue drafting assistant for the GeoView monorepo (`Canadian-Geospati
 - **NEVER infer build/deployment behavior from file or script naming** — trace the actual CI workflow files (`.github/workflows/*.yml`) and the invoked npm/rush scripts to confirm which build config a deployment really uses. For example, the gh-pages develop preview is built by `build.yml` → `rush build` → `webpack.prod.js` (the **production** config), NOT `webpack.dev-build.js` despite the "dev" in that filename.
 
 ## Workflow
+
+Use `vscode/askQuestions` for clarifications and approval requests, asking one focused question at a time. If the tool is unavailable in the current client, ask in chat and wait for the answer before proceeding.
 
 ### Phase 1 — Understand the Problem
 

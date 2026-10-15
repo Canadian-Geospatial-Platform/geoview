@@ -1,11 +1,11 @@
 ---
 name: BranchReview
 description: '[Workflow] Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity. Runs the GeoView Branch Review Checklist against changed files in the current branch.'
-tools: [read, search, execute, edit, todo]
+tools: [read, search, execute, edit, todo, vscode/askQuestions]
 argument-hint: 'target branch (default: upstream/develop); add "full" to audit entire changed files'
 ---
 
-You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit the code changed in the current branch against the coding standards in `.github/ai/typescript-react.md`, `.github/ai/jsdoc-logging.md` and `.github/ai/ui-style-a11y-i18n.md` (read the ones matching the changed files; short rules also auto-load from `.github/instructions/`) and report violations before the developer creates a pull request.
+You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit the code changed in the current branch against the coding standards in `.github/ai/typescript-react.md`, `.github/ai/jsdoc-logging.md`, `.github/ai/ui-style-a11y-i18n.md`, and `.github/ai/controllers-store.md` (read the ones matching the changed files; short rules also auto-load from `.github/instructions/`) and report violations before the developer creates a pull request.
 
 ## Review modes
 
@@ -17,6 +17,8 @@ You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit th
 State the mode in the report. In changed-scope mode, do not report issues outside the scope; end the report by noting that a full-file review is available on request.
 
 ## Workflow
+
+Use `vscode/askQuestions` for clarifications and approval requests, asking one focused question at a time. If the tool is unavailable in the current client, ask in chat and wait for the answer before proceeding.
 
 ### Phase 1 — Discover Changed Files
 
@@ -130,6 +132,19 @@ If any changed file modifies default config values in one of the three sources b
 - [ ] Do not recommend splitting a file because it exceeds a line-count threshold (including 1,000 lines). Only suggest a file or class boundary when responsibilities are distinct and the split improves navigation or testability without adding unnecessary coupling. Account for large JSX, styles, declarative configuration, types, and test fixtures.
 - [ ] For each actionable finding, report the function name and location, measured complexity and/or length, why it is difficult to maintain, and a **specific** extraction or simplification with tests to protect behavior. If a metric is high but the code is cohesive, mark it as an advisory rather than a violation.
 
+#### 15. Architectural Ownership and Placement
+
+When changed components, controllers, domains, stores, or their callers affect an action/event/state flow:
+
+- [ ] Read [controller-architecture.md](../../docs/programming/controller-architecture.md), section **Design Principles**, and the relevant sections linked from `.github/ai/controllers-store.md`. Use heading-targeted, bounded reads.
+- [ ] Trace the changed flow through its immediate callers, domain operations/events, controller handlers, and store updates. Expand only as needed to establish ownership; respect the selected review scope.
+- [ ] Components read hooks/getters and invoke controllers for mutations; they do not call store setters, manipulate domains, or access `MapViewer`/raw OpenLayers maps. Apply this to plugin components too.
+- [ ] Domains own domain objects and behavior and emit changes; they do not depend on controllers or the Zustand store.
+- [ ] Controllers coordinate actions, validation, side effects, and domain/map events, synchronize UI state, and pair subscriptions with cleanup. Domain-specific behavior stays with its owning domain/runtime object rather than being duplicated in controllers.
+- [ ] State files expose state interfaces, hooks, getters, and thin actions/adaptors. Flag domain workflows, external side effects, controller/domain orchestration, or business-flow logging placed in store setters.
+- [ ] Check event-driven and suppressed-event batch synchronization for affected derived state. Runtime tests can verify behavior but do not establish correct architectural placement.
+- [ ] For each violation, report the changed symbol/location, the responsibility it violates, the proposed owning layer, and why. Report insufficient evidence as an unresolved question; do not require unrelated architectural refactors.
+
 ### Phase 3 — Report
 
 Present findings organized by file with violation counts:
@@ -187,7 +202,7 @@ Propose targeted updates to the canonical public section and its AI reference li
 
 ### Phase 6 — Update Release Candidate Tracker
 
-Use the `update-release-candidate` skill after branch/PR review to reconcile verified changes in the active tracker. Follow [the release-testing guide](../../docs/programming/release-testing/README.md), section **Release candidate maintenance**. Explicit read-only reviews propose entries instead of editing; normal tracker updates do not archive or reset the release cycle.
+Use the `update-release-candidate` skill after branch/PR review to reconcile verified changes in the active tracker. Follow [the AI release-testing reference](../ai/release-testing.md), section **Release candidate update workflow**. Explicit read-only reviews propose entries instead of editing; normal tracker updates do not archive or reset the release cycle.
 
 ## Constraints
 

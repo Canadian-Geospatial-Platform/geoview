@@ -3,10 +3,10 @@ description: JSDoc, comment and logger trace conventions
 applyTo: 'packages/**/*.{ts,tsx}'
 ---
 
-Canonical: [JSDoc conventions](../../docs/programming/best-practices.md#documentation-conventions),
-[trace conventions](../../docs/programming/logging.md#characteristics-to-know-when-using-logger),
-[logging ownership](../../docs/programming/logging.md#where-to-log--controllers-not-store-state-files).
-Audit workflow: [JSDoc audit](../ai/jsdoc-logging.md#jsdoc-audit-checklist).
+Canonical sections (search the named heading and read only that section):
+[best-practices.md](../../docs/programming/best-practices.md) → **Documentation conventions**;
+[logging.md](../../docs/programming/logging.md) → **Characteristics to know when using `logger`** and **Where to log — controllers, not store state files**.
+Audit workflow: [jsdoc-logging.md](../ai/jsdoc-logging.md) → **JSDoc Audit Checklist**.
 
 - Check every function/hook/property, not just exports; explicit return annotations and semantic JSDoc.
 - Render trace at component entry, effect/memo trace first; `memoSxClasses` is the documented exception.

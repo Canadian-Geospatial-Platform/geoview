@@ -1,7 +1,7 @@
 ---
 name: IssueReview
 description: "[Workflow] Use when: reviewing a PR branch against its linked GitHub issue. Compares the branch diff with the issue's proposed fix to verify alignment, catch gaps, and record lessons learned from the developer's actual fix in the canonical public docs."
-tools: [read, search, execute, edit, web]
+tools: [read, search, execute, edit, web, vscode/askQuestions]
 argument-hint: 'issue number or issue URL'
 ---
 
@@ -20,6 +20,8 @@ This agent creates a feedback loop between issue drafting and implementation:
 **Do not implement the fix.** This agent reviews a finished fix written by someone else. If the branch has no changes for the issue yet, stop and point the user to [using-ai.md](../../docs/programming/using-ai.md), section **Recommended Issue-to-PR Workflow**: fix with the default agent first, then return here in a new chat.
 
 ## Workflow
+
+Use `vscode/askQuestions` for clarifications and approval requests, asking one focused question at a time. If the tool is unavailable in the current client, ask in chat and wait for the answer before proceeding.
 
 ### Step 1 — Gather the Issue
 
@@ -102,7 +104,7 @@ Place shared guidance in the matching public section and link it from the specia
 
 ### Step 5 — Update the Release Candidate Tracker
 
-Use the `update-release-candidate` skill, following [the release-testing guide](../../docs/programming/release-testing/README.md), section **Release candidate maintenance**, to record the verified change in `docs/programming/release-testing/RELEASE-CANDIDATE.md`.
+Use the `update-release-candidate` skill, following [the AI release-testing reference](../ai/release-testing.md), section **Release candidate update workflow**, to record the verified change in `docs/programming/release-testing/RELEASE-CANDIDATE.md`.
 
 - Use the issue as evidence: its number, intent and category, together with the comparison from Step 3. Describe what the branch actually did, not what the issue proposed, when they differ.
 - `BranchReview` may already have added an entry for this branch. Update that entry instead of adding a duplicate.

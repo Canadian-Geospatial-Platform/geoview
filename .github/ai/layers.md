@@ -10,7 +10,6 @@ Read only the linked section of each doc: search for its heading and read to the
 | Layer sets                                                                                   | [Layer-set architecture](../../docs/programming/layerset-architecture.md#overview)                                                                                                                                                 |
 | Display names, groups, proxy, opacity, visibility, scale, partial success, GeoPackage fields | [Runtime invariants](../../docs/programming/adding-layer-types.md#runtime-invariants)                                                                                                                                              |
 | Repeated WMS names and path-aware resolution (#3521)                                         | [WMS duplicate names](../../docs/programming/troubleshooting.md#duplicate-names-in-nested-groups)                                                                                                                                  |
-| Hidden panel lists and selection/focus (#3635)                                               | [LayerController](../../docs/programming/controller-architecture.md#layercontroller)                                                                                                                                               |
 | Style/time/config/table AND filters                                                          | [Filter sources](../../docs/programming/layer-filters.md#overview)                                                                                                                                                                 |
 | Simple geometry visibility limitation, item identity                                         | [Style-based filters](../../docs/programming/layer-filters.md#filter-source-1-class-filter-style-based)                                                                                                                            |
 | Batched filter updates                                                                       | [Batch synchronization](../../docs/programming/layer-filters.md#batch-operations-and-filter-synchronization)                                                                                                                       |
@@ -32,7 +31,8 @@ Read only the linked section of each doc: search for its heading and read to the
   Inspect both inference and consumers; explicitly nest the table entry for deterministic test paths.
 - WMS: `ogc-wms.ts` metadata-path helpers; `add-layer-utils.ts` path lookup; tree walkers and ordered paths.
 - Opacity: `abstract-base-layer.ts` cap, `GVGroupLayer` cascade/addLayer reapplication, LayerController snapshot.
-- Hidden panels: layer-state composite hidden/range sets → list builders → LayerList/Item focus restoration.
+- Panel presentation of hidden layers belongs to controller/store and UI logic, not the layer domain:
+  see [controller/store routing](controllers-store.md#source-navigation) and [UI routing](ui-style-a11y-i18n.md#source-navigation-and-translation-workflow). Runtime visibility rules remain in the linked runtime invariants.
 - Scale: `MapViewer.computeEffectiveLayerScales` → `LayerController.updateLayerInVisibleRange` →
   `AbstractBaseGVLayer.isInVisibleRange(currentResolution)`; inspect signatures before copying old recipes.
 - Time: DateMgt OGC parser, ESRI normalization, TimeSliderController filter generation and registration.

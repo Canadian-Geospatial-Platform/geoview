@@ -27,7 +27,6 @@ Read only the linked section of each doc: search for its heading and read to the
 
 ## Source navigation
 
-Check `core/utils/{fetch-helper,fetch-worker-helper,dom-helper,utilities,constant,date-utilities}.ts`
-and `geo/utils/{utilities,projection}.ts` before introducing helpers.
+Before introducing helpers or libraries, consult the [curated utility index](../../docs/programming/best-practices.md#shared-helpers-and-error-boundaries).
 For plugin imports use `geoview-core/...`, not core's `@/` alias.
 JSDoc/trace review routing lives in [jsdoc-logging.md](jsdoc-logging.md#jsdoc-audit-checklist).

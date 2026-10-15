@@ -14,7 +14,7 @@
 
 ### Package Manager & Security Auditing
 
-- **pnpm 8.x** is the package manager under Rush (configured in `rush.json`)
+- **Package manager:** Rush uses pnpm; read the pinned version from `pnpmVersion` in `rush.json`.
 - **Lockfile**: `common/temp/pnpm-lock.yaml` is the single source of truth for installed versions
 - **`npm audit`** is unreliable in pnpm workspaces — it reads `node_modules/` but doesn't understand pnpm's symlinked structure, producing false positives. Always cross-reference findings against the pnpm lockfile.
 - **Fixing vulnerabilities**:

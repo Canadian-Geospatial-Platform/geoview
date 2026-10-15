@@ -65,24 +65,27 @@ Key rules: **140-char print width**, single quotes, always-parens on arrows, ES5
 
 ## Specialist Reference (read on demand, not always loaded)
 
+For documentation edits, read [documentation.md](ai/documentation.md) for audience ownership and optional summary synchronization.
+
 Read only the doc(s) relevant to the task, and only the linked **section** of each: search for the heading, read to the next heading of the same level, and expand only if that is insufficient (see `AGENTS.md` → Reading linked docs). Short scoped rules auto-load from `.github/instructions/`.
 
-> **PUBLIC DOCS ARE THE SOURCE OF TRUTH:** All agents and developers must keep shared architecture, conventions, behavior, and examples in public docs, linking to their sections from AI references and scoped instructions instead of duplicating them. See [the documentation ownership rule](../docs/programming/using-ai.md#documentation-ownership-public-docs-first).
+> **DOCUMENTATION OWNERSHIP:** Shared developer/user guidance is canonical in public docs; AI-only procedures stay in AI customization files. Link instead of copying; optional tagged AI summaries must stay synchronized with their source. Follow [documentation.md](ai/documentation.md) for ownership and summary rules.
 
-| Topic                                                                   | Doc                                                       | Specialist agent      |
-| ----------------------------------------------------------------------- | --------------------------------------------------------- | --------------------- |
-| Shared GeoView terminology                                              | [terminology.md](../docs/programming/terminology.md)      | All agents            |
-| Cross-package architecture, design decisions, API design                | [code-map.md](ai/code-map.md) and relevant subsystem docs | GeoViewArchitect      |
-| Controllers, domains, store, events                                     | [controllers-store.md](ai/controllers-store.md)           | ControllerStoreExpert |
-| Map/geo runtime: viewer, projections, rotation, OL interactions, swiper | [map-architecture.md](ai/map-architecture.md)             | MapGeoExpert          |
-| Layers, proxy, opacity, visibility, filters, time                       | [layers.md](ai/layers.md)                                 | LayerExpert           |
-| Config, schema defaults, GeoCore                                        | [config-schema.md](ai/config-schema.md)                   | LayerExpert           |
-| TypeScript / React conventions                                          | [typescript-react.md](ai/typescript-react.md)             | BranchReview          |
-| JSDoc, comments, logging                                                | [jsdoc-logging.md](ai/jsdoc-logging.md)                   | BranchReview          |
-| Styling, UI library, a11y, i18n                                         | [ui-style-a11y-i18n.md](ai/ui-style-a11y-i18n.md)         | UIA11yReviewer        |
-| Test suite authoring                                                    | [test-suite.md](ai/test-suite.md)                         | TestCreator           |
-| Manual release-testing plan                                             | [release-testing.md](ai/release-testing.md)               | TestCreator           |
-| Build, gh-pages, dependency audit                                       | [build-deploy.md](ai/build-deploy.md)                     | DepUpdate             |
+| Topic                                                                   | Doc                                                       | Specialist agent           |
+| ----------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------- |
+| Shared GeoView terminology                                              | [terminology.md](../docs/programming/terminology.md)      | All agents                 |
+| Cross-package architecture, design decisions, API design                | [code-map.md](ai/code-map.md) and relevant subsystem docs | GeoViewArchitect           |
+| Controllers, domains, store, events                                     | [controllers-store.md](ai/controllers-store.md)           | ControllerStoreExpert      |
+| Map/geo runtime: viewer, projections, rotation, OL interactions, swiper | [map-architecture.md](ai/map-architecture.md)             | MapGeoExpert               |
+| Package schema, lifecycle, translations, and specific runtime           | [packages.md](ai/packages.md)                             | Relevant domain specialist |
+| Layers, proxy, opacity, visibility, filters, time                       | [layers.md](ai/layers.md)                                 | LayerExpert                |
+| Config, schema defaults, GeoCore                                        | [config-schema.md](ai/config-schema.md)                   | LayerExpert                |
+| TypeScript / React conventions                                          | [typescript-react.md](ai/typescript-react.md)             | BranchReview               |
+| JSDoc, comments, logging                                                | [jsdoc-logging.md](ai/jsdoc-logging.md)                   | BranchReview               |
+| Styling, UI library, a11y, i18n                                         | [ui-style-a11y-i18n.md](ai/ui-style-a11y-i18n.md)         | UIA11yReviewer             |
+| Test suite authoring                                                    | [test-suite.md](ai/test-suite.md)                         | TestCreator                |
+| Manual release-testing plan                                             | [release-testing.md](ai/release-testing.md)               | TestCreator                |
+| Build, gh-pages, dependency audit                                       | [build-deploy.md](ai/build-deploy.md)                     | DepUpdate                  |
 
 Also: `AGENTS.md` (delegation policy), `.github/memories/repo/` (gotchas), `docs/programming/*.md` (deep docs).
 

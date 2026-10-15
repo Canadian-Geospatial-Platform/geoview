@@ -10,14 +10,21 @@ This document explains the internal architecture of Controllers, how they integr
 
 ### The Controller Paradigm
 
-GeoView uses a layered architecture where **Controllers** sit between UI Components and backend code and Domain logic (business/map events). It also helps coordinate domain and Zustand store:
+GeoView uses a layered architecture where **Controllers** coordinate UI actions, domain operations, domain/map events, and Zustand store updates:
 
+```text
+UI --calls--> Controller --operates on--> Domain
+                  |
+                  +--subscribes to--> Domain / MapViewer events
+                  |                        |
+                  |                 handlers run on emission
+                  |                        |
+                  +<-----------------------+
+                  |
+                  +--updates--> Store --read via hooks/getters by--> UI
 ```
-Controller --> Domain --> Store
-MapViewer Events --> Controller --> Store (setterActions / store helper functions)
-UI Components  --> Store Hooks  --> Read state directly from store
-UI Components  --> Controllers  --> Trigger actions / domain operations
-```
+
+The subscription arrow describes wiring performed by the controller, not a call from the domain to the controller. Domains emit events without knowing their subscribers; controller-owned handlers react to those events and update the store. Domains never call controllers or access the Zustand store.
 
 ### Three-Layer System
 
@@ -756,53 +763,22 @@ Shell measures that chrome and `useMapResize` subtracts it; only expanded footer
 the configured height. Viewer/shell/map containers require `box-sizing: border-box`.
 The map info bar is separate from the footer and always shows attribution/scale; rotation is dynamic-only.
 
-Swiper runtime is coordinated through controllers:
-
-- Clip selected outputs through per-layer `prerender` / `postrender`, never renderer-container CSS
-  `clip-path` (OL containers/canvases can be shared). Use `getRenderPixel` for canvas coordinates and
-  restore WebGL scissor state. Regressions must prove non-target layers have no handlers.
-- Register each resolved path progressively, not behind `Promise.all`; reconcile removed paths without
-  clearing already clipped layers while slower descendants load.
-- Gate hover in `LayerSetController.#handleMapPointerStopped` with the swiper pixel hit test;
-  clear hover results over tight divider and larger centered-handle bands. React `stopPropagation`
-  can run after OL's listener and cannot reliably suppress queries.
-- During dragging, disable `DragPan` and viewport pointer-events; restore both on stop and unmount.
-  An `isDragging` ref guards resize remounts so diagonal drag streams are not destroyed.
-
 No domain subscriptions. Provides zoom operations (`zoomToExtent`, `zoomToInitialExtent`, `zoomToMyLocation`, `zoomToGeoLocatorLocation`, etc.), feature highlighting (`addHighlightedFeature`, `highlightBBox`, `removeHighlightedFeature`, etc.), projection switching (`setProjection`), basemap management (`setBasemap`, `resetBasemap`), click markers, and coordinate info.
+
+### SwiperController
+
+Owns Swiper layer registration and render clipping, and provides the divider hit test used by
+LayerSetController. Package UI coordinates drag lifecycle through controller APIs; MapController
+provides generic map operations rather than owning Swiper-specific behavior.
+See [Swiper runtime integration](../app/packages/geoview-core-packages.md#swiper-runtime-integration)
+for cross-controller responsibilities and runtime safeguards.
 
 ### LayerController
 
-List panels (data table, details, geochart, time slider) keep visibility-hidden entries in a separate
-"Hidden layers" list with an eye toggle (#3635), but still exclude out-of-scale entries.
-`useStoreLayerIsHiddenOnMapSet` combines parent hiding, scale and own visibility.
-Pair it with `useStoreLayerInVisibleRangeSet`; visibility-hidden means
-`layerHiddenSet[path] && inVisibleRangeSet[path] !== false`.
-
-- Re-enable hidden ancestors via `setLayerVisibleIncludingParents`; do not change sibling own flags.
-  A group becoming visible inherently reveals other individually-visible children.
-- Multi-layer entries use `relatedLayerPaths` for all backing layers and
-  `every((p) => layerHiddenSet[p] !== false)` for hidden state (untracked entries count as hidden).
-- Clear selection when visibility-hidden, not when only out of range. Details/data-table need an effect
-  keyed on `layerHiddenSet`; geochart/time-slider can use their existing selection effect's `entry.isHidden`.
-- Render two native lists with heading IDs from `useId`, `aria-labelledby`, and a polite `role="status"`
-  announcement of moves (skip initial render). Keep `ul`/`li`, not `role="group"`.
-- Moving between lists remounts items: restore focus via stable IDs with `getGVElementByFullId`,
-  not a stale element ref.
-- Non-interactive hidden rows use `tabIndex={-1}`, no click/keyboard handlers, `disableRipple`,
-  and cursor/hover reset; do not use MUI disabled (it washes out text, suppresses tooltip and changes noWrap).
-  Keep the eye button interactive; title style is grey[700]/italic.
-- In details collapsed app-bar `toggleMode`/`compact`, suppress hidden entries in both the main builder and
-  out-of-range-with-features merge, headings and empty instructions. Thread compact through Layout/LayerList.
-  `userDismissedGuideRef` prevents the auto-guide from reopening after dismissal; set on right-panel close
-  and reset when the panel closes or features reappear. Show the close button whenever the right panel is open.
-- The eye selects entries with `numOffeatures !== 0` and follows Layout's right-panel focus;
-  undefined feature count is content, while zero leaves the guide visible.
-
-These rules do not apply to Legend/Layers, which remain visibility controls.
-For external HTML, `UseHtmlToReact` is the shared converter. A JSX call-site try/catch cannot
-catch child render errors; malformed-HTML resilience needs a converter change or a real caller boundary,
-not a superficial catch around JSX.
+`setLayerVisibleIncludingParents` re-enables hidden ancestors without changing sibling own flags.
+A group becoming visible inherently reveals other individually-visible children. The controller
+synchronizes visibility and range state for UI consumers; panel grouping, selection, and focus belong
+to those consumers. See [Hidden-layer panel presentation](best-practices.md#hidden-layer-panel-presentation).
 
 The most heavily-connected controller. Subscribes to 15+ `LayerDomain` events in `onHook()`:
 

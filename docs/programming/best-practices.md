@@ -88,9 +88,38 @@ is thus cleared up.
 
 ### Shared helpers and error boundaries
 
-Shared helpers are preferable to duplicate logic: `GeoUtilities` for geo operations,
-`DateUtilities` for dates, `constant.ts` for extensions/regex/enums, and `Fetch` for HTTP.
-Share constants from one source; extract repeated logic to the nearest shared plugin service or core utility.
+Before adding a helper or importing another library, check the existing utilities below. This is a
+curated discovery index, not an exhaustive API reference; follow the source links for current
+signatures and behavior. Share constants from one source and extract repeated logic to the nearest
+shared plugin service or core utility.
+
+| Utility/module                                                                           | Use it for                                                                            | Important constraint                                                            |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [DOM helpers](../../packages/geoview-core/src/core/utils/dom-helper.ts)                  | Map-scoped IDs, element lookup, selectors, and tabbable elements                      | Keep lookups within the owning map; see the DOM-access section below            |
+| [debounce](../../packages/geoview-core/src/core/utils/debounce.ts)                       | Coalescing repeated calls, with leading/trailing options                              | Call `cancel()` during owner cleanup; `flush()` immediately runs a pending call |
+| [General utilities](../../packages/geoview-core/src/core/utils/utilities.ts)             | Timing, IDs, validation, deep clone/merge/equality, formatting, and shared operations | Check each helper's supported inputs; prefer events over polling                |
+| [Fetch](../../packages/geoview-core/src/core/utils/fetch-helper.ts)                      | HTTP requests with timeouts, aborts, and typed errors                                 | Use the worker helper inside workers; see request guidance below                |
+| [Worker fetch helper](../../packages/geoview-core/src/core/utils/fetch-worker-helper.ts) | Worker-safe requests with timeout handling                                            | Do not import the main `Fetch` class into workers                               |
+| [DateMgt](../../packages/geoview-core/src/core/utils/date-mgt.ts)                        | Date parsing/formatting, time zones, durations, and OGC/ESRI time dimensions          | Preserve the intended calendar/instant mode and time-zone semantics             |
+| [Constants](../../packages/geoview-core/src/core/utils/constant.ts)                      | Shared extensions, regex patterns, timeouts, and other constants                      | Reuse exported values rather than maintaining local copies                      |
+| [logger](../../packages/geoview-core/src/core/utils/logger.ts)                           | Application, error, and render/hook tracing                                           | Business-flow logging belongs outside store state files                         |
+| [AsyncSemaphore](../../packages/geoview-core/src/core/utils/async-semaphore.ts)          | Bounded asynchronous concurrency                                                      | Use `withLock()` when the caller needs results or propagated errors             |
+| [OGC URL helpers](../../packages/geoview-core/src/core/utils/ogc-url-helper.ts)          | Service request parameters and OGC layer-name encoding                                | Reuse protocol-specific encoding rather than hand-building query strings        |
+| [LocalStorage](../../packages/geoview-core/src/core/utils/localStorage.ts)               | Shared local-storage access                                                           | Follow the existing key and serialization conventions                           |
+| [GeoUtilities](../../packages/geoview-core/src/geo/utils/utilities.ts)                   | Geographic geometry, extent, format, measurement, and service operations              | Check existing geo helpers before implementing another algorithm                |
+| [Projection](../../packages/geoview-core/src/geo/utils/projection.ts)                    | Projection lookup/registration and coordinate/extent transforms                       | Confirm input/output projection and coordinate order                            |
+
+Existing libraries also provide reusable primitives. Prefer the repository wrapper when it adds
+GeoView-specific behavior; do not introduce a new dependency merely to duplicate an existing helper.
+
+| Library           | Existing reuse path                                                                                                    | Important constraint                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| OpenLayers (`ol`) | Geometry, extent, format, projection, and rendering primitives; GeoUtilities/Projection wrap shared GeoView operations | Map manipulation stays in controllers/runtime code, not React components        |
+| Day.js (`dayjs`)  | DateMgt centralizes configured date plugins and date/time semantics                                                    | Prefer DateMgt for application dates rather than separately configuring plugins |
+| proj4             | Projection integrates projection definitions with OpenLayers                                                           | Prefer Projection for shared GeoView transforms and registration                |
+
+Core imports use `@/core/utils/...` or `@/geo/utils/...`; plugins use `geoview-core/...` instead of
+core's `@/` alias. Not every utility is a class: some export functions, types, or hooks.
 
 Use `Fetch` from `@/core/utils/fetch-helper`, never raw `fetch()`. It handles timeouts, aborts,
 signal merging and typed errors. Choose `fetchJson`, `fetchEsriJson` (embedded ESRI errors),
@@ -107,6 +136,42 @@ Catch only the intended recoverable error: check `instanceof`, handle that type,
 Broad suppression is reserved for documented best-effort boundaries such as optional legend enrichment.
 `GeoViewError.throwIfAborted(error)` rethrows aborts during format fallback. Update `@throws` for errors
 that now propagate; do not silently replace real failures with warnings.
+
+### Shared HTML rendering and error boundaries
+
+For external HTML, `UseHtmlToReact` is the shared converter. A JSX call-site try/catch cannot
+catch child render errors; malformed-HTML resilience needs a converter change or a real caller boundary,
+not a superficial catch around JSX.
+
+### Hidden-layer panel presentation
+
+List panels (data table, details, geochart, time slider) keep visibility-hidden entries in a separate
+"Hidden layers" list with an eye toggle (#3635), but still exclude out-of-scale entries.
+`useStoreLayerIsHiddenOnMapSet` combines parent hiding, scale and own visibility.
+Pair it with `useStoreLayerInVisibleRangeSet`; visibility-hidden means
+`layerHiddenSet[path] && inVisibleRangeSet[path] !== false`.
+
+- Use LayerController's `setLayerVisibleIncludingParents` to re-enable a layer masked by hidden
+  ancestors; see [controller responsibilities](controller-architecture.md#layercontroller).
+- Multi-layer entries use `relatedLayerPaths` for all backing layers and
+  `every((p) => layerHiddenSet[p] !== false)` for hidden state (untracked entries count as hidden).
+- Clear selection when visibility-hidden, not when only out of range. Details/data-table need an effect
+  keyed on `layerHiddenSet`; geochart/time-slider can use their existing selection effect's `entry.isHidden`.
+- Render two native lists with heading IDs from `useId`, `aria-labelledby`, and a polite `role="status"`
+  announcement of moves (skip initial render). Keep `ul`/`li`, not `role="group"`.
+- Moving between lists remounts items: restore focus via stable IDs with `getGVElementByFullId`,
+  not a stale element ref.
+- Non-interactive hidden rows use `tabIndex={-1}`, no click/keyboard handlers, `disableRipple`,
+  and cursor/hover reset; do not use MUI disabled (it washes out text, suppresses tooltip and changes noWrap).
+  Keep the eye button interactive; title style is grey[700]/italic.
+- In details collapsed app-bar `toggleMode`/`compact`, suppress hidden entries in both the main builder and
+  out-of-range-with-features merge, headings and empty instructions. Thread compact through Layout/LayerList.
+  `userDismissedGuideRef` prevents the auto-guide from reopening after dismissal; set on right-panel close
+  and reset when the panel closes or features reappear. Show the close button whenever the right panel is open.
+- The eye selects entries with `numOffeatures !== 0` and follows Layout's right-panel focus;
+  undefined feature count is content, while zero leaves the guide visible.
+
+These rules do not apply to Legend/Layers, which remain visibility controls.
 
 ### Inheritance and narrowing
 

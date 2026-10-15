@@ -9,7 +9,7 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 
 ## Hard rules
 
-> **PUBLIC DOCS ARE THE SOURCE OF TRUTH:** Shared architecture, coding conventions, behavior, and examples belong in `docs/programming/` or `docs/app/`. All agents and developers must link AI references and scoped instructions to the relevant public sections instead of maintaining duplicate explanations. Keep only brief enforcement reminders and genuinely AI-specific routing/workflows in AI files; preserve unique knowledge before removing a copy.
+> **DOCUMENTATION OWNERSHIP:** Shared developer/user guidance belongs in public docs; AI-only procedures belong in instructions, AI references, agents, or skills. Link to canonical public sections rather than copying them. Optional tagged AI summaries are exceptions to bounded reading and must stay synchronized. Follow [documentation ownership and summary rules](.github/ai/documentation.md).
 
 - Never read `packages/geoview-core/public/builds/` (stale bundles). Source of truth: `packages/geoview-core/src/`.
 - Architecture: UI components -> controllers -> Zustand store; domains -> controllers -> store. Components never touch `MapViewer`/`mapViewer.map`; add a controller method instead.
@@ -44,11 +44,11 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 ## Where the detailed rules live (loaded on demand)
 
 - Always-on summary + index: `.github/copilot-instructions.md`
-- Specialist reference docs (read the one matching the task): `.github/ai/*.md` (controllers-store, map-architecture, layers, config-schema, typescript-react, jsdoc-logging, ui-style-a11y-i18n, test-suite, build-deploy)
+- Specialist reference docs (read the one matching the task): `.github/ai/*.md` (controllers-store, map-architecture, packages, layers, config-schema, typescript-react, jsdoc-logging, ui-style-a11y-i18n, test-suite, build-deploy)
 - Scoped rules: `.github/instructions/*.instructions.md` (auto-applied by file glob)
 - Repo memory (gotchas, architecture map): `.github/memories/repo/`
 - Deep docs: `docs/programming/*.md` (terminology, controller-architecture, layerset-architecture, best-practices, using-store, event-helper, time-dimension, layer-filters); human guide to this AI setup: `docs/programming/using-ai.md` (update it when agents/skills change)
-- Workflows (skills, auto-picked or run with `/name`): `.github/skills/*/SKILL.md` (review-branch, sync-test-counts, new-layer, add-component, add-translation, update-defaults, add-geoview-test, add-display-theme, capture-lesson, optimize-prompt, update-release-candidate). Do not add `.prompt.md` files: the agent-host harness (Copilot CLI) ignores them.
+- Workflows (skills, auto-picked or run with `/name`): `.github/skills/*/SKILL.md` (review-branch, sync-test-counts, new-layer, add-component, add-translation, update-defaults, add-geoview-test, add-display-theme, capture-lesson, optimize-prompt, update-release-candidate, draft-pr). Do not add `.prompt.md` files: the agent-host harness (Copilot CLI) ignores them.
 
 ## Delegation policy
 
