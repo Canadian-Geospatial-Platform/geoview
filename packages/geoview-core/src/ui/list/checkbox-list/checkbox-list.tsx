@@ -11,7 +11,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
-import { ListItemButton } from '@/ui';
+import { ListItemButton } from '@/ui/list/list-item-button';
 import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
 

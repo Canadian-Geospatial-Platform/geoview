@@ -11,10 +11,12 @@ Read only the linked section of each doc: search for its heading and read to the
 | Radius tokens and numeric sx multiplier pitfall                        | [Border radius](../../docs/programming/styling-best-practices.md#7--border-radius-named-tokens-on-themeshape)                                     |
 | Display theme registration and demo numbering                          | [Theme registration](../../docs/programming/styling-best-practices.md#4--registering-display-themes)                                              |
 | UI/icon imports                                                        | [Import order](../../docs/programming/best-practices.md#7--how-we-order-the-import-statements)                                                    |
-| Keyboard/focus-indicator architecture                                  | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode)                                                                   |
+| Keyboard behavior and focus implementation                            | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode), [Implementation](#keyboard-mode-and-panel-focus)                 |
+| Focus-indicator configuration and exceptions                           | [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators), [Implementation](#focus-indicator-maintenance)                        |
 | Hidden-layer panel grouping, eye toggles, selection, and focus (#3635) | [Panel behavior](../../docs/programming/best-practices.md#hidden-layer-panel-presentation), [Implementation](#hidden-layer-panel-implementation)  |
 | Shared HTML conversion and render-error boundaries                     | [HTML rendering](../../docs/programming/best-practices.md#shared-html-rendering-and-error-boundaries)                                             |
 | Semantic controls, labels, toggles, focus and tooltips                 | [Accessibility checklist](../../docs/app/accessibility.md#code-review-checklist), [ARIA](../../docs/app/accessibility.md#004-aria-best-practices) |
+| Accessibility source searches and enforcement                         | [Review procedure](#accessibility-review-procedure), [Wrapper naming](#wrapper-naming-and-diagnostics)                                            |
 | Snackbar persistence and no interactive transient actions              | [Notifications](../../docs/programming/notifications.md#the-governing-wcag-rule)                                                                  |
 | Typed actionable errors, not error.generic                             | [Generic-error failover](../../docs/programming/notifications.md#the-generic-error-message-last-resort-failover)                                  |
 
@@ -42,6 +44,123 @@ Search `public/locales/{en,fr}/translation.json` before creating keys: namespace
 (`appbar`, `mapctrl`, `dataTable` differ). Use `t('domain.key')` and i18next `{{name}}` interpolation;
 keep key parity and meaningful French text. Do not copy hypothetical translation keys from examples.
 The public translation convention is in [UI wrappers and translated labels](../../docs/programming/styling-best-practices.md#3--ui-wrappers-and-translated-labels).
+
+## Accessibility implementation
+
+Public behavior and shared developer guidance remain in the [accessibility guide](../../docs/app/accessibility.md).
+The following sections own source-specific maintenance details, not additional user instructions.
+When changing a behavior described there, update the public explanation and these notes together.
+
+### Keyboard mode and panel focus
+
+Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode) and
+[intentional interaction patterns](../../docs/app/accessibility.md#002-intentional-interaction-patterns).
+
+- The `.geoview-map` wrapper contains the shell and focusable controls; `#{mapId}-mapTargetElement`
+  is the OpenLayers canvas container. [Map](../../packages/geoview-core/src/core/components/map/map.tsx)
+  assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
+  focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
+- [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
+  on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
+- [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
+  `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and enable its viewer-level trap.
+  [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,
+  Ctrl+Q exit, and the shell mousemove listener. Check `movementX`/`movementY`: zero movement must not
+  exit keyboard mode during resize/fullscreen transitions. Keep listener cleanup paired with exit.
+- [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
+  coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
+  [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
+  also checks toggle/mobile mode, content, and right-panel visibility.
+- Follow [Layout](../../packages/geoview-core/src/core/components/common/layout.tsx) for selected-layer
+  focus restoration. Guide/lightbox handlers must take precedence over enclosing panel dismissal.
+  [FullScreenDialog](../../packages/geoview-core/src/core/components/common/full-screen-dialog.tsx)
+  relies on MUI `onClose` for Escape and the surrounding layout for restoration after exit.
+- [TimeSlider](../../packages/geoview-time-slider/src/time-slider.tsx) defers normal-mode Escape closing
+  only when `onRequestClose` exists and playback or layer loading is active. It stops playback,
+  suppresses the event, and sets `pendingCloseRef`; the effect closes when both conditions clear.
+  Without the callback, Escape stops playback and bubbles. Fullscreen Escape also bubbles to the
+  dialog. Preserve transition cleanup of playback and pending-close state: removing the panel
+  during playback/loading can disrupt focus-trap state.
+- [handleEscapeKey](../../packages/geoview-core/src/core/utils/utilities.ts) takes a key string, not
+  an event, and cannot stop propagation. [Popper](../../packages/geoview-core/src/ui/popper/popper.tsx)
+  adapts its `handleKeyDown` prop to `(key, closeCallback)`, so the helper can be passed directly.
+  Custom event boundaries must suppress propagation when closing nested content must leave its parent open.
+
+### Focus-indicator maintenance
+
+Contracts: [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators) and
+[authoring conventions](../../docs/programming/styling-best-practices.md#4--keyboard-focus-indicators).
+Start at [themeOptionsGenerator.ts](../../packages/geoview-core/src/ui/style/themeOptionsGenerator.ts).
+
+- MUI's theme-level `focusVisible` owns native Material indicators. GeoView configures a 3px outline,
+  2px outward offset, and 6px halo: black/white in light themes, white/translucent black in dark.
+  `getFocusIndicatorStyles` covers custom/composite controls and external-theme fallbacks;
+  `getFormControlFocusIndicatorStyles` drops the halo for border/underline inputs.
+- InputBase-derived form roots retain `.geoview-keyboard-active &:has(:focus-visible)`.
+  Do not replace this keyboard-mode scope with MUI's option or mouse-triggered focus styling.
+- Native placement: Tabs use inset indicators; Checkbox/Radio follow the first SVG icon; dense
+  MenuItems use a fully inset outline without halo. Other clip-prone controls use native inset placement.
+  Custom Checkbox/Radio icons must render SVG for native indicator coverage.
+- The option removes focus-only backgrounds/overlays from menu/list items, Chip, AccordionSummary,
+  CardActionArea, Autocomplete options, and Slider; independent hover, selected, and active styles remain.
+  Slider hover styles must not replace keyboard indicators.
+- [Tabs](../../packages/geoview-core/src/ui/tabs/tabs-style.ts) and
+  [Slider](../../packages/geoview-core/src/ui/slider/slider-style.ts) retain fallback indicators when
+  external themes do not enable the option. Re-pass raw `focusVisible` configuration when recomposing
+  palette changes; do not reuse previously resolved colors.
+- [Switch](../../packages/geoview-core/src/ui/switch/switch-style.ts) indicates focus around the full
+  label and suppresses the redundant track ring. Layer-settings cards retain zero-offset/no-halo
+  treatment; layer rows retain no halo and selected background with native inset offset when enabled.
+  [Custom Legend](../../packages/geoview-custom-legend/src/custom-legend-style.ts) description buttons
+  use the native indicator instead of the former 2px text-colored outline; preserve external-theme fallbacks.
+- Table, Guide, and compact panel controls keep local inset/no-halo exceptions rather than a second
+  universal ring. App-bar/nav-bar ring suppression remains a separate accessibility/design review item.
+  Verify clipping in paint-contained tables, adjacent button groups, portals, and fullscreen.
+  Scale/mouse-position groups, OpenLayers controls, AOI cards, media, and vendor overlays need separate checks.
+- Keep a real outline for forced-colors mode. Browser emulation is not Windows High Contrast sign-off;
+  SVG Checkbox/Radio indicators need platform verification. Use the
+  [visual-indicator release tests](../../docs/programming/release-testing/21-wcag-accessibility.md#contrast--visual-indicators)
+  plus the contexts above before removing exceptions.
+
+### Wrapper naming and diagnostics
+
+Contract: [Select naming](../../docs/app/accessibility.md#select-naming) and
+[icon-button guidance](../../docs/app/accessibility.md#icon-buttons).
+
+- [IconButtonPropsExtend](../../packages/geoview-core/src/ui/icon-button/icon-button.tsx) uses
+  `Omit<IconButtonProps, 'aria-label'>` plus required `'aria-label': string`.
+  This catches missing props, not empty/meaningless labels. The wrapper forwards `aria-disabled`
+  without blocking `onClick`; callers must return early in activation handlers.
+- [Select](../../packages/geoview-core/src/ui/select/select.tsx) uses an exclusive label/aria-label
+  union, but TypeScript accepts empty strings. Runtime checks log missing, conflicting, empty, or
+  whitespace-only naming props through `logger.logError` without interrupting rendering.
+  Diagnostics apply in development and production subject to logging level, with no in-app notification.
+  Logging does not repair the accessible name.
+- Visible labels use a generated `useId` value unless `labelId` is supplied. `inputLabel` customizations
+  cannot override its `id`. The visible `label` also goes to Material Select for the outlined notch.
+  With `aria-label`, no InputLabel is rendered and no `labelId` is connected.
+
+### Accessibility review procedure
+
+Use the public [review checklist](../../docs/app/accessibility.md#code-review-checklist) for expected
+outcomes. Search only the changed scope; useful source-search candidates are:
+
+- `onClick`/`onMouseDown`/`onPointerDown` or `role="button"` on div/span/Box/Card/Typography/ListItem/img
+- Ternary `aria-label`, repeated label values, and state-dependent `disabled={...}`
+- Dialog/Modal/Drawer close handlers, including `onClose`, `onKeyDown`, and `disableEscapeKeyDown`
+- `<img` and `component="img"`, Tooltip wrappers, `aria-live`, and `role="status"`
+- IDs generated in loops or from layer paths, and control width/height below 44px
+
+[ESLint](../../packages/eslint.config.js) enforces `jsx-a11y/no-static-element-interactions`,
+`click-events-have-key-events`, and `interactive-supports-focus`. Fully hand-rolled button semantics
+can pass these checks; `no-restricted-syntax` warns on `role="button"`, so manual review is still needed.
+For legitimate delegated container listeners, keep clicks on empty space harmless and justify any
+`// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events`
+with the delegation purpose rather than adding fake button semantics.
+When replacing a styled Box with ButtonBase, neutralize button defaults as needed
+(`width: '100%'`, `justifyContent: 'flex-start'`, `textAlign: 'left'`, `font: 'inherit'`, `color: 'inherit'`)
+and use `disableRipple` where appropriate without removing the theme's focus outline.
+Shared semantic and ARIA guidance stays public; do not duplicate its examples here.
 
 ## Hidden-layer panel implementation
 

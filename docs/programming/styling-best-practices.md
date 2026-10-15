@@ -173,4 +173,4 @@ Let the theme provide the standard indicator for MUI controls. For custom contro
 
 When an inset offset equals the outline width, use the existing `FOCUS_OUTLINE_WIDTH` constant (for example, ``outlineOffset: `-${FOCUS_OUTLINE_WIDTH}` ``) rather than repeating its pixel value. Keep distinct one-off offsets literal; do not add tokens for them. Use `boxShadow: 'none'` directly when the halo must be suppressed.
 
-InputBase-derived form controls retain the keyboard-mode scope described in the [accessibility guidance](../app/accessibility.md#keyboard-focus-indicators). Other intentional exceptions, including clipping and external-theme fallbacks, are documented there.
+Form controls show their focus outline in keyboard navigation mode. Keep indicators visible when controls are clipped or inset, and preserve fallback indicators for external themes. See the [accessibility guide](../app/accessibility.md#keyboard-focus-indicators) for user-facing focus behavior.

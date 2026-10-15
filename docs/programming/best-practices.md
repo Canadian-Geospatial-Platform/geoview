@@ -658,29 +658,13 @@ onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQ
 
 ## <a id="accessibility"></a>17- Accessibility (WCAG 2.1 Level AA)
 
-**For detailed patterns with code examples, see [accessibility.md Section 008](app/accessibility.md#code-review-checklist).**
+The [accessibility guide](../app/accessibility.md) owns the shared guidance:
 
-**Note:** `IconButton` `aria-label` is TypeScript-enforced — the compiler prevents missing labels, no manual check needed.
+- [Best practices and examples](../app/accessibility.md#003-best-practices) explain semantic controls, focus management, Escape dismissal, tooltips, and image alternatives
+- [ARIA guidance](../app/accessibility.md#004-aria-best-practices) covers names, states, and live announcements
+- The [code-review checklist](../app/accessibility.md#code-review-checklist) provides a concise review aid
 
-**Quick reference — Common issues to check during code review:**
-
-- `onClick` or `role="button"` on `<div>`, `<span>`, `<Box>`, `<Card>`, `<ListItem>` (use `Button`, `IconButton`, `ButtonBase` or `ListItemButton` instead of hand-rolled `role`/`tabIndex`/`onKeyDown`)
-- Ternary operator in `aria-label` on toggle buttons (use stable label + `aria-pressed` instead)
-- `disabled={state}` on buttons that toggle between enabled/disabled (use `aria-disabled` to prevent focus loss)
-- Modal/Dialog/Drawer without `onKeyDown` handler calling `handleEscapeKey(event.key, onClose)` from `@/core/utils/utilities`
-- Images without `alt` attribute (use `alt=""` for decorative, descriptive text for informative)
-- `<Tooltip>` wrapping non-interactive elements like `ListItem`, `Box`, `Typography` (use `ListItemButton` or other interactive wrapper)
-- Duplicate IDs in loops (add unique suffixes like `${mapId}-layer-${id}` or use `generateId(8)`)
-
-**See [accessibility.md Section 008](app/accessibility.md#code-review-checklist) for:**
-
-- Complete ❌ VIOLATION / ✅ CORRECT code examples
-- Search patterns for each check
-- "Why this matters" explanations
-- TypeScript enforcement details
-- Priority levels (HIGH/MEDIUM/ENHANCEMENT)
-
-**For comprehensive WCAG 2.1 Level AA guidance, see [accessibility.md](app/accessibility.md).**
+`IconButton` requires an `aria-label` prop at compile time; reviewers still need to check that its value is meaningful.
 
 ## <a id="dom-access"></a>18- Map-scoped DOM access (no direct `document.*`)
 
