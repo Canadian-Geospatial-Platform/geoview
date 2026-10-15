@@ -2115,7 +2115,7 @@ export abstract class GeoUtilities {
    * @param fieldType - The field type string to inspect
    * @returns `true` if the field type is a GML geometry type; otherwise, `false`
    */
-  static isGmlGeometryField(fieldType: string): boolean {
+  static isGmlGeometryField(fieldType: string | undefined): boolean {
     return (
       fieldType === 'gml:PointPropertyType' ||
       fieldType === 'gml:MultiPointPropertyType' ||
