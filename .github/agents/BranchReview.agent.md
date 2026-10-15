@@ -202,6 +202,8 @@ Propose targeted updates to the canonical public section and its AI reference li
 
 ### Phase 6 — Update Release Candidate Tracker
 
+Complete this phase before ending the initial branch/PR review turn, even when no code fixes have been approved or are needed. Phases 4–5 are conditional on approval; waiting for that approval must not block this phase.
+
 Use the `update-release-candidate` skill after branch/PR review to reconcile verified changes in the active tracker. Follow [the AI release-testing reference](../ai/release-testing.md), section **Release candidate update workflow**. Explicit read-only reviews propose entries instead of editing; normal tracker updates do not archive or reset the release cycle.
 
 ## Constraints
@@ -209,7 +211,7 @@ Use the `update-release-candidate` skill after branch/PR review to reconcile ver
 - DO NOT modify files that are not changed in the branch, except the release tracker when applying Phase 6 and approved documentation upkeep
 - DO NOT fix formatting/prettier issues — the developer should run `npm run format` separately
 - DO NOT run `npm run lint` or `npm run build` — this is a pattern-level review, not a build check
-- DO NOT auto-fix without presenting the report first and getting user approval
+- DO NOT auto-fix code violations without presenting the report first and getting user approval. This approval requirement does not block Phase 6 tracker maintenance, which follows its own explicit read-only rules.
 - DO NOT remove or alter existing `TODO`, `NOTE`, `FIXME`, `// GV`, or `eslint-disable` comments
 - ONLY review files under `packages/` — ignore docs, config, scripts
 
@@ -233,6 +235,6 @@ git diff --name-only upstream/develop...HEAD -- '*.ts' '*.tsx'
 
 ## Output Format
 
-Always return the structured report from Phase 3. End with a prompt asking which violations to auto-fix.
+Always return the structured report from Phase 3. Complete Phase 6 before ending the initial review turn or asking which code violations to auto-fix; the approval prompt must not cause tracker maintenance to be skipped.
 
 **Knowledge upkeep:** follow `AGENTS.md` → Knowledge upkeep and the **public-docs-first** rule: record shared guidance in its public section and link from AI references, never duplicate it. List changed files in your report.

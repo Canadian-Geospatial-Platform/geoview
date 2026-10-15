@@ -9,7 +9,7 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 
 ## Hard rules
 
-> **DOCUMENTATION OWNERSHIP:** Shared developer/user guidance belongs in public docs; AI-only procedures belong in instructions, AI references, agents, or skills. Link to canonical public sections rather than copying them. Optional tagged AI summaries are exceptions to bounded reading and must stay synchronized. Follow [documentation ownership and summary rules](.github/ai/documentation.md).
+> **DOCUMENTATION OWNERSHIP:** Keep user guides brief; public developer docs own concepts and behavioral contracts. AI references own internal maintenance details and procedures, linked to the public contract in both directions where useful. Keep linked content and optional summaries synchronized. Follow [documentation ownership rules](.github/ai/documentation.md).
 
 - Never read `packages/geoview-core/public/builds/` (stale bundles). Source of truth: `packages/geoview-core/src/`.
 - Architecture: UI components -> controllers -> Zustand store; domains -> controllers -> store. Components never touch `MapViewer`/`mapViewer.map`; add a controller method instead.
@@ -64,7 +64,7 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 
 When you learn something new and verified in your area (a root cause, pitfall, non-obvious pattern or convention, confirmed by code, a fix, or the user), record it before finishing — don't wait to be asked:
 
-- Shared domain rule or pattern → the matching public doc, with a section link from the relevant `.github/ai/*.md` reference; AI-only routing/workflow → the AI reference itself.
+- Shared concept/behavioral contract → public doc; internal maintenance details or AI routing/workflow → owning `.github/ai/*.md` reference. Cross-link related contract and implementation sections and keep them synchronized.
 - Short, stable gotcha → `.github/memories/repo/gotchas.md`.
 - Short rule that must apply to every edit of some files → the matching `.github/instructions/*.instructions.md`.
 - Public behavior/API that devs or users rely on → `docs/programming/` or `docs/app/` (published).

@@ -9,6 +9,7 @@ Lesson to capture: use the user's request; if it is missing, use the most recent
 2. **Route** — Pick ONE destination (see `AGENTS.md` → Knowledge upkeep):
    - Shared domain rule/pattern or public behavior/API → matching public section in `docs/programming/` or `docs/app/`; link that section from the AI reference instead of copying it
    - AI-only routing/workflow → matching `.github/ai/*.md`
+   - Internal implementation-maintenance details → owning `.github/ai/*.md`, linked to the public behavioral contract; follow [documentation.md](../../ai/documentation.md), section **Linking behavior and implementation**, and synchronize affected counterparts
    - Short, stable gotcha (1-3 lines) → `.github/memories/repo/gotchas.md`
    - Must apply on every edit of certain files → brief reminder and canonical section link in `.github/instructions/*.instructions.md` (keep under 400 lines)
 3. **Deduplicate** — Search the destination (and the other AI docs) for the topic first. Update or correct the existing entry rather than adding a near-copy; remove anything the lesson proves wrong.

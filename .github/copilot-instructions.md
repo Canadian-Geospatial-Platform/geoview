@@ -69,7 +69,7 @@ For documentation edits, read [documentation.md](ai/documentation.md) for audien
 
 Read only the doc(s) relevant to the task, and only the linked **section** of each: search for the heading, read to the next heading of the same level, and expand only if that is insufficient (see `AGENTS.md` → Reading linked docs). Short scoped rules auto-load from `.github/instructions/`.
 
-> **DOCUMENTATION OWNERSHIP:** Shared developer/user guidance is canonical in public docs; AI-only procedures stay in AI customization files. Link instead of copying; optional tagged AI summaries must stay synchronized with their source. Follow [documentation.md](ai/documentation.md) for ownership and summary rules.
+> **DOCUMENTATION OWNERSHIP:** Keep user guides brief and public developer docs conceptual. Internal maintenance details and AI procedures belong in AI references; cross-link them with public behavioral contracts and synchronize both. Follow [documentation.md](ai/documentation.md) for ownership and summary rules.
 
 | Topic                                                                   | Doc                                                       | Specialist agent           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------- |
@@ -89,7 +89,7 @@ Read only the doc(s) relevant to the task, and only the linked **section** of ea
 
 Also: `AGENTS.md` (delegation policy), `.github/memories/repo/` (gotchas), `docs/programming/*.md` (deep docs).
 
-**Knowledge upkeep**: record verified shared knowledge in the matching public doc and link its section from the AI reference; keep AI-only workflows in AI files and short gotchas in memory — see `AGENTS.md` → Knowledge upkeep.
+**Knowledge upkeep**: public docs own concepts/behavior; AI references own linked internal maintenance details and workflows; memory holds short gotchas — see `AGENTS.md` → Knowledge upkeep.
 
 **Non-negotiables**: components go through controllers (never `MapViewer`); no `any`, explicit return types, `undefined` over `null`; `Fetch`, `delay()`, dom-helper wrappers, `logger`; UI and icons from `@/ui`; strings via `t()` in `en` and `fr`; never delete TODO/NOTE/FIXME/WCAG comments.
 

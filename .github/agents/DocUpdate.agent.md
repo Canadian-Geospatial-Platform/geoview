@@ -45,7 +45,8 @@ For each doc file, check for:
 - **Missing content**: New classes, APIs, controllers, events, store slices, layer types, or config options that exist in code but are not documented
 - **Incorrect examples**: Code snippets in docs that no longer compile or reference renamed/removed symbols
 - **Structural drift**: File paths or directory references in docs that no longer match the actual project structure
-- **Audience/ownership drift**: Apply [documentation.md](../ai/documentation.md), sections **Choosing the owner** and **Optional AI summaries**. Flag AI-only procedures in public docs and duplicated shared explanations in AI files.
+- **Audience/ownership drift**: Apply [documentation.md](../ai/documentation.md), sections **Choosing the owner**, **Linking behavior and implementation**, and **Optional AI summaries**. Keep viewer guides brief and task-oriented, public developer docs conceptual, and internal maintenance checklists in the owning AI reference. Flag misplaced procedures and duplicated explanations.
+- **Implementation-reference synchronization**: Follow in-scope behavior/implementation links in both directions. Verify maintenance notes against current source and the public contract; update affected EN/FR guide text, links, and notes together. Report obsolete mechanics, orphaned references, and unchecked counterparts.
 - **Summary synchronization**: For in-scope public changes, search AI references for source paths/headings and `AI-SUMMARY` markers; verify affected summaries and links. For an in-scope summary change, compare it with its canonical section, including conditions and exceptions. Report both locations and pending checks; markers alone do not prove synchronization.
 
 ### Phase 3 — Guide Files (EN/FR)
@@ -128,7 +129,7 @@ After applying documentation edits, review the `.github/ai/*.md` docs (index in 
 - A new architectural pattern discovered during the audit that is not documented in the instructions
 - Stale code examples in the instructions that match the same staleness you just fixed in docs
 
-Propose targeted updates to the canonical public section and its AI reference links, not a duplicate AI explanation; get user approval before applying. Follow [documentation.md](../ai/documentation.md), section **Synchronizing documentation**, and apply approved source/summary updates together. Do not create summaries by default.
+Propose targeted updates to the public contract and its linked AI implementation reference, not duplicate explanations; get user approval before applying. Follow [documentation.md](../ai/documentation.md), section **Synchronizing documentation**, and apply approved contract/reference/summary updates together. Do not create summaries by default.
 
 ## Constraints
 
@@ -136,7 +137,7 @@ Propose targeted updates to the canonical public section and its AI reference li
 - DO NOT modify source code — never edit `.ts` / `.tsx` / `.js` / `.json` / schema files under `packages/` (this agent is docs-only); README/Markdown files are the only files you may edit inside `packages/`
 - DO NOT invent documentation content — all updates must be grounded in actual source code found in `packages/`
 - DO NOT delete existing TODO, NOTE, or FIXME comments in documentation files
-- Editable files are limited to: everything under `docs/`, the root `README.md` / `README-DEV.md` / `CONTRIBUTING.md`, per-package `packages/*/README.md`, and both `packages/geoview-core/public/locales/{en,fr}/guide.md` files. After approval, also edit directly affected `.github/ai/*.md` links/summaries or relocate AI-only documentation there. Do not edit other `.github/` files or source/config files; report needed customization changes for the main agent.
+- Editable files are limited to: everything under `docs/`, the root `README.md` / `README-DEV.md` / `CONTRIBUTING.md`, per-package `packages/*/README.md`, and both `packages/geoview-core/public/locales/{en,fr}/guide.md` files. After approval, also edit directly affected `.github/ai/*.md` links, implementation references, or summaries, including relocating internal maintenance details there. Do not edit other `.github/` files or source/config files; report needed customization changes for the main agent.
 - When updating code examples in docs, verify the new example compiles against current types/APIs by searching for the actual signatures in source
 - **Validation (terminal use is limited to this):** after applying edits, from `packages/` run `npm run ai:check` (AI files link into public doc headings, so a renamed heading breaks routing) and `npx prettier --check <edited files>`. Read-only `git` commands are allowed. Do not install, build, or run other scripts. Report anything you could not run as pending.
 

@@ -10,7 +10,7 @@ You review and build UI code. Read `.github/ai/ui-style-a11y-i18n.md`, `.github/
 ## Modes
 
 - **Static** (default): inspect source and perform targeted code validation. Do not start a viewer or run browser checks automatically.
-- **Browser**: when the user requests interactive/runtime UI checking, follow [using-ai.md](../../docs/programming/using-ai.md), section **Interactive Browser UI Checking**. Test only the requested page and interactions, using browser snapshots and controls; use screenshots to inspect visual states. Browser mode is read-only unless fixes are requested.
+- **Browser**: when the user requests interactive/runtime UI checking, follow [the UI AI reference](../ai/ui-style-a11y-i18n.md), section **Interactive browser UI checking**. Browser mode is read-only unless fixes are requested.
 
 Use `vscode/askQuestions` for missing page, expected behavior, or approval details, one focused question at a time. If unavailable, ask in chat and wait.
 

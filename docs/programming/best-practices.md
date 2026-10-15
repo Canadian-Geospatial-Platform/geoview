@@ -146,32 +146,14 @@ not a superficial catch around JSX.
 ### Hidden-layer panel presentation
 
 List panels (data table, details, geochart, time slider) keep visibility-hidden entries in a separate
-"Hidden layers" list with an eye toggle (#3635), but still exclude out-of-scale entries.
-`useStoreLayerIsHiddenOnMapSet` combines parent hiding, scale and own visibility.
-Pair it with `useStoreLayerInVisibleRangeSet`; visibility-hidden means
-`layerHiddenSet[path] && inVisibleRangeSet[path] !== false`.
+"Hidden layers" list; the eye toggle shows them again. Out-of-scale entries remain excluded.
+Hiding a selected layer returns its panel to the guide; scale changes alone do not clear selection.
+The UI owns grouping and focus, while [LayerController](controller-architecture.md#layercontroller)
+owns visibility actions. Legend/Layers remain the visibility controls, not consumers of this grouping.
 
-- Use LayerController's `setLayerVisibleIncludingParents` to re-enable a layer masked by hidden
-  ancestors; see [controller responsibilities](controller-architecture.md#layercontroller).
-- Multi-layer entries use `relatedLayerPaths` for all backing layers and
-  `every((p) => layerHiddenSet[p] !== false)` for hidden state (untracked entries count as hidden).
-- Clear selection when visibility-hidden, not when only out of range. Details/data-table need an effect
-  keyed on `layerHiddenSet`; geochart/time-slider can use their existing selection effect's `entry.isHidden`.
-- Render two native lists with heading IDs from `useId`, `aria-labelledby`, and a polite `role="status"`
-  announcement of moves (skip initial render). Keep `ul`/`li`, not `role="group"`.
-- Moving between lists remounts items: restore focus via stable IDs with `getGVElementByFullId`,
-  not a stale element ref.
-- Non-interactive hidden rows use `tabIndex={-1}`, no click/keyboard handlers, `disableRipple`,
-  and cursor/hover reset; do not use MUI disabled (it washes out text, suppresses tooltip and changes noWrap).
-  Keep the eye button interactive; title style is grey[700]/italic.
-- In details collapsed app-bar `toggleMode`/`compact`, suppress hidden entries in both the main builder and
-  out-of-range-with-features merge, headings and empty instructions. Thread compact through Layout/LayerList.
-  `userDismissedGuideRef` prevents the auto-guide from reopening after dismissal; set on right-panel close
-  and reset when the panel closes or features reappear. Show the close button whenever the right panel is open.
-- The eye selects entries with `numOffeatures !== 0` and follows Layout's right-panel focus;
-  undefined feature count is content, while zero leaves the guide visible.
-
-These rules do not apply to Legend/Layers, which remain visibility controls.
+Maintainers can consult the repository's
+[hidden-layer implementation reference](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#hidden-layer-panel-implementation)
+for internal state, selection, and focus details (#3635).
 
 ### Inheritance and narrowing
 
