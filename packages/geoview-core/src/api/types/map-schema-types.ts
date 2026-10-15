@@ -701,7 +701,8 @@ export type TypeOutfields = {
   /** Display alias for the field. */
   alias: string;
   /** Field data type. */
-  type: TypeOutfieldsType;
+  type?: TypeOutfieldsType;
+  /** Field domain */
   domain?: TypeDomain;
   /** Whether this field appears in summary views. Default = true. */
   summary?: boolean;
