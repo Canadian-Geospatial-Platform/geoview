@@ -1884,13 +1884,14 @@ export class MapViewer {
    * Longitudes are preserved as supplied; no antimeridian unwrapping is performed.
    *
    * @param midpointWSENCoords - Four [longitude, latitude] coordinates in west, south, east, north screen-edge order
+   * @param useRotation - Whether to align the midpoint directions; false preserves the current rotation, defaults to true
    * @param useAnimation - Optional animation flag, defaults to true
    * @returns A promise that resolves after fitting and rendering complete
    * @throws {InvalidViewportMidpointsError} When coordinates are invalid or their opposing pairs cannot define an orientation
    * @throws {MapViewportUnavailableError} When the viewport cannot be sampled (propagated from `getViewportBoundaryLonLat()`)
    * @throws {CancelledError} When another interaction interrupts the fit animation
    */
-  async fitViewportToMidpointsLonLat(midpointWSENCoords: readonly Coordinate[], useAnimation = true): Promise<void> {
+  async fitViewportToMidpointsLonLat(midpointWSENCoords: readonly Coordinate[], useRotation = true, useAnimation = true): Promise<void> {
     // Reject malformed input before changing the view, while allowing unwrapped longitudes beyond +/-180.
     if (
       !Array.isArray(midpointWSENCoords) ||
@@ -1912,18 +1913,22 @@ export class MapViewer {
     const coordinates = midpointWSENCoords.map((coordinate) => Projection.transformFromLonLat(coordinate, projection));
     if (coordinates.some((coordinate) => !coordinate.every(Number.isFinite))) throw new InvalidViewportMidpointsError();
 
-    const rotation = MapViewer.#getViewportMidpointRotation(coordinates);
     const view = this.getView();
+
     // Finish rotating before fitting: OpenLayers computes the fit against the view's current rotation.
-    if (useAnimation) {
-      // Fit the points, not their map-axis bounding extent, to avoid extra space around rotated geometry.
-      await new Promise<void>((resolve, reject) => {
-        view.animate({ rotation, duration: OL_ZOOM_DURATION }, (complete): void => {
-          if (complete) resolve();
-          else reject(new CancelledError('Viewport midpoint rotation was interrupted.'));
+    if (useRotation) {
+      const rotation = MapViewer.#getViewportMidpointRotation(coordinates);
+      if (useAnimation) {
+        await new Promise<void>((resolve, reject) => {
+          view.animate({ rotation, duration: OL_ZOOM_DURATION }, (complete): void => {
+            if (complete) resolve();
+            else reject(new CancelledError('Viewport midpoint rotation was interrupted.'));
+          });
         });
-      });
-    } else view.setRotation(rotation);
+      } else view.setRotation(rotation);
+    }
+
+    // Fit the points, not their map-axis bounding extent, to avoid extra space around rotated geometry.
     await new Promise<void>((resolve, reject) => {
       view.fit(new MultiPoint(coordinates), {
         duration: useAnimation ? OL_ZOOM_DURATION : 0,
@@ -1933,6 +1938,7 @@ export class MapViewer {
         },
       });
     });
+
     // Resolve only once pixel-based boundary queries can observe the fitted view.
     await this.waitForRender();
   }
