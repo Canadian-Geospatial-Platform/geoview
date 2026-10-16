@@ -1,7 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import * as translate from 'react-i18next';
-import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import 'ol/ol.css';
 import '@/ui/style/style.css';
@@ -63,7 +62,7 @@ export declare const cgpv: {
     translate: typeof translate;
     ui: {
         useTheme: typeof useTheme;
-        useMediaQuery: typeof useMediaQuery;
+        useMediaQuery: <T = import("@mui/material").Theme>(queryInput: string | ((theme: T) => string), options?: import("@mui/material").UseMediaQueryOptions) => boolean;
         useWhatChanged: (hookId: string, dependency?: unknown[], dependencyNames?: string[]) => void;
         elements: typeof UI;
     };

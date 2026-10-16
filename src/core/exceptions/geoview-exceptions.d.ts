@@ -90,6 +90,22 @@ export declare class MapViewerNotFoundError extends GeoViewError {
      */
     constructor(mapId: string);
 }
+/** Error thrown when a map cannot provide finite samples of its visible viewport boundary. */
+export declare class MapViewportUnavailableError extends GeoViewError {
+    /**
+     * Creates an instance of MapViewportUnavailableError.
+     *
+     * @param mapId - The map whose viewport could not be sampled
+     */
+    constructor(mapId: string);
+}
+/** Error thrown when viewport fitting is given invalid longitude/latitude midpoints. */
+export declare class InvalidViewportMidpointsError extends GeoViewError {
+    /**
+     * Creates an instance of InvalidViewportMidpointsError.
+     */
+    constructor();
+}
 /**
  * Error thrown when a map viewer with a specified ID already exists.
  */

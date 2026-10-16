@@ -221,6 +221,13 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     setSelectedLayerPath(layerPath: string): void;
     /**
+     * Checks if the specified layer is a raster layer.
+     *
+     * @param layerPath - The layer path to check
+     * @returns True if the layer is a raster layer, false otherwise
+     */
+    isRasterLayer(layerPath: string): boolean;
+    /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
      * Waits for each layer's bounds to be initialized before computing the union.

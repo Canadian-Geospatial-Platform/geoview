@@ -25,6 +25,8 @@ export type CheckboxListItem = {
  * Manages internal state of checked items and notifies parent via onChecked callback
  * when selections change. Designed for presenting multiple selectable options with
  * optional content on the right side of each item.
+ * Each row exposes the checkbox name and checked state; its visual checkbox is
+ * hidden from assistive technology to avoid nested interactive semantics.
  *
  * @deprecated This component is not currently used. Consider using Material-UI's
  * FormGroup or FormControlLabel components directly for new implementations.

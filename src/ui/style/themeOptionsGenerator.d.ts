@@ -8,14 +8,13 @@ export declare const FOCUS_OUTLINE_OFFSET = "2px";
 /** Focus indicator halo (box-shadow) size for enhanced visibility. */
 export declare const FOCUS_HALO_SIZE = "6px";
 /**
- * WCAG-compliant focus indicator styles for keyboard navigation.
+ * Gets shared focus indicator styles for keyboard navigation.
  *
- * Returns a CSSObject for use in MUI component styleOverrides.
- * Component-level application is required because MUI's ButtonBase sets outline: 0
- * with higher CSS specificity than CssBaseline global styles.
+ * Covers non-MUI controls, composite indicators and wrappers whose external theme
+ * has not enabled MUI's focusVisible option. Native Material indicators are owned by the theme.
  *
  * @param geoViewColors - GeoView color palette for focus indicator colors
- * @returns Focus indicator style object for .Mui-focusVisible selector
+ * @returns Focus indicator styles for the caller's keyboard-focus selector
  */
 export declare const getFocusIndicatorStyles: (geoViewColors: IGeoViewColors) => CSSObject;
 /**

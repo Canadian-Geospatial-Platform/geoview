@@ -48,6 +48,10 @@ export interface TypeFilterAttribute {
     dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
     /** Optional step interval for range filters. Only applies when filterType is 'range'. */
     rangeStep?: number;
+    /** Number formatting style for range filters. 'currency' adds a symbol and two decimals. Only applies when filterType is 'range'. */
+    numberFormat?: 'number' | 'currency';
+    /** Currency code for formatting range values when numberFormat is 'currency'. Only applies when filterType is 'range'. */
+    currency?: string;
     /** Optional flag indicating if the attribute is searchable. Multiselect only. */
     searchable?: boolean;
 }
@@ -66,7 +70,7 @@ export interface TypeFilterLayerConfig {
     /** Display name for the layer. */
     layerName?: string;
     /** Whether filtering is enabled for this layer. */
-    enabled: boolean;
+    enabled?: boolean;
     /** Default collapsed state for layer sections. */
     defaultCollapsed?: boolean;
     /** Array of filterable attributes. */
