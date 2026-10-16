@@ -21,6 +21,12 @@ export declare class StateApi {
      */
     getLegendCollapsedState(layerPath: string): boolean;
     /**
+     * Gets whether the footer bar panel is open.
+     *
+     * @returns True when the footer bar panel is open
+     */
+    getFooterBarIsOpen(): boolean;
+    /**
      * Gets a specific state from a plugin.
      *
      * @param pluginId - The plugin to get state for

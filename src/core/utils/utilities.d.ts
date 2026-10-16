@@ -603,7 +603,15 @@ export declare function isLocalhost(): boolean;
  * @param displayLanguage - The display language ('en' or 'fr')
  * @returns The formatted value
  */
-export declare function formatMeasurementValue(value: number, displayLanguage: string): string;
+export declare function formatMeasurementValue(value: number, displayLanguage: TypeDisplayLanguage): string;
+/**
+ * Formats a numeric value as currency according to the display language.
+ *
+ * @param value - The numeric value to format as currency
+ * @param displayLanguage - The display language ('en' or 'fr')
+ * @returns The formatted currency string
+ */
+export declare function formatCurrencyValue(value: number, displayLanguage: TypeDisplayLanguage, currency?: string): string;
 /**
  * Formats a length measurement with appropriate units.
  *
@@ -611,7 +619,7 @@ export declare function formatMeasurementValue(value: number, displayLanguage: s
  * @param displayLanguage - The display language
  * @returns The formatted length string
  */
-export declare function formatLength(length: number, displayLanguage: string): string;
+export declare function formatLength(length: number, displayLanguage: TypeDisplayLanguage): string;
 /**
  * Formats an area measurement with appropriate units.
  *
@@ -619,7 +627,7 @@ export declare function formatLength(length: number, displayLanguage: string): s
  * @param displayLanguage - The display language
  * @returns The formatted area string
  */
-export declare function formatArea(area: number, displayLanguage: string): string;
+export declare function formatArea(area: number, displayLanguage: TypeDisplayLanguage): string;
 /**
  * Normalizes a WMS accesspath if it is from datacube.
  *

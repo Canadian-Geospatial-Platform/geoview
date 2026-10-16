@@ -1,3 +1,4 @@
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { FitOptions } from 'ol/View';
 /** Repository URL for GitHub. */
 export declare const GITHUB_REPO = "https://github.com/Canadian-Geospatial-Platform/geoview";
@@ -6,6 +7,8 @@ export declare const GEO_URL_TEXT: {
     url: string;
     text: string;
 };
+/** Maps a display language to its BCP-47 locale tag for Intl-based number/currency/date formatting. */
+export declare const DISPLAY_LANGUAGE_LOCALE: Record<TypeDisplayLanguage, string>;
 /**
  * OpenLayers default maximum zoom level.
  * @deprecated Doesn't seem used anymore

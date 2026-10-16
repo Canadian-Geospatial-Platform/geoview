@@ -10,7 +10,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
-import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeViewportBoundaryLonLat } from '@/api/types/map-schema-types';
 import type { EffectiveLayerScales, TypeLegend } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -626,6 +626,34 @@ export declare class MapViewer {
      * @returns The coordinate in LonLat
      */
     convertCoordinateMapProjToLonLat(coordinate: Coordinate): Coordinate;
+    /**
+     * Samples the rendered viewport corners and edge midpoints in longitude/latitude.
+     *
+     * Excludes OL View padding (the map-info bar in dynamic mode). Labels refer to screen positions,
+     * not geographic directions after rotation. This is a rendered-view snapshot, not an envelope.
+     * Call after map readiness and after rendering completes following programmatic view changes.
+     *
+     * @returns Fresh boundary coordinates in [longitude, latitude] degrees
+     * @throws {MapViewportUnavailableError} When the viewport has no usable size, pixel transform, or finite boundary coordinates
+     */
+    getViewportBoundaryLonLat(): TypeViewportBoundaryLonLat;
+    /**
+     * Rotates and fits longitude/latitude edge midpoints inside the padded viewport.
+     *
+     * Adds no extra margin. Existing view constraints apply; different projections or aspect ratios
+     * may prevent all points from landing exactly on their corresponding edges. Rotation aligns the
+     * west-to-east and south-to-north pairs to the screen axes with equal directional influence.
+     * Longitudes are preserved as supplied; no antimeridian unwrapping is performed.
+     *
+     * @param midpointWSENCoords - Four [longitude, latitude] coordinates in west, south, east, north screen-edge order
+     * @param useRotation - Whether to align the midpoint directions; false preserves the current rotation, defaults to true
+     * @param useAnimation - Optional animation flag, defaults to true
+     * @returns A promise that resolves after fitting and rendering complete
+     * @throws {InvalidViewportMidpointsError} When coordinates are invalid or their opposing pairs cannot define an orientation
+     * @throws {MapViewportUnavailableError} When the viewport cannot be sampled (propagated from `getViewportBoundaryLonLat()`)
+     * @throws {CancelledError} When another interaction interrupts the fit animation
+     */
+    fitViewportToMidpointsLonLat(midpointWSENCoords: readonly Coordinate[], useRotation?: boolean, useAnimation?: boolean): Promise<void>;
     /**
      * Transforms extent from LonLat to the current projection of the map.
      *
