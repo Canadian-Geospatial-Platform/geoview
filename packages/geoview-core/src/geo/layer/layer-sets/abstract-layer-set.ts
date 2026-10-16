@@ -597,7 +597,7 @@ export abstract class AbstractLayerSet {
             const field = record.fieldInfo[fieldName]!;
             field.fieldKey = fieldKeyCounter++;
             field.alias = outfield.alias;
-            field.dataType = outfield.type;
+            field.dataType = outfield.type || 'string';
             return false; // keep this entry
           }
 

@@ -1159,10 +1159,12 @@ export type TypeMetadataWFSFeatureTypeListFeatureType = {
   'wfs:Name'?: string | TypeMetadataWFSTextOnly;
   Title: string | TypeMetadataWFSTextOnly;
   'wfs:Title'?: string | TypeMetadataWFSTextOnly;
-  DefaultSRS: string | TypeMetadataWFSTextOnly;
-  DefaultCRS?: string | TypeMetadataWFSTextOnly;
-  'wfs:DefaultSRS'?: string | TypeMetadataWFSTextOnly;
-  'wfs:DefaultCRS'?: string | TypeMetadataWFSTextOnly;
+  SRS?: string | TypeMetadataWFSTextOnly; // Support for WFS 1.0.0
+  'wfs:SRS'?: string | TypeMetadataWFSTextOnly; // Support for WFS 1.0.0
+  DefaultSRS?: string | TypeMetadataWFSTextOnly; // Support for WFS 1.1.0
+  'wfs:DefaultSRS'?: string | TypeMetadataWFSTextOnly; // Support for WFS 1.1.0
+  DefaultCRS?: string | TypeMetadataWFSTextOnly; // Support for 2.0.0
+  'wfs:DefaultCRS'?: string | TypeMetadataWFSTextOnly; // Support for 2.0.0
   OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
   'wfs:OutputFormats'?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
   'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
