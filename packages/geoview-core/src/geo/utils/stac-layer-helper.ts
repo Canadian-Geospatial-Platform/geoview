@@ -54,15 +54,14 @@ function getGeoJsonRings(geometry: unknown): TypePoint2D[][] {
 }
 
 /**
- * Helper class for managing ol-stac layers on an OpenLayers map.
+ * Helper class for creating and managing STAC preview layers on an OpenLayers map.
  *
- * This utility wraps ol-stac's STACLayer to provide a simple API for adding,
- * removing, and querying STAC layers. It does NOT integrate with the GeoView
- * layer system (no layerPath, no legend, no store entry).
+ * These layers are not integrated with the GeoView layer system (no layerPath, legend, or store entry).
  */
 export abstract class StacLayerHelper {
-  /**
-   * Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac.
+  // #region STATIC METHODS
+
+  /** Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac; returns undefined if setup fails.
    *
    * This is useful when ol-stac's asset selection logic does not find the right
    * asset (e.g., datacube items with role "data" instead of "overview"/"visual").
@@ -70,15 +69,15 @@ export abstract class StacLayerHelper {
    * @param map - The OpenLayers map instance
    * @param geotiffUrl - URL to the Cloud-Optimized GeoTIFF file
    * @param opacity - Optional layer opacity (0-1), defaults to 1
-   * @returns A promise that resolves with the created WebGLTile layer, or null on failure
    */
-  static async addGeoTiffLayer(map: OlMap, geotiffUrl: string, opacity?: number): Promise<WebGLTile | null> {
+  // TODO: Avoid mutating the map in this helper; move layer addition into a controller method.
+  static async addGeoTiffLayer(map: OlMap, geotiffUrl: string, opacity?: number): Promise<WebGLTile | undefined> {
     try {
       let palette: RGBA[] | undefined;
       try {
         palette = await extractGeotiffColorMap(geotiffUrl);
       } catch (error: unknown) {
-        logger.logError(
+        logger.logWarning(
           `StacLayerHelper.addGeoTiffLayer - Could not extract colormap (falling back to default rendering): ${geotiffUrl}`,
           error
         );
@@ -110,12 +109,12 @@ export abstract class StacLayerHelper {
       return layer;
     } catch (error: unknown) {
       logger.logError(`StacLayerHelper.addGeoTiffLayer - Failed to add GeoTIFF layer: ${geotiffUrl}`, error);
-      return null;
+      return undefined;
     }
   }
 
   /**
-   * Adds a non-georeferenced image clipped and rotated to fit its STAC item footprint.
+   * Adds a non-georeferenced image stretched over the projected footprint bounds and clipped to the footprint.
    *
    * If the item has no polygon geometry, its axis-aligned bbox is used as the footprint.
    *
@@ -125,7 +124,9 @@ export abstract class StacLayerHelper {
    * @param opacity - Optional overlay opacity (0-1), defaults to 1
    * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
    * @returns A promise that resolves with the created image layer after the image loads
+   * @throws {Error} When the image fails to load or the layer cannot be added to the map
    */
+  // TODO: Avoid mutating the map in this helper; move layer addition into a controller method.
   static addImageLayer(
     map: OlMap,
     imageUrl: string,
@@ -134,7 +135,7 @@ export abstract class StacLayerHelper {
     geometry?: unknown
   ): Promise<ImageLayer<ImageCanvas>> {
     const image = new Image();
-    // NAPL browse images do not expose Access-Control-Allow-Origin; this canvas is only drawn for display, never pixel-read.
+    // Some browse images do not expose Access-Control-Allow-Origin (e.g. NAPL); this canvas is only drawn for display, never pixel-read.
     const source = new ImageCanvas({
       ratio: 1,
       canvasFunction: (extent, resolution, pixelRatio, size, projection): HTMLCanvasElement =>
@@ -238,6 +239,7 @@ export abstract class StacLayerHelper {
    * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
    * @returns The transformed extent in the map's projection
    */
+  // TODO: Use or create a geo utilities functions (avoid duplication)
   static transformBboxToMapProjection(mapId: string, bbox: [number, number, number, number]): [number, number, number, number] {
     const destProj = Projection.getProjectionFromStringOrNumber(getStoreMapCurrentProjectionEPSG(mapId));
     const srcProj = Projection.getProjectionLonLat();
@@ -261,6 +263,7 @@ export abstract class StacLayerHelper {
    * @param mapId - The map identifier
    * @returns The map extent as [west, south, east, north], clamped to valid bounds
    */
+  // TODO: Use or create a geo utilities functions (avoid duplication)
   static getMapExtentAsWgs84Bbox(mapId: string): [number, number, number, number] {
     const extent = getStoreMapExtent(mapId);
     if (!extent) return [-180, -90, 180, 90];
@@ -277,6 +280,7 @@ export abstract class StacLayerHelper {
    * @param stops - Optional number of segments per edge, defaults to 25
    * @returns A closed ring of [lon, lat] coordinate pairs
    */
+  // TODO: Use or create a geo utilities functions (avoid duplication)
   static #densifyBboxRing(bbox: [number, number, number, number], stops = 25): number[][] {
     const [west, south, east, north] = bbox;
     const ring: number[][] = [];
@@ -288,7 +292,57 @@ export abstract class StacLayerHelper {
   }
 
   /**
-   * Applies an affine image transform from the footprint's first, second, and fourth vertices.
+   * Gets the projected extent that contains all footprint ring coordinates.
+   *
+   * @param rings - Projected footprint rings
+   * @returns The projected extent, or undefined when no finite area is available
+   */
+  static #getProjectedFootprintExtent(rings: TypePoint2D[][]): Extent | undefined {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    rings.forEach((ring) => {
+      ring.forEach(([x, y]) => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      });
+    });
+
+    if (![minX, minY, maxX, maxY].every(Number.isFinite) || minX === maxX || minY === maxY) return undefined;
+    return [minX, minY, maxX, maxY];
+  }
+
+  /**
+   * Clips a canvas to the projected footprint rings.
+   *
+   * @param context - The canvas drawing context
+   * @param rings - Projected footprint rings
+   * @param toCanvasPixel - Converts projected coordinates to canvas pixels
+   */
+  static #clipFootprint(
+    context: CanvasRenderingContext2D,
+    rings: TypePoint2D[][],
+    toCanvasPixel: (coordinate: TypePoint2D) => TypePoint2D
+  ): void {
+    context.beginPath();
+    rings.forEach((ring) => {
+      ring.forEach((coordinate, index) => {
+        const [pixelX, pixelY] = toCanvasPixel(coordinate);
+        if (index === 0) context.moveTo(pixelX, pixelY);
+        else context.lineTo(pixelX, pixelY);
+      });
+      context.closePath();
+    });
+    context.clip('evenodd');
+  }
+
+  /**
+   * Stretches an image across the projected footprint bounds and clips it to the footprint.
    *
    * @param image - The loaded thumbnail image
    * @param bbox - Fallback item bbox in EPSG:4326
@@ -324,16 +378,13 @@ export abstract class StacLayerHelper {
       [bbox[0], bbox[3]],
     ];
     const footprintRings = rings.length ? rings : [fallbackRing];
-    const projectedRings = footprintRings.map((ring) =>
-      ring.map((coordinate) => transformCoordinate(coordinate, 'EPSG:4326', projection) as TypePoint2D)
-    );
-    const imageRing = projectedRings[0];
-    const hasClosedRing =
-      imageRing.length > 1 &&
-      imageRing[0][0] === imageRing[imageRing.length - 1][0] &&
-      imageRing[0][1] === imageRing[imageRing.length - 1][1];
-    const cornerCount = hasClosedRing ? imageRing.length - 1 : imageRing.length;
-    if (cornerCount < 4) return canvas;
+    const projectedRings = footprintRings
+      .map((ring) => ring.map((coordinate) => transformCoordinate(coordinate, 'EPSG:4326', projection) as TypePoint2D))
+      .filter((ring) => ring.length >= 4 && ring.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y)));
+    if (!projectedRings.length) return canvas;
+
+    const footprintExtent = StacLayerHelper.#getProjectedFootprintExtent(projectedRings);
+    if (!footprintExtent) return canvas;
 
     const context = canvas.getContext('2d');
     if (!context) return canvas;
@@ -343,21 +394,11 @@ export abstract class StacLayerHelper {
       ((extent[3] - coordinate[1]) / resolution) * pixelRatio,
     ];
 
-    context.beginPath();
-    projectedRings.forEach((ring) => {
-      ring.forEach((coordinate, index) => {
-        const [pixelX, pixelY] = toCanvasPixel(coordinate);
-        if (index === 0) context.moveTo(pixelX, pixelY);
-        else context.lineTo(pixelX, pixelY);
-      });
-      context.closePath();
-    });
-    context.clip('evenodd');
+    StacLayerHelper.#clipFootprint(context, projectedRings, toCanvasPixel);
 
-    // EODMS maps NAPL image pixels to its ordered footprint vertices: 0=top-left, 1=bottom-left, 3=top-right.
-    const topLeft = toCanvasPixel(imageRing[0]);
-    const bottomLeft = toCanvasPixel(imageRing[1]);
-    const topRight = toCanvasPixel(imageRing[3]);
+    const topLeft = toCanvasPixel([footprintExtent[0], footprintExtent[3]]);
+    const bottomLeft = toCanvasPixel([footprintExtent[0], footprintExtent[1]]);
+    const topRight = toCanvasPixel([footprintExtent[2], footprintExtent[3]]);
 
     context.setTransform(
       (topRight[0] - topLeft[0]) / image.naturalWidth,
@@ -386,4 +427,6 @@ export abstract class StacLayerHelper {
       color: ['palette', ['band', 1], colorStrings],
     });
   }
+
+  // #endregion STATIC METHODS
 }

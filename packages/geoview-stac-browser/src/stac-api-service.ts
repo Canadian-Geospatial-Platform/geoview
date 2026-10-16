@@ -84,6 +84,8 @@ export class StacApiService {
     this.#searchUrl = `${this.#stacUrl}/search`;
   }
 
+  // #region PUBLIC METHODS
+
   /**
    * Fetches the landing page and detects the optional features supported by the server.
    *
@@ -152,25 +154,6 @@ export class StacApiService {
   }
 
   /**
-   * Fetches and caches queryables for one collection or the catalog.
-   *
-   * @param collectionId - Collection ID, or an empty string for catalog queryables
-   * @returns A promise that resolves with queryable properties keyed by field name
-   */
-  async #fetchQueryablesForCollection(collectionId: string): Promise<Record<string, StacQueryableField>> {
-    const cached = this.#queryablesCache.get(collectionId);
-    if (cached) return cached;
-
-    const url = collectionId
-      ? `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/queryables`
-      : `${this.#stacUrl}/queryables`;
-    const queryables = await Fetch.fetchJson<StacQueryables>(url);
-    const properties = queryables.properties ?? {};
-    this.#queryablesCache.set(collectionId, properties);
-    return properties;
-  }
-
-  /**
    * Searches for STAC items using the POST /search endpoint, falling back to GET /search when POST is blocked.
    *
    * @param params - Search parameters
@@ -186,29 +169,6 @@ export class StacApiService {
     }
 
     return this.#searchRawItems(params);
-  }
-
-  /**
-   * Sends a raw initial search request, falling back to GET /search when POST is blocked.
-   *
-   * @param params - Search parameters
-   * @returns A promise that resolves with the raw search result
-   */
-  async #searchRawItems(params: StacSearchParams): Promise<StacSearchResult> {
-    if (!this.#isSearchUsingGet) {
-      try {
-        return await StacApiService.#postJson<StacSearchResult>(this.#searchUrl, StacApiService.#buildSearchBody(params));
-      } catch (error: unknown) {
-        if (!(error instanceof NetworkError)) throw error;
-
-        // TODO: Ask the datacube team to allow OPTIONS (CORS preflight) on /search, then remove this GET fallback.
-        // The JSON POST triggers a CORS preflight that datacube answers with a 403, while a plain GET is allowed.
-        logger.logWarning(`StacApiService - POST ${this.#searchUrl} blocked (likely CORS preflight), falling back to GET`, error);
-        this.#isSearchUsingGet = true;
-      }
-    }
-
-    return Fetch.fetchJson<StacSearchResult>(`${this.#searchUrl}?${StacApiService.#buildSearchQuery(params)}`);
   }
 
   /**
@@ -241,19 +201,71 @@ export class StacApiService {
   }
 
   /**
-   * Fetches one raw API search page, following GET or POST pagination links.
+   * Fetches items belonging to a specific collection.
    *
-   * @param link - The next or previous link of a search result
-   * @param params - The original search parameters
-   * @returns A promise that resolves with the raw page
+   * @param collectionId - The collection ID to fetch items for
+   * @param limit - Optional max items per page
+   * @param sortby - Optional sort criteria (only send when the server supports sorting)
+   * @param pageUrl - Optional full URL from a pagination link
+   * @returns A promise that resolves with the items response
+   * @throws {ResponseError | NetworkError | RequestTimeoutError} When the request fails
    */
-  static #fetchRawSearchPage(link: StacLink, params: StacSearchParams): Promise<StacSearchResult> {
-    if (link.method !== 'POST') return Fetch.fetchJson<StacSearchResult>(link.href);
+  fetchCollectionItems(collectionId: string, limit?: number, sortby?: StacSortBy[], pageUrl?: string): Promise<StacItemsResponse> {
+    if (pageUrl) return Fetch.fetchJson<StacItemsResponse>(pageUrl);
 
-    const originalBody = StacApiService.#buildSearchBody(params);
-    let body = originalBody;
-    if (link.body) body = link.merge ? { ...originalBody, ...link.body } : link.body;
-    return StacApiService.#postJson<StacSearchResult>(link.href, body);
+    const query = new URLSearchParams();
+    if (limit) query.set('limit', String(limit));
+    if (sortby?.length) query.set('sortby', StacApiService.#formatSortByQuery(sortby));
+    const queryString = query.toString();
+
+    const url = `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/items${queryString ? `?${queryString}` : ''}`;
+    return Fetch.fetchJson<StacItemsResponse>(url);
+  }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Fetches and caches queryables for one collection or the catalog.
+   *
+   * @param collectionId - Collection ID, or an empty string for catalog queryables
+   * @returns A promise that resolves with queryable properties keyed by their STAC field name
+   */
+  async #fetchQueryablesForCollection(collectionId: string): Promise<Record<string, StacQueryableField>> {
+    const cached = this.#queryablesCache.get(collectionId);
+    if (cached) return cached;
+
+    const url = collectionId
+      ? `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/queryables`
+      : `${this.#stacUrl}/queryables`;
+    const queryables = await Fetch.fetchJson<StacQueryables>(url);
+    const properties = queryables.properties ?? {};
+    this.#queryablesCache.set(collectionId, properties);
+    return properties;
+  }
+
+  /**
+   * Sends a raw initial search request, falling back to GET /search when POST is blocked.
+   *
+   * @param params - Search parameters
+   * @returns A promise that resolves with the raw search result
+   */
+  async #searchRawItems(params: StacSearchParams): Promise<StacSearchResult> {
+    if (!this.#isSearchUsingGet) {
+      try {
+        return await StacApiService.#postJson<StacSearchResult>(this.#searchUrl, StacApiService.#buildSearchBody(params));
+      } catch (error: unknown) {
+        if (!(error instanceof NetworkError)) throw error;
+
+        // TODO: Ask the datacube team to allow OPTIONS (CORS preflight) on /search, then remove this GET fallback.
+        // The JSON POST triggers a CORS preflight that datacube answers with a 403, while a plain GET is allowed.
+        logger.logWarning(`StacApiService - POST ${this.#searchUrl} blocked (likely CORS preflight), falling back to GET`, error);
+        this.#isSearchUsingGet = true;
+      }
+    }
+
+    return Fetch.fetchJson<StacSearchResult>(`${this.#searchUrl}?${StacApiService.#buildSearchQuery(params)}`);
   }
 
   /**
@@ -310,6 +322,10 @@ export class StacApiService {
     return { href, rel: 'next' };
   }
 
+  // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
+
   /**
    * Fetches a single STAC item by URL.
    *
@@ -319,28 +335,6 @@ export class StacApiService {
    */
   static fetchItem(itemUrl: string): Promise<StacItem> {
     return Fetch.fetchJson<StacItem>(itemUrl);
-  }
-
-  /**
-   * Fetches items belonging to a specific collection.
-   *
-   * @param collectionId - The collection ID to fetch items for
-   * @param limit - Optional max items per page
-   * @param sortby - Optional sort criteria (only send when the server supports sorting)
-   * @param pageUrl - Optional full URL from a pagination link
-   * @returns A promise that resolves with the items response
-   * @throws {ResponseError | NetworkError | RequestTimeoutError} When the request fails
-   */
-  fetchCollectionItems(collectionId: string, limit?: number, sortby?: StacSortBy[], pageUrl?: string): Promise<StacItemsResponse> {
-    if (pageUrl) return Fetch.fetchJson<StacItemsResponse>(pageUrl);
-
-    const query = new URLSearchParams();
-    if (limit) query.set('limit', String(limit));
-    if (sortby?.length) query.set('sortby', StacApiService.#formatSortByQuery(sortby));
-    const queryString = query.toString();
-
-    const url = `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/items${queryString ? `?${queryString}` : ''}`;
-    return Fetch.fetchJson<StacItemsResponse>(url);
   }
 
   /**
@@ -392,6 +386,22 @@ export class StacApiService {
     }
 
     return `${start} – ${end}`;
+  }
+
+  /**
+   * Fetches one raw API search page, following GET or POST pagination links.
+   *
+   * @param link - The next or previous link of a search result
+   * @param params - The original search parameters
+   * @returns A promise that resolves with the raw page
+   */
+  static #fetchRawSearchPage(link: StacLink, params: StacSearchParams): Promise<StacSearchResult> {
+    if (link.method !== 'POST') return Fetch.fetchJson<StacSearchResult>(link.href);
+
+    const originalBody = StacApiService.#buildSearchBody(params);
+    let body = originalBody;
+    if (link.body) body = link.merge ? { ...originalBody, ...link.body } : link.body;
+    return StacApiService.#postJson<StacSearchResult>(link.href, body);
   }
 
   /**
@@ -461,4 +471,6 @@ export class StacApiService {
       body: JSON.stringify(body),
     });
   }
+
+  // #endregion STATIC METHODS
 }

@@ -76,7 +76,6 @@ export class StacBrowserController extends AbstractMapViewerController {
   /**
    * Adds footprint polygons to the map in the given geometry group.
    *
-   * Footprints without a geometry or a valid bbox are skipped.
    *
    * @param groupId - The geometry group id used to manage the footprints lifecycle
    * @param footprints - The footprints to draw
@@ -93,15 +92,15 @@ export class StacBrowserController extends AbstractMapViewerController {
     }
 
     footprints.forEach((footprint) => {
+      const bbox = StacBrowserController.#getLonLatBbox(footprint.bbox);
       const footprintKey = StacBrowserController.#getFootprintKey(footprint);
       if (footprintKey && footprintKeys.has(footprintKey)) return;
       if (footprintKey) footprintKeys.add(footprintKey);
 
       if (footprint.geometry) {
         StacLayerHelper.addFootprintLayer(geometryApi, { geometry: footprint.geometry }, color, fillOpacity, groupId);
-      } else if (footprint.bbox && footprint.bbox.length >= 4) {
-        const [west, south, east, north] = footprint.bbox;
-        StacLayerHelper.addFootprintLayer(geometryApi, { bbox: [west, south, east, north] }, color, fillOpacity, groupId);
+      } else if (bbox) {
+        StacLayerHelper.addFootprintLayer(geometryApi, { bbox }, color, fillOpacity, groupId);
       }
     });
 
@@ -231,7 +230,7 @@ export class StacBrowserController extends AbstractMapViewerController {
     const { map } = this.getMapViewer();
 
     try {
-      const layer = await StacLayerHelper.addImageLayer(map, imageUrl, bbox, opacity, geometry);
+      const layer = await Promise.resolve(StacLayerHelper.addImageLayer(map, imageUrl, bbox, opacity, geometry));
       if (this.#overlayRequests.get(overlayId) !== requestId) {
         StacLayerHelper.removeStacLayer(map, layer);
         return false;
@@ -340,6 +339,18 @@ export class StacBrowserController extends AbstractMapViewerController {
   // #region STATIC METHODS
 
   /**
+   * Converts a four- or six-coordinate STAC bbox to its 2D longitude/latitude extent.
+   *
+   * @param bbox - A STAC bbox in EPSG:4326
+   * @returns The 2D bbox, or undefined when the bbox length is unsupported
+   */
+  static #getLonLatBbox(bbox?: number[]): TypeLonLatBbox | undefined {
+    if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
+    if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
+    return undefined;
+  }
+
+  /**
    * Creates a stable identity for duplicate GeoJSON geometries or bounding boxes.
    *
    * @param footprint - The STAC footprint to identify
@@ -351,7 +362,8 @@ export class StacBrowserController extends AbstractMapViewerController {
       const geometry = JSON.stringify(footprint.geometry);
       return geometry ? `geometry:${geometry}` : undefined;
     }
-    if (footprint.bbox && footprint.bbox.length >= 4) return `bbox:${JSON.stringify(footprint.bbox.slice(0, 4))}`;
+    const bbox = StacBrowserController.#getLonLatBbox(footprint.bbox);
+    if (bbox) return `bbox:${JSON.stringify(bbox)}`;
     return undefined;
   }
 

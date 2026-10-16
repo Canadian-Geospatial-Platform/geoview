@@ -256,7 +256,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   keywordChip: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 1),
-    fontSize: '0.75rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.geoViewColor?.textColor.main,
     whiteSpace: 'nowrap',
@@ -380,7 +380,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetTypeBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: '0.7rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     fontWeight: 600,
     borderRadius: theme.shape.borderRadiusSm,
     backgroundColor: theme.palette.geoViewColor?.primary.main,
@@ -390,7 +390,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetRoleBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: '0.65rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     fontWeight: 500,
     borderRadius: theme.shape.borderRadiusSm,
     border: `1px solid ${theme.palette.divider}`,

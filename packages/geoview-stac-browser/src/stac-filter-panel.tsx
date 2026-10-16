@@ -1,4 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 
 import { Box, Button, Checkbox, CircularProgressBase, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -67,7 +68,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
 
@@ -298,7 +299,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
     <Box sx={memoSxClasses.filterPanel}>
       {config.searchDescription && (
         <Typography component="p" sx={memoSxClasses.detailDescription}>
-          {t(config.searchDescription)}
+          {config.searchDescription}
         </Typography>
       )}
 
@@ -308,6 +309,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
           <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.textSearch')}</Typography>
           <TextField
             size="small"
+            aria-label={t('stacBrowser.textSearch')}
             placeholder={t('stacBrowser.keywords')}
             value={filterState.keyword}
             onChange={handleKeywordChange}
@@ -360,7 +362,10 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
               const isNumeric = queryable.type === 'integer' || queryable.type === 'number';
               const isBoolean = queryable.type === 'boolean';
               const isDate = queryable.format === 'date' || queryable.format === 'date-time';
-              const operators = isNumeric || isDate ? ['=', '<>', '<', '<=', '>', '>='] : ['=', '<>', 'like'];
+              let operators: string[];
+              if (isNumeric || isDate) operators = ['=', '<>', '<', '<=', '>', '>='];
+              else if (isBoolean || queryable.enum) operators = ['=', '<>'];
+              else operators = ['=', '<>', 'like'];
               const currentFilter = {
                 operator: filterState.propertyFilters[field]?.operator ?? '=',
                 value: filterState.propertyFilters[field]?.value ?? '',

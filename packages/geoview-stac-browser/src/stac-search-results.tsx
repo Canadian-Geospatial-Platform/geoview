@@ -1,4 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, CircularProgressBase, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -72,7 +73,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
 
@@ -191,7 +192,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
                   </Button>
                 )}
                 {results.features.length > 0 && (
-                  <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: '0.85rem' }}>
+                  <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: theme.palette.geoViewFontSize?.sm }}>
                     {startItem}–{endItem}
                   </Typography>
                 )}
