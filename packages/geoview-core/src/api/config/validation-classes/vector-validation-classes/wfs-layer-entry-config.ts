@@ -7,15 +7,19 @@
 } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
+import { toArray } from '@/core/utils/utilities';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
+  /** The DescribeFeatureType full URL that was used for the layer, if any */
+  #describeFeatureTypeFullUrl?: string;
+
   /**
    * Creates an instance of OgcWfsLayerEntryConfig.
    *
@@ -56,6 +60,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   // #endregion OVERRIDES
 
+  // #region METHODS
+
   /**
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
    *
@@ -78,7 +84,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     // If metadata FeatureType isn't an array
     let featureTypes: TypeMetadataWFSFeatureTypeListFeatureType[] = metadata.FeatureTypeList
       .FeatureType as TypeMetadataWFSFeatureTypeListFeatureType[];
-    if (!Array.isArray(metadata.FeatureTypeList.FeatureType)) featureTypes = [metadata.FeatureTypeList.FeatureType];
+    featureTypes = toArray(metadata.FeatureTypeList.FeatureType);
 
     // Find the feature type for this layer
     const featureTypeForLayer = featureTypes.find((layerMetadata) => {
@@ -97,21 +103,43 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Returns the spatial reference system (SRS) of the layer's data.
    *
-   * This method reads the layer's feature type definition and returns the
-   * default SRS/projection used by the WFS layer. If the `DefaultSRS` is
-   * an object with a `#text` property (common in XML-parsed responses),
-   * the method returns the value of that property. Otherwise, it returns
-   * `DefaultSRS` directly.
+   * Reads the version-specific field: `DefaultCRS` (WFS 2.0), `DefaultSRS` (WFS 1.1), or `SRS` (WFS 1.0), in that order.
+   * A value may be a string or an XML-parsed object with a `#text` property.
    *
-   * @returns The EPSG code or SRS string (e.g., 'EPSG:3857'), or undefined if not determined
+   * The CRS identifier is returned as provided by the service (for example, an EPSG code, OGC URN, or OGC CRS URI);
+   * it is not normalized.
+   *
+   * @returns The CRS identifier declared by the service, or undefined if none is available
    */
   getProjectionOfData(): string | undefined {
     // Get the feature type
     const featureType = this.getFeatureType();
-    if (typeof featureType.DefaultSRS === 'object' && '#text' in featureType.DefaultSRS) {
-      return featureType.DefaultSRS['#text'];
+    // If WFS is version 2.0.0, check DefaultCRS
+    if (featureType.DefaultCRS) {
+      if (typeof featureType.DefaultCRS === 'object' && '#text' in featureType.DefaultCRS) {
+        return featureType.DefaultCRS['#text'];
+      }
+      return featureType.DefaultCRS;
     }
-    return featureType.DefaultSRS;
+
+    // If WFS is version 1.1.0, check DefaultSRS
+    if (featureType.DefaultSRS) {
+      if (typeof featureType.DefaultSRS === 'object' && '#text' in featureType.DefaultSRS) {
+        return featureType.DefaultSRS['#text'];
+      }
+      return featureType.DefaultSRS;
+    }
+
+    // If WFS is version 1.0.0, check SRS
+    if (featureType.SRS) {
+      if (typeof featureType.SRS === 'object' && '#text' in featureType.SRS) {
+        return featureType.SRS['#text'];
+      }
+      return featureType.SRS;
+    }
+
+    // Unknown
+    return undefined;
   }
 
   /**
@@ -186,22 +214,24 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
-   * Gets if the config has specified that we should fetch the styles from the WMS.
+   * Gets the full DescribeFeatureType URL used for the layer.
    *
-   * @returns True when the styles should be fetched from the WMS. True by default
+   * @returns The recorded DescribeFeatureType URL, or undefined if none was recorded
    */
-  getShouldFetchStylesFromWMS(): boolean {
-    return this.getGeoviewLayerConfig().fetchStylesOnWMS ?? true; // default: true
+  getDescribeFeatureTypeFullUrl(): string | undefined {
+    return this.#describeFeatureTypeFullUrl;
   }
 
   /**
-   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
+   * Stores the full DescribeFeatureType URL used for the layer.
    *
-   * @returns The WMS styles layer id
+   * @param describeFeatureTypeFullUrl - Full URL of the DescribeFeatureType request
    */
-  getWmsStylesLayerId(): string {
-    return this.layerEntryProps.wmsLayerId || this.layerId;
+  setDescribeFeatureTypeFullUrl(describeFeatureTypeFullUrl: string): void {
+    this.#describeFeatureTypeFullUrl = describeFeatureTypeFullUrl;
   }
+
+  // #endregion METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object) represents a WFS Feature layer type.

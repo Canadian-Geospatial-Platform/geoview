@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Experimental: WFS vector layer examples from multiple CDTK (VPN required) services with associated WMS layers. <ul><li>Airborne: Test of WFS feature queries for airborne radioactivity using its associated WMS layer.</li><li>Assessment Inventory: Test querying completed and terminated projects from one WFS service, with project names used as feature titles.</li><li>Completed Inventory Custom Style: Test applying a unique-value point style by project category to WFS features.</li><li>Charging Corridor: Test linking WFS and WMS layers whose published identifiers differ.</li><li>Charging Corridor Forced Style: Test overriding the corridor line style with categories based on the final score field.</li><li>Critical Minerals: Test of WFS feature queries for the mines layer with its associated WMS.</li><li>Abandoned Orphaned Mines: Test of WFS feature queries for the abandoned and orphaned mines layer with its associated WMS.</li><li>Earthquakes 2000-2010: Test using magnitude as the feature title for earthquake records.</li><li>GSC Photo Collection: Test of WFS feature queries for the seabed photo collection with its associated WMS.</li><li>Pacific Seismic Reflection: Test of WFS feature queries for the Pacific seismic reflection layer with its associated WMS.</li><li>Surficial Geology: Test of WFS feature queries for the DMF layer with its associated WMS.</li><li>Lidar Point Cloud Elevation: Test of WFS feature queries for lidar project data with its associated WMS.</li><li>Wind Turbine: Test of WFS feature queries for wind turbine data with its associated WMS.</li><li>Regions: Test of WFS feature queries for physical regions with its associated WMS.</li><li>Major Projects: Test loading point and line WFS layers together under one GeoView layer.</li></ul>"
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
@@ -10,9 +13,9 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "LYR1-qgis",
+        "geoviewLayerId": "airborne",
         "geoviewLayerName": "Airborne",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -21,9 +24,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR2-qgis",
+        "geoviewLayerId": "assessment-inventory",
         "geoviewLayerName": "Assessment Inventory",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -45,9 +48,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR2-qgis-custom",
-        "geoviewLayerName": "Assessment Inventory Custom Style",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "geoviewLayerId": "completed-inventory-custom",
+        "geoviewLayerName": "Completed Inventory Custom Style",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -137,9 +140,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR4-qgis",
+        "geoviewLayerId": "charging-corridor",
         "geoviewLayerName": "Charging Corridor",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -149,9 +152,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR4-qgis-custom",
+        "geoviewLayerId": "charging-corridor-custom",
         "geoviewLayerName": "Charging Corridor Forced Style",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -279,9 +282,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR5-qgis",
+        "geoviewLayerId": "critical-minerals",
         "geoviewLayerName": "Critical Minerals",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -290,9 +293,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR5-aban-qgis",
+        "geoviewLayerId": "abandoned-orphaned-mines",
         "geoviewLayerName": "Abandoned Orphaned Mines",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/oam_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -301,9 +304,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR6-qgis",
+        "geoviewLayerId": "earthquakes",
         "geoviewLayerName": "Earthquakes 2000-2010",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -317,9 +320,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR7-qgis",
+        "geoviewLayerId": "photo-coll",
         "geoviewLayerName": "GSC Photo Collection",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -328,9 +331,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR8-qgis",
+        "geoviewLayerId": "pacific-seismic",
         "geoviewLayerName": "Pacific Seismic Reflection",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -339,9 +342,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR9-qgis",
+        "geoviewLayerId": "surficial-geology",
         "geoviewLayerName": "Surficial Geology",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -350,9 +353,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR10-qgis",
+        "geoviewLayerId": "lidar-point-cloud",
         "geoviewLayerName": "Lidar Point Cloud Elevation",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -361,9 +364,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR11-qgis",
+        "geoviewLayerId": "wind-turbine",
         "geoviewLayerName": "Wind Turbine",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -372,9 +375,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR12-qgis",
+        "geoviewLayerId": "regions",
         "geoviewLayerName": "Regions",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -383,9 +386,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR99-qgis",
+        "geoviewLayerId": "major-projects",
         "geoviewLayerName": "Major Projects",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {

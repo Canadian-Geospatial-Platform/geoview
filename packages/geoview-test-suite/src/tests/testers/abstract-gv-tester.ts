@@ -50,7 +50,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME = 'Airborne Radioactivity';
 
   /** Airborne Radioactivity wms */
-  static AIRBORNE_RADIOACTIVITY_WMS_URL = 'https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en';
+  static AIRBORNE_RADIOACTIVITY_WMS_URL = 'https://qgis-tst.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en';
   static AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID = 'AIRB_RAD';
   static AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS: TypeOutfields[] = [
     {
@@ -719,7 +719,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly DATACUBE_RING_FIRE_LAYER_ID_VICTORIA: string = 'victoria';
 
   /** Landcover group WMS served from a local XML capability document */
-  static readonly LANDCOVER_CDTK_URL: string = 'https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en';
+  static readonly LANDCOVER_CDTK_URL: string = 'https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en';
   static readonly LANDCOVER_CDTK_LAYER_GROUP_ID: string = 'landcover_groupe';
   static readonly LANDCOVER_CDTK_LAYER_ID_2010: string = 'landcover_2010_19classes';
   static readonly LANDCOVER_CDTK_LAYER_ID_2015: string = 'landcover_2015_19classes';
@@ -859,6 +859,11 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly CANIMAGE_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/canimage_en';
   static readonly CANIMAGE_WMS_GROUP_ID: string = 'canimage';
   static readonly CANIMAGE_WMS_LEAF_ID: string = 'canimage.natural-colour.overview8';
+
+  /** WMS — Quebec transport service with the ZPEGT group. */
+  static readonly TRANSPORTS_WMS_URL: string = 'https://ws.mapserver.transports.gouv.qc.ca/swtq';
+  static readonly TRANSPORTS_WMS_AIRPORT_LAYER_ID: string = 'aeroport';
+  static readonly TRANSPORTS_WMS_ZPEGT_LAYER_ID: string = 'zpegt';
 
   static readonly CBMT_WMS_URL: string = 'https://maps.geogratis.gc.ca/wms/CBMT?REQUEST=GetCapabilities&SERVICE=WMS';
   static readonly CBMT_WMS_LAYER_ID: string = 'National';

@@ -15,6 +15,7 @@ import type { TemporalMode, TimeDimension, TimeIANA } from '@/core/utils/date-mg
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -41,17 +42,17 @@ import type {
   TypeLegend,
 } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { SnackbarType } from '@/core/utils/notifications';
+import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { SnackbarType } from '@/core/utils/notifications';
-import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
-import { delay, doTimeout, type DelayJob } from '@/core/utils/utilities';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { delay, doTimeout, isObjectNonEmpty, type DelayJob } from '@/core/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -1023,7 +1024,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Tweak the current layer filters to modify the time filter (create a new layer filters if none currently exists)
     const layerFilters = this.getLayerFilters();
-    layerFilters.setTimeFilter(`${field} >= date '${date1}' and ${field} <= date '${date2}'`);
+    layerFilters.setTimeFilter(`${field} >= '${date1}' and ${field} <= '${date2}'`);
 
     // Redirect
     this.#setLayerFilters(layerFilters, 'time');
@@ -1116,11 +1117,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     promiseLegend
       .then((legend) => {
         // If legend was received
-        if (legend) {
+        if (isObjectNonEmpty(legend)) {
           // Set the legend
           this.setLegend(legend);
+
           // Save the style according to the legend
           this.onSetStyleAccordingToLegend(legend);
+
           // Emit legend information once retrieved
           this.#emitLegendQueried({ legend });
         }
@@ -2464,13 +2467,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     };
 
     // Process the feature style
-    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
+    const processedFeatureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     // If no feature style generated
-    if (!featureStyle) {
+    if (!processedFeatureStyle) {
       // No style
       return undefined;
     }
+
+    // Feature-info thumbnails use the base style when line rendering also returns endpoint styles.
+    const featureStyle = Array.isArray(processedFeatureStyle) ? processedFeatureStyle[0] : processedFeatureStyle;
 
     // Clone the style
     const styleClone = featureStyle.clone();
@@ -2614,12 +2620,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // GV Note: We assume that if outfields are not provided, all fields are of type string and have no domain.
     // GV This is a fallback and may not be accurate, but without outfield metadata we have no way to know the correct types or domains.
     // GV And the alternative would be to skip and show no fields
-    const fieldEntries: Array<{
-      name: string;
-      type: TypeOutfieldsType;
-      alias: string;
-      domain?: TypeDomain;
-    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name }));
+    const fieldEntries = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name, domain: undefined }));
 
     for (const fieldEntry of fieldEntries) {
       // Skip geometry field
@@ -2627,7 +2628,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       if (fieldEntry.name === 'geometry') continue;
 
       // Get the field value from the feature
-      const fieldValue = feature.get(fieldEntry.name);
+      const fieldValue = GeoUtilities.readFeatureField(feature, fieldEntry.name);
 
       // Skip nested objects (but allow arrays)
       // eslint-disable-next-line no-continue
@@ -2646,7 +2647,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           inputTimezone,
           inputTemporalMode
         ),
-        dataType: fieldEntry.type,
+        dataType: fieldEntry.type || 'string',
         alias: fieldEntry.alias,
         domain: fieldEntry.domain,
       };
@@ -2679,20 +2680,23 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   static helperGetFieldValue(
     feature: Feature,
     fieldName: string,
-    fieldType: TypeOutfieldsType,
+    fieldType: TypeOutfieldsType | undefined,
     fieldDomain: TypeDomain | undefined,
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined
   ): unknown {
-    const fieldValue = feature.get(fieldName);
+    // Read the value
+    const fieldValue = GeoUtilities.readFeatureField(feature, fieldName);
+
+    // If the field data type is 'date'
     if (fieldType === 'date') {
       // If the value is null or undefined, return it as-is instead of trying to parse it as a date
       // GV Some services have date fields with 'Null' in their data.. e.g. https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer/6
       if (fieldValue === null || fieldValue === undefined || fieldValue === 'Null') return fieldValue;
 
       // Read the date
-      return DateMgt.createDate(fieldValue, inputFormat, inputTimezone, inputTemporalMode);
+      return DateMgt.createDate(fieldValue as string, inputFormat, inputTimezone, inputTemporalMode);
     }
 
     // If the field has a domain
@@ -2716,7 +2720,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 export type GetFieldValueDelegate = (
   feature: Feature,
   fieldName: string,
-  fieldType: TypeOutfieldsType,
+  fieldType: TypeOutfieldsType | undefined,
   fieldDomain: TypeDomain | undefined,
   inputFormat: string | string[] | undefined,
   inputTimezone: TimeIANA | undefined,

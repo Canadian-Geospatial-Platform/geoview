@@ -2,6 +2,9 @@ import type { TypeGeoviewLayerType, TypeBaseVectorSourceInitialConfig } from '@/
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Max number of records for query */
@@ -11,9 +14,13 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
-export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
   /** Max number of records for query */
   maxRecordCount?: number;
+
+  /** The GetStyles full url that was used to generate the style, if any */
+  // GV Attribute is duplicated in the OGC WMS entry config to keep this state off unrelated base-layer entries.
+  #wmsGetStylesFullUrl?: string;
 
   /**
    * Creates an instance of VectorLayerEntryConfig.
@@ -38,4 +45,71 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   }
 
   // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Gets if the config has specified that we should fetch the styles from the WMS.
+   *
+   * @returns True when the styles should be fetched from the WMS. True by default
+   */
+  getShouldFetchStylesFromWMS(): boolean {
+    return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig | TypeOgcFeatureLayerConfig).fetchStylesOnWMS ?? true; // default: true
+  }
+
+  /**
+   * Gets the full WMS GetStyles URL used to generate the style.
+   *
+   * @returns The recorded WMS GetStyles URL, or undefined if none was recorded
+   */
+  getWmsGetStylesFullUrl(): string | undefined {
+    return this.#wmsGetStylesFullUrl;
+  }
+
+  /**
+   * Stores the full WMS GetStyles URL used to generate the style.
+   *
+   * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
+   */
+  setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string | undefined): void {
+    this.#wmsGetStylesFullUrl = wmsGetStylesFullUrl;
+  }
+
+  /**
+   * Gets the WMS styles URL associated with this OGC Feature layer entry config if any.
+   *
+   * @returns The WMS styles URL
+   */
+  getWmsStylesUrl(): string | undefined {
+    return this.layerEntryProps.wmsUrl;
+  }
+
+  /**
+   * Gets the WMS styles URL associated with this OGC Feature layer entry config if any. Returns the DataAccessPath if not specified.
+   *
+   * @returns The WMS styles URL
+   */
+  getWmsStylesUrlOrDefault(): string {
+    return this.layerEntryProps.wmsUrl ?? this.getDataAccessPath();
+  }
+
+  /**
+   * Gets the WMS styles layer id associated with this WFS layer entry config if any.
+   *
+   * @returns The WMS styles layer id
+   */
+  getWmsStylesLayerId(): string | undefined {
+    return this.layerEntryProps.wmsLayerId;
+  }
+
+  /**
+   * Gets the WMS styles layer id associated with this WFS layer entry config if any. Returns the layerId if not specified.
+   *
+   * @returns The WMS styles layer id
+   */
+  getWmsStylesLayerIdOrDefault(): string {
+    return this.layerEntryProps.wmsLayerId ?? this.layerId;
+  }
+
+  // #endregion METHODS
 }

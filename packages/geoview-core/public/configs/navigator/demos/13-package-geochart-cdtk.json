@@ -30,7 +30,7 @@
       {
         "geoviewLayerId": "wmsLYR2-qgis",
         "geoviewLayerName": "CanVec",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -42,7 +42,7 @@
       {
         "geoviewLayerId": "wfsLYR3-qgis",
         "geoviewLayerName": "Inventory",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {

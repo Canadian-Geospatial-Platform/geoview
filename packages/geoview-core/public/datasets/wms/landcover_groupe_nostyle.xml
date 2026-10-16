@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WMS_Capabilities xmlns:qgs="http://www.qgis.org/wms" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wms" xmlns:sld="http://www.opengis.net/sld" xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/sld_capabilities.xsd http://www.qgis.org/wms https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;REQUEST=GetSchemaExtension" version="1.3.0">
+<WMS_Capabilities xmlns:qgs="http://www.qgis.org/wms" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wms" xmlns:sld="http://www.opengis.net/sld" xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/sld_capabilities.xsd http://www.qgis.org/wms https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;REQUEST=GetSchemaExtension" version="1.3.0">
  <Service>
   <Name>WMS</Name>
   <Title>Land Cover of Canada - Cartographic Product Collection</Title>
-  <Abstract><![CDATA[Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis. 
+  <Abstract><![CDATA[Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis.
 
 ]]></Abstract>
   <KeywordList>
@@ -27,7 +27,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -43,7 +43,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -59,7 +59,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -71,7 +71,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -81,7 +81,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -91,7 +91,7 @@
     <DCPType>
      <HTTP>
       <Get>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?"/>
       </Get>
      </HTTP>
     </DCPType>
@@ -104,7 +104,7 @@
   <Layer queryable="1">
    <Name>land_cover_of_canada_-_cartographic_product_collection</Name>
    <Title>Land Cover of Canada - Cartographic Product Collection</Title>
-   <Abstract><![CDATA[Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis. 
+   <Abstract><![CDATA[Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis.
 
 ]]></Abstract>
    <KeywordList>
@@ -138,7 +138,7 @@
    <Layer queryable="1">
     <Name>landcover_19classes</Name>
     <Title>Land Cover of Canada</Title>
-    <Abstract>Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis. 
+    <Abstract>Collection of Land Cover products for Canada as produced by Natural Resources Canada using Landsat satellite imagery. This collection of cartographic products offers classified Land Cover of Canada at a 30 metre scale, updated on a 5 year basis.
 
 </Abstract>
     <CRS>CRS:84</CRS>
@@ -171,7 +171,7 @@
      <Title>default</Title>
      <LegendURL>
       <Format>image/png</Format>
-      <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=Land Cover of Canada&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
+      <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=Land Cover of Canada&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
      </LegendURL>
     </Style>
     <Layer queryable="1">
@@ -260,7 +260,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>1</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=1&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=1&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -268,7 +268,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>10</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=10&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=10&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -276,7 +276,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>11</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=11&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=11&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -284,7 +284,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>12</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=12&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=12&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -292,7 +292,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>13</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=13&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=13&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -300,7 +300,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>14</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=14&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=14&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -308,7 +308,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>15</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=15&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=15&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -316,7 +316,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>16</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=16&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=16&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -324,7 +324,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>17</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=17&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=17&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -332,7 +332,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>18</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=18&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=18&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -340,7 +340,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>19</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=19&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=19&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -348,7 +348,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>2</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=2&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=2&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -356,7 +356,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>3</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=3&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=3&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -364,7 +364,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>4</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=4&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=4&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -372,7 +372,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>5</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=5&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=5&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -380,7 +380,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>6</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=6&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=6&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -388,7 +388,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>7</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=7&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=7&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -396,7 +396,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>8</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=8&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=8&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -404,7 +404,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>9</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=9&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=9&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -412,7 +412,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>default</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2015_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Dimension name="TIME" units="ISO8601">2015-07-01T12:00:00</Dimension>
@@ -461,7 +461,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>1</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=1&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=1&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -469,7 +469,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>10</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=10&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=10&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -477,7 +477,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>11</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=11&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=11&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -485,7 +485,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>12</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=12&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=12&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -493,7 +493,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>13</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=13&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=13&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -501,7 +501,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>14</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=14&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=14&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -509,7 +509,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>15</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=15&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=15&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -517,7 +517,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>16</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=16&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=16&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -525,7 +525,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>17</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=17&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=17&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -533,7 +533,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>18</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=18&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=18&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -541,7 +541,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>19</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=19&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=19&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -549,7 +549,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>2</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=2&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=2&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -557,7 +557,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>3</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=3&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=3&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -565,7 +565,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>4</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=4&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=4&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -573,7 +573,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>5</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=5&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=5&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -581,7 +581,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>6</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=6&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=6&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -589,7 +589,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>7</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=7&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=7&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -597,7 +597,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>8</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=8&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=8&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -605,7 +605,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>9</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=9&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=9&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Style>
@@ -613,7 +613,7 @@ Disclaimer: Maps for 2010 and 2015 were based on slightly different methodology.
       <Title>default</Title>
       <LegendURL>
        <Format>image/png</Format>
-       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
+       <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_groupe_fr?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetLegendGraphic&amp;LAYER=landcover_2010_19classes&amp;FORMAT=image/png&amp;STYLE=default&amp;SLD_VERSION=1.1.0"/>
       </LegendURL>
      </Style>
      <Dimension name="TIME" units="ISO8601">2010-07-01T12:00:00</Dimension>

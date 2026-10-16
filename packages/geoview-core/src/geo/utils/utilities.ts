@@ -69,7 +69,24 @@ interface EsriJSONReadResult {
   dataProjection?: ProjectionLike;
 }
 
-// #region FETCH METADATA
+/** GML elements whose srsName controls OpenLayers axis-order parsing. */
+const GML_GEOMETRY_ELEMENT_NAMES = new Set([
+  'Point',
+  'MultiPoint',
+  'LineString',
+  'MultiLineString',
+  'LinearRing',
+  'Polygon',
+  'MultiPolygon',
+  'Surface',
+  'MultiSurface',
+  'Curve',
+  'MultiCurve',
+  'Envelope',
+  'Box',
+]);
+
+// #region FETCH METADATA - PUBLIC METHODS
 
 export abstract class GeoUtilities {
   /**
@@ -218,12 +235,21 @@ export abstract class GeoUtilities {
     xmlFilter: string | undefined,
     outputProjectionCode: string | undefined
   ): string {
-    // Redirect
-    const outputFormatClause = outputFormat ? `&outputFormat=${encodeURIComponent(outputFormat)}` : '';
-    const outfieldsClause = outfields ? `&propertyName=${encodeURIComponent(outfields.map((f) => f.name).join(','))}` : '';
+    // The outfields map
+    const outfieldsMap = outfields ? outfields.map((f) => f.name).join(',') : '';
+
+    // Format the parameters
+    const typeName = `typeName=${layerId}`;
+    const outputFormatClause = outputFormat ? `&outputFormat=${outputFormat}` : '';
+    const outfieldsClause = outfields ? `&propertyName=${outfieldsMap}` : '';
+
+    // Always encode the filter, because of the special characters it may contain (e.g., XML tags).
     const xmlFilterClause = xmlFilter ? `&filter=${encodeURIComponent(xmlFilter)}` : '';
-    const outputProjectionCodeClause = outputProjectionCode ? `&srsName=${encodeURIComponent(outputProjectionCode)}` : '';
-    return `${this.ensureServiceRequestUrl(url, 'WFS', 'GetFeature', version)}&typeName=${encodeURIComponent(layerId)}${outputFormatClause}${outfieldsClause}${xmlFilterClause}${outputProjectionCodeClause}`;
+
+    const outputProjectionCodeClause = outputProjectionCode ? `&srsName=${outputProjectionCode}` : '';
+
+    // Return the whole url with all parameters
+    return `${this.ensureServiceRequestUrl(url, 'WFS', 'GetFeature', version)}&${typeName}${outputFormatClause}${outfieldsClause}${xmlFilterClause}${outputProjectionCodeClause}`;
   }
 
   /**
@@ -368,11 +394,14 @@ export abstract class GeoUtilities {
 
     // If it's an array, find the best object in the array
     if (Array.isArray(metadataResult)) {
-      metadataResult = metadataResult.find((obj) => obj.FeatureTypeList);
+      metadataResult = metadataResult.find((obj) => obj.FeatureTypeList || obj['wfs:FeatureTypeList']);
     }
 
     // Validate and extend metadata result
     metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(data, metadataResult);
+
+    // Normalize the Json to make it more uniform,
+    this.#helperParseCapabilityWFS(metadataResult);
 
     // Return it
     return { data: metadataResult, proxyUsed };
@@ -588,10 +617,6 @@ export abstract class GeoUtilities {
     return result;
   }
 
-  // #endregion FETCH METADATA
-
-  // #region FETCH METADATA - PRIVATE METHODS
-
   /**
    * Validates the Esri proxy error in the parsed metadata.
    *
@@ -623,6 +648,58 @@ export abstract class GeoUtilities {
       xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
     ) {
       throw new NetworkError('The Esri proxy returned an error with the underlying url.', '500');
+    }
+  }
+
+  // #endregion FETCH METADATA - PUBLIC METHODS
+
+  // #region FETCH METADATA - PRIVATE METHODS
+
+  /**
+   * Normalizes WFS capabilities property names and CRS aliases.
+   *
+   * @param metadataResult - Parsed WFS capabilities to normalize
+   */
+  static #helperParseCapabilityWFS(metadataResult: TypeMetadataWFSCapabilities): void {
+    this.#helperNormalizeWfsNamespaceRec(metadataResult);
+
+    const featureTypes = metadataResult.FeatureTypeList?.FeatureType;
+    if (!featureTypes) return;
+
+    const featureTypeList = Array.isArray(featureTypes) ? featureTypes : [featureTypes];
+    featureTypeList.forEach((featureType) => {
+      // Standardize all WFS versions to DefaultCRS property
+      // eslint-disable-next-line no-param-reassign
+      featureType.DefaultCRS = featureType['wfs:DefaultCRS'];
+
+      // eslint-disable-next-line no-param-reassign
+      featureType.DefaultSRS = featureType['wfs:DefaultSRS'];
+
+      // eslint-disable-next-line no-param-reassign
+      featureType.SRS = featureType['wfs:SRS'];
+    });
+  }
+
+  /**
+   * Normalizes WFS-prefixed property names recursively.
+   *
+   * @param value - Value to normalize
+   */
+  static #helperNormalizeWfsNamespaceRec(value: unknown): void {
+    if (Array.isArray(value)) {
+      for (const item of value) this.#helperNormalizeWfsNamespaceRec(item);
+      return;
+    }
+    if (typeof value !== 'object' || value === null) return;
+
+    const properties = value as Record<string, unknown>;
+    for (const [key, propertyValue] of Object.entries(properties)) {
+      this.#helperNormalizeWfsNamespaceRec(propertyValue);
+      if (key.startsWith('wfs:')) {
+        const normalizedKey = key.slice('wfs:'.length);
+        if (properties[normalizedKey] === undefined) properties[normalizedKey] = propertyValue;
+        delete properties[key];
+      }
     }
   }
 
@@ -1094,7 +1171,35 @@ export abstract class GeoUtilities {
 
   // #endregion LEGEND
 
-  // #region GEOMETRY PUBLIC
+  // #region PARSING FEATURE
+
+  /**
+   * Extracts a scalar time position from a parsed GML temporal value.
+   *
+   * @param feature - Feature containing the date field.
+   * @param fieldName - Name of the date field to read.
+   * @returns A date-compatible value, or its string representation when the value is an unsupported object
+   */
+  static readFeatureField(feature: Feature, fieldName: string): unknown {
+    // Read the value in the field
+    let value = feature.get(fieldName);
+
+    // GML TimeInstant values can be represented as a parsed _content_.timePosition object.
+    if (typeof value === 'object' && value !== null && '_content_' in value) {
+      // eslint-disable-next-line no-underscore-dangle
+      const content = value._content_;
+      if (typeof content === 'object' && content !== null && 'timePosition' in content) {
+        value = content.timePosition;
+      }
+    }
+
+    // Return the value
+    return value;
+  }
+
+  // #endregion PARSING FEATURE
+
+  // #region GEOMETRY - PUBLIC METHODS
 
   /**
    * Returns the WKT representation of a given geometry.
@@ -1328,13 +1433,17 @@ export abstract class GeoUtilities {
     outProjection?: ProjectionLike
   ): Promise<SourceFeaturesInfo> {
     const format = new WFS({ version });
+    const wfsSource = typeof wfs === 'string' ? new DOMParser().parseFromString(wfs, 'text/xml') : wfs;
 
     // Read the EPSG from the GML content
-    const interpretedProjection = GeoUtilities.readEPSGOfGML(wfs);
+    const interpretedProjection = GeoUtilities.readEPSGOfGML(wfsSource);
 
     // If the projection was interpreted from the data, use that
-    // eslint-disable-next-line no-param-reassign
-    if (interpretedProjection) inProjection = interpretedProjection;
+    if (interpretedProjection) {
+      // eslint-disable-next-line no-param-reassign
+      inProjection = interpretedProjection;
+      GeoUtilities.#applyGmlProjectionFallback(wfsSource, inProjection);
+    }
 
     // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
     // or fall back to format-detected projection when no inProjection is available
@@ -1347,7 +1456,7 @@ export abstract class GeoUtilities {
     }
 
     // Read the features
-    const features = format.readFeatures(wfs, { dataProjection, featureProjection: outProjection });
+    const features = format.readFeatures(wfsSource, { dataProjection, featureProjection: outProjection });
 
     // Return the features and the interpreted source projection
     return { features, dataProjection };
@@ -1463,9 +1572,35 @@ export abstract class GeoUtilities {
     });
   }
 
-  // #endregion GEOMETRY PUBLIC
+  // #endregion GEOMETRY - PUBLIC METHODS
 
-  // #region GEOMETRY PRIVATE
+  // #region GEOMETRY - PRIVATE METHODS
+
+  /**
+   * Adds an srsName to GML geometry elements that do not declare one.
+   *
+   * OpenLayers reads axis order from the geometry element's srsName, but some WFS responses declare the CRS only on an ancestor. This copies the
+   * nearest ancestor's srsName, or uses the response's detected CRS when no ancestor declares one. Existing geometry-level values are preserved.
+   * Only GML 3.1 and 3.2 geometry elements are updated.
+   *
+   * @param gml - XML document or element containing the GML geometries
+   * @param srsName - Detected response CRS used when no ancestor declares an srsName
+   */
+  static #applyGmlProjectionFallback(gml: unknown, srsName: string): void {
+    if (typeof gml !== 'object' || gml === null || !('querySelectorAll' in gml)) return;
+
+    const xml = gml as Document | Element;
+    for (const geometry of xml.querySelectorAll('*')) {
+      const isGmlGeometry =
+        (geometry.namespaceURI === 'http://www.opengis.net/gml' || geometry.namespaceURI === 'http://www.opengis.net/gml/3.2') &&
+        GML_GEOMETRY_ELEMENT_NAMES.has(geometry.localName);
+
+      if (isGmlGeometry && !geometry.hasAttribute('srsName')) {
+        const inheritedSrsName = geometry.parentElement?.closest('[srsName]')?.getAttribute('srsName');
+        geometry.setAttribute('srsName', inheritedSrsName || srsName);
+      }
+    }
+  }
 
   /**
    * Extracts an EPSG code from a SRS/CRS standard string.
@@ -1479,11 +1614,11 @@ export abstract class GeoUtilities {
     // "http://www.opengis.net/gml/srs/epsg.xml#4326" -> EPSG:4326
     // "urn:x-ogc:def:crs:EPSG:6.6:4326" -> EPSG:4326
 
-    // Direct "EPSG:xxxx"
-    if (name.startsWith('EPSG:')) return name;
+    const epsgIndex = name.toLowerCase().lastIndexOf('epsg');
+    if (epsgIndex === -1) return undefined;
 
-    // URN formats
-    const match = name.match(/EPSG[:/]+(\d+)/i);
+    // CRS URNs can include an EPSG database version before the actual code.
+    const match = name.slice(epsgIndex + 'EPSG'.length).match(/(?:^|[:/#])(\d+)$/);
     if (match) return `EPSG:${match[1]}`;
 
     return undefined;
@@ -1545,7 +1680,7 @@ export abstract class GeoUtilities {
     return cleanedFeatures;
   }
 
-  // #endregion GEOMETRY PRIVATE
+  // #endregion GEOMETRY - PRIVATE METHODS
 
   // #region VARIA
 
@@ -1973,13 +2108,38 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Determines whether a field type represents a GML geometry property.
+   *
+   * @param fieldType - The field type string to inspect
+   * @returns `true` if the field type is a GML geometry type; otherwise, `false`
+   */
+  static isGmlGeometryField(fieldType: string | undefined): boolean {
+    return (
+      fieldType === 'gml:PointPropertyType' ||
+      fieldType === 'gml:MultiPointPropertyType' ||
+      fieldType === 'gml:CurvePropertyType' ||
+      fieldType === 'gml:MultiCurvePropertyType' ||
+      fieldType === 'gml:LineStringPropertyType' ||
+      fieldType === 'gml:MultiLineStringPropertyType' ||
+      fieldType === 'gml:SurfacePropertyType' ||
+      fieldType === 'gml:MultiSurfacePropertyType' ||
+      fieldType === 'gml:PolygonPropertyType' ||
+      fieldType === 'gml:MultiPolygonPropertyType' ||
+      fieldType === 'gml:SolidPropertyType' ||
+      fieldType === 'gml:MultiSolidPropertyType' ||
+      fieldType === 'gml:GeometryPropertyType' ||
+      fieldType === 'gml:MultiGeometryPropertyType'
+    );
+  }
+
+  /**
    * Converts a WFS geometry type string to a TypeStyleGeometry.
    *
    * @param wfsGeometryType - The wfs geometry type to convert
    * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported
    */
-  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry {
+  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
     switch (wfsGeometryType) {
       case 'gml:PointPropertyType':
         return 'Point';
@@ -2010,7 +2170,7 @@ export abstract class GeoUtilities {
    * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported
    */
-  static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+  static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string | undefined): TypeStyleGeometry {
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
         return 'Point';

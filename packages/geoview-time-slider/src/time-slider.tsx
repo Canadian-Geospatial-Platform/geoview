@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
+import { toArray } from 'geoview-core/core/utils/utilities';
 import type { DateTimeStepUnit } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses, SLIDER_WIDTH_STYLE } from './time-slider-style';
@@ -524,7 +525,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       sliderDeltaRef.current = undefined;
       activeThumbRef.current = activeThumb;
 
-      const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
+      const valuesAsArray = toArray(newValues);
       const calendarValues = getCalendarStepValues(valuesAsArray, calendarStepAnchorRef.current ?? minAndMax[0], stepUnit, discreteValues);
       setValues(timeSliderController.constrainValues(layerPath, calendarValues, activeThumb));
     },
@@ -546,11 +547,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       if (calendarKeyStepRef.current) return;
 
       if (discreteValues && singleHandle) {
-        const value = Array.isArray(newValues) ? newValues[0] : newValues;
+        const value = toArray(newValues)[0];
         const nearest = DateMgt.findNearestTimestamp(memoTimeStampRange, value);
         timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
-        const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
+        const valuesAsArray = toArray(newValues);
         const calendarValues = getCalendarStepValues(
           valuesAsArray,
           calendarStepAnchorRef.current ?? minAndMax[0],

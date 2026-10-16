@@ -1,15 +1,6 @@
 {
   "map": {
     "viewSettings": {
-      "initialView": {
-        "zoomAndCenter": [
-          3,
-          [
-            0,
-            20
-          ]
-        ]
-      },
       "projection": 3857
     },
     "basemapOptions": {
@@ -19,13 +10,15 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "ogcFeatureLYR1",
-        "geoviewLayerName": "Large Lakes",
-        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerId": "weather-clim-group",
+        "geoviewLayerName": "Weather Climate Group",
+        "metadataAccessPath": "https://api.weather.gc.ca",
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "lakes"
+            "layerId": "ahccd-stations",
+            "wmsUrl": "https://geo.weather.gc.ca/geomet-climate",
+            "wmsLayerId": "AHCCD.STATIONS"
           }
         ]
       }

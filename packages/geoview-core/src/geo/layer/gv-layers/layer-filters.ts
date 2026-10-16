@@ -1,5 +1,5 @@
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { NodeType, type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /**
  * Aggregates and composes the different filter fragments applied at various
@@ -204,10 +204,23 @@ export class LayerFilters {
    * Returns all active filters (including time-based filters) combined into a
    * single expression using the logical AND operator.
    *
+   * @param adjustTimeFilterForVector - Whether to adjust the time filter for vector data
+   * @param vectorTimeField - Optional vector field that corresponds to the time filter
+   * @param dateFieldNames - Names of date-typed feature fields
    * @returns A combined filter expression
    */
-  getAllFilters(): string {
-    return LayerFilters.joinWithAnd(this.#getAllFilters(), this.#extraSpacing);
+  getAllFilters(adjustTimeFilterForVector = false, vectorTimeField?: string, dateFieldNames?: string[]): string {
+    // Get the data related filters
+    const dataRelatedFilters = this.#getDataRelatedFilters();
+
+    // If tweaking the time filter to point on vector fields
+    let timeFilter = this.#timeFilter;
+    if (adjustTimeFilterForVector) {
+      timeFilter = LayerFilters.adjustTimeFilterForVectorData(timeFilter, vectorTimeField, dateFieldNames ?? []);
+    }
+
+    // Return the filter clause
+    return LayerFilters.joinWithAnd([...dataRelatedFilters, timeFilter], this.#extraSpacing);
   }
 
   /**
@@ -239,17 +252,6 @@ export class LayerFilters {
   }
 
   /**
-   * Returns all defined filters, including time-based filters.
-   *
-   * Undefined or empty filters are automatically excluded.
-   *
-   * @returns An array of all active filter expressions
-   */
-  #getAllFilters(): (string | undefined)[] {
-    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#panelFilter, this.#timeFilter];
-  }
-
-  /**
    * Recomputes and updates the cached filter equation.
    *
    * This method combines all active filters, analyzes them, and stores the
@@ -264,6 +266,78 @@ export class LayerFilters {
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Adjusts a time filter to match fields available in associated vector data.
+   *
+   * The original predicate is retained when its field exists. Otherwise, the configured vector time field is preferred, followed by a sole
+   * date-typed field. When neither is available, undefined is returned so unrelated client-side filters can still be applied.
+   *
+   * @param timeFilter - Optional time filter predicate
+   * @param vectorTimeField - Optional configured vector time field
+   * @param dateFieldNames - Names of date-typed feature fields
+   * @returns The adjusted time filter, or undefined when no time filter can be applied
+   */
+  static adjustTimeFilterForVectorData(
+    timeFilter: string | undefined,
+    vectorTimeField: string | undefined,
+    dateFieldNames: string[]
+  ): string | undefined {
+    if (!timeFilter) return timeFilter;
+
+    // Create the filter nodes from the time filter
+    const filterNodesFromFilter = GeoviewRenderer.createFilterNodeFromFilter(timeFilter);
+    const timeFilterFieldNode = filterNodesFromFilter.find(
+      (node) => node.nodeType === NodeType.variable && typeof node.nodeValue === 'string'
+    );
+
+    const timeFilterField = typeof timeFilterFieldNode?.nodeValue === 'string' ? timeFilterFieldNode.nodeValue : undefined;
+
+    // Keep the configured filter when its field is present in the returned feature data.
+    if (!timeFilterField || dateFieldNames.includes(timeFilterField)) return timeFilter;
+
+    // Prefer the configured vector time field when it is available.
+    let fallbackTimeField = vectorTimeField && dateFieldNames.includes(vectorTimeField) ? vectorTimeField : undefined;
+
+    if (!fallbackTimeField) {
+      // Infer the field by type only when there is exactly one date field.
+      if (dateFieldNames.length === 1 && dateFieldNames.includes(dateFieldNames[0])) fallbackTimeField = dateFieldNames[0];
+    }
+
+    // Rewrite the missing field reference for client-side filtering.
+    return fallbackTimeField ? timeFilter.replaceAll(timeFilterField, fallbackTimeField) : undefined;
+  }
+
+  /**
+   * Creates a client-side filter equation from class, time, and panel filters.
+   *
+   * When the time filter field is unavailable, the configured vector time field is preferred if present in the feature data.
+   * Otherwise, a sole date-typed feature field is used; if there are multiple or no date fields, the time filter is omitted.
+   * The class and panel filters are always retained.
+   *
+   * @param classFilter - Optional class renderer filter
+   * @param timeFilter - Optional time slider filter
+   * @param panelFilter - Optional filter panel filter
+   * @param vectorTimeField - Optional configured vector time field
+   * @param dateFieldNames - Names of date-typed feature fields
+   * @returns The parsed client-side filter equation
+   */
+  static createClientFilterEquation(
+    classFilter: string | undefined,
+    timeFilter: string | undefined,
+    panelFilter: string | undefined,
+    vectorTimeField: string | undefined,
+    dateFieldNames: string[]
+  ): FilterNodeType[] {
+    // Get the time filter adjusted for the available vector data fields
+    const theTimeFilter = LayerFilters.adjustTimeFilterForVectorData(timeFilter, vectorTimeField, dateFieldNames);
+
+    // Combine all applicable filters into a single filter string
+    const allFilters = LayerFilters.joinWithAnd([classFilter, theTimeFilter, panelFilter]);
+
+    // Create the client-side filter equation from the combined filter string
+    return GeoviewRenderer.createFilterNodeFromFilter(allFilters);
+  }
 
   /**
    * Joins multiple SQL filter fragments using the AND operator.

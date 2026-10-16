@@ -37,6 +37,13 @@ Read only the linked section of each doc: search for its heading and read to the
   `AbstractBaseGVLayer.isInVisibleRange(currentResolution)`; inspect signatures before copying old recipes.
 - Time: DateMgt OGC parser, ESRI normalization, TimeSliderController filter generation and registration.
 
+### WFS SLD Graphic-Stroke Rendering
+
+- `WfsRenderer.#buildLayerStyleInfoLineSymbolizer()` retains multiple `LineSymbolizer` strokes and stores endpoint graphics with their `firstPoint`/`lastPoint` placement in `TypeLineStringVectorConfig.graphicStrokes`; do not discard them when building the base line stroke.
+- `ConfigApi.getStyleFromWMSRenderer()` passes `undefined` as the geometry type so line-only SLDs remain `LineString`. The live WMS path may pass metadata geometry to convert a line-only polygon outline when appropriate.
+- `GeoviewRenderer` line processors may return `Style | Style[] | undefined`. Line stroke styles come first (base, then additional strokes), followed by endpoint graphics. Map layer callbacks may return the full array; feature-info thumbnails should use only the base style.
+- Endpoint styles are cached by their `GraphicStrokeWithPlacement` descriptor. Use and await `createLineStringCanvasAsync()` for legend/demo canvases so endpoint images finish loading before canvas export.
+
 ### Scale Limits & Visibility Range
 
 Routing alias retained for MapGeoExpert: read [runtime invariants](../../docs/programming/adding-layer-types.md#runtime-invariants).

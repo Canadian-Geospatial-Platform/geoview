@@ -1,11 +1,13 @@
 import type {
   ConfigBaseClass,
+  LayerNameChangedDelegate,
+  LayerNameChangedEvent,
   LayerStatusChangedDelegate,
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
@@ -17,11 +19,13 @@ import {
   getStoreLayerLegendQueryStatus,
   getStoreLayerLegendSchemaTag,
   getStoreLayerStyleConfig,
+  setStoreLayerName,
   setStoreLayerStatus,
   setStoreLegendQueryStatus,
 } from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
+import { isObjectNonEmpty } from '@/core/utils/utilities';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -45,6 +49,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /** A bounded reference to the handle layer style changed */
   #boundedHandleLayerStyleChanged: StyleChangedDelegate;
 
+  /** A bounded reference to the handle layer name changed */
+  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
+
   /** A bounded reference to the handle layer style applied */
   #boundedHandleLayerStyleApplied: StyleAppliedDelegate;
 
@@ -61,6 +68,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
     super(mapViewer, controllerRegistry, layerDomain);
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
+    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
   }
@@ -103,6 +111,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Register the layer status changed handler
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
+    // Register the layer status changed handler
+    layerConfig.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     // Propagate to the store as the config has been registered
     this.controllerRegistry.layerSetController.propagateLegendToStore(layerConfig.layerPath);
   }
@@ -115,6 +126,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   protected override onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
     // Call parent
     super.onUnregisterLayerConfig(layerConfig);
+
+    // Register the layer status changed handler
+    layerConfig?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Unregister the layer status changed handler
     layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
@@ -251,9 +265,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
       // Whenever the legend response comes in
       legendPromise
-        ?.then((legend: TypeLegend | null | undefined) => {
-          // If legend received
-          if (legend) {
+        ?.then((legend) => {
+          // If legend was received
+          if (isObjectNonEmpty(legend)) {
             // Check for possible number of icons and set icon cache size
             this.mapViewer.updateIconImageCache(legend);
 
@@ -360,6 +374,21 @@ export class LegendsLayerSet extends AbstractLayerSet {
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', sender.layerPath, error);
+    }
+  }
+
+  /**
+   * Handles when a layer name changes on a layer config.
+   * @param sender - The layer config that changed its name
+   * @param layerNameChangedEvent - The layer name changed event
+   */
+  #handleLayerNameChanged(sender: ConfigBaseClass, layerNameChangedEvent: LayerNameChangedEvent): void {
+    try {
+      // Save to the store
+      setStoreLayerName(this.getMapId(), sender.layerPath, layerNameChangedEvent.layerName);
+    } catch (error: unknown) {
+      // Log
+      logger.logError('CAUGHT in handleLayerNameChanged', sender.layerPath, error);
     }
   }
 

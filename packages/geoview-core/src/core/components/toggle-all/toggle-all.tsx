@@ -72,9 +72,9 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   }, [allLayersCollapsed, layerController]);
 
   // TODO Hide this component until all layers have loaded the first time.
-  // TO.DO May require something external as a useRef for the first time the !layerAreLoading didn't work
-  // TO.DO There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
-  // TO.DO So need something more stable from the state
+  // TO.DOCONT May require something external as a useRef for the first time the !layerAreLoading didn't work
+  // TO.DOCONT There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
+  // TO.DOCONT So need something more stable from the state
   return (
     <Box id={`${mapId}-${containerType}-${source}-toggle-all`} sx={memoToggleAllStyles}>
       {(source === 'legend' || displayState === 'view') && (

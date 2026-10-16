@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Experimental: WMS layer examples from multiple CDTK (VPN required) services with associated WFS layers. <ul><li>Airborne: Test of a WMS layer using its associated WFS for airborne radioactivity feature queries.</li><li>Completed Inventory: Test of WMS feature queries using the project name as the feature title.</li><li>Completed Inventory Custom Style: Test of a custom unique-value point style based on project category; documents a known issue with icons at large sizes in the DataTable.</li><li>Charging Corridor: Test linking a WMS to its WFS feature source when their published layer identifiers differ.</li><li>Critical Minerals: Test of a WMS layer and associated WFS feature data for the mines dataset.</li><li>Abandoned Orphaned Mines: Test of a WMS layer and associated WFS feature data for abandoned and orphaned mines.</li><li>Earthquakes 2000-2010: Test using earthquake magnitude as the feature title in WMS feature information.</li><li>GSC Photo Collection: Test of a WMS layer with WFS feature queries for the seabed photo collection.</li><li>Pacific Seismic Reflection: Test of a WMS layer with WFS feature queries for seismic reflection data.</li><li>Surficial Geology: Test of WMS feature information using the English label as the feature title.</li><li>Lidar Point Cloud Elevation: Test of a WMS layer and associated WFS feature data for lidar projects.</li><li>Wind Turbine: Test of a WMS layer with associated WFS feature data for wind turbines.</li><li>Regions: Test of a WMS layer with associated WFS feature data for physical regions.</li><li>Major Projects: Test of a WMS succeeding with fetching data from the associated WFS (see DataTable), but failing to create their style due to the GetStyles endpoint not found or not existing. This layer is also used to test that a click on a map feature will still show the details for the feature but show it as 'Unsymbolized'.</li><li>Stations: Test a WMS layer for which no WFS layer is available.</li><li>Landcover: Test a WMS layer where a WFS service is available, but the matching WFS layer identifier is not configured.</li></ul>"
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
@@ -10,9 +13,9 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "LYR1-qgis",
+        "geoviewLayerId": "airborne",
         "geoviewLayerName": "Airborne",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -21,14 +24,9 @@
         ]
       },
       {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerName": "Major Projects Inventory",
-        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
-      },
-      {
-        "geoviewLayerId": "LYR3-qgis",
+        "geoviewLayerId": "assessment-inventory",
         "geoviewLayerName": "Completed Inventory",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -42,9 +40,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR3-qgis-custom",
-        "geoviewLayerName": "Completed Inventory Custom Style (known issue (at large) icons broken in DataTable)",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "geoviewLayerId": "completed-inventory-custom",
+        "geoviewLayerName": "Completed Inventory Custom Style",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -134,9 +132,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR4-qgis",
+        "geoviewLayerId": "charging-corridor",
         "geoviewLayerName": "Charging Corridor",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -146,9 +144,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR5-qgis",
+        "geoviewLayerId": "critical-minerals",
         "geoviewLayerName": "Critical Minerals",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -157,9 +155,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR5-aban-qgis",
+        "geoviewLayerId": "abandoned-orphaned-mines",
         "geoviewLayerName": "Abandoned Orphaned Mines",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/oam_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -168,9 +166,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR6-qgis",
+        "geoviewLayerId": "earthquakes",
         "geoviewLayerName": "Earthquakes 2000-2010",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -184,9 +182,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR7-qgis",
+        "geoviewLayerId": "photo-coll",
         "geoviewLayerName": "GSC Photo Collection",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -195,9 +193,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR8-qgis",
+        "geoviewLayerId": "pacific-seismic",
         "geoviewLayerName": "Pacific Seismic Reflection",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -206,9 +204,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR9-qgis",
+        "geoviewLayerId": "surficial-geology",
         "geoviewLayerName": "Surficial Geology",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -222,9 +220,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR10-qgis",
+        "geoviewLayerId": "lidar-point-cloud",
         "geoviewLayerName": "Lidar Point Cloud Elevation",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -233,9 +231,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR11-qgis",
+        "geoviewLayerId": "wind-turbine",
         "geoviewLayerName": "Wind Turbine",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -244,9 +242,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR12-qgis",
+        "geoviewLayerId": "regions",
         "geoviewLayerName": "Regions",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -255,9 +253,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR99-qgis",
+        "geoviewLayerId": "major-projects",
         "geoviewLayerName": "Major Projects",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -269,9 +267,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR100-qgis",
-        "geoviewLayerName": "Stations (no WFS at all)",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
+        "geoviewLayerId": "stations",
+        "geoviewLayerName": "Stations",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -280,9 +278,9 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR16-qgis",
-        "geoviewLayerName": "Landcover (WFS exists, but layer id not there)",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en",
+        "geoviewLayerId": "landcover",
+        "geoviewLayerName": "Landcover",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
