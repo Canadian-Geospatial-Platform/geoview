@@ -1,5 +1,7 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
+import { FOCUS_OUTLINE_WIDTH, getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets custom sx classes for the common grid layout.
@@ -75,31 +77,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     height: '100%',
     width: '100%',
-    '&:focus-visible': {
-      border: '2px solid inherit',
-    },
-
     '& .MuiPaper-root': {
       border: 'none',
-    },
-    '& .guideBox': {
-      position: 'relative',
-      color: `${theme.palette.geoViewColor?.grey.dark[800]}  !important`,
-      padding: theme.spacing(2),
-      img: {
-        maxWidth: '100%',
-      },
-      td: {
-        width: 'auto',
-        paddingLeft: theme.spacing(2),
-      },
-      th: {
-        textAlign: 'left',
-        paddingLeft: theme.spacing(2),
-      },
-      '& h4': {
-        borderBottom: 'none',
-      },
     },
     '&.fullscreen-mode': {
       a: {
@@ -120,6 +99,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
       borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd}`,
       overflow: 'auto',
+      '&:focus-visible': {
+        ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
+        boxShadow: 'none',
+      },
     },
   },
   gridRightMain: {

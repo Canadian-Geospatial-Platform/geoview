@@ -634,18 +634,13 @@ const ResponsiveGridLayout = forwardRef(
       return (
         <Box
           ref={guideContainerRef}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable guide region must be keyboard-focusable to scroll it (WCAG 2.1.1)
           tabIndex={0}
           className="panel-content-container"
           sx={memoGuideSxClasses.guideContainer}
           onKeyDown={handleGuideKeyDown}
         >
-          <Box
-            className="guideBox"
-            sx={{
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...(memoGuideSxClasses.guideContainer as any)?.['& .guideBox'],
-            }}
-          >
+          <Box sx={memoGuideSxClasses.guideBox}>
             {/* Close button inside guide - shown when WCAG is enabled, not fullscreen, and no feature content is selected */}
 
             {isFocusTrap && !isFullScreen && hasContent && (

@@ -368,6 +368,8 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
   return (
     <Box sx={memoSxClasses.wrapper}>
+      {/* Delegated listener (not a control): any click inside (mainly bubbled from the tabs/buttons, incl. keyboard activation) scrolls the footer into view */}
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
       <Grid container id={`${mapId}-footerbar-header`} onClick={onHeaderClick} sx={memoSxClasses.header}>
         <Grid size={{ xs: 7, sm: 10 }}>
           {!isMobile ? (

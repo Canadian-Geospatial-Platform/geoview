@@ -1,5 +1,5 @@
 // GV: THIS UI COMPONENT IS NOT USE
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -11,6 +11,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 
+import { ListItemButton } from '@/ui/list/list-item-button';
 import { getSxClasses } from '@/ui/list/checkbox-list/checkbox-list-style';
 import { logger } from '@/core/utils/logger';
 
@@ -43,6 +44,8 @@ export type CheckboxListItem = {
  * Manages internal state of checked items and notifies parent via onChecked callback
  * when selections change. Designed for presenting multiple selectable options with
  * optional content on the right side of each item.
+ * Each row exposes the checkbox name and checked state; its visual checkbox is
+ * hidden from assistive technology to avoid nested interactive semantics.
  *
  * @deprecated This component is not currently used. Consider using Material-UI's
  * FormGroup or FormControlLabel components directly for new implementations.
@@ -51,10 +54,14 @@ export type CheckboxListItem = {
  * @returns CheckboxList component with selectable checkbox items
  */
 function CheckboxListUI(props: CheckboxListProps): JSX.Element {
+  // Log
+  logger.logTraceRenderDetailed('ui/list/checkbox-list/checkbox-list');
+
   const { listItems, checkedValues, multiselect, onChecked = null } = props;
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const listId = useId();
 
   // internal state
   const [checked, setChecked] = useState(checkedValues);
@@ -64,38 +71,37 @@ function CheckboxListUI(props: CheckboxListProps): JSX.Element {
   /**
    * Handles when the user toggles a checkbox item
    */
-  const handleToggle = (value: string): void => {
-    let newCheckedValues: string[];
-    if (multiselect) {
-      const currentIndex = checked.indexOf(value);
-      newCheckedValues = [...checked];
+  const handleToggle = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      const value = event.currentTarget.dataset.value ?? '';
+      let newCheckedValues: string[];
+      if (multiselect) {
+        const currentIndex = checked.indexOf(value);
+        newCheckedValues = [...checked];
 
-      if (currentIndex === -1) {
-        newCheckedValues.push(value);
+        if (currentIndex === -1) {
+          newCheckedValues.push(value);
+        } else {
+          newCheckedValues.splice(currentIndex, 1);
+        }
       } else {
-        newCheckedValues.splice(currentIndex, 1);
+        newCheckedValues = [value];
       }
-    } else {
-      newCheckedValues = [value];
-    }
 
-    // Set state
-    setChecked(newCheckedValues);
+      // Set state
+      setChecked(newCheckedValues);
 
-    // Callback
-    onChecked?.(value, newCheckedValues.indexOf(value) >= 0, newCheckedValues);
-  };
-
-  /**
-   * Handles clicks on the right-side content to prevent event propagation
-   */
-  const handleClickContent = useCallback((event: React.MouseEvent<HTMLElement>): void => {
-    event.stopPropagation();
-  }, []);
+      // Callback
+      onChecked?.(value, newCheckedValues.indexOf(value) >= 0, newCheckedValues);
+    },
+    [checked, multiselect, onChecked]
+  );
 
   // #endregion
 
-  // Effect triggered when the checked values changes
+  /**
+   * Syncs the internal checked state when the checked values prop changes.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('CHECKBOX-LIST - checkedValues', checkedValues);
@@ -106,26 +112,36 @@ function CheckboxListUI(props: CheckboxListProps): JSX.Element {
   return (
     <List sx={sxClasses.list}>
       {listItems.map((item: CheckboxListItem, idx: number) => {
-        const labelId = `checkbox-list-label-${idx}`;
+        const labelId = `${listId}-checkbox-list-label-${idx}`;
 
         return (
-          <ListItem sx={sxClasses.listItem} title={item.display} key={item.value} dense onClick={() => handleToggle(item.value)}>
-            <ListItemIcon sx={sxClasses.listItemIcon}>
-              <Checkbox
-                edge="start"
-                checked={checked.includes(item.value)}
-                tabIndex={-1}
-                disableRipple
-                slotProps={{ input: { 'aria-labelledby': labelId } }}
-                aria-hidden="true"
-              />
-            </ListItemIcon>
-            <Typography sx={sxClasses.typography} variant="body2" noWrap component="ul">
-              {item.display}
-            </Typography>
-            <Box sx={sxClasses.boxcontent} className="Checkbox-content-root" onClick={handleClickContent}>
-              {item.contentRight}
-            </Box>
+          <ListItem
+            sx={sxClasses.listItem}
+            title={item.display}
+            key={item.value}
+            disablePadding
+            secondaryAction={
+              <Box sx={sxClasses.boxcontent} className="Checkbox-content-root">
+                {item.contentRight}
+              </Box>
+            }
+          >
+            <ListItemButton
+              sx={sxClasses.listItemButton}
+              data-value={item.value}
+              role="checkbox"
+              aria-checked={checked.includes(item.value)}
+              aria-labelledby={labelId}
+              dense
+              onClick={handleToggle}
+            >
+              <ListItemIcon sx={sxClasses.listItemIcon} aria-hidden="true">
+                <Checkbox edge="start" checked={checked.includes(item.value)} tabIndex={-1} disableRipple />
+              </ListItemIcon>
+              <Typography id={labelId} sx={sxClasses.typography} variant="body2" noWrap component="span">
+                {item.display}
+              </Typography>
+            </ListItemButton>
           </ListItem>
         );
       })}

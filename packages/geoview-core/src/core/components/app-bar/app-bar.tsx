@@ -626,9 +626,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [memoBottomListItems, sxClasses]);
 
   return (
+    // Delegated listener (not a control): any click inside (mainly bubbled from child buttons, incl. keyboard activation) scrolls the shell into view
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box
-        sx={[sxClasses.appBarButtons, !scrollState.isScrollable && { paddingTop: '8px' }] as SxProps}
+        sx={[sxClasses.appBarButtons, !scrollState.isScrollable && sxClasses.appBarButtonsNotScrollable] as SxProps}
         component="nav"
         aria-label={t('appbar.navLabel')}
       >

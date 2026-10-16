@@ -223,6 +223,7 @@ _(Dependency updates, build config changes)_
 - **MUI v7 → v9 upgrade**: @mui/material 7.3.2→9.1.2, @mui/icons-material 7.3.2→9.1.1, @mui/lab 7.0.0-beta.17→9.0.0-beta.5, @mui/system→9.1.2, @mui/x-date-pickers 7.20.0→9.7.0, @mui/x-tree-view 7.17.0→9.7.0, mui-color-input 7.0.0→9.0.0 (#3545)
 - Removed 4 duplicate MUI packages from devDependencies (#3545)
 - Webpack: Added `fullySpecified: false` for .mjs ESM resolution (#3545)
+- Upgraded `@mui/material`, `@mui/system` and `@mui/icons-material` from 9.1.x to 9.4.0 in `geoview-core` (and `@mui/material` in `geoview-drawer`) to adopt the theme-level `focusVisible` option (#3641)
 
 ## Architecture & Performance
 
@@ -292,6 +293,11 @@ _(WCAG fixes and improvements)_
 - Updated raster function, mosaic rule, and WMS style settings to use native button controls for expandable sections and selectable cards, with associated labels and decorative previews (issue #3656; #3678).
 - Updated Select controls across export, geolocator, layer settings, filter panel, and mobile tabs to use a single accessible naming source and automatically associated visible labels (#3678).
 - Localized the export preview loading message in English and French (#3678).
+- Adopted MUI 9.4 theme-level `focusVisible` for Material focus indicators (3px outline, 2px offset, 6px halo) and removed the broad `MuiButtonBase` focus override; `getFocusIndicatorStyles()` is retained for non-MUI/composite controls and external-theme fallbacks, and only the dense `MenuItem` keeps a fully inset outline without halo (#3642)
+- Replaced non-interactive elements used as buttons (cards, rows, tiles, undo/delete controls) with native `ButtonBase`/`IconButton`/`ListItemButton` in the layer delete/undo button, AOI panel, and checkbox list; removed hand-rolled `role="button"` + `tabIndex` + `onKeyDown` handlers (keyboard activation is detected via `event.detail === 0`). Delegated click containers (app bar, map info, footer tabs header) and focusable non-control regions (map, guide, rotation indicator) now carry justified `eslint-disable` comments (#3679)
+- Added `jsx-a11y` lint enforcement in `packages/eslint.config.js` (MUI component → DOM element mapping, interaction-handler scoping, `click-events-have-key-events`, `interactive-supports-focus`) plus a `no-restricted-syntax` warning against hand-rolled `role="button"` (#3679)
+- Swiper bar is now exposed as an accessible `slider` (`aria-valuenow`/`aria-valuetext`, orientation-aware label and keyboard instructions, decorative handle hidden), with the announced position updated live while dragging and debounced render cancelled on stop/unmount (new `positionLabel`, `positionFromLeft`, `positionFromTop`, `instructionsHorizontal`, `instructionsVertical` translations in EN/FR) (#3691)
+- Focus ring styling and accessibility documentation updates following the MUI 9.4 focus-indicator migration (tabs, slider and switch styles, guide/app-bar/data-table style clean-up, `docs/app/accessibility.md` and WCAG release-test page).
 
 ## Documentation & Cleanup
 

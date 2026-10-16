@@ -98,6 +98,8 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   // #endregion Handlers
 
   return (
+    // Delegated listener (not a control): any click inside (mainly bubbled from child buttons, incl. keyboard activation) scrolls the shell into view
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <Box component="section" aria-label={t('map.info')} id={`${mapId}-mapInfo`} sx={memoContainerSx} onClick={onScrollShellIntoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />

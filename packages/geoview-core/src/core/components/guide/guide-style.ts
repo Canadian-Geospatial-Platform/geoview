@@ -1,6 +1,7 @@
-import type { Theme } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
+import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
 
 /**
  * Gets reusable guide box styles for guide content.
@@ -8,17 +9,10 @@ import { visuallyHidden } from '@/ui/style/default';
  * @param theme - The theme object
  * @returns The guide box sx styles object
  */
-const getGuideBoxStyles = (theme: Theme): Object => ({
+const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
+  position: 'relative',
   color: theme.palette.geoViewColor?.grey.dark[800],
   padding: theme.spacing(2),
-  '& td': {
-    paddingTop: theme.spacing(0.5),
-    '& img': {
-      verticalAlign: 'bottom',
-      width: '24px',
-      height: '24px',
-    },
-  },
   '& h1': {
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(2),
@@ -28,27 +22,47 @@ const getGuideBoxStyles = (theme: Theme): Object => ({
     borderBottom: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
   },
   '& h2': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(3),
     paddingBottom: theme.spacing(0.5),
     fontSize: theme.palette.geoViewFontSize?.lg,
     fontWeight: 600,
+    overflowWrap: 'anywhere',
+    wordBreak: 'normal',
+    hyphens: 'auto',
     borderBottom: `2px solid ${theme.palette.geoViewColor?.secondary.main}`,
     '& img': {
       height: '30px',
       verticalAlign: 'middle',
+      flexShrink: 0,
+    },
+    '& a': {
+      flexShrink: 0,
     },
   },
   '& h3': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(2.5),
     paddingBottom: theme.spacing(0.5),
     fontSize: theme.palette.geoViewFontSize?.md,
     fontWeight: 600,
+    overflowWrap: 'anywhere',
+    wordBreak: 'normal',
+    hyphens: 'auto',
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[400]}`,
     '& img': {
       height: '25px',
       verticalAlign: 'bottom',
+      flexShrink: 0,
+    },
+    '& a': {
+      flexShrink: 0,
     },
   },
   '& h4': {
@@ -56,10 +70,30 @@ const getGuideBoxStyles = (theme: Theme): Object => ({
     marginTop: theme.spacing(2),
     fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: 600,
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: 'none',
     '& img': {
       verticalAlign: 'bottom',
     },
+  },
+  '& table': {
+    marginBottom: theme.spacing(2),
+  },
+  '& td': {
+    width: 'auto',
+    paddingTop: theme.spacing(0.5),
+    paddingLeft: theme.spacing(2),
+    '& img': {
+      verticalAlign: 'bottom',
+      width: '24px',
+      height: '24px',
+    },
+  },
+  '& th': {
+    textAlign: 'left',
+    paddingLeft: theme.spacing(2),
+  },
+  '& img': {
+    maxWidth: '100%',
   },
   '& p': {
     marginBottom: theme.spacing(1.25),
@@ -70,9 +104,6 @@ const getGuideBoxStyles = (theme: Theme): Object => ({
   },
   '& ul, & ol': {
     marginBottom: theme.spacing(1.25),
-  },
-  '& table': {
-    marginBottom: theme.spacing(2),
   },
 });
 
@@ -88,13 +119,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      '& .responsive-layout-right-main-content': {
-        '&:focus-visible': {
-          border: '2px solid inherit',
-        },
-      },
-      // Scope all guide-specific styles under .guideBox to prevent collision with other components
-      '& .guideBox': getGuideBoxStyles(theme),
     },
     rightPanelContainer: {
       color: theme.palette.geoViewColor?.textColor.main,
@@ -108,9 +132,8 @@ export const getSxClasses = (theme: Theme): SxStyles =>
         color: 'white',
         fontWeight: 'bold',
       },
-      // Scope all guide-specific styles under .guideBox to prevent collision with other components
-      '& .guideBox': getGuideBoxStyles(theme),
     },
+    guideBox: getGuideBoxStyles(theme),
     footerGuideListItemText: {
       '&:hover': {
         cursor: 'pointer',
@@ -159,7 +182,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     searchNavigationButton: {
       '&.Mui-focusVisible': {
-        outlineOffset: '-3px',
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },
@@ -168,7 +191,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     searchClearButton: {
       '&.Mui-focusVisible': {
-        outlineOffset: '-3px',
+        outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
     },

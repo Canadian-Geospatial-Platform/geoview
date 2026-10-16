@@ -18,6 +18,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '28px',
     padding: theme.spacing(0),
     color: theme.palette.secondary.contrastText,
+  },
+  listItemButton: {
+    height: '100%',
+    padding: theme.spacing(0),
     '&:hover': {
       backgroundColor: '#dddddd',
       color: theme.palette.geoViewColor?.primary.dark,

@@ -160,3 +160,17 @@ borderRadius: theme.shape.borderRadiusMd,
 **Prefer central defaults.** MUI's own components (Button, Paper, Dialog, Menu, inputs, Tooltip and others) already read the numeric base `theme.shape.borderRadius` (6), so don't re-declare a radius on them. When a whole component family needs a different radius, change it once in `theme.components` (`themeOptionsGenerator.ts`) instead of at each call site.
 
 **Off-scale legacy values** move to the nearest token: `5px` goes to `borderRadiusMd`, and anything else is decided case by case. Keep `theme.shape.borderRadius` (the base) as a **number** — MUI components such as Skeleton do math on it.
+
+## 4- Keyboard focus indicators
+
+Use the focus selector that matches the element receiving focus:
+
+- MUI `ButtonBase`-derived controls (for example, `Button`, `IconButton`, and `ListItemButton`): use `&.Mui-focusVisible`.
+- Native or custom focusable elements: use `&:focus-visible`.
+- A wrapper that indicates focus on a child: use `&:has(.Mui-focusVisible)` for a MUI child or `&:has(:focus-visible)` for a native/custom child.
+
+Let the theme provide the standard indicator for MUI controls. For custom controls or composite wrappers that need to draw an indicator, use `getFocusIndicatorStyles()` from `themeOptionsGenerator.ts`. Keep local overrides limited to layout needs such as inset placement or suppressing a redundant halo; do not restate the standard ring's color, width, or halo locally.
+
+When an inset offset equals the outline width, use the existing `FOCUS_OUTLINE_WIDTH` constant (for example, ``outlineOffset: `-${FOCUS_OUTLINE_WIDTH}` ``) rather than repeating its pixel value. Keep distinct one-off offsets literal; do not add tokens for them. Use `boxShadow: 'none'` directly when the halo must be suppressed.
+
+Form controls show their focus outline in keyboard navigation mode. Keep indicators visible when controls are clipped or inset, and preserve fallback indicators for external themes. See the [accessibility guide](../app/accessibility.md#keyboard-focus-indicators) for user-facing focus behavior.

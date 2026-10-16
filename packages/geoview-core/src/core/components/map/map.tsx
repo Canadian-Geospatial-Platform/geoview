@@ -128,6 +128,7 @@ export function Map(props: MapProps): JSX.Element {
       id={buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget)}
       ref={mapElement}
       sx={memoSxClasses.mapContainer}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the map region is keyboard-operable (arrow-key panning, crosshair) when interaction is dynamic
       tabIndex={mapInteraction === 'static' ? -1 : 0}
       role="region"
       aria-label={t('map.container', { mapId })}

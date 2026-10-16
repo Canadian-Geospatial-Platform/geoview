@@ -145,11 +145,16 @@ When WCAG mode is enabled and a panel opens, focus should be trapped within it.
 
 ## Contrast & Visual Indicators
 
-| Test                          | Description                | Steps                                                  | Expected Result                                          | Auto |
-| ----------------------------- | -------------------------- | ------------------------------------------------------ | -------------------------------------------------------- | ---- |
-| Focus indicators visible      | Focus ring on all elements | 1. Tab through all elements                            | Every focused element has a visible focus ring/outline   | M    |
-| Focus indicator in all themes | Focus visible in all theme | 1. Switch to to every theme<br>2. Tab through elements | Focus indicators are still visible (sufficient contrast) | M    |
-| Color is not sole indicator   | Status uses icons/text too | 1. Check layer status changes (loaded/error/loading)   | Icons or text are used in addition to color              | M    |
+Verify using live keyboard navigation, computed styles and written observations; no screenshots
+or visual snapshots are required. Allow focus transitions to settle before inspecting styles.
+Existing app-bar/nav-bar ring suppression is a separately tracked accessibility/design exception,
+not a passing result for the universal focus-indicator check.
+
+| Test                          | Description                | Steps                                                | Expected Result                                          | Auto |
+| ----------------------------- | -------------------------- | ---------------------------------------------------- | -------------------------------------------------------- | ---- |
+| Focus indicators visible      | Focus ring on all elements | 1. Tab through all elements                          | Every focused element has a visible focus ring/outline   | M    |
+| Focus indicator in all themes | Focus visible in all theme | 1. Switch to every theme<br>2. Tab through elements  | Focus indicators are still visible (sufficient contrast) | M    |
+| Color is not sole indicator   | Status uses icons/text too | 1. Check layer status changes (loaded/error/loading) | Icons or text are used in addition to color              | M    |
 
 ## Multi-Map WCAG
 

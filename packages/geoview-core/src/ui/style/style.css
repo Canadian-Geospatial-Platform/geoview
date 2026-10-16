@@ -7,17 +7,6 @@ Hold viewer specific css not inside theme
   position: relative !important;
 }
 
-/* specifiv style for icon alignement in guide component */
-.guideBox h3 img {
-  vertical-align: bottom;
-}
-.guideBox h4 img {
-  vertical-align: bottom;
-}
-.guideBox p img {
-  vertical-align: bottom;
-}
-
 /* smooth data table scrolling */
 .MuiTableContainer-root {
   contain: paint;

@@ -15,10 +15,6 @@ body {
   background-color: #ffffff !important;
 }
 
-td {
-  width: 100%;
-}
-
 .collapsible {
   background-color: #757575;
   color: white;
@@ -367,18 +363,26 @@ table.state {
   margin-bottom: 30px;
 }
 
-.demo-section h4:not([class*='MuiTypography']) {
+.demo-section h4 {
   color: #333;
   border-bottom: 2px solid #4caf50;
   padding-bottom: 8px;
   margin-bottom: 15px;
 }
 
-/* Only apply to direct paragraph children, not nested components like geoview */
+/* Only apply to direct paragraph children; maps must not be nested inside .demo-section */
 .demo-section > p,
-.demo-section > div > p:not([class*='MuiTypography']) {
+.demo-section > div > p {
   color: #555;
   margin-bottom: 15px;
+}
+
+.demo-section p code {
+  font-size: 16px;
+  margin: 2px 6px;
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 3px;
 }
 
 .demo-list {
@@ -708,14 +712,6 @@ table.state {
 
 /* Ensure code elements inside list items match the text size */
 .option-item ul li code {
-  font-size: 16px;
-  margin: 2px 6px;
-  background-color: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 3px;
-}
-
-p code {
   font-size: 16px;
   margin: 2px 6px;
   background-color: #f6f8fa;
