@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useId } from 'react';
 
 import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, Checkbox, Tooltip, Typography } from 'geoview-core/ui';
@@ -47,9 +47,10 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
   const effectiveDisplay = StacConfigUtils.resolveItemDisplayOptions(display, item.collection);
   const { itemView, actions, dateDisplay } = effectiveDisplay;
   const { t } = useTranslation();
+  const titleId = useId();
 
   const title = StacFieldUtils.getTitle(item, itemView?.titleField);
-  const footprintLabel = t(selectedColor ? 'stacBrowser.removeFootprintHighlight' : 'stacBrowser.highlightFootprint', { title });
+  const footprintLabel = t('stacBrowser.highlightFootprint', { title });
   const thumbnailUrl = StacAssetUtils.getThumbnailUrl(item);
   const badge = StacAssetUtils.getAssetTypeBadge(item);
   const datetime = item.properties.datetime ?? item.properties.start_datetime;
@@ -72,7 +73,9 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
         </Tooltip>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
         <Box sx={sxClasses.itemRowText}>
-          <Typography sx={sxClasses.resultTitle}>{title}</Typography>
+          <Typography id={titleId} sx={sxClasses.resultTitle}>
+            {title}
+          </Typography>
           {(badge || !itemView?.summaryFields?.length) && (
             <Typography sx={sxClasses.resultMeta}>
               {badge && (
@@ -110,6 +113,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             startIcon={<ZoomInSearchIcon fontSize="small" />}
             data-item-key={itemKey}
             data-action="zoom"
+            aria-describedby={titleId}
             onClick={onAction}
           >
             {t('stacBrowser.zoom')}
@@ -122,11 +126,12 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             startIcon={isPreviewed ? <VisibilityIcon fontSize="small" /> : <MapIcon fontSize="small" />}
             data-item-key={itemKey}
             data-action="preview"
+            aria-describedby={titleId}
             onClick={onAction}
             aria-pressed={isPreviewed}
             sx={isPreviewed ? sxClasses.itemActionActive : undefined}
           >
-            {isPreviewed ? t('stacBrowser.hideFromMap') : t('stacBrowser.showOnMap')}
+            {t('stacBrowser.showOnMap')}
           </Button>
         )}
         <Button
@@ -135,6 +140,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
           endIcon={<ChevronRightIcon fontSize="small" />}
           data-item-key={itemKey}
           data-action="detail"
+          aria-describedby={titleId}
           onClick={onAction}
         >
           {t('stacBrowser.details')}

@@ -276,8 +276,8 @@
       "description": "Styles for collection extents and search result footprints",
       "$ref": "#/definitions/TypeStacFootprintStyles",
       "default": {
-        "collection": { "color": "#1976d2", "fillOpacity": 0.2 },
-        "search": { "color": "#FF8C00", "fillOpacity": 0.25 }
+        "collection": { "color": "#1976d2", "fillOpacity": 0 },
+        "search": { "color": "#FF8C00", "fillOpacity": 0 }
       }
     },
     "actions": {

@@ -1,6 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, CircularProgressBase, Typography } from 'geoview-core/ui';
+import { ArrowBackIcon, ArrowForwardIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
@@ -130,12 +131,35 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
     [collections]
   );
 
+  // #region Handlers
+
+  /**
+   * Handles navigating to the previous page, ignored while unavailable.
+   */
+  const handlePrevClick = useCallback((): void => {
+    if (isLoading || !hasPrev) return;
+    onPrevPage();
+  }, [isLoading, hasPrev, onPrevPage]);
+
+  /**
+   * Handles navigating to the next page, ignored while unavailable.
+   */
+  const handleNextClick = useCallback((): void => {
+    if (isLoading || !hasNext) return;
+    onNextPage();
+  }, [isLoading, hasNext, onNextPage]);
+
+  // #endregion
+
+  const startItem = (currentPage - 1) * pageSize + 1;
+  const endItem = startItem + results.features.length - 1;
+
   return (
     <Box sx={memoSxClasses.panelContent}>
       {/* Back link */}
       <Box sx={memoSxClasses.stickyNav}>
-        <Button type="text" size="small" onClick={onBack}>
-          ← {t('stacBrowser.backToSearch')}
+        <Button type="text" size="small" startIcon={<ArrowBackIcon fontSize="small" />} onClick={onBack}>
+          {t('stacBrowser.backToSearch')}
         </Button>
         {onZoomToSearch && (
           <Button type="text" size="small" onClick={onZoomToSearch}>
@@ -143,6 +167,10 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
           </Button>
         )}
       </Box>
+
+      <Typography component="h3" tabIndex={-1} data-stac-view-focus sx={memoSxClasses.visuallyHidden}>
+        {t('stacBrowser.searchResults')}
+      </Typography>
 
       <Box role="status" aria-live="polite">
         {isLoading && (
@@ -161,7 +189,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
         {Array.from(memoGroupedItems.entries()).map(([collectionId, groupItems]) => (
           <Box key={collectionId} sx={memoSxClasses.collectionGroup}>
             {/* Collection header */}
-            <Typography sx={memoSxClasses.collectionGroupTitle}>
+            <Typography component="h4" sx={memoSxClasses.collectionGroupTitle}>
               {getCollectionTitle(collectionId)} ({groupItems.length})
             </Typography>
 
@@ -170,30 +198,34 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
           </Box>
         ))}
 
-        {(hasPrev || hasNext) &&
-          (() => {
-            const startItem = (currentPage - 1) * pageSize + 1;
-            const endItem = startItem + results.features.length - 1;
-            return (
-              <Box sx={memoSxClasses.pagination}>
-                {hasPrev && (
-                  <Button type="text" variant="outlined" onClick={onPrevPage} disabled={isLoading}>
-                    ← {t('stacBrowser.previous')}
-                  </Button>
-                )}
-                {hasNext && (
-                  <Button type="text" variant="outlined" onClick={onNextPage} disabled={isLoading}>
-                    {t('stacBrowser.next')} →
-                  </Button>
-                )}
-                {results.features.length > 0 && (
-                  <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: theme.palette.geoViewFontSize?.sm }}>
-                    {startItem}–{endItem}
-                  </Typography>
-                )}
-              </Box>
-            );
-          })()}
+        {/* Both buttons stay rendered so focus is kept when a page boundary is reached */}
+        {(hasPrev || hasNext) && (
+          <Box sx={memoSxClasses.pagination}>
+            <Button
+              type="text"
+              variant="outlined"
+              startIcon={<ArrowBackIcon fontSize="small" />}
+              aria-disabled={isLoading || !hasPrev}
+              onClick={handlePrevClick}
+            >
+              {t('stacBrowser.previous')}
+            </Button>
+            <Button
+              type="text"
+              variant="outlined"
+              endIcon={<ArrowForwardIcon fontSize="small" />}
+              aria-disabled={isLoading || !hasNext}
+              onClick={handleNextClick}
+            >
+              {t('stacBrowser.next')}
+            </Button>
+            {results.features.length > 0 && (
+              <Typography role="status" sx={memoSxClasses.pageRange}>
+                {t('stacBrowser.itemRange', { start: startItem, end: endItem })}
+              </Typography>
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );

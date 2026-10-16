@@ -51,7 +51,7 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
   return (
     <Box sx={sxClasses.metadataGrid} component="dl">
       {rows.map((row) => (
-        <Box key={row.field} sx={{ display: 'contents' }}>
+        <Box key={row.field} sx={sxClasses.metadataPair}>
           <Typography component="dt" sx={sxClasses.metadataKey}>
             {row.isConfiguredLabel ? t(row.label) : row.label}
           </Typography>

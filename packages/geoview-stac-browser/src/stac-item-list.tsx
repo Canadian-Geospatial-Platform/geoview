@@ -30,7 +30,7 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
   logger.logTraceRender('geoview-stac-browser/stac-item-list');
 
   const { items, display, interactions, sxClasses } = props;
-  const { selectedColors, previewedIds, onToggleSelected, onTogglePreview, onZoom, onOpenDetail } = interactions;
+  const { selectedColors, previewedHrefs, onToggleSelected, onTogglePreview, onZoom, onOpenDetail } = interactions;
   const { cgpv } = window as TypeWindow;
   const { useCallback } = cgpv.reactUtilities.react;
 
@@ -75,7 +75,7 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
             itemKey={itemKey}
             display={display}
             selectedColor={selectedColors[itemKey]}
-            isPreviewed={!!previewedIds[itemKey]}
+            isPreviewed={!!previewedHrefs[itemKey]}
             sxClasses={sxClasses}
             onToggleSelected={handleToggleSelected}
             onAction={handleAction}

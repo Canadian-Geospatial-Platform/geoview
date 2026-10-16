@@ -112,7 +112,12 @@ export class StacBrowserController extends AbstractMapViewerController {
       if (footprintKey) footprintKeys.add(footprintKey);
 
       const { color, fillOpacity = 0.1 } = footprint;
-      const style: TypeFeatureStyle = { strokeColor: color, strokeWidth: 2, fillColor: color, fillOpacity };
+      // GeometryApi treats a 0 fill opacity as opaque, so an outline-only footprint must omit the fill
+      const style: TypeFeatureStyle = {
+        strokeColor: color,
+        strokeWidth: 2,
+        ...(fillOpacity > 0 ? { fillColor: color, fillOpacity } : {}),
+      };
       const polygons = StacLayerHelper.getGeoJsonPolygons(footprint.geometry);
       if (polygons.length) {
         polygons.forEach((polygon) => geometryApi.addPolygon(polygon, { projection: 4326, style }, undefined, groupId));
@@ -305,6 +310,16 @@ export class StacBrowserController extends AbstractMapViewerController {
    */
   showError(messageKey: string, messageParams?: Record<string, unknown>): void {
     this.getControllersRegistry().uiController.addMessage('error', messageKey, messageParams);
+  }
+
+  /**
+   * Shows a translated success message in the snackbar and the notification panel.
+   *
+   * @param messageKey - The translation key of the message
+   * @param messageParams - Optional parameters for message interpolation
+   */
+  showSuccess(messageKey: string, messageParams?: Record<string, unknown>): void {
+    this.getControllersRegistry().uiController.addMessage('success', messageKey, messageParams);
   }
 
   // #endregion PUBLIC METHODS

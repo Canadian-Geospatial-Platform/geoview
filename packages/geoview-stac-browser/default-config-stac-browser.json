@@ -17,11 +17,11 @@
   "footprintStyles": {
     "collection": {
       "color": "#1976d2",
-      "fillOpacity": 0.2
+      "fillOpacity": 0
     },
     "search": {
       "color": "#FF8C00",
-      "fillOpacity": 0.25
+      "fillOpacity": 0
     }
   },
   "displayPreview": true,

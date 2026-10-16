@@ -14,6 +14,9 @@ import { Projection } from '@/geo/utils/projection';
 /** Property key used to tag layers added by the STAC browser plugin. */
 const STAC_BROWSER_TAG = 'gv-stac-browser';
 
+/** Z-index of the previews, above every STAC footprint group (9999 by default, 10001 for selected items). */
+const PREVIEW_ZINDEX = 10002;
+
 /** Two-dimensional coordinate used while fitting a static preview to its footprint. */
 export type TypePoint2D = [number, number];
 
@@ -93,7 +96,7 @@ export abstract class StacLayerHelper {
 
       const layer = new WebGLTile({ source, opacity });
       layer.set(STAC_BROWSER_TAG, true);
-      layer.setZIndex(10000);
+      layer.setZIndex(PREVIEW_ZINDEX);
       if (palette) StacLayerHelper.#applyPaletteStyle(layer, palette);
       return layer;
     } catch (error: unknown) {
@@ -129,7 +132,7 @@ export abstract class StacLayerHelper {
     });
     const layer = new ImageLayer({ source, opacity });
     layer.set(STAC_BROWSER_TAG, true);
-    layer.setZIndex(10000);
+    layer.setZIndex(PREVIEW_ZINDEX);
 
     return new Promise((resolve, reject) => {
       image.onload = (): void => {

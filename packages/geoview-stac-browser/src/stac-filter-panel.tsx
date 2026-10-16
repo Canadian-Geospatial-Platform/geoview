@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 
-import { Box, Button, Checkbox, CircularProgressBase, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
+import { Box, Button, Checkbox, CircularProgressBase, FormControlLabel, Select, TextField, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
@@ -68,13 +68,16 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useId, useMemo, useState } = cgpv.reactUtilities.react;
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const baseId = useId();
 
   const stacController = useStacBrowserController();
 
   const [queryables, setQueryables] = useState<Record<string, StacQueryableField>>({});
   const [queryablesLoading, setQueryablesLoading] = useState(false);
+  /** Server sortables of the selected collections, undefined when the server does not publish them. */
+  const [sortables, setSortables] = useState<Record<string, StacQueryableField> | undefined>(undefined);
 
   const showKeyword = config.filters?.keyword !== false && isFreeTextSupported;
   const showCollections = config.filters?.collections !== false && collections.length > 1;
@@ -127,6 +130,35 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   }, [apiService, memoSelectedQueryableCollections, selectedQueryableCollectionKey, showPropertyFilters, showSort, stacController]);
 
   /**
+   * Loads the sortable fields of the selected collections.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('STAC-FILTER-PANEL - Load sortables', selectedQueryableCollectionKey);
+
+    if (!showSort || memoSelectedQueryableCollections.length === 0) {
+      setSortables(undefined);
+      return undefined;
+    }
+
+    let cancelled = false;
+    apiService
+      .fetchSortables(memoSelectedQueryableCollections)
+      .then((result) => {
+        if (!cancelled) setSortables(result);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        // Best effort: without sortables the sort list falls back to the queryables
+        logger.logWarning('STAC-FILTER-PANEL - Could not load sortable properties', error);
+        setSortables(undefined);
+      });
+
+    return (): void => {
+      cancelled = true;
+    };
+  }, [apiService, memoSelectedQueryableCollections, selectedQueryableCollectionKey, showSort]);
+
+  /**
    * Builds the queryable property fields allowed by the package configuration.
    */
   const memoPropertyFields = useMemo((): [string, StacQueryableField][] => {
@@ -135,16 +167,29 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   }, [queryables, config.filters?.properties]);
 
   /**
-   * Builds sortable fields from the available queryables.
+   * Builds the sort fields from the server sortables, or from the queryables when the server does not publish sortables.
    */
   const memoSortFields = useMemo((): string[] => {
-    logger.logTraceUseMemo('STAC-FILTER-PANEL - memoSortFields', queryables);
-    const fields = new Set(['datetime', 'id', ...Object.keys(queryables)]);
-    return Array.from(fields).filter((field) => {
-      const queryable = queryables[field];
-      return !queryable || (queryable.type !== 'geometry' && queryable.format !== 'geometry-any');
+    logger.logTraceUseMemo('STAC-FILTER-PANEL - memoSortFields', sortables, queryables);
+    const definitions = sortables ?? queryables;
+    const fields = sortables ? Object.keys(sortables) : Array.from(new Set(['datetime', 'id', ...Object.keys(queryables)]));
+    return fields.filter((field) => {
+      const definition = definitions[field];
+      return !definition || (definition.type !== 'geometry' && definition.format !== 'geometry-any');
     });
-  }, [queryables]);
+  }, [sortables, queryables]);
+
+  const showSortControls = showSort && memoSortFields.length > 0;
+
+  /**
+   * Moves the selected sort field to an available one when the selection no longer allows it.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('STAC-FILTER-PANEL - Keep the sort field valid', memoSortFields, filterState.sortField);
+
+    if (!showSortControls || memoSortFields.includes(filterState.sortField)) return;
+    setFilterState((previous) => ({ ...previous, sortField: memoSortFields[0] }));
+  }, [showSortControls, memoSortFields, filterState.sortField, setFilterState]);
 
   // #region Handlers
 
@@ -207,13 +252,13 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   );
 
   /**
-   * Handles changes to a queryable property value.
+   * Handles changes to a queryable property value; the field is the input name.
    */
   const handlePropertyFilterChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-      const field = event.currentTarget.dataset.propertyField;
+    (event: { target: { name?: string; value: unknown } }): void => {
+      const field = event.target.name;
       if (!field) return;
-      const { value } = event.currentTarget;
+      const value = String(event.target.value);
       setFilterState((previous) => ({
         ...previous,
         propertyFilters: {
@@ -226,13 +271,13 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   );
 
   /**
-   * Handles changes to a queryable property operator.
+   * Handles changes to a queryable property operator; the field is the input name.
    */
   const handlePropertyOperatorChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      const field = event.currentTarget.dataset.propertyField;
+    (event: { target: { name?: string; value: unknown } }): void => {
+      const field = event.target.name;
       if (!field) return;
-      const { value } = event.currentTarget;
+      const value = String(event.target.value);
       setFilterState((previous) => ({
         ...previous,
         propertyFilters: {
@@ -248,18 +293,27 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    * Handles changes to the sort field or direction.
    */
   const handleSortChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      const { name, value } = event.currentTarget;
-      if (name === 'stac-sort-field') setFilterState((previous) => ({ ...previous, sortField: value }));
+    (event: { target: { name?: string; value: unknown } }): void => {
+      const value = String(event.target.value);
+      if (event.target.name === 'stac-sort-field') setFilterState((previous) => ({ ...previous, sortField: value }));
       else setFilterState((previous) => ({ ...previous, sortDirection: value === 'asc' ? 'asc' : 'desc' }));
     },
     [setFilterState]
   );
 
   /**
-   * Handles search button click.
+   * Handles the clear filters button, ignored while a search is pending.
+   */
+  const handleClearClick = useCallback((): void => {
+    if (isSearching) return;
+    onClearFilters();
+  }, [isSearching, onClearFilters]);
+
+  /**
+   * Handles search button click, ignored while a search is pending.
    */
   const handleSearchClick = useCallback((): void => {
+    if (isSearching) return;
     const params: StacFilterValues = {};
 
     if (showCollections && filterState.selectedCollections.length) {
@@ -287,17 +341,31 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
     const filter = StacConfigUtils.buildCql2Filter(filterState.propertyFilters, queryables);
     if (filter) params.filter = filter;
-    if (showSort && filterState.sortField) {
+    if (showSortControls && memoSortFields.includes(filterState.sortField)) {
       params.sortBy = [{ field: filterState.sortField, direction: filterState.sortDirection }];
     }
 
     onSearch(params);
-  }, [showCollections, filterState, queryables, config.defaults?.bbox, showKeyword, showSort, onSearch, stacController]);
+  }, [
+    isSearching,
+    showCollections,
+    filterState,
+    queryables,
+    config.defaults?.bbox,
+    showKeyword,
+    showSortControls,
+    memoSortFields,
+    onSearch,
+    stacController,
+  ]);
 
   // #endregion
 
   return (
     <Box sx={memoSxClasses.filterPanel}>
+      <Typography component="h3" tabIndex={-1} data-stac-view-focus sx={memoSxClasses.visuallyHidden}>
+        {t('stacBrowser.search')}
+      </Typography>
       {config.searchDescription && (
         <Typography component="p" sx={memoSxClasses.detailDescription}>
           {config.searchDescription}
@@ -321,8 +389,10 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
       {/* Collection filter */}
       {showCollections && (
-        <Box sx={memoSxClasses.filterRow}>
-          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.collections')}</Typography>
+        <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-collections`}>
+          <Typography id={`${baseId}-collections`} sx={memoSxClasses.filterLabel}>
+            {t('stacBrowser.collections')}
+          </Typography>
           <Box sx={memoSxClasses.collectionsListBox}>
             {collections.map((collection) => (
               <FormControlLabel
@@ -344,20 +414,24 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
       {/* Temporal filter */}
       {config.filters?.temporal !== false && (
-        <Box sx={memoSxClasses.filterRow}>
-          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.temporal')}</Typography>
+        <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-temporal`}>
+          <Typography id={`${baseId}-temporal`} sx={memoSxClasses.filterLabel}>
+            {t('stacBrowser.temporal')}
+          </Typography>
           <Box sx={memoSxClasses.dateInputRow}>
             <input type="date" aria-label={t('stacBrowser.startDate')} value={filterState.startDate} onChange={handleStartDateChange} />
-            <Typography>—</Typography>
+            <Typography aria-hidden="true">—</Typography>
             <input type="date" aria-label={t('stacBrowser.endDate')} value={filterState.endDate} onChange={handleEndDateChange} />
           </Box>
         </Box>
       )}
 
       {showPropertyFilters && (
-        <Box sx={memoSxClasses.filterRow}>
-          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.propertyFilters')}</Typography>
-          {queryablesLoading && <Typography sx={memoSxClasses.resultMeta}>{t('stacBrowser.loading')}</Typography>}
+        <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-properties`}>
+          <Typography id={`${baseId}-properties`} sx={memoSxClasses.filterLabel}>
+            {t('stacBrowser.propertyFilters')}
+          </Typography>
+          <Box role="status">{queryablesLoading && <Typography sx={memoSxClasses.resultMeta}>{t('stacBrowser.loading')}</Typography>}</Box>
           {!queryablesLoading &&
             memoPropertyFields.map(([field, queryable]) => {
               const isNumeric = queryable.type === 'integer' || queryable.type === 'number';
@@ -379,36 +453,31 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
               return (
                 <Box key={field} sx={memoSxClasses.propertyFilterRow}>
                   <Typography sx={memoSxClasses.resultMeta}>{label}</Typography>
-                  <select
+                  <Select
                     aria-label={t('stacBrowser.propertyOperator', { field: label })}
-                    data-property-field={field}
+                    inputProps={{ name: field }}
                     value={currentFilter.operator}
                     onChange={handlePropertyOperatorChange}
-                  >
-                    {operators.map((operator) => (
-                      <option key={operator} value={operator}>
-                        {operator}
-                      </option>
-                    ))}
-                  </select>
+                    menuItems={operators.map((operator) => ({ item: { value: operator, children: operator } }))}
+                  />
                   {isBoolean || queryable.enum ? (
-                    <select
+                    <Select
                       aria-label={t('stacBrowser.propertyValue', { field: label })}
-                      data-property-field={field}
+                      inputProps={{ name: field }}
                       value={currentFilter.value}
                       onChange={handlePropertyFilterChange}
-                    >
-                      <option value="">{t('stacBrowser.anyValue')}</option>
-                      {(queryable.enum ?? ['true', 'false']).map((value) => (
-                        <option key={String(value)} value={String(value)}>
-                          {String(value)}
-                        </option>
-                      ))}
-                    </select>
+                      displayEmpty
+                      menuItems={[
+                        { item: { value: '', children: t('stacBrowser.anyValue') } },
+                        ...(queryable.enum ?? ['true', 'false']).map((value) => ({
+                          item: { value: String(value), children: String(value) },
+                        })),
+                      ]}
+                    />
                   ) : (
                     <input
                       aria-label={t('stacBrowser.propertyValue', { field: label })}
-                      data-property-field={field}
+                      name={field}
                       type={valueInputType}
                       value={currentFilter.value}
                       onChange={handlePropertyFilterChange}
@@ -423,31 +492,33 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
         </Box>
       )}
 
-      {showSort && (
-        <Box sx={memoSxClasses.filterRow}>
-          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.sort')}</Typography>
+      {showSortControls && (
+        <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-sort`}>
+          <Typography id={`${baseId}-sort`} sx={memoSxClasses.filterLabel}>
+            {t('stacBrowser.sort')}
+          </Typography>
           <Box sx={memoSxClasses.dateInputRow}>
-            <select
+            <Select
               aria-label={t('stacBrowser.sortField')}
-              name="stac-sort-field"
+              inputProps={{ name: 'stac-sort-field' }}
               value={filterState.sortField}
               onChange={handleSortChange}
-            >
-              {memoSortFields.map((field) => (
-                <option key={field} value={field}>
-                  {queryables[field]?.title ?? field}
-                </option>
-              ))}
-            </select>
-            <select
+              fullWidth
+              menuItems={memoSortFields.map((field) => ({
+                item: { value: field, children: (sortables ?? queryables)[field]?.title ?? field },
+              }))}
+            />
+            <Select
               aria-label={t('stacBrowser.sortDirection')}
-              name="stac-sort-direction"
+              inputProps={{ name: 'stac-sort-direction' }}
               value={filterState.sortDirection}
               onChange={handleSortChange}
-            >
-              <option value="asc">{t('stacBrowser.ascending')}</option>
-              <option value="desc">{t('stacBrowser.descending')}</option>
-            </select>
+              fullWidth
+              menuItems={[
+                { item: { value: 'asc', children: t('stacBrowser.ascending') } },
+                { item: { value: 'desc', children: t('stacBrowser.descending') } },
+              ]}
+            />
           </Box>
         </Box>
       )}
@@ -483,10 +554,10 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
         )}
       </Box>
       <Box sx={memoSxClasses.filterActions}>
-        <Button type="text" variant="outlined" onClick={onClearFilters} disabled={isSearching}>
+        <Button type="text" variant="outlined" onClick={handleClearClick} aria-disabled={isSearching}>
           {t('stacBrowser.clearFilters')}
         </Button>
-        <Button type="text" variant="contained" onClick={handleSearchClick} disabled={isSearching}>
+        <Button type="text" variant="contained" onClick={handleSearchClick} aria-disabled={isSearching}>
           {t('stacBrowser.search')}
         </Button>
       </Box>
