@@ -86,7 +86,7 @@
       {
         "geoviewLayerId": "archive-flood-wms",
         "geoviewLayerName": "Archive Flood - WMS CDTK",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
