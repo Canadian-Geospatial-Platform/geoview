@@ -801,8 +801,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoFilteredFeatures', data.features);
 
-    // Gather the available field information from the feature
-    const fieldInfos: Partial<Record<string, TypeFieldEntry>> = data.features?.[0]?.fieldInfo ?? {};
+    // Gather the available field names and date fields from the feature
+    const featureFieldInfo: Partial<Record<string, TypeFieldEntry>> = data.features?.[0]?.fieldInfo ?? {};
+    const dateFieldNames = Object.entries(featureFieldInfo)
+      .filter(([, fieldInfo]) => fieldInfo?.dataType === 'date')
+      .map(([fieldName]) => fieldName);
 
     // Create the filter equation equivalent of the combined filter
     const layerFilterEquation = LayerFilters.createClientFilterEquation(
@@ -810,7 +813,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
       layerTimeFilter,
       layerFilterPanelFilterExpression,
       vectorTimeField,
-      fieldInfos
+      dateFieldNames
     );
 
     // Filter each features
