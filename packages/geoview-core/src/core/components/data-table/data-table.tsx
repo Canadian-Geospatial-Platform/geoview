@@ -1202,8 +1202,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
           const [start, end] = value;
 
           // Convert the dates as read to UTC ISO strings, that's the core standard
-          const startDate = start?.isValid() ? start.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
-          const endDate = end?.isValid() ? end.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+          const startDate = isDayjs(start) && start.isValid() ? start.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+          const endDate = isDayjs(end) && end.isValid() ? end.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
 
           const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
 
