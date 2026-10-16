@@ -1,6 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { SxStyles } from 'geoview-core/ui/style/types';
-import { Box, Button, Select, Typography } from 'geoview-core/ui';
+import { Box, Button, Typography } from 'geoview-core/ui';
+import { ArrowBackIcon, ArrowForwardIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
@@ -30,8 +31,6 @@ interface StacCollectionDetailProps {
   collection: StacCollection;
   /** The STAC API service instance. */
   apiService: StacApiService;
-  /** Collections that can be selected without leaving the items view. */
-  collections: StacCollection[];
   /** Number of items per page. */
   limit: number;
   /** Optional sort criteria, only set when the server supports sorting. */
@@ -40,8 +39,6 @@ interface StacCollectionDetailProps {
   display: StacItemDisplayOptions;
   /** Selection/preview state and callbacks of the item cards. */
   interactions: StacItemInteractions;
-  /** Callback to switch to another collection. */
-  onCollectionChange: (collectionId: string) => void;
   /** Optional callback to go back to the collections list, hidden when undefined. */
   onBack?: () => void;
 }
@@ -56,13 +53,14 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-collection-detail');
 
-  const { collection, apiService, collections, limit, sortby, display, interactions, onCollectionChange, onBack } = props;
+  const { collection, apiService, limit, sortby, display, interactions, onBack } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useId, useMemo, useRef, useState } = cgpv.reactUtilities.react;
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const descriptionId = useId();
 
   const stacController = useStacBrowserController();
   /**
@@ -176,15 +174,17 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * Handles navigating to the next page of items.
    */
   const handleNextPage = useCallback((): void => {
-    if (nextUrl) void loadItems(nextUrl);
-  }, [nextUrl, loadItems]);
+    if (isLoading || !nextUrl) return;
+    void loadItems(nextUrl);
+  }, [isLoading, nextUrl, loadItems]);
 
   /**
    * Handles navigating to the previous page of items.
    */
   const handlePrevPage = useCallback((): void => {
-    if (prevUrl) void loadItems(prevUrl);
-  }, [prevUrl, loadItems]);
+    if (isLoading || !prevUrl) return;
+    void loadItems(prevUrl);
+  }, [isLoading, prevUrl, loadItems]);
 
   /**
    * Handles toggling the description expanded state.
@@ -202,16 +202,6 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       logger.logError('STAC-COLLECTION-DETAIL - Failed to zoom to collection extent', error);
     });
   }, [stacController, memoUnionExtent]);
-
-  /**
-   * Handles switching the active collection from the item browser.
-   */
-  const handleCollectionChange = useCallback(
-    (event: { target: { value: unknown } }): void => {
-      if (typeof event.target.value === 'string') onCollectionChange(event.target.value);
-    },
-    [onCollectionChange]
-  );
 
   // #endregion
 
@@ -232,32 +222,26 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       {/* Back link */}
       {onBack && (
         <Box sx={memoSxClasses.backLink}>
-          <Button type="text" size="small" onClick={onBack}>
-            ← {t('stacBrowser.backToCollections')}
+          <Button type="text" size="small" startIcon={<ArrowBackIcon fontSize="small" />} onClick={onBack}>
+            {t('stacBrowser.backToCollections')}
           </Button>
         </Box>
       )}
 
       {/* Collection Header */}
       <Box sx={memoSxClasses.detailSection}>
-        {collections.length > 1 ? (
-          <Select
-            aria-label={t('stacBrowser.collection')}
-            value={collection.id}
-            onChange={handleCollectionChange}
-            fullWidth
-            menuItems={collections.map((entry) => ({ item: { value: entry.id, children: StacFieldUtils.getCollectionTitle(entry) } }))}
-          />
-        ) : (
-          <Typography sx={memoSxClasses.detailTitle}>{StacFieldUtils.getCollectionTitle(collection)}</Typography>
-        )}
+        <Typography component="h3" tabIndex={-1} data-stac-view-focus sx={memoSxClasses.detailTitle}>
+          {StacFieldUtils.getCollectionTitle(collection)}
+        </Typography>
 
         {/* Description with Read more */}
         {description && (
           <Box>
-            <Typography sx={memoSxClasses.detailDescription}>{displayDesc}</Typography>
+            <Typography id={descriptionId} sx={memoSxClasses.detailDescription}>
+              {displayDesc}
+            </Typography>
             {isDescLong && (
-              <Button type="text" size="small" onClick={handleToggleDescription}>
+              <Button type="text" size="small" aria-expanded={descExpanded} aria-controls={descriptionId} onClick={handleToggleDescription}>
                 {descExpanded ? t('stacBrowser.readLess') : t('stacBrowser.readMore')}
               </Button>
             )}
@@ -307,35 +291,51 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
       {/* Items Section */}
       <Box sx={memoSxClasses.detailSection}>
-        <Typography sx={memoSxClasses.itemsSectionTitle}>
+        <Typography component="h4" sx={memoSxClasses.itemsSectionTitle}>
           {t('stacBrowser.items')}
           {numberMatched !== undefined ? ` (${numberMatched.toLocaleString()})` : ''}
         </Typography>
 
-        {isLoading && (
-          <Box sx={memoSxClasses.loading}>
-            <Typography>{t('stacBrowser.loading')}</Typography>
-          </Box>
-        )}
-
-        {!isLoading && items.length === 0 && (
-          <Box sx={memoSxClasses.noResults}>
-            <Typography>{t('stacBrowser.noResults')}</Typography>
-          </Box>
-        )}
+        <Box role="status" aria-live="polite">
+          {isLoading && (
+            <Box sx={memoSxClasses.loading}>
+              <Typography>{t('stacBrowser.loading')}</Typography>
+            </Box>
+          )}
+          {!isLoading && items.length === 0 && (
+            <Box sx={memoSxClasses.noResults}>
+              <Typography>{t('stacBrowser.noResults')}</Typography>
+            </Box>
+          )}
+          {!isLoading && items.length > 0 && (
+            <Typography sx={memoSxClasses.visuallyHidden}>{t('stacBrowser.itemsShown', { count: items.length })}</Typography>
+          )}
+        </Box>
 
         {!isLoading && items.length > 0 && (
           <StacItemList items={items} display={display} interactions={interactions} sxClasses={memoSxClasses} />
         )}
 
-        {/* Pagination */}
-        {!isLoading && (prevUrl || nextUrl) && (
+        {/* Pagination stays rendered while loading so the focused button is kept */}
+        {(prevUrl || nextUrl) && (
           <Box sx={memoSxClasses.paginationBar}>
-            <Button type="text" size="small" disabled={!prevUrl} onClick={handlePrevPage}>
-              ← {t('stacBrowser.previous')}
+            <Button
+              type="text"
+              size="small"
+              startIcon={<ArrowBackIcon fontSize="small" />}
+              aria-disabled={isLoading || !prevUrl}
+              onClick={handlePrevPage}
+            >
+              {t('stacBrowser.previous')}
             </Button>
-            <Button type="text" size="small" disabled={!nextUrl} onClick={handleNextPage}>
-              {t('stacBrowser.next')} →
+            <Button
+              type="text"
+              size="small"
+              endIcon={<ArrowForwardIcon fontSize="small" />}
+              aria-disabled={isLoading || !nextUrl}
+              onClick={handleNextPage}
+            >
+              {t('stacBrowser.next')}
             </Button>
           </Box>
         )}

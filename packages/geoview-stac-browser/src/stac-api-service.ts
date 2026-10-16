@@ -61,6 +61,9 @@ export class StacApiService {
   /** Queryable schemas cached by collection id (or the catalog-level empty key). */
   #queryablesCache = new Map<string, Record<string, StacQueryableField>>();
 
+  /** Sortable schemas cached by collection id, undefined when the server does not publish them. */
+  #sortablesCache = new Map<string, Record<string, StacQueryableField> | undefined>();
+
   /**
    * Creates a STAC API service instance.
    *
@@ -134,10 +137,24 @@ export class StacApiService {
     }
 
     const responses = await Promise.all(ids.map((collectionId) => this.#fetchQueryablesForCollection(collectionId)));
-    if (responses.length === 1) return responses[0];
+    return StacApiService.#intersectProperties(responses);
+  }
 
-    const commonFields = Object.keys(responses[0]).filter((field) => responses.every((response) => !!response[field]));
-    return Object.fromEntries(commonFields.map((field) => [field, responses[0][field]]));
+  /**
+   * Fetches the sortable property schemas for the selected collections.
+   *
+   * For multiple collections, only fields sortable in every selected collection are returned so one sort is valid for the whole search.
+   *
+   * @param collectionIds - Optional selected collection IDs; omitted means catalog-level sortables
+   * @returns A promise that resolves with sortable properties keyed by their STAC field name,
+   *   or undefined when a collection does not publish its sortables
+   * @throws {NetworkError | RequestTimeoutError} When the request cannot reach the server
+   */
+  async fetchSortables(collectionIds?: string[]): Promise<Record<string, StacQueryableField> | undefined> {
+    const ids = collectionIds?.length ? collectionIds : [''];
+    const responses = await Promise.all(ids.map((collectionId) => this.#fetchSortablesForCollection(collectionId)));
+    if (responses.some((response) => response === undefined)) return undefined;
+    return StacApiService.#intersectProperties(responses as Record<string, StacQueryableField>[]);
   }
 
   /**
@@ -229,6 +246,30 @@ export class StacApiService {
     const queryables = await Fetch.fetchJson<StacQueryables>(url);
     const properties = queryables.properties ?? {};
     this.#queryablesCache.set(collectionId, properties);
+    return properties;
+  }
+
+  /**
+   * Fetches and caches the sortables of one collection or the catalog.
+   *
+   * @param collectionId - Collection ID, or an empty string for catalog sortables
+   * @returns A promise that resolves with sortable properties, or undefined when the server answers with an HTTP error
+   * @throws {NetworkError | RequestTimeoutError} When the request cannot reach the server
+   */
+  async #fetchSortablesForCollection(collectionId: string): Promise<Record<string, StacQueryableField> | undefined> {
+    if (this.#sortablesCache.has(collectionId)) return this.#sortablesCache.get(collectionId);
+
+    const url = collectionId ? `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/sortables` : `${this.#stacUrl}/sortables`;
+    let properties: Record<string, StacQueryableField> | undefined;
+    try {
+      const sortables = await Fetch.fetchJson<StacQueryables>(url);
+      properties = sortables.properties ?? {};
+    } catch (error: unknown) {
+      // Sortables are optional (OGC API Features part 3); an HTTP error means the server does not publish them
+      if (!(error instanceof ResponseError)) throw error;
+      properties = undefined;
+    }
+    this.#sortablesCache.set(collectionId, properties);
     return properties;
   }
 
@@ -350,6 +391,18 @@ export class StacApiService {
     let body = originalBody;
     if (link.body) body = link.merge ? { ...originalBody, ...link.body } : link.body;
     return StacApiService.#postJson<StacSearchResult>(link.href, body);
+  }
+
+  /**
+   * Keeps only the properties present in every collection response.
+   *
+   * @param responses - Property schemas of each collection
+   * @returns The properties shared by all collections, with the definitions of the first one
+   */
+  static #intersectProperties(responses: Record<string, StacQueryableField>[]): Record<string, StacQueryableField> {
+    if (responses.length === 1) return responses[0];
+    const commonFields = Object.keys(responses[0]).filter((field) => responses.every((response) => !!response[field]));
+    return Object.fromEntries(commonFields.map((field) => [field, responses[0][field]]));
   }
 
   /**

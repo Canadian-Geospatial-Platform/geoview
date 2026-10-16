@@ -414,8 +414,8 @@ export interface StacItemDisplayOptions {
 export interface StacItemInteractions {
   /** Colors of selected items, keyed by stable item identity. */
   selectedColors: Record<string, string>;
-  /** Stable identities of items previewed on the map. */
-  previewedIds: Record<string, boolean>;
+  /** URL of the asset previewed on the map, keyed by stable item identity. */
+  previewedHrefs: Record<string, string>;
   /** Toggles the selection (colored footprint) of an item. */
   onToggleSelected: (item: StacItem) => void;
   /** Toggles the map preview of an item. */

@@ -1,19 +1,21 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+import { visuallyHidden } from 'geoview-core/ui/style/default';
+import { getFormControlFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
 
 /** Default color of the collection extent footprint. */
 export const COLLECTION_COLOR = '#1976d2';
 
-/** Default fill opacity of the collection extent footprint. */
-export const COLLECTION_FILL_OPACITY = 0.2;
+/** Default fill opacity of the collection extent footprint, outline only. */
+export const COLLECTION_FILL_OPACITY = 0;
 
 /** Default color of item footprints. */
 export const ITEM_COLOR = '#FF8C00';
 
-/** Default fill opacity of item footprints shown while browsing a collection or viewing an item. */
-export const ITEM_FILL_OPACITY = 0.15;
+/** Default fill opacity of item footprints shown while browsing a collection or viewing an item, outline only. */
+export const ITEM_FILL_OPACITY = 0;
 
-/** Default fill opacity of search-result footprints. */
-export const SEARCH_FILL_OPACITY = 0.25;
+/** Default fill opacity of search-result footprints, outline only. */
+export const SEARCH_FILL_OPACITY = 0;
 
 /** Colors assigned to the selected items, distinct from the collection and item footprint colors. */
 export const SELECTION_COLORS = ['#e53935', '#43a047', '#fdd835', '#8e24aa', '#00acc1', '#d81b60', '#7cb342', '#5e35b1'];
@@ -22,16 +24,40 @@ export const SELECTION_COLORS = ['#e53935', '#43a047', '#fdd835', '#8e24aa', '#0
 export const SELECTED_FILL_OPACITY = 0.25;
 
 /**
+ * Gets the styles of native date and number inputs, which are not InputBase controls and need the shared keyboard focus indicator.
+ *
+ * @param theme - The MUI theme
+ * @returns The native input style definitions
+ */
+const getNativeInputSx = (theme: Theme): ReturnType<typeof getFormControlFocusIndicatorStyles> => ({
+  minWidth: 0,
+  maxWidth: '100%',
+  padding: theme.spacing(0.5),
+  font: 'inherit',
+  '.geoview-keyboard-active &:focus-visible': theme.palette.geoViewColor
+    ? getFormControlFocusIndicatorStyles(theme.palette.geoViewColor)
+    : {},
+});
+
+/**
  * Gets the sx classes for the STAC browser components.
  *
  * @param theme - The MUI theme
  * @returns The sx style definitions
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  visuallyHidden,
   mainContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    overflow: 'hidden',
+  },
+  viewContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minHeight: 0,
     overflow: 'hidden',
   },
   panelContent: {
@@ -126,11 +152,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
     gap: theme.spacing(0.75),
     alignItems: 'center',
-    '& > select, & > input': {
+    '& > .MuiFormControl-root': {
       minWidth: 0,
-      maxWidth: '100%',
-      padding: theme.spacing(0.5),
     },
+    '& > input': getNativeInputSx(theme),
   },
   resultsList: {
     padding: theme.spacing(1),
@@ -195,6 +220,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.action.hover,
     },
   },
+  assetItemSelected: {
+    backgroundColor: theme.palette.action.selected,
+  },
+  assetTitleSelected: {
+    fontWeight: 600,
+  },
   loading: {
     display: 'flex',
     justifyContent: 'center',
@@ -214,10 +245,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     padding: theme.spacing(1),
   },
+  pageRange: {
+    marginLeft: 'auto',
+    alignSelf: 'center',
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
   dateInputRow: {
     display: 'flex',
     gap: theme.spacing(1),
     alignItems: 'center',
+    '& > input': { ...getNativeInputSx(theme), flex: 1 },
   },
   containedInExtentCheckbox: {
     marginLeft: theme.spacing(0.25),
@@ -244,9 +281,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   // Collection card styles
+  collectionList: {
+    listStyle: 'none',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0),
+  },
   collectionCard: {
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '100%',
+    textAlign: 'left',
+    font: 'inherit',
+    color: 'inherit',
     gap: theme.spacing(0.5),
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
@@ -258,14 +305,28 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   collectionTitle: {
+    display: 'block',
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.geoViewColor?.textColor.main,
   },
   collectionDescription: {
+    display: 'block',
     fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.geoViewColor?.textColor.light[200],
     lineHeight: 1.4,
+  },
+  collectionSearchField: {
+    flex: 1,
+  },
+  sortToggle: {
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    backgroundColor: 'transparent',
+    borderRadius: theme.shape.borderRadiusSm,
+    '&[aria-pressed="true"]': {
+      color: theme.palette.geoViewColor?.primary.main,
+      backgroundColor: theme.palette.action.selected,
+    },
   },
 
   // Keyword chips
@@ -372,6 +433,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     margin: theme.spacing(0),
     padding: theme.spacing(0.5, 0.5, 0.5, 1),
     fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+  metadataPair: {
+    display: 'contents',
   },
   metadataKey: {
     fontWeight: 600,

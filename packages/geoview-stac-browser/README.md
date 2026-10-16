@@ -45,41 +45,41 @@ Item and collection zooms fit their extent in the map area beside the open STAC 
 
 ### Properties
 
-| Property                     | Type               | Default       | Description                                                                                |
-| ---------------------------- | ------------------ | ------------- | ------------------------------------------------------------------------------------------ |
-| `stacUrl`                    | string             | (required)    | Base URL of the STAC API                                                                   |
-| `browseEnabled`              | boolean            | `true`        | Enable collection browsing; when false, only search mode is available                      |
-| `defaultMode`                | string             | `"browse"`    | Initial `browse` or `search` view; search is always used when browsing is disabled         |
-| `searchDescription`          | string             | -             | Optional custom text displayed above the search filters                                    |
-| `collections.include`        | string[]           | -             | Collection IDs to show (all when omitted)                                                  |
-| `collections.exclude`        | string[]           | -             | Collection IDs to hide                                                                     |
-| `collections.default`        | string             | -             | Collection opened at startup (opened automatically when only one collection is allowed)    |
-| `filters.collections`        | boolean            | `true`        | Enable collection filter (shown when more than one collection is allowed)                  |
-| `filters.temporal`           | boolean            | `true`        | Enable temporal extent filter                                                              |
-| `filters.spatial`            | boolean            | `true`        | Enable spatial extent (bbox) filter                                                        |
-| `filters.keyword`            | boolean            | `true`        | Enable keyword search (hidden when the server does not support free-text search)           |
-| `filters.sort`               | boolean            | `true`        | Show interactive sort controls when the server supports sorting                            |
-| `filters.properties`         | boolean / array    | unset         | Show CQL2 filters for all queryables (`true`) or an allowlist of field names/configs       |
-| `defaults.collections`       | string[]           | `[]`          | Pre-selected collection IDs                                                                |
-| `defaults.useMapExtent`      | boolean            | `false`       | Pre-select Use current map extent when spatial filtering is enabled                        |
-| `defaults.containedInExtent` | boolean            | `false`       | Pre-select Fully contained in extent; applies only when Use current map extent is selected |
-| `defaults.bbox`              | number[]           | -             | Default bbox [west, south, east, north], applied when the map extent is not used           |
-| `defaults.datetime`          | string             | -             | Default ISO 8601 datetime interval (pre-fills the temporal filter)                         |
-| `defaults.limit`             | number             | `20`          | Items per page                                                                             |
-| `defaults.sortBy`            | object[]           | -             | Sort criteria `{ field, direction }`, applied only when the server supports sorting        |
-| `itemView.titleField`        | string             | -             | Dot path of the item title field (defaults to `properties.title`, then `id`)               |
-| `itemView.summaryFields`     | object[]           | -             | Fields shown on item cards: `{ field, label?, format? }` (defaults to the item date)       |
-| `itemView.metadataFields`    | `"all"` / object[] | `"all"`       | Fields shown in the metadata view                                                          |
-| `itemView.excludeFields`     | string[]           | -             | Dot paths never shown in the metadata view                                                 |
-| `collectionOverrides`        | object             | -             | Per-collection `itemView`, `preview`, and `actions` overrides                              |
-| `preview.mode`               | string             | `"auto"`      | `auto`, `cog`, `thumbnail` or `none`. Previews are map overlays, never added to the legend |
-| `preview.assetPriority`      | string[]           | -             | Asset roles or keys used to pick the preview asset, in priority order                      |
-| `preview.opacity`            | number             | `1`           | Opacity of the preview overlay                                                             |
-| `footprintStyles.collection` | object             | blue / 0.2    | Color and fill opacity for the collection extent on the map                                |
-| `footprintStyles.search`     | object             | orange / 0.25 | Color and fill opacity for search-result footprints on the map                             |
-| `actions.*`                  | boolean            | `true`        | Toggle item actions: `zoom`, `showOnMap`, `download`, `copyUrl`                            |
-| `displayPreview`             | boolean            | `true`        | Master switch for map previews                                                             |
-| `isOpen`                     | boolean            | `false`       | Whether panel opens automatically                                                          |
+| Property                     | Type               | Default    | Description                                                                                |
+| ---------------------------- | ------------------ | ---------- | ------------------------------------------------------------------------------------------ |
+| `stacUrl`                    | string             | (required) | Base URL of the STAC API                                                                   |
+| `browseEnabled`              | boolean            | `true`     | Enable collection browsing; when false, only search mode is available                      |
+| `defaultMode`                | string             | `"browse"` | Initial `browse` or `search` view; search is always used when browsing is disabled         |
+| `searchDescription`          | string             | -          | Optional custom text displayed above the search filters                                    |
+| `collections.include`        | string[]           | -          | Collection IDs to show (all when omitted)                                                  |
+| `collections.exclude`        | string[]           | -          | Collection IDs to hide                                                                     |
+| `collections.default`        | string             | -          | Collection opened at startup (opened automatically when only one collection is allowed)    |
+| `filters.collections`        | boolean            | `true`     | Enable collection filter (shown when more than one collection is allowed)                  |
+| `filters.temporal`           | boolean            | `true`     | Enable temporal extent filter                                                              |
+| `filters.spatial`            | boolean            | `true`     | Enable spatial extent (bbox) filter                                                        |
+| `filters.keyword`            | boolean            | `true`     | Enable keyword search (hidden when the server does not support free-text search)           |
+| `filters.sort`               | boolean            | `true`     | Show interactive sort controls when the server supports sorting                            |
+| `filters.properties`         | boolean / array    | unset      | Show CQL2 filters for all queryables (`true`) or an allowlist of field names/configs       |
+| `defaults.collections`       | string[]           | `[]`       | Pre-selected collection IDs                                                                |
+| `defaults.useMapExtent`      | boolean            | `false`    | Pre-select Use current map extent when spatial filtering is enabled                        |
+| `defaults.containedInExtent` | boolean            | `false`    | Pre-select Fully contained in extent; applies only when Use current map extent is selected |
+| `defaults.bbox`              | number[]           | -          | Default bbox [west, south, east, north], applied when the map extent is not used           |
+| `defaults.datetime`          | string             | -          | Default ISO 8601 datetime interval (pre-fills the temporal filter)                         |
+| `defaults.limit`             | number             | `20`       | Items per page                                                                             |
+| `defaults.sortBy`            | object[]           | -          | Sort criteria `{ field, direction }`, applied only when the server supports sorting        |
+| `itemView.titleField`        | string             | -          | Dot path of the item title field (defaults to `properties.title`, then `id`)               |
+| `itemView.summaryFields`     | object[]           | -          | Fields shown on item cards: `{ field, label?, format? }` (defaults to the item date)       |
+| `itemView.metadataFields`    | `"all"` / object[] | `"all"`    | Fields shown in the metadata view                                                          |
+| `itemView.excludeFields`     | string[]           | -          | Dot paths never shown in the metadata view                                                 |
+| `collectionOverrides`        | object             | -          | Per-collection `itemView`, `preview`, and `actions` overrides                              |
+| `preview.mode`               | string             | `"auto"`   | `auto`, `cog`, `thumbnail` or `none`. Previews are map overlays, never added to the legend |
+| `preview.assetPriority`      | string[]           | -          | Asset roles or keys used to pick the preview asset, in priority order                      |
+| `preview.opacity`            | number             | `1`        | Opacity of the preview overlay                                                             |
+| `footprintStyles.collection` | object             | blue / 0   | Color and fill opacity for the collection extent on the map                                |
+| `footprintStyles.search`     | object             | orange / 0 | Color and fill opacity for search-result footprints on the map                             |
+| `actions.*`                  | boolean            | `true`     | Toggle item actions: `zoom`, `showOnMap`, `download`, `copyUrl`                            |
+| `displayPreview`             | boolean            | `true`     | Master switch for map previews                                                             |
+| `isOpen`                     | boolean            | `false`    | Whether panel opens automatically                                                          |
 
 Field paths use dot notation into the STAC item (`id`, `collection`, `properties.scale`, `assets.thumbnail.href`). Supported `format` values: `text`, `date`, `datetime`, `number`, `epsg`, `url`, `json`. A `label` can be plain text or a translation key.
 

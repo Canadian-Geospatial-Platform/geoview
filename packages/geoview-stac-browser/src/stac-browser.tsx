@@ -10,7 +10,7 @@ import {
   useStoreAppDisplayLanguage,
 } from 'geoview-core/core/stores/states/app-state';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
-import type { TypeStacMapExtentSnapshot } from 'geoview-core/core/controllers/stac-browser-controller';
+import type { TypeStacMapExtentSnapshot, TypeStacPreviewAsset } from 'geoview-core/core/controllers/stac-browser-controller';
 
 import type {
   BrowseMode,
@@ -20,6 +20,7 @@ import type {
   StacCollection,
   StacFilterValues,
   StacFilterPanelState,
+  StacAsset,
   StacItem,
   StacItemDisplayOptions,
   StacItemInteractions,
@@ -41,7 +42,7 @@ import { getSxClasses, SELECTED_FILL_OPACITY, SELECTION_COLORS } from './stac-br
 /** Geometry group used for the selected item footprints. */
 const SELECTED_FOOTPRINT_GROUP = 'stac-selected-footprints';
 
-/** Z-index of the selected footprints, above the other footprints (9999) and the previews (10000). */
+/** Z-index of the selected footprints, above the other footprints (9999) and below the previews (10002). */
 const SELECTED_FOOTPRINT_ZINDEX = 10001;
 
 /**
@@ -136,10 +137,14 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [itemDetailOrigin, setItemDetailOrigin] = useState<PanelView>('collections');
   /** Selected items with their footprint color, keyed by stable item identity. */
   const [selectedItems, setSelectedItems] = useState<Record<string, { item: StacItem; color: string }>>({});
-  /** Items previewed on the map, keyed by stable item identity. */
-  const [previewedIds, setPreviewedIds] = useState<Record<string, boolean>>({});
+  /** URL of the asset previewed on the map, keyed by stable item identity; shared by the item cards and the item detail. */
+  const [previewedHrefs, setPreviewedHrefs] = useState<Record<string, string>>({});
   /** Identifies the latest item-detail request so stale responses cannot change the active view. */
   const itemDetailRequestIdRef = useRef(0);
+  /** Container of the active view, used to find its focus target. */
+  const contentRef = useRef<HTMLDivElement>(null);
+  /** Whether the next render should move focus to the active view heading, set by user navigation only. */
+  const isViewFocusRequestedRef = useRef(false);
 
   const limit = config.defaults?.limit ?? DEFAULT_PAGE_LIMIT;
   const searchSortBy = capabilities?.searchSort ? config.defaults?.sortBy : undefined;
@@ -231,6 +236,19 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, [stacController]);
 
   /**
+   * Moves the keyboard focus to the active view heading after a user navigation replaced the focused control.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('STAC-BROWSER - Focus the active view', view);
+
+    if (!isViewFocusRequestedRef.current) return;
+    const heading = contentRef.current?.querySelector<HTMLElement>('[data-stac-view-focus]');
+    if (!heading) return;
+    isViewFocusRequestedRef.current = false;
+    heading.focus();
+  }, [view, mode, selectedItem, selectedCollection, selectedItems, previewedHrefs]);
+
+  /**
    * Stores a search result page and its pagination links.
    *
    * @param result - The search result
@@ -292,6 +310,46 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     displayDateMode,
   ]);
 
+  /**
+   * Removes the map preview of an item.
+   *
+   * @param itemKey - The stable item identity
+   */
+  const hidePreview = useCallback(
+    (itemKey: string): void => {
+      stacController.removeOverlay(getPreviewOverlayId(itemKey));
+      setPreviewedHrefs((prev) => {
+        const next = { ...prev };
+        delete next[itemKey];
+        return next;
+      });
+    },
+    [stacController]
+  );
+
+  /**
+   * Shows an asset of an item on the map, replacing the current preview of that item.
+   *
+   * @param item - The STAC item
+   * @param previewAsset - The asset to show
+   */
+  const showPreview = useCallback(
+    (item: StacItem, previewAsset: TypeStacPreviewAsset): void => {
+      const itemKey = StacFieldUtils.getItemKey(item);
+      hidePreview(itemKey);
+      const { preview } = StacConfigUtils.resolveItemDisplayOptions(memoDisplay, item.collection);
+      stacController
+        .addPreviewOverlay(getPreviewOverlayId(itemKey), previewAsset, preview?.opacity, item.bbox, item.geometry)
+        .then((isAdded) => {
+          if (isAdded) setPreviewedHrefs((prev) => ({ ...prev, [itemKey]: previewAsset.href }));
+        })
+        .catch((error: unknown) => {
+          logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
+        });
+    },
+    [stacController, memoDisplay, hidePreview]
+  );
+
   // #region Handlers
 
   /**
@@ -301,6 +359,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (newMode: BrowseMode): void => {
       if (newMode === 'browse' && !browseEnabled) return;
       itemDetailRequestIdRef.current += 1;
+      isViewFocusRequestedRef.current = true;
       setMode(newMode);
       if (newMode === 'browse') {
         setView(defaultCollection ? 'collection-detail' : 'collections');
@@ -319,16 +378,17 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   );
 
   /**
-   * Handles clicking a browse/search mode tab.
+   * Handles clicking a browse/search mode tab, ignored while a request is pending.
    */
   const handleModeClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
+      if (isLoading) return;
       const newMode = event.currentTarget.dataset.mode;
       if (newMode === 'browse' || newMode === 'search') {
         handleModeChange(newMode);
       }
     },
-    [handleModeChange]
+    [isLoading, handleModeChange]
   );
 
   /**
@@ -336,22 +396,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleCollectionClick = useCallback((collection: StacCollection): void => {
     itemDetailRequestIdRef.current += 1;
+    isViewFocusRequestedRef.current = true;
     setSelectedCollection(collection);
     setView('collection-detail');
   }, []);
-
-  /**
-   * Handles switching collections without leaving the item view.
-   */
-  const handleCollectionChange = useCallback(
-    (collectionId: string): void => {
-      const collection = collections.find((entry) => entry.id === collectionId);
-      if (collection) {
-        handleCollectionClick(collection);
-      }
-    },
-    [collections, handleCollectionClick]
-  );
 
   /**
    * Handles clicking on an item to view its details.
@@ -361,6 +409,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       const requestId = ++itemDetailRequestIdRef.current;
       const openItem = (itemToOpen: StacItem): void => {
         if (requestId !== itemDetailRequestIdRef.current) return;
+        isViewFocusRequestedRef.current = true;
         setSelectedItem(itemToOpen);
         setItemDetailOrigin(view);
         setView('item-detail');
@@ -427,6 +476,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             setSearchContainedExtent(containedExtent);
             setSearchResultPages([result]);
             applySearchResult(result, 1);
+            if (result.features.length > 0) isViewFocusRequestedRef.current = true;
             setView(result.features.length > 0 ? 'search-results' : 'search');
           }
         } catch (error: unknown) {
@@ -499,6 +549,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleBackFromItemDetail = useCallback((): void => {
     itemDetailRequestIdRef.current += 1;
+    isViewFocusRequestedRef.current = true;
     setSelectedItem(undefined);
     setView(itemDetailOrigin);
   }, [itemDetailOrigin]);
@@ -508,6 +559,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleBackToCollections = useCallback((): void => {
     itemDetailRequestIdRef.current += 1;
+    isViewFocusRequestedRef.current = true;
     setSelectedCollection(undefined);
     setView('collections');
   }, []);
@@ -517,6 +569,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleBackToSearch = useCallback((): void => {
     itemDetailRequestIdRef.current += 1;
+    isViewFocusRequestedRef.current = true;
     setView('search');
   }, []);
 
@@ -537,6 +590,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       const collection = collections.find((c) => c.id === collectionId);
       if (collection) {
         itemDetailRequestIdRef.current += 1;
+        isViewFocusRequestedRef.current = true;
         setMode('browse');
         setSelectedItem(undefined);
         setSelectedCollection(collection);
@@ -566,36 +620,36 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, []);
 
   /**
-   * Handles toggling the map preview (COG or image overlay) of an item.
+   * Handles the item card map preview: hides any shown asset of the item, otherwise shows its configured preview asset.
    */
   const handleTogglePreview = useCallback(
     (item: StacItem): void => {
       const itemKey = StacFieldUtils.getItemKey(item);
-      const overlayId = getPreviewOverlayId(itemKey);
-      if (stacController.hasOverlay(overlayId)) {
-        stacController.removeOverlay(overlayId);
-        setPreviewedIds((prev) => {
-          const next = { ...prev };
-          delete next[itemKey];
-          return next;
-        });
+      if (previewedHrefs[itemKey]) {
+        hidePreview(itemKey);
         return;
       }
 
       const { preview } = StacConfigUtils.resolveItemDisplayOptions(memoDisplay, item.collection);
       const previewAsset = StacAssetUtils.getPreviewAsset(item, preview);
-      if (!previewAsset) return;
-
-      stacController
-        .addPreviewOverlay(overlayId, previewAsset, preview?.opacity, item.bbox, item.geometry)
-        .then((isAdded) => {
-          if (isAdded) setPreviewedIds((prev) => ({ ...prev, [itemKey]: true }));
-        })
-        .catch((error: unknown) => {
-          logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
-        });
+      if (previewAsset) showPreview(item, previewAsset);
     },
-    [stacController, memoDisplay]
+    [previewedHrefs, memoDisplay, hidePreview, showPreview]
+  );
+
+  /**
+   * Handles an item detail asset toggle: hides the asset when it is shown, otherwise shows it instead of the current preview.
+   */
+  const handleToggleAssetPreview = useCallback(
+    (item: StacItem, asset: StacAsset): void => {
+      const itemKey = StacFieldUtils.getItemKey(item);
+      if (previewedHrefs[itemKey] === asset.href) {
+        hidePreview(itemKey);
+        return;
+      }
+      showPreview(item, { kind: 'cog', href: asset.href });
+    },
+    [previewedHrefs, hidePreview, showPreview]
   );
 
   /**
@@ -626,10 +680,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles clearing every item selection and map preview.
    */
   const handleClearSelection = useCallback((): void => {
-    Object.keys(previewedIds).forEach((itemKey) => stacController.removeOverlay(getPreviewOverlayId(itemKey)));
-    setPreviewedIds({});
+    Object.keys(previewedHrefs).forEach((itemKey) => stacController.removeOverlay(getPreviewOverlayId(itemKey)));
+    // The Clear button disappears with the selection bar
+    isViewFocusRequestedRef.current = true;
+    setPreviewedHrefs({});
     setSelectedItems({});
-  }, [stacController, previewedIds]);
+  }, [stacController, previewedHrefs]);
 
   // #endregion
 
@@ -637,23 +693,24 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Builds the selection/preview state and callbacks of the item cards.
    */
   const memoInteractions = useMemo((): StacItemInteractions => {
-    logger.logTraceUseMemo('STAC-BROWSER - memoInteractions', selectedItems, previewedIds);
+    logger.logTraceUseMemo('STAC-BROWSER - memoInteractions', selectedItems, previewedHrefs);
     const selectedColors: Record<string, string> = {};
     Object.entries(selectedItems).forEach(([itemId, entry]) => {
       selectedColors[itemId] = entry.color;
     });
     return {
       selectedColors,
-      previewedIds,
+      previewedHrefs,
       onToggleSelected: handleToggleSelected,
       onTogglePreview: handleTogglePreview,
       onZoom: handleZoomToItem,
       onOpenDetail: handleItemClick,
     };
-  }, [selectedItems, previewedIds, handleToggleSelected, handleTogglePreview, handleZoomToItem, handleItemClick]);
+  }, [selectedItems, previewedHrefs, handleToggleSelected, handleTogglePreview, handleZoomToItem, handleItemClick]);
 
   const selectedCount = Object.keys(selectedItems).length;
-  const previewedCount = Object.keys(previewedIds).length;
+  const previewedCount = Object.keys(previewedHrefs).length;
+  const hasSelection = selectedCount > 0 || previewedCount > 0;
 
   /**
    * Renders the active view based on the current panel state.
@@ -665,6 +722,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         <StacItemDetail
           item={selectedItem}
           display={memoDisplay}
+          previewedHref={previewedHrefs[StacFieldUtils.getItemKey(selectedItem)]}
+          onToggleAssetPreview={handleToggleAssetPreview}
           onBack={handleBackFromItemDetail}
           onGoToCollection={browseEnabled ? handleGoToCollection : undefined}
         />
@@ -677,12 +736,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         <StacCollectionDetail
           collection={selectedCollection}
           apiService={memoApiService}
-          collections={collections}
           limit={limit}
           sortby={itemsSortBy}
           display={memoDisplay}
           interactions={memoInteractions}
-          onCollectionChange={handleCollectionChange}
           onBack={collections.length > 1 ? handleBackToCollections : undefined}
         />
       );
@@ -734,7 +791,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     // Default: collections list — browse mode
     if (!isInitialized) {
       return (
-        <Box sx={memoSxClasses.loading}>
+        <Box sx={memoSxClasses.loading} role="status">
           <Typography>{t('stacBrowser.loading')}</Typography>
         </Box>
       );
@@ -742,7 +799,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
     if (collections.length === 0) {
       return (
-        <Box sx={memoSxClasses.noResults}>
+        <Box sx={memoSxClasses.noResults} role="status">
           <Typography>{t('stacBrowser.noResults')}</Typography>
         </Box>
       );
@@ -764,7 +821,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'browse' && memoSxClasses.modeButtonActive] as SxProps}
             data-mode="browse"
-            disabled={isLoading}
+            aria-disabled={isLoading}
             onClick={handleModeClick}
             aria-pressed={mode === 'browse'}
           >
@@ -774,7 +831,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'search' && memoSxClasses.modeButtonActive] as SxProps}
             data-mode="search"
-            disabled={isLoading}
+            aria-disabled={isLoading}
             onClick={handleModeClick}
             aria-pressed={mode === 'search'}
           >
@@ -783,21 +840,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         </Box>
       )}
 
-      {/* Selection summary, kept across views so the user can clear the map at any time */}
-      <Box role="status" aria-live="polite">
-        {(selectedCount > 0 || previewedCount > 0) && (
-          <Box sx={memoSxClasses.selectionBar}>
-            <Typography sx={memoSxClasses.resultMeta}>
-              {t('stacBrowser.selectionSummary', { selected: selectedCount, previewed: previewedCount })}
-            </Typography>
-            <Button type="text" size="small" onClick={handleClearSelection}>
-              {t('stacBrowser.clear')}
-            </Button>
-          </Box>
+      {/* Selection summary, kept across views so the user can clear the map at any time; the status stays mounted to be announced */}
+      <Box sx={hasSelection ? memoSxClasses.selectionBar : undefined}>
+        <Typography role="status" sx={memoSxClasses.resultMeta}>
+          {hasSelection ? t('stacBrowser.selectionSummary', { selected: selectedCount, previewed: previewedCount }) : ''}
+        </Typography>
+        {hasSelection && (
+          <Button type="text" size="small" onClick={handleClearSelection}>
+            {t('stacBrowser.clear')}
+          </Button>
         )}
       </Box>
 
-      {renderContent()}
+      <Box ref={contentRef} sx={memoSxClasses.viewContainer}>
+        {renderContent()}
+      </Box>
     </Box>
   );
 }
