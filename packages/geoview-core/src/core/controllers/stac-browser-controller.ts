@@ -6,9 +6,11 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import { getStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
 import { getGVElementById, getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
 import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
@@ -25,8 +27,24 @@ export interface TypeStacMapExtentSnapshot {
 export interface TypeStacFootprint {
   /** GeoJSON geometry (Polygon or MultiPolygon) in EPSG:4326. */
   geometry?: unknown;
-  /** Bounding box in EPSG:4326, used when no geometry is available. */
+  /** Bounding box in EPSG:4326, used when no polygon geometry is available. */
   bbox?: number[];
+}
+
+/** A STAC footprint with its drawing style. */
+export interface TypeStacStyledFootprint extends TypeStacFootprint {
+  /** CSS color for the stroke and fill. */
+  color: string;
+  /** Optional fill opacity (0-1), defaults to 0.1. */
+  fillOpacity?: number;
+}
+
+/** A STAC asset resolved for a map preview: a Cloud-Optimized GeoTIFF or a plain image stretched over the footprint. */
+export interface TypeStacPreviewAsset {
+  /** The preview kind. */
+  kind: 'cog' | 'image';
+  /** URL of the preview asset. */
+  href: string;
 }
 
 /**
@@ -74,34 +92,38 @@ export class StacBrowserController extends AbstractMapViewerController {
   // #region PUBLIC METHODS
 
   /**
-   * Adds footprint polygons to the map in the given geometry group.
+   * Replaces the footprints of a geometry group, each drawn with its own style.
    *
+   * Identical footprints are drawn once. Bbox footprints are densified so their edges follow curvilinear projections (e.g., LCC).
    *
    * @param groupId - The geometry group id used to manage the footprints lifecycle
-   * @param footprints - The footprints to draw
-   * @param color - CSS color for the stroke and fill
-   * @param fillOpacity - Optional fill opacity (0-1)
+   * @param footprints - The styled footprints to draw
    * @param zIndex - Optional z-index of the geometry group (footprint groups default to 9999)
    */
-  addFootprints(groupId: string, footprints: TypeStacFootprint[], color: string, fillOpacity?: number, zIndex?: number): void {
+  setFootprints(groupId: string, footprints: TypeStacStyledFootprint[], zIndex?: number): void {
+    this.clearFootprints(groupId);
     const geometryApi = this.getGeometryApi();
-    let footprintKeys = this.#footprintKeysByGroup.get(groupId);
-    if (!footprintKeys) {
-      footprintKeys = new Set<string>();
-      this.#footprintKeysByGroup.set(groupId, footprintKeys);
-    }
+    const footprintKeys = new Set<string>();
+    this.#footprintKeysByGroup.set(groupId, footprintKeys);
 
     footprints.forEach((footprint) => {
-      const bbox = StacBrowserController.#getLonLatBbox(footprint.bbox);
       const footprintKey = StacBrowserController.#getFootprintKey(footprint);
       if (footprintKey && footprintKeys.has(footprintKey)) return;
       if (footprintKey) footprintKeys.add(footprintKey);
 
-      if (footprint.geometry) {
-        StacLayerHelper.addFootprintLayer(geometryApi, { geometry: footprint.geometry }, color, fillOpacity, groupId);
-      } else if (bbox) {
-        StacLayerHelper.addFootprintLayer(geometryApi, { bbox }, color, fillOpacity, groupId);
+      const { color, fillOpacity = 0.1 } = footprint;
+      const style: TypeFeatureStyle = { strokeColor: color, strokeWidth: 2, fillColor: color, fillOpacity };
+      const polygons = StacLayerHelper.getGeoJsonPolygons(footprint.geometry);
+      if (polygons.length) {
+        polygons.forEach((polygon) => geometryApi.addPolygon(polygon, { projection: 4326, style }, undefined, groupId));
+        return;
       }
+
+      const bbox = GeoUtilities.bboxToExtent2D(footprint.bbox);
+      if (!bbox) return;
+      const lonLat = Projection.getProjectionLonLat();
+      const ring = Projection.transformAndDensifyExtent(bbox, lonLat, lonLat);
+      geometryApi.addPolygon([[...ring, ring[0]]], { projection: 4326, style }, undefined, groupId);
     });
 
     if (zIndex !== undefined && geometryApi.hasGeometryGroup(groupId)) geometryApi.setGeometryGroupZIndex(groupId, zIndex);
@@ -113,7 +135,8 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @param groupId - The geometry group id to clear
    */
   clearFootprints(groupId: string): void {
-    StacLayerHelper.clearFootprints(this.getGeometryApi(), groupId);
+    const geometryApi = this.getGeometryApi();
+    if (geometryApi.hasGeometryGroup(groupId)) geometryApi.deleteGeometryGroup(groupId);
     this.#footprintKeysByGroup.delete(groupId);
   }
 
@@ -126,7 +149,7 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @throws {InvalidExtentError} When the extent is invalid (propagated from `zoomToExtent()`)
    */
   zoomToLonLatBbox(bbox: TypeLonLatBbox): Promise<void> {
-    const extent = StacLayerHelper.transformBboxToMapProjection(this.getMapId(), bbox);
+    const extent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), this.getMapViewer().getProjection(), 25);
     return this.getControllersRegistry().mapController.zoomToExtent(extent, true, {
       padding: this.#getZoomPadding(),
     });
@@ -167,10 +190,43 @@ export class StacBrowserController extends AbstractMapViewerController {
   /**
    * Gets the current map extent as a lon/lat bounding box.
    *
-   * @returns The map extent in EPSG:4326 [west, south, east, north]
+   * @returns The map extent in EPSG:4326 [west, south, east, north], clamped to valid bounds
    */
   getMapExtentAsLonLatBbox(): TypeLonLatBbox {
-    return StacLayerHelper.getMapExtentAsWgs84Bbox(this.getMapId());
+    const snapshot = this.captureMapExtent();
+    if (!snapshot) return [-180, -90, 180, 90];
+    const [west, south, east, north] = Projection.transformExtentFromProj(
+      snapshot.extent,
+      this.getMapViewer().getProjection(),
+      Projection.getProjectionLonLat()
+    );
+    return [Math.max(west, -180), Math.max(south, -90), Math.min(east, 180), Math.min(north, 90)];
+  }
+
+  /**
+   * Adds a map preview overlay for a resolved STAC asset, replacing any overlay with the same id.
+   *
+   * COG assets are rendered as georeferenced tiles; image assets are stretched over the footprint and need a bbox.
+   *
+   * @param overlayId - The caller-provided id of the overlay
+   * @param previewAsset - The asset to preview
+   * @param opacity - Optional overlay opacity (0-1)
+   * @param bbox - Optional 2D or 3D STAC bbox in EPSG:4326, required for image previews
+   * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326 used to clip image previews
+   * @returns A promise that resolves with true when the overlay was added
+   */
+  addPreviewOverlay(
+    overlayId: string,
+    previewAsset: TypeStacPreviewAsset,
+    opacity?: number,
+    bbox?: number[],
+    geometry?: unknown
+  ): Promise<boolean> {
+    if (previewAsset.kind === 'cog') return this.addGeoTiffOverlay(overlayId, previewAsset.href, opacity);
+
+    const lonLatBbox = GeoUtilities.bboxToExtent2D(bbox);
+    if (!lonLatBbox) return Promise.resolve(false);
+    return this.#addImageOverlay(overlayId, previewAsset.href, lonLatBbox, opacity, geometry);
   }
 
   /**
@@ -185,14 +241,9 @@ export class StacBrowserController extends AbstractMapViewerController {
     this.removeOverlay(overlayId);
     const requestId = Symbol(overlayId);
     this.#overlayRequests.set(overlayId, requestId);
-    const { map } = this.getMapViewer();
-
     try {
-      const layer = await StacLayerHelper.addGeoTiffLayer(map, geotiffUrl, opacity);
-      if (this.#overlayRequests.get(overlayId) !== requestId) {
-        if (layer) StacLayerHelper.removeStacLayer(map, layer);
-        return false;
-      }
+      const layer = await StacLayerHelper.createGeoTiffLayer(geotiffUrl, opacity);
+      if (this.#overlayRequests.get(overlayId) !== requestId) return false;
 
       this.#overlayRequests.delete(overlayId);
       if (!layer) {
@@ -200,6 +251,7 @@ export class StacBrowserController extends AbstractMapViewerController {
         return false;
       }
 
+      this.getMapViewer().map.addLayer(layer);
       this.#overlays.set(overlayId, layer);
       logger.logInfo('STAC browser - Added GeoTIFF overlay:', overlayId, geotiffUrl);
       return true;
@@ -207,43 +259,6 @@ export class StacBrowserController extends AbstractMapViewerController {
       if (this.#overlayRequests.get(overlayId) === requestId) {
         this.#overlayRequests.delete(overlayId);
         logger.logError(`STAC browser - Failed to add GeoTIFF overlay: ${overlayId}`, error);
-        this.showError('stacBrowser.errorPreview');
-      }
-      return false;
-    }
-  }
-
-  /**
-   * Adds an image preview overlay (e.g., a thumbnail) fitted to the item footprint, replacing any overlay with the same id.
-   *
-   * @param overlayId - The caller-provided id of the overlay
-   * @param imageUrl - URL of the image
-   * @param bbox - The bounding box in EPSG:4326 [west, south, east, north]
-   * @param opacity - Optional overlay opacity (0-1)
-   * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
-   * @returns A promise that resolves with true when the image overlay was added
-   */
-  async addImageOverlay(overlayId: string, imageUrl: string, bbox: TypeLonLatBbox, opacity?: number, geometry?: unknown): Promise<boolean> {
-    this.removeOverlay(overlayId);
-    const requestId = Symbol(overlayId);
-    this.#overlayRequests.set(overlayId, requestId);
-    const { map } = this.getMapViewer();
-
-    try {
-      const layer = await Promise.resolve(StacLayerHelper.addImageLayer(map, imageUrl, bbox, opacity, geometry));
-      if (this.#overlayRequests.get(overlayId) !== requestId) {
-        StacLayerHelper.removeStacLayer(map, layer);
-        return false;
-      }
-
-      this.#overlayRequests.delete(overlayId);
-      this.#overlays.set(overlayId, layer);
-      logger.logInfo('STAC browser - Added image overlay:', overlayId, imageUrl);
-      return true;
-    } catch (error: unknown) {
-      if (this.#overlayRequests.get(overlayId) === requestId) {
-        this.#overlayRequests.delete(overlayId);
-        logger.logError(`STAC browser - Failed to add image overlay: ${overlayId}`, error);
         this.showError('stacBrowser.errorPreview');
       }
       return false;
@@ -270,7 +285,7 @@ export class StacBrowserController extends AbstractMapViewerController {
     const layer = this.#overlays.get(overlayId);
     if (!layer) return;
 
-    StacLayerHelper.removeStacLayer(this.getMapViewer().map, layer);
+    this.getMapViewer().map.removeLayer(layer);
     this.#overlays.delete(overlayId);
   }
 
@@ -295,6 +310,45 @@ export class StacBrowserController extends AbstractMapViewerController {
   // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
+
+  /**
+   * Adds an image preview overlay (e.g., a thumbnail) fitted to the item footprint, replacing any overlay with the same id.
+   *
+   * @param overlayId - The caller-provided id of the overlay
+   * @param imageUrl - URL of the image
+   * @param bbox - The bounding box in EPSG:4326 [west, south, east, north]
+   * @param opacity - Optional overlay opacity (0-1)
+   * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
+   * @returns A promise that resolves with true when the image overlay was added
+   */
+  async #addImageOverlay(
+    overlayId: string,
+    imageUrl: string,
+    bbox: TypeLonLatBbox,
+    opacity?: number,
+    geometry?: unknown
+  ): Promise<boolean> {
+    this.removeOverlay(overlayId);
+    const requestId = Symbol(overlayId);
+    this.#overlayRequests.set(overlayId, requestId);
+    try {
+      const layer = await StacLayerHelper.createImageLayer(imageUrl, bbox, opacity, geometry);
+      if (this.#overlayRequests.get(overlayId) !== requestId) return false;
+
+      this.#overlayRequests.delete(overlayId);
+      this.getMapViewer().map.addLayer(layer);
+      this.#overlays.set(overlayId, layer);
+      logger.logInfo('STAC browser - Added image overlay:', overlayId, imageUrl);
+      return true;
+    } catch (error: unknown) {
+      if (this.#overlayRequests.get(overlayId) === requestId) {
+        this.#overlayRequests.delete(overlayId);
+        logger.logError(`STAC browser - Failed to add image overlay: ${overlayId}`, error);
+        this.showError('stacBrowser.errorPreview');
+      }
+      return false;
+    }
+  }
 
   /**
    * Gets fit padding that reserves the visible STAC panel overlap on the left of the map.
@@ -339,18 +393,6 @@ export class StacBrowserController extends AbstractMapViewerController {
   // #region STATIC METHODS
 
   /**
-   * Converts a four- or six-coordinate STAC bbox to its 2D longitude/latitude extent.
-   *
-   * @param bbox - A STAC bbox in EPSG:4326
-   * @returns The 2D bbox, or undefined when the bbox length is unsupported
-   */
-  static #getLonLatBbox(bbox?: number[]): TypeLonLatBbox | undefined {
-    if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
-    if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
-    return undefined;
-  }
-
-  /**
    * Creates a stable identity for duplicate GeoJSON geometries or bounding boxes.
    *
    * @param footprint - The STAC footprint to identify
@@ -362,7 +404,7 @@ export class StacBrowserController extends AbstractMapViewerController {
       const geometry = JSON.stringify(footprint.geometry);
       return geometry ? `geometry:${geometry}` : undefined;
     }
-    const bbox = StacBrowserController.#getLonLatBbox(footprint.bbox);
+    const bbox = GeoUtilities.bboxToExtent2D(footprint.bbox);
     if (bbox) return `bbox:${JSON.stringify(bbox)}`;
     return undefined;
   }

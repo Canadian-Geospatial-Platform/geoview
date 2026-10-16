@@ -1,5 +1,26 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
+/** Default color of the collection extent footprint. */
+export const COLLECTION_COLOR = '#1976d2';
+
+/** Default fill opacity of the collection extent footprint. */
+export const COLLECTION_FILL_OPACITY = 0.2;
+
+/** Default color of item footprints. */
+export const ITEM_COLOR = '#FF8C00';
+
+/** Default fill opacity of item footprints shown while browsing a collection or viewing an item. */
+export const ITEM_FILL_OPACITY = 0.15;
+
+/** Default fill opacity of search-result footprints. */
+export const SEARCH_FILL_OPACITY = 0.25;
+
+/** Colors assigned to the selected items, distinct from the collection and item footprint colors. */
+export const SELECTION_COLORS = ['#e53935', '#43a047', '#fdd835', '#8e24aa', '#00acc1', '#d81b60', '#7cb342', '#5e35b1'];
+
+/** Fill opacity of selected item footprints. */
+export const SELECTED_FILL_OPACITY = 0.25;
+
 /**
  * Gets the sx classes for the STAC browser components.
  *

@@ -5,14 +5,16 @@ import { SortByAlphaIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
-import type { StacCollection } from './stac-browser-types';
-import { StacApiService } from './stac-api-service';
+import type { StacCollection, StacDateDisplayOptions } from './stac-browser-types';
+import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
 
 /** Props for the StacCollectionList component. */
 interface StacCollectionListProps {
   /** Available collections. */
   collections: StacCollection[];
+  /** Map date settings used to format the temporal extents. */
+  dateDisplay: StacDateDisplayOptions;
   /** Callback when a collection card is clicked. */
   onCollectionClick: (collection: StacCollection) => void;
 }
@@ -27,7 +29,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-collection-list');
 
-  const { collections, onCollectionClick } = props;
+  const { collections, dateDisplay, onCollectionClick } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
@@ -50,14 +52,14 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
     if (searchText.trim()) {
       const query = searchText.trim().toLowerCase();
       filtered = collections.filter((c) => {
-        const title = (c.title ?? c.id).toLowerCase();
+        const title = StacFieldUtils.getCollectionTitle(c).toLowerCase();
         const keywords = c.keywords?.map((k) => k.toLowerCase()) ?? [];
         return title.includes(query) || keywords.some((k) => k.includes(query));
       });
     }
 
     if (sortAsc) {
-      return [...filtered].sort((a, b) => (a.title ?? a.id).localeCompare(b.title ?? b.id));
+      return [...filtered].sort((a, b) => StacFieldUtils.getCollectionTitle(a).localeCompare(StacFieldUtils.getCollectionTitle(b)));
     }
     return filtered;
   }, [collections, searchText, sortAsc]);
@@ -134,7 +136,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
       </Box>
 
       {memoFilteredCollections.map((collection) => {
-        const temporal = StacApiService.formatTemporalExtent(collection, true);
+        const temporal = StacFieldUtils.formatTemporalExtent(collection, t('stacBrowser.present'), dateDisplay, true);
         return (
           <Box
             key={collection.id}
@@ -145,7 +147,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
             role="button"
             tabIndex={0}
           >
-            <Typography sx={memoSxClasses.collectionTitle}>{collection.title ?? collection.id}</Typography>
+            <Typography sx={memoSxClasses.collectionTitle}>{StacFieldUtils.getCollectionTitle(collection)}</Typography>
             {collection.description && (
               <Typography sx={memoSxClasses.collectionDescription}>
                 {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}

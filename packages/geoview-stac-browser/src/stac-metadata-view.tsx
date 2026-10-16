@@ -6,7 +6,7 @@ import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { containsHtmlTags, linkifyAndSanitizeHtml } from 'geoview-core/core/utils/utilities';
 import { UseHtmlToReact } from 'geoview-core/core/components/common/hooks/use-html-to-react';
 
-import type { StacItem, StacItemViewConfig } from './stac-browser-types';
+import type { StacDateDisplayOptions, StacItem, StacItemViewConfig } from './stac-browser-types';
 import { StacFieldUtils } from './stac-field-utils';
 
 /**
@@ -27,6 +27,8 @@ interface StacMetadataViewProps {
   item: StacItem;
   /** Optional item display options (metadataFields, excludeFields). */
   itemView?: StacItemViewConfig;
+  /** Optional map date settings used to format date fields. */
+  dateDisplay?: StacDateDisplayOptions;
   /** The sx classes object. */
   sxClasses: SxStyles;
 }
@@ -41,10 +43,10 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-metadata-view');
 
-  const { item, itemView, sxClasses } = props;
+  const { item, itemView, dateDisplay, sxClasses } = props;
   const { t } = useTranslation();
 
-  const rows = StacFieldUtils.getMetadataRows(item, itemView);
+  const rows = StacFieldUtils.getMetadataRows(item, itemView, dateDisplay);
 
   return (
     <Box sx={sxClasses.metadataGrid} component="dl">

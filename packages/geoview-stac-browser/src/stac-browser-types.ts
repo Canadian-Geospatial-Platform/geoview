@@ -1,3 +1,6 @@
+import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
+import type { TimeIANA } from 'geoview-core/core/utils/date-mgt';
+
 /** STAC collection metadata. */
 export interface StacCollection {
   /** Collection identifier. */
@@ -377,6 +380,18 @@ export interface StacBrowserConfig {
   isOpen: boolean;
 }
 
+/** Date display settings taken from the map configuration. */
+export interface StacDateDisplayOptions {
+  /** Display language of the map. */
+  language: TypeDisplayLanguage;
+  /** IANA timezone used to display date-times. */
+  timezone: TimeIANA;
+  /** Day.js format of dates in the display language. */
+  dateFormat: string;
+  /** Day.js format of date-times in the display language. */
+  datetimeFormat: string;
+}
+
 /** Display options shared by the item lists and cards. */
 export interface StacItemDisplayOptions {
   /** Optional item display options. */
@@ -391,6 +406,8 @@ export interface StacItemDisplayOptions {
   collectionOverrides?: Record<string, StacCollectionOverride>;
   /** Whether map previews are enabled. */
   isPreviewEnabled: boolean;
+  /** Date display settings. */
+  dateDisplay: StacDateDisplayOptions;
 }
 
 /** Item selection and preview state with the callbacks acting on it. */

@@ -2,7 +2,13 @@ import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
+import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import {
+  useStoreAppDisplayDateMode,
+  useStoreAppDisplayDateTimezone,
+  useStoreAppDisplayLanguage,
+} from 'geoview-core/core/stores/states/app-state';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 import type { TypeStacMapExtentSnapshot } from 'geoview-core/core/controllers/stac-browser-controller';
 
@@ -21,15 +27,16 @@ import type {
   StacSearchParams,
   StacSearchResult,
 } from './stac-browser-types';
-import { DEFAULT_PAGE_LIMIT, SELECTION_COLORS, StacApiService } from './stac-api-service';
+import { DEFAULT_PAGE_LIMIT, StacApiService } from './stac-api-service';
 import { StacAssetUtils } from './stac-asset-utils';
+import { StacConfigUtils } from './stac-config-utils';
 import { StacFieldUtils } from './stac-field-utils';
 import { StacFilterPanel } from './stac-filter-panel';
 import { StacCollectionList } from './stac-collection-list';
 import { StacCollectionDetail } from './stac-collection-detail';
 import { StacSearchResults } from './stac-search-results';
 import { StacItemDetail } from './stac-item-detail';
-import { getSxClasses } from './stac-browser-style';
+import { getSxClasses, SELECTED_FILL_OPACITY, SELECTION_COLORS } from './stac-browser-style';
 
 /** Geometry group used for the selected item footprints. */
 const SELECTED_FOOTPRINT_GROUP = 'stac-selected-footprints';
@@ -95,6 +102,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const displayDateTimezone = useStoreAppDisplayDateTimezone();
+  const displayDateMode = useStoreAppDisplayDateMode();
 
   const browseEnabled = config.browseEnabled !== false;
   const initialMode: BrowseMode = browseEnabled ? (config.defaultMode ?? 'browse') : 'search';
@@ -157,7 +167,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         ]);
         if (cancelled) return;
 
-        const allowedCollections = StacApiService.filterCollections(allCollections, config.collections);
+        const allowedCollections = StacConfigUtils.filterCollections(allCollections, config.collections);
         const startCollection =
           allowedCollections.find((collection) => collection.id === config.collections?.default) ??
           (allowedCollections.length === 1 ? allowedCollections[0] : undefined);
@@ -192,10 +202,16 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-BROWSER - Draw selected footprints', Object.keys(selectedItems).length);
 
-    stacController.clearFootprints(SELECTED_FOOTPRINT_GROUP);
-    Object.values(selectedItems).forEach(({ item, color }) => {
-      stacController.addFootprints(SELECTED_FOOTPRINT_GROUP, [item], color, 0.25, SELECTED_FOOTPRINT_ZINDEX);
-    });
+    stacController.setFootprints(
+      SELECTED_FOOTPRINT_GROUP,
+      Object.values(selectedItems).map(({ item, color }) => ({
+        geometry: item.geometry,
+        bbox: item.bbox,
+        color,
+        fillOpacity: SELECTED_FILL_OPACITY,
+      })),
+      SELECTED_FOOTPRINT_ZINDEX
+    );
 
     return (): void => {
       stacController.clearFootprints(SELECTED_FOOTPRINT_GROUP);
@@ -243,6 +259,38 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     },
     [config.collections, collections]
   );
+
+  /**
+   * Builds the display options shared by the item cards and the item detail, including the map date settings.
+   */
+  const memoDisplay = useMemo((): StacItemDisplayOptions => {
+    logger.logTraceUseMemo('STAC-BROWSER - memoDisplay', isPreviewEnabled, displayLanguage, displayDateTimezone, displayDateMode);
+    const { dateFormat, datetimeFormat } = DateMgt.getDisplayDateDefaults(displayDateMode);
+    return {
+      itemView: config.itemView,
+      actions: config.actions,
+      preview: config.preview,
+      footprintStyles: config.footprintStyles,
+      collectionOverrides: config.collectionOverrides,
+      isPreviewEnabled,
+      dateDisplay: {
+        language: displayLanguage,
+        timezone: displayDateTimezone,
+        dateFormat: dateFormat[displayLanguage],
+        datetimeFormat: datetimeFormat[displayLanguage],
+      },
+    };
+  }, [
+    config.itemView,
+    config.actions,
+    config.preview,
+    config.footprintStyles,
+    config.collectionOverrides,
+    isPreviewEnabled,
+    displayLanguage,
+    displayDateTimezone,
+    displayDateMode,
+  ]);
 
   // #region Handlers
 
@@ -534,26 +582,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         return;
       }
 
-      const preview = { ...config.preview, ...config.collectionOverrides?.[item.collection ?? '']?.preview };
+      const { preview } = StacConfigUtils.resolveItemDisplayOptions(memoDisplay, item.collection);
       const previewAsset = StacAssetUtils.getPreviewAsset(item, preview);
-      const bbox = StacFieldUtils.getBbox(item);
       if (!previewAsset) return;
 
-      if (previewAsset.kind === 'image') {
-        if (!bbox) return;
-        stacController
-          .addImageOverlay(overlayId, previewAsset.href, bbox, preview.opacity, item.geometry)
-          .then((isAdded) => {
-            if (isAdded) setPreviewedIds((prev) => ({ ...prev, [itemKey]: true }));
-          })
-          .catch((error: unknown) => {
-            logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
-          });
-        return;
-      }
-
       stacController
-        .addGeoTiffOverlay(overlayId, previewAsset.href, preview.opacity)
+        .addPreviewOverlay(overlayId, previewAsset, preview?.opacity, item.bbox, item.geometry)
         .then((isAdded) => {
           if (isAdded) setPreviewedIds((prev) => ({ ...prev, [itemKey]: true }));
         })
@@ -561,7 +595,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
           logger.logError(`STAC-BROWSER - Failed to preview item ${item.id}`, error);
         });
     },
-    [stacController, config.preview, config.collectionOverrides]
+    [stacController, memoDisplay]
   );
 
   /**
@@ -598,21 +632,6 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, [stacController, previewedIds]);
 
   // #endregion
-
-  /**
-   * Builds the display options shared by the item cards and the item detail.
-   */
-  const memoDisplay = useMemo((): StacItemDisplayOptions => {
-    logger.logTraceUseMemo('STAC-BROWSER - memoDisplay', isPreviewEnabled);
-    return {
-      itemView: config.itemView,
-      actions: config.actions,
-      preview: config.preview,
-      footprintStyles: config.footprintStyles,
-      collectionOverrides: config.collectionOverrides,
-      isPreviewEnabled,
-    };
-  }, [config.itemView, config.actions, config.preview, config.footprintStyles, config.collectionOverrides, isPreviewEnabled]);
 
   /**
    * Builds the selection/preview state and callbacks of the item cards.
@@ -731,7 +750,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
     return (
       <Box sx={memoSxClasses.panelContent}>
-        <StacCollectionList collections={collections} onCollectionClick={handleCollectionClick} />
+        <StacCollectionList collections={collections} dateDisplay={memoDisplay.dateDisplay} onCollectionClick={handleCollectionClick} />
       </Box>
     );
   };

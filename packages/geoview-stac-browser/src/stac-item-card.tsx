@@ -8,7 +8,7 @@ import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { StacItem, StacItemDisplayOptions } from './stac-browser-types';
 import { StacAssetUtils } from './stac-asset-utils';
-import { resolveStacItemDisplayOptions } from './stac-config-utils';
+import { StacConfigUtils } from './stac-config-utils';
 import { StacFieldUtils } from './stac-field-utils';
 
 /** Props for the StacItemCard component. */
@@ -44,8 +44,8 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
   logger.logTraceRender('geoview-stac-browser/stac-item-card');
 
   const { item, itemKey, display, selectedColor, isPreviewed, sxClasses, onToggleSelected, onAction } = props;
-  const effectiveDisplay = resolveStacItemDisplayOptions(display, item.collection);
-  const { itemView, actions } = effectiveDisplay;
+  const effectiveDisplay = StacConfigUtils.resolveItemDisplayOptions(display, item.collection);
+  const { itemView, actions, dateDisplay } = effectiveDisplay;
   const { t } = useTranslation();
 
   const title = StacFieldUtils.getTitle(item, itemView?.titleField);
@@ -80,13 +80,13 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
                   {badge}
                 </Box>
               )}
-              {!itemView?.summaryFields?.length && datetime ? new Date(datetime).toLocaleDateString() : ''}
+              {!itemView?.summaryFields?.length && datetime ? StacFieldUtils.formatValue(datetime, 'date', dateDisplay) : ''}
             </Typography>
           )}
           {!!itemView?.summaryFields?.length && (
             <Box sx={sxClasses.itemSummary}>
               {itemView.summaryFields.map((field) => {
-                const value = StacFieldUtils.getFormattedValue(item, field);
+                const value = StacFieldUtils.getFormattedValue(item, field, dateDisplay);
                 if (!value) return null;
                 return (
                   <Box component="span" key={field.field}>

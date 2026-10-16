@@ -7,9 +7,8 @@ import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { StacAsset, StacItem, StacItemDisplayOptions } from './stac-browser-types';
-import { ITEM_COLOR } from './stac-api-service';
 import { StacAssetUtils } from './stac-asset-utils';
-import { resolveStacItemDisplayOptions } from './stac-config-utils';
+import { StacConfigUtils } from './stac-config-utils';
 import { StacFieldUtils } from './stac-field-utils';
 import { StacMetadataView } from './stac-metadata-view';
 import { getSxClasses } from './stac-browser-style';
@@ -43,7 +42,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   logger.logTraceRender('geoview-stac-browser/stac-item-detail');
 
   const { item, display, onBack, onGoToCollection } = props;
-  const effectiveDisplay = resolveStacItemDisplayOptions(display, item.collection);
+  const effectiveDisplay = StacConfigUtils.resolveItemDisplayOptions(display, item.collection);
   const { itemView, actions, isPreviewEnabled } = effectiveDisplay;
   const previewOpacity = effectiveDisplay.preview?.opacity;
   const { cgpv } = window as TypeWindow;
@@ -63,13 +62,15 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-ITEM-DETAIL - Auto-show footprint', item.id);
 
-    stacController.addFootprints(FOOTPRINT_GROUP, [item], ITEM_COLOR, 0.15);
+    stacController.setFootprints(FOOTPRINT_GROUP, [
+      { geometry: item.geometry, bbox: item.bbox, ...StacConfigUtils.getFootprintStyle(display, item.collection, 'item') },
+    ]);
 
     return (): void => {
       stacController.clearFootprints(FOOTPRINT_GROUP);
       stacController.removeOverlay(PREVIEW_OVERLAY_ID);
     };
-  }, [stacController, item]);
+  }, [stacController, item, display]);
 
   // #region Handlers
 
@@ -172,7 +173,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       <Box sx={memoSxClasses.metadataSection}>
         <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.metadata')}</Typography>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={title} sx={memoSxClasses.previewImage} />}
-        <StacMetadataView item={item} itemView={itemView} sxClasses={memoSxClasses} />
+        <StacMetadataView item={item} itemView={itemView} dateDisplay={display.dateDisplay} sxClasses={memoSxClasses} />
       </Box>
 
       {/* Assets - clickable GeoTIFF assets to display on map */}
