@@ -290,8 +290,6 @@ export interface StacCollectionsConfig {
   exclude?: string[];
   /** Collection ID opened directly when the browser starts. */
   default?: string;
-  /** Whether searches are always restricted to the allowed collections, defaults to true. */
-  restrictSearch?: boolean;
 }
 
 /** Item display options. */
@@ -336,7 +334,7 @@ export interface StacBrowserConfig {
   browseEnabled?: boolean;
   /** Initial mode, defaults to browse; search is always used when browsing is disabled. */
   defaultMode?: BrowseMode;
-  /** Optional text or translation key displayed above the search filters. */
+  /** Optional custom text displayed above the search filters. */
   searchDescription?: string;
   /** Collections restriction options. */
   collections?: StacCollectionsConfig;

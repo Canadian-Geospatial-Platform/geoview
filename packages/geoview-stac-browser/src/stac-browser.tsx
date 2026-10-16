@@ -91,7 +91,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
@@ -105,10 +105,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [capabilities, setCapabilities] = useState<StacCapabilities | undefined>(undefined);
   const [collections, setCollections] = useState<StacCollection[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [defaultCollection, setDefaultCollection] = useState<StacCollection | null>(null);
-  const [selectedCollection, setSelectedCollection] = useState<StacCollection | null>(null);
-  const [selectedItem, setSelectedItem] = useState<StacItem | null>(null);
-  const [searchResult, setSearchResult] = useState<StacSearchResult | null>(null);
+  const [defaultCollection, setDefaultCollection] = useState<StacCollection | undefined>(undefined);
+  const [selectedCollection, setSelectedCollection] = useState<StacCollection | undefined>(undefined);
+  const [selectedItem, setSelectedItem] = useState<StacItem | undefined>(undefined);
+  const [searchResult, setSearchResult] = useState<StacSearchResult | undefined>(undefined);
   /** Search result pages cached to provide stable previous-page navigation after client-side filtering. */
   const [searchResultPages, setSearchResultPages] = useState<StacSearchResult[]>([]);
   const [searchParams, setSearchParams] = useState<StacSearchParams | undefined>(undefined);
@@ -128,6 +128,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [selectedItems, setSelectedItems] = useState<Record<string, { item: StacItem; color: string }>>({});
   /** Items previewed on the map, keyed by stable item identity. */
   const [previewedIds, setPreviewedIds] = useState<Record<string, boolean>>({});
+  /** Identifies the latest item-detail request so stale responses cannot change the active view. */
+  const itemDetailRequestIdRef = useRef(0);
 
   const limit = config.defaults?.limit ?? DEFAULT_PAGE_LIMIT;
   const searchSortBy = capabilities?.searchSort ? config.defaults?.sortBy : undefined;
@@ -207,6 +209,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     logger.logTraceUseEffect('STAC-BROWSER - Register preview cleanup');
 
     return (): void => {
+      itemDetailRequestIdRef.current += 1;
       stacController.removeAllOverlays();
     };
   }, [stacController]);
@@ -232,8 +235,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const resolveSearchCollections = useCallback(
     (selected?: string[]): string[] | undefined => {
-      const isRestricted =
-        config.collections?.restrictSearch !== false && !!(config.collections?.include?.length || config.collections?.exclude?.length);
+      const isRestricted = !!(config.collections?.include?.length || config.collections?.exclude?.length);
       const allowedIds = collections.map((collection) => collection.id);
 
       if (selected?.length) return isRestricted ? selected.filter((id) => allowedIds.includes(id)) : selected;
@@ -250,6 +252,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const handleModeChange = useCallback(
     (newMode: BrowseMode): void => {
       if (newMode === 'browse' && !browseEnabled) return;
+      itemDetailRequestIdRef.current += 1;
       setMode(newMode);
       if (newMode === 'browse') {
         setView(defaultCollection ? 'collection-detail' : 'collections');
@@ -257,9 +260,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         setView('search');
       }
       // Clear selection when switching modes
-      setSelectedItem(null);
-      setSelectedCollection(newMode === 'browse' ? defaultCollection : null);
-      setSearchResult(null);
+      setSelectedItem(undefined);
+      setSelectedCollection(newMode === 'browse' ? defaultCollection : undefined);
+      setSearchResult(undefined);
       setSearchResultPages([]);
       setSearchContainedExtent(undefined);
       setSearchMapExtent(undefined);
@@ -284,6 +287,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles clicking on a collection card to view its details.
    */
   const handleCollectionClick = useCallback((collection: StacCollection): void => {
+    itemDetailRequestIdRef.current += 1;
     setSelectedCollection(collection);
     setView('collection-detail');
   }, []);
@@ -294,7 +298,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const handleCollectionChange = useCallback(
     (collectionId: string): void => {
       const collection = collections.find((entry) => entry.id === collectionId);
-      if (collection) handleCollectionClick(collection);
+      if (collection) {
+        handleCollectionClick(collection);
+      }
     },
     [collections, handleCollectionClick]
   );
@@ -304,7 +310,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleItemClick = useCallback(
     (item: StacItem): void => {
+      const requestId = ++itemDetailRequestIdRef.current;
       const openItem = (itemToOpen: StacItem): void => {
+        if (requestId !== itemDetailRequestIdRef.current) return;
         setSelectedItem(itemToOpen);
         setItemDetailOrigin(view);
         setView('item-detail');
@@ -319,6 +327,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       StacApiService.fetchItem(selfLink.href)
         .then(openItem)
         .catch((error: unknown) => {
+          if (requestId !== itemDetailRequestIdRef.current) return;
           // Best effort: the item from the list already holds the metadata, the full item only enriches it
           logger.logWarning(`STAC-BROWSER - Could not fetch the full item ${item.id}, using the listed item`, error);
           openItem(item);
@@ -336,8 +345,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       const doSearch = async (): Promise<void> => {
         try {
           setIsLoading(true);
-          setSelectedItem(null);
-          setSearchResult(null);
+          itemDetailRequestIdRef.current += 1;
+          setSelectedItem(undefined);
+          setSearchResult(undefined);
           setSearchMapExtent(stacController.captureMapExtent());
 
           const collectionIds = resolveSearchCollections(filters.collections);
@@ -440,7 +450,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles going back from item detail to its origin view.
    */
   const handleBackFromItemDetail = useCallback((): void => {
-    setSelectedItem(null);
+    itemDetailRequestIdRef.current += 1;
+    setSelectedItem(undefined);
     setView(itemDetailOrigin);
   }, [itemDetailOrigin]);
 
@@ -448,7 +459,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles going back to the collections list.
    */
   const handleBackToCollections = useCallback((): void => {
-    setSelectedCollection(null);
+    itemDetailRequestIdRef.current += 1;
+    setSelectedCollection(undefined);
     setView('collections');
   }, []);
 
@@ -456,6 +468,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles going back to the search panel.
    */
   const handleBackToSearch = useCallback((): void => {
+    itemDetailRequestIdRef.current += 1;
     setView('search');
   }, []);
 
@@ -464,7 +477,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const handleClearFilters = useCallback((): void => {
     setFilterPanelState(getDefaultFilterPanelState(config));
-    setSearchResult(null);
+    setSearchResult(undefined);
   }, [config]);
 
   /**
@@ -475,8 +488,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       if (!browseEnabled) return;
       const collection = collections.find((c) => c.id === collectionId);
       if (collection) {
+        itemDetailRequestIdRef.current += 1;
         setMode('browse');
-        setSelectedItem(null);
+        setSelectedItem(undefined);
         setSelectedCollection(collection);
         setView('collection-detail');
       }

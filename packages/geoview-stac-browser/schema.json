@@ -140,7 +140,7 @@
       "default": "browse"
     },
     "searchDescription": {
-      "description": "Optional plain text or translation key displayed above the search filters. Hidden when omitted or empty",
+      "description": "Optional custom text displayed above the search filters. Hidden when omitted or empty",
       "type": "string"
     },
     "collections": {
@@ -161,11 +161,6 @@
         "default": {
           "description": "Collection ID opened directly when the browser starts. When only one collection is allowed, it is opened automatically",
           "type": "string"
-        },
-        "restrictSearch": {
-          "description": "When include or exclude is set, searches are always restricted to the allowed collections",
-          "type": "boolean",
-          "default": true
         }
       }
     },

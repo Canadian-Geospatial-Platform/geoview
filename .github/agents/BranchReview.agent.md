@@ -1,6 +1,6 @@
 ---
 name: BranchReview
-description: '[Workflow] Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity. Runs the GeoView Branch Review Checklist against changed files in the current branch.'
+description: "[Workflow] Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity. Runs the GeoView Branch Review Checklist against changed files in the current branch."
 tools: [read, search, execute, edit, todo, vscode/askQuestions]
 argument-hint: 'target branch (default: upstream/develop); add "full" to audit entire changed files'
 ---
@@ -9,10 +9,10 @@ You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit th
 
 ## Review modes
 
-| Mode                        | When                                                                                     | What is audited                                                                                                                                                                                                                                              |
-| --------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Changed scope** (default) | Every review unless the user asks for full mode                                          | Every declaration the diff adds or modifies, plus the **enclosing declaration** of each changed line (a one-line change inside a component audits that whole component and its hooks). File-level items (imports, regions) only where the diff touches them. |
-| **Full file**               | The user says "full", "whole file", "entire file", or asks to bring files up to standard | Every component, hook, function, method, type, property and constant in each changed file. Report pre-existing issues separately from issues in the changed code.                                                                                            |
+| Mode                        | When                                                                                     | What is audited                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Changed scope** (default) | Every review unless the user asks for full mode                                          | Every declaration the diff adds or modifies, plus the **enclosing declaration** of each changed line (a one-line change inside a component audits that whole component and its hooks). File-level items (imports, regions) only where the diff touches them. When class methods are added, removed, moved, or reordered, audit the class's complete method ordering and required regions, even if the region-marker lines are unchanged. |
+| **Full file**               | The user says "full", "whole file", "entire file", or asks to bring files up to standard | Every component, hook, function, method, type, property and constant in each changed file. Report pre-existing issues separately from issues in the changed code.                                                                                                                                                                                                                                                                        |
 
 State the mode in the report. In changed-scope mode, do not report issues outside the scope; end the report by noting that a full-file review is available on request.
 
@@ -104,9 +104,11 @@ These are the most commonly missed issues:
 - [ ] `// GV` internal comment blocks are NOT converted to JSDoc
 - [ ] `// eslint-disable` comments are NOT removed or altered
 
-#### 12. Handler Regions
+#### 12. Class Method Order, Regions, and Handler Regions
 
-- [ ] Related handlers are grouped with `// #region Handlers` / `// #endregion`
+- [ ] When class methods are added, removed, moved, or reordered, verify the complete class member order against `best-practices.md` section **11- How we order functions in classes**
+- [ ] For changed classes, ensure each nonempty method group uses the required labeled `// #region` / `// #endregion` markers, even when the region-marker lines themselves are unchanged
+- [ ] Related React handlers are grouped with `// #region Handlers` / `// #endregion`
 
 #### 13. Three Default Value Sources (Must Stay in Sync)
 
