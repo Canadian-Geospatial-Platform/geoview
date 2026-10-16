@@ -767,7 +767,11 @@ export class GVWMS extends AbstractGVRaster {
     let fieldsToReturn = wfsLayerConfig.getOutfields();
 
     // Total filter
-    const totalFilter = layerFilters?.getAllFilters();
+    const totalFilter = layerFilters?.getAllFilters(
+      true,
+      wmsLayerConfig.getVectorTimeField(),
+      wfsLayerConfig.getOutfieldsDate().map((outfield) => outfield.name)
+    );
 
     // If any
     if (totalFilter) {

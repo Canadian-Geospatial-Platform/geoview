@@ -1810,22 +1810,28 @@ export abstract class WfsRenderer {
           return equalTo(fieldNameForNegativeQueries, '__NO__MATCH__');
         }
 
+        const comparisonValue = (typeof literal1 === 'string' && isNumeric(literal1) ? Number(literal1) : literal1) as number;
+
         switch (op) {
           case '>':
-            return greaterThan(property, Number(literal1));
+            return greaterThan(property, comparisonValue);
           case '>=':
-            return greaterThanOrEqualTo(property, Number(literal1));
+            return greaterThanOrEqualTo(property, comparisonValue);
           case '<':
-            return lessThan(property, Number(literal1));
+            return lessThan(property, comparisonValue);
           case '<=':
-            return lessThanOrEqualTo(property, Number(literal1));
+            return lessThanOrEqualTo(property, comparisonValue);
           case '=':
             return equalTo(property, literal1);
           case 'between':
             if (literal2 === undefined) {
               throw new Error('Between requires two literals');
             }
-            return between(property, Number(literal1), Number(literal2));
+            return between(
+              property,
+              comparisonValue,
+              (typeof literal2 === 'string' && isNumeric(literal2) ? Number(literal2) : literal2) as number
+            );
         }
         throw new Error('Unsupported comparison op ' + op);
       }
