@@ -235,14 +235,21 @@ export abstract class GeoUtilities {
     xmlFilter: string | undefined,
     outputProjectionCode: string | undefined
   ): string {
-    // Redirect
-    const outputFormatClause = outputFormat ? `&outputFormat=${encodeURIComponent(outputFormat)}` : '';
-    const outfieldsClause = outfields ? `&propertyName=${encodeURIComponent(outfields.map((f) => f.name).join(','))}` : '';
+    // The outfields map
+    const outfieldsMap = outfields ? outfields.map((f) => f.name).join(',') : '';
+
+    // Format the parameters
+    const typeName = `typeName=${layerId}`;
+    const outputFormatClause = outputFormat ? `&outputFormat=${outputFormat}` : '';
+    const outfieldsClause = outfields ? `&propertyName=${outfieldsMap}` : '';
+
+    // Always encode the filter, because of the special characters it may contain (e.g., XML tags).
     const xmlFilterClause = xmlFilter ? `&filter=${encodeURIComponent(xmlFilter)}` : '';
-    const outputProjectionCodeClause = outputProjectionCode ? `&srsName=${encodeURIComponent(outputProjectionCode)}` : '';
+
+    const outputProjectionCodeClause = outputProjectionCode ? `&srsName=${outputProjectionCode}` : '';
 
     // Return the whole url with all parameters
-    return `${this.ensureServiceRequestUrl(url, 'WFS', 'GetFeature', version)}&typeName=${encodeURIComponent(layerId)}${outputFormatClause}${outfieldsClause}${xmlFilterClause}${outputProjectionCodeClause}`;
+    return `${this.ensureServiceRequestUrl(url, 'WFS', 'GetFeature', version)}&${typeName}${outputFormatClause}${outfieldsClause}${xmlFilterClause}${outputProjectionCodeClause}`;
   }
 
   /**
@@ -2129,7 +2136,7 @@ export abstract class GeoUtilities {
    * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported
    */
-  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry {
+  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
     switch (wfsGeometryType) {
       case 'gml:PointPropertyType':
         return 'Point';
@@ -2160,7 +2167,7 @@ export abstract class GeoUtilities {
    * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported
    */
-  static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
+  static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string | undefined): TypeStyleGeometry {
     switch (esriGeometryType) {
       case 'esriGeometryPoint':
         return 'Point';
