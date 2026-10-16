@@ -103,21 +103,43 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Returns the spatial reference system (SRS) of the layer's data.
    *
-   * This method reads the layer's feature type definition and returns the
-   * default SRS/projection used by the WFS layer. If the `DefaultSRS` is
-   * an object with a `#text` property (common in XML-parsed responses),
-   * the method returns the value of that property. Otherwise, it returns
-   * `DefaultSRS` directly.
+   * Reads the version-specific field: `DefaultCRS` (WFS 2.0), `DefaultSRS` (WFS 1.1), or `SRS` (WFS 1.0), in that order.
+   * A value may be a string or an XML-parsed object with a `#text` property.
    *
-   * @returns The EPSG code or SRS string (e.g., 'EPSG:3857'), or undefined if not determined
+   * The CRS identifier is returned as provided by the service (for example, an EPSG code, OGC URN, or OGC CRS URI);
+   * it is not normalized.
+   *
+   * @returns The CRS identifier declared by the service, or undefined if none is available
    */
   getProjectionOfData(): string | undefined {
     // Get the feature type
     const featureType = this.getFeatureType();
-    if (typeof featureType.DefaultSRS === 'object' && '#text' in featureType.DefaultSRS) {
-      return featureType.DefaultSRS['#text'];
+    // If WFS is version 2.0.0, check DefaultCRS
+    if (featureType.DefaultCRS) {
+      if (typeof featureType.DefaultCRS === 'object' && '#text' in featureType.DefaultCRS) {
+        return featureType.DefaultCRS['#text'];
+      }
+      return featureType.DefaultCRS;
     }
-    return featureType.DefaultSRS;
+
+    // If WFS is version 1.1.0, check DefaultSRS
+    if (featureType.DefaultSRS) {
+      if (typeof featureType.DefaultSRS === 'object' && '#text' in featureType.DefaultSRS) {
+        return featureType.DefaultSRS['#text'];
+      }
+      return featureType.DefaultSRS;
+    }
+
+    // If WFS is version 1.0.0, check SRS
+    if (featureType.SRS) {
+      if (typeof featureType.SRS === 'object' && '#text' in featureType.SRS) {
+        return featureType.SRS['#text'];
+      }
+      return featureType.SRS;
+    }
+
+    // Unknown
+    return undefined;
   }
 
   /**
