@@ -35,6 +35,10 @@ Read only the linked section of each doc: search for its heading and read to the
 IconButton requires `aria-label`, uses it as tooltip fallback and adds tooltip/ref/visibility behavior.
 Verify wrapper props rather than assuming the MUI interface.
 
+Snackbar shares its close callback with the nested Alert. Keep `reason` optional for Alert close-button
+events, and accept MUI's `null` timeout event in both the wrapper and the shell callback. This external
+callback contract is an exception to preferring `undefined` over `null`.
+
 Hidden-layer panels: follow panel list builders and selection effects into LayerList/LayerListItem
 for separate visible/hidden lists, eye controls, announcements, and focus restoration after remounts.
 Use [Hidden-layer panel implementation](#hidden-layer-panel-implementation) for maintenance details

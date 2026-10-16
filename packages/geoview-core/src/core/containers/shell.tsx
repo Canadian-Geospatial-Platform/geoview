@@ -216,7 +216,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles when a SnackBar needs to close.
    */
   const handleSnackBarClose = useCallback(
-    (event?: React.SyntheticEvent | Event, reason?: string): void => {
+    (event?: React.SyntheticEvent | Event | null, reason?: string): void => {
       // Remove displayed message from queue
       mapViewer.notifications.snackbarMessageQueue.shift();
       if (reason === 'clickaway') {
@@ -418,7 +418,7 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     const updateCollapsedFooterHeight = (): void => {
-      // Use the full container while expanded and the header alone while collapsed.
+      // When expanded, reserve only the header height; when collapsed, measure the entire footer container.
       const measuredFooterElement = isOpen ? footerHeader : footerContainer;
       const nextHeight = Math.ceil(measuredFooterElement.getBoundingClientRect().height);
       setCollapsedFooterHeight((previousHeight) => (previousHeight === nextHeight ? previousHeight : nextHeight));

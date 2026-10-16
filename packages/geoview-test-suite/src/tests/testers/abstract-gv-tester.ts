@@ -2,6 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
@@ -10,6 +11,7 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
+import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -25,6 +27,15 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly OTTAWA_LONLAT: Coordinate = [-75.8, 45.24];
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-88.31, 51.97];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
+
+  /** Far-west Canada center for viewport boundary tests. */
+  static readonly VIEWPORT_WEST_CANADA_LONLAT: Coordinate = [-135, 60];
+  /** Far-east Canada center for viewport boundary tests. */
+  static readonly VIEWPORT_EAST_CANADA_LONLAT: Coordinate = [-55, 60];
+  /** Center whose Web Mercator viewport crosses the antimeridian. */
+  static readonly VIEWPORT_ANTIMERIDIAN_LONLAT: Coordinate = [179, 60];
+  /** Near-pole center for finite LCC viewport sampling. */
+  static readonly VIEWPORT_POLAR_LONLAT: Coordinate = [-95, 85];
 
   /** Extent covering Ontario province in lonlat [minX, minY, maxX, maxY]. */
   static readonly ONTARIO_EXTENT: [number, number, number, number] = [-100, 50, -80, 57];
@@ -1062,6 +1073,18 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   getMapId(): string {
     return this.getMapViewer().mapId;
+  }
+
+  /**
+   * Gets the suite's existing map container instead of adding maps to the test runner page.
+   *
+   * @returns The current suite's map root
+   * @throws {TestError} When the suite's map container is missing
+   */
+  protected getViewportHost(): HTMLElement {
+    const host = getGVRootElement(this.getMapId());
+    if (!host) throw new TestError('Viewport test suite has no map container');
+    return host;
   }
 
   /**

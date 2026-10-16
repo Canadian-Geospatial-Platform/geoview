@@ -644,6 +644,8 @@
     },
     "map": {
       "mapIdNotFound": "Map with ID '{{mapId}}' not found.",
+      "invalidViewportMidpoints": "Unable to adjust the map area. Provide four finite longitude/latitude edge midpoints in west, south, east, north order, with distinct opposing points and consistent directions.",
+      "viewportUnavailable": "Unable to read the visible area of map '{{mapId}}'. Make sure the map is visible and has finished rendering, then try again.",
       "mapIdAlreadyExists": "Map with ID '{{mapId}}' already exists.",
       "errorGeometryGroupId": "Invalid geometry group id '{{geometryGroupId}}' not found",
       "geoviewStoreNotFound": "GeoView Store on Map '{{mapId}}' not found.",
