@@ -51,8 +51,7 @@ import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import linkifyHtml from 'linkify-html';
-import { isImage, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
+import { isImage, linkifyAndSanitizeHtml, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
@@ -419,9 +418,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
       if ((typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number') {
         try {
           // Apply linkification and accessibility enhancements
-          const linkified = linkifyHtml(cellValue.toString(), linkifyOptions);
-          const enhanced = enhanceLinksAccessibility(linkified, t('general.opensInNewTab'));
-          const sanitized = sanitizeHtmlContent(enhanced);
+          const sanitized = linkifyAndSanitizeHtml(cellValue.toString(), t('general.opensInNewTab'), linkifyOptions);
 
           // Fast path: no '<' character means no HTML elements possible
           if (!sanitized.includes('<')) {

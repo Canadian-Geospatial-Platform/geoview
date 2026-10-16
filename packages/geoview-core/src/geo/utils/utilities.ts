@@ -1155,6 +1155,33 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Collects every position of a GeoJSON geometry, including the members of a GeometryCollection.
+   *
+   * @param geometry - The GeoJSON geometry value to read
+   * @returns The 2D positions of the geometry, or an empty array when the value is not a GeoJSON geometry
+   */
+  static getGeoJsonCoordinates(geometry: unknown): Coordinate[] {
+    const coordinates: Coordinate[] = [];
+    const visitCoordinates = (value: unknown): void => {
+      if (!Array.isArray(value)) return;
+      if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
+        coordinates.push([value[0], value[1]]);
+        return;
+      }
+      value.forEach(visitCoordinates);
+    };
+    const visitGeometry = (value: unknown): void => {
+      if (!value || typeof value !== 'object') return;
+      const geoJson = value as { coordinates?: unknown; geometries?: unknown };
+      if (geoJson.coordinates !== undefined) visitCoordinates(geoJson.coordinates);
+      if (Array.isArray(geoJson.geometries)) geoJson.geometries.forEach(visitGeometry);
+    };
+
+    visitGeometry(geometry);
+    return coordinates;
+  }
+
+  /**
    * Extracts the EPSG code from a GeoJSON object's CRS definition.
    *
    * Accepts either a GeoJSON object or a JSON string. If the GeoJSON contains
@@ -1788,6 +1815,18 @@ export abstract class GeoUtilities {
     )
       return true;
     return false;
+  }
+
+  /**
+   * Converts a 2D or 3D GeoJSON bbox to a 2D extent.
+   *
+   * @param bbox - A bbox ordered as [minX, minY, maxX, maxY] or [minX, minY, minZ, maxX, maxY, maxZ]
+   * @returns The 2D extent [minX, minY, maxX, maxY], or undefined when the bbox length is unsupported
+   */
+  static bboxToExtent2D(bbox?: number[]): [number, number, number, number] | undefined {
+    if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
+    if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
+    return undefined;
   }
 
   // #endregion EXTENT
