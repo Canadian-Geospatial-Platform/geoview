@@ -6,7 +6,8 @@ import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { StacCollection, StacItem, StacItemDisplayOptions, StacItemInteractions, StacSearchResult } from './stac-browser-types';
-import { ITEM_COLOR, SEARCH_FILL_OPACITY } from './stac-api-service';
+import { StacConfigUtils } from './stac-config-utils';
+import { StacFieldUtils } from './stac-field-utils';
 import { StacItemList } from './stac-item-list';
 import { getSxClasses } from './stac-browser-style';
 
@@ -83,20 +84,14 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-SEARCH-RESULTS - Show footprints', results.features.length);
 
-    stacController.clearFootprints(FOOTPRINT_GROUP);
-    results.features.forEach((item) => {
-      const overrideFootprintStyles = display.collectionOverrides?.[item.collection ?? '']?.footprintStyles;
-      const searchFootprintStyle = {
-        ...display.footprintStyles?.search,
-        ...(overrideFootprintStyles?.search ?? overrideFootprintStyles?.collection),
-      };
-      stacController.addFootprints(
-        FOOTPRINT_GROUP,
-        [item],
-        searchFootprintStyle?.color ?? ITEM_COLOR,
-        searchFootprintStyle?.fillOpacity ?? SEARCH_FILL_OPACITY
-      );
-    });
+    stacController.setFootprints(
+      FOOTPRINT_GROUP,
+      results.features.map((item) => ({
+        geometry: item.geometry,
+        bbox: item.bbox,
+        ...StacConfigUtils.getFootprintStyle(display, item.collection, 'search'),
+      }))
+    );
 
     return (): void => {
       stacController.clearFootprints(FOOTPRINT_GROUP);
@@ -130,7 +125,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   const getCollectionTitle = useCallback(
     (collectionId: string): string => {
       const collection = collections.find((c) => c.id === collectionId);
-      return collection?.title ?? collectionId;
+      return collection ? StacFieldUtils.getCollectionTitle(collection) : collectionId;
     },
     [collections]
   );

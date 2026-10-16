@@ -8,7 +8,8 @@ import { useStacBrowserController } from 'geoview-core/core/controllers/use-cont
 
 import type { StacBrowserConfig, StacCollection, StacFilterPanelState, StacFilterValues, StacQueryableField } from './stac-browser-types';
 import type { StacApiService } from './stac-api-service';
-import { buildStacCql2Filter, getStacPropertyFilterFields } from './stac-config-utils';
+import { StacConfigUtils } from './stac-config-utils';
+import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
 
 /** Props for the StacFilterPanel component. */
@@ -81,15 +82,14 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const showSort = config.filters?.sort !== false && isSortSupported;
 
   /**
-   * Resolves selected collection IDs used to request queryables.
+   * Resolves the collection IDs used to request queryables. An empty selection means all available collections.
    */
-  const memoSelectedQueryableCollections = useMemo((): string[] | undefined => {
+  const memoSelectedQueryableCollections = useMemo((): string[] => {
     logger.logTraceUseMemo('STAC-FILTER-PANEL - memoSelectedQueryableCollections', filterState.selectedCollections, collections.length);
     if (filterState.selectedCollections.length) return filterState.selectedCollections;
-    if (collections.length === 1) return [collections[0].id];
-    return undefined;
+    return collections.map((collection) => collection.id);
   }, [filterState.selectedCollections, collections]);
-  const selectedQueryableCollectionKey = memoSelectedQueryableCollections?.join(',') ?? '';
+  const selectedQueryableCollectionKey = memoSelectedQueryableCollections.join(',');
 
   /**
    * Loads queryable fields for the selected collections.
@@ -97,8 +97,9 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-FILTER-PANEL - Load queryables', selectedQueryableCollectionKey);
 
-    if (!showPropertyFilters && !showSort) {
+    if ((!showPropertyFilters && !showSort) || memoSelectedQueryableCollections.length === 0) {
       setQueryables({});
+      setQueryablesLoading(false);
       return undefined;
     }
 
@@ -130,7 +131,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    */
   const memoPropertyFields = useMemo((): [string, StacQueryableField][] => {
     logger.logTraceUseMemo('STAC-FILTER-PANEL - memoPropertyFields', queryables, config.filters?.properties);
-    return getStacPropertyFilterFields(queryables, config.filters?.properties);
+    return StacConfigUtils.getPropertyFilterFields(queryables, config.filters?.properties);
   }, [queryables, config.filters?.properties]);
 
   /**
@@ -284,7 +285,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       params.q = filterState.keyword.trim();
     }
 
-    const filter = buildStacCql2Filter(filterState.propertyFilters, queryables);
+    const filter = StacConfigUtils.buildCql2Filter(filterState.propertyFilters, queryables);
     if (filter) params.filter = filter;
     if (showSort && filterState.sortField) {
       params.sortBy = [{ field: filterState.sortField, direction: filterState.sortDirection }];
@@ -334,7 +335,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
                     size="small"
                   />
                 }
-                label={collection.title ?? collection.id}
+                label={StacFieldUtils.getCollectionTitle(collection)}
               />
             ))}
           </Box>

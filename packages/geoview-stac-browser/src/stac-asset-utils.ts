@@ -1,12 +1,6 @@
-import type { StacAsset, StacItem, StacPreviewConfig } from './stac-browser-types';
+import type { TypeStacPreviewAsset } from 'geoview-core/core/controllers/stac-browser-controller';
 
-/** A preview resolved for an item: a Cloud-Optimized GeoTIFF or a plain image stretched over the item bbox. */
-export interface StacPreviewAsset {
-  /** The preview kind. */
-  kind: 'cog' | 'image';
-  /** URL of the preview asset. */
-  href: string;
-}
+import type { StacAsset, StacItem, StacPreviewConfig } from './stac-browser-types';
 
 /** Default asset roles/keys used to pick the preview asset in "auto" mode. */
 const DEFAULT_ASSET_PRIORITY = ['visual', 'overview', 'data', 'thumbnail'];
@@ -21,7 +15,11 @@ const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
 const NON_IMAGE_MEDIA_TYPES = ['application/geo+json', 'application/json', 'application/pdf', 'application/xml', 'application/zip'];
 
 /**
- * Utility functions to inspect STAC item assets.
+ * Utility functions to classify STAC item assets and pick the one used as a map preview.
+ *
+ * They recognize Cloud-Optimized GeoTIFFs and browser-displayable images from the media type or file extension,
+ * find thumbnails, and resolve the preview asset from the configured mode and asset priority (roles or keys).
+ * Rendering the chosen asset on the map is done by the core STAC browser controller.
  */
 export abstract class StacAssetUtils {
   // #region STATIC METHODS
@@ -88,7 +86,7 @@ export abstract class StacAssetUtils {
    * @param preview - Optional preview configuration
    * @returns The preview asset, or undefined when the item cannot be previewed
    */
-  static getPreviewAsset(item: StacItem, preview?: StacPreviewConfig): StacPreviewAsset | undefined {
+  static getPreviewAsset(item: StacItem, preview?: StacPreviewConfig): TypeStacPreviewAsset | undefined {
     const mode = preview?.mode ?? 'auto';
     if (mode === 'none') return undefined;
     const hasBbox = (item.bbox?.length ?? 0) >= 4;

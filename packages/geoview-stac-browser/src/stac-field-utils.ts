@@ -1,4 +1,14 @@
-import type { StacFieldConfig, StacFieldFormat, StacItem, StacItemViewConfig } from './stac-browser-types';
+import { DateMgt, type TemporalMode } from 'geoview-core/core/utils/date-mgt';
+import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
+
+import type {
+  StacCollection,
+  StacDateDisplayOptions,
+  StacFieldConfig,
+  StacFieldFormat,
+  StacItem,
+  StacItemViewConfig,
+} from './stac-browser-types';
 
 /** A label/value row of the metadata view. */
 export interface StacMetadataRow {
@@ -15,8 +25,23 @@ export interface StacMetadataRow {
 /** Property keys displayed as date-times in the "all" metadata view. */
 const DATETIME_KEYS = ['datetime', 'start_datetime', 'end_datetime', 'created', 'updated'];
 
+/** Matches a date without a time component, displayed as a calendar date so it never shifts a day. */
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Date display used when the caller does not provide the map settings. */
+const DEFAULT_DATE_DISPLAY: StacDateDisplayOptions = {
+  language: 'en',
+  timezone: DateMgt.TIME_UTC,
+  dateFormat: DateMgt.ISO_DATE_FORMAT,
+  datetimeFormat: DateMgt.ISO_DATETIME_FORMAT_MINUTES,
+};
+
 /**
- * Utility functions to read and format configurable STAC item fields.
+ * Utility functions to read and format the fields of STAC items and collections for display.
+ *
+ * They give items a stable identity across collections, read values by dot path, and format them
+ * (dates through GeoView's DateMgt using the map language, timezone, and date mode). They also expose
+ * the item bbox and full-geometry containment checks, backed by the core GeoUtilities.
  */
 export abstract class StacFieldUtils {
   // #region STATIC METHODS
@@ -52,18 +77,21 @@ export abstract class StacFieldUtils {
    *
    * @param value - The value to format
    * @param format - Optional display format, defaults to "text"
+   * @param dateDisplay - Optional map date settings, defaults to ISO dates in UTC
    * @returns The formatted value, or an empty string when the value is empty
    */
-  static formatValue(value: unknown, format: StacFieldFormat = 'text'): string {
+  static formatValue(value: unknown, format: StacFieldFormat = 'text', dateDisplay: StacDateDisplayOptions = DEFAULT_DATE_DISPLAY): string {
     if (value === undefined || value === null || value === '') return '';
 
     switch (format) {
+      // TODO: Should this use GeoView's DateMgt to honor the configured locale and timezone?
       case 'date':
-      case 'datetime': {
-        const date = new Date(String(value));
-        if (Number.isNaN(date.getTime())) return String(value);
-        return format === 'date' ? date.toLocaleDateString() : date.toLocaleString();
-      }
+      case 'datetime':
+        return StacFieldUtils.#formatDate(
+          String(value),
+          format === 'date' ? dateDisplay.dateFormat : dateDisplay.datetimeFormat,
+          dateDisplay
+        );
       case 'number':
         return typeof value === 'number' ? value.toLocaleString() : String(value);
       case 'epsg':
@@ -83,10 +111,11 @@ export abstract class StacFieldUtils {
    *
    * @param item - The STAC item
    * @param field - The field configuration
+   * @param dateDisplay - Optional map date settings
    * @returns The formatted value, or an empty string when the field is missing
    */
-  static getFormattedValue(item: StacItem, field: StacFieldConfig): string {
-    return StacFieldUtils.formatValue(StacFieldUtils.getValue(item, field.field), field.format);
+  static getFormattedValue(item: StacItem, field: StacFieldConfig, dateDisplay?: StacDateDisplayOptions): string {
+    return StacFieldUtils.formatValue(StacFieldUtils.getValue(item, field.field), field.format, dateDisplay);
   }
 
   /**
@@ -112,18 +141,50 @@ export abstract class StacFieldUtils {
   }
 
   /**
+   * Gets the display title of a collection.
+   *
+   * @param collection - The STAC collection
+   * @returns The collection title, or its id when it has no title
+   */
+  static getCollectionTitle(collection: StacCollection): string {
+    return collection.title ?? collection.id;
+  }
+
+  /**
+   * Formats the first temporal extent interval of a collection as calendar dates.
+   *
+   * @param collection - The STAC collection
+   * @param presentLabel - Translated label shown for an open end
+   * @param dateDisplay - Optional map date settings
+   * @param yearOnly - Optional whether to show the years only
+   * @returns The formatted date range, or an empty string when the collection has no temporal extent
+   */
+  static formatTemporalExtent(
+    collection: StacCollection,
+    presentLabel: string,
+    dateDisplay: StacDateDisplayOptions = DEFAULT_DATE_DISPLAY,
+    yearOnly = false
+  ): string {
+    const interval = collection.extent?.temporal?.interval?.[0];
+    if (!interval) return '';
+
+    const format = yearOnly ? 'YYYY' : dateDisplay.dateFormat;
+    const start = interval[0] ? StacFieldUtils.#formatDate(interval[0], format, dateDisplay, 'calendar') : '...';
+    const end = interval[1] ? StacFieldUtils.#formatDate(interval[1], format, dateDisplay, 'calendar') : presentLabel;
+    return `${start} – ${end}`;
+  }
+
+  /**
    * Gets the 2D lon/lat bbox of an item, supporting 3D bboxes.
    *
    * @param item - The STAC item
    * @returns The bbox [west, south, east, north], or undefined when the item has no valid bbox
    */
   static getBbox(item: StacItem): [number, number, number, number] | undefined {
-    const { bbox } = item;
-    if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
-    if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
-    return undefined;
+    return GeoUtilities.bboxToExtent2D(item.bbox);
   }
 
+  // TODO: Consider moving reusable geometry/extent checks into shared GeoView geo utilities.
   /**
    * Checks whether every item geometry vertex is inside an extent, falling back to the item bbox when geometry is unavailable.
    *
@@ -132,29 +193,8 @@ export abstract class StacFieldUtils {
    * @returns True when the full item geometry or bbox is contained in the extent
    */
   static isItemWithinExtent(item: StacItem, extent: [number, number, number, number]): boolean {
-    const coordinates: number[][] = [];
-    const visitCoordinates = (value: unknown): void => {
-      if (!Array.isArray(value)) return;
-      if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
-        coordinates.push([value[0], value[1]]);
-        return;
-      }
-      value.forEach(visitCoordinates);
-    };
-    const visitGeometry = (value: unknown): void => {
-      if (!value || typeof value !== 'object') return;
-      const geometry = value as { coordinates?: unknown; geometries?: unknown };
-      if (geometry.coordinates !== undefined) visitCoordinates(geometry.coordinates);
-      if (Array.isArray(geometry.geometries)) geometry.geometries.forEach(visitGeometry);
-    };
-
-    visitGeometry(item.geometry);
-
-    if (coordinates.length) {
-      return coordinates.every(
-        ([longitude, latitude]) => longitude >= extent[0] && latitude >= extent[1] && longitude <= extent[2] && latitude <= extent[3]
-      );
-    }
+    const coordinates = GeoUtilities.getGeoJsonCoordinates(item.geometry);
+    if (coordinates.length) return coordinates.every((coordinate) => GeoUtilities.isPointInExtent(coordinate, extent));
 
     const bbox = StacFieldUtils.getBbox(item);
     return !!bbox && bbox[0] >= extent[0] && bbox[1] >= extent[1] && bbox[2] <= extent[2] && bbox[3] <= extent[3];
@@ -182,9 +222,10 @@ export abstract class StacFieldUtils {
    *
    * @param item - The STAC item
    * @param itemView - Optional item display options
+   * @param dateDisplay - Optional map date settings
    * @returns The non-empty metadata rows
    */
-  static getMetadataRows(item: StacItem, itemView?: StacItemViewConfig): StacMetadataRow[] {
+  static getMetadataRows(item: StacItem, itemView?: StacItemViewConfig, dateDisplay?: StacDateDisplayOptions): StacMetadataRow[] {
     const excluded = new Set(itemView?.excludeFields ?? []);
     const fields: StacFieldConfig[] =
       itemView?.metadataFields && itemView.metadataFields !== 'all'
@@ -212,10 +253,25 @@ export abstract class StacFieldUtils {
           field: field.field,
           label: StacFieldUtils.getLabel(field),
           isConfiguredLabel: !!field.label,
-          value: assetHref ?? StacFieldUtils.formatValue(rawValue, field.format),
+          value: assetHref ?? StacFieldUtils.formatValue(rawValue, field.format, dateDisplay),
         };
       })
       .filter((row) => row.value !== '');
+  }
+
+  /**
+   * Formats a date with DateMgt, keeping the raw value when it cannot be parsed.
+   *
+   * @param value - The date value
+   * @param displayFormat - The Day.js output format
+   * @param dateDisplay - The map date settings
+   * @param temporalMode - Optional temporal mode, defaults to calendar for date-only values and instant otherwise
+   * @returns The formatted date, or the raw value when it is not a valid date
+   */
+  static #formatDate(value: string, displayFormat: string, dateDisplay: StacDateDisplayOptions, temporalMode?: TemporalMode): string {
+    const mode = temporalMode ?? (DATE_ONLY_REGEX.test(value) ? 'calendar' : 'instant');
+    if (!DateMgt.parseDateToDayjs(value, undefined, undefined, mode).isValid()) return value;
+    return DateMgt.formatDate(value, displayFormat, dateDisplay.language, dateDisplay.timezone, mode);
   }
 
   // #endregion STATIC METHODS

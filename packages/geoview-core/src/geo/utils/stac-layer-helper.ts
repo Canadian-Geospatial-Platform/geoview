@@ -1,4 +1,3 @@
-import type OlMap from 'ol/Map';
 import ImageLayer from 'ol/layer/Image';
 import WebGLTile from 'ol/layer/WebGLTile';
 import { transform as transformCoordinate } from 'ol/proj';
@@ -8,84 +7,75 @@ import ImageCanvas from 'ol/source/ImageCanvas';
 import type { Extent } from 'ol/extent';
 import type { Size } from 'ol/size';
 
-import { getStoreMapCurrentProjectionEPSG, getStoreMapExtent } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { extractGeotiffColorMap, type RGBA } from '@/core/utils/utilities';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
-import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
 /** Property key used to tag layers added by the STAC browser plugin. */
 const STAC_BROWSER_TAG = 'gv-stac-browser';
 
 /** Two-dimensional coordinate used while fitting a static preview to its footprint. */
-type TypePoint2D = [number, number];
+export type TypePoint2D = [number, number];
 
 /**
- * Extracts polygon rings from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
- *
- * @param geometry - GeoJSON geometry value
- * @returns Valid rings in longitude/latitude order
- */
-function getGeoJsonRings(geometry: unknown): TypePoint2D[][] {
-  if (!geometry || typeof geometry !== 'object') return [];
-  const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
-
-  if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
-    return geoJson.geometries.flatMap(getGeoJsonRings);
-  }
-
-  if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
-    return geoJson.coordinates.flatMap((ring) => {
-      if (!Array.isArray(ring)) return [];
-      const coordinates = ring.filter(
-        (coordinate): coordinate is TypePoint2D =>
-          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
-      );
-      return coordinates.length >= 4 ? [coordinates] : [];
-    });
-  }
-
-  if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
-    return geoJson.coordinates.flatMap((polygon) => getGeoJsonRings({ type: 'Polygon', coordinates: polygon }));
-  }
-
-  return [];
-}
-
-/**
- * Helper class for creating and managing STAC preview layers on an OpenLayers map.
+ * Helper class for creating STAC preview layers. Adding them to the map is the controller's responsibility.
  *
  * These layers are not integrated with the GeoView layer system (no layerPath, legend, or store entry).
  */
 export abstract class StacLayerHelper {
   // #region STATIC METHODS
 
-  /** Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac; returns undefined if setup fails.
+  /**
+   * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
+   *
+   * @param geometry - GeoJSON geometry value
+   * @returns Polygons as arrays of valid rings, in longitude/latitude order
+   */
+  static getGeoJsonPolygons(geometry: unknown): TypePoint2D[][][] {
+    if (!geometry || typeof geometry !== 'object') return [];
+    const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
+
+    if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+      return geoJson.geometries.flatMap((child) => StacLayerHelper.getGeoJsonPolygons(child));
+    }
+
+    if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
+      const rings = StacLayerHelper.#readRings(geoJson.coordinates);
+      return rings.length ? [rings] : [];
+    }
+
+    if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
+      return geoJson.coordinates.flatMap((polygon) => StacLayerHelper.getGeoJsonPolygons({ type: 'Polygon', coordinates: polygon }));
+    }
+
+    return [];
+  }
+
+  /**
+   * Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac.
    *
    * This is useful when ol-stac's asset selection logic does not find the right
    * asset (e.g., datacube items with role "data" instead of "overview"/"visual").
    *
-   * @param map - The OpenLayers map instance
    * @param geotiffUrl - URL to the Cloud-Optimized GeoTIFF file
    * @param opacity - Optional layer opacity (0-1), defaults to 1
+   * @returns A promise that resolves with the created layer, or undefined when the source cannot be set up
    */
-  // TODO: Avoid mutating the map in this helper; move layer addition into a controller method.
-  static async addGeoTiffLayer(map: OlMap, geotiffUrl: string, opacity?: number): Promise<WebGLTile | undefined> {
+  static async createGeoTiffLayer(geotiffUrl: string, opacity?: number): Promise<WebGLTile | undefined> {
     try {
       let palette: RGBA[] | undefined;
       try {
         palette = await extractGeotiffColorMap(geotiffUrl);
       } catch (error: unknown) {
         logger.logWarning(
-          `StacLayerHelper.addGeoTiffLayer - Could not extract colormap (falling back to default rendering): ${geotiffUrl}`,
+          `StacLayerHelper.createGeoTiffLayer - Could not extract colormap (falling back to default rendering): ${geotiffUrl}`,
           error
         );
       }
 
       const hasColorMap = !!palette;
       logger.logInfo(
-        `StacLayerHelper.addGeoTiffLayer - hasColorMap=${hasColorMap}, palette entries=${palette?.length ?? 0} for: ${geotiffUrl}`
+        `StacLayerHelper.createGeoTiffLayer - hasColorMap=${hasColorMap}, palette entries=${palette?.length ?? 0} for: ${geotiffUrl}`
       );
 
       const source = new GeoTIFF({
@@ -105,30 +95,26 @@ export abstract class StacLayerHelper {
       layer.set(STAC_BROWSER_TAG, true);
       layer.setZIndex(10000);
       if (palette) StacLayerHelper.#applyPaletteStyle(layer, palette);
-      map.addLayer(layer);
       return layer;
     } catch (error: unknown) {
-      logger.logError(`StacLayerHelper.addGeoTiffLayer - Failed to add GeoTIFF layer: ${geotiffUrl}`, error);
+      logger.logError(`StacLayerHelper.createGeoTiffLayer - Failed to create GeoTIFF layer: ${geotiffUrl}`, error);
       return undefined;
     }
   }
 
   /**
-   * Adds a non-georeferenced image stretched over the projected footprint bounds and clipped to the footprint.
+   * Creates a non-georeferenced image layer stretched over the projected footprint bounds and clipped to the footprint.
    *
    * If the item has no polygon geometry, its axis-aligned bbox is used as the footprint.
    *
-   * @param map - The OpenLayers map instance
    * @param imageUrl - URL of the image
    * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
    * @param opacity - Optional overlay opacity (0-1), defaults to 1
    * @param geometry - Optional GeoJSON footprint geometry in EPSG:4326
    * @returns A promise that resolves with the created image layer after the image loads
-   * @throws {Error} When the image fails to load or the layer cannot be added to the map
+   * @throws {Error} When the image fails to load
    */
-  // TODO: Avoid mutating the map in this helper; move layer addition into a controller method.
-  static addImageLayer(
-    map: OlMap,
+  static createImageLayer(
     imageUrl: string,
     bbox: [number, number, number, number],
     opacity?: number,
@@ -149,146 +135,33 @@ export abstract class StacLayerHelper {
       image.onload = (): void => {
         image.onload = null;
         image.onerror = null;
-        try {
-          source.changed();
-          map.addLayer(layer);
-          resolve(layer);
-        } catch (error: unknown) {
-          reject(error);
-        }
+        source.changed();
+        resolve(layer);
       };
       image.onerror = (): void => {
         image.onload = null;
         image.onerror = null;
-        reject(new Error(`StacLayerHelper.addImageLayer - Failed to load image: ${imageUrl}`));
+        reject(new Error(`StacLayerHelper.createImageLayer - Failed to load image: ${imageUrl}`));
       };
       image.src = imageUrl;
     });
   }
 
   /**
-   * Removes a STAC layer from the map.
+   * Reads the valid rings of GeoJSON Polygon coordinates.
    *
-   * @param map - The OpenLayers map instance
-   * @param layer - The STAC layer to remove
+   * @param coordinates - GeoJSON Polygon coordinates
+   * @returns Rings with at least four valid coordinates
    */
-  static removeStacLayer(map: OlMap, layer: unknown): void {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type is not statically available
-      map.removeLayer(layer as any);
-    } catch (error: unknown) {
-      logger.logError('StacLayerHelper.removeStacLayer - Failed to remove STAC layer', error);
-    }
-  }
-
-  /**
-   * Adds a footprint polygon to the map using the GeometryApi.
-   *
-   * Accepts either a bounding box or a GeoJSON geometry. Bbox edges are densified
-   * with intermediate points to render accurately in curvilinear projections (e.g., LCC).
-   *
-   * @param geometryApi - The GeometryApi instance for the target map
-   * @param footprint - Either a bbox [west, south, east, north] in EPSG:4326, or a GeoJSON geometry object
-   * @param color - CSS color string for stroke and fill (e.g., '#1976d2', '#FF8C00')
-   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
-   * @param groupId - Optional geometry group ID for managing footprint lifecycle
-   */
-  static addFootprintLayer(
-    geometryApi: GeometryApi,
-    footprint: { bbox?: [number, number, number, number]; geometry?: unknown },
-    color: string,
-    fillOpacity = 0.1,
-    groupId?: string
-  ): void {
-    const style: TypeFeatureStyle = { strokeColor: color, strokeWidth: 2, fillColor: color, fillOpacity };
-
-    if (footprint.geometry) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GeoJSON geometry type/coordinates access
-      const geom = footprint.geometry as any;
-      if (geom.type === 'MultiPolygon' && Array.isArray(geom.coordinates)) {
-        for (const polygonCoords of geom.coordinates) {
-          geometryApi.addPolygon(polygonCoords, { projection: 4326, style }, undefined, groupId);
-        }
-      } else if (Array.isArray(geom.coordinates)) {
-        geometryApi.addPolygon(geom.coordinates, { projection: 4326, style }, undefined, groupId);
-      }
-      return;
-    }
-
-    if (footprint.bbox) {
-      const ring = StacLayerHelper.#densifyBboxRing(footprint.bbox);
-      geometryApi.addPolygon([ring], { projection: 4326, style }, undefined, groupId);
-    }
-  }
-
-  /**
-   * Removes all footprint geometries for a given group and deletes the group.
-   *
-   * @param geometryApi - The GeometryApi instance
-   * @param groupId - The geometry group ID to clear
-   */
-  static clearFootprints(geometryApi: GeometryApi, groupId: string): void {
-    if (geometryApi.hasGeometryGroup(groupId)) geometryApi.deleteGeometryGroup(groupId);
-  }
-
-  /**
-   * Transforms a bbox from EPSG:4326 to the map's current projection.
-   * Uses densified polygon edges for accurate extent in curvilinear projections.
-   *
-   * @param mapId - The map identifier
-   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
-   * @returns The transformed extent in the map's projection
-   */
-  // TODO: Use or create a geo utilities functions (avoid duplication)
-  static transformBboxToMapProjection(mapId: string, bbox: [number, number, number, number]): [number, number, number, number] {
-    const destProj = Projection.getProjectionFromStringOrNumber(getStoreMapCurrentProjectionEPSG(mapId));
-    const srcProj = Projection.getProjectionLonLat();
-    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, destProj);
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    for (const [x, y] of coords) {
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-    }
-    return [minX, minY, maxX, maxY];
-  }
-
-  /**
-   * Returns the map's current extent as a WGS84 bbox.
-   *
-   * @param mapId - The map identifier
-   * @returns The map extent as [west, south, east, north], clamped to valid bounds
-   */
-  // TODO: Use or create a geo utilities functions (avoid duplication)
-  static getMapExtentAsWgs84Bbox(mapId: string): [number, number, number, number] {
-    const extent = getStoreMapExtent(mapId);
-    if (!extent) return [-180, -90, 180, 90];
-    const srcProj = Projection.getProjectionFromStringOrNumber(getStoreMapCurrentProjectionEPSG(mapId));
-    const destProj = Projection.getProjectionLonLat();
-    const bbox4326 = Projection.transformExtentFromProj(extent, srcProj, destProj) as [number, number, number, number];
-    return [Math.max(bbox4326[0], -180), Math.max(bbox4326[1], -90), Math.min(bbox4326[2], 180), Math.min(bbox4326[3], 90)];
-  }
-
-  /**
-   * Densifies a bounding box into a closed polygon ring with intermediate points along each edge.
-   *
-   * @param bbox - Bounding box [west, south, east, north]
-   * @param stops - Optional number of segments per edge, defaults to 25
-   * @returns A closed ring of [lon, lat] coordinate pairs
-   */
-  // TODO: Use or create a geo utilities functions (avoid duplication)
-  static #densifyBboxRing(bbox: [number, number, number, number], stops = 25): number[][] {
-    const [west, south, east, north] = bbox;
-    const ring: number[][] = [];
-    for (let i = 0; i <= stops; i++) ring.push([west + (east - west) * (i / stops), south]);
-    for (let i = 1; i <= stops; i++) ring.push([east, south + (north - south) * (i / stops)]);
-    for (let i = 1; i <= stops; i++) ring.push([east - (east - west) * (i / stops), north]);
-    for (let i = 1; i <= stops; i++) ring.push([west, north - (north - south) * (i / stops)]);
-    return ring;
+  static #readRings(coordinates: unknown[]): TypePoint2D[][] {
+    return coordinates.flatMap((ring) => {
+      if (!Array.isArray(ring)) return [];
+      const points = ring.filter(
+        (coordinate): coordinate is TypePoint2D =>
+          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
+      );
+      return points.length >= 4 ? [points] : [];
+    });
   }
 
   /**
@@ -369,7 +242,7 @@ export abstract class StacLayerHelper {
     canvas.height = Math.round(size[1] * pixelRatio);
     if (!image.complete || image.naturalWidth === 0 || image.naturalHeight === 0 || resolution <= 0) return canvas;
 
-    const rings = getGeoJsonRings(geometry);
+    const rings = StacLayerHelper.getGeoJsonPolygons(geometry).flat();
     const fallbackRing: TypePoint2D[] = [
       [bbox[0], bbox[3]],
       [bbox[0], bbox[1]],

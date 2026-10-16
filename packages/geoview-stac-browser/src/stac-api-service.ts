@@ -5,7 +5,6 @@ import { StacFieldUtils } from './stac-field-utils';
 import type {
   StacCapabilities,
   StacCollection,
-  StacCollectionsConfig,
   StacItem,
   StacItemsResponse,
   StacLandingPage,
@@ -16,21 +15,6 @@ import type {
   StacSearchResult,
   StacSortBy,
 } from './stac-browser-types';
-
-/** Color for collection-level footprint (bbox). */
-export const COLLECTION_COLOR = '#1976d2';
-
-/** Default fill opacity for collection-level footprints. */
-export const COLLECTION_FILL_OPACITY = 0.2;
-
-/** Color for item-level footprints. */
-export const ITEM_COLOR = '#FF8C00';
-
-/** Default fill opacity for search-result footprints. */
-export const SEARCH_FILL_OPACITY = 0.25;
-
-/** Colors assigned to the selected items, distinct from the collection and item footprint colors. */
-export const SELECTION_COLORS = ['#e53935', '#43a047', '#fdd835', '#8e24aa', '#00acc1', '#d81b60', '#7cb342', '#5e35b1'];
 
 /** Default number of items per page when not configured. */
 export const DEFAULT_PAGE_LIMIT = 20;
@@ -53,6 +37,9 @@ interface StacContainedSearchCursor {
 /**
  * Service class for interacting with STAC APIs.
  *
+ * It reads the landing page to detect optional server features (free text, sort, CQL2), lists collections and their items,
+ * loads queryables, and runs item searches (POST with a GET fallback, server or assembled pagination).
+ * When full containment in an extent is requested, it filters pages client-side and keeps a cursor across API pages.
  * Request failures are not swallowed: the typed errors from the Fetch helper propagate to the caller.
  */
 export class StacApiService {
@@ -347,45 +334,6 @@ export class StacApiService {
   static getPageLink(response: { links?: StacLink[] }, direction: 'next' | 'prev'): StacLink | undefined {
     const rels = direction === 'next' ? ['next'] : ['prev', 'previous'];
     return response.links?.find((link) => rels.includes(link.rel));
-  }
-
-  /**
-   * Applies the configured include/exclude restrictions to a list of collections.
-   *
-   * @param collections - All collections returned by the server
-   * @param config - Optional collections configuration
-   * @returns The allowed collections
-   */
-  static filterCollections(collections: StacCollection[], config?: StacCollectionsConfig): StacCollection[] {
-    const include = config?.include?.length ? new Set(config.include) : undefined;
-    const exclude = new Set(config?.exclude ?? []);
-    return collections.filter((collection) => (!include || include.has(collection.id)) && !exclude.has(collection.id));
-  }
-
-  /**
-   * Formats a collection's temporal extent interval for display.
-   *
-   * @param collection - The STAC collection to extract temporal extent from
-   * @param yearOnly - Optional whether to show year only instead of full date
-   * @returns Formatted date range string, or empty string if unavailable
-   */
-  static formatTemporalExtent(collection: StacCollection, yearOnly?: boolean): string {
-    const interval = collection.extent?.temporal?.interval?.[0];
-    if (!interval) return '';
-
-    let start: string | number = '...';
-    if (interval[0]) {
-      const date = new Date(interval[0]);
-      start = yearOnly ? date.getFullYear() : date.toLocaleDateString();
-    }
-
-    let end: string | number = 'present';
-    if (interval[1]) {
-      const date = new Date(interval[1]);
-      end = yearOnly ? date.getFullYear() : date.toLocaleDateString();
-    }
-
-    return `${start} – ${end}`;
   }
 
   /**

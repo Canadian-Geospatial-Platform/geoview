@@ -5,6 +5,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
+import type { TypeStacStyledFootprint } from 'geoview-core/core/controllers/stac-browser-controller';
 
 import type {
   StacCollection,
@@ -14,25 +15,14 @@ import type {
   StacItemInteractions,
   StacSortBy,
 } from './stac-browser-types';
-import { COLLECTION_COLOR, COLLECTION_FILL_OPACITY, ITEM_COLOR, StacApiService } from './stac-api-service';
+import { StacApiService } from './stac-api-service';
+import { StacConfigUtils } from './stac-config-utils';
 import { StacItemList } from './stac-item-list';
 import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
 
 /** Geometry group used for the collection and its items footprints. */
 const FOOTPRINT_GROUP = 'stac-collection-footprints';
-
-/**
- * Converts a STAC bbox to its two-dimensional longitude/latitude extent.
- *
- * @param bbox - A four- or six-coordinate STAC bbox
- * @returns The 2D bbox, or undefined when the input is invalid
- */
-function getLonLatBbox(bbox?: number[]): [number, number, number, number] | undefined {
-  if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
-  if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
-  return undefined;
-}
 
 /** Props for the StacCollectionDetail component. */
 interface StacCollectionDetailProps {
@@ -76,16 +66,15 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
   const stacController = useStacBrowserController();
   /**
-   * Resolves the collection-specific footprint style over package defaults.
+   * Resolves the collection extent and item footprint styles over package defaults.
    */
-  const memoCollectionFootprintStyle = useMemo((): StacFootprintStyleConfig => {
-    logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoCollectionFootprintStyle', display.footprintStyles, collection.id);
+  const memoFootprintStyles = useMemo((): Record<'collection' | 'item', Required<StacFootprintStyleConfig>> => {
+    logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoFootprintStyles', display.footprintStyles, collection.id);
     return {
-      ...display.footprintStyles?.collection,
-      ...display.collectionOverrides?.[collection.id]?.footprintStyles?.collection,
+      collection: StacConfigUtils.getFootprintStyle(display, collection.id, 'collection'),
+      item: StacConfigUtils.getFootprintStyle(display, collection.id, 'item'),
     };
-  }, [display.footprintStyles, display.collectionOverrides, collection.id]);
-  const collectionItemFootprintStyle = display.collectionOverrides?.[collection.id]?.footprintStyles?.collection;
+  }, [display, collection.id]);
 
   /** Items for the current page. */
   const [items, setItems] = useState<StacItem[]>([]);
@@ -109,7 +98,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
     logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoUnionExtent', items.length);
 
     const collBbox = collection.extent?.spatial?.bbox?.[0];
-    let union = getLonLatBbox(collBbox);
+    let union = GeoUtilities.bboxToExtent2D(collBbox);
 
     for (const item of items) {
       const itemBbox = StacFieldUtils.getBbox(item);
@@ -125,31 +114,15 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Show footprints', items.length);
 
-    // Clean previous footprints
-    stacController.clearFootprints(FOOTPRINT_GROUP);
-
-    // Draw collection footprint with union extent (blue)
-    if (memoUnionExtent) {
-      stacController.addFootprints(
-        FOOTPRINT_GROUP,
-        [{ bbox: memoUnionExtent }],
-        memoCollectionFootprintStyle.color ?? COLLECTION_COLOR,
-        memoCollectionFootprintStyle.fillOpacity ?? COLLECTION_FILL_OPACITY
-      );
-    }
-
-    // Use a collection-specific style for its item footprints, falling back to orange item styling.
-    stacController.addFootprints(
-      FOOTPRINT_GROUP,
-      items,
-      collectionItemFootprintStyle?.color ?? ITEM_COLOR,
-      collectionItemFootprintStyle?.fillOpacity ?? 0.15
-    );
+    const footprints: TypeStacStyledFootprint[] = [];
+    if (memoUnionExtent) footprints.push({ bbox: memoUnionExtent, ...memoFootprintStyles.collection });
+    items.forEach((item) => footprints.push({ geometry: item.geometry, bbox: item.bbox, ...memoFootprintStyles.item }));
+    stacController.setFootprints(FOOTPRINT_GROUP, footprints);
 
     return (): void => {
       stacController.clearFootprints(FOOTPRINT_GROUP);
     };
-  }, [stacController, items, memoUnionExtent, memoCollectionFootprintStyle, collectionItemFootprintStyle]);
+  }, [stacController, items, memoUnionExtent, memoFootprintStyles]);
 
   /**
    * Loads a page of items, from the first page or from a pagination link.
@@ -247,8 +220,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const memoTemporalDisplay = useMemo((): string => {
     logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoTemporalDisplay', collection.extent);
-    return StacApiService.formatTemporalExtent(collection);
-  }, [collection]);
+    return StacFieldUtils.formatTemporalExtent(collection, t('stacBrowser.present'), display.dateDisplay);
+  }, [collection, t, display.dateDisplay]);
 
   const description = collection.description ?? '';
   const isDescLong = description.length > 200;
@@ -273,10 +246,10 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
             value={collection.id}
             onChange={handleCollectionChange}
             fullWidth
-            menuItems={collections.map((entry) => ({ item: { value: entry.id, children: entry.title ?? entry.id } }))}
+            menuItems={collections.map((entry) => ({ item: { value: entry.id, children: StacFieldUtils.getCollectionTitle(entry) } }))}
           />
         ) : (
-          <Typography sx={memoSxClasses.detailTitle}>{collection.title ?? collection.id}</Typography>
+          <Typography sx={memoSxClasses.detailTitle}>{StacFieldUtils.getCollectionTitle(collection)}</Typography>
         )}
 
         {/* Description with Read more */}
