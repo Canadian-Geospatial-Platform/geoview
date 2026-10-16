@@ -50,11 +50,10 @@ Item and collection zooms fit their extent in the map area beside the open STAC 
 | `stacUrl`                    | string             | (required)    | Base URL of the STAC API                                                                   |
 | `browseEnabled`              | boolean            | `true`        | Enable collection browsing; when false, only search mode is available                      |
 | `defaultMode`                | string             | `"browse"`    | Initial `browse` or `search` view; search is always used when browsing is disabled         |
-| `searchDescription`          | string             | -             | Optional plain text or translation key displayed above the search filters                  |
+| `searchDescription`          | string             | -             | Optional custom text displayed above the search filters                                    |
 | `collections.include`        | string[]           | -             | Collection IDs to show (all when omitted)                                                  |
 | `collections.exclude`        | string[]           | -             | Collection IDs to hide                                                                     |
 | `collections.default`        | string             | -             | Collection opened at startup (opened automatically when only one collection is allowed)    |
-| `collections.restrictSearch` | boolean            | `true`        | When `include`/`exclude` is set, searches are restricted to the allowed collections        |
 | `filters.collections`        | boolean            | `true`        | Enable collection filter (shown when more than one collection is allowed)                  |
 | `filters.temporal`           | boolean            | `true`        | Enable temporal extent filter                                                              |
 | `filters.spatial`            | boolean            | `true`        | Enable spatial extent (bbox) filter                                                        |
@@ -88,7 +87,7 @@ Field paths use dot notation into the STAC item (`id`, `collection`, `properties
 
 Set `browseEnabled: false` for search-only catalogs. This hides the mode selector and collection-browsing navigation, even if `defaultMode` is `"browse"`. With browsing enabled, `defaultMode: "search"` opens the search form without opening the default collection.
 
-Set `searchDescription` to custom guidance shown at the top of the search form; omit it or use an empty string to hide it. Plain text and translation keys are supported. The built-in `stacBrowser.geolocatorSearchDescription` key provides EN/FR guidance to use the geolocator to search within a predefined extent.
+Set `searchDescription` to custom text shown at the top of the search form; omit it or use an empty string to hide it. The value is displayed as provided and is not treated as a translation key.
 
 `defaults.useMapExtent` and `defaults.containedInExtent` pre-select the spatial checkboxes without submitting a search. The current map extent is read when the user searches, so moving the map before searching uses the new extent. Users can change either checkbox; Clear filters restores the configured defaults. When `filters.spatial` is false, the map extent is not selected.
 
@@ -138,7 +137,7 @@ The STAC `datetime` parameter filters item acquisition time. A service field suc
   "stacUrl": "https://eodms-sgdot.nrcan-rncan.gc.ca/search",
   "browseEnabled": false,
   "defaultMode": "search",
-  "searchDescription": "stacBrowser.geolocatorSearchDescription",
+  "searchDescription": "Use the geolocator to search within a predefined extent.",
   "collections": { "include": ["NAPL"], "default": "NAPL" },
   "filters": {
     "sort": true,

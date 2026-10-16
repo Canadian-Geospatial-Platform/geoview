@@ -1,4 +1,4 @@
-import type { SxProps } from 'geoview-core/ui/style/types';
+import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, IconButton, Typography } from 'geoview-core/ui';
 import { CopyIcon, DownloadIcon, VisibilityIcon, VisibilityOffIcon } from 'geoview-core/ui/icons';
@@ -51,11 +51,11 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
 
-  const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
+  const [selectedAssetKey, setSelectedAssetKey] = useState<string | undefined>(undefined);
 
   /**
    * Auto-shows the item footprint in orange on mount and cleans up on unmount.
@@ -96,7 +96,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
 
       // If clicking the same asset, toggle it off
       if (selectedAssetKey === assetKey) {
-        setSelectedAssetKey(null);
+        setSelectedAssetKey(undefined);
         return;
       }
 
@@ -210,7 +210,8 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
                   <Box sx={memoSxClasses.assetActions}>
                     {isGeotiff && isPreviewEnabled && actions?.showOnMap !== false && (
                       <IconButton
-                        aria-label={t('stacBrowser.showOnMap')}
+                        aria-label={t(isSelected ? 'stacBrowser.hideFromMap' : 'stacBrowser.showOnMap')}
+                        aria-pressed={isSelected}
                         size="small"
                         data-asset-key={key}
                         onClick={handleToggleView}

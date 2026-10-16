@@ -1,4 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, IconButton, TextField, Typography } from 'geoview-core/ui';
 import { SortByAlphaIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -32,7 +33,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   const { t } = useTranslation();
   const theme = useTheme();
   const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   /** Whether alphabetical sort is active. */
   const [sortAsc, setSortAsc] = useState(false);
@@ -107,11 +108,12 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
   // #endregion
 
   return (
-    <Box sx={sxClasses.resultsList}>
+    <Box sx={memoSxClasses.resultsList}>
       {/* Search box and sort button */}
-      <Box sx={sxClasses.browseToolbar}>
+      <Box sx={memoSxClasses.browseToolbar}>
         <TextField
           size="small"
+          aria-label={t('stacBrowser.searchCollections')}
           placeholder={t('stacBrowser.searchCollections')}
           value={searchText}
           onChange={handleSearchChange}
@@ -137,28 +139,28 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
           <Box
             key={collection.id}
             data-collection-id={collection.id}
-            sx={sxClasses.collectionCard}
+            sx={memoSxClasses.collectionCard}
             onClick={handleCardClick}
             onKeyDown={handleCardKeyDown}
             role="button"
             tabIndex={0}
           >
-            <Typography sx={sxClasses.collectionTitle}>{collection.title ?? collection.id}</Typography>
+            <Typography sx={memoSxClasses.collectionTitle}>{collection.title ?? collection.id}</Typography>
             {collection.description && (
-              <Typography sx={sxClasses.collectionDescription}>
+              <Typography sx={memoSxClasses.collectionDescription}>
                 {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
               </Typography>
             )}
-            {temporal && <Typography sx={sxClasses.resultMeta}>{temporal}</Typography>}
+            {temporal && <Typography sx={memoSxClasses.resultMeta}>{temporal}</Typography>}
             {collection.keywords && collection.keywords.length > 0 && (
-              <Box sx={sxClasses.keywordChipsRow}>
+              <Box sx={memoSxClasses.keywordChipsRow}>
                 {collection.keywords.slice(0, 5).map((keyword) => (
-                  <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
+                  <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
                     {keyword}
                   </Box>
                 ))}
                 {collection.keywords.length > 5 && (
-                  <Box component="span" sx={sxClasses.keywordChip}>
+                  <Box component="span" sx={memoSxClasses.keywordChip}>
                     +{collection.keywords.length - 5}
                   </Box>
                 )}

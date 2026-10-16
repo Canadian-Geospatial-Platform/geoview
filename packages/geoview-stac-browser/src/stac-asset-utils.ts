@@ -24,6 +24,8 @@ const NON_IMAGE_MEDIA_TYPES = ['application/geo+json', 'application/json', 'appl
  * Utility functions to inspect STAC item assets.
  */
 export abstract class StacAssetUtils {
+  // #region STATIC METHODS
+
   /**
    * Checks if an asset is a GeoTIFF by media type or file extension.
    *
@@ -119,4 +121,6 @@ export abstract class StacAssetUtils {
     if (!item.assets) return undefined;
     return item.assets[roleOrKey] ?? Object.values(item.assets).find((asset) => asset.roles?.includes(roleOrKey));
   }
+
+  // #endregion STATIC METHODS
 }

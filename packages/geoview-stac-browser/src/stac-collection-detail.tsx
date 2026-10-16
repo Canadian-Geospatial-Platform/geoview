@@ -1,4 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, Select, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -15,10 +16,23 @@ import type {
 } from './stac-browser-types';
 import { COLLECTION_COLOR, COLLECTION_FILL_OPACITY, ITEM_COLOR, StacApiService } from './stac-api-service';
 import { StacItemList } from './stac-item-list';
+import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
 
 /** Geometry group used for the collection and its items footprints. */
 const FOOTPRINT_GROUP = 'stac-collection-footprints';
+
+/**
+ * Converts a STAC bbox to its two-dimensional longitude/latitude extent.
+ *
+ * @param bbox - A four- or six-coordinate STAC bbox
+ * @returns The 2D bbox, or undefined when the input is invalid
+ */
+function getLonLatBbox(bbox?: number[]): [number, number, number, number] | undefined {
+  if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
+  if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
+  return undefined;
+}
 
 /** Props for the StacCollectionDetail component. */
 interface StacCollectionDetailProps {
@@ -57,8 +71,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
   /**
@@ -85,25 +99,24 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const [numberMatched, setNumberMatched] = useState<number | undefined>(undefined);
   /** Whether the description is expanded. */
   const [descExpanded, setDescExpanded] = useState(false);
+  /** Identifies the latest item request so stale responses cannot replace current collection data. */
+  const itemsRequestIdRef = useRef(0);
 
   /**
    * Computes the union bounding box of the collection extent and all loaded items.
    */
-  const memoUnionExtent = useMemo((): [number, number, number, number] | null => {
+  const memoUnionExtent = useMemo((): [number, number, number, number] | undefined => {
     logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoUnionExtent', items.length);
 
     const collBbox = collection.extent?.spatial?.bbox?.[0];
-    let union = collBbox ? ([collBbox[0], collBbox[1], collBbox[2], collBbox[3]] as [number, number, number, number]) : undefined;
+    let union = getLonLatBbox(collBbox);
 
     for (const item of items) {
-      const iBbox = item.bbox;
-      if (iBbox && iBbox.length >= 4) {
-        union = GeoUtilities.getExtentUnion(union, [iBbox[0], iBbox[1], iBbox[2], iBbox[3]]) as
-          [number, number, number, number] | undefined;
-      }
+      const itemBbox = StacFieldUtils.getBbox(item);
+      if (itemBbox) union = GeoUtilities.getExtentUnion(union, itemBbox) as [number, number, number, number] | undefined;
     }
 
-    return union ?? null;
+    return union;
   }, [collection.extent, items]);
 
   /**
@@ -146,6 +159,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const loadItems = useCallback(
     async (pageUrl?: string): Promise<void> => {
+      const requestId = ++itemsRequestIdRef.current;
       try {
         setIsLoading(true);
         if (!pageUrl) {
@@ -155,16 +169,18 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
           setNumberMatched(undefined);
         }
         const response = await apiService.fetchCollectionItems(collection.id, limit, sortby, pageUrl);
+        if (requestId !== itemsRequestIdRef.current) return;
         setItems(response.features);
         setNextUrl(StacApiService.getPageLink(response, 'next')?.href);
         setPrevUrl(StacApiService.getPageLink(response, 'prev')?.href);
         setNumberMatched(response.numberMatched);
       } catch (error: unknown) {
+        if (requestId !== itemsRequestIdRef.current) return;
         // UI boundary: report the failed request to the user
         logger.logError(`STAC-COLLECTION-DETAIL - Failed to fetch items for collection ${collection.id}`, error);
         stacController.showError('stacBrowser.errorRequest');
       } finally {
-        setIsLoading(false);
+        if (requestId === itemsRequestIdRef.current) setIsLoading(false);
       }
     },
     [apiService, collection.id, limit, sortby, stacController]
@@ -176,6 +192,9 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Fetch items on mount', collection.id);
     void loadItems();
+    return (): void => {
+      itemsRequestIdRef.current += 1;
+    };
   }, [collection.id, loadItems]);
 
   // #region Handlers

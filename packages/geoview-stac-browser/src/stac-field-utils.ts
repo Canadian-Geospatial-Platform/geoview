@@ -19,6 +19,8 @@ const DATETIME_KEYS = ['datetime', 'start_datetime', 'end_datetime', 'created', 
  * Utility functions to read and format configurable STAC item fields.
  */
 export abstract class StacFieldUtils {
+  // #region STATIC METHODS
+
   /**
    * Gets a stable key for an item that is unique across collections.
    *
@@ -215,4 +217,6 @@ export abstract class StacFieldUtils {
       })
       .filter((row) => row.value !== '');
   }
+
+  // #endregion STATIC METHODS
 }

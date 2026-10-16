@@ -15,6 +15,8 @@ import defaultConfig from '../default-config-stac-browser.json';
  * STAC Browser plugin — provides a panel for browsing and filtering STAC API catalogs.
  */
 class StacBrowserPlugin extends AppBarPlugin {
+  // #region OVERRIDES
+
   /**
    * Returns the schema that is defined for this package.
    *
@@ -45,7 +47,6 @@ class StacBrowserPlugin extends AppBarPlugin {
           title: 'STAC Browser',
           browse: 'Browse',
           search: 'Search',
-          geolocatorSearchDescription: 'Use the geolocator to search within a predefined extent.',
           temporal: 'Temporal Extent',
           startDate: 'Start date',
           endDate: 'End date',
@@ -105,7 +106,6 @@ class StacBrowserPlugin extends AppBarPlugin {
           title: 'Navigateur STAC',
           browse: 'Parcourir',
           search: 'Rechercher',
-          geolocatorSearchDescription: 'Utilisez le géolocalisateur pour rechercher dans une étendue prédéfinie.',
           temporal: 'Étendue temporelle',
           startDate: 'Date de début',
           endDate: 'Date de fin',
@@ -215,6 +215,8 @@ class StacBrowserPlugin extends AppBarPlugin {
    * Handles cleanup when the plugin is removed.
    */
   override onRemoved(): void {}
+
+  // #endregion OVERRIDES
 }
 
 export default StacBrowserPlugin;
