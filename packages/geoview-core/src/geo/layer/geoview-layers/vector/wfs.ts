@@ -220,8 +220,6 @@ export class WFS extends AbstractGeoViewVector {
    * @throws {ResponseError} When all output format attempts return unsuccessful HTTP responses
    * @throws {ResponseEmptyError} When all output format attempts return empty responses
    * @throws {NetworkError} When the DescribeFeatureType request encounters a network error
-   * @throws {SyntaxError} When all response bodies fail XML and JSON parsing
-   * @throws {Error} When all JSON responses lack the expected feature properties
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -807,7 +805,6 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param responseText - The raw response text from the DescribeFeatureType request
    * @returns The parsed array of field definitions
-   * @throws {SyntaxError} When XML parsing fails and the response is not valid JSON
    * @throws {Error} When the response is valid JSON but does not contain a feature properties array
    */
   static #parseResponseForOutfields(responseText: string): TypeOutfields[] {

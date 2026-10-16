@@ -1580,7 +1580,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // GetStyles is optional and unavailable on many WMS services
     if (!layerConfig.getSupportsGetStyles()) {
-      logger.logWarning(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
+      logger.logDebug(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
       return undefined;
     }
 

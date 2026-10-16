@@ -2620,12 +2620,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // GV Note: We assume that if outfields are not provided, all fields are of type string and have no domain.
     // GV This is a fallback and may not be accurate, but without outfield metadata we have no way to know the correct types or domains.
     // GV And the alternative would be to skip and show no fields
-    const fieldEntries: Array<{
-      name: string;
-      type: TypeOutfieldsType;
-      alias: string;
-      domain?: TypeDomain;
-    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name }));
+    const fieldEntries = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name, domain: undefined }));
 
     for (const fieldEntry of fieldEntries) {
       // Skip geometry field
@@ -2652,7 +2647,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           inputTimezone,
           inputTemporalMode
         ),
-        dataType: fieldEntry.type,
+        dataType: fieldEntry.type || 'string',
         alias: fieldEntry.alias,
         domain: fieldEntry.domain,
       };
@@ -2685,7 +2680,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   static helperGetFieldValue(
     feature: Feature,
     fieldName: string,
-    fieldType: TypeOutfieldsType,
+    fieldType: TypeOutfieldsType | undefined,
     fieldDomain: TypeDomain | undefined,
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
@@ -2725,7 +2720,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 export type GetFieldValueDelegate = (
   feature: Feature,
   fieldName: string,
-  fieldType: TypeOutfieldsType,
+  fieldType: TypeOutfieldsType | undefined,
   fieldDomain: TypeDomain | undefined,
   inputFormat: string | string[] | undefined,
   inputTimezone: TimeIANA | undefined,

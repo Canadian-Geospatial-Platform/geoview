@@ -193,9 +193,6 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSectionContent}>
           {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
-          {layerDataProjectionCode && (
-            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
-          )}
           {memoResources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
@@ -212,7 +209,6 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               </a>
             </Box>
           )}
-          {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
           {vectorStructureFullUrl && (
             <Box className="info-container">
               {`${t('layers.layerVectorStructureFullUrl')}`}
@@ -228,6 +224,10 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
                 {wmsGetStylesFullUrl}
               </a>
             </Box>
+          )}
+          {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
+          {layerDataProjectionCode && (
+            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
           )}
           <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>

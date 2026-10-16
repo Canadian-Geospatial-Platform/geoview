@@ -668,12 +668,15 @@ export abstract class GeoUtilities {
 
     const featureTypeList = Array.isArray(featureTypes) ? featureTypes : [featureTypes];
     featureTypeList.forEach((featureType) => {
-      if (featureType.DefaultSRS === undefined && featureType.DefaultCRS !== undefined) {
-        // eslint-disable-next-line no-param-reassign
-        featureType.DefaultSRS = featureType.DefaultCRS;
-      }
+      // Standardize all WFS versions to DefaultCRS property
       // eslint-disable-next-line no-param-reassign
-      delete featureType.DefaultCRS;
+      featureType.DefaultCRS = featureType['wfs:DefaultCRS'];
+
+      // eslint-disable-next-line no-param-reassign
+      featureType.DefaultSRS = featureType['wfs:DefaultSRS'];
+
+      // eslint-disable-next-line no-param-reassign
+      featureType.SRS = featureType['wfs:SRS'];
     });
   }
 
