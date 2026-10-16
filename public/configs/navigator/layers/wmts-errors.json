@@ -1,0 +1,96 @@
+{
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          4,
+          [
+            -100,
+            55
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmtsLYR2",
+        "geoviewLayerName": "Error metadataAccessPath (unreachable URL)",
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://badurl/oops/WMTSCapabilities.xml",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmtsLYR3",
+        "geoviewLayerName": "Error layerId (not found)",
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "BaseMaps_DOES_NOT_EXIST",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmtsLYR4",
+        "geoviewLayerName": "Error tileMatrixSet (invalid)",
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
+            "tileMatrixSet": "invalidMatrixSet"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

@@ -1,0 +1,25 @@
+{
+  "configMeta": {
+    "description": "LCC projection (3978) with simple basemap. Minimal config (default appBar, footerBar and navBar)."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "simple",
+      "shaded": true,
+      "labeled": true,
+      "labelZIndex": 20
+    }
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

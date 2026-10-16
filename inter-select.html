@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Select (interactions)- Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Select (interactions)</strong></h1></td></tr></tbody></table><table><tbody><tr><td><ol><a href="./index.html">Main</a><li><a href="#SELECT1">Select (simple case)</a></li></ol></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Select functionalities</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="SELECT1">1. Select (simple case)</h4><a class="ref-link" href="#top">Top</a></div><div>In this example, all shapes are selectable. Click features to see information on the selection. Hold shift-key to select more than one shape.</div><div style="position: relative"><div class="logs-container"><div class="logs-container-title">API EVENTS LOGS</div><div class="logs-container-sub-title">(see console for more)</div><div id="LOGS1"></div></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                    'minZoom': 2,
+                    'maxZoom': 12,
+                    'projection': 3978
+                },
+                'basemapOptions': {
+                    'basemapId': 'simple',
+                    'shaded': true,
+                    'labeled': false
+                }
+            },
+            'theme': 'geo.ca',
+            'corePackages': []
+          }"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>let map1;
+      function initMap1(map) {
+        // Keep reference
+        map1 = map;
+
+        // Create geometry group which will handle the drawing and set it as active
+        const groupKey = 'selectGroup';
+        const geomGrp = map.layer.geometry.createGeometryGroup(groupKey);
+
+        // Add dummy shapes
+        addDefaultShapes(map, groupKey);
+
+        // Init select interactions
+        const select1 = map.initSelectInteractions();
+
+        // Wire handler
+        select1.onSelectChanged((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'selectChanged');
+          console.log(payload);
+        });
+      }
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        // If all maps initialized
+        if (mapViewer.mapId === 'map1') {
+          // Init map
+          initMap1(mapViewer);
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>
