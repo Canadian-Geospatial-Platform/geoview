@@ -6,6 +6,7 @@ import {
   addStoreDetailsCheckedFeature,
   deleteStoreDetailsFeatureInfo,
   removeStoreDetailsCheckedFeature,
+  setStoreDetailsCurrentFeatureIndex,
   setStoreDetailsLayerDataArrayBatchLayerPathBypass,
   setStoreDetailsSelectedLayerPath,
 } from '@/core/stores/states/feature-info-state';
@@ -35,6 +36,16 @@ export class DetailsController extends AbstractMapViewerController {
   setSelectedLayerPath(layerPath: string): void {
     // Save in the store
     setStoreDetailsSelectedLayerPath(this.getMapId(), layerPath);
+  }
+
+  /**
+   * Sets the selected feature index in the details panel.
+   *
+   * @param currentFeatureIndex - The feature index to select
+   */
+  setCurrentFeatureIndex(currentFeatureIndex: number): void {
+    // Save in the store
+    setStoreDetailsCurrentFeatureIndex(this.getMapId(), currentFeatureIndex);
   }
 
   /**

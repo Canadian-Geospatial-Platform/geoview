@@ -14,6 +14,7 @@ import {
   useStoreDetailsLayerDataArray,
   useStoreDetailsLayerDataArrayBatch,
   useStoreDetailsSelectedLayerPath,
+  useStoreDetailsCurrentFeatureIndex,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/states/feature-info-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
@@ -29,7 +30,7 @@ import {
 } from '@/core/stores/states/layer-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo, TypeQueryStatus } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeMapMouseInfo, TypeQueryStatus } from '@/api/types/map-schema-types';
 
 import type { LayerListEntry } from '@/core/components/common/layer-list';
 import type { LayoutExposedMethods } from '@/core/components/common/layout';
@@ -37,7 +38,7 @@ import { Layout } from '@/core/components/common/layout';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
-import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
@@ -108,13 +109,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const detailsController = useDetailsController();
 
   // States
-  const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
-  const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
-  const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListStructureEntry[]>([]);
+  const currentFeatureIndex = useStoreDetailsCurrentFeatureIndex();
   const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
-  const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>(undefined);
-  const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
+  const previousHighlightedFeaturesRef = useRef<TypeFeatureInfoEntry[]>([]);
+  const previousLayerFeaturesRef = useRef<TypeFeatureInfoEntry[] | undefined>(undefined);
   const layoutRef = useRef<LayoutExposedMethods>(null);
   // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
   const userDismissedGuideRef = useRef<boolean>(false);
@@ -146,22 +145,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       return memoIsCheckedFeaturesSet.has(feature?.uid);
     },
     [memoIsCheckedFeaturesSet]
-  );
-
-  /**
-   * Clears the highlighted features when they are not checked.
-   *
-   * @param arrayToClear - The array to clear of unchecked features
-   */
-  const clearHighlightsUnchecked = useCallback(
-    (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
-      arrayToClear?.forEach((feature) => {
-        if (!memoIsCheckedFeaturesSet.has(feature.uid)) {
-          mapController.removeHighlightedFeature(feature);
-        }
-      });
-    },
-    [memoIsCheckedFeaturesSet, mapController]
   );
 
   /**
@@ -314,6 +297,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     arrayOfLayerData,
     coordinateInfoEnabled,
     queryableByLayerPath,
+
     layerNames,
     layerStatuses,
     layerHiddenSet,
@@ -332,10 +316,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    *
    * Contains only layerPath, numOffeatures, and queryStatus — the minimum needed to detect when a
    * batched update has changed feature counts or added/removed layers. This drives the batch-gated
-   * selection effects and the feature-index reset logic without re-triggering on live display changes.
+   * selection effects and feature-index reset logic without re-triggering on live display changes.
    */
   const memoLayersListBatched = useMemo((): LayerListStructureEntry[] => {
-    // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayersListBatched', arrayOfLayerDataBatch);
 
     return arrayOfLayerDataBatch.map((layer) => ({
@@ -396,39 +379,37 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     return !!memoCurrentFeature?.geometry;
   }, [memoCurrentFeature?.geometry]);
 
-  /**
-   * Updates the selected features for the highlight on the map.
-   *
-   * Removes the previously highlighted feature and adds a new one.
-   *
-   * @param newIndex - The new index to select the feature
-   * @param prevLayer - Optional layer on which to unselect features
-   */
-  const updateFeatureSelected = useCallback(
-    (newIndex: number, prevLayer?: TypeLayerData) => {
-      // Get the current feature in highlight
-      let currentFeature;
-      if (prevLayer?.features) {
-        currentFeature = prevLayer?.features?.[prevFeatureIndex.current];
-      }
+  /** Memoizes the checked features and active current feature that should be highlighted. */
+  const memoFeaturesToHighlight = useMemo((): TypeFeatureInfoEntry[] => {
+    const featuresToHighlight = checkedFeatures.filter(hasValidGeometry);
+    // The current feature is an additional highlight only while its detail pane is visible.
+    if (memoIsPanelOpen && memoCurrentFeature && memoCurrentFeatureHasGeometry && !isFeatureInCheckedFeatures(memoCurrentFeature)) {
+      featuresToHighlight.push(memoCurrentFeature);
+    }
+    return featuresToHighlight;
+  }, [checkedFeatures, hasValidGeometry, isFeatureInCheckedFeatures, memoCurrentFeature, memoCurrentFeatureHasGeometry, memoIsPanelOpen]);
 
-      // If found, remove it
-      if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
-        // Remove
-        mapController.removeHighlightedFeature(currentFeature);
-      }
+  /** Tracks the layer and feature count used by the current-feature index. */
+  const previousFeatureSelectionRef = useRef({
+    layerPath: selectedLayerPath,
+    featureCount: memoSelectedLayerDataFeatures?.length ?? 0,
+  });
 
-      // Get the next feature navigating to
-      const nextFeature = memoSelectedLayerData?.features?.[newIndex];
+  /** Resets navigation when the selected layer or its feature count changes. */
+  useEffect(() => {
+    logger.logTraceUseEffect('DETAILS-PANEL - reset feature index', selectedLayerPath, memoSelectedLayerDataFeatures?.length);
 
-      // If found, add it
-      if (nextFeature) mapController.addHighlightedFeature(nextFeature);
+    const featureCount = memoSelectedLayerDataFeatures?.length ?? 0;
+    if (
+      previousFeatureSelectionRef.current.layerPath !== selectedLayerPath ||
+      previousFeatureSelectionRef.current.featureCount !== featureCount
+    ) {
+      // Restart navigation when the selected layer or its result set changes.
+      detailsController.setCurrentFeatureIndex(0);
+    }
 
-      // Update the current feature index
-      setCurrentFeatureIndex(newIndex);
-    },
-    [memoSelectedLayerData?.features, isFeatureInCheckedFeatures, mapController]
-  );
+    previousFeatureSelectionRef.current = { layerPath: selectedLayerPath, featureCount };
+  }, [detailsController, selectedLayerPath, memoSelectedLayerDataFeatures?.length]);
 
   /**
    * Effect used when the structural layers list changes.
@@ -443,44 +424,32 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (!memoLayersListBatched.length) detailsController.setSelectedLayerPath('');
   }, [memoLayersListBatched, detailsController]);
 
-  /**
-   * Effect used when the layers list changes.
-   * Note: This useEffect is triggered many times as the layerDataArray gets processed.
-   */
+  /** Keeps map highlights synchronized with checked and current feature selection. */
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - memoSelectedLayerDataFeatures changed', memoSelectedLayerDataFeatures);
+    logger.logTraceUseEffect('DETAILS-PANEL - synchronize feature highlights', memoFeaturesToHighlight, memoSelectedLayerDataFeatures);
 
-    // Clear the unchecked highlights
-    clearHighlightsUnchecked(prevLayerFeatures.current);
+    const previousFeatures = previousHighlightedFeaturesRef.current;
+    const layerFeaturesChanged = previousLayerFeaturesRef.current !== memoSelectedLayerDataFeatures;
+    // Remove features that are no longer checked or selected.
+    previousFeatures
+      .filter((feature) => !memoFeaturesToHighlight.includes(feature))
+      .forEach((feature) => mapController.removeHighlightedFeature(feature));
+    // Add newly checked or selected features.
+    memoFeaturesToHighlight
+      .filter((feature) => !previousFeatures.includes(feature))
+      .forEach((feature) => mapController.addHighlightedFeature(feature));
 
-    // Re-highlight all checked features to ensure they persist through zoom
-    checkedFeatures.forEach((checkedFeature) => {
-      if (hasValidGeometry(checkedFeature)) {
-        mapController.addHighlightedFeature(checkedFeature);
-      }
-    });
-    // TODO: REFACTOR - The details-panel should be refactored to simplify the logic of the highlighted features, it's a bit confusing right now, too many useEffects
-    // TO.DOCONT: For example here, it's weird to have the 'memoSelectedLayerDataFeatures' in the dependency array here to make it work...
-  }, [memoSelectedLayerDataFeatures, clearHighlightsUnchecked, checkedFeatures, hasValidGeometry, mapController]);
-
-  /**
-   * Use Effect for when the current feature has a geometry loaded
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - memoCurrentFeature changed', memoCurrentFeature);
-
-    // If current feature
-    if (memoCurrentFeature) {
-      // If the geometry has been loaded
-      if (memoCurrentFeatureHasGeometry) {
-        if (memoIsPanelOpen) mapController.addHighlightedFeature(memoCurrentFeature);
-      } else {
-        mapController.removeHighlightedFeature(memoCurrentFeature);
-      }
+    if (layerFeaturesChanged) {
+      // Reapply checked features that were already tracked when query results refresh.
+      checkedFeatures
+        .filter(hasValidGeometry)
+        .filter((feature) => previousFeatures.includes(feature))
+        .forEach((feature) => mapController.addHighlightedFeature(feature));
     }
-  }, [memoCurrentFeature, memoCurrentFeatureHasGeometry, memoIsPanelOpen, mapController]);
+
+    previousHighlightedFeaturesRef.current = memoFeaturesToHighlight;
+    previousLayerFeaturesRef.current = memoSelectedLayerDataFeatures;
+  }, [checkedFeatures, hasValidGeometry, mapController, memoFeaturesToHighlight, memoSelectedLayerDataFeatures]);
 
   /**
    * Effect used to persist the layer path bypass for the layerDataArray.
@@ -546,13 +515,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleClearAllHighlights = useCallback((): void => {
     if (checkedFeatures.length === 0) return;
-    // clear all highlights from features on the map in all layers
-    mapController.removeHighlightedFeature('all');
-    // clear checked features array
     detailsController.removeCheckedFeature('all');
-    // add the highlight to the current feature
-    mapController.addHighlightedFeature(memoSelectedLayerData?.features?.[currentFeatureIndex] as TypeFeatureInfoEntry);
-  }, [checkedFeatures, currentFeatureIndex, detailsController, mapController, memoSelectedLayerData?.features]);
+  }, [checkedFeatures.length, detailsController]);
 
   /**
    * Handles when the right panel is closed in responsive layout.
@@ -561,12 +525,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const handleRightPanelClosed = useCallback((): void => {
     // Remember the explicit close so the no-features guide effect doesn't immediately force the panel back open
     userDismissedGuideRef.current = true;
-
-    // Only remove the current selected feature highlight if it's not checked
-    const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
-    if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
-      mapController.removeHighlightedFeature(currentFeature);
-    }
 
     // Return focus to the layer list item that opened this panel
     if (selectedLayerPath) {
@@ -577,7 +535,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // No layer selected, don't move focus
       uiController.disableFocusTrap('no-focus');
     }
-  }, [memoSelectedLayerData, currentFeatureIndex, isFeatureInCheckedFeatures, selectedLayerPath, mapId, mapController, uiController]);
+  }, [selectedLayerPath, mapId, uiController]);
 
   /**
    * Handles when the right panel visibility changes.
@@ -588,7 +546,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
   /**
    * Handles clicks to forward and back arrows in right panel.
-   * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
+   * Updates the selected feature index and restores focus to the navigation button.
    *
    * @param change - The change to index number (-1 for back, 1 for forward)
    */
@@ -602,11 +560,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         return;
       }
 
-      // Keep previous index for navigation
-      prevFeatureIndex.current = currentFeatureIndex;
-
-      // Update current index
-      updateFeatureSelected(newIndex, memoSelectedLayerData);
+      // Let the highlight effect react to the new current feature.
+      detailsController.setCurrentFeatureIndex(newIndex);
 
       // Restore focus to the navigation button after React completes the state update and re-render
       requestAnimationFrame(() => {
@@ -619,7 +574,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         }
       });
     },
-    [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected]
+    [currentFeatureIndex, detailsController, memoSelectedLayerData]
   );
 
   /**
@@ -643,61 +598,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
-      // Set the selected layer path in the store which will in turn trigger the store listeners on this component
+      // Start on the first result in the newly selected layer.
+      detailsController.setCurrentFeatureIndex(0);
       detailsController.setSelectedLayerPath(layerEntry.layerPath);
-
-      // Re-highlight the current feature when panel becomes visible (layer selection makes panel visible)
-      // Use setTimeout to ensure the layer data is updated first
-      setTimeout(() => {
-        const layerData = arrayOfLayerDataBatch.find((layer) => layer.layerPath === layerEntry.layerPath);
-        const featureToHighlight = layerData?.features?.[0]; // Will be index 0 after layer change
-        if (featureToHighlight && hasValidGeometry(featureToHighlight)) {
-          mapController.addHighlightedFeature(featureToHighlight);
-        }
-      }, TIMEOUT.deferExecution);
     },
-    [detailsController, mapController, arrayOfLayerDataBatch, hasValidGeometry]
+    [detailsController]
   );
   // #endregion
-
-  // #region PROCESSING
-
-  /**
-   * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
-   * the previously selected feature index so that in the useEffect, later, the component can udpate
-   * the selected features with the store.
-   */
-  const resetCurrentIndex = (): void => {
-    // Keep reference on previously selected features
-    prevLayerFeatures.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal)?.features;
-    // Keep reference on previously selected index
-    prevFeatureIndex.current = currentFeatureIndex;
-    // Reset the indexing
-    setCurrentFeatureIndex(0);
-  };
-
-  // If the structural layer data has changed since last render (driven by batch updates only, not display changes)
-  if (arrayOfLayerListLocal !== memoLayersListBatched) {
-    // Selected array layer data changed
-    setArrayOfLayerListLocal(memoLayersListBatched);
-
-    // Only reset the feature index if the number of features in the currently selected layer changed
-    const currentSelectedLayer = memoLayersListBatched.find((layer) => layer.layerPath === selectedLayerPath);
-    const previousSelectedLayer = arrayOfLayerListLocal.find((layer) => layer.layerPath === selectedLayerPath);
-
-    // Reset index only if feature count changed for the selected layer
-    if (currentSelectedLayer && previousSelectedLayer && currentSelectedLayer.numOffeatures !== previousSelectedLayer.numOffeatures) {
-      resetCurrentIndex();
-    }
-  }
-
-  // If the layer path has changed since last render
-  if (selectedLayerPathLocal !== selectedLayerPath) {
-    // Selected layer path changed
-    setSelectedLayerPathLocal(selectedLayerPath);
-    // Reset the feature index, because it's a whole different selected layer with different features
-    resetCurrentIndex();
-  }
 
   /**
    * Selects a layer after a map click.
@@ -730,6 +637,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (coordinatesChanged) {
       // Clear all highlights
       mapController.removeHighlightedFeature('all');
+      // Keep the cleared targets from being restored by the synchronization effect.
+      previousHighlightedFeaturesRef.current = memoFeaturesToHighlight;
 
       // Clear all checked features
       detailsController.removeCheckedFeature('all');
