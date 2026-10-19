@@ -468,7 +468,7 @@
     "changeDisplayProjection": "Projection non supportée",
     "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée.",
     "wfsRenderer": {
-      "getStylesInvalidResponse": "Descriptor de couche stylée (SLD) invalide. Vérifiez la réponse 'GetStyles'.",
+      "getStylesInvalidResponse": "Descripteur de couche stylée (SLD) invalide. Vérifiez la réponse 'GetStyles'.",
       "getStylesNotSupported": "Styles non supportés : {{cause}}"
     }
   },
