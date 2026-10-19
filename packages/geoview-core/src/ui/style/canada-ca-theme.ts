@@ -11,6 +11,8 @@ export const canadaCaThemeColors: IGeoViewColors = {
 
   bgColor: new GeoViewColorClass('#F8F8F8'),
   primary: new GeoViewColorClass('#26374A'),
+  // Federal Identity Program secondary. Unlike the default themes, Canada.ca has a
+  // genuine secondary distinct from primary.
   secondary: new GeoViewColorClass('#5b7592'),
   textColor: new GeoViewColorClass('#000000'),
   grey: new GeoViewColorClass('#969696'),

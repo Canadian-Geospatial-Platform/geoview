@@ -78,7 +78,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       },
       '> p': {
         fontSize: theme.palette.geoViewFontSize?.sm,
-        color: `${theme.palette.geoViewColor?.textColor.main} !important`,
+        color: `${theme.palette.text.primary} !important`,
         fontWeight: '400 !important',
       },
     },

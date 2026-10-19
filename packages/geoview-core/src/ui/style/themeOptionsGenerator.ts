@@ -1,4 +1,4 @@
-import type { ThemeOptions } from '@mui/material';
+import type { PaletteMode, ThemeOptions } from '@mui/material';
 import type { CSSObject } from '@mui/system';
 import type { IGeoViewColors } from '@/ui/style/types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes, GEOVIEW_SHAPE } from '@/ui/style/default';
@@ -170,9 +170,14 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
  *
  * @param geoViewColors - Optional color palette to generate theme from
  * @param themeFont - Optional font family stack to apply to the generated theme
+ * @param mode - Optional palette mode ('light' or 'dark') for MUI component defaults
  * @returns Complete MUI ThemeOptions configuration
  */
-export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors, themeFont = font): ThemeOptions => {
+export const generateThemeOptions = (
+  geoViewColors: IGeoViewColors = defaultGeoViewColors,
+  themeFont = font,
+  mode: PaletteMode = 'light' // Default to light mode if not specified
+): ThemeOptions => {
   logger.logTraceCore('ui/style/themeOptionsGenerator - generateThemeOptions', geoViewColors);
 
   const themeHeadingStyles = {
@@ -189,6 +194,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       boxShadow: `0 0 0 ${FOCUS_HALO_SIZE} ${geoViewColors.focusIndicator.halo}`,
     },
     palette: {
+      mode,
       geoViewColor: geoViewColors,
       geoViewFontSize: geoViewFontSizes,
       geoViewSpacingAndSizing: {},
@@ -203,11 +209,13 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         dark: geoViewColors.primary.dark[200],
         contrastText: geoViewColors.primary.contrastText(),
       },
+      // This default theme has no distinct secondary colour. `secondary` uses the same color as
+      // primary. See geoViewColors default.ts.
       secondary: {
-        main: geoViewColors.primary.main,
-        light: geoViewColors.primary.light[600],
-        dark: geoViewColors.primary.dark[300],
-        contrastText: geoViewColors.primary.contrastText(),
+        main: geoViewColors.secondary.main,
+        light: geoViewColors.secondary.light[600],
+        dark: geoViewColors.secondary.dark[200],
+        contrastText: geoViewColors.secondary.contrastText(),
       },
       error: {
         main: geoViewColors.error.main,
@@ -236,11 +244,9 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       contrastThreshold: 3,
       tonalOffset: 0.2,
       text: {
-        primary: geoViewColors.textColor.light[50],
+        primary: geoViewColors.textColor.main,
         secondary: geoViewColors.textColor.light[500],
-        disabled: 'rgba(0, 0, 0, 0.38)',
       },
-      divider: 'rgba(0, 0, 0, 0.12)',
       background: {
         paper: geoViewColors.bgColor.light[600],
         default: geoViewColors.bgColor.light[500],
@@ -251,10 +257,6 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         hoverOpacity: opacity.hoverOpacity,
         selected: geoViewColors.primary.opacity(opacity.selectedOpacity),
         selectedOpacity: opacity.selectedOpacity,
-        // hoverRow: `rgba(0, 255, 255, ${opacity.hoverOpacity})`,
-        // selectedRow: `rgba(0, 255, 255, ${opacity.selectedOpacity})`,
-        disabled: 'rgba(0, 0, 0, 0.26)',
-        disabledBackground: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
         disabledOpacity: opacity.disabledOpacity,
         focus: geoViewColors.primary.opacity(opacity.focusOpacity),
         focusOpacity: opacity.focusOpacity,
@@ -406,7 +408,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
       },
       MuiListItem: {
         styleOverrides: {
-          root: {
+          root: ({ theme }) => ({
             '&.layer-panel': {
               boxShadow: 'none',
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
@@ -431,18 +433,12 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 borderWidth: '2px !important',
                 borderStyle: 'solid !important',
               },
-              // when layer is dragging
-              '&.dragging': {
-                backgroundcolor: geoViewColors.primary.dark[600],
-                cursor: 'grab',
-                userSelect: 'none',
-              },
               // for handling layer status
               '&.error, &.query-error': {
                 background: geoViewColors.error.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
                   fontWeight: 'bold',
-                  color: geoViewColors.error.main,
+                  color: theme.palette.error.main,
                 },
               },
               // for handling loading layer status
@@ -450,7 +446,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 background: geoViewColors.info.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
                   fontWeight: 'bold',
-                  color: geoViewColors.info.main,
+                  color: theme.palette.info.main,
                 },
               },
               // for handling registered layer status - means we are unable to query metadata, server is slow
@@ -462,7 +458,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 },
               },
             },
-          },
+          }),
         },
       },
       MuiButton: {

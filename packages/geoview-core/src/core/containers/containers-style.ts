@@ -56,7 +56,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     },
 
     '& a[href]': {
-      color: theme.palette.geoViewColor?.primary.main,
+      color: theme.palette.primary.main,
       '*:hover': {
         color: theme.palette.geoViewColor?.primary.dark[300],
       },

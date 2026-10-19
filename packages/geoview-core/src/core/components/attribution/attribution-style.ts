@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowY: 'auto',
     overflowX: 'hidden',
     scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+    scrollbarColor: `${theme.palette.primary.main} transparent`,
     '& p': {
       color: theme.palette.geoViewColor?.textColor.light[250],
       margin: theme.spacing(0.5, 0),

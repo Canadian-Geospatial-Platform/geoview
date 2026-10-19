@@ -43,7 +43,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   notificationsTitle: {
     fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: '700',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   notificationsFooter: {
     display: 'flex',
@@ -81,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     scrollbarGutter: 'stable',
     padding: theme.spacing(1),
     scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+    scrollbarColor: `${theme.palette.primary.main} transparent`,
   },
   notificationItem: {
     display: 'flex',
