@@ -1,4 +1,5 @@
 import type { MapViewer } from '@/geo/map/map-viewer';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { type TypeFilterValue, type TypeFilterState, type TypeRangeValue, type TypeDateRangeValue, type TypeFilterAttribute } from '@/core/stores/states/filter-panel-state';
@@ -184,6 +185,14 @@ export declare class FilterPanelController extends AbstractMapViewerController {
         maxDate: string;
     } | null;
     /**
+     * Formats a numeric value for display, grouped by thousands and locale-aware.
+     *
+     * @param value - The numeric value to format
+     * @param attribute - The filter attribute containing number format and currency information
+     * @returns The formatted number value as a string
+     */
+    formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string;
+    /**
      * Formats a timestamp value for display in the UI.
      *
      * Uses DateMgt to format timestamps consistently across the application.
@@ -191,7 +200,7 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      * @param timestamp - Milliseconds since epoch
      * @returns Formatted date string (e.g., "Jan 15, 2020")
      */
-    formatDateForDisplay(timestamp: number): string;
+    formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string;
     /**
      * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
      *

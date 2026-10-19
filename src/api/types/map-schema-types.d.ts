@@ -35,6 +35,33 @@ export type TypeMapFeaturesInstance = {
 };
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`; kept as `Array<number>` to align with OpenLayers' Extent type. */
 export type Extent = Array<number>;
+/** Boundary samples in [longitude, latitude] degrees, labelled by screen position rather than geographic direction. */
+export interface TypeViewportBoundaryLonLat {
+    /** Corners of the viewport rectangle excluding OL View padding. */
+    corners: {
+        /** Top-left corner. */
+        nw: Coordinate;
+        /** Top-right corner. */
+        ne: Coordinate;
+        /** Bottom-right corner. */
+        se: Coordinate;
+        /** Bottom-left corner. */
+        sw: Coordinate;
+    };
+    /** Edge midpoints of the viewport rectangle excluding OL View padding. */
+    midpoints: {
+        /** Top edge midpoint. */
+        n: Coordinate;
+        /** Right edge midpoint. */
+        e: Coordinate;
+        /** Bottom edge midpoint. */
+        s: Coordinate;
+        /** Left edge midpoint. */
+        w: Coordinate;
+    };
+    /** Four [longitude, latitude] pairs in west, south, east, north screen-edge order, not a numeric bbox. */
+    midpointWSENCoords: Coordinate[];
+}
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
 /** Constante mainly use for language validation. */

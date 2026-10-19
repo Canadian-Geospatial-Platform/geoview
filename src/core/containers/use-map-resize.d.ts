@@ -19,12 +19,14 @@ interface UseMapResizeProps {
 type TypeUseMapResize = {
     /** The ref for the map shell container. */
     mapShellContainerRef: React.RefObject<HTMLDivElement | null>;
+    /** The host inline height captured before it was overridden with 'fit-content', if overridden. */
+    hostOriginalHeightRef: React.RefObject<string | undefined>;
 };
 /**
  * Hook that manages map shell container resizing based on fullscreen and footer panel state.
  *
  * @param props - The resize hook configuration properties
- * @returns An object containing the mapShellContainerRef
+ * @returns An object containing the mapShellContainerRef and hostOriginalHeightRef
  */
 export declare const useMapResize: ({ isMapFullScreen, isFooterBarOpen, footerPanelResizeValue, isFooterBar, collapsedFooterHeight, geoviewElement, appHeight, }: UseMapResizeProps) => TypeUseMapResize;
 export {};
