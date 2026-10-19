@@ -121,7 +121,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       flexDirection: 'column',
     },
     rightPanelContainer: {
-      color: theme.palette.geoViewColor?.textColor.main,
+      color: theme.palette.text.primary,
       '& .search-highlight': {
         backgroundColor: theme.palette.warning.light,
         padding: theme.spacing(0.25, 0.5),

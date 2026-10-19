@@ -155,7 +155,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     top: '50%',
     transform: 'translateY(-50%)',
     // Keep the eye toggle looking actionable (not greyed like the disabled item) so users know they can restore visibility
-    color: theme.palette.geoViewColor?.primary.main,
+    color: theme.palette.primary.main,
     '&:hover': {
       color: theme.palette.geoViewColor?.primary.dark[200],
       backgroundColor: theme.palette.geoViewColor?.primary.lighten(0.9, 0.3),

@@ -56,7 +56,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderBottomLeftRadius: theme.shape.borderRadiusNone,
       borderBottomRightRadius: theme.shape.borderRadiusNone,
       '&.active': {
-        backgroundColor: theme.palette.geoViewColor?.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.geoViewColor?.white,
         boxShadow: 1,
       },
@@ -82,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '&.fullscreen-mode': {
       a: {
-        color: theme.palette.geoViewColor?.primary.main,
+        color: theme.palette.primary.main,
         '&:hover': {
           color: theme.palette.geoViewColor?.primary.dark[300],
         },

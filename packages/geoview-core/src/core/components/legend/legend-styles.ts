@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   title: {
     textAlign: 'left',
     fontWeight: '600',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     fontSize: theme.palette.geoViewFontSize?.md,
   },
   layerStackContainer: {

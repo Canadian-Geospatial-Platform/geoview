@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       borderRadius: theme.shape.borderRadiusMd,
       pointerEvents: 'all',
       scrollbarWidth: 'thin',
-      scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+      scrollbarColor: `${theme.palette.primary.main} transparent`,
     },
     // Add top offset to nav bar when overview map is visible to avoid overlap
     navBarContainerWithOverview: {
@@ -123,7 +123,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
         color: theme.palette.geoViewColor?.bgColor.dark[950],
       },
       '&.highlighted.active': {
-        backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
         '& .MuiSvgIcon-root': {
           color: `inherit`,
@@ -164,19 +164,19 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
     popoverTitleLabel: {
       fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
       fontWeight: '700',
-      color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
+      color: theme.palette.text.primary,
       flexShrink: 1,
       padding: theme.spacing(0),
     },
     popoverTitleActions: {
       display: 'flex',
       flexShrink: 0,
-      color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
+      color: theme.palette.text.primary,
     },
     popoverTitle: {
       fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
       fontWeight: '700',
-      color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
+      color: theme.palette.text.primary,
       minHeight: '48px',
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
       display: 'flex',
@@ -190,7 +190,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
         minHeight: 0,
         overflowY: 'auto',
         scrollbarWidth: 'thin',
-        scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+        scrollbarColor: `${theme.palette.primary.main} transparent`,
       },
     },
     listItem: {
@@ -199,7 +199,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
     button: {
       justifyContent: 'flex-start',
       '&[aria-pressed="true"]': {
-        backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
         // Force icon colors to white when pressed
         '& .MuiSvgIcon-root': {
@@ -259,7 +259,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
         gap: theme.spacing(1), // Adds spacing between icon and text
       },
       '& .MuiToggleButton-root.Mui-selected': {
-        backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.geoViewColor?.white ?? theme.palette.primary.contrastText,
         '&:hover': {
           backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,

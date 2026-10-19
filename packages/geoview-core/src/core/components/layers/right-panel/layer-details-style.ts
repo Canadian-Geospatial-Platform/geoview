@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   tableIconLabel: {
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     fontSize: theme.palette.geoViewFontSize?.default,
     alignSelf: 'center',
   },
@@ -66,7 +66,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   infoSectionTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.25),
   },
   infoSectionContent: {

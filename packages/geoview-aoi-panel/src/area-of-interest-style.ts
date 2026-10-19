@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     border: '2px solid rgba(255,255,255,0.25)',
     transition: 'all 0.3s ease-in-out',
     '&:hover': {
-      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+      border: `2px solid ${theme.palette.primary.main}`,
     },
     '& .aoiCardMedia': {
       display: 'block',

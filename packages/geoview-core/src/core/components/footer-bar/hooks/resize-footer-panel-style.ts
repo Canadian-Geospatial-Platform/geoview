@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   title: {
     fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: '700',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   sliderWrapper: {
     height: '300px',

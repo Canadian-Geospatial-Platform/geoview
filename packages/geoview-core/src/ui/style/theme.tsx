@@ -6,14 +6,7 @@ import { darkThemeColors } from '@/ui/style/dark-theme';
 import { geoCaThemeColors } from '@/ui/style/geo-ca-theme';
 import { canadaCaThemeColors, canadaCaThemeFont } from '@/ui/style/canada-ca-theme';
 import { generateThemeOptions } from '@/ui/style/themeOptionsGenerator';
-
-declare module '@mui/material/styles/createPalette' {
-  interface Palette {
-    border: {
-      primary: string;
-    };
-  }
-}
+import { font } from '@/ui/style/default';
 
 /**
  * Resolves theme options based on display mode.
@@ -24,13 +17,13 @@ declare module '@mui/material/styles/createPalette' {
 function getThemeOptions(mode: TypeDisplayTheme): ThemeOptions {
   switch (mode) {
     case 'dark':
-      return generateThemeOptions(darkThemeColors);
+      return generateThemeOptions(darkThemeColors, font, 'dark');
     case 'canada.ca':
-      return generateThemeOptions(canadaCaThemeColors, canadaCaThemeFont);
+      return generateThemeOptions(canadaCaThemeColors, canadaCaThemeFont, 'light');
     case 'geo.ca':
-      return generateThemeOptions(geoCaThemeColors);
+      return generateThemeOptions(geoCaThemeColors, font, 'light');
     default:
-      return generateThemeOptions(lightThemeColors);
+      return generateThemeOptions(lightThemeColors, font, 'light');
   }
 }
 

@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: 0,
     zIndex: 9999,
     textAlign: 'center',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     fontSize: theme.palette.geoViewFontSize?.xl,
   },
   stepper: {

@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     alignItems: 'center',
     gap: theme.spacing(1),
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     textAlign: 'left',
     transition: 'color 0.2s',
     '&:hover': {
