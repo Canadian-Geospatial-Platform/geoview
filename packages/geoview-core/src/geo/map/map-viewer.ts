@@ -1136,6 +1136,14 @@ export class MapViewer {
    * @returns The simulated map click information
    */
   simulateMapClick(lonlat: Coordinate): SimulatedMapClick {
+    // Prepare the promise when the query initiated by the emitted map single-click event has ended
+    const promiseQuery = this.controllers.layerSetController.featureInfoLayerSet
+      .onceQueryEnded((event) => event.coordinate === lonlat)
+      .then((event) => event.resultSet);
+
+    // Prepare the promise when the query + UI batch propagation delay + buffer to make sure of Zustand delays
+    const promiseQueryBatched = promiseQuery.then(() => delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH + 300));
+
     // Transform lonlat to map projection
     const projCode = this.getProjection().getCode();
     const projected = Projection.transformPoints([lonlat], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
@@ -1147,12 +1155,6 @@ export class MapViewer {
       projected,
       dragging: false,
     };
-
-    // Perform the map click
-    const promiseQuery = this.controllers.layerSetController.performMapClickAction(clickCoordinates);
-
-    // Wait for the query + UI batch propagation delay + buffer to make sure of Zustand delays
-    const promiseQueryBatched = promiseQuery.then(() => delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH + 300));
 
     // Emit the single click event which triggers the feature info query
     this.#emitMapSingleClick(clickCoordinates);

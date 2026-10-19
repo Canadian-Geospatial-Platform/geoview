@@ -13,6 +13,7 @@ import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-en
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
 import { toArray } from '@/core/utils/utilities';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
@@ -210,7 +211,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * @returns True if the version is higher than 2.0.0, otherwise false
    */
   getVersionIsHigherThan2(): boolean {
-    return this.getVersionOrDefault().startsWith('2.');
+    return WfsRenderer.versionIsHigherThan2(this.getVersionOrDefault());
   }
 
   /**

@@ -233,6 +233,16 @@ export abstract class WfsRenderer {
     return childrenXmlDecoded;
   }
 
+  /**
+   * Determines whether a WFS version uses the version 2.x filter format.
+   *
+   * @param version - The WFS version string to check.
+   * @returns True when the version starts with `2.`, otherwise false.
+   */
+  static versionIsHigherThan2(version: string): boolean {
+    return version.startsWith('2.');
+  }
+
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
@@ -1882,7 +1892,11 @@ export abstract class WfsRenderer {
    * @param attributeFilter - Optional XML string for attribute filter, e.g. `<ogc:Or>...</ogc:Or>`
    * @returns Combined XML `<ogc:Filter>` or undefined if nothing to combine
    */
-  static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined {
+  static combineGmlFilters(
+    spatialFilter: string | undefined,
+    attributeFilter: string | undefined,
+    versionHigherThan2: boolean
+  ): string | undefined {
     // If neither filter is defined, nothing to do
     if (!spatialFilter && !attributeFilter) {
       return undefined;
@@ -1897,12 +1911,13 @@ export abstract class WfsRenderer {
       return attributeFilter;
     }
 
+    // If higher than 2, use fes:And instead of ogc:And
     // Combine both under <And>
     return `
-      <ogc:And>
+      ${versionHigherThan2 ? '<fes:And>' : '<ogc:And>'}
         ${attributeFilter}
         ${spatialFilter}
-      </ogc:And>
+      ${versionHigherThan2 ? '</fes:And>' : '</ogc:And>'}
   `.trim();
   }
 

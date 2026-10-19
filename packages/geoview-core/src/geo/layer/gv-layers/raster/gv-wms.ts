@@ -588,11 +588,14 @@ export class GVWMS extends AbstractGVRaster {
     // Wrap the ogc filter request
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
+    // GV Using 'en' as default language in the callback as the language is unnecessary to get extent from features here anyways
+    const language = 'en';
+
     // Fetch and parse features using the WFS format fallback strategy.
     const parsedFeatures = await WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
       wfsLayerConfig,
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, 'en'),
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, 'en'),
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language),
+      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language),
       undefined,
       [],
       xmlFilterReady,
@@ -813,7 +816,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Build attribute+spatial OGC filter
-    const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
+    const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute, wfsLayerConfig.getVersionIsHigherThan2());
 
     // Wrap the ogc filter request
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());

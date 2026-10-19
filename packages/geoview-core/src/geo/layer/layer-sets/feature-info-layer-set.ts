@@ -1,7 +1,7 @@
 ﻿import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
@@ -404,7 +404,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
  */
 export interface QueryEndedEvent {
   coordinate: Coordinate;
-  resultSet: TypeResultSet;
+  resultSet: TypeFeatureInfoResultSet;
 }
 
 /**
