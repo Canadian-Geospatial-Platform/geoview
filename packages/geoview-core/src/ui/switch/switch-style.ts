@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiSwitch-switchBase.Mui-focusVisible': {
       color: theme.palette.primary.contrastText,
-      background: theme.palette.geoViewColor?.primary.main,
+      background: theme.palette.primary.main,
       outlineColor: 'transparent',
       boxShadow: 'none',
     },

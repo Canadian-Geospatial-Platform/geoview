@@ -128,8 +128,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   modeButtonActive: {
-    borderBottom: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
-    color: theme.palette.geoViewColor?.primary.main,
+    borderBottom: `2px solid ${theme.palette.primary.main}`,
+    color: theme.palette.primary.main,
     fontWeight: 600,
   },
   filterPanel: {
@@ -159,7 +159,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterLabel: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   propertyFilterRow: {
     display: 'grid',
@@ -195,7 +195,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   resultTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   resultMeta: {
     fontSize: theme.palette.geoViewFontSize?.sm,
@@ -213,11 +213,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   detailTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.lg,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   detailDescription: {
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   assetList: {
     display: 'flex',
@@ -318,14 +318,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     cursor: 'pointer',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
-      borderColor: theme.palette.geoViewColor?.primary.main,
+      borderColor: theme.palette.primary.main,
     },
   },
   collectionTitle: {
     display: 'block',
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   collectionDescription: {
     display: 'block',
@@ -363,7 +363,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.25, 1),
     fontSize: theme.palette.geoViewFontSize?.xs,
     backgroundColor: theme.palette.action.selected,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     whiteSpace: 'nowrap',
   },
 
@@ -382,7 +382,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   metadataLabel: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   zoomButton: {
     fontSize: theme.palette.geoViewFontSize?.sm,
@@ -392,7 +392,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   itemsSectionTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.5),
   },
   itemCard: {
@@ -489,7 +489,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.xs,
     fontWeight: 600,
     borderRadius: theme.shape.borderRadiusSm,
-    backgroundColor: theme.palette.geoViewColor?.primary.main,
+    backgroundColor: theme.palette.primary.main,
     color: theme.palette.geoViewColor?.white,
     marginRight: theme.spacing(0.5),
   },
@@ -527,7 +527,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   collectionGroupTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.primary.main,
+    color: theme.palette.primary.main,
     padding: theme.spacing(0.5, 0),
     borderBottom: `1px solid ${theme.palette.divider}`,
     marginBottom: theme.spacing(0.5),

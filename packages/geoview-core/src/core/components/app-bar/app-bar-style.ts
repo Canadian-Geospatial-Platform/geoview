@@ -69,7 +69,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       padding: theme.spacing(0),
       borderRadius: theme.shape.borderRadiusNone,
       backgroundColor: 'transparent',
-      color: theme.palette.geoViewColor?.primary.main,
+      color: theme.palette.primary.main,
       transition: 'background-color 0.3s ease-in-out',
       '& span': {
         margin: theme.spacing(0),

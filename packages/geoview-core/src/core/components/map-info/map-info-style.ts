@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme): SxStyles => {
     // Container for the dynamic (interactive) map; height is set at the call site from the expanded state
     container: {
       ...mapInfoBaseStyles,
-      scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+      scrollbarColor: `${theme.palette.primary.main} transparent`,
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.divider}`,
       color: theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.text.primary,
       backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,

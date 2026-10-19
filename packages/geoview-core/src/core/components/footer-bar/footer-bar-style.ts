@@ -29,11 +29,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiTabs-root .MuiTab-icon': {
       maxWidth: '24px',
-      color: theme.palette.geoViewColor?.primary.main,
+      color: theme.palette.primary.main,
     },
     '& .MuiTab-root.Mui-selected': {
       color: theme.palette.geoViewColor?.white,
-      background: theme.palette.geoViewColor?.primary.main,
+      background: theme.palette.primary.main,
       minHeight: 0,
     },
     '& .MuiTab-root:hover .MuiTab-icon': {

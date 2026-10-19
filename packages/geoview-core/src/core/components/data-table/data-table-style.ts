@@ -175,7 +175,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   rightPanelContainer: {
     overflowY: 'auto',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   toolbarContainer: {
     justifyContent: 'space-between',

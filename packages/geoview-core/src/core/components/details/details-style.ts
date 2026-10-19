@@ -10,7 +10,7 @@ import { visuallyHidden } from '@/ui/style/default';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   rightPanelContainer: {
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   rightPanelStatus: {
     display: 'flex',

@@ -12,11 +12,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignSelf: 'center',
     height: 40,
     width: '1px !important',
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.divider,
   },
   horizontal: {
     height: 1,
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.divider,
   },
   grow: {
     flexGrow: 1,

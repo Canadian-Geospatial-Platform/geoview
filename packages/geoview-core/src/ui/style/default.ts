@@ -104,12 +104,15 @@ export const geoViewColors: IGeoViewColors = {
 
   bgColor: new GeoViewColorClass('#F1F2F5'),
   primary: new GeoViewColorClass('#515BA5'),
-  secondary: new GeoViewColorClass('#1976d2'),
+  // This design has no distinct secondary colour. `secondary` uses the same color as
+  // primary deliberately so that `color="secondary"` stays consistent with the brand
+  // rather than falling back to MUI's default.
+  secondary: new GeoViewColorClass('#515BA5'),
   textColor: new GeoViewColorClass('#393939'),
-  success: new GeoViewColorClass('#2e7d32'),
+  success: new GeoViewColorClass('#2e7d32'), // Same as info for now
   error: new GeoViewColorClass('#d32f2f'),
   warning: new GeoViewColorClass('#ed6c02'),
-  info: new GeoViewColorClass('#2e7d32'),
+  info: new GeoViewColorClass('#2e7d32'), // Same as success for now
   grey: new GeoViewColorClass('#9e9e9e'),
 
   /** Default focus indicator for WCAG compliance (geo.ca theme baseline) */

@@ -51,7 +51,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   headerText: {
     fontSize: theme.palette.geoViewFontSize?.md,
     fontWeight: '600',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     maxWidth: '400px',
   },
 
@@ -68,7 +68,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: '1.125rem', // 18px
     fontWeight: '700',
     lineHeight: 1.2,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
 
   // Group item button
