@@ -47,6 +47,9 @@ export interface IFeatureInfoState {
   /** The layer path of the currently selected layer in the details panel. */
   selectedLayerPath: string;
 
+  /** The index of the currently selected feature in the details panel. */
+  currentFeatureIndex: number;
+
   /** Whether the coordinate info feature is enabled. */
   coordinateInfoEnabled: boolean;
 
@@ -68,6 +71,7 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
+    setCurrentFeatureIndex: (currentFeatureIndex: number) => void;
     setCoordinateInfoEnabled: (coordinateInfoEnabled: boolean) => void;
     updateCoordinateInfoLayer: (features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus) => void;
   };
@@ -127,6 +131,13 @@ export const getStoreDetailsSelectedLayerPath = (mapId: string): string => {
 
 /** Hook that returns the selected layer path in the details panel. */
 export const useStoreDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+
+/** Gets the selected feature index in the details panel. */
+export const getStoreDetailsCurrentFeatureIndex = (mapId: string): number => getStoreDetailsState(mapId).currentFeatureIndex;
+
+/** Hook that returns the selected feature index in the details panel. */
+export const useStoreDetailsCurrentFeatureIndex = (): number =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.currentFeatureIndex);
 
 /**
  * Gets the layer query status for a given layer path.
@@ -260,6 +271,11 @@ export const setStoreDetailsLayerDataArrayBatchLayerPathBypass = (mapId: string,
  */
 export const setStoreDetailsSelectedLayerPath = (mapId: string, selectedLayerPath: string): void => {
   getStoreDetailsState(mapId).actions.setSelectedLayerPath(selectedLayerPath);
+};
+
+/** Sets the selected feature index in the details panel. */
+export const setStoreDetailsCurrentFeatureIndex = (mapId: string, currentFeatureIndex: number): void => {
+  getStoreDetailsState(mapId).actions.setCurrentFeatureIndex(currentFeatureIndex);
 };
 
 /**
@@ -482,6 +498,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArrayBatch: [],
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
+    currentFeatureIndex: 0,
     coordinateInfoEnabled: false,
     hideCoordinateInfoSwitch: false,
 
@@ -581,6 +598,21 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           detailsState: {
             ...get().detailsState,
             selectedLayerPath,
+          },
+        });
+      },
+
+      /**
+       * Sets the selected feature index in the details panel.
+       *
+       * @param currentFeatureIndex - The feature index to select
+       */
+      setCurrentFeatureIndex(currentFeatureIndex: number) {
+        if (get().detailsState.currentFeatureIndex === currentFeatureIndex) return;
+        set({
+          detailsState: {
+            ...get().detailsState,
+            currentFeatureIndex,
           },
         });
       },
