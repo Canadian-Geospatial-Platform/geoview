@@ -1,5 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, ButtonBase, IconButton, TextField, Typography } from 'geoview-core/ui';
+import { Box, IconButton, TextField, Typography } from 'geoview-core/ui';
 import { SortByAlphaIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -81,10 +81,25 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
    * Handles click on a collection card.
    */
   const handleCardClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>): void => {
+    (event: React.MouseEvent<HTMLDivElement>): void => {
       const { collectionId } = event.currentTarget.dataset;
       const collection = memoFilteredCollections.find((c) => c.id === collectionId);
       if (collection) onCollectionClick(collection);
+    },
+    [memoFilteredCollections, onCollectionClick]
+  );
+
+  /**
+   * Handles keyboard activation on a collection card.
+   */
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { collectionId } = event.currentTarget.dataset;
+        const collection = memoFilteredCollections.find((c) => c.id === collectionId);
+        if (collection) onCollectionClick(collection);
+      }
     },
     [memoFilteredCollections, onCollectionClick]
   );
@@ -119,22 +134,24 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
       {memoFilteredCollections.map((collection) => {
         const temporal = StacApiService.formatTemporalExtent(collection, true);
         return (
-          <ButtonBase key={collection.id} data-collection-id={collection.id} sx={sxClasses.collectionCard} onClick={handleCardClick}>
-            <Typography component="span" sx={sxClasses.collectionTitle}>
-              {collection.title ?? collection.id}
-            </Typography>
+          <Box
+            key={collection.id}
+            data-collection-id={collection.id}
+            sx={sxClasses.collectionCard}
+            onClick={handleCardClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+          >
+            <Typography sx={sxClasses.collectionTitle}>{collection.title ?? collection.id}</Typography>
             {collection.description && (
-              <Typography component="span" sx={sxClasses.collectionDescription}>
+              <Typography sx={sxClasses.collectionDescription}>
                 {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
               </Typography>
             )}
-            {temporal && (
-              <Typography component="span" sx={sxClasses.resultMeta}>
-                {temporal}
-              </Typography>
-            )}
+            {temporal && <Typography sx={sxClasses.resultMeta}>{temporal}</Typography>}
             {collection.keywords && collection.keywords.length > 0 && (
-              <Box component="span" sx={sxClasses.keywordChipsRow}>
+              <Box sx={sxClasses.keywordChipsRow}>
                 {collection.keywords.slice(0, 5).map((keyword) => (
                   <Box key={keyword} component="span" sx={sxClasses.keywordChip}>
                     {keyword}
@@ -147,7 +164,7 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
                 )}
               </Box>
             )}
-          </ButtonBase>
+          </Box>
         );
       })}
     </Box>
