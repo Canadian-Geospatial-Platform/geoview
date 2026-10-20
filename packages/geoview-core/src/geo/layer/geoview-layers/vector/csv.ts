@@ -109,7 +109,7 @@ export class CSV extends AbstractGeoViewVector {
 
     // Query; surface a specific message if the CSV source can't be loaded (e.g. unreachable/404)
     const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
-      AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings)
+      AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false))
     );
 
     // The projection of the data if defined

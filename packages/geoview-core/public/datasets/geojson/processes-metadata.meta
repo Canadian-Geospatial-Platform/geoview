@@ -6,7 +6,7 @@
       "layerName": "Raster Drill process",
       "source": {
         "dataAccessPath": "https://api.weather.gc.ca/processes/raster-drill/execution",
-        "postSettings": {
+        "initialPostQuery": {
           "header": {
             "accept": "application/json",
             "Content-Type": "application/json"

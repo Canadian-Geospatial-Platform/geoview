@@ -440,7 +440,7 @@ export class CoreTester extends GVAbstractTester {
 
     return this.test(
       'Test WFS SLD conversion with a text-only rule...',
-      async (test) => {
+      (test) => {
         test.addStep('Converting a line style followed by a text-only SLD rule...');
         return WfsRenderer.buildLayerStyleInfo(styles, undefined);
       },

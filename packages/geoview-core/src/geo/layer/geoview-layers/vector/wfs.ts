@@ -7,7 +7,7 @@ import { bbox as vectorBbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypePostSettings, TypeMetadataWFSCapabilities, VectorStrategy } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataWFSCapabilities, VectorStrategy } from '@/api/types/layer-schema-types';
 import {
   CONST_LAYER_TYPES,
   MIME_TYPE_FORMAT_JSON,
@@ -311,29 +311,14 @@ export class WFS extends AbstractGeoViewVector {
 
     // Get the version and post settings
     const version = layerConfigWFS.getVersionOrDefault();
-    const { postSettings } = layerConfigWFS.getSource();
 
     // Delegate to the generic fallback with the standard WFS parse functions
     return WFS.fetchWithFormatFallback(
       layerConfigWFS,
       (url, requestInit) =>
-        WFS.#fetchAndParseWFSFeaturesJSON(
-          url,
-          version,
-          postSettings,
-          readOptions.dataProjection,
-          readOptions.featureProjection,
-          requestInit
-        ),
+        WFS.#fetchAndParseWFSFeaturesJSON(url, version, readOptions.dataProjection, readOptions.featureProjection, requestInit),
       (url, requestInit) =>
-        WFS.#fetchAndParseWFSFeaturesText(
-          url,
-          version,
-          postSettings,
-          readOptions.dataProjection,
-          readOptions.featureProjection,
-          requestInit
-        ),
+        WFS.#fetchAndParseWFSFeaturesText(url, version, readOptions.dataProjection, readOptions.featureProjection, requestInit),
       bboxExtent
     );
   }
@@ -621,8 +606,8 @@ export class WFS extends AbstractGeoViewVector {
     // Get the officially supported formats by the service
     const supportedFormats = WFS.#resolveSupportedFormats(layerConfig);
 
-    // Get the post endpoint URL if available and not overridden by postSettings
-    const postEndpointHref = layerConfig.getSource().postSettings ? undefined : layerConfig.getMetadataGetFeatureOperationUrlPost();
+    // Get the post endpoint URL if available
+    const postEndpointHref = layerConfig.getMetadataGetFeatureOperationUrlPost();
 
     // Resolve the full URL with proxy if needed
     const postEndpoint = postEndpointHref ? layerConfig.getUrlWithProxyWhenNeeded(postEndpointHref) : undefined;
@@ -883,7 +868,6 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param url - The WFS GetFeature request URL
    * @param version - The WFS version string (e.g., '1.1.0', '2.0.0')
-   * @param postSettings - Optional POST settings for the request
    * @param dataProjection - Optional data projection for feature reading
    * @param featureProjection - Optional feature projection for reprojection
    * @returns A promise that resolves to source features info
@@ -891,13 +875,12 @@ export class WFS extends AbstractGeoViewVector {
   static async #fetchAndParseWFSFeaturesJSON(
     url: string,
     version: string,
-    postSettings?: TypePostSettings,
     dataProjection?: string | OLProjection,
     featureProjection?: string | OLProjection,
     requestInit?: RequestInit
   ): Promise<SourceFeaturesInfo> {
     // Fetch as JSON
-    const responseData = requestInit ? await Fetch.fetchJson(url, requestInit) : await AbstractGeoViewVector.fetchJson(url, postSettings);
+    const responseData = await Fetch.fetchJson(url, requestInit);
 
     // Parse the response
     return WFS.#parseWFSResponseData(responseData, version, dataProjection, featureProjection);
@@ -908,7 +891,6 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param url - The WFS GetFeature request URL
    * @param version - The WFS version string (e.g., '1.1.0', '2.0.0')
-   * @param postSettings - Optional POST settings for the request
    * @param dataProjection - Optional data projection for feature reading
    * @param featureProjection - Optional feature projection for reprojection
    * @returns A promise that resolves to source features info
@@ -916,13 +898,12 @@ export class WFS extends AbstractGeoViewVector {
   static async #fetchAndParseWFSFeaturesText(
     url: string,
     version: string,
-    postSettings?: TypePostSettings,
     dataProjection?: string | OLProjection,
     featureProjection?: string | OLProjection,
     requestInit?: RequestInit
   ): Promise<SourceFeaturesInfo> {
     // Fetch as text
-    const responseData = requestInit ? await Fetch.fetchText(url, requestInit) : await AbstractGeoViewVector.fetchText(url, postSettings);
+    const responseData = await Fetch.fetchText(url, requestInit);
 
     // Parse the response
     return WFS.#parseWFSResponseData(responseData, version, dataProjection, featureProjection);

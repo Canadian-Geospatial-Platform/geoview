@@ -6,7 +6,7 @@
       "layerName": "Downstream Analysis",
       "source": {
         "dataAccessPath": "https://app.chn-rhc.geogc.ca/api/processes/downstream-analysis/execution",
-        "postSettings": {
+        "initialPostQuery": {
           "header": {
             "accept": "application/json",
             "Content-Type": "application/json"

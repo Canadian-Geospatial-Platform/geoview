@@ -7,7 +7,7 @@ import { getUid } from 'ol/util';
 import type { ReadOptions } from 'ol/format/Feature';
 
 import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypePostSettings } from '@/api/types/layer-schema-types';
+import type { TypeBaseVectorSourceInitialPostQuery } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -176,23 +176,47 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // #region STATIC METHODS
 
   /**
-   * Fetches text data from the given URL using settings defined in the vector source configuration.
+   * Fetches json data from the given URL using settings defined in the vector source configuration.
    *
-   * Supports both GET and POST requests depending on the presence of `postSettings`.
+   * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
    *
    * @param url - The URL to fetch data from
-   * @param postSettings - Optional POST settings from the layer config
-   * @returns A promise that resolves to the fetched text response
+   * @param initialPostQuery - Optional POST settings when querying via POST method
+   * @returns A promise that resolves to the fetched JSON response
    */
-  static fetchText(url: string, postSettings?: TypePostSettings): Promise<string> {
+  static fetchJson(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<unknown> {
     // Default to a GET request
     const fetchOptions: RequestInit = { method: 'GET' };
 
-    // If postSettings are defined, switch to POST and include headers and body
-    if (postSettings) {
+    // If initialPostQuery is defined, switch to POST and include headers and body
+    if (initialPostQuery) {
       fetchOptions.method = 'POST';
-      fetchOptions.headers = postSettings.header;
-      fetchOptions.body = JSON.stringify(postSettings.data);
+      fetchOptions.headers = initialPostQuery.header;
+      fetchOptions.body = JSON.stringify(initialPostQuery.data);
+    }
+
+    // Execute the fetch using the provided options and return the response text
+    return Fetch.fetchJson(url, fetchOptions);
+  }
+
+  /**
+   * Fetches text data from the given URL using settings defined in the vector source configuration.
+   *
+   * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
+   *
+   * @param url - The URL to fetch data from
+   * @param initialPostQuery - Optional POST settings when querying via POST method
+   * @returns A promise that resolves to the fetched text response
+   */
+  static fetchText(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<string> {
+    // Default to a GET request
+    const fetchOptions: RequestInit = { method: 'GET' };
+
+    // If initialPostQuery is defined, switch to POST and include headers and body
+    if (initialPostQuery) {
+      fetchOptions.method = 'POST';
+      fetchOptions.headers = initialPostQuery.header;
+      fetchOptions.body = JSON.stringify(initialPostQuery.data);
     }
 
     // Execute the fetch using the provided options and return the response text
@@ -216,30 +240,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     } catch (error: unknown) {
       throw new LayerSourceFailedToLoadError(layerConfig.getLayerNameCascade(), formatError(error));
     }
-  }
-
-  /**
-   * Fetches json data from the given URL using settings defined in the vector source configuration.
-   *
-   * Supports both GET and POST requests depending on the presence of `postSettings`.
-   *
-   * @param url - The URL to fetch data from
-   * @param postSettings - Optional POST settings from the layer config
-   * @returns A promise that resolves to the fetched JSON response
-   */
-  static fetchJson(url: string, postSettings?: TypePostSettings): Promise<unknown> {
-    // Default to a GET request
-    const fetchOptions: RequestInit = { method: 'GET' };
-
-    // If postSettings are defined, switch to POST and include headers and body
-    if (postSettings) {
-      fetchOptions.method = 'POST';
-      fetchOptions.headers = postSettings.header;
-      fetchOptions.body = JSON.stringify(postSettings.data);
-    }
-
-    // Execute the fetch using the provided options and return the response text
-    return Fetch.fetchJson(url, fetchOptions);
   }
 
   /**

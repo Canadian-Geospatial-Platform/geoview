@@ -1451,8 +1451,9 @@
           "type": "string",
           "description": "The path to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
         },
-        "postSettings": {
+        "initialPostQuery": {
           "type": "object",
+          "description": "The initial data payload that should be used to load the features using an HTTP POST request.",
           "properties": {
             "header": {
               "type": "object"

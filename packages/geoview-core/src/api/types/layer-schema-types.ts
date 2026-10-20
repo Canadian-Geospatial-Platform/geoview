@@ -113,9 +113,6 @@ export type ConfigAbstractBaseClassOrType = AbstractBaseLayerEntryConfig | Abstr
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigVectorTilesClassOrType = VectorTilesLayerEntryConfig | VectorTilesLayerEntryConfigProps;
 
-/** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
-export type TypePostSettings = { header?: Record<string, string>; data: unknown };
-
 // TODO: REFACTOR - Remove geoCore from the type
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType =
@@ -259,8 +256,11 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   dataProjection?: string; // TODO: ? refactor - from geo map schema types
 
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
-  postSettings?: TypePostSettings; // TODO: ? refactor - from geo map schema types
+  initialPostQuery?: TypeBaseVectorSourceInitialPostQuery;
 }
+
+/** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
+export type TypeBaseVectorSourceInitialPostQuery = { header?: Record<string, string>; data: unknown };
 
 export interface TypeSourceGeoJSONInitialConfig extends TypeBaseVectorSourceInitialConfig {
   geojson?: string;
