@@ -528,6 +528,7 @@
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filtering map",
     "clearFilters": "Clear filters",
+    "invalidNumericFilter": "Enter a valid number. Whole numbers must stay within the supported precision.",
     "zoomToFilteredExtent": "Zoom to filtered extent",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",

@@ -104,6 +104,14 @@ const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null 
 /** Checks if a value is a date range tuple containing at least one Dayjs element. */
 const isDateRange = (v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && (v as unknown[]).some(isDayjs);
 
+/** Checks whether a numeric filter bound is finite and does not lose whole-number precision. */
+const isNumericFilterBoundValid = (value: unknown): boolean => {
+  if (value === undefined || value === null || String(value).trim() === '') return true;
+
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && (!Number.isInteger(numericValue) || Number.isSafeInteger(numericValue));
+};
+
 /** Linkify configuration options for URL detection and formatting. */
 const linkifyOptions = {
   attributes: {
@@ -1121,8 +1129,16 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
       sx: memoSxClasses.tableHead,
     },
     defaultColumn: {
-      muiFilterTextFieldProps: {
-        sx: memoSxClasses.filterTextField,
+      muiFilterTextFieldProps: ({ column, rangeFilterIndex }) => {
+        const filterValue = column.getFilterValue();
+        const boundValue = Array.isArray(filterValue) ? filterValue[rangeFilterIndex ?? 0] : filterValue;
+        const isInvalidNumericFilter = isColumnFilterNumeric(column.id) && !isNumericFilterBoundValid(boundValue);
+
+        return {
+          sx: memoSxClasses.filterTextField,
+          error: isInvalidNumericFilter,
+          helperText: isInvalidNumericFilter ? t('dataTable.invalidNumericFilter') : undefined,
+        };
       },
     },
     // override z-index of table when table is in fullscreen mode
@@ -1225,12 +1241,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
          * ------------------------- */
         if (Array.isArray(value) && isColumnFilterNumeric(filterId)) {
           const [minRaw, maxRaw] = value;
+          if (!isNumericFilterBoundValid(minRaw) || !isNumericFilterBoundValid(maxRaw)) return '';
+
           const min = minRaw === '' || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
           const max = maxRaw === '' || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
-
-          if ((min !== undefined && Number.isNaN(min)) || (max !== undefined && Number.isNaN(max))) {
-            return '';
-          }
 
           const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
 
@@ -1272,7 +1286,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
          * ------------------------- */
         if (isColumnFilterNumeric(filterId)) {
           const num = Number(value);
-          if (Number.isNaN(num)) return '';
+          if (!Number.isFinite(num) || !isNumericFilterBoundValid(value)) return '';
           return `${filterId} ${NUMBER_FILTER[filterFn ?? 'equals']} ${num}`;
         }
 
