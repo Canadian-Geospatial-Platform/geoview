@@ -1,20 +1,13 @@
 ﻿import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
+import WFSFormat from 'ol/format/WFS';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
-import { bbox } from 'ol/loadingstrategy';
+import { bbox as vectorBbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type {
-  TypeGeoviewLayerConfig,
-  TypePostSettings,
-  TypeMetadataWFSCapabilities,
-  TypeMetadataWFSOperationMetadataOperationParameter,
-  TypeMetadataWFSOperationMetadataOperationParameterValue,
-  TypeMetadataWFSTextOnly,
-  VectorStrategy,
-} from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypePostSettings, TypeMetadataWFSCapabilities, VectorStrategy } from '@/api/types/layer-schema-types';
 import {
   CONST_LAYER_TYPES,
   MIME_TYPE_FORMAT_JSON,
@@ -232,9 +225,9 @@ export class WFS extends AbstractGeoViewVector {
     // Cast it
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
-    // Try the service default first, then advertised formats as fallbacks
+    // Try without specifying an output format first (typically the describefeaturetype shouldn't need one), then advertised formats as fallbacks
     const version = layerConfigWFS.getVersionOrDefault();
-    const outputFormats = WFS.extractDescribeFeatureOutputFormats(this.getMetadata()!).filter((format) => format !== '');
+    const outputFormats = layerConfigWFS.getMetadataDescribeFeatureTypeOutputFormats();
     const outputFormatsToTry = ['', ...outputFormats];
 
     // Retry response-level failures with advertised formats
@@ -312,7 +305,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // Build the bbox extent string if the strategy is bbox and the extent is valid
     let bboxExtent: string | undefined;
-    if (sourceOptions.strategy === bbox && Number.isFinite(readOptions.extent?.[0])) {
+    if (sourceOptions.strategy === vectorBbox && Number.isFinite(readOptions.extent?.[0])) {
       bboxExtent = `${readOptions.extent},${Projection.getProjectionFromStringOrNumber(readOptions.featureProjection)?.getCode()}`;
     }
 
@@ -323,8 +316,24 @@ export class WFS extends AbstractGeoViewVector {
     // Delegate to the generic fallback with the standard WFS parse functions
     return WFS.fetchWithFormatFallback(
       layerConfigWFS,
-      (url) => WFS.#fetchAndParseWFSFeaturesJSON(url, version, postSettings, readOptions.dataProjection, readOptions.featureProjection),
-      (url) => WFS.#fetchAndParseWFSFeaturesText(url, version, postSettings, readOptions.dataProjection, readOptions.featureProjection),
+      (url, requestInit) =>
+        WFS.#fetchAndParseWFSFeaturesJSON(
+          url,
+          version,
+          postSettings,
+          readOptions.dataProjection,
+          readOptions.featureProjection,
+          requestInit
+        ),
+      (url, requestInit) =>
+        WFS.#fetchAndParseWFSFeaturesText(
+          url,
+          version,
+          postSettings,
+          readOptions.dataProjection,
+          readOptions.featureProjection,
+          requestInit
+        ),
       bboxExtent
     );
   }
@@ -531,65 +540,6 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Extracts all advertised output format values for a WFS DescribeFeatureType operation
-   * from the parsed WFS capabilities metadata.
-   *
-   * The method navigates through the `ows:OperationsMetadata` section of the capabilities
-   * document to locate the `"DescribeFeatureType"` operation and returns every available
-   * output format value.
-   *
-   * @param metadata - The parsed WFS capabilities metadata object
-   * @returns The advertised output format strings, or an empty array if none are found
-   */
-  static extractDescribeFeatureOutputFormats(metadata: TypeMetadataWFSCapabilities): string[] {
-    // Find the operation for DescribeFeatureOutput
-    const describeFeatureOp = metadata['ows:OperationsMetadata']?.['ows:Operation']?.find(
-      (op) => op['@attributes'].name === 'DescribeFeatureType'
-    );
-
-    // If found
-    if (describeFeatureOp) {
-      // Find the outputFormat parameter
-      let describeFeatureOperationParameter = describeFeatureOp['ows:Parameter'] as TypeMetadataWFSOperationMetadataOperationParameter[];
-      describeFeatureOperationParameter = toArray(describeFeatureOperationParameter);
-
-      // Now Parameter is an array, find the 'outputFormat' parameter
-      const describeOperationOutputFormat = describeFeatureOperationParameter.find((op) => op['@attributes'].name === 'outputFormat');
-
-      // If found
-      if (describeOperationOutputFormat) {
-        // If there's an 'AllowedValues' property
-        let outputFormatValues: (string | TypeMetadataWFSTextOnly)[] = [];
-        if (typeof describeOperationOutputFormat === 'object' && 'ows:AllowedValues' in describeOperationOutputFormat) {
-          // GEO SERVER WAY
-          const allowedValues = toArray(
-            describeOperationOutputFormat['ows:AllowedValues'] as
-              TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[]
-          );
-          outputFormatValues = allowedValues.flatMap((allowedValue) =>
-            toArray(allowedValue['ows:Value'] as (string | TypeMetadataWFSTextOnly) | (string | TypeMetadataWFSTextOnly)[])
-          );
-        } else if (typeof describeOperationOutputFormat === 'object' && 'ows:Value' in describeOperationOutputFormat) {
-          // QGIS SERVER WAY
-          outputFormatValues = toArray(
-            describeOperationOutputFormat['ows:Value'] as string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[]
-          );
-        }
-
-        // Return all values, extracting text from XML-parsed objects
-        return outputFormatValues.flatMap((value) => {
-          if (typeof value === 'string') return [value];
-          if (value && typeof value === 'object' && '#text' in value) return [value['#text']];
-          return [];
-        });
-      }
-    }
-
-    // Not found
-    return [];
-  }
-
-  /**
    * Fetches the metadata for a typical WFS class.
    *
    * @param url - The url to query the metadata from
@@ -649,42 +599,65 @@ export class WFS extends AbstractGeoViewVector {
    * Accepts custom parse functions so callers can plug in their own fetch+parse pipeline.
    *
    * @param layerConfig - The WFS layer entry configuration
-   * @param queryFnJSON - A function that receives a URL and queries the response as JSON
-   * @param queryFnFallback - A function that receives a URL and queries the response as text (used when JSON format is unavailable or fails)
+   * @param queryFnJSON - A function that receives a URL and optional request settings and queries the response as JSON
+   * @param queryFnFallback - A function that receives a URL and optional request settings and queries the response as text
    * @param bboxExtent - Optional bbox extent string (e.g., 'minx,miny,maxx,maxy,EPSG:3978')
    * @param outfields - Optional list of fields to return (propertyName parameter)
    * @param filter - Optional OGC XML filter string
    * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
    * @returns A promise that resolves with the result of the parse function
+   * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
    * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
    */
   static async fetchWithFormatFallback<T>(
     layerConfig: OgcWfsLayerEntryConfig,
-    queryFnJSON: (url: string) => Promise<T>,
-    queryFnFallback: (url: string) => Promise<T>,
+    queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<T>,
+    queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<T>,
     bboxExtent?: string,
     outfields?: TypeOutfields[],
     filter?: string,
     srsName?: string
   ): Promise<T> {
+    // Get the officially supported formats by the service
     const supportedFormats = WFS.#resolveSupportedFormats(layerConfig);
+
+    // Get the post endpoint URL if available and not overridden by postSettings
+    const postEndpointHref = layerConfig.getSource().postSettings ? undefined : layerConfig.getMetadataGetFeatureOperationUrlPost();
+
+    // Resolve the full URL with proxy if needed
+    const postEndpoint = postEndpointHref ? layerConfig.getUrlWithProxyWhenNeeded(postEndpointHref) : undefined;
+
+    // Context object for handling post fallback scenarios
+    const postFallbackContext = {
+      layerConfig,
+      postEndpoint,
+      bboxExtent,
+      outfields,
+      filter,
+      srsName,
+      state: {
+        usePostFallback: false,
+        lastUriTooLongError: undefined as ResponseError | undefined,
+      },
+    };
 
     // Ordered list of formats to try, from most preferred to least preferred.
     // Each entry maps a MIME type to the parse function to use for that format.
-    const formatCandidates: { format: string; queryFn: (url: string) => Promise<T> }[] = [
+    const formatCandidates: { format: string; queryFn: (url: string, requestInit?: RequestInit) => Promise<T> }[] = [
       { format: MIME_TYPE_FORMAT_JSON, queryFn: queryFnJSON },
       { format: MIME_TYPE_FORMAT_GML_XML_32, queryFn: queryFnFallback },
       { format: MIME_TYPE_FORMAT_TEXT_XML_GML_321, queryFn: queryFnFallback },
       { format: MIME_TYPE_FORMAT_TEXT_XML_GML_311, queryFn: queryFnFallback },
       { format: MIME_TYPE_FORMAT_TEXT_XML_GML_212, queryFn: queryFnFallback },
       { format: MIME_TYPE_FORMAT_TEXT_XML, queryFn: queryFnFallback },
+      { format: '', queryFn: queryFnFallback },
     ];
 
     // Try each format candidate in order
     let result: T | undefined;
     for (const candidate of formatCandidates) {
-      // Check if the service supports this format
-      const matchingFormats = WFS.#supportedFormatsInclude(supportedFormats, candidate.format);
+      // The empty format is a final request without an outputFormat parameter.
+      const matchingFormats = candidate.format ? WFS.#supportedFormatsInclude(supportedFormats, candidate.format) : [''];
       if (matchingFormats.length) {
         try {
           // Build the GetFeatureUrl with the candidate format and other parameters
@@ -692,30 +665,20 @@ export class WFS extends AbstractGeoViewVector {
 
           // GV Here, we do want to await in the loop, because we want to know if the fetch/parse succeeded before looping to the next format request.
           // eslint-disable-next-line no-await-in-loop
-          result = await candidate.queryFn(url);
+          result = await WFS.#queryWithGetOrPostFallback(candidate.queryFn, url, matchingFormats[0], postFallbackContext);
 
           // If the fetch/parse succeeded, return right away
           if (result) return result;
         } catch (error: unknown) {
           // Throw on abort to skip remaining format attempts
           GeoViewError.throwIfAborted(error);
+          if (error instanceof ResponseError && error.status === 414) postFallbackContext.state.lastUriTooLongError = error;
         }
       }
     }
 
-    // Final fallback: try with no specific outputFormat
-    if (!result) {
-      try {
-        const url = WFS.#buildGetFeatureUrl(layerConfig, '', bboxExtent, outfields, filter, srsName);
-        result = await queryFnFallback(url);
-      } catch (error: unknown) {
-        // Throw on abort to skip
-        GeoViewError.throwIfAborted(error);
-      }
-    }
-
-    // If result was retrieved
-    if (result) return result;
+    // Preserve the actionable URI-length failure if every format and POST fallback failed.
+    if (postFallbackContext.state.lastUriTooLongError) throw postFallbackContext.state.lastUriTooLongError;
 
     // Failed
     throw new LayerInvalidFeatureInfoFormatWFSError(layerConfig.layerPath, supportedFormats, layerConfig.getLayerNameCascade());
@@ -724,6 +687,196 @@ export class WFS extends AbstractGeoViewVector {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Queries a GetFeature candidate and retries with an advertised XML POST endpoint after HTTP 414.
+   *
+   * @param queryFn - The response parser and query function
+   * @param url - The candidate GetFeature URL
+   * @param outputFormat - The requested response format
+   * @param context - The request settings and retry state shared by all format candidates
+   * @returns The parsed response
+   */
+  static async #queryWithGetOrPostFallback<T>(
+    queryFn: (url: string, requestInit?: RequestInit) => Promise<T>,
+    url: string,
+    outputFormat: string,
+    context: TypeWFSGetOrPostFallbackContext
+  ): Promise<T> {
+    const { layerConfig, postEndpoint, bboxExtent, outfields, filter, srsName, state } = context;
+
+    // Once GET has exceeded the URI limit, send later format candidates through POST too.
+    if (state.usePostFallback && postEndpoint) {
+      const postRequest = WFS.#buildGetFeaturePostRequest(layerConfig, postEndpoint, outputFormat, bboxExtent, outfields, filter, srsName);
+      if (postRequest) return queryFn(postRequest.url, postRequest.requestInit);
+    }
+
+    try {
+      // Keep GET as the default; only switch methods when the server rejects its URL length.
+      return await queryFn(url);
+    } catch (error: unknown) {
+      // POST only addresses an overlong request URL; propagate unrelated failures unchanged.
+      if (!(error instanceof ResponseError) || error.status !== 414) throw error;
+      state.lastUriTooLongError = error;
+      if (!postEndpoint) throw error;
+
+      // Preserve the original 414 if the advertised endpoint or request cannot be used safely.
+      const postRequest = WFS.#buildGetFeaturePostRequest(layerConfig, postEndpoint, outputFormat, bboxExtent, outfields, filter, srsName);
+      if (!postRequest) throw error;
+
+      state.usePostFallback = true;
+      return queryFn(postRequest.url, postRequest.requestInit);
+    }
+  }
+
+  /**
+   * Builds a WFS GetFeature POST request using the service's advertised XML endpoint.
+   *
+   * @param layerConfig - The WFS layer entry configuration
+   * @param postEndpoint - The advertised POST endpoint
+   * @param outputFormat - The requested response format
+   * @param bboxExtent - Optional comma-separated BBOX and CRS
+   * @param outfields - Optional requested properties
+   * @param filter - Optional OGC/FES filter XML
+   * @param srsName - Optional response projection
+   * @returns The POST endpoint and request settings, or undefined when the request cannot be represented safely
+   */
+  static #buildGetFeaturePostRequest(
+    layerConfig: OgcWfsLayerEntryConfig,
+    postEndpoint: string,
+    outputFormat: string,
+    bboxExtent?: string,
+    outfields?: TypeOutfields[],
+    filter?: string,
+    srsName?: string
+  ): TypeWFSGetFeaturePostRequest | undefined {
+    // Get the WFS version
+    const version = layerConfig.getVersionOrDefault();
+
+    // Feature namespace declarations come from capabilities metadata, not the WFS protocol namespace.
+    const metadata = layerConfig.getServiceMetadata();
+    if (!metadata) return undefined;
+
+    const namespaceAttributes = metadata['@attributes'] as Record<string, unknown>;
+    const featureType = WFS.#asRecord(layerConfig.getFeatureType());
+    const featureTypeAttributes = WFS.#asRecord(featureType?.['@attributes']);
+    const prefixSeparator = layerConfig.layerId.indexOf(':');
+    // A feature type QName can contain at most one prefix separator; don't guess how to encode malformed names.
+    if (prefixSeparator !== -1 && layerConfig.layerId.indexOf(':', prefixSeparator + 1) !== -1) return undefined;
+    const declaredPrefix = prefixSeparator === -1 ? undefined : layerConfig.layerId.substring(0, prefixSeparator);
+    const featurePrefix = declaredPrefix ?? 'feature';
+    const featureTypeName = prefixSeparator === -1 ? layerConfig.layerId : layerConfig.layerId.substring(prefixSeparator + 1);
+    const namespaceKey = `xmlns:${featurePrefix}`;
+    // An unprefixed type may use the service's default namespace; a declared prefix must resolve explicitly.
+    const featureNamespace =
+      namespaceAttributes[namespaceKey] ??
+      featureTypeAttributes?.[namespaceKey] ??
+      (!declaredPrefix ? (namespaceAttributes.xmlns ?? featureTypeAttributes?.xmlns) : undefined);
+    // WFS protocol namespaces cannot stand in for the application's feature namespace.
+    if (typeof featureNamespace !== 'string' || !featureNamespace || featureNamespace.startsWith('http://www.opengis.net/wfs'))
+      return undefined;
+
+    let bbox: [number, number, number, number] | undefined;
+    let bboxProjection: string | undefined;
+    if (bboxExtent) {
+      // Split the four numeric ordinates from the optional CRS suffix used by GeoView's BBOX string.
+      const bboxParts = bboxExtent.split(',');
+      if (bboxParts.length < 4 || bboxParts.slice(0, 4).some((value) => !value.trim())) return undefined;
+      const bboxValues = bboxParts.slice(0, 4).map(Number);
+      if (!bboxValues.every(Number.isFinite)) return undefined;
+      bbox = [bboxValues[0], bboxValues[1], bboxValues[2], bboxValues[3]];
+      bboxProjection = bboxParts.slice(4).join(',') || undefined;
+    }
+
+    // Get the geometry field name
+    const geometryName = layerConfig.getGeometryField()?.name;
+
+    // WFS BBOX filters need the feature's geometry property name.
+    if (bbox && !geometryName) return undefined;
+
+    // Use OpenLayers to emit the version-specific GetFeature and Query XML.
+    const requestNode = new WFSFormat({ version }).writeGetFeature({
+      featureNS: featureNamespace,
+      featurePrefix,
+      featureTypes: [featureTypeName],
+      ...(outputFormat && { outputFormat }),
+      ...(srsName && { srsName }),
+      ...(outfields && { propertyNames: outfields.map((outfield) => outfield.name) }),
+      ...(bbox && { bbox, geometryName }),
+    });
+    const requestElement = requestNode as Element;
+    const requestDocument = requestElement.ownerDocument;
+    if (!requestDocument) return undefined;
+
+    // Fail closed if the writer did not produce the Query node needed for filter and BBOX updates.
+    const queryElement = Array.from(requestElement.getElementsByTagName('*')).find((element) => element.localName === 'Query');
+    if (!queryElement) return undefined;
+
+    if (bboxProjection) {
+      // Restore the CRS suffix because the writer receives only the numeric BBOX ordinates.
+      const bboxElement = Array.from(queryElement.getElementsByTagName('*')).find(
+        (element) => element.localName === 'Envelope' || element.localName === 'Box'
+      );
+      bboxElement?.setAttribute('srsName', bboxProjection);
+    }
+
+    if (filter) {
+      const filterDocument = new DOMParser().parseFromString(filter, 'application/xml');
+      const filterElement = filterDocument.documentElement;
+      // The filter namespace is version-specific; reject malformed or incompatible XML instead of sending it as text.
+      const filterNamespace = version === '2.0.0' ? 'http://www.opengis.net/fes/2.0' : 'http://www.opengis.net/ogc';
+      if (
+        filterDocument.getElementsByTagName('parsererror').length ||
+        filterElement.localName !== 'Filter' ||
+        filterElement.namespaceURI !== filterNamespace
+      )
+        return undefined;
+
+      const generatedFilterElement = queryElement.getElementsByTagNameNS(filterNamespace, 'Filter').item(0);
+      if (generatedFilterElement) {
+        // OpenLayers may have added a BBOX predicate; combine it with the caller's predicate using AND.
+        const filterChildren = Array.from(filterElement.childNodes).filter((node) => node.nodeType === Node.ELEMENT_NODE);
+        const bboxFilterChildren = Array.from(generatedFilterElement.childNodes).filter((node) => node.nodeType === Node.ELEMENT_NODE);
+        if (!filterChildren.length || !bboxFilterChildren.length) return undefined;
+
+        // Keep namespace bindings declared on the caller's filter for its imported predicates.
+        for (const attribute of Array.from(filterElement.attributes)) {
+          if (attribute.namespaceURI === 'http://www.w3.org/2000/xmlns/') {
+            generatedFilterElement.setAttributeNS(attribute.namespaceURI, attribute.name, attribute.value);
+          }
+        }
+
+        const filterPrefix = generatedFilterElement.prefix ?? (version === '2.0.0' ? 'fes' : 'ogc');
+        const andElement = requestDocument.createElementNS(filterNamespace, `${filterPrefix}:And`);
+        while (generatedFilterElement.firstChild) generatedFilterElement.removeChild(generatedFilterElement.firstChild);
+        generatedFilterElement.appendChild(andElement);
+        for (const child of [...filterChildren, ...bboxFilterChildren]) andElement.appendChild(requestDocument.importNode(child, true));
+      } else {
+        queryElement.appendChild(requestDocument.importNode(filterElement, true));
+      }
+    }
+
+    return {
+      url: postEndpoint,
+      requestInit: {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/xml; charset=UTF-8' },
+        // Put GetFeature parameters in the XML body instead of extending the query string.
+        body: new XMLSerializer().serializeToString(requestElement),
+      },
+    };
+  }
+
+  /**
+   * Narrows an unknown value to a plain record.
+   *
+   * @param value - The value to inspect
+   * @returns The record, or undefined when the value is not a record
+   */
+  static #asRecord(value: unknown): Record<string, unknown> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    return value as Record<string, unknown>;
+  }
 
   /**
    * Fetches WFS features as JSON and parses the response into OpenLayers features.
@@ -740,10 +893,11 @@ export class WFS extends AbstractGeoViewVector {
     version: string,
     postSettings?: TypePostSettings,
     dataProjection?: string | OLProjection,
-    featureProjection?: string | OLProjection
+    featureProjection?: string | OLProjection,
+    requestInit?: RequestInit
   ): Promise<SourceFeaturesInfo> {
     // Fetch as JSON
-    const responseData = await AbstractGeoViewVector.fetchJson(url, postSettings);
+    const responseData = requestInit ? await Fetch.fetchJson(url, requestInit) : await AbstractGeoViewVector.fetchJson(url, postSettings);
 
     // Parse the response
     return WFS.#parseWFSResponseData(responseData, version, dataProjection, featureProjection);
@@ -764,10 +918,11 @@ export class WFS extends AbstractGeoViewVector {
     version: string,
     postSettings?: TypePostSettings,
     dataProjection?: string | OLProjection,
-    featureProjection?: string | OLProjection
+    featureProjection?: string | OLProjection,
+    requestInit?: RequestInit
   ): Promise<SourceFeaturesInfo> {
     // Fetch as text
-    const responseData = await AbstractGeoViewVector.fetchText(url, postSettings);
+    const responseData = requestInit ? await Fetch.fetchText(url, requestInit) : await AbstractGeoViewVector.fetchText(url, postSettings);
 
     // Parse the response
     return WFS.#parseWFSResponseData(responseData, version, dataProjection, featureProjection);
@@ -793,7 +948,7 @@ export class WFS extends AbstractGeoViewVector {
       return GeoUtilities.readFeaturesFromGeoJSON(responseData, dataProjection, featureProjection);
     }
 
-    // Here, the output isn't GeoJSON, probably XML/GML
+    // Here, the output isn't GeoJSON, assume XML/GML
     return GeoUtilities.readFeaturesFromWFS(responseData, version, dataProjection, featureProjection);
   }
 
@@ -831,6 +986,7 @@ export class WFS extends AbstractGeoViewVector {
       return xmlFields;
     } catch {
       // Some services return JSON even when they accept an outputFormat request for XML or vice versa.
+      // Continue to try parsing as JSON if XML parsing fails.
     }
 
     const parsed = JSON.parse(responseText) as { featureTypes?: { properties?: TypeOutfields[] }[] };
@@ -888,7 +1044,7 @@ export class WFS extends AbstractGeoViewVector {
   ): string {
     // Work the url for a GetFeature request
     let url = GeoUtilities.ensureServiceRequestUrlGetFeature(
-      layerConfig.getDataAccessPath(),
+      layerConfig.getMetadataGetFeatureOperationUrlGet() ?? layerConfig.getDataAccessPath(),
       layerConfig.layerId,
       layerConfig.getVersionOrDefault(),
       outputFormat,
@@ -911,3 +1067,34 @@ export class WFS extends AbstractGeoViewVector {
 
   // #endregion STATIC PRIVATE METHODS
 }
+
+/** Shared inputs and retry state for WFS GetFeature format candidates. */
+type TypeWFSGetOrPostFallbackContext = {
+  /** Layer configuration used to build a POST request. */
+  layerConfig: OgcWfsLayerEntryConfig;
+  /** Advertised POST endpoint, when available. */
+  postEndpoint: string | undefined;
+  /** Optional BBOX extent and CRS. */
+  bboxExtent: string | undefined;
+  /** Optional feature properties requested by the caller. */
+  outfields: TypeOutfields[] | undefined;
+  /** Optional OGC filter expression. */
+  filter: string | undefined;
+  /** Optional output projection code. */
+  srsName: string | undefined;
+  /** Mutable state shared while trying formats and switching from GET to POST. */
+  state: {
+    /** Whether an earlier HTTP 414 switched subsequent candidates to POST. */
+    usePostFallback: boolean;
+    /** Most recent HTTP 414 to preserve if all request attempts fail. */
+    lastUriTooLongError: ResponseError | undefined;
+  };
+};
+
+/** A WFS POST endpoint paired with the serialized request settings. */
+type TypeWFSGetFeaturePostRequest = {
+  /** Advertised service endpoint for the POST request. */
+  url: string;
+  /** HTTP method, headers, and serialized XML body. */
+  requestInit: RequestInit;
+};
