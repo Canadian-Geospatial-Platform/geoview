@@ -1,6 +1,6 @@
 import type Feature from 'ol/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { all, bbox } from 'ol/loadingstrategy';
+import { all, bbox as vectorBbox } from 'ol/loadingstrategy';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
@@ -94,7 +94,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? bbox : all;
+    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? vectorBbox : all;
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
@@ -126,7 +126,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           AbstractGeoViewVector.#normalizeDateFields(featuresFiltered, layerConfig);
 
           // If the strategy is 'bbox'
-          if (sourceOptions.strategy === bbox) {
+          if (sourceOptions.strategy === vectorBbox) {
             // Clear the previously fetched features or they'll get stacked up.
             // GV Do this right before readding features so that the features flicker as less as possible on the map
             vectorSource.clear(true);

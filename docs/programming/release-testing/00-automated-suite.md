@@ -33,7 +33,7 @@ The checklist counts release executions rather than unique test methods. `suite-
 
 | #   | Suite                                    | Tests   | Status   |
 | --- | ---------------------------------------- | ------- | -------- |
-| 1   | `suite-core`                             | 15      | [ ] Pass |
+| 1   | `suite-core`                             | 16      | [ ] Pass |
 | 2   | `suite-config`                           | 39      | [ ] Pass |
 | 3   | `suite-utilities`                        | 53      | [ ] Pass |
 | 4   | `suite-layer` (LCC — EPSG:3978)          | 49      | [ ] Pass |
@@ -47,7 +47,7 @@ The checklist counts release executions rather than unique test methods. `suite-
 | 12  | `suite-geochart`                         | 2       | [ ] Pass |
 | 13  | `suite-swiper`                           | 6       | [ ] Pass |
 | 14  | `suite-time-slider`                      | 3       | [ ] Pass |
-|     | **Total**                                | **313** |          |
+|     | **Total**                                | **320** |          |
 
 ## What to Do if a Suite Fails
 

@@ -255,6 +255,9 @@ export class RequestTimeoutError extends Error {
  * due to a non-success HTTP status.
  */
 export class ResponseError extends Error {
+  /** HTTP status code returned for the failed request. */
+  readonly status: number;
+
   /**
    * Creates an instance of ResponseError.
    *
@@ -265,6 +268,9 @@ export class ResponseError extends Error {
   constructor(response: Response) {
     // Generate an error message using the response's status and statusText
     super(`Fetch error, status was: ${response.status} and status text was: ${response.statusText}`);
+
+    // Keep the error status internally
+    this.status = response.status;
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'ResponseError';

@@ -3,12 +3,14 @@ import type {
   TypeMetadataWMSCapabilities,
   TypeMetadataWFSCapabilities,
   TypeMetadataWMTSCapabilities,
+  TypeStylesWMS,
 } from 'geoview-core/api/types/layer-schema-types';
 import type { PingResult } from 'geoview-core/core/utils/utilities';
 import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
 import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
 import { EsriRenderer, type EsriUniqueValueRenderer } from 'geoview-core/geo/utils/renderer/esri-renderer';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
+import { WfsRenderer } from 'geoview-core/geo/utils/renderer/wfs-renderer';
 import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/utilities';
 
 import { Test } from '../core/test';
@@ -396,6 +398,56 @@ export class CoreTester extends GVAbstractTester {
 
         test.addStep('Verifying the loaded magenta pattern was rendered at the canvas center...');
         Test.assertIsArrayEqual(result.centerPixel, [255, 0, 255, 255]);
+      }
+    );
+  }
+
+  /**
+   * Tests that a text-only SLD rule does not invalidate supported geometry styles.
+   *
+   * @returns A promise that resolves with the converted WFS styles
+   */
+  testWfsStyleWithTextOnlyRule(): Promise<Test<TypeLayerStyleConfig>> {
+    const styles: TypeStylesWMS = {
+      StyledLayerDescriptor: {
+        NamedLayer: {
+          '#text': '',
+          'se:Name': 'DMF',
+          UserStyle: {
+            'se:FeatureTypeStyle': {
+              'se:Rule': [
+                {
+                  'se:LineSymbolizer': {
+                    'se:Stroke': {
+                      'se:SvgParameter': [
+                        {
+                          '@attributes': { name: 'stroke' },
+                          '#text': '#0070ff',
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  'se:TextSymbolizer': {},
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    return this.test(
+      'Test WFS SLD conversion with a text-only rule...',
+      async (test) => {
+        test.addStep('Converting a line style followed by a text-only SLD rule...');
+        return WfsRenderer.buildLayerStyleInfo(styles, undefined);
+      },
+      (test, result) => {
+        test.addStep('Verifying the line style is retained...');
+        Test.assertIsDefined('result.LineString', result.LineString);
+        Test.assertIsArrayLengthEqual(result.LineString?.info, 1);
       }
     );
   }

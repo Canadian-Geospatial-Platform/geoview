@@ -74,7 +74,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 | Group             | Suite                   | Tester(s)                                                                                       | Test Count | Execution                   |
 | ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 15         | Parallel                    |
+| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 16         | Parallel                    |
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
@@ -87,7 +87,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 6          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **267**    |                             |
+| **Total**         |                         |                                                                                                 | **271**    |                             |
 
 ---
 
@@ -112,13 +112,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 6   | `testValidateAndPingUrlWmsService`      | test      | Test validateAndPingUrl with a WMS service URL...                                     |
 | 7   | `testGeometryCollectionLegendStyles`    | test      | Test GeometryCollection legend style generation...                                    |
 | 8   | `testEsriPictureFillLegendStyles`       | test      | Test ESRI picture fill legend style generation...                                     |
-| 9   | `testProxyGetWMSServiceMetadata`        | test      | Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...          |
-| 10  | `testProxyGetWMSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWMSServiceMetadata with bad URL...                               |
-| 11  | `testProxyGetWFSServiceMetadata`        | test      | Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...          |
-| 12  | `testProxyGetWFSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWFSServiceMetadata with bad URL...                               |
-| 13  | `testProxyGetWMTSServiceMetadata`       | test      | Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service (proxy fallback)... |
-| 14  | `testProxyGetWMTSServiceMetadataBadUrl` | testError | Test GeoUtilities.getWMTSServiceMetadata with bad URL...                              |
-| 15  | `testFetchJsonWithProxyFallbackBadUrl`  | testError | Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...                          |
+| 9   | `testWfsStyleWithTextOnlyRule`          | test      | Test WFS SLD conversion with a text-only rule...                                     |
+| 10  | `testProxyGetWMSServiceMetadata`        | test      | Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...          |
+| 11  | `testProxyGetWMSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWMSServiceMetadata with bad URL...                               |
+| 12  | `testProxyGetWFSServiceMetadata`        | test      | Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...          |
+| 13  | `testProxyGetWFSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWFSServiceMetadata with bad URL...                               |
+| 14  | `testProxyGetWMTSServiceMetadata`       | test      | Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service (proxy fallback)... |
+| 15  | `testProxyGetWMTSServiceMetadataBadUrl` | testError | Test GeoUtilities.getWMTSServiceMetadata with bad URL...                              |
+| 16  | `testFetchJsonWithProxyFallbackBadUrl`  | testError | Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...                          |
 
 ---
 

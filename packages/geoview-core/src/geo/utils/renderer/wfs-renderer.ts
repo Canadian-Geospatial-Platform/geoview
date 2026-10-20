@@ -79,6 +79,17 @@ export abstract class WfsRenderer {
     let hasDefault = false;
 
     rules.forEach((userRule) => {
+      // Text symbolizers do not provide standalone geometry settings in this renderer.
+      // TODO: WFS-RENDERER - Add support for TextSymbolizer by removing this early return check and test https://qgis-tst.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en
+      if (
+        userRule['se:TextSymbolizer'] &&
+        !userRule['se:PointSymbolizer'] &&
+        !userRule['se:LineSymbolizer'] &&
+        !userRule['se:PolygonSymbolizer']
+      ) {
+        return;
+      }
+
       // Check the filter for the rule if any
       const label = userRule['se:Name'] || 'unnamed';
 

@@ -1186,6 +1186,7 @@ export type TypeMetadataWFSFeatureTypeListFeatureOutputFormat = {
 
 export type TypeMetadataWFSAttributes = {
   version?: string;
+  [attributeName: string]: string | undefined;
 };
 
 export type TypeMetadataWFSOperationMetadata = {
@@ -1195,6 +1196,20 @@ export type TypeMetadataWFSOperationMetadata = {
 export type TypeMetadataWFSOperationMetadataOperation = {
   '@attributes': TypeMetadataWFSAttribute;
   'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
+  'ows:DCP'?: TypeMetadataWFSDCP | TypeMetadataWFSDCP[];
+};
+
+export type TypeMetadataWFSDCP = {
+  'ows:HTTP'?: {
+    'ows:Get'?: TypeMetadataWFSGetPost | TypeMetadataWFSGetPost[];
+    'ows:Post'?: TypeMetadataWFSGetPost | TypeMetadataWFSGetPost[];
+  };
+};
+
+export type TypeMetadataWFSGetPost = {
+  '@attributes'?: {
+    'xlink:href'?: string;
+  };
 };
 
 export type TypeMetadataWFSOperationMetadataOperationParameter = {

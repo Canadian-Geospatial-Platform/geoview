@@ -3,6 +3,9 @@
   TypeGeoviewLayerConfig,
   TypeMetadataWFSCapabilities,
   TypeMetadataWFSFeatureTypeListFeatureType,
+  TypeMetadataWFSOperationMetadataOperation,
+  TypeMetadataWFSOperationMetadataOperationParameter,
+  TypeMetadataWFSOperationMetadataOperationParameterValue,
   TypeMetadataWFSTextOnly,
 } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
@@ -215,7 +218,94 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
-   * Gets the full DescribeFeatureType URL used for the layer.
+   * Gets the advertised DescribeFeatureType operation metadata.
+   *
+   * @returns The operation metadata, or undefined when the service does not provide it
+   */
+  getMetadataDescribeFeatureTypeOperation(): TypeMetadataWFSOperationMetadataOperation | undefined {
+    return OgcWfsLayerEntryConfig.readDescribeFeatureOperation(this.getServiceMetadata());
+  }
+
+  /**
+   * Gets the advertised output formats for the DescribeFeatureType operation.
+   *
+   * @returns The advertised output format strings, or an empty array if none are found
+   */
+  getMetadataDescribeFeatureTypeOutputFormats(): string[] {
+    const describeFeatureOp = this.getMetadataDescribeFeatureTypeOperation();
+    if (!describeFeatureOp) return [];
+
+    // Capabilities may provide one parameter object or an array of parameters.
+    let describeFeatureOperationParameter = describeFeatureOp['ows:Parameter'] as TypeMetadataWFSOperationMetadataOperationParameter[];
+    describeFeatureOperationParameter = toArray(describeFeatureOperationParameter);
+
+    const describeOperationOutputFormat = describeFeatureOperationParameter.find((op) => op['@attributes'].name === 'outputFormat');
+    if (!describeOperationOutputFormat) return [];
+
+    let outputFormatValues: (string | TypeMetadataWFSTextOnly)[] = [];
+    if (typeof describeOperationOutputFormat === 'object' && 'ows:AllowedValues' in describeOperationOutputFormat) {
+      // GeoServer nests the advertised formats under AllowedValues.
+      const allowedValues = toArray(
+        describeOperationOutputFormat['ows:AllowedValues'] as
+          TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[]
+      );
+      outputFormatValues = allowedValues.flatMap((allowedValue) =>
+        toArray(allowedValue['ows:Value'] as (string | TypeMetadataWFSTextOnly) | (string | TypeMetadataWFSTextOnly)[])
+      );
+    } else if (typeof describeOperationOutputFormat === 'object' && 'ows:Value' in describeOperationOutputFormat) {
+      // QGIS exposes the values directly on the outputFormat parameter.
+      outputFormatValues = toArray(
+        describeOperationOutputFormat['ows:Value'] as string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[]
+      );
+    }
+
+    // XML parsers may wrap values in #text objects; discard empty entries.
+    return outputFormatValues
+      .flatMap((value) => {
+        if (typeof value === 'string') return [value];
+        if (value && typeof value === 'object' && '#text' in value) return [value['#text']];
+        return [];
+      })
+      .filter((format) => format !== '');
+  }
+
+  /**
+   * Gets the advertised GetFeature operation metadata.
+   *
+   * @returns The operation metadata, or undefined when the service does not provide it
+   */
+  getMetadataGetFeatureOperation(): TypeMetadataWFSOperationMetadataOperation | undefined {
+    return OgcWfsLayerEntryConfig.readGetFeatureOperation(this.getServiceMetadata());
+  }
+
+  /**
+   * Gets the advertised HTTP GET URL for the GetFeature operation.
+   *
+   * @returns The advertised GET URL, or undefined when the service does not provide one
+   */
+  getMetadataGetFeatureOperationUrlGet(): string | undefined {
+    return OgcWfsLayerEntryConfig.#getMetadataGetFeatureOperationUrl(
+      this.getServiceMetadata(),
+      this.getMetadataGetFeatureOperation(),
+      'Get'
+    );
+  }
+
+  /**
+   * Gets the advertised HTTP POST URL for the GetFeature operation.
+   *
+   * @returns The advertised POST URL, or undefined when the service does not provide one
+   */
+  getMetadataGetFeatureOperationUrlPost(): string | undefined {
+    return OgcWfsLayerEntryConfig.#getMetadataGetFeatureOperationUrl(
+      this.getServiceMetadata(),
+      this.getMetadataGetFeatureOperation(),
+      'Post'
+    );
+  }
+
+  /**
+   * Gets the full URL used for the DescribeFeatureType request.
    *
    * @returns The recorded DescribeFeatureType URL, or undefined if none was recorded
    */
@@ -245,5 +335,96 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   static isClassOrTypeWFSLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWFSLayerConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.WFS);
+  }
+
+  /**
+   * Finds the DescribeFeatureType operation in the WFS service metadata.
+   *
+   * @param metadata - The parsed WFS capabilities metadata
+   * @returns The operation metadata, or undefined when the service does not advertise the operation
+   */
+  static readDescribeFeatureOperation(
+    metadata: TypeMetadataWFSCapabilities | undefined
+  ): TypeMetadataWFSOperationMetadataOperation | undefined {
+    // Find the operation for DescribeFeatureOutput
+    return metadata?.['ows:OperationsMetadata']?.['ows:Operation']?.find((op) => op['@attributes'].name === 'DescribeFeatureType');
+  }
+
+  /**
+   * Finds the GetFeature operation in the WFS service metadata.
+   *
+   * @param metadata - The parsed WFS capabilities metadata
+   * @returns The operation metadata, or undefined when the service does not advertise the operation
+   */
+  static readGetFeatureOperation(metadata: TypeMetadataWFSCapabilities | undefined): TypeMetadataWFSOperationMetadataOperation | undefined {
+    // Find the operation for GetFeature
+    return metadata?.['ows:OperationsMetadata']?.['ows:Operation']?.find((op) => op['@attributes'].name === 'GetFeature');
+  }
+
+  /**
+   * Gets the advertised HTTP binding URL for the GetFeature operation.
+   *
+   * Checks OWS OperationsMetadata first, then the legacy WFS 1.0.0 Capability structure.
+   *
+   * @param method - The HTTP binding method
+   * @returns The advertised binding URL, or undefined when none is found
+   */
+  static #getMetadataGetFeatureOperationUrl(
+    metadata: TypeMetadataWFSCapabilities | undefined,
+    operation: TypeMetadataWFSOperationMetadataOperation | undefined,
+    method: 'Get' | 'Post'
+  ): string | undefined {
+    if (!metadata) return undefined;
+
+    const dcpValues = operation?.['ows:DCP'];
+    for (const dcp of toArray(dcpValues ?? [])) {
+      const http = dcp['ows:HTTP'];
+      let bindings: unknown;
+      if (method === 'Get') bindings = http?.['ows:Get'];
+      else bindings = http?.['ows:Post'];
+      const href = OgcWfsLayerEntryConfig.#readBindingHref(bindings);
+      if (href) return href;
+    }
+
+    const legacyGetFeature = OgcWfsLayerEntryConfig.#asRecord(metadata.Capability?.Request.GetFeature);
+    const legacyDcpValues = legacyGetFeature?.DCPType;
+    for (const dcp of toArray(legacyDcpValues ?? [])) {
+      const http = OgcWfsLayerEntryConfig.#asRecord(OgcWfsLayerEntryConfig.#asRecord(dcp)?.HTTP);
+      const href = OgcWfsLayerEntryConfig.#readBindingHref(http?.[method]);
+      if (href) return href;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Reads the endpoint href from a parsed HTTP binding.
+   *
+   * @param value - The parsed GET or POST binding
+   * @returns The href, or undefined when none is present
+   */
+  static #readBindingHref(value: unknown): string | undefined {
+    const values = Array.isArray(value) ? value : [value];
+    for (const candidate of values) {
+      const binding = OgcWfsLayerEntryConfig.#asRecord(candidate);
+      const attributes = OgcWfsLayerEntryConfig.#asRecord(binding?.['@attributes']);
+      const onlineResource = OgcWfsLayerEntryConfig.#asRecord(binding?.OnlineResource);
+      const onlineResourceAttributes = OgcWfsLayerEntryConfig.#asRecord(onlineResource?.['@attributes']);
+      const href =
+        attributes?.['xlink:href'] ?? attributes?.href ?? onlineResourceAttributes?.['xlink:href'] ?? onlineResourceAttributes?.href;
+      if (typeof href === 'string' && href.length > 0) return href;
+    }
+    return undefined;
+  }
+
+  /**
+   * Narrows an unknown value to a plain record.
+   *
+   * @param value - The value to inspect
+   * @returns The record, or undefined when the value is not a record
+   */
+  static #asRecord(value: unknown): Record<string, unknown> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    return value as Record<string, unknown>;
   }
 }

@@ -594,8 +594,9 @@ export class GVWMS extends AbstractGVRaster {
     // Fetch and parse features using the WFS format fallback strategy.
     const parsedFeatures = await WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
       wfsLayerConfig,
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language),
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, undefined, requestInit),
+      (url, requestInit) =>
+        GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, undefined, requestInit),
       undefined,
       [],
       xmlFilterReady,
@@ -824,8 +825,10 @@ export class GVWMS extends AbstractGVRaster {
     // Use the generic format fallback strategy with our own parse pipeline
     return WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
       wfsLayerConfig,
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
-      (url) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
+      (url, requestInit) =>
+        GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController, requestInit),
+      (url, requestInit) =>
+        GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController, requestInit),
       undefined,
       fieldsToReturn,
       xmlFilterReady,
@@ -1108,6 +1111,7 @@ export class GVWMS extends AbstractGVRaster {
    *   date formatting
    * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @param abortController - Optional {@link AbortController} used to cancel the fetch request
+   * @param requestInit - Optional fetch settings used by the shared WFS format fallback
    * @returns A promise that resolves with the feature info result
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {ResponseEmptyError} When the JSON response is empty
@@ -1120,10 +1124,14 @@ export class GVWMS extends AbstractGVRaster {
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
     language: TypeDisplayLanguage,
-    abortController: AbortController | undefined = undefined
+    abortController: AbortController | undefined = undefined,
+    requestInit?: RequestInit
   ): Promise<TypeFeatureInfoResult> {
     // Call the GetFeature
-    const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
+    const responseData = await Fetch.fetchJson(urlWithOutputJson, {
+      ...requestInit,
+      signal: requestInit?.signal ?? abortController?.signal,
+    });
 
     // Read the features
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
@@ -1141,6 +1149,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and date formatting
    * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @param abortController - Optional {@link AbortController} used to cancel the fetch request
+   * @param requestInit - Optional fetch settings used by the shared WFS format fallback
    * @returns A promise that resolves with the feature info result
    */
   static async #fetchAndParseFeaturesFromWFSTextUrl(
@@ -1148,10 +1157,14 @@ export class GVWMS extends AbstractGVRaster {
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
     language: TypeDisplayLanguage,
-    abortController: AbortController | undefined = undefined
+    abortController: AbortController | undefined = undefined,
+    requestInit?: RequestInit
   ): Promise<TypeFeatureInfoResult> {
     // Call the GetFeature
-    const responseData = await Fetch.fetchText(urlWithOutputFormat, { signal: abortController?.signal });
+    const responseData = await Fetch.fetchText(urlWithOutputFormat, {
+      ...requestInit,
+      signal: requestInit?.signal ?? abortController?.signal,
+    });
 
     // Read the features
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWFS(responseData, wfsLayerConfig.getVersionOrDefault(), undefined);
