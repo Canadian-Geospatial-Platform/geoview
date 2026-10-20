@@ -84,7 +84,6 @@ export abstract class StacFieldUtils {
     if (value === undefined || value === null || value === '') return '';
 
     switch (format) {
-      // TODO: Should this use GeoView's DateMgt to honor the configured locale and timezone?
       case 'date':
       case 'datetime':
         return StacFieldUtils.#formatDate(
@@ -184,7 +183,6 @@ export abstract class StacFieldUtils {
     return GeoUtilities.bboxToExtent2D(item.bbox);
   }
 
-  // TODO: Consider moving reusable geometry/extent checks into shared GeoView geo utilities.
   /**
    * Checks whether every item geometry vertex is inside an extent, falling back to the item bbox when geometry is unavailable.
    *

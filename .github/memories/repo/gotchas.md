@@ -10,3 +10,4 @@
 - `public/builds/` holds stale bundles; never use as reference.
 - `npm audit` / `npm audit fix` are unreliable in Rush/pnpm; use the pnpm lockfile.
 - Swiper: clip per-layer in OL `prerender/postrender`, never CSS `clip-path` on shared renderer containers.
+- Full type-aware lint (`packages` `lint`/`fix`, run by the core build) exceeds Node's ~4 GB default heap: each plugin `tsconfig` maps `geoview-core/*` to core `src`, so core is loaded once per package. `projectService: true` does not help (different `paths` per package); the scripts run ESLint with `--max-old-space-size=8192`.
