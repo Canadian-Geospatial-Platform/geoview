@@ -32,6 +32,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       transform: 'rotate(-18deg) translateX(-8px)',
     },
   },
+  // Icon containers use invariant white: layer symbology is authored for a white backing and must not follow the theme surface.
   iconPreviewStacked: {
     width: 24,
     height: 24,
@@ -41,9 +42,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0),
     borderRadius: theme.shape.borderRadiusNone,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
+    borderColor: theme.palette.divider,
     boxShadow: 2,
-    backgroundColor: theme.palette.geoViewColor?.white,
+    backgroundColor: theme.palette.common.white,
   },
   maxIconImg: {
     maxWidth: 24,
@@ -57,16 +58,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     width: 24,
     height: '24px !important',
-    backgroundColor: theme.palette.geoViewColor?.white,
+    backgroundColor: theme.palette.common.white,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
+    borderColor: theme.palette.divider,
     borderRadius: theme.shape.borderRadiusSm,
   },
   titleIcon: {
     '&.MuiSvgIcon-root': {
       border: '1px solid',
-      backgroundColor: theme.palette.geoViewColor?.white,
-      borderColor: theme.palette.geoViewColor?.primary.main,
+      backgroundColor: theme.palette.common.white,
+      borderColor: theme.palette.primary.main,
       borderRadius: theme.shape.borderRadiusSm,
       '& path': {
         fill: theme.palette.geoViewColor?.bgColor.dark[800],
@@ -79,9 +80,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     width: '30px',
     height: '30px',
-    backgroundColor: theme.palette.geoViewColor?.white,
+    backgroundColor: theme.palette.common.white,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor?.primary.main,
+    borderColor: theme.palette.primary.main,
     borderRadius: theme.shape.borderRadiusSm,
   },
   groupIcon: {

@@ -87,7 +87,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1, 1.5, 0.5),
     position: 'sticky',
     top: 0,
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
+    backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
     zIndex: 1,
     borderBottom: `1px solid ${theme.palette.divider}`,
   },

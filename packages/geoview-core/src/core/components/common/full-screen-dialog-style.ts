@@ -19,7 +19,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dialogHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300] ?? theme.palette.divider}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   dialogTitle: {
     fontSize: theme.palette.geoViewFontSize?.lg,

@@ -21,7 +21,7 @@ export const truncatedCellContentSx: SxProps<Theme> = {
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  dataPanel: { background: theme.palette.geoViewColor?.bgColor.main, paddingBottom: theme.spacing(2) },
+  dataPanel: { background: theme.palette.surface?.high ?? theme.palette.background.paper, paddingBottom: theme.spacing(2) },
   gridContainer: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
   selectedRows: {
     fontSize: theme.palette.geoViewFontSize?.sm,
@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       marginRight: theme.spacing(0),
     },
     '& .MuiFormHelperText-root': {
-      color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+      color: theme.palette.text.secondary, // WCAG - Matches global placeholder text color
     },
   },
   dataTableTopToolbar: {
@@ -59,13 +59,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   filterMap: {
-    '& .Mui-checked': {
-      '& .MuiTouchRipple-root': {
-        color: theme.palette.action.active,
-      },
-    },
     '& .MuiTouchRipple-root': {
-      color: theme.palette.geoViewColor?.grey.dark[900],
+      color: theme.palette.action.active,
     },
   },
   filterTextField: {

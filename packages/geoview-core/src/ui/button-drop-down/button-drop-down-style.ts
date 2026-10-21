@@ -12,7 +12,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     fontSize: theme?.typography?.fontSize,
     color: theme.palette.geoViewColor?.primary.dark,
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
+    backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
   },
   buttonText: {},
   buttonArrow: {

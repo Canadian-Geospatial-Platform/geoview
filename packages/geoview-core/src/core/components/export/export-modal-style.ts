@@ -75,7 +75,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxWidth: '100%',
     width: 'auto',
     height: 'auto',
-    border: '1px solid #ccc',
+    border: `1px solid ${theme.palette.divider}`,
     objectFit: 'contain',
   },
 
@@ -87,7 +87,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxWidth: '80%',
     width: 'auto',
     height: 'auto',
-    border: '1px solid #ccc',
+    border: `1px solid ${theme.palette.divider}`,
     margin: '0 auto',
     display: 'flex',
     alignItems: 'center',

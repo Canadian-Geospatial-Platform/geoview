@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   stepper: {
     '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
-      color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+      color: theme.palette.text.secondary, // WCAG - Matches global placeholder text color
     },
   },
   layerTreeContainer: {

@@ -11,8 +11,8 @@ type SxClasses = Record<string, object>;
  */
 export const getSxClasses = (theme: Theme): SxClasses => ({
   tooltipItem: {
-    color: theme.palette.geoViewColor?.bgColor.light[900],
-    background: theme.palette.geoViewColor?.bgColor.dark[900],
+    color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
+    background: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
     opacity: 0.9,
     fontSize: theme.palette.geoViewFontSize?.default,
     padding: theme.spacing(0.5, 1),
@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   },
   tooltipText: {
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.bgColor.light[900],
+    color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

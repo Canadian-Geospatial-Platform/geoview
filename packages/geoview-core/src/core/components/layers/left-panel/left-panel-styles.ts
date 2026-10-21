@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        borderBottom: `1px solid ${theme.palette.geoViewColor?.grey.darken(1, 0.12)}`,
+        borderBottom: `1px solid ${theme.palette.divider}`,
       },
     },
 

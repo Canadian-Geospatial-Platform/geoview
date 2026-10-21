@@ -19,7 +19,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: '180px',
     maxWidth: '70vw',
     maxHeight: 'min(100vh, 200px)',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
+    backgroundColor: theme.palette.background.paper,
     boxShadow: 2,
   },
   content: {
@@ -29,7 +29,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     scrollbarWidth: 'thin',
     scrollbarColor: `${theme.palette.primary.main} transparent`,
     '& p': {
-      color: theme.palette.geoViewColor?.textColor.light[250],
+      color: theme.palette.text.secondary,
       margin: theme.spacing(0.5, 0),
       overflowWrap: 'break-word',
       wordBreak: 'break-word',

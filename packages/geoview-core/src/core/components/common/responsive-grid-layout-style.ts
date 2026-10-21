@@ -44,7 +44,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   rightButtonsContainer: {
     alignSelf: 'end',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[300],
+    backgroundColor: theme.palette.background.paper,
     '& .MuiButton-startIcon': {
       [theme.breakpoints.down('md')]: {
         margin: theme.spacing(0),
@@ -57,7 +57,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderBottomRightRadius: theme.shape.borderRadiusNone,
       '&.active': {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.geoViewColor?.white,
+        color: theme.palette.primary.contrastText,
         boxShadow: 1,
       },
       '&.Mui-focusVisible': {
@@ -84,7 +84,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       a: {
         color: theme.palette.primary.main,
         '&:hover': {
-          color: theme.palette.geoViewColor?.primary.dark[300],
+          color: theme.palette.primary.dark,
         },
       },
     },
@@ -94,9 +94,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       padding: theme.spacing(2),
     },
     '& .panel-content-container': {
-      backgroundColor: theme.palette.geoViewColor?.white,
+      backgroundColor: theme.palette.background.paper,
       minHeight: '0',
-      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+      border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd}`,
       overflow: 'auto',
       '&:focus-visible': {
@@ -113,7 +113,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
   },
   guideButtonGroup: {
-    border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+    border: `2px solid ${theme.palette.primary.main}`,
     borderBottom: 'none',
     borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusNone}`,
   },
