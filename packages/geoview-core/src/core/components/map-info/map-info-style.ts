@@ -29,9 +29,9 @@ export const getSxClasses = (theme: Theme): SxStyles => {
     container: {
       ...mapInfoBaseStyles,
       scrollbarColor: `${theme.palette.primary.main} transparent`,
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.divider}`,
-      color: theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.text.primary,
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
       width: 'calc(100% - 48px)',
       zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
       boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200] ?? theme.palette.grey[300]}`,

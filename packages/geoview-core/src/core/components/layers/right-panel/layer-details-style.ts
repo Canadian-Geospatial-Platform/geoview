@@ -46,7 +46,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'auto',
   },
   layerInfo: {
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     fontSize: theme.palette.geoViewFontSize?.sm,
     '& .info-container': {
       display: 'flex',
@@ -85,7 +85,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   verticalDivider: {
     width: '1px',
     height: '30px',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
+    backgroundColor: theme.palette.divider,
     // Absorb flex gap so the 1px divider plus its margins equal layerButtonsGroup's gap (theme.spacing(2))
     margin: `0 calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
   },
@@ -192,7 +192,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   attributionText: {
     marginTop: theme.spacing(1.25),
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'center',
   },

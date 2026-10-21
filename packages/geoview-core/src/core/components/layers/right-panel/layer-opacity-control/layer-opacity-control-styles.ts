@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       width: '9px',
       height: '9px',
       opacity: 1,
-      backgroundColor: theme.palette.geoViewColor?.primary.light[600],
+      backgroundColor: theme.palette.primary.light,
       border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: theme.shape.borderRadiusFull,
     },

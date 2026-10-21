@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
   },
   button: {
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
+    color: theme.palette.action.active,
     width: 30,
     height: 30,
   },

@@ -28,7 +28,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     left: `${appBarWidth}px`,
   },
   panelCard: {
-    backgroundColor: theme.palette.geoViewColor?.bgColor.main,
+    backgroundColor: theme.palette.surface?.high ?? theme.palette.background.paper,
     height: '100%',
     borderRadius: GEOVIEW_SHAPE.borderRadiusNone,
     flexDirection: 'column',
@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       minWidth: '100%',
     },
     '& .MuiCardHeader-root': {
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
+      backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
       borderBottomColor: theme.palette.geoViewColor?.bgColor.dark[100],
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',

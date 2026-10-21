@@ -66,7 +66,9 @@ declare module '@mui/material/styles' {
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
-    backdrop: string;
+    inverseContent?: { surface: string; text: string };
+    layerVisibility?: { checked: string; unchecked: string };
+    surface?: { low: string; high: string };
     // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
     geoViewFontSize?: IGeoViewFontSizes;
@@ -74,7 +76,9 @@ declare module '@mui/material/styles/createPalette' {
   }
 
   interface PaletteOptions {
-    backdrop?: string;
+    inverseContent?: { surface?: string; text?: string };
+    layerVisibility?: { checked?: string; unchecked?: string };
+    surface?: { low?: string; high?: string };
     // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
     geoViewFontSize?: IGeoViewFontSizes;

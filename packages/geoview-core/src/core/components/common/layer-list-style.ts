@@ -21,7 +21,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '& .MuiListItemButton-root': {
         padding: theme.spacing(0, 0.25, 0, 2),
         height: '100%',
-        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+        backgroundColor: theme.palette.background.paper,
       },
     },
     '& .MuiListItemButton-root': {
@@ -134,8 +134,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   dividerVertical: {
     marginLeft: theme.spacing(0.75),
-    height: '1.5rem',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
+    height: '24px',
   },
   zoomButton: {
     height: 40,
@@ -157,8 +156,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     // Keep the eye toggle looking actionable (not greyed like the disabled item) so users know they can restore visibility
     color: theme.palette.primary.main,
     '&:hover': {
-      color: theme.palette.geoViewColor?.primary.dark[200],
-      backgroundColor: theme.palette.geoViewColor?.primary.lighten(0.9, 0.3),
+      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.action.hover,
     },
   },
   listPrimaryTextHidden: {

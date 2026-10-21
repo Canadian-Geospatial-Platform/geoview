@@ -51,7 +51,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '&:nth-of-type(odd)': {
       backgroundColor: theme.palette.geoViewColor?.bgColor.darken(0.1),
-      color: theme.palette.geoViewColor?.bgColor.darken(0.9),
+      color: theme.palette.text.primary,
     },
   },
   featureInfoItemValue: {
@@ -123,7 +123,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     background: 'transparent',
   },
   coordinateInfoContainer: {
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[600],
+    backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(2),
   },
   coordinateInfoTitle: {

@@ -11,7 +11,7 @@ import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
  */
 const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
   position: 'relative',
-  color: theme.palette.geoViewColor?.grey.dark[800],
+  color: theme.palette.text.primary,
   padding: theme.spacing(2),
   '& h1': {
     marginBottom: theme.spacing(0.5),
@@ -19,7 +19,7 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     paddingBottom: theme.spacing(0.5),
     fontSize: theme.palette.geoViewFontSize?.xl,
     fontWeight: 700,
-    borderBottom: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+    borderBottom: `2px solid ${theme.palette.primary.main}`,
   },
   '& h2': {
     display: 'flex',
@@ -33,7 +33,7 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     overflowWrap: 'anywhere',
     wordBreak: 'normal',
     hyphens: 'auto',
-    borderBottom: `2px solid ${theme.palette.geoViewColor?.secondary.main}`,
+    borderBottom: `2px solid ${theme.palette.secondary.main}`,
     '& img': {
       height: '30px',
       verticalAlign: 'middle',
@@ -55,7 +55,7 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     overflowWrap: 'anywhere',
     wordBreak: 'normal',
     hyphens: 'auto',
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[400]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     '& img': {
       height: '25px',
       verticalAlign: 'bottom',
@@ -129,7 +129,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       },
       '& .current-match': {
         backgroundColor: theme.palette.warning.main,
-        color: 'white',
+        color: theme.palette.warning.contrastText,
         fontWeight: 'bold',
       },
     },
@@ -160,7 +160,7 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       marginBottom: theme.spacing(1.5),
     },
     guideSearch: {
-      backgroundColor: theme.palette.geoViewColor?.bgColor.light[600],
+      backgroundColor: theme.palette.background.paper,
       marginBottom: theme.spacing(1.25),
       width: '400px',
       maxWidth: '100%',
@@ -172,12 +172,12 @@ export const getSxClasses = (theme: Theme): SxStyles =>
     },
     searchMatchCount: {
       fontSize: theme.palette.geoViewFontSize?.xs,
-      color: theme.palette.geoViewColor?.textColor.light[200],
+      color: theme.palette.text.secondary,
       whiteSpace: 'nowrap',
     },
     searchNoResults: {
       fontSize: theme.palette.geoViewFontSize?.xs,
-      color: theme.palette.geoViewColor?.textColor.light[200],
+      color: theme.palette.text.secondary,
       whiteSpace: 'nowrap',
     },
     searchNavigationButton: {

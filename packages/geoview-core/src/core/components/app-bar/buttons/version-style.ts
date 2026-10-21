@@ -17,11 +17,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 'auto',
     minWidth: '180px',
     maxWidth: '70vw',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
+    backgroundColor: theme.palette.background.paper,
     boxShadow: 2,
     marginLeft: theme.spacing(1),
     '& a': {
-      color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor?.primary.light[300],
+      color: theme.palette.primary.main,
       textDecoration: 'underline',
     },
   },
@@ -32,7 +32,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: '48px',
     minWidth: 0,
     padding: theme.spacing(0.5, 2),
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     gap: theme.spacing(2),
   },
   versionsInfoTitle: {

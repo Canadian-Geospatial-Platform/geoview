@@ -74,10 +74,10 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       alignItems: 'center',
     },
     navBtnGroup: {
-      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      backgroundColor: theme.palette.background.paper,
       overflow: 'clip',
       '& .MuiButtonGroup-grouped:not(:last-child)': {
-        borderColor: theme.palette.geoViewColor?.bgColor.light[900],
+        borderColor: theme.palette.divider,
       },
     },
     /**
@@ -92,8 +92,8 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       },
     },
     navButton: {
-      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
-      color: theme.palette.geoViewColor?.bgColor.dark[900],
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
       borderRadius: theme.shape.borderRadiusNone,
       width: '44px',
       height: '44px',
@@ -101,34 +101,25 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       minWidth: '44px',
       padding: 'initial',
       transition: 'background-color 0.3s ease-in-out',
-      '&:not(:last-of-type)': {
-        borderBottomLeftRadius: theme.shape.borderRadiusNone,
-        borderBottomRightRadius: theme.shape.borderRadiusNone,
-        borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.light[900]}`,
-      },
-      '&:not(:first-of-type)': {
-        borderTopLeftRadius: theme.shape.borderRadiusNone,
-        borderTopRightRadius: theme.shape.borderRadiusNone,
-      },
       '&:hover': {
-        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
-        color: theme.palette.geoViewColor?.bgColor.dark[700],
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       },
       '&:focus': {
         backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
         color: theme.palette.geoViewColor?.bgColor.dark[700],
       },
       '&:active': {
-        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
-        color: theme.palette.geoViewColor?.bgColor.dark[950],
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       },
       '&.highlighted.active': {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+        color: theme.palette.primary.contrastText,
         '& .MuiSvgIcon-root': {
           color: `inherit`,
-          fill: `${theme.palette.geoViewColor?.white ?? theme.palette.common.white}`,
-          stroke: `${theme.palette.geoViewColor?.white ?? theme.palette.common.white}`,
+          fill: theme.palette.primary.contrastText,
+          stroke: theme.palette.primary.contrastText,
         },
       },
       // Override global focus indicator for NavBar buttons
@@ -156,7 +147,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       alignItems: 'center',
       width: '100%',
       minHeight: '48px',
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
+      borderBottom: `1px solid ${theme.palette.divider}`,
       padding: theme.spacing(0.5, 1, 0.5, 2),
       flexShrink: 0,
       gap: theme.spacing(1),
@@ -178,7 +169,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       fontWeight: '700',
       color: theme.palette.text.primary,
       minHeight: '48px',
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
+      borderBottom: `1px solid ${theme.palette.divider}`,
       display: 'flex',
       alignItems: 'center',
       padding: theme.spacing(0.5, 2),
@@ -200,15 +191,15 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       justifyContent: 'flex-start',
       '&[aria-pressed="true"]': {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+        color: theme.palette.primary.contrastText,
         // Force icon colors to white when pressed
         '& .MuiSvgIcon-root': {
-          color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
-          fill: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
-          stroke: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+          color: theme.palette.primary.contrastText,
+          fill: theme.palette.primary.contrastText,
+          stroke: theme.palette.primary.contrastText,
         },
         '&:hover': {
-          backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.dark,
         },
       },
     },
@@ -260,9 +251,9 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       },
       '& .MuiToggleButton-root.Mui-selected': {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.geoViewColor?.white ?? theme.palette.primary.contrastText,
+        color: theme.palette.primary.contrastText,
         '&:hover': {
-          backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.dark,
         },
       },
     },
