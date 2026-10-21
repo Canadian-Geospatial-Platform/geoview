@@ -29,10 +29,6 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
         }
       : {}),
   },
-  backdrop: {
-    position: 'absolute',
-    background: theme.palette?.backdrop,
-  },
   content: {
     padding: theme.spacing(0.75, 0),
     whiteSpace: 'pre-line',

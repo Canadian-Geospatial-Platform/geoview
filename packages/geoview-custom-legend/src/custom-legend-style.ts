@@ -17,7 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     overflowY: 'auto',
     overflowX: 'hidden',
-    background: theme.palette.geoViewColor?.bgColor.main,
+    backgroundColor: theme.palette.surface?.high ?? theme.palette.background.paper,
   },
 
   // List container for legend items
@@ -81,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Group icon styling
   groupIcon: {
-    border: '1px solid #515BA5',
+    border: `1px solid ${theme.palette.primary.main}`,
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[800],
     padding: theme.spacing(0.25),
     width: '24px',
@@ -135,7 +135,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Sublayer count caption
   groupSubLayerCount: {
     display: 'block',
-    color: '#393939',
+    color: theme.palette.text.primary,
     fontSize: '14px',
     margin: theme.spacing(0),
   },

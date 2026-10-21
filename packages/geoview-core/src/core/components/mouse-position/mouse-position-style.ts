@@ -17,7 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
+    color: theme.palette.text.primary,
     lineHeight: 1.5,
     minHeight: '33px',
     paddingBlock: theme.spacing(0.25),
@@ -31,7 +31,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   mousePositionTextContainer: {
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
+    color: theme.palette.text.primary,
     display: 'flex',
     flexDirection: 'column',
     [theme.breakpoints.down('md')]: {
@@ -83,7 +83,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   mousePositionCheckmark: {
     paddingRight: theme.spacing(0.75),
     fontSize: theme.palette.geoViewFontSize?.lg,
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
+    color: theme.palette.action.active,
   },
   mousePositionText: {
     fontSize: theme.palette.geoViewFontSize?.default,

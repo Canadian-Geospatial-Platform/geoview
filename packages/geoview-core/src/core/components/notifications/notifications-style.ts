@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxWidth: '70vw',
     maxHeight: 'min(100vh, 500px)',
     marginLeft: theme.spacing(1),
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
+    backgroundColor: theme.palette.background.paper,
     boxShadow: 2,
   },
   notificationsHeader: {
@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: '48px',
     minWidth: 0,
     padding: theme.spacing(0.5, 1, 0.5, 2),
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     gap: theme.spacing(2),
   },
   notificationsTitle: {
@@ -51,7 +51,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'flex-end',
     alignItems: 'center',
     padding: theme.spacing(1, 1, 1, 2),
-    borderTop: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderTop: `1px solid ${theme.palette.divider}`,
     minWidth: 0,
     minHeight: '48px',
   },
@@ -91,7 +91,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1),
     minWidth: 0,
     '&:not(:last-child)': {
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
   },
   notificationsItemMsg: {
@@ -100,7 +100,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     gap: theme.spacing(1),
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[250],
+    color: theme.palette.text.primary,
     margin: theme.spacing(0),
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
@@ -112,8 +112,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   notificationsItemCount: {
     display: 'inline-block',
     padding: theme.spacing(0, 2),
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[800],
-    color: theme.palette.geoViewColor?.bgColor.light[800],
+    backgroundColor: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
+    color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
     fontSize: theme.palette.geoViewFontSize?.sm,
     borderRadius: theme.shape.borderRadiusFull,
     height: '20px',

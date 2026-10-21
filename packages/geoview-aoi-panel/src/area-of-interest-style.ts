@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: 'inherit',
     borderRadius: theme.shape.borderRadiusMd,
     backgroundColor: theme.palette.background.paper,
-    border: '2px solid rgba(255,255,255,0.25)',
+    border: `2px solid ${theme.palette.divider}`,
     transition: 'all 0.3s ease-in-out',
     '&:hover': {
       border: `2px solid ${theme.palette.primary.main}`,

@@ -1,4 +1,5 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
+import type { Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/system';
 import type { IGeoViewColors } from '@/ui/style/types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes, GEOVIEW_SHAPE } from '@/ui/style/default';
@@ -61,31 +62,36 @@ export const getFormControlFocusIndicatorStyles = (geoViewColors: IGeoViewColors
  * Note: Material focus indicators are owned by theme.focusVisible to avoid duplication.
  *
  * @param geoViewColors - GeoView color palette to derive button styles from
- * @returns Style override object for MUI Button component
+ * @param palette - Generated MUI palette for semantic button colours
+ * @returns Style override object for MUI Button and IconButton components
  */
-const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
+const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['palette']): CSSObject => ({
   '&.highlighted': {
     '&:hover, &:active, &.active': {
-      backgroundColor: `${geoViewColors.primary.main}`,
-      color: `${geoViewColors.white}`,
+      backgroundColor: palette.primary.main,
+      color: palette.primary.contrastText,
     },
   },
   '&.buttonOutline': {
     backgroundColor: 'transparent',
     border: `3px solid transparent`,
-    color: `${geoViewColors.primary.main}`,
+    color: palette.primary.main,
     '&:hover, &:active, &.active': {
-      backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
-      border: `3px solid ${geoViewColors.primary.light[500]}`,
-      color: `${geoViewColors.primary.dark[100]}`,
-      boxShadow: 1,
+      backgroundColor: palette.action.hover,
+      border: `3px solid ${palette.primary.light}`,
+      color: palette.primary.dark,
+    },
+    // Active state gets a stronger border than hover: this must come after the
+    // combined hover/active block to override its borderColor.
+    '&:active, &.active': {
+      borderColor: palette.primary.main,
     },
     '&:disabled': {
-      color: `${geoViewColors.bgColor.dark[450]}`,
+      color: palette.text.disabled,
       backgroundColor: 'transparent',
     },
     '&[aria-disabled="true"]': {
-      color: `${geoViewColors.bgColor.dark[450]}`,
+      color: palette.text.disabled,
       backgroundColor: 'transparent',
       cursor: 'not-allowed',
     },
@@ -93,51 +99,51 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
   '&.buttonPopperClose': {
     // used for Popper/dialog close buttons
     backgroundColor: 'transparent',
-    border: `1px solid ${geoViewColors.primary.main}`,
-    color: `${geoViewColors.primary.main}`,
+    border: `1px solid ${palette.primary.main}`,
+    color: palette.primary.main,
     height: 36,
     width: 36,
     transition: 'background-color 0.3s ease-in-out',
     '&:hover': {
-      backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+      backgroundColor: palette.action.hover,
     },
     '&:disabled': {
-      color: `${geoViewColors.bgColor.dark[450]}`,
-      borderColor: `${geoViewColors.bgColor.dark[450]}`,
+      color: palette.text.disabled,
+      borderColor: palette.action.disabled,
       backgroundColor: 'transparent',
     },
   },
   '&.buttonFilledOutline:not(:disabled)': {
-    backgroundColor: `${geoViewColors.primary.main}`,
+    backgroundColor: palette.primary.main,
     border: `3px solid transparent`,
-    color: `${geoViewColors.white}`,
+    color: palette.primary.contrastText,
     '&:hover, &:active, &.active': {
-      backgroundColor: `${geoViewColors.primary.light[800]}`,
-      border: `3px solid ${geoViewColors.primary.light[500]}`,
-      color: `${geoViewColors.primary.dark[100]}`,
-      boxShadow: 1,
+      backgroundColor: palette.primary.light,
+      border: `3px solid ${palette.primary.light}`,
+      color: palette.primary.dark,
+    },
+    '&:active, &.active': {
+      borderColor: palette.primary.main,
     },
   },
   '&.buttonFilledOutline:disabled': {
-    backgroundColor: `${geoViewColors.bgColor.dark[150]}`,
+    backgroundColor: palette.action.disabledBackground,
   },
   '&.buttonFilled': {
     // used for app-bar buttons
     backgroundColor: `transparent`,
     border: `2px solid transparent`,
-    color: `${geoViewColors.primary.main}`,
+    color: palette.primary.main,
     '&:hover, &:focus': {
-      backgroundColor: geoViewColors.primary.light[200],
-      color: geoViewColors.white,
-      boxShadow: 1,
+      backgroundColor: palette.primary.main,
+      color: palette.primary.contrastText,
     },
     '&:active, &.active': {
-      backgroundColor: `${geoViewColors.primary.main}`,
-      color: `${geoViewColors.white}`,
-      boxShadow: 1,
+      backgroundColor: palette.primary.main,
+      color: palette.primary.contrastText,
     },
     '&:disabled': {
-      color: `${geoViewColors.bgColor.dark[450]}`,
+      color: palette.text.disabled,
     },
   },
   '&.appBarButtonStatic': {
@@ -146,13 +152,15 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): CSSObject => ({
     height: 40,
     width: 40,
     '&:hover, &:active, &.active': {
-      backgroundColor: `${geoViewColors.primary.main}`,
-      border: `2px solid ${geoViewColors.primary.light[500]}`,
-      color: `${geoViewColors.white}`,
-      boxShadow: 1,
+      backgroundColor: palette.primary.main,
+      border: `2px solid ${palette.primary.light}`,
+      color: palette.primary.contrastText,
+    },
+    '&:active, &.active': {
+      borderColor: palette.primary.main,
     },
     '&:disabled': {
-      color: `${geoViewColors.bgColor.dark[450]}`,
+      color: palette.text.disabled,
     },
     '&:focus-visible': {
       ...getFocusIndicatorStyles(geoViewColors),
@@ -198,7 +206,19 @@ export const generateThemeOptions = (
       geoViewColor: geoViewColors,
       geoViewFontSize: geoViewFontSizes,
       geoViewSpacingAndSizing: {},
-      backdrop: '#3F3F3F50',
+      inverseContent: {
+        surface: geoViewColors.bgColor.dark[800],
+        text: geoViewColors.bgColor.light[800],
+      },
+      layerVisibility: {
+        unchecked: geoViewColors.bgColor.dark[200],
+        checked: geoViewColors.bgColor.dark[600],
+      },
+      // Surface levels describe depth, not lightness; their luminance direction inverts in dark mode.
+      surface: {
+        low: geoViewColors.bgColor.dark[50],
+        high: geoViewColors.bgColor.main,
+      },
       common: {
         black: '#000',
         white: '#fff',
@@ -245,7 +265,7 @@ export const generateThemeOptions = (
       tonalOffset: 0.2,
       text: {
         primary: geoViewColors.textColor.main,
-        secondary: geoViewColors.textColor.light[500],
+        secondary: geoViewColors.textColor.light[200], // WCAG - ensures sufficient contrast for accessibility
       },
       background: {
         paper: geoViewColors.bgColor.light[600],
@@ -365,10 +385,10 @@ export const generateThemeOptions = (
           },
         },
         styleOverrides: {
-          tooltip: {
-            backgroundColor: geoViewColors.bgColor.dark[800],
-            color: geoViewColors.bgColor.light[800],
-          },
+          tooltip: ({ theme }) => ({
+            backgroundColor: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
+            color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
+          }),
         },
       },
       MuiPopper: {
@@ -383,16 +403,16 @@ export const generateThemeOptions = (
       },
       MuiPaper: {
         styleOverrides: {
-          root: {
+          root: ({ theme }) => ({
             borderWidth: '1px',
-            borderColor: geoViewColors.bgColor.darken(0.5, 0.5),
+            borderColor: theme.palette.divider,
             borderStyle: 'solid',
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.darken(0.2, 0.5)}`,
 
             '&.unbordered': {
               borderStyle: 'none',
             },
-          },
+          }),
         },
       },
       MuiMenuItem: {
@@ -412,7 +432,7 @@ export const generateThemeOptions = (
             '&.layer-panel': {
               boxShadow: 'none',
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
-                background: `${geoViewColors.bgColor.light[600]} 0% 0% no-repeat padding-box`,
+                background: `${theme.palette.background.paper} 0% 0% no-repeat padding-box`,
                 borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
                 marginBottom: '10px',
               },
@@ -429,7 +449,7 @@ export const generateThemeOptions = (
 
               // for selected layer
               '&.selectedLayer, &.selected': {
-                borderColor: `${geoViewColors.primary.main} !important`,
+                borderColor: `${theme.palette.primary.main} !important`,
                 borderWidth: '2px !important',
                 borderStyle: 'solid !important',
               },
@@ -463,16 +483,12 @@ export const generateThemeOptions = (
       },
       MuiButton: {
         styleOverrides: {
-          root: {
-            ...getButtonStyleOverrides(geoViewColors),
-          },
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
         },
       },
       MuiIconButton: {
         styleOverrides: {
-          root: {
-            ...getButtonStyleOverrides(geoViewColors),
-          },
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
         },
       },
       MuiFab: {
@@ -499,9 +515,9 @@ export const generateThemeOptions = (
       },
       MuiTabs: {
         styleOverrides: {
-          root: {
-            backgroundColor: geoViewColors.bgColor.dark[100], // Background color for the Tabs component
-          },
+          root: ({ theme }) => ({
+            backgroundColor: theme.palette.background.default, // Background color for the Tabs component
+          }),
           indicator: {
             backgroundColor: '#FF4081', // Background color for the selected tab indicator
           },
@@ -509,29 +525,29 @@ export const generateThemeOptions = (
       },
       MuiTab: {
         styleOverrides: {
-          root: {
-            color: geoViewColors.textColor.light[100], // Text color for the tabs
+          root: ({ theme }) => ({
+            color: theme.palette.text.primary, // Text color for the tabs
             '&.Mui-selected': {
-              color: `${geoViewColors.primary.light[200]}`, // Text color for the selected tab
+              color: theme.palette.primary.main, // Text color for the selected tab
             },
-          },
+          }),
         },
       },
       MuiTypography: {
         styleOverrides: {
-          root: {
-            color: geoViewColors.textColor.main,
+          root: ({ theme }) => ({
+            color: theme.palette.text.primary,
             overflowWrap: 'anywhere',
             wordBreak: 'normal',
             hyphens: 'auto',
-          },
+          }),
         },
       },
       MuiInputBase: {
         styleOverrides: {
-          root: {
+          root: ({ theme }) => ({
             '& .MuiInputBase-input::placeholder': {
-              color: geoViewColors.textColor.light[200], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
+              color: theme.palette.text.secondary,
               opacity: 1,
             },
             // Hide browser's native search input controls globally: It's confusing to keyboard users as it isn't focusable
@@ -557,19 +573,19 @@ export const generateThemeOptions = (
             '.geoview-keyboard-active &:has(:focus-visible)::before': {
               border: 'none',
             },
-          },
+          }),
         },
       },
       MuiFormLabel: {
         styleOverrides: {
-          root: {
-            color: geoViewColors.textColor.light[200], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
+          root: ({ theme }) => ({
+            color: theme.palette.text.secondary,
             opacity: 1,
-            // Keep the focused label the same as the root color instead of MUI's default primary.main, but preserve MUI's error color
+            // Keep the focused label the same as the root color, but preserve MUI's error color
             '&.Mui-focused:not(.Mui-error)': {
-              color: geoViewColors.textColor.light[200],
+              color: theme.palette.text.secondary,
             },
-          },
+          }),
         },
       },
     },
