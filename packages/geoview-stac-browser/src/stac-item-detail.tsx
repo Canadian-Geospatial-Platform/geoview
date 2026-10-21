@@ -169,9 +169,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
         <Typography component="h4" sx={memoSxClasses.filterLabel}>
           {t('stacBrowser.metadata')}
         </Typography>
-        {thumbnailUrl && (
-          <Box component="img" src={thumbnailUrl} alt={t('stacBrowser.previewOf', { title })} sx={memoSxClasses.previewImage} />
-        )}
+        {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={memoSxClasses.previewImage} />}
         <StacMetadataView item={item} itemView={itemView} dateDisplay={display.dateDisplay} sxClasses={memoSxClasses} />
       </Box>
 

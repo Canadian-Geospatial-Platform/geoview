@@ -1,6 +1,10 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 import { visuallyHidden } from 'geoview-core/ui/style/default';
-import { getFormControlFocusIndicatorStyles } from 'geoview-core/ui/style/themeOptionsGenerator';
+import {
+  FOCUS_OUTLINE_WIDTH,
+  getFocusIndicatorStyles,
+  getFormControlFocusIndicatorStyles,
+} from 'geoview-core/ui/style/themeOptionsGenerator';
 
 /** Default color of the collection extent footprint. */
 export const COLLECTION_COLOR = '#1976d2';
@@ -59,6 +63,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flex: 1,
     minHeight: 0,
     overflow: 'hidden',
+    // View headings receive programmatic focus only
+    '& [data-stac-view-focus]:focus': { outline: 'none' },
+    '.geoview-keyboard-active & [data-stac-view-focus]:focus-visible': theme.palette.geoViewColor
+      ? getFocusIndicatorStyles(theme.palette.geoViewColor)
+      : {},
   },
   panelContent: {
     display: 'flex',
@@ -111,6 +120,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textAlign: 'center',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
+    },
+    // Tabs touch the clipped panel edges, so the focus indicator is drawn inside them
+    '&:focus-visible, &.Mui-focusVisible': {
+      outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
+      boxShadow: 'none',
     },
   },
   modeButtonActive: {
@@ -269,6 +283,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   collectionsListBox: {
     maxHeight: 150,
     overflow: 'auto',
+    // Room for the checkbox focus indicator, which the scroll container would otherwise clip
+    padding: theme.spacing(1.5),
+    '& .MuiFormControlLabel-root': { marginLeft: 0 },
   },
   detailSection: {
     padding: theme.spacing(0, 1.5),
@@ -318,6 +335,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   collectionSearchField: {
     flex: 1,
+    // The floating label sits on the focus outline, so it needs an opaque background to stay readable
+    '.geoview-keyboard-active & .MuiInputLabel-shrink.Mui-focused': {
+      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
+      padding: theme.spacing(0, 0.5),
+      marginLeft: theme.spacing(-0.5),
+    },
   },
   sortToggle: {
     color: theme.palette.geoViewColor?.textColor.light[200],

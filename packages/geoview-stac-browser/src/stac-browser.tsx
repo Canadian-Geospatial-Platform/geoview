@@ -99,7 +99,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useId, useMemo, useRef, useState } = cgpv.reactUtilities.react;
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
@@ -143,8 +143,11 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const itemDetailRequestIdRef = useRef(0);
   /** Container of the active view, used to find its focus target. */
   const contentRef = useRef<HTMLDivElement>(null);
+  const modeTabsId = useId();
   /** Whether the next render should move focus to the active view heading, set by user navigation only. */
   const isViewFocusRequestedRef = useRef(false);
+  /** Optional selector of the element to focus instead of the view heading. */
+  const viewFocusSelectorRef = useRef<string | undefined>(undefined);
 
   const limit = config.defaults?.limit ?? DEFAULT_PAGE_LIMIT;
   const searchSortBy = capabilities?.searchSort ? config.defaults?.sortBy : undefined;
@@ -242,10 +245,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     logger.logTraceUseEffect('STAC-BROWSER - Focus the active view', view);
 
     if (!isViewFocusRequestedRef.current) return;
-    const heading = contentRef.current?.querySelector<HTMLElement>('[data-stac-view-focus]');
-    if (!heading) return;
+    const target =
+      (viewFocusSelectorRef.current && contentRef.current?.querySelector<HTMLElement>(viewFocusSelectorRef.current)) ||
+      contentRef.current?.querySelector<HTMLElement>('[data-stac-view-focus]');
+    if (!target) return;
     isViewFocusRequestedRef.current = false;
-    heading.focus();
+    viewFocusSelectorRef.current = undefined;
+    target.focus();
   }, [view, mode, selectedItem, selectedCollection, selectedItems, previewedHrefs]);
 
   /**
@@ -359,7 +365,6 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (newMode: BrowseMode): void => {
       if (newMode === 'browse' && !browseEnabled) return;
       itemDetailRequestIdRef.current += 1;
-      isViewFocusRequestedRef.current = true;
       setMode(newMode);
       if (newMode === 'browse') {
         setView(defaultCollection ? 'collection-detail' : 'collections');
@@ -390,6 +395,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     },
     [isLoading, handleModeChange]
   );
+
+  /**
+   * Handles arrow, Home and End keys on the mode tabs; Enter and Space activate the focused tab.
+   */
+  const handleModeKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>): void => {
+    const currentMode = event.currentTarget.dataset.mode;
+    let nextMode: BrowseMode | undefined;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') nextMode = currentMode === 'browse' ? 'search' : 'browse';
+    else if (event.key === 'Home') nextMode = 'browse';
+    else if (event.key === 'End') nextMode = 'search';
+    if (!nextMode) return;
+
+    event.preventDefault();
+    event.currentTarget.parentElement?.querySelector<HTMLElement>(`[data-mode="${nextMode}"]`)?.focus();
+  }, []);
 
   /**
    * Handles clicking on a collection card to view its details.
@@ -560,9 +580,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const handleBackToCollections = useCallback((): void => {
     itemDetailRequestIdRef.current += 1;
     isViewFocusRequestedRef.current = true;
+    viewFocusSelectorRef.current = selectedCollection ? `[data-collection-id="${CSS.escape(selectedCollection.id)}"]` : undefined;
     setSelectedCollection(undefined);
     setView('collections');
-  }, []);
+  }, [selectedCollection]);
 
   /**
    * Handles going back to the search panel.
@@ -816,24 +837,34 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     <Box sx={memoSxClasses.mainContainer}>
       {/* Mode toggle — Browse / Search (hide when in item-detail) */}
       {browseEnabled && view !== 'item-detail' && (
-        <Box sx={memoSxClasses.modeToggle} role="group" aria-label={t('stacBrowser.modeSelector')}>
+        <Box sx={memoSxClasses.modeToggle} role="tablist" aria-label={t('stacBrowser.modeSelector')}>
           <Button
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'browse' && memoSxClasses.modeButtonActive] as SxProps}
+            id={`${modeTabsId}-browse`}
             data-mode="browse"
+            role="tab"
+            aria-selected={mode === 'browse'}
+            aria-controls={`${modeTabsId}-panel`}
+            tabIndex={mode === 'browse' ? 0 : -1}
             aria-disabled={isLoading}
             onClick={handleModeClick}
-            aria-pressed={mode === 'browse'}
+            onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.browse')}
           </Button>
           <Button
             type="text"
             sx={[memoSxClasses.modeButton, mode === 'search' && memoSxClasses.modeButtonActive] as SxProps}
+            id={`${modeTabsId}-search`}
             data-mode="search"
+            role="tab"
+            aria-selected={mode === 'search'}
+            aria-controls={`${modeTabsId}-panel`}
+            tabIndex={mode === 'search' ? 0 : -1}
             aria-disabled={isLoading}
             onClick={handleModeClick}
-            aria-pressed={mode === 'search'}
+            onKeyDown={handleModeKeyDown}
           >
             {t('stacBrowser.search')}
           </Button>
@@ -852,7 +883,16 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         )}
       </Box>
 
-      <Box ref={contentRef} sx={memoSxClasses.viewContainer}>
+      <Box
+        ref={contentRef}
+        sx={memoSxClasses.viewContainer}
+        {...(browseEnabled &&
+          view !== 'item-detail' && {
+            id: `${modeTabsId}-panel`,
+            role: 'tabpanel',
+            'aria-labelledby': `${modeTabsId}-${mode}`,
+          })}
+      >
         {renderContent()}
       </Box>
     </Box>

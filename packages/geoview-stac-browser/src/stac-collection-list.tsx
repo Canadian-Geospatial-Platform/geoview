@@ -121,6 +121,16 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
         </IconButton>
       </Box>
 
+      {/* Announces the filter result; empty when not filtering so the full list is not announced on load */}
+      <Box role="status" sx={memoSxClasses.visuallyHidden}>
+        {searchText.trim() &&
+          (memoFilteredCollections.length === 0
+            ? t('stacBrowser.noCollectionsFound')
+            : t(memoFilteredCollections.length === 1 ? 'stacBrowser.collectionFound' : 'stacBrowser.collectionsFound', {
+                count: memoFilteredCollections.length,
+              }))}
+      </Box>
+
       <Box component="ul" sx={memoSxClasses.collectionList}>
         {memoFilteredCollections.map((collection, index) => {
           const temporal = StacFieldUtils.formatTemporalExtent(collection, t('stacBrowser.present'), dateDisplay, true);

@@ -113,7 +113,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             startIcon={<ZoomInSearchIcon fontSize="small" />}
             data-item-key={itemKey}
             data-action="zoom"
-            aria-describedby={titleId}
+            aria-label={`${t('stacBrowser.zoom')} ${titleId}`}
             onClick={onAction}
           >
             {t('stacBrowser.zoom')}
@@ -126,7 +126,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             startIcon={isPreviewed ? <VisibilityIcon fontSize="small" /> : <MapIcon fontSize="small" />}
             data-item-key={itemKey}
             data-action="preview"
-            aria-describedby={titleId}
+            aria-label={`${t('stacBrowser.showOnMap')} ${titleId}`}
             onClick={onAction}
             aria-pressed={isPreviewed}
             sx={isPreviewed ? sxClasses.itemActionActive : undefined}
@@ -140,7 +140,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
           endIcon={<ChevronRightIcon fontSize="small" />}
           data-item-key={itemKey}
           data-action="detail"
-          aria-describedby={titleId}
+          aria-label={`${t('stacBrowser.details')} ${titleId}`}
           onClick={onAction}
         >
           {t('stacBrowser.details')}

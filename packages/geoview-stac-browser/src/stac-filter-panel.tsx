@@ -95,6 +95,21 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const selectedQueryableCollectionKey = memoSelectedQueryableCollections.join(',');
 
   /**
+   * Builds the collection checkbox labels, adding the collection id when titles are duplicated.
+   */
+  const memoCollectionLabels = useMemo((): Record<string, string> => {
+    logger.logTraceUseMemo('STAC-FILTER-PANEL - memoCollectionLabels', collections.length);
+    const titles = collections.map((collection) => StacFieldUtils.getCollectionTitle(collection));
+    return Object.fromEntries(
+      collections.map((collection, index) => {
+        const title = titles[index];
+        const isDuplicate = titles.indexOf(title) !== titles.lastIndexOf(title);
+        return [collection.id, isDuplicate ? `${title} (${collection.id})` : title];
+      })
+    );
+  }, [collections]);
+
+  /**
    * Loads queryable fields for the selected collections.
    */
   useEffect(() => {
@@ -405,7 +420,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
                     size="small"
                   />
                 }
-                label={StacFieldUtils.getCollectionTitle(collection)}
+                label={memoCollectionLabels[collection.id]}
               />
             ))}
           </Box>
