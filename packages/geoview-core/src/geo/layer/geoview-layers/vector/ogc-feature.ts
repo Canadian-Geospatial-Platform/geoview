@@ -465,6 +465,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         if (fields[fieldEntryKey].type === 'Geometry') return;
 
         if (!fields[fieldEntryKey]) return;
+
         const fieldEntry = fields[fieldEntryKey];
         if (fieldEntry.type === 'Geometry') return;
 

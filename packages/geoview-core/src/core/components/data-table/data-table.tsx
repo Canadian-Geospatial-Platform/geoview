@@ -1284,8 +1284,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
           const [minRaw, maxRaw] = value;
           if (!isNumericFilterBoundValid(minRaw) || !isNumericFilterBoundValid(maxRaw)) return '';
 
-          const min = minRaw === '' || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
-          const max = maxRaw === '' || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
+          const min = minRaw === undefined || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
+          const max = maxRaw === undefined || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
 
           const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
 
