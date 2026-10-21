@@ -375,6 +375,22 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [isOpen, tabId, mapId]);
 
   /**
+   * Traps the focus in a panel opened from the configuration once a keyboard user moves into it.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('APP-BAR - trap focus in panel opened from config', tabId, isOpen, isFocusTrapped);
+
+    if (!activeTrapGeoView || !isOpen || isFocusTrapped || !tabId) return undefined;
+    const panelElement = getGVElementByFullId(mapId, getButtonElementId(tabId, '-panel'));
+    if (!panelElement) return undefined;
+
+    const handleFocusIn = (): void => uiController.setActiveAppBarTab(tabId, true, true);
+    panelElement.addEventListener('focusin', handleFocusIn);
+    return (): void => panelElement.removeEventListener('focusin', handleFocusIn);
+  }, [activeTrapGeoView, isOpen, isFocusTrapped, tabId, mapId, getButtonElementId, uiController]);
+
+  /**
    * Creates AppBar button panels from configuration tabs.
    */
   useEffect(() => {
