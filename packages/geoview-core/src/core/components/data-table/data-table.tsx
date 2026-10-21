@@ -729,6 +729,42 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
   );
 
   /**
+   * Checks whether a feature already provides an extent for map zooming.
+   *
+   * @param feature - Feature to inspect
+   * @returns Whether the feature has an extent
+   */
+  const featureHasExtent = useCallback((feature: TypeFeatureInfoEntry): boolean => {
+    return !!feature.extent;
+  }, []);
+
+  /**
+   * Finds the feature attribute marked as its OID field.
+   *
+   * @param feature - Feature whose field metadata is inspected
+   * @returns The OID field name, or undefined when no OID field is present
+   */
+  const featureOidFieldName = useCallback((feature: TypeFeatureInfoEntry): string | undefined => {
+    if (feature.fieldInfo) {
+      return Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+    }
+    return undefined;
+  }, []);
+
+  /**
+   * Checks whether a feature can be zoomed to using its extent or OID field.
+   *
+   * @param feature - Feature to inspect
+   * @returns Whether the feature has an extent or an OID field for extent retrieval
+   */
+  const isFeatureZoomable = useCallback(
+    (feature: TypeFeatureInfoEntry): boolean => {
+      return featureHasExtent(feature) || !!featureOidFieldName(feature);
+    },
+    [featureHasExtent, featureOidFieldName]
+  );
+
+  /**
    * Zooms to a feature on the map.
    *
    * @param feature - The feature to zoom to
@@ -736,19 +772,21 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
    */
   const zoomToFeature = useCallback(
     async (feature: TypeFeatureInfoEntry): Promise<void> => {
-      let { extent } = feature;
-
-      // Get oid field
-      let oidField: string | undefined;
-      if (feature && feature.fieldInfo) {
-        oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      // Get the extent if any
+      let extent;
+      if (featureHasExtent(feature)) {
+        // eslint-disable-next-line prefer-destructuring
+        extent = feature.extent;
       }
 
+      // Get oid field name if any
+      const oidFieldName = featureOidFieldName(feature);
+
       // If there is no extent, but there's an OID field (ESRI Dynamic layer / WMS with associated WFS) ?
-      if (!extent && oidField) {
+      if (!extent && oidFieldName) {
         try {
           // Get the feature extent using its oid field
-          extent = await layerController.getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
+          extent = await layerController.getExtentFromFeatures(layerPath, [feature.fieldInfo[oidFieldName]!.value as number], oidFieldName);
         } catch (error: unknown) {
           // Log error
           logger.logError(error);
@@ -767,7 +805,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [layerPath, layerController]
+    [layerPath, featureHasExtent, featureOidFieldName, layerController]
   );
 
   /**
@@ -862,6 +900,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         </Box>
       );
 
+      // Can zoom on the feature if it has the geometry or it has an oid field key which we can query, on-the-fly, the service
+      const canZoom = isFeatureZoomable(feature);
+
       const featureInfo: DataTableRow = {
         gvFeature: feature,
         ICON: icon,
@@ -875,7 +916,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
             tooltipPlacement="top"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
             onClick={handleZoomClickWrapper}
-            disabled={!feature.supportZoomTo}
+            disabled={!canZoom}
           >
             <ZoomInSearchIcon />
           </IconButton>
@@ -899,7 +940,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
 
       return featureInfo;
     });
-  }, [memoFilteredFeatures, mapId, containerType, t, handleZoomClickWrapper, handleDetailsClickWrapper, memoSxClasses]);
+  }, [memoFilteredFeatures, mapId, containerType, t, isFeatureZoomable, handleZoomClickWrapper, handleDetailsClickWrapper, memoSxClasses]);
 
   // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.

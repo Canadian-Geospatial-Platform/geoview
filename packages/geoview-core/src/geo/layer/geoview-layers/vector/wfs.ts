@@ -319,7 +319,10 @@ export class WFS extends AbstractGeoViewVector {
         WFS.#fetchAndParseWFSFeaturesJSON(url, version, readOptions.dataProjection, readOptions.featureProjection, requestInit),
       (url, requestInit) =>
         WFS.#fetchAndParseWFSFeaturesText(url, version, readOptions.dataProjection, readOptions.featureProjection, requestInit),
-      bboxExtent
+      undefined,
+      bboxExtent,
+      undefined,
+      undefined
     );
   }
 
@@ -598,10 +601,10 @@ export class WFS extends AbstractGeoViewVector {
     layerConfig: OgcWfsLayerEntryConfig,
     queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<T>,
     queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<T>,
-    bboxExtent?: string,
-    outfields?: TypeOutfields[],
-    filter?: string,
-    srsName?: string
+    outfields: TypeOutfields[] | undefined,
+    bboxExtent: string | undefined,
+    filter: string | undefined,
+    srsName: string | undefined
   ): Promise<T> {
     // Get the officially supported formats by the service
     const supportedFormats = WFS.#resolveSupportedFormats(layerConfig);

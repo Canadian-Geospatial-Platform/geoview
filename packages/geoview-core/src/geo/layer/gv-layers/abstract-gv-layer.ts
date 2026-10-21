@@ -1319,7 +1319,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       layerConfig.getSchemaTag(),
       nameField,
       layerConfig.getOutfields(),
-      true,
       domainsLookup,
       this.getStyle(),
       includeNoStyleFeatures,
@@ -2503,7 +2502,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param schemaTag - The Geoview layer type for the features
    * @param nameField - Optional field name to use as the display name for features
    * @param outFields - Optional array of output fields to include in the feature info
-   * @param supportZoomTo - Whether zoom-to functionality is supported for these features
    * @param domainsLookup - Optional array of field metadata for domain lookups
    * @param layerStyle - Optional mapping of geometry type to style settings for icons
    * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
@@ -2519,7 +2517,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     schemaTag: TypeGeoviewLayerType,
     nameField: string | undefined,
     outFields: TypeOutfields[] | undefined,
-    supportZoomTo: boolean,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
     layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
     includeNoStyleFeatures: boolean,
@@ -2563,7 +2560,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
             featureIcon: imageSource,
             fieldInfo: {},
             nameField,
-            supportZoomTo,
             layerPath,
           };
 

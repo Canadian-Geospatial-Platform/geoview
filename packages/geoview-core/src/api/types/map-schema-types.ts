@@ -1151,8 +1151,6 @@ export type TypeFeatureInfoEntry = {
   featureKey: number;
   /** Geoview layer type that produced the result. */
   geoviewLayerType: TypeGeoviewLayerType;
-  /** Whether the feature supports zooming. */
-  supportZoomTo: boolean;
   /** Optional feature identifier from the source. */
   uid?: string;
   /** Optional OpenLayers feature. */

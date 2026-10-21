@@ -1150,7 +1150,6 @@ export class MapController extends AbstractMapViewerController {
           },
           featureKey: 0,
           geoviewLayerType: 'CSV',
-          supportZoomTo: true,
           layerPath: LAYER_PATH_COORDINATE_INFO,
         },
       ];

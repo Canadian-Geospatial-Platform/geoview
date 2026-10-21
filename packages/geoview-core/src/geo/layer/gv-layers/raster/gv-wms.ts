@@ -598,7 +598,7 @@ export class GVWMS extends AbstractGVRaster {
       (url, requestInit) =>
         GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, undefined, requestInit),
       undefined,
-      [],
+      undefined,
       xmlFilterReady,
       outProjection.getCode()
     );
@@ -765,11 +765,6 @@ export class GVWMS extends AbstractGVRaster {
     // Get the version
     const version = wfsLayerConfig.getVersionOrDefault();
 
-    // Create the filterXML from the sql filter
-    let gmlFilterAttribute;
-    let gmlFilterSpatial;
-    let fieldsToReturn = wfsLayerConfig.getOutfields();
-
     // Total filter
     const totalFilter = layerFilters?.getAllFilters(
       true,
@@ -777,13 +772,15 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getOutfieldsDate().map((outfield) => outfield.name)
     );
 
-    // If any
+    // If any attribute filter
+    let gmlFilterAttribute;
     if (totalFilter) {
       // Build a OGC Filter for the filter
       gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(totalFilter, version, wfsLayerConfig.getOutfields()?.[0]?.name!);
     }
 
     // If performing a query based on a clicked coordinate, we want to filter spatially
+    let gmlFilterSpatial;
     if (clickCoordinate && viewResolution) {
       // Get the geometry field name
       const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
@@ -811,9 +808,6 @@ export class GVWMS extends AbstractGVRaster {
         // Create the intersects filter
         gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
       }
-
-      // We want all fields in the response, to make sure the geometry is included, clear it
-      fieldsToReturn = undefined;
     }
 
     // Build attribute+spatial OGC filter
@@ -830,7 +824,7 @@ export class GVWMS extends AbstractGVRaster {
       (url, requestInit) =>
         GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController, requestInit),
       undefined,
-      fieldsToReturn,
+      undefined,
       xmlFilterReady,
       projectionCode
     );
@@ -1203,7 +1197,6 @@ export class GVWMS extends AbstractGVRaster {
       vectorLayerConfig.getSchemaTag(),
       nameField,
       vectorLayerConfig.getOutfields(),
-      wmsLayerConfig.hasOutfieldsPK(),
       undefined,
       layerStyle,
       this.#shouldIncludeNoStyleFeatures(layerStyle),
@@ -1703,7 +1696,6 @@ export class GVWMS extends AbstractGVRaster {
       extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
       featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
-      supportZoomTo: true,
       layerPath,
       nameField,
     };
