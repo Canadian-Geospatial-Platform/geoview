@@ -2619,7 +2619,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const fieldEntries = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name, domain: undefined }));
 
     for (const fieldEntry of fieldEntries) {
-      // TODO: CHECK - I don't think this condition is necessary, because we don't store the geometry field in the outFields per logic elsewhere in the codebase (2026-10-21). Comment it?
+      // TODO: CHECK - I don't think this condition is necessary, because we don't store the geometry field in the outFields per logic elsewhere in the codebase (2026-10-21). Remove it?
       // Skip geometry field
       // eslint-disable-next-line no-continue
       if (fieldEntry.name === 'geometry') continue;
