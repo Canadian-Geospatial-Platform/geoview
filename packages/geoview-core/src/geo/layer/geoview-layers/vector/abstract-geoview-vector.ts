@@ -98,8 +98,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
-      // GV Use void IIFE so the outer function stays sync and avoids @typescript-eslint/no-misused-promises
-      void (async (): Promise<void> => {
+      // GV The loader callback returns void, so run the asynchronous loading work without returning its promise.
+      // GV Report load failures through failureCallback and log errors that escape to prevent unhandled rejections.
+      // Asynchronously call vector loading
+      (async (): Promise<void> => {
         try {
           // Clear last error if any
           vectorSource.clearLoaderError();
@@ -146,7 +148,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // and this will remove the failed extent so that OpenLayers may retry loading it later.
           failureCallback?.();
         }
-      })();
+      })().catch((error: unknown) => {
+        // Log the error
+        logger.logPromiseFailed(`Error occurred while loading vector source for layer ${layerConfig.layerPath}`, error);
+      });
     };
 
     // Create the vector source with the source options
