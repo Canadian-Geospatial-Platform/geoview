@@ -435,7 +435,11 @@ export function SingleLayer({
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
-    void layerCreatorController.reloadLayer(layerPath);
+    // Asynchronously reload the layer
+    layerCreatorController.reloadLayer(layerPath).catch((error: unknown) => {
+      // Log error
+      logger.logPromiseFailed(`Reload failed for GeoView layer ${layerPath}`, error);
+    });
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 
   /**
@@ -450,8 +454,11 @@ export function SingleLayer({
         // Set ref to indicate a reload has been requested so focus can be set to the reload button after status updates
         reloadRequestedRef.current = true;
 
-        // Reload layer
-        void layerCreatorController.reloadLayer(layerPath);
+        // Asynchronously reload the layer
+        layerCreatorController.reloadLayer(layerPath).catch((error: unknown) => {
+          // Log error
+          logger.logPromiseFailed(`Reload failed for GeoView layer ${layerPath}`, error);
+        });
 
         // Prevent double-firing via native button click event
         event.preventDefault();

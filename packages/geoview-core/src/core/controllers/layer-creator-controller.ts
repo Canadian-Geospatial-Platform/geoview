@@ -420,15 +420,20 @@ export class LayerCreatorController extends AbstractMapViewerController {
       .then(() => {
         // After each GeoCore layer loads, remove any new child paths that weren't in the original order
         parentPaths.forEach((parentPath) => {
-          void this.onceLayerConfigAdded().then(() => {
-            // Only process group layers — single-layer GeoCore UUIDs have no children to prune
-            const layerConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(parentPath);
-            if (layerConfig instanceof GroupLayerEntryConfig) {
-              this.#getAllChildPaths(parentPath)
-                .filter((childPath) => !originalOrderedLayers.includes(childPath))
-                .forEach((childPath) => this.removeLayerUsingPath(childPath));
-            }
-          });
+          this.onceLayerConfigAdded()
+            .then(() => {
+              // Only process group layers — single-layer GeoCore UUIDs have no children to prune
+              const layerConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(parentPath);
+              if (layerConfig instanceof GroupLayerEntryConfig) {
+                this.#getAllChildPaths(parentPath)
+                  .filter((childPath) => !originalOrderedLayers.includes(childPath))
+                  .forEach((childPath) => this.removeLayerUsingPath(childPath));
+              }
+            })
+            .catch((error: unknown) => {
+              // Log the error
+              logger.logPromiseFailed('Error occurred while processing layer config added', error);
+            });
         });
 
         // Restore original layer order
@@ -436,11 +441,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
         // Restore original visibility for each layer when it first loads
         originalOrderedLayers.forEach((layerPath) => {
-          void this.#layerDomain
+          this.#layerDomain
             .onceLayerFirstLoaded((event) => event.layer.getLayerPath() === layerPath)
             .then((event) => {
               const { visible } = originalLegendLayersInfo.find((info) => info.layerPath === layerPath) ?? {};
               event.layer?.setVisible(visible ?? true);
+            })
+            .catch((error: unknown) => {
+              // Log the error
+              logger.logPromiseFailed('Error occurred while restoring layer visibility', error);
             });
         });
       })

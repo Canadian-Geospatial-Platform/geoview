@@ -1047,9 +1047,13 @@ export function AddNewLayer(): JSX.Element {
 
     if (activeStep === 0) {
       // Focus the upload button using the ref
-      void delay(0).then(() => {
-        uploadButtonRef.current?.focus();
-      });
+      delay(0)
+        .then(() => {
+          uploadButtonRef.current?.focus();
+        })
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('Focus management failed', error);
+        });
 
       return undefined;
     }

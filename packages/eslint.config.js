@@ -174,7 +174,12 @@ export default [
       '@typescript-eslint/prefer-promise-reject-errors': 'off',
       '@typescript-eslint/no-misused-promises': 'error',
       '@typescript-eslint/no-unsafe-function-type': 'error',
-      '@typescript-eslint/no-floating-promises': 'error',
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        {
+          ignoreVoid: false
+        },
+      ],
       '@typescript-eslint/explicit-function-return-type': [
         1,
         {

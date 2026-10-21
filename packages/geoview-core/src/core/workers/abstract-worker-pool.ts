@@ -177,7 +177,7 @@ export abstract class AbstractWorkerPool<T> {
     this.#messageHandlers.forEach((handler) => replacementWorker.addMessageHandler(handler));
     this.workers[workerIndex] = replacementWorker;
     this.busyWorkers.add(replacementWorker);
-    void replacementWorker
+    replacementWorker
       .init()
       .catch((error: unknown) => {
         logger.logError(`Failed to initialize replacement worker in ${this.name}`, error);
