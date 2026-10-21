@@ -31,15 +31,18 @@ const CALENDAR_SLIDER_NATIVE_STEP = 1;
 /** Number of calendar steps applied for a single Page Up/Down key press, mirroring the native range input's larger jump. */
 const CALENDAR_SLIDER_PAGE_STEP_MULTIPLIER = 10;
 
-/** Applies calendar stepping to continuous slider values while preserving discrete service values. */
+/** Applies calendar stepping to continuous slider values, clamps them to the layer bounds, and preserves discrete service values. */
 function getCalendarStepValues(
   values: number[],
   anchor: number,
   stepUnit: DateTimeStepUnit | undefined,
-  discreteValues: boolean
+  discreteValues: boolean,
+  minAndMax: number[]
 ): number[] {
   // Service-provided discrete ranges already define their valid slider positions.
-  return stepUnit && !discreteValues ? DateMgt.snapValuesToCalendarStep(values, anchor, stepUnit) : values;
+  if (!stepUnit || discreteValues) return values;
+
+  return DateMgt.snapValuesToCalendarStep(values, anchor, stepUnit).map((value) => Math.min(minAndMax[1], Math.max(minAndMax[0], value)));
 }
 
 /** Properties for the TimeSlider component. */
@@ -526,7 +529,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       activeThumbRef.current = activeThumb;
 
       const valuesAsArray = toArray(newValues);
-      const calendarValues = getCalendarStepValues(valuesAsArray, calendarStepAnchorRef.current ?? minAndMax[0], stepUnit, discreteValues);
+      const calendarValues = getCalendarStepValues(
+        valuesAsArray,
+        calendarStepAnchorRef.current ?? minAndMax[0],
+        stepUnit,
+        discreteValues,
+        minAndMax
+      );
       setValues(timeSliderController.constrainValues(layerPath, calendarValues, activeThumb));
     },
     [layerPath, timeSliderController, stepUnit, discreteValues, minAndMax]
@@ -556,7 +565,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           valuesAsArray,
           calendarStepAnchorRef.current ?? minAndMax[0],
           stepUnit,
-          discreteValues
+          discreteValues,
+          minAndMax
         );
         const constrainedValues = timeSliderController.constrainValues(layerPath, calendarValues, activeThumbRef.current);
         timeSliderController.updateTimeSliderValues(layerPath, constrainedValues);
