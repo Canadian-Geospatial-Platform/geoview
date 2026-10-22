@@ -13,6 +13,8 @@ The Canadian Geospatial Platform intends to deploy new infrastructure, tools and
 
 GeoView is built with **React**, **TypeScript**, and **OpenLayers**, and is structured as a **Rush monorepo**. It can be embedded into any web page with a single script tag and configured declaratively via HTML attributes or programmatically through a rich JavaScript/TypeScript API.
 
+Use GeoView as a standalone web viewer with support for a wide variety of spatial datasets and extensive built-in exploration tools, or integrate it into a website or open-data portal, as GEO.ca and Open Maps Canada do. See [Where GeoView fits](docs/app/geoview-comparison.md) for product categories and alternatives, and [GeoView capabilities](docs/app/geoview-capabilities.md) for features, packages, and customization **(both guides are English only)**.
+
 ### Key Capabilities
 
 **Extensive Layer Support**
@@ -84,7 +86,7 @@ A plugin system allows functionality to be extended without modifying the core. 
 
 © His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources.
 
-This project is released under the applicable Government of Canada open-source license.
+The [repository license](LICENSE.md) includes MIT terms, separate Canada branding restrictions, and third-party licensing conditions.
 
 ---
 
@@ -100,6 +102,8 @@ Fait partie de **GEO.ca**
 La Plateforme géospatiale canadienne vise à déployer une nouvelle infrastructure, de nouveaux outils et une intégration web de GeoCore, une nouvelle bibliothèque de lac de métadonnées géospatiales capable de prendre en charge plusieurs normes de métadonnées. Pour répondre à ces besoins, il faut un visualiseur léger à intégrer dans cette infrastructure. L'objectif est d'avoir un visualiseur flexible pour afficher des données géospatiales provenant du lac de métadonnées GeoCore sur une carte avec des fonctionnalités personnalisables.
 
 GeoView est construit avec **React**, **TypeScript** et **OpenLayers**, et est structuré en **monorepo Rush**. Il peut être intégré dans n'importe quelle page web à l'aide d'une seule balise script et configuré de manière déclarative via des attributs HTML ou par programmation via une API JavaScript/TypeScript.
+
+Utilisez GeoView comme visualisateur web autonome prenant en charge une grande variété de jeux de données spatiales et offrant de nombreux outils d'exploration intégrés, ou intégrez-le à un site web ou à un portail de données ouvertes, comme le font GEO.ca et Cartes ouvertes Canada. Consultez [Où se situe GeoView](docs/app/geoview-comparison.md) pour les catégories de produits et les autres solutions, et [Les capacités de GeoView](docs/app/geoview-capabilities.md) pour les fonctionnalités, les plugiciels et la personnalisation **(les deux guides sont en anglais seulement)**.
 
 ### Capacités principales
 
@@ -151,4 +155,4 @@ Un système de plugiciels permet d'étendre les fonctionnalités sans modifier l
 
 © Sa Majesté le Roi du chef du Canada, représenté par le ministre des Ressources naturelles.
 
-Ce projet est publié sous la licence open source applicable du gouvernement du Canada.
+La [licence du dépôt](LICENSE.md) comprend les conditions de la licence MIT, des restrictions distinctes concernant l'identité visuelle du Canada et les conditions de licence des composants tiers.

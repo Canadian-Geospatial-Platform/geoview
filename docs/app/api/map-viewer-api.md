@@ -77,6 +77,14 @@ const count = await mapViewer.waitAllLayersStatus('loaded');
 const config = mapViewer.createMapConfigFromMapState();
 ```
 
+### Saving and Restoring Map Configuration
+
+`createMapConfigFromMapState()` captures selected current state as a reusable map configuration. It includes view/projection/rotation and basemap settings, layer order and supported layer settings such as visibility, opacity, and styles, UI configuration, and state from supported initialized packages. This is a richer persistence mechanism than the parameters supported by a shareable URL, not a serialization of the entire browser session.
+
+The host application serializes the returned configuration as JSON and provides file download/upload or another storage mechanism. Reload the saved JSON text or a configuration URL through [`createMapFromConfig`](api.md#creating-a-map), use `data-config-url` as described in [Creating Maps](../config/create-map.md), or parse the saved JSON and pass the configuration object to [`cgpv.api.reload`](api.md#reloading-a-map) to replace an existing map. `reloadWithCurrentState` captures and recreates the map directly; it does not save a configuration file.
+
+The configuration references data/services rather than bundling their contents. It is not a backup of query results, drawing geometries, credentials, arbitrary host/plugin state, or every live filter/interaction. The target map container supplies its identity and language. The AOI package's curated geographic destinations are separate from this API-based persistence workflow. See the [MapViewer](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/MapViewer.html) and [API](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/API.html) TypeDoc references for full method contracts and options.
+
 ### Coordinate Transformations
 
 ```typescript
