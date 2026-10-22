@@ -1,6 +1,7 @@
 import KeyboardPan from 'ol/interaction/KeyboardPan';
 import KeyboardZoom from 'ol/interaction/KeyboardZoom';
 import type { Coordinate } from 'ol/coordinate';
+import type View from 'ol/View';
 
 import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
@@ -46,7 +47,7 @@ import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { createGuideObject, exitFullscreen, requestFullscreen } from '@/core/utils/utilities';
+import { createGuideObject, exitFullscreen, getFullscreenElement, requestFullscreen } from '@/core/utils/utilities';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type {
@@ -83,6 +84,33 @@ export class UIController extends AbstractMapViewerController {
   /** The bounded reference to the display date timezone changed handler. */
   #boundedHandleDisplayDateTimezoneChanged: DomainDisplayDateTimezoneChangedDelegate;
 
+  /** The browser fullscreen change event names (standard and vendor-prefixed). */
+  static readonly #FULLSCREEN_CHANGE_EVENTS = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
+
+  /** The tolerance used to compare view states around fullscreen transitions. */
+  static readonly #FULLSCREEN_VIEW_TOLERANCE = 1e-6;
+
+  /** The element currently in fullscreen for this map, undefined when fullscreen is not active. */
+  #fullscreenElement?: TypeHTMLElement;
+
+  /** The view state saved when entering fullscreen. */
+  #fullscreenSavedView?: TypeFullscreenSavedView;
+
+  /** The view state after the last map size change while in fullscreen. */
+  #fullscreenSettledState?: TypeFullscreenViewState;
+
+  /** Whether the view was changed (user or programmatic) while in fullscreen, sticky until exit. */
+  #fullscreenViewChanged = false;
+
+  /** The bounded reference to the browser fullscreen change handler. */
+  #boundedHandleFullscreenChanged: () => void;
+
+  /** The bounded reference to the map size changed handler used while in fullscreen. */
+  #boundedHandleFullscreenSizeChanged: () => void;
+
+  /** The bounded reference to the map move end handler used while in fullscreen. */
+  #boundedHandleFullscreenMoveEnd: () => void;
+
   /**
    * Creates an instance of UIController.
    *
@@ -107,6 +135,11 @@ export class UIController extends AbstractMapViewerController {
 
     // Keep a bounded reference to the handle display date timezone changed
     this.#boundedHandleDisplayDateTimezoneChanged = this.#handleDisplayDateTimezoneChanged.bind(this);
+
+    // Keep bounded references to the fullscreen handlers
+    this.#boundedHandleFullscreenChanged = this.#handleFullscreenChanged.bind(this);
+    this.#boundedHandleFullscreenSizeChanged = this.#handleFullscreenSizeChanged.bind(this);
+    this.#boundedHandleFullscreenMoveEnd = this.#handleFullscreenMoveEnd.bind(this);
   }
 
   // #region OVERRIDES
@@ -132,6 +165,9 @@ export class UIController extends AbstractMapViewerController {
    * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
+    // Unhooks the fullscreen listeners, if fullscreen is active
+    if (this.#fullscreenElement) this.#removeFullscreenListeners();
+
     // Unhooks when the display date timezone changes
     this.#uiDomain.offDisplayDateTimezoneChanged(this.#boundedHandleDisplayDateTimezoneChanged);
 
@@ -434,45 +470,51 @@ export class UIController extends AbstractMapViewerController {
   /**
    * Toggles the fullscreen state.
    *
-   * When entering fullscreen, requests fullscreen on the provided element.
-   * When exiting, preserves the current map extent by zooming back after the size change.
+   * When entering fullscreen, saves the current view (center, resolution, rotation) and requests fullscreen on the provided element.
+   * When exiting, only asks the browser to leave fullscreen; the view is handled once the browser reports the exit
+   * (same path for the fullscreen button, the `Esc` key and this API). If the user did not change the view while in fullscreen,
+   * the saved view is restored exactly; otherwise the current center and resolution are kept.
+   * Calls that do not change the state (entering while active, exiting while inactive) are ignored.
    *
    * @param status - Whether to enter or exit fullscreen
-   * @param element - Optional HTML element to make fullscreen
+   * @param element - Optional HTML element to make fullscreen (required to enter fullscreen)
    */
   setFullScreen(status: boolean, element?: TypeHTMLElement): void {
     // If entering fullscreen
-    if (status && element) {
+    if (status) {
+      // If already active or no element to make fullscreen, nothing to do
+      if (this.#fullscreenElement || !element) return;
+
+      const view = this.getMapViewer().getView();
+      const viewState = UIController.#getViewState(view);
+      if (viewState) this.#fullscreenSavedView = { view, ...viewState };
+      this.#fullscreenSettledState = viewState;
+      this.#fullscreenViewChanged = false;
+      this.#fullscreenElement = element;
+
+      // Track view changes and size changes, and listen for the browser leaving fullscreen
+      this.#addFullscreenListeners();
+
       // Request full screen on the element
-      requestFullscreen(element);
+      void requestFullscreen(element).catch((): void => {
+        if (this.#fullscreenElement === element && getFullscreenElement() !== element) this.#handleFullscreenExited();
+      });
+
+      // Save in store
+      setStoreAppFullScreenActive(this.getMapId(), true);
+      return;
     }
 
-    // exit fullscreen
-    if (!status) {
-      // Store the extent before any size changes occur
-      const currentExtent = this.getMapViewer().getView().calculateExtent();
+    // Exiting fullscreen, if not active, nothing to do
+    if (!this.#fullscreenElement) return;
 
-      // Store the extent and other relevant information
-      const handleSizeChange = (): void => {
-        this.getControllersRegistry()
-          .mapController.zoomToExtent(currentExtent, true, { padding: [0, 0, 0, 0] }) // Precise zooming, no default padding to be applied in this case
-          .then(() => {
-            // TODO: CLEANUP - Remove the commented code if it still behaves correctly now, commented on 2026-07-22
-            // Force render
-            // this.getMapViewer().map.renderSync();
-          })
-          .catch((error: unknown) => {
-            logger.logError('Error during zoom after fullscreen exit:', error);
-          });
-      };
-
-      // Add the listener before exiting fullscreen
-      this.getMapViewer().map.once('change:size', handleSizeChange);
+    if (getFullscreenElement() === this.#fullscreenElement) {
+      // Ask the browser to exit, the 'fullscreenchange' handler finishes the exit
       exitFullscreen();
+    } else {
+      // The browser is not in fullscreen on this map (e.g. request rejected), finish the exit now
+      this.#handleFullscreenExited();
     }
-
-    // Save in store
-    setStoreAppFullScreenActive(this.getMapId(), status);
   }
 
   /**
@@ -671,4 +713,148 @@ export class UIController extends AbstractMapViewerController {
   }
 
   // #endregion DOMAIN HANDLERS
+
+  // #region FULLSCREEN
+
+  /**
+   * Handles the browser fullscreen change events while this map is in fullscreen.
+   *
+   * Finishes the exit when the browser is no longer in fullscreen on this map's element (fullscreen button, `Esc` key or API).
+   */
+  #handleFullscreenChanged(): void {
+    // If still in fullscreen on this map's element (e.g. the 'enter' event), nothing to do
+    if (!this.#fullscreenElement || getFullscreenElement() === this.#fullscreenElement) return;
+
+    this.#handleFullscreenExited();
+  }
+
+  /**
+   * Handles the map size changes while in fullscreen.
+   *
+   * OpenLayers resolves the view constraints on size change before this handler runs, so the recorded state
+   * is the view as the resize left it, any later difference comes from a user or programmatic interaction.
+   */
+  #handleFullscreenSizeChanged(): void {
+    this.#fullscreenSettledState = UIController.#getViewState(this.getMapViewer().getView());
+  }
+
+  /**
+   * Handles the map move end while in fullscreen.
+   *
+   * Marks the view as changed when it differs from the state recorded after the last size change. The flag is sticky,
+   * so a later size change (e.g. footer resize) re-recording the settled state cannot hide an earlier interaction.
+   * Size-driven constraint adjustments are not flagged: OpenLayers applies them synchronously on `change:size`,
+   * before the settled state is recorded, while `moveend` only fires after the next render.
+   */
+  #handleFullscreenMoveEnd(): void {
+    if (this.#fullscreenViewChanged) return;
+    const currentState = UIController.#getViewState(this.getMapViewer().getView());
+    if (!UIController.#isSameViewState(currentState, this.#fullscreenSettledState)) this.#fullscreenViewChanged = true;
+  }
+
+  /**
+   * Finishes exiting fullscreen: removes the listeners, restores the saved view when the user did not interact
+   * (otherwise keeps the current center and resolution) and updates the store.
+   */
+  #handleFullscreenExited(): void {
+    // Unregister the listeners
+    this.#removeFullscreenListeners();
+
+    const savedView = this.#fullscreenSavedView;
+    const settledState = this.#fullscreenSettledState;
+    const viewChanged = this.#fullscreenViewChanged;
+    this.#fullscreenElement = undefined;
+    this.#fullscreenSavedView = undefined;
+    this.#fullscreenSettledState = undefined;
+    this.#fullscreenViewChanged = false;
+
+    // Restore the saved view only if the view (and projection) is the same and was not changed while in fullscreen
+    // (the state comparison catches a change made after the last 'moveend', e.g. exiting mid-interaction)
+    const view = this.getMapViewer().getView();
+    const currentState = UIController.#getViewState(view);
+    if (savedView && savedView.view === view && !viewChanged && UIController.#isSameViewState(currentState, settledState)) {
+      view.cancelAnimations();
+      view.setRotation(savedView.rotation);
+      view.setResolution(savedView.resolution);
+      view.setCenter(savedView.center);
+    }
+
+    // Save in store
+    setStoreAppFullScreenActive(this.getMapId(), false);
+  }
+
+  /**
+   * Adds the map size change, map move end and browser fullscreen change listeners used while in fullscreen.
+   */
+  #addFullscreenListeners(): void {
+    const { map } = this.getMapViewer();
+    map.on('change:size', this.#boundedHandleFullscreenSizeChanged);
+    map.on('moveend', this.#boundedHandleFullscreenMoveEnd);
+    UIController.#FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+      document.addEventListener(eventName, this.#boundedHandleFullscreenChanged);
+    });
+  }
+
+  /**
+   * Removes the map size change, map move end and browser fullscreen change listeners used while in fullscreen.
+   */
+  #removeFullscreenListeners(): void {
+    const { map } = this.getMapViewer();
+    map.un('change:size', this.#boundedHandleFullscreenSizeChanged);
+    map.un('moveend', this.#boundedHandleFullscreenMoveEnd);
+    UIController.#FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+      document.removeEventListener(eventName, this.#boundedHandleFullscreenChanged);
+    });
+  }
+
+  /**
+   * Gets the center, resolution and rotation of a view.
+   *
+   * @param view - The OpenLayers view
+   * @returns The view state, or undefined when the view is not fully defined
+   */
+  static #getViewState(view: View): TypeFullscreenViewState | undefined {
+    const center = view.getCenter();
+    const resolution = view.getResolution();
+    if (!center || resolution === undefined) return undefined;
+    return { center: [...center], resolution, rotation: view.getRotation() };
+  }
+
+  /**
+   * Indicates if two view states are the same, within a tolerance for floating point rounding.
+   *
+   * @param stateA - The first view state
+   * @param stateB - The second view state
+   * @returns True when both states are defined and equal
+   */
+  static #isSameViewState(stateA: TypeFullscreenViewState | undefined, stateB: TypeFullscreenViewState | undefined): boolean {
+    if (!stateA || !stateB) return false;
+
+    // Center tolerance is a tiny fraction of a pixel, resolution and rotation tolerances are relative/absolute epsilons
+    const centerTolerance = stateB.resolution * UIController.#FULLSCREEN_VIEW_TOLERANCE;
+    return (
+      Math.abs(stateA.center[0] - stateB.center[0]) <= centerTolerance &&
+      Math.abs(stateA.center[1] - stateB.center[1]) <= centerTolerance &&
+      Math.abs(stateA.resolution - stateB.resolution) <= stateB.resolution * UIController.#FULLSCREEN_VIEW_TOLERANCE &&
+      Math.abs(stateA.rotation - stateB.rotation) <= UIController.#FULLSCREEN_VIEW_TOLERANCE
+    );
+  }
+
+  // #endregion FULLSCREEN
 }
+
+/** The center, resolution and rotation of the map view, saved around fullscreen transitions. */
+type TypeFullscreenViewState = {
+  /** The view center. */
+  center: Coordinate;
+  /** The view resolution. */
+  resolution: number;
+  /** The view rotation in radians. */
+  rotation: number;
+};
+
+/** The view state saved when entering fullscreen, with the view it belongs to (a projection change replaces the view). */
+type TypeFullscreenSavedView = TypeFullscreenViewState & {
+  /** The view the state was read from. */
+  view: View;
+};

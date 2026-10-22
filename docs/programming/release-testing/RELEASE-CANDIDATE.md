@@ -223,6 +223,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed the swiper bar drifting out of alignment with the clipped layer edge on map resize: the bar position is now recomputed from the divider percentage and the `Draggable` is remounted via a resize token only while not dragging (guarded by a dragging ref), so the bar and per-layer clip stay aligned at load and on grow/shrink without ever remounting mid-drag (#3625)
 - Fixed the map hover feature-info query firing when the cursor rests on the swiper bar/handle (the bar overlays the map, so `mapState.hoverFeatureInfo` was populated for the layer beneath it). Stopping DOM pointer propagation on the bar was insufficient because React 17+ delegates events to the root — after OL's viewport listener has already run. The query is now gated at the source: `LayerSetController.#handleMapPointerStopped` calls the new `SwiperController.isPointerOverSwiper(pixel, mapSize)` and clears the hover results (skipping the query) when the pointer is over the swiper. Two tunable bands (`SWIPER_HOVER_SUPPRESS_BAND_BAR` for the thin bar along the whole divider, `SWIPER_HOVER_SUPPRESS_BAND_HANDLE` localized to the centered handle) keep the suppression tight to the bar and generous only around the handle (#3625)
 - Fixed swiper layers not being clipped until every configured layer had loaded — the resolution effect used `Promise.all`, so no clip handlers attached until the slowest layer registered, leaving already-loaded layers rendered in full. Layers are now attached to the swiper **incrementally** (each `waitForLayerRegistered` appends its layer to state as soon as it resolves, with a reconcile that drops de-selected layers without wiping the rest), so each layer is clipped the moment it loads instead of after the whole set (#3625)
+- Fixed the map not returning to its original center and zoom after entering and exiting fullscreen without interaction (most visible on small/square viewers), and the fullscreen button and `Esc` giving different results. Exiting used to refit the fullscreen extent into the smaller viewer (zooming out) and ran twice for the button. `UIController.setFullScreen` now saves the view (center, resolution, rotation) on enter and finishes the exit through a single controller-owned `fullscreenchange` path scoped to the map's own element (button, `Esc` and `mapViewer.setFullscreen` behave the same; other maps on the page are no longer affected). If the view did not change in fullscreen except through resize-driven constraint adjustments, the saved view is restored exactly; otherwise the current center and resolution are kept (no refit). `exitFullscreen()` no longer calls `document.exitFullscreen()` when nothing is fullscreen (#3674)
 
 ## Build & Dependencies
 
@@ -383,10 +384,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 917   |
+| Total tests   | 901    | 919   |
 | Automated (A) | 60     | 62    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 686   |
+| Manual (M)    | 672    | 688   |
 
 ## Notes for Release Notes Author
 

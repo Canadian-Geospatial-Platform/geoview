@@ -38,9 +38,11 @@ Default navbar (when `navBar` is omitted from config): `["zoom", "rotation", "fu
 
 ## Full Screen
 
-| Test              | Description               | Steps                                                                             | Expected Result                                                     | Auto |
-| ----------------- | ------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---- |
-| Fullscreen toggle | Enter and exit fullscreen | 1. On Map 1, click the fullscreen button<br>2. Click again (or press ESC) to exit | Viewer goes fullscreen on first click, exits on second click or ESC | M    |
+| Test                     | Description                              | Steps                                                                                                                                         | Expected Result                                                                                       | Auto |
+| ------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---- |
+| Fullscreen toggle        | Enter and exit fullscreen                | 1. On Map 1, click the fullscreen button<br>2. Click again (or press ESC) to exit                                                             | Viewer goes fullscreen on first click, exits on second click or ESC                                   | M    |
+| Fullscreen view restored | Same view after exit without interaction | 1. On Map 1, note the center and zoom<br>2. Enter fullscreen, do not touch the map, exit with the button<br>3. Repeat step 2 exiting with ESC | Center and zoom are exactly the same as before entering fullscreen, for both the button and ESC exits | M    |
+| Fullscreen view kept     | User changes kept after exit             | 1. On Map 1, enter fullscreen<br>2. Pan and zoom the map<br>3. Exit fullscreen (button or ESC)                                                | The map keeps the center and zoom set in fullscreen (no zoom out to fit the fullscreen extent)        | M    |
 
 ## Basemap Select
 
