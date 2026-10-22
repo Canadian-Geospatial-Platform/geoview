@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useCallback } from 'react';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -8,18 +9,6 @@ import { UseHtmlToReact } from 'geoview-core/core/components/common/hooks/use-ht
 
 import type { StacDateDisplayOptions, StacItem, StacItemViewConfig } from './stac-browser-types';
 import { StacFieldUtils } from './stac-field-utils';
-
-/**
- * Renders URLs in metadata as safe external links while leaving surrounding text escaped by React.
- *
- * @param value - The metadata value to render
- * @param opensInNewTab - Accessible announcement for external links
- * @returns The value with URL segments rendered as links
- */
-function renderMetadataLinks(value: string, opensInNewTab: string): ReactNode {
-  const safeHtml = linkifyAndSanitizeHtml(value, opensInNewTab);
-  return containsHtmlTags(safeHtml) ? <UseHtmlToReact htmlContent={safeHtml} omitWrappers /> : safeHtml;
-}
 
 /** Props for the StacMetadataView component. */
 interface StacMetadataViewProps {
@@ -48,6 +37,20 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
 
   const rows = StacFieldUtils.getMetadataRows(item, itemView, dateDisplay);
 
+  /**
+   * Renders URLs in metadata as safe external links while leaving surrounding text escaped by React.
+   *
+   * @param value - The metadata value to render
+   * @returns The value with URL segments rendered as links
+   */
+  const renderMetadataLinks = useCallback(
+    (value: string): ReactNode => {
+      const safeHtml = linkifyAndSanitizeHtml(value, t('general.opensInNewTab'));
+      return containsHtmlTags(safeHtml) ? <UseHtmlToReact htmlContent={safeHtml} omitWrappers /> : safeHtml;
+    },
+    [t]
+  );
+
   return (
     <Box sx={sxClasses.metadataGrid} component="dl">
       {rows.map((row) => (
@@ -56,7 +59,7 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
             {row.isConfiguredLabel ? t(row.label) : row.label}
           </Typography>
           <Typography component="dd" sx={sxClasses.metadataValue}>
-            {renderMetadataLinks(row.value, t('general.opensInNewTab'))}
+            {renderMetadataLinks(row.value)}
           </Typography>
         </Box>
       ))}

@@ -118,7 +118,7 @@ export class StacBrowserController extends AbstractMapViewerController {
         strokeWidth: 2,
         ...(fillOpacity > 0 ? { fillColor: color, fillOpacity } : {}),
       };
-      const polygons = StacLayerHelper.getGeoJsonPolygons(footprint.geometry);
+      const polygons = GeoUtilities.getGeoJsonPolygons(footprint.geometry);
       if (polygons.length) {
         polygons.forEach((polygon) => geometryApi.addPolygon(polygon, { projection: 4326, style }, undefined, groupId));
         return;

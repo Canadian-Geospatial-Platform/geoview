@@ -16,7 +16,7 @@ import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { getStoreLayerLegendLayers } from '@/core/stores/states/layer-state';
 
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage } from '@/core/utils/utilities';
+import { getLocalizedMessage, loadImage } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
@@ -619,11 +619,8 @@ export class ExportUtilities {
       return Promise.resolve(fallbackHeight);
     }
 
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = imageUrl;
-
-      img.onload = () => {
+    return loadImage(imageUrl)
+      .then((img) => {
         const maxWidth = SHARED_STYLES.wmsImageWidth * scale;
 
         // Calculate final dimensions based on maxWidth constraint (CSS behavior)
@@ -638,19 +635,15 @@ export class ExportUtilities {
 
         // Apply scaled margin to match CSS (wmsMarginBottom must be scaled)
         const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
-        const totalHeight = finalHeight + scaledMargin;
-
-        resolve(totalHeight);
-      };
-
-      // Error fallback: use 100px scaled with margin
-      img.onerror = () => {
+        return finalHeight + scaledMargin;
+      })
+      .catch((error: unknown) => {
+        // Error fallback: use 100px scaled with margin
         const scaledMargin = SHARED_STYLES.wmsMarginBottom * scale;
         const fallbackHeight = 100 * scale + scaledMargin;
-        logger.logError(`WMS Image "${layerName}" failed to load, using fallback: ${Math.round(fallbackHeight)}px`);
-        resolve(fallbackHeight);
-      };
-    });
+        logger.logError(`WMS Image "${layerName}" failed to load, using fallback: ${Math.round(fallbackHeight)}px`, error);
+        return fallbackHeight;
+      });
   }
 
   /**

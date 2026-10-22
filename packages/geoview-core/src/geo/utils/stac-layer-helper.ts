@@ -4,12 +4,13 @@ import { transform as transformCoordinate } from 'ol/proj';
 import type OlProjection from 'ol/proj/Projection';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import ImageCanvas from 'ol/source/ImageCanvas';
-import type { Extent } from 'ol/extent';
+import { boundingExtent, getHeight, getWidth, type Extent } from 'ol/extent';
 import type { Size } from 'ol/size';
 
 import { logger } from '@/core/utils/logger';
-import { extractGeotiffColorMap, type RGBA } from '@/core/utils/utilities';
+import { extractGeotiffColorMap, getGeotiffPaletteStyle, loadImage, type RGBA } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /** Property key used to tag layers added by the STAC browser plugin. */
 const STAC_BROWSER_TAG = 'gv-stac-browser';
@@ -27,32 +28,6 @@ export type TypePoint2D = [number, number];
  */
 export abstract class StacLayerHelper {
   // #region STATIC METHODS
-
-  /**
-   * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
-   *
-   * @param geometry - GeoJSON geometry value
-   * @returns Polygons as arrays of valid rings, in longitude/latitude order
-   */
-  static getGeoJsonPolygons(geometry: unknown): TypePoint2D[][][] {
-    if (!geometry || typeof geometry !== 'object') return [];
-    const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
-
-    if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
-      return geoJson.geometries.flatMap((child) => StacLayerHelper.getGeoJsonPolygons(child));
-    }
-
-    if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
-      const rings = StacLayerHelper.#readRings(geoJson.coordinates);
-      return rings.length ? [rings] : [];
-    }
-
-    if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
-      return geoJson.coordinates.flatMap((polygon) => StacLayerHelper.getGeoJsonPolygons({ type: 'Polygon', coordinates: polygon }));
-    }
-
-    return [];
-  }
 
   /**
    * Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac.
@@ -97,7 +72,7 @@ export abstract class StacLayerHelper {
       const layer = new WebGLTile({ source, opacity });
       layer.set(STAC_BROWSER_TAG, true);
       layer.setZIndex(PREVIEW_ZINDEX);
-      if (palette) StacLayerHelper.#applyPaletteStyle(layer, palette);
+      if (palette) layer.setStyle(getGeotiffPaletteStyle(palette));
       return layer;
     } catch (error: unknown) {
       logger.logError(`StacLayerHelper.createGeoTiffLayer - Failed to create GeoTIFF layer: ${geotiffUrl}`, error);
@@ -117,14 +92,14 @@ export abstract class StacLayerHelper {
    * @returns A promise that resolves with the created image layer after the image loads
    * @throws {Error} When the image fails to load
    */
-  static createImageLayer(
+  static async createImageLayer(
     imageUrl: string,
     bbox: [number, number, number, number],
     opacity?: number,
     geometry?: unknown
   ): Promise<ImageLayer<ImageCanvas>> {
-    const image = new Image();
     // Some browse images do not expose Access-Control-Allow-Origin (e.g. NAPL); this canvas is only drawn for display, never pixel-read.
+    const image = await loadImage(imageUrl);
     const source = new ImageCanvas({
       ratio: 1,
       canvasFunction: (extent, resolution, pixelRatio, size, projection): HTMLCanvasElement =>
@@ -133,64 +108,7 @@ export abstract class StacLayerHelper {
     const layer = new ImageLayer({ source, opacity });
     layer.set(STAC_BROWSER_TAG, true);
     layer.setZIndex(PREVIEW_ZINDEX);
-
-    return new Promise((resolve, reject) => {
-      image.onload = (): void => {
-        image.onload = null;
-        image.onerror = null;
-        source.changed();
-        resolve(layer);
-      };
-      image.onerror = (): void => {
-        image.onload = null;
-        image.onerror = null;
-        reject(new Error(`StacLayerHelper.createImageLayer - Failed to load image: ${imageUrl}`));
-      };
-      image.src = imageUrl;
-    });
-  }
-
-  /**
-   * Reads the valid rings of GeoJSON Polygon coordinates.
-   *
-   * @param coordinates - GeoJSON Polygon coordinates
-   * @returns Rings with at least four valid coordinates
-   */
-  static #readRings(coordinates: unknown[]): TypePoint2D[][] {
-    return coordinates.flatMap((ring) => {
-      if (!Array.isArray(ring)) return [];
-      const points = ring.filter(
-        (coordinate): coordinate is TypePoint2D =>
-          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
-      );
-      return points.length >= 4 ? [points] : [];
-    });
-  }
-
-  /**
-   * Gets the projected extent that contains all footprint ring coordinates.
-   *
-   * @param rings - Projected footprint rings
-   * @returns The projected extent, or undefined when no finite area is available
-   */
-  static #getProjectedFootprintExtent(rings: TypePoint2D[][]): Extent | undefined {
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-
-    rings.forEach((ring) => {
-      ring.forEach(([x, y]) => {
-        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x);
-        maxY = Math.max(maxY, y);
-      });
-    });
-
-    if (![minX, minY, maxX, maxY].every(Number.isFinite) || minX === maxX || minY === maxY) return undefined;
-    return [minX, minY, maxX, maxY];
+    return layer;
   }
 
   /**
@@ -245,7 +163,7 @@ export abstract class StacLayerHelper {
     canvas.height = Math.round(size[1] * pixelRatio);
     if (!image.complete || image.naturalWidth === 0 || image.naturalHeight === 0 || resolution <= 0) return canvas;
 
-    const rings = StacLayerHelper.getGeoJsonPolygons(geometry).flat();
+    const rings = GeoUtilities.getGeoJsonPolygons(geometry).flat();
     const fallbackRing: TypePoint2D[] = [
       [bbox[0], bbox[3]],
       [bbox[0], bbox[1]],
@@ -259,8 +177,9 @@ export abstract class StacLayerHelper {
       .filter((ring) => ring.length >= 4 && ring.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y)));
     if (!projectedRings.length) return canvas;
 
-    const footprintExtent = StacLayerHelper.#getProjectedFootprintExtent(projectedRings);
-    if (!footprintExtent) return canvas;
+    // Projected rings already contain only finite coordinates, so only a zero-area extent is rejected
+    const footprintExtent = boundingExtent(projectedRings.flat());
+    if (getWidth(footprintExtent) <= 0 || getHeight(footprintExtent) <= 0) return canvas;
 
     const context = canvas.getContext('2d');
     if (!context) return canvas;
@@ -287,21 +206,6 @@ export abstract class StacLayerHelper {
     context.drawImage(image, 0, 0);
     context.setTransform(1, 0, 0, 1, 0, 0);
     return canvas;
-  }
-
-  /**
-   * Applies an embedded color palette as a WebGLTile style.
-   *
-   * @param layer - The WebGLTile layer
-   * @param palette - Array of RGBA color tuples from the GeoTIFF color map
-   */
-  static #applyPaletteStyle(layer: WebGLTile, palette: RGBA[]): void {
-    const adjustedPalette = [...palette];
-    adjustedPalette[0] = [0, 0, 0, 0];
-    const colorStrings = adjustedPalette.map(([r, g, b, a]) => `rgba(${r},${g},${b},${a / 255})`);
-    layer.setStyle({
-      color: ['palette', ['band', 1], colorStrings],
-    });
   }
 
   // #endregion STATIC METHODS

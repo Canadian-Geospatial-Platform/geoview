@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
 import linkifyHtml from 'linkify-html';
 import { fromUrl } from 'geotiff';
+import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
@@ -771,6 +772,25 @@ export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | unde
 }
 
 /**
+ * Builds a WebGLTile style that renders band 1 through an embedded GeoTIFF color palette.
+ *
+ * The nodata index (0) is made fully transparent so that pixels outside the data extent do not render as a solid color.
+ *
+ * @param palette - Array of RGBA color tuples from the GeoTIFF color map
+ * @returns The WebGLTile style using the OpenLayers palette expression
+ */
+export function getGeotiffPaletteStyle(palette: RGBA[]): WebGLTileStyle {
+  // Make nodata index (0) fully transparent
+  const adjustedPalette = [...palette];
+  adjustedPalette[0] = [0, 0, 0, 0];
+
+  // Convert RGBA tuples to CSS color strings as expected by the OpenLayers palette expression
+  const colorStrings = adjustedPalette.map(([r, g, b, a]) => `rgba(${r},${g},${b},${a / 255})`);
+
+  return { color: ['palette', ['band', 1], colorStrings] };
+}
+
+/**
  * Set alpha for a color.
  *
  * @param colorArray - The array of color numbers
@@ -1295,6 +1315,31 @@ export function isImage(item: string): boolean {
   const isKnownImageEndpoint = IMAGE_VALIDATION_PATTERNS.KNOWN_ENDPOINT.test(item);
 
   return hasImageExtension || isDataUrl || isKnownImageEndpoint;
+}
+
+/**
+ * Loads an image from a URL or a data URL.
+ *
+ * @param src - The image URL or data URL
+ * @returns A promise that resolves with the loaded image
+ * @throws {Error} When the image fails to load
+ */
+export function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = (): void => {
+      image.onload = null;
+      image.onerror = null;
+      resolve(image);
+    };
+    image.onerror = (): void => {
+      image.onload = null;
+      image.onerror = null;
+      // Data URLs can be very long, so they are not included in the message
+      reject(new Error(`Failed to load image: ${src.startsWith('data:') ? 'data URL' : src}`));
+    };
+    image.src = src;
+  });
 }
 
 /**

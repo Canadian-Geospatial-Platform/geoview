@@ -45,39 +45,6 @@ const SELECTED_FOOTPRINT_GROUP = 'stac-selected-footprints';
 /** Z-index of the selected footprints, above the other footprints (9999) and below the previews (10002). */
 const SELECTED_FOOTPRINT_ZINDEX = 10001;
 
-/**
- * Gets the overlay id of an item map preview.
- *
- * @param itemKey - The stable item identity
- * @returns The overlay id
- */
-function getPreviewOverlayId(itemKey: string): string {
-  return `stac-preview-${itemKey}`;
-}
-
-/**
- * Gets the default values shown in the search form.
- *
- * @param config - The plugin configuration
- * @returns The initial search-form state
- */
-function getDefaultFilterPanelState(config: StacBrowserConfig): StacFilterPanelState {
-  const datetime = config.defaults?.datetime?.split('/') ?? [];
-  const getDate = (value: string | undefined): string => (value && value !== '..' ? value.substring(0, 10) : '');
-
-  return {
-    selectedCollections: config.defaults?.collections ?? [],
-    useMapExtent: config.filters?.spatial !== false && (config.defaults?.useMapExtent ?? false),
-    containedInExtent: config.defaults?.containedInExtent ?? false,
-    startDate: getDate(datetime[0]),
-    endDate: getDate(datetime[1]),
-    keyword: '',
-    propertyFilters: {},
-    sortField: config.defaults?.sortBy?.[0]?.field ?? 'datetime',
-    sortDirection: config.defaults?.sortBy?.[0]?.direction ?? 'desc',
-  };
-}
-
 /** Props for the StacBrowser component. */
 interface StacBrowserProps {
   /** Plugin configuration. */
@@ -128,7 +95,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   /** Visible map extent captured at search submission, preserved while paging and inspecting items. */
   const [searchMapExtent, setSearchMapExtent] = useState<TypeStacMapExtentSnapshot | undefined>(undefined);
   /** Search form values are lifted here so navigation back from results preserves them. */
-  const [filterPanelState, setFilterPanelState] = useState<StacFilterPanelState>(() => getDefaultFilterPanelState(config));
+  const [filterPanelState, setFilterPanelState] = useState<StacFilterPanelState>(() => StacConfigUtils.getDefaultFilterPanelState(config));
   const [isLoading, setIsLoading] = useState(false);
   const [nextPageLink, setNextPageLink] = useState<StacLink | undefined>(undefined);
   const [prevPageLink, setPrevPageLink] = useState<StacLink | undefined>(undefined);
@@ -323,7 +290,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    */
   const hidePreview = useCallback(
     (itemKey: string): void => {
-      stacController.removeOverlay(getPreviewOverlayId(itemKey));
+      stacController.removeOverlay(StacConfigUtils.getPreviewOverlayId(itemKey));
       setPreviewedHrefs((prev) => {
         const next = { ...prev };
         delete next[itemKey];
@@ -345,7 +312,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       hidePreview(itemKey);
       const { preview } = StacConfigUtils.resolveItemDisplayOptions(memoDisplay, item.collection);
       stacController
-        .addPreviewOverlay(getPreviewOverlayId(itemKey), previewAsset, preview?.opacity, item.bbox, item.geometry)
+        .addPreviewOverlay(StacConfigUtils.getPreviewOverlayId(itemKey), previewAsset, preview?.opacity, item.bbox, item.geometry)
         .then((isAdded) => {
           if (isAdded) setPreviewedHrefs((prev) => ({ ...prev, [itemKey]: previewAsset.href }));
         })
@@ -598,7 +565,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles resetting the search form to configured defaults.
    */
   const handleClearFilters = useCallback((): void => {
-    setFilterPanelState(getDefaultFilterPanelState(config));
+    setFilterPanelState(StacConfigUtils.getDefaultFilterPanelState(config));
     setSearchResult(undefined);
   }, [config]);
 
@@ -701,7 +668,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles clearing every item selection and map preview.
    */
   const handleClearSelection = useCallback((): void => {
-    Object.keys(previewedHrefs).forEach((itemKey) => stacController.removeOverlay(getPreviewOverlayId(itemKey)));
+    Object.keys(previewedHrefs).forEach((itemKey) => stacController.removeOverlay(StacConfigUtils.getPreviewOverlayId(itemKey)));
     // The Clear button disappears with the selection bar
     isViewFocusRequestedRef.current = true;
     setPreviewedHrefs({});
