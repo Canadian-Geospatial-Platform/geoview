@@ -46,7 +46,8 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
   const renderMetadataLinks = useCallback(
     (value: string): ReactNode => {
       const safeHtml = linkifyAndSanitizeHtml(value, t('general.opensInNewTab'));
-      return containsHtmlTags(safeHtml) ? <UseHtmlToReact htmlContent={safeHtml} omitWrappers /> : safeHtml;
+      // Sanitized text is HTML-escaped, so plain values are returned as-is for React to escape once
+      return containsHtmlTags(safeHtml) ? <UseHtmlToReact htmlContent={safeHtml} omitWrappers /> : value;
     },
     [t]
   );

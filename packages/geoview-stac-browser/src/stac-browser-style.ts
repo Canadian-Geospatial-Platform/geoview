@@ -425,15 +425,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   itemCardActions: {
     display: 'flex',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: theme.spacing(0.25, 0.5),
     '& .MuiButton-root': {
       fontSize: theme.palette.geoViewFontSize?.sm,
       minWidth: 0,
       padding: theme.spacing(0.25, 0.75),
     },
-  },
-  itemActionActive: {
-    backgroundColor: theme.palette.action.selected,
   },
   selectionBar: {
     display: 'flex',

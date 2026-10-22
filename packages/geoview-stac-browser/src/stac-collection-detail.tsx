@@ -293,7 +293,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       <Box sx={memoSxClasses.detailSection}>
         <Typography component="h4" sx={memoSxClasses.itemsSectionTitle}>
           {t('stacBrowser.items')}
-          {numberMatched !== undefined ? ` (${numberMatched.toLocaleString()})` : ''}
+          {numberMatched !== undefined ? ` (${numberMatched.toLocaleString(display.dateDisplay.language)})` : ''}
         </Typography>
 
         <Box role="status" aria-live="polite">

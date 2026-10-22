@@ -45,9 +45,9 @@ The checklist counts release executions rather than unique test methods. `suite-
 | 10  | `suite-details`                          | 6       | [ ] Pass |
 | 11  | `suite-data-table`                       | 13      | [ ] Pass |
 | 12  | `suite-geochart`                         | 2       | [ ] Pass |
-| 13  | `suite-swiper`                           | 6       | [ ] Pass |
+| 13  | `suite-swiper`                           | 7       | [ ] Pass |
 | 14  | `suite-time-slider`                      | 3       | [ ] Pass |
-|     | **Total**                                | **313** |          |
+|     | **Total**                                | **314** |          |
 
 ## What to Do if a Suite Fails
 
