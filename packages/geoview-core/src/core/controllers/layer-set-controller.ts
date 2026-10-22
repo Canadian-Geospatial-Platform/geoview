@@ -7,6 +7,7 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -485,8 +486,6 @@ export class LayerSetController extends AbstractMapViewerController {
     const controls: TypeLayerControls = this.#buildLegendLayerControls(layerConfig, isChild);
 
     // Get the visibility flag, use the gv layer if we can, or use the initial settings of the config or default true if none are specified
-    // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
-    // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
     const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
 
     // Compute effective layer scales to get the in visible range flag
@@ -551,11 +550,11 @@ export class LayerSetController extends AbstractMapViewerController {
       if (layer instanceof AbstractGVVector) {
         legendLayerEntry.hasText = !!layer.getTextOLLayer();
         legendLayerEntry.textVisible = layer.getTextVisible();
+        legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
       }
 
       // If the layer is GVEsriImage
       if (layer instanceof GVEsriImage) {
-        // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
         legendLayerEntry.rasterFunction = layer.getRasterFunction();
         legendLayerEntry.rasterFunctionInfos = layer.getMetadataRasterFunctionInfos();
         legendLayerEntry.mosaicRule = layer.getMosaicRule();
@@ -566,12 +565,9 @@ export class LayerSetController extends AbstractMapViewerController {
       // If the layer is WMS
       if (layer instanceof GVWMS) {
         legendLayerEntry.wmsStyle = layer.getWmsStyle();
+        legendLayerEntry.vectorTimeField = layer.getLayerConfig().getVectorTimeField();
+        legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
       }
-    }
-
-    // If the layer config is WMS
-    if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-      legendLayerEntry.wmsStyles = layerConfig.getStylesMetadata();
     }
 
     // If layer config is OGC
@@ -581,6 +577,24 @@ export class LayerSetController extends AbstractMapViewerController {
       layerConfig instanceof OgcWmtsLayerEntryConfig
     ) {
       legendLayerEntry.ogcVersion = layerConfig.getVersion(); // Don't use getVersionOrDefault() here - we want the truth
+    }
+
+    // If the layer config is WMS
+    if (layerConfig instanceof OgcWmsLayerEntryConfig) {
+      legendLayerEntry.wmsStyles = layerConfig.getStylesMetadata();
+      legendLayerEntry.vectorStructureFullUrl =
+        layerConfig.getWfsLayerConfig?.()?.getDescribeFeatureTypeFullUrl() ??
+        layerConfig.getOGCApiFeaturesLayerConfig?.()?.getQueryablesFullUrl();
+    }
+
+    // If the layer config is WFS
+    if (layerConfig instanceof OgcWfsLayerEntryConfig) {
+      legendLayerEntry.vectorStructureFullUrl = layerConfig.getDescribeFeatureTypeFullUrl();
+    }
+
+    // If the layer config is OGC Feature API
+    if (layerConfig instanceof OgcFeatureLayerEntryConfig) {
+      legendLayerEntry.vectorStructureFullUrl = layerConfig.getQueryablesFullUrl();
     }
 
     // If non existing in the store yet

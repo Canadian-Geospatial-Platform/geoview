@@ -45,6 +45,7 @@ import {
   useStoreLayerDisplayDateTimezone,
   useStoreLayerFilterClass,
   useStoreLayerName,
+  useStoreLayerVectorTimeField,
 } from '@/core/stores/states/layer-state';
 import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
@@ -55,7 +56,7 @@ import linkifyHtml from 'linkify-html';
 import { isImage, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
-import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -102,6 +103,14 @@ const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null 
 
 /** Checks if a value is a date range tuple containing at least one Dayjs element. */
 const isDateRange = (v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && (v as unknown[]).some(isDayjs);
+
+/** Checks whether a numeric filter bound is finite and does not lose whole-number precision. */
+const isNumericFilterBoundValid = (value: unknown): boolean => {
+  if (value === undefined || value === null || String(value).trim() === '') return true;
+
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && (!Number.isInteger(numericValue) || Number.isSafeInteger(numericValue));
+};
 
 /** Linkify configuration options for URL detection and formatting. */
 const linkifyOptions = {
@@ -259,6 +268,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
   const layerName = useStoreLayerName(layerPath);
+  const vectorTimeField = useStoreLayerVectorTimeField(layerPath);
   const dataTableController = useDataTableController();
   const layerController = useLayerController();
   const uiController = useUIController();
@@ -719,6 +729,42 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
   );
 
   /**
+   * Checks whether a feature already provides an extent for map zooming.
+   *
+   * @param feature - Feature to inspect
+   * @returns Whether the feature has an extent
+   */
+  const featureHasExtent = useCallback((feature: TypeFeatureInfoEntry): boolean => {
+    return !!feature.extent;
+  }, []);
+
+  /**
+   * Finds the feature attribute marked as its OID field.
+   *
+   * @param feature - Feature whose field metadata is inspected
+   * @returns The OID field name, or undefined when no OID field is present
+   */
+  const featureOidFieldName = useCallback((feature: TypeFeatureInfoEntry): string | undefined => {
+    if (feature.fieldInfo) {
+      return Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+    }
+    return undefined;
+  }, []);
+
+  /**
+   * Checks whether a feature can be zoomed to using its extent or OID field.
+   *
+   * @param feature - Feature to inspect
+   * @returns Whether the feature has an extent or an OID field for extent retrieval
+   */
+  const isFeatureZoomable = useCallback(
+    (feature: TypeFeatureInfoEntry): boolean => {
+      return featureHasExtent(feature) || !!featureOidFieldName(feature);
+    },
+    [featureHasExtent, featureOidFieldName]
+  );
+
+  /**
    * Zooms to a feature on the map.
    *
    * @param feature - The feature to zoom to
@@ -726,19 +772,21 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
    */
   const zoomToFeature = useCallback(
     async (feature: TypeFeatureInfoEntry): Promise<void> => {
-      let { extent } = feature;
-
-      // Get oid field
-      let oidField: string | undefined;
-      if (feature && feature.fieldInfo) {
-        oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      // Get the extent if any
+      let extent;
+      if (featureHasExtent(feature)) {
+        // eslint-disable-next-line prefer-destructuring
+        extent = feature.extent;
       }
 
+      // Get oid field name if any
+      const oidFieldName = featureOidFieldName(feature);
+
       // If there is no extent, but there's an OID field (ESRI Dynamic layer / WMS with associated WFS) ?
-      if (!extent && oidField) {
+      if (!extent && oidFieldName) {
         try {
           // Get the feature extent using its oid field
-          extent = await layerController.getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
+          extent = await layerController.getExtentFromFeatures(layerPath, [feature.fieldInfo[oidFieldName]!.value as number], oidFieldName);
         } catch (error: unknown) {
           // Log error
           logger.logError(error);
@@ -757,7 +805,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [layerPath, layerController]
+    [layerPath, featureHasExtent, featureOidFieldName, layerController]
   );
 
   /**
@@ -799,11 +847,20 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoFilteredFeatures', data.features);
 
-    // In addition, filter on the class renderer filters and the time slider filter
-    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
+    // Gather the available field names and date fields from the feature
+    const featureFieldInfo: Partial<Record<string, TypeFieldEntry>> = data.features?.[0]?.fieldInfo ?? {};
+    const dateFieldNames = Object.entries(featureFieldInfo)
+      .filter(([, fieldInfo]) => fieldInfo?.dataType === 'date')
+      .map(([fieldName]) => fieldName);
 
     // Create the filter equation equivalent of the combined filter
-    const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
+    const layerFilterEquation = LayerFilters.createClientFilterEquation(
+      layerClassFilter,
+      layerTimeFilter,
+      layerFilterPanelFilterExpression,
+      vectorTimeField,
+      dateFieldNames
+    );
 
     // Filter each features
     return (
@@ -811,7 +868,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? []
     );
-  }, [data.features, layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
+  }, [data.features, layerClassFilter, layerTimeFilter, vectorTimeField, layerFilterPanelFilterExpression]);
 
   /**
    * Updates filtered features ref for handler access.
@@ -843,6 +900,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         </Box>
       );
 
+      // Can zoom on the feature if it has the geometry or it has an oid field key which we can query, on-the-fly, the service
+      const canZoom = isFeatureZoomable(feature);
+
       const featureInfo: DataTableRow = {
         gvFeature: feature,
         ICON: icon,
@@ -856,7 +916,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
             tooltipPlacement="top"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
             onClick={handleZoomClickWrapper}
-            disabled={!feature.supportZoomTo}
+            disabled={!canZoom}
           >
             <ZoomInSearchIcon />
           </IconButton>
@@ -880,7 +940,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
 
       return featureInfo;
     });
-  }, [memoFilteredFeatures, mapId, containerType, t, handleZoomClickWrapper, handleDetailsClickWrapper, memoSxClasses]);
+  }, [memoFilteredFeatures, mapId, containerType, t, isFeatureZoomable, handleZoomClickWrapper, handleDetailsClickWrapper, memoSxClasses]);
 
   // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
@@ -1110,8 +1170,16 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
       sx: memoSxClasses.tableHead,
     },
     defaultColumn: {
-      muiFilterTextFieldProps: {
-        sx: memoSxClasses.filterTextField,
+      muiFilterTextFieldProps: ({ column, rangeFilterIndex }) => {
+        const filterValue = column.getFilterValue();
+        const boundValue = Array.isArray(filterValue) ? filterValue[rangeFilterIndex ?? 0] : filterValue;
+        const isInvalidNumericFilter = isColumnFilterNumeric(column.id) && !isNumericFilterBoundValid(boundValue);
+
+        return {
+          sx: memoSxClasses.filterTextField,
+          error: isInvalidNumericFilter,
+          helperText: isInvalidNumericFilter ? t('dataTable.invalidNumericFilter') : undefined,
+        };
       },
     },
     // override z-index of table when table is in fullscreen mode
@@ -1191,8 +1259,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
           const [start, end] = value;
 
           // Convert the dates as read to UTC ISO strings, that's the core standard
-          const startDate = start?.isValid() ? start.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
-          const endDate = end?.isValid() ? end.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+          const startDate = isDayjs(start) && start.isValid() ? start.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+          const endDate = isDayjs(end) && end.isValid() ? end.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
 
           const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
 
@@ -1214,12 +1282,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
          * ------------------------- */
         if (Array.isArray(value) && isColumnFilterNumeric(filterId)) {
           const [minRaw, maxRaw] = value;
-          const min = minRaw === '' || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
-          const max = maxRaw === '' || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
+          if (!isNumericFilterBoundValid(minRaw) || !isNumericFilterBoundValid(maxRaw)) return '';
 
-          if ((min !== undefined && Number.isNaN(min)) || (max !== undefined && Number.isNaN(max))) {
-            return '';
-          }
+          const min = minRaw === undefined || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
+          const max = maxRaw === undefined || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
 
           const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
 
@@ -1261,7 +1327,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
          * ------------------------- */
         if (isColumnFilterNumeric(filterId)) {
           const num = Number(value);
-          if (Number.isNaN(num)) return '';
+          if (!Number.isFinite(num) || !isNumericFilterBoundValid(value)) return '';
           return `${filterId} ${NUMBER_FILTER[filterFn ?? 'equals']} ${num}`;
         }
 

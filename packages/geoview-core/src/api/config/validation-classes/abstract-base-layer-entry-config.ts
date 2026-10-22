@@ -261,7 +261,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       normalizedMetadata[simplifiedType as TypeStyleGeometry] = styleConfig;
     });
 
-    this.#layerStyle = deepMerge(normalizedMetadata, this.#layerStyle);
+    // Set the layer style
+    this.setLayerStyle(deepMerge(normalizedMetadata, this.#layerStyle));
   }
 
   /**
@@ -712,6 +713,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // Return it
     return outfieldOID;
+  }
+
+  /**
+   * Gets the outfields representing date fields.
+   *
+   * @returns The outfields representing date fields, or an empty array if none are found
+   */
+  getOutfieldsDate(): TypeOutfields[] {
+    return this.getOutfields()?.filter((outfield) => outfield.type === 'date') ?? [];
   }
 
   /**

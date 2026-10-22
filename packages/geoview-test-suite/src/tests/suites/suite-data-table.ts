@@ -96,7 +96,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Sequential — tests interact with shared data table state
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
-    await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 598);
+    await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 600);
     await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable(DataTableTester.GEOPACKAGE_EMPTY_FIELD_LAYER_PATH);
     await this.#dataTableTester.testMapFilteredRecordDefault(DataTableTester.GEOJSON_LAYER_PATH);

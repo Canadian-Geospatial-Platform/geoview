@@ -1,4 +1,9 @@
-﻿import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC } from '@/api/types/layer-schema-types';
+﻿import type {
+  ConfigClassOrType,
+  TypeGeoviewLayerConfig,
+  TypeLayerMetadataOGC,
+  TypeMetadataOGCFeature,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -7,6 +12,9 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
+  /** The Queryables full URL that was used for the layer, if any */
+  #queryablesFullUrl?: string;
+
   /**
    * Creates an instance of OgcFeatureLayerEntryConfig.
    *
@@ -28,6 +36,15 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
+   * Overrides the parent class's getter to provide strongly-typed OGC API Features service metadata.
+   *
+   * @returns The service metadata, or undefined if it has not been set
+   */
+  override getServiceMetadata(): TypeMetadataOGCFeature | undefined {
+    return super.getServiceMetadata() as TypeMetadataOGCFeature | undefined;
+  }
+
+  /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
    * @returns The strongly-typed layer metadata specific to this layer entry config
@@ -37,6 +54,30 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Gets the full Queryables URL used for the layer, if available.
+   *
+   * @returns The Queryables URL, or undefined if none has been set
+   */
+  getQueryablesFullUrl(): string | undefined {
+    return this.#queryablesFullUrl;
+  }
+
+  /**
+   * Sets the full Queryables URL used for the layer.
+   *
+   * @param queryablesFullUrl - The Queryables URL to store
+   */
+  setQueryablesFullUrl(queryablesFullUrl: string): void {
+    this.#queryablesFullUrl = queryablesFullUrl;
+  }
+
+  // #endregion METHODS
+
+  // #region STATIC METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object) represents an OGC Feature layer type.
@@ -50,4 +91,6 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
   }
+
+  // #endregion STATIC METHODS
 }

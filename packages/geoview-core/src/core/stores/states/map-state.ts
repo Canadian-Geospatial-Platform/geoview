@@ -748,6 +748,11 @@ export const getStoreMapHighlightedFeaturesByUid = (mapId: string, featureUid: s
   return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid === featureUid);
 };
 
+/** Returns highlighted features not matching the given feature UID. */
+export const getStoreMapHighlightedFeaturesExcludingUid = (mapId: string, featureUid: string | undefined): TypeFeatureInfoEntry[] => {
+  return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid !== featureUid);
+};
+
 /** Returns the current map extent in the map's projection, or undefined if not yet set. */
 export const getStoreMapExtent = (mapId: string): Extent | undefined => getStoreMapState(mapId).mapExtent;
 

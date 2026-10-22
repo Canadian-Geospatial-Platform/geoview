@@ -1531,6 +1531,9 @@ export const useStoreLayerUrl = createLayerSelectorHook('url');
 /** Hook that returns the layer name for a specific layer. */
 export const useStoreLayerName = createLayerSelectorHook('layerName');
 
+/** Hook that returns the vector time field for a specific layer with temporal data associated with a WMS layer. */
+export const useStoreLayerVectorTimeField = createLayerSelectorHook('vectorTimeField');
+
 /**
  * Hook that returns a record of layer names for all layers.
  *
@@ -1771,6 +1774,32 @@ export const useStoreLayerStyleSettings = (layerPath: string): string[] => {
     }
 
     return settings;
+  });
+};
+
+/**
+ * Selects the URL used to retrieve a layer's vector structure.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The vector structure URL, or undefined if the layer or URL is unavailable
+ */
+export const useStoreLayerVectorStructureFullUrl = (layerPath: string | undefined): string | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.vectorStructureFullUrl;
+  });
+};
+
+/**
+ * Selects the WMS GetStyles request URL recorded for a layer.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The WMS GetStyles URL, or undefined if the layer or URL is unavailable
+ */
+export const useStoreLayerWMSGetStylesFullUrl = (layerPath: string | undefined): string | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.wmsGetStylesFullUrl;
   });
 };
 

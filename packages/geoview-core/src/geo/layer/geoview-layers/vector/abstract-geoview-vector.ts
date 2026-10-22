@@ -1,24 +1,24 @@
 import type Feature from 'ol/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { all, bbox } from 'ol/loadingstrategy';
+import { all, bbox as vectorBbox } from 'ol/loadingstrategy';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 import type { ReadOptions } from 'ol/format/Feature';
 
 import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypePostSettings } from '@/api/types/layer-schema-types';
+import type { TypeBaseVectorSourceInitialPostQuery } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError } from '@/core/exceptions/core-exceptions';
+import { formatError, InvalidDateError } from '@/core/exceptions/core-exceptions';
 import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { EMPTY_FETCH_RESULT, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 
 /**
  * The AbstractGeoViewVector class.
@@ -94,7 +94,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? bbox : all;
+    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? vectorBbox : all;
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
@@ -123,10 +123,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
 
           // Normalize the date fields
-          AbstractGeoViewVector.#normalizeDateFields(features, layerConfig);
+          AbstractGeoViewVector.#normalizeDateFields(featuresFiltered, layerConfig);
 
           // If the strategy is 'bbox'
-          if (sourceOptions.strategy === bbox) {
+          if (sourceOptions.strategy === vectorBbox) {
             // Clear the previously fetched features or they'll get stacked up.
             // GV Do this right before readding features so that the features flicker as less as possible on the map
             vectorSource.clear(true);
@@ -176,23 +176,47 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // #region STATIC METHODS
 
   /**
-   * Fetches text data from the given URL using settings defined in the vector source configuration.
+   * Fetches json data from the given URL using settings defined in the vector source configuration.
    *
-   * Supports both GET and POST requests depending on the presence of `postSettings`.
+   * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
    *
    * @param url - The URL to fetch data from
-   * @param postSettings - Optional POST settings from the layer config
-   * @returns A promise that resolves to the fetched text response
+   * @param initialPostQuery - Optional POST settings when querying via POST method
+   * @returns A promise that resolves to the fetched JSON response
    */
-  static fetchText(url: string, postSettings?: TypePostSettings): Promise<string> {
+  static fetchJson(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<unknown> {
     // Default to a GET request
     const fetchOptions: RequestInit = { method: 'GET' };
 
-    // If postSettings are defined, switch to POST and include headers and body
-    if (postSettings) {
+    // If initialPostQuery is defined, switch to POST and include headers and body
+    if (initialPostQuery) {
       fetchOptions.method = 'POST';
-      fetchOptions.headers = postSettings.header;
-      fetchOptions.body = JSON.stringify(postSettings.data);
+      fetchOptions.headers = initialPostQuery.header;
+      fetchOptions.body = JSON.stringify(initialPostQuery.data);
+    }
+
+    // Execute the fetch using the provided options and return the response text
+    return Fetch.fetchJson(url, fetchOptions);
+  }
+
+  /**
+   * Fetches text data from the given URL using settings defined in the vector source configuration.
+   *
+   * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
+   *
+   * @param url - The URL to fetch data from
+   * @param initialPostQuery - Optional POST settings when querying via POST method
+   * @returns A promise that resolves to the fetched text response
+   */
+  static fetchText(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<string> {
+    // Default to a GET request
+    const fetchOptions: RequestInit = { method: 'GET' };
+
+    // If initialPostQuery is defined, switch to POST and include headers and body
+    if (initialPostQuery) {
+      fetchOptions.method = 'POST';
+      fetchOptions.headers = initialPostQuery.header;
+      fetchOptions.body = JSON.stringify(initialPostQuery.data);
     }
 
     // Execute the fetch using the provided options and return the response text
@@ -216,30 +240,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     } catch (error: unknown) {
       throw new LayerSourceFailedToLoadError(layerConfig.getLayerNameCascade(), formatError(error));
     }
-  }
-
-  /**
-   * Fetches json data from the given URL using settings defined in the vector source configuration.
-   *
-   * Supports both GET and POST requests depending on the presence of `postSettings`.
-   *
-   * @param url - The URL to fetch data from
-   * @param postSettings - Optional POST settings from the layer config
-   * @returns A promise that resolves to the fetched JSON response
-   */
-  static fetchJson(url: string, postSettings?: TypePostSettings): Promise<unknown> {
-    // Default to a GET request
-    const fetchOptions: RequestInit = { method: 'GET' };
-
-    // If postSettings are defined, switch to POST and include headers and body
-    if (postSettings) {
-      fetchOptions.method = 'POST';
-      fetchOptions.headers = postSettings.header;
-      fetchOptions.body = JSON.stringify(postSettings.data);
-    }
-
-    // Execute the fetch using the provided options and return the response text
-    return Fetch.fetchJson(url, fetchOptions);
   }
 
   /**
@@ -297,6 +297,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerConfig.initQueryableSource(outfields.length > 0);
   }
 
+  // #endregion STATIC METHODS
+
+  // #region STATIC PRIVATE METHODS
+
   /**
    * Processes metadata for a set of features by assigning unique IDs and initializing feature info configuration if needed.
    *
@@ -334,27 +338,76 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param layerConfig - The layer configuration containing metadata about the date fields.
    */
   static #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
-    // Get all fields declared as type 'date' in the feature info config
-    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
-    if (!dateFields?.length) return;
+    // The outfields identify which feature properties have date metadata.
+    const outfields = layerConfig.getOutfields();
+    if (!outfields) return;
 
-    // Iterate over each feature to normalize its date fields
-    features.forEach((feature) => {
-      dateFields.forEach((field) => {
-        // Read the value
-        const value = feature.get(field.name);
+    // Leave non-date fields untouched; only date-typed fields need timestamp normalization.
+    const dateFields = outfields.filter((field) => field.type === 'date');
+    if (!dateFields.length) return;
 
-        // If the value is defined and not null
-        if (value && value !== null) {
-          feature.set(
-            field.name,
-            DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone()),
-            true
-          );
+    // Stage each field separately so conversion is committed only if all its values are valid.
+    dateFields.forEach((field) => {
+      // Retain source values for the string fallback and timestamps for a possible commit.
+      const originalValues: { feature: Feature; value: DateLike | null | undefined }[] = [];
+      const normalizedValues: (number | undefined)[] = [];
+      let hasInvalidDate = false;
+      let invalidDateValue: DateLike | null | undefined;
+
+      // Stop scanning this field at the first invalid date; later features need no date parsing.
+      for (const feature of features) {
+        // Unwrap GML temporal values before validating or storing the original value.
+        const value = GeoUtilities.readFeatureField(feature, field.name) as DateLike | null | undefined;
+
+        // Keep the feature paired with its source value for the fallback path.
+        originalValues.push({ feature, value });
+
+        // Empty values remain empty and do not count as invalid dates.
+        if (value === undefined || value === null || value === '') {
+          normalizedValues.push(undefined);
+        } else {
+          try {
+            // Attempt to convert the value to a millisecond timestamp
+            normalizedValues.push(
+              DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone())
+            );
+          } catch (error: unknown) {
+            if (!(error instanceof InvalidDateError)) throw error;
+            hasInvalidDate = true;
+            invalidDateValue = value;
+            normalizedValues.push(undefined);
+            // The staged values are sufficient for fallback; don't inspect remaining features.
+            break;
+          }
         }
+      }
+
+      // One invalid value makes the field non-date, so discard staged timestamps and keep visited values as text.
+      if (hasInvalidDate) {
+        // Log warning
+        logger.logWarning(
+          `Invalid date detected '${String(invalidDateValue)}' in field '${field.name}'. Downgrading field type to 'string'.`
+        );
+
+        // eslint-disable-next-line no-param-reassign
+        field.type = 'string';
+
+        // Rollback the original values in the features
+        originalValues.forEach(({ feature, value }) => {
+          if (value !== undefined && value !== null) feature.set(field.name, String(value), true);
+        });
+
+        // Skip timestamp commits for this field and continue with the next date field.
+        return;
+      }
+
+      // No invalid values were found, so commit the complete set of staged timestamps.
+      features.forEach((feature, index) => {
+        const dateValue = normalizedValues[index];
+        if (dateValue !== undefined) feature.set(field.name, dateValue, true);
       });
     });
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }

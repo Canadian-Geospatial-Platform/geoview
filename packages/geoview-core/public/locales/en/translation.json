@@ -284,6 +284,8 @@
     "layerPath": "Layer Path",
     "layerType": "Type: ",
     "layerOgcVersion": "OGC Version",
+    "layerVectorStructureFullUrl": "Vector Structure: ",
+    "layerWmsGetStylesFullUrl": "WMS GetStyles: ",
     "layerBounds": "Bounds ({{mapProjectionEPSG}})",
     "layerBounds4326": "Bounds (EPSG:4326)",
     "layerMaxScale": "Max Scale",
@@ -464,7 +466,11 @@
     "changeDisplayLanguage": "Only 'en' and 'fr' are supported",
     "changeDisplayTheme": "Theme unsupported",
     "changeDisplayProjection": "Projection unsupported",
-    "invalidConfig": "Invalid JSON config, default configuration applied."
+    "invalidConfig": "Invalid JSON config, default configuration applied.",
+    "wfsRenderer": {
+      "getStylesInvalidResponse": "Invalid StyledLayerDescriptor (SLD). Check the 'GetStyles' response.",
+      "getStylesNotSupported": "Not Supported Styles: {{cause}}"
+    }
   },
   "exportModal": {
     "title": "Map preview",
@@ -522,6 +528,7 @@
     "filterMap": "Filter map",
     "stopFilterMap": "Stop filtering map",
     "clearFilters": "Clear filters",
+    "invalidNumericFilter": "Enter a valid number. Whole numbers must stay within the supported precision.",
     "zoomToFilteredExtent": "Zoom to filtered extent",
     "rowsSelected": "{rowsSelected} of {totalRows} row(s) selected",
     "rowsFiltered": "{rowsFiltered} of {totalRows} row(s) filtered",

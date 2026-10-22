@@ -32,6 +32,8 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
+  useStoreLayerVectorStructureFullUrl,
+  useStoreLayerWMSGetStylesFullUrl,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -77,6 +79,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const url = useStoreLayerUrl(layerPath);
   const ogcVersion = useStoreLayerOgcVersion(layerPath);
+  const vectorStructureFullUrl = useStoreLayerVectorStructureFullUrl(layerPath);
+  const wmsGetStylesFullUrl = useStoreLayerWMSGetStylesFullUrl(layerPath);
   const bounds = useStoreLayerBounds(layerPath);
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
@@ -189,9 +193,6 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSectionContent}>
           {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
-          {layerDataProjectionCode && (
-            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
-          )}
           {memoResources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
@@ -208,7 +209,26 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               </a>
             </Box>
           )}
+          {vectorStructureFullUrl && (
+            <Box className="info-container">
+              {`${t('layers.layerVectorStructureFullUrl')}`}
+              <a href={vectorStructureFullUrl} target="_blank" rel="noopener noreferrer">
+                {vectorStructureFullUrl}
+              </a>
+            </Box>
+          )}
+          {wmsGetStylesFullUrl && (
+            <Box className="info-container">
+              {`${t('layers.layerWmsGetStylesFullUrl')}`}
+              <a href={wmsGetStylesFullUrl} target="_blank" rel="noopener noreferrer">
+                {wmsGetStylesFullUrl}
+              </a>
+            </Box>
+          )}
           {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
+          {layerDataProjectionCode && (
+            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
+          )}
           <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}

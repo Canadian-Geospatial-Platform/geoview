@@ -284,6 +284,8 @@
     "layerPath": "Chemin de la couche",
     "layerType": "Type : ",
     "layerOgcVersion": "Version OGC",
+    "layerVectorStructureFullUrl": "Url structure vectorielle: ",
+    "layerWmsGetStylesFullUrl": "Url GetStyles : ",
     "layerBounds": "Étendu ({{mapProjectionEPSG}})",
     "layerBounds4326": "Étendu (EPSG:4326)",
     "layerMaxScale": "Échelle maximale",
@@ -464,7 +466,11 @@
     "changeDisplayLanguage": "Seulement 'en' et 'fr' sont supporées",
     "changeDisplayTheme": "Theme non supporté",
     "changeDisplayProjection": "Projection non supportée",
-    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée."
+    "invalidConfig": "Configuration JSON non valide, configuration par défaut appliquée.",
+    "wfsRenderer": {
+      "getStylesInvalidResponse": "Descripteur de couche stylée (SLD) invalide. Vérifiez la réponse 'GetStyles'.",
+      "getStylesNotSupported": "Styles non supportés : {{cause}}"
+    }
   },
   "exportModal": {
     "title": "Aperçu de la carte",
@@ -522,6 +528,7 @@
     "filterMap": "Filtrer la carte",
     "stopFilterMap": "Arrêter le filtrage de la carte",
     "clearFilters": "Effacer les filtres",
+    "invalidNumericFilter": "Saisissez un nombre valide. Les nombres entiers doivent respecter la précision prise en charge.",
     "zoomToFilteredExtent": "Zoomer sur l'étendue filtrée",
     "rowsSelected": "{rowsSelected} sur {totalRows} ligne(s) sélectionnée(s)",
     "rowsFiltered": "{rowsFiltered} sur {totalRows} ligne(s) filtrée(s)",

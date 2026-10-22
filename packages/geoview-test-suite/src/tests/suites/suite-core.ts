@@ -45,7 +45,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       <b>URL validation</b> — Simple ping, XYZ tiles, invalid format, unreachable, WMS service<br/>
       <b>Service metadata</b> — WMS, WFS, WMTS GetCapabilities (happy path + bad URL)<br/>
       <b>Proxy fallback</b> — JSON fetch with CORS proxy retry (happy path + bad URL)<br/>
-      <b>Rendering</b> — GeometryCollection legend style generation`;
+      <b>Rendering</b> — GeometryCollection and picture-fill legends; WFS SLD style conversion`;
   }
 
   /**
@@ -54,7 +54,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 15;
+    return 16;
   }
 
   /**
@@ -118,6 +118,9 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pWfsMetadataBadUrl = this.#coreTester.testProxyGetWFSServiceMetadataBadUrl();
     if (isRunningSequentially) await pWfsMetadataBadUrl;
 
+    const pWfsStyleWithTextOnlyRule = this.#coreTester.testWfsStyleWithTextOnlyRule();
+    if (isRunningSequentially) await pWfsStyleWithTextOnlyRule;
+
     const pWmtsMetadata = this.#coreTester.testProxyGetWMTSServiceMetadata();
     if (isRunningSequentially) await pWmtsMetadata;
 
@@ -142,6 +145,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       pWmsMetadataBadUrl,
       pWfsMetadata,
       pWfsMetadataBadUrl,
+      pWfsStyleWithTextOnlyRule,
       pWmtsMetadata,
       pWmtsMetadataBadUrl,
       // pFetchJsonProxy,

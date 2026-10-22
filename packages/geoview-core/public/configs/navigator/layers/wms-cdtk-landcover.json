@@ -15,7 +15,7 @@
       {
         "geoviewLayerId": "landcover-xml-group",
         "geoviewLayerName": "Landcover 2010-2020 Group (XML)",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
@@ -26,7 +26,7 @@
       {
         "geoviewLayerId": "landcover-xml-distinct",
         "geoviewLayerName": "Landcover (no group-time-dimension)",
-        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
+        "metadataAccessPath": "https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_vrt_en",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
