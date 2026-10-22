@@ -133,6 +133,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('STAC-BROWSER - Fetch capabilities and collections on mount');
 
+    // Fetch the collections data
     let cancelled = false;
     const fetchData = async (): Promise<void> => {
       try {
@@ -467,15 +468,14 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             if (hasResults) isViewFocusRequestedRef.current = true;
             setView(hasResults ? 'search-results' : 'search');
           }
-        } catch (error: unknown) {
+        })
+        .catch((error: unknown): void => {
           // UI boundary: report the failed request to the user
           logger.logError('STAC-BROWSER - Search failed:', error);
           stacController.showError('stacBrowser.errorRequest');
         } finally {
           setIsLoading(false);
-        }
-      };
-      void doSearch();
+        });
     },
     [isLoading, resolveSearchCollections, limit, searchSortBy, memoApiService, applySearchResult, stacController]
   );
