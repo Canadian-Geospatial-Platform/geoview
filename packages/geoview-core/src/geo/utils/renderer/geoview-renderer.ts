@@ -12,7 +12,7 @@ import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 
-import { setAlphaColor } from '@/core/utils/utilities';
+import { loadImage, setAlphaColor } from '@/core/utils/utilities';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type {
@@ -215,39 +215,21 @@ export abstract class GeoviewRenderer {
    * @returns A promise that resolves with the loaded image, or null if loading fails
    */
   static loadImage(src: string): Promise<HTMLImageElement | null> {
-    const promisedImage = new Promise<HTMLImageElement | null>((resolve) => {
-      const image = new Image();
-      image.src = src;
-      image
-        .decode()
-        .then(() => resolve(image))
-        .catch((error: unknown) => {
-          logger.logError('this.loadImage(src) - Error while loading the src image =', src, error);
-          resolve(null);
-        });
+    return loadImage(src).catch((error: unknown) => {
+      logger.logError('GeoviewRenderer.loadImage - Error while loading the src image =', src, error);
+      return null;
     });
-    return promisedImage;
   }
 
   /**
    * Loads the image of an icon that compose the legend.
    *
-   * This is an alternate method of loadImage because the latter had some issues? See the GV comments in the callers. Refactor them together?
-   *
    * @param src - Source information (base64 image) of the image to load
-   * @returns A promise that resolves with the loaded image, or null if loading fails
+   * @returns A promise that resolves with the loaded image
+   * @throws {Error} When the image fails to load
    */
   static loadImageFromDataUrl(src: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      const image = new Image();
-      image.onload = (): void => {
-        resolve(image);
-      };
-      image.onerror = (error): void => {
-        reject(error);
-      };
-      image.src = src;
-    });
+    return loadImage(src);
   }
 
   /**

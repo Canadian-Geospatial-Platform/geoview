@@ -1,7 +1,9 @@
 import type {
+  StacBrowserConfig,
   StacCollection,
   StacCollectionsConfig,
   StacCql2Expression,
+  StacFilterPanelState,
   StacFootprintStyleConfig,
   StacItemDisplayOptions,
   StacPropertyFilterConfig,
@@ -21,6 +23,39 @@ export type StacFootprintKind = 'collection' | 'item' | 'search';
  */
 export abstract class StacConfigUtils {
   // #region STATIC METHODS
+
+  /**
+   * Gets the overlay id of an item map preview.
+   *
+   * @param itemKey - The stable item identity
+   * @returns The overlay id
+   */
+  static getPreviewOverlayId(itemKey: string): string {
+    return `stac-preview-${itemKey}`;
+  }
+
+  /**
+   * Gets the default values shown in the search form.
+   *
+   * @param config - The plugin configuration
+   * @returns The initial search-form state
+   */
+  static getDefaultFilterPanelState(config: StacBrowserConfig): StacFilterPanelState {
+    const datetime = config.defaults?.datetime?.split('/') ?? [];
+    const getDate = (value: string | undefined): string => (value && value !== '..' ? value.substring(0, 10) : '');
+
+    return {
+      selectedCollections: config.defaults?.collections ?? [],
+      useMapExtent: config.filters?.spatial !== false && (config.defaults?.useMapExtent ?? false),
+      containedInExtent: config.defaults?.containedInExtent ?? false,
+      startDate: getDate(datetime[0]),
+      endDate: getDate(datetime[1]),
+      keyword: '',
+      propertyFilters: {},
+      sortField: config.defaults?.sortBy?.[0]?.field ?? 'datetime',
+      sortDirection: config.defaults?.sortBy?.[0]?.direction ?? 'desc',
+    };
+  }
 
   /**
    * Resolves collection-specific item presentation options over the package-level settings.

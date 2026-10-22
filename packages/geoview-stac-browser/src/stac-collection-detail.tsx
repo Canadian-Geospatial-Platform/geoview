@@ -128,7 +128,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    * @param pageUrl - Optional pagination link URL
    * @returns A promise that resolves when the page is loaded or the error is reported
    */
-  const loadItems = useCallback(
+  const tryLoadItems = useCallback(
     async (pageUrl?: string): Promise<void> => {
       const requestId = ++itemsRequestIdRef.current;
       try {
@@ -162,11 +162,11 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Fetch items on mount', collection.id);
-    void loadItems();
+    void tryLoadItems();
     return (): void => {
       itemsRequestIdRef.current += 1;
     };
-  }, [collection.id, loadItems]);
+  }, [collection.id, tryLoadItems]);
 
   // #region Handlers
 
@@ -175,16 +175,16 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const handleNextPage = useCallback((): void => {
     if (isLoading || !nextUrl) return;
-    void loadItems(nextUrl);
-  }, [isLoading, nextUrl, loadItems]);
+    void tryLoadItems(nextUrl);
+  }, [isLoading, nextUrl, tryLoadItems]);
 
   /**
    * Handles navigating to the previous page of items.
    */
   const handlePrevPage = useCallback((): void => {
     if (isLoading || !prevUrl) return;
-    void loadItems(prevUrl);
-  }, [isLoading, prevUrl, loadItems]);
+    void tryLoadItems(prevUrl);
+  }, [isLoading, prevUrl, tryLoadItems]);
 
   /**
    * Handles toggling the description expanded state.
