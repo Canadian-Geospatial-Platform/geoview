@@ -1,0 +1,235 @@
+{
+  "configMeta": {
+    "description": "Experimental: WMS vector layer examples covering SLD styles, unique-value rules, and vector time filters.<ul><li>Cities: Cities WMS on the map with filtering and DataTable capabilities using the vector information from the WFS.</li><li>Cities Experimental (explicit): Test of a WMS using its associated explicitely defined WFS. It's not necessary in this case, because the application can infer these parameters (proof the other Cities layer works), but it's to show how one can configure it.</li><li>Débit de circulation: Test of a WMS with incomplete ogc Filters for some class rendering styling.</li><li>Condition routière hivernale du réseau routier: Test of a WMS with incomplete ogc Filters for some class rendering styling.</li><li>Élement de drainage: Test of a WMS using its associated WFS for vector data queries.</li><li>Réseau routier - RTSS: Test of a WMS with class rendering style acting strangely depending on the zoom level, explanation?</li><li>Sous-ministériat aux territoires: Test of a WMS using its associated WFS for vector data queries.</li><li>Zone de dégel: Test of a WMS using its associated WFS for vector data queries.</li><li>Radar photo: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Site d'investigation géotechnique: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Sortie d'autoroute: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Aéroport: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>Potential de glissement - Surface: Test of WMS with working class filters based on vector data.</li><li>Potential de glissement - Ligne: Test of WMS with working class filters based on vector data. Investigate why the records are filtered by default in the DataTable?</li><li>Potential de glissement - Index: Test of WMS with working class filters based on vector data.</li><li>Couche publique des historiques d'embâcle: Test of a WMS only partly successing in creating the style from the incomplete style information in the GetStyles. This layer also has a very particular combination of features, because it also has a time-dimension on the WMS. This layer also presents a particular challenge because the WMS exposes a time dimension. To support vector-time filtering, the time-slider filter must work in combination with the DataTable filter. However, the time parameter used to query the WMS does not directly identify the corresponding time field in the vector data retrieved through WFS. To handle this, a new configuration option, vectorTimeField, specifies the name of the actual time field in the WFS vector data. This allows the time-slider filtering to be applied consistently to the vector features, alongside the DataTable filtering. Additionally, this layer exposes a proxy issue when querying features at a map-click location. Requests routed through our proxy fail to return the expected information, whereas querying the service directly succeeds. This can be verified by comparing the requests in the browser's Network tab.</li><li>Limites territoriales (MSP): Test of a WMS using its associated WFS for vector data queries. Known proxy issue when querying the data.</li><li>Caserne de pompier: Test of a WMS failing to create their style due to incomplete PointSymbolizer information in the GetStyles.</li><li>AHCCD stations: Test of a WMS layer fetching its vector information from an OGC API Feature instead of a WFS. This is done by providing 'ogcApiFeaturesUrl' and 'ogcApiFeaturesLayerId' configurations in the layer entry. Known issue when trying to filter the WMS with attributes such as when using the DataTable filters. The field names of the vector differ from the field names in the WMS, e.g.: elevation__elevation in the vector vs properties.elevation__elevation in the WMS. Therefore the OGC:Filter generated for the GetMap service request has an invalid field name property.</li><li>Major Projects Inventory: Test of a WMS succeeding with fetching data from the associated WFS (see DataTable), but failing to create their style due to the GetStyles endpoint not found or not existing. This layer is also used to test that a click on a map feature will still show the details for the feature but show it as 'Unsymbolized'.</li><li>Groundwater Wells: Test of a WMS succeeding with fetching data from the associated WFS (see DataTable), but failing to create their style due to the GetStyles endpoint not found or not existing.</li><li>VRI - 2025 - Forest Vegetation Composite Rank 1 Layer: Test of a WMS succeeding with fetching data from the associated WFS (see DataTable), but failing to create their style due to the GetStyles endpoint not found or not existing.</li><li>Beaufort_Mackenzie: An ESRI-WMS layer with an Esri-WFS layer attached which unfortunaly doesn't work, because the SLD provided by the Esri-WMS is incomplete/insufficient. This example is left there to show an example of a Esri-WMS/Esri-WFS association. In fact, it seems like most if not all the services from Donnees_Ouvertes-Open_Data are providing empty styles information in their GetStyles response. For example:<ul><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WMSServer?SERVICE=WMS&REQUEST=GetStyles&VERSION=1.3.0&Layers=0'>OGERP_Beaufort_Mackenzie_PEMT</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Historic_Treaty_F/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>Historic_Treaty_F</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Droits_petroliers_et_gaziers_Oil_and_Gas_Rights/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>Droits_petroliers_et_gaziers_Oil_and_Gas_Rights</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Community_Well_Being_Index_E/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>Community_Well_Being_Index_E</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Conseil_Tribal_Tribal_Council/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>Conseil_Tribal_Tribal_Council</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Licence_exploration_houille_NU_Coal_Exploration_Licence/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>Licence_exploration_houille_NU_Coal_Exploration_Licence</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Arctique_Est_PEMT_Eastern_Arctic/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>OGERP_Arctique_Est_PEMT_Eastern_Arctic</a></li><li><a href='https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WMSServer?SERVICE=WMS&amp;REQUEST=GetStyles&amp;VERSION=1.3.0&amp;Layers=0'>OGERP_Beaufort_Mackenzie_PEMT</a></li></ul></li><li>National Burned Area Composite (1972-2025): Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable.</li><li>Reported Wildland Fires: Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable.</li><li>Sit Natura 2000: Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable.</li><li>Populatie Rezidenta pe Sexe la nivel de Judet: Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable.</li></ul>"
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true,
+      "labelZIndex": 20
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "cities",
+        "geoviewLayerName": "Cities",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wms",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cities-explicit",
+        "geoviewLayerName": "Cities Experimental (explicit)",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wms",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "cities",
+            "wfsUrl": "https://demo.mapserver.org/cgi-bin/wfs",
+            "wfsLayerId": "ms:cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            },
+            "initialSettings": {
+              "states": { "visible": false }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "transports",
+        "geoviewLayerName": "Transports",
+        "metadataAccessPath": "https://ws.mapserver.transports.gouv.qc.ca/swtq",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "circulation_routier"
+          },
+          {
+            "layerId": "conditions_routieres"
+          },
+          {
+            "layerId": "iit_v_drang_condu_permn_ligne"
+          },
+          {
+            "layerId": "bgr_v_sous_route_res_sup_act"
+          },
+          {
+            "layerId": "bgr_v_dirct_genrl_geomt_act"
+          },
+          {
+            "layerId": "zone_degel"
+          },
+          {
+            "layerId": "radars_photos"
+          },
+          {
+            "layerId": "site_inv_geotech_p"
+          },
+          {
+            "layerId": "sortie_aut"
+          },
+          {
+            "layerId": "aeroport"
+          },
+          {
+            "layerId": "zpegt"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "gouv-ouvert",
+        "geoviewLayerName": "Gouv Ouvert (proxied)",
+        "metadataAccessPath": "https://geoegl.msp.gouv.qc.ca/ws/igo_gouvouvert.fcgi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "vg_observation_v_inondation_embacle_wmst",
+            "vectorTimeField": "date_observation"
+          },
+          {
+            "layerId": "MSP_DIRECTION_REG_COG_S"
+          },
+          {
+            "layerId": "CASERNE"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "weather-clim-group",
+        "geoviewLayerName": "Weather Climate Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet-climate",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "weather-clim-group-g",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "AHCCD.STATIONS",
+                "ogcApiFeaturesUrl": "https://api.weather.gc.ca",
+                "ogcApiFeaturesLayerId": "ahccd-stations"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
+        "geoviewLayerId": "kelowna-wells",
+        "geoviewLayerName": "BC (zoom on Kelowna city)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          },
+          {
+            "layerId": "pub:WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "beaufort-mackenzie",
+        "geoviewLayerName": "Beaufort Mackenzie",
+        "metadataAccessPath": "https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WMSServer",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "wfsUrl": "https://geo.sac-isc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/OGERP_Beaufort_Mackenzie_PEMT/MapServer/WFSServer",
+            "wfsLayerId": "esri:Grille_de_référence___Reference_Grid"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "nrcan-cwfif",
+        "geoviewLayerName": "NRCan CWFIF",
+        "metadataAccessPath": "https://geoserver.cwfif.nrcan.gc.ca/geoserver/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "public:nbac"
+          },
+          {
+            "layerId": "public:cwfif_national_reportedfires"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geo-spatial.org",
+        "geoviewLayerName": "Geo-spatial.org (Romania)",
+        "metadataAccessPath": "https://services.geo-spatial.org/geoserver/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "colaborari:natura_2000"
+          },
+          {
+            "layerId": "recensamant:PopulatieRezidentaDupaSexJudet"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "featureId": "gc-001",
+        "name": "Geometry Collection Test Feature",
+        "category": "mixed",
+        "status": "active",
+        "priority": 3,
+        "elevationM": 245.7,
+        "createdAt": "2026-04-22T10:30:00Z",
+        "isOperational": true,
+        "owner": "GeoView QA",
+        "notes": "Used to validate feature properties for GeometryCollection"
+      },
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [-75.7, 45.4]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [-79.4, 43.7],
+              [-73.6, 45.5]
+            ]
+          },
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [-134.1, 51.0],
+                [-113.9, 51.0],
+                [-113.9, 55.1],
+                [-134.1, 55.1],
+                [-134.1, 51.0]
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "featureId": "gc-002",
+        "name": "Geometry Collection Test Feature 2",
+        "category": "mixed",
+        "status": "inactive",
+        "priority": 1,
+        "elevationM": 132.4,
+        "createdAt": "2026-04-22T10:45:00Z",
+        "isOperational": false,
+        "owner": "GeoView QA",
+        "notes": "Inactive sample to validate unique value styling"
+      },
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [-76.0, 45.2]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [-79.8, 44.2],
+              [-74.8, 44.9]
+            ]
+          },
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [-132.5, 49.5],
+                [-126.5, 49.5],
+                [-126.5, 53.0],
+                [-132.5, 53.0],
+                [-132.5, 49.5]
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "featureId": "gc-003",
+        "name": "Geometry Collection Test Feature 3",
+        "category": "mixed",
+        "status": "maintenance",
+        "priority": 2,
+        "elevationM": 318.9,
+        "createdAt": "2026-04-22T11:00:00Z",
+        "isOperational": true,
+        "owner": "GeoView QA",
+        "notes": "Maintenance sample to validate default and category rendering"
+      },
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [-75.2, 46.0]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [-78.5, 45.8],
+              [-73.9, 46.3]
+            ]
+          },
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [-121.3, 50.5],
+                [-115.2, 50.5],
+                [-115.2, 54.3],
+                [-121.3, 54.3],
+                [-121.3, 50.5]
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "featureId": "gc-004",
+        "name": "Geometry Collection Test Feature 4",
+        "category": "mixed",
+        "status": "planned",
+        "priority": 4,
+        "elevationM": 89.2,
+        "createdAt": "2026-04-22T11:20:00Z",
+        "isOperational": false,
+        "owner": "GeoView QA",
+        "notes": "Planned sample to validate default unique value rendering"
+      },
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [-74.6, 45.7]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [-77.6, 45.0],
+              [-73.0, 45.4]
+            ]
+          },
+          {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [-110.4, 48.4],
+                [-104.3, 48.4],
+                [-104.3, 51.8],
+                [-110.4, 51.8],
+                [-110.4, 48.4]
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

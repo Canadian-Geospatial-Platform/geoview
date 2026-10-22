@@ -1,0 +1,86 @@
+{
+  "configMeta": {
+    "description": "Drawer plugin with custom fill and stroke style, all geometry types, and measurements hidden by default."
+  },
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "layerIds": []
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": "uniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ElevationHRDEM",
+        "geoviewLayerName": "Elevation HRDEM Mosaic",
+        "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dsm-hillshade",
+            "layerName": "Elevation HRDEM Mosaic Hillshade DSM"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "drawer",
+    "basemap-select",
+    "projection",
+    "fullscreen"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "light",
+  "corePackagesConfig": [
+    {
+      "drawer": {
+        "style": {
+          "fillColor": "rgba(0, 255, 255, 0.3)",
+          "strokeColor": "#0000ff",
+          "strokeWidth": 3
+        },
+        "activeGeom": "Star",
+        "geomTypes": [
+          "Point",
+          "Text",
+          "LineString",
+          "Polygon",
+          "Rectangle",
+          "Circle",
+          "Star"
+        ],
+        "hideMeasurements": true
+      }
+    }
+  ]
+}

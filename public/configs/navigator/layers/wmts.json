@@ -1,0 +1,134 @@
+{
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          4,
+          [
+            -100,
+            55
+          ]
+        ]
+      },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "nogeom",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "basemap_wmts",
+        "geoviewLayerName": "Shaded Basemap - returning blank tiles",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "biomass",
+        "geoviewLayerName": "Biomass - reprojection issues",
+        "metadataAccessPath": "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GEDI_ISS_L4B_Aboveground_Biomass_Density_Mean_201904-202303",
+            "tileMatrixSet": "1km"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "sgmc2",
+        "geoviewLayerName": "sgmc2",
+        "metadataAccessPath": "https://mrdata.usgs.gov/mapcache/wmts",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "sgmc2",
+            "tileMatrixSet": "GoogleMapsCompatible"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "lidar",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW",
+            "tileMatrixSet": "PM_0_18"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "timeZonesLYR",
+        "geoviewLayerName": "Timezones",
+        "metadataAccessPath": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "WorldTimeZones",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geopf",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerType": "ogcWmts",
+        "useAsBasemap": true,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+            "tileMatrixSet": "PM_0_19"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

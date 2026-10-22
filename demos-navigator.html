@@ -1,0 +1,127 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Demos Navigator - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><style>.actionButton {
+        padding: 5px;
+      }
+
+      .selector-container {
+        display: flex;
+        flex-direction: row;
+        margin: 10px;
+      }
+
+      .selector {
+        padding: 15px;
+      }
+
+      .editor {
+        display: inline-flex;
+        gap: 10px;
+        font-family: monospace;
+        line-height: 21px;
+        background: #282a3a;
+        border-radius: 2px;
+        padding: 20px 10px;
+        height: 600px;
+        overflow-y: auto;
+      }
+
+      .line-numbers {
+        width: 20px;
+        text-align: right;
+        height: 9999px;
+      }
+
+      .line-numbers span {
+        counter-increment: linenumber;
+      }
+
+      .line-numbers span::before {
+        content: counter(linenumber);
+        display: block;
+        color: #506882;
+      }
+
+      textarea {
+        height: 9999px;
+        line-height: 21px;
+        overflow-y: hidden;
+        padding: 0;
+        border: 0;
+        background: #282a3a;
+        color: #fff;
+        min-width: 500px;
+        outline: none;
+        resize: none;
+      }
+
+      select {
+        max-width: 96%;
+      }
+
+      @media screen and (max-width: 600px) {
+        .selector-container {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+        }
+        .selector-container p {
+          margin-bottom: 0px;
+        }
+        .selector {
+          padding: 8px;
+        }
+        textarea {
+          min-width: 96%;
+          max-width: 96%;
+        }
+      }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Demos Navigator</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr><tr><td><a href="./layers-navigator.html">Layers Navigator</a><br/></td></tr></tbody></table></div><hr/><div class="selector-container"><p>Configuration to load:</p><div class="selector"><select name="Config Loader" id="configLoader"><option value="">--select--</option><option value="./configs/navigator/demos/00-basic-footer-appbar-combo.json">Basic map with app bar footer bar combo</option><option value="./configs/navigator/demos/01-basemap-LCC-TLS.json">Basemap LCC Transport-Labeled-Shaded</option><option value="./configs/navigator/demos/02-basemap-LCC-SL.json">Basemap LCC Simple-Labeled (overview map hide on zoom 7 and lower)</option><option value="./configs/navigator/demos/03-projection-WM.json">Basemap WM</option><option value="./configs/navigator/demos/04-restrict-zoom.json">Restricted zoom [4, 8]</option><option value="./configs/navigator/demos/05-max-extent-override.json">Unrestricted zoom map extent for WM zoom north</option><option value="./configs/navigator/demos/06-zoom-layer.json">Zoom on layer extent</option><option value="./configs/navigator/demos/07-layer-zoom-levels.json">Zoom and Scale Settings</option><option value="./configs/navigator/demos/08-all-layer-zoom-levels.json">All Layer Type Zoom and Scale</option><option value="./configs/navigator/demos/09-basic-footer-layers-tab.json">Basic map with footer - Layers Default</option><option value="./configs/navigator/demos/10-basic-appbar-data-table-tab.json">Basic map with app bar - Data Table Default</option><option value="./configs/navigator/demos/11-package-time-slider.json">Package - Time Slider</option><option value="./configs/navigator/demos/12-package-time-slider-custom.json">Package - Time Slider - Custom config</option><option value="./configs/navigator/demos/13-package-geochart.json">Package - Geochart</option><option value="./configs/navigator/demos/13-package-geochart-wms.json">Package - Geochart - WMS</option><option value="./configs/navigator/demos/14-package-swiper.json">Package - Swiper</option><option value="./configs/navigator/demos/15-package-drawer.json">Package - Drawer - BETA</option><option value="./configs/navigator/demos/16-package-area-of-interest.json">Package - Area of interest</option><option value="./configs/navigator/demos/17-package-custom-legend.json">Package - Custom Legend</option><option value="./configs/navigator/demos/18-global-settings.json">Global Settings Options</option><option value="./configs/navigator/demos/19-export-map-large-legend.json">Map Export - Large Legend</option></select></div></div><div class="selector-container"><p>Display Language:</p><div class="selector"><select name="Switch Language" id="switchLang"><option value="en">English</option><option value="fr">French</option><option value="unsupported">Not Supported</option></select> <input type="checkbox" id="resetLayer" name="resetLayer" checked="checked"/> <label for="resetLayer">Reset Layers</label></div><p>Display Theme:</p><div class="selector"><select name="Switch Theme" id="switchTheme"><option value="geo.ca">Geo.ca</option><option value="light">Light</option><option value="dark">Dark</option><option value="unsupported">Not Supported</option></select></div><p>Display Projection:</p><div class="selector"><select name="Switch Projection" id="switchProjection"><option value="3978">LCC (3978)</option><option value="3857">Web Mercator (3857)</option><option value="unsupported">Not Supported</option></select></div></div><hr/><button type="button" class="collapsible">Layers Status</button><pre id="sandboxMap-state" class="panel map-title-holder"></pre><div id="mapSection"><div id="map1"></div></div><p>This map loads its configurations from a selected configuration file.</p><hr/><div class="editor"><div class="line-numbers"><span></span></div><textarea id="configGeoview" name="configuration" rows="30" cols="150">
+        Select a configuration file to see its content...
+      </textarea></div><div class="actionButton">Reload Map <button id="Reload-Button">Reload</button></div><div class="actionButton">Remove Map <button id="Remove-Button">Remove</button></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>const configLoader = document.getElementById('configLoader');
+      const switchLang = document.getElementById('switchLang');
+      const resetLayer = document.getElementById('resetLayer');
+      const switchThemeElem = document.getElementById('switchTheme');
+      const switchProjectioneElem = document.getElementById('switchProjection');
+      const reload = document.getElementById('Reload-Button');
+      const remove = document.getElementById('Remove-Button');
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config');
+      const mapId = 'map1';
+
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
+      configLoader.addEventListener('change', async (e) => {
+        onConfigChange(mapId, e);
+      });
+      // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
+
+      // If there's a config
+      if (config) {
+        configLoader.value = config;
+        configLoader.dispatchEvent(new Event('change'));
+      }
+
+      // ------------------ SWITCHER SECTION START -----------------------------------------
+      switchLang.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setLanguage(e.target.value, resetLayer.checked);
+      });
+
+      switchThemeElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setTheme(e.target.value);
+      });
+
+      switchProjectioneElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
+      });
+      // ------------------ SWITCHER SECTION END -----------------------------------------
+
+      reload.addEventListener('click', (e) => {
+        cgpv.api.reload(mapId);
+      });
+
+      remove.addEventListener('click', (e) => {
+        cgpv.api.deleteMapViewer(mapId, true);
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>
