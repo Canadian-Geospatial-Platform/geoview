@@ -50,7 +50,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       <b>UI tabs</b> — Footer bar select/create tab, app bar select tab<br/>
       <b>Language</b> — Runtime language switch<br/>
       <b>Layers</b> — Non-queryable exclusion from details, hoverable state, geometry group z-index<br/>
-      <b>Details</b> — Layer selection persistence across tab switches`;
+      <b>Details</b> — Layer selection persistence across tab switches<br/>
+      <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction`;
   }
 
   /**
@@ -59,7 +60,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 16;
+    return 17;
   }
 
   /**
@@ -177,6 +178,12 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     // Wait on details layer selection persistence which manipulates the map state a lot and should run independently
     await pDetailsLayerSelectionPersistence;
 
+    // Test fullscreen view restoration and interaction preservation
+    const pFullscreenViewRestoration = this.#mapTester.testFullscreenViewRestoration();
+
+    // Wait until fullscreen state cleanup completes before returning the suite result
+    await pFullscreenViewRestoration;
+
     // Resolve when all
     return Promise.all([
       pmapState,
@@ -194,6 +201,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       pNonQueryableLayerNotInDetails,
       pLayerHoverableState,
       pDetailsLayerSelectionPersistence,
+      pFullscreenViewRestoration,
     ]);
   }
 }

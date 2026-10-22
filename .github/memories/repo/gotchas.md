@@ -10,3 +10,4 @@
 - `public/builds/` holds stale bundles; never use as reference.
 - `npm audit` / `npm audit fix` are unreliable in Rush/pnpm; use the pnpm lockfile.
 - Swiper: clip per-layer in OL `prerender/postrender`, never CSS `clip-path` on shared renderer containers.
+- Never refit an extent across a viewport aspect-ratio change (e.g. fullscreen exit); restore center/resolution. OL resolves view constraints on every `change:size` before user listeners (#3674).

@@ -748,6 +748,12 @@ The following table summarizes all controllers, their purpose, dependencies, and
 
 Subscribes to `UIDomain.onLanguageChanged()`. Provides a large public API for managing UI state: panels, footer/app bar tabs, focus traps, language, theme, notifications, crosshairs, fullscreen, etc.
 
+#### Fullscreen view preservation
+
+- `setFullScreen(true, element)` saves the view center, resolution and rotation. The fullscreen button, `Esc` and `setFullScreen(false)` all finish through one controller-owned `fullscreenchange` handler, scoped to the map's own shell element. UI components must not register their own exit listeners.
+- On exit, if the view was not changed in fullscreen, the controller restores the saved view exactly (`setCenter`/`setResolution`, no `fit`). Otherwise it keeps the current center and resolution. Never refit the fullscreen extent: fitting a wide extent into a smaller or squarer viewer zooms out (#3674).
+- The restore can run before the viewer shrinks. Views use a `maxExtent` with OpenLayers' default size-dependent constraints, and OpenLayers re-applies those constraints on every map `change:size` before user listeners run. So a resize can change the view without any user interaction. The controller records the view after each `change:size`, and sets a sticky "changed" flag on `moveend` when the view differs from that record. `moveend` fires only after the next render, so a resize alone never sets the flag, and an earlier interaction stays recorded even if a later in-fullscreen resize (for example a footer resize) happens.
+
 ### MapController
 
 Viewport containment and screen directions must use projected pixels rather than geographic bearings:
