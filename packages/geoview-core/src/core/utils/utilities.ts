@@ -35,6 +35,12 @@ interface TypeDocument extends Document {
   msExitFullscreen: () => void;
   /** Firefox vendor-prefixed fullscreen exit method. */
   mozCancelFullScreen: () => void;
+  /** Safari vendor-prefixed current fullscreen element. */
+  webkitFullscreenElement?: Element | null;
+  /** IE11 vendor-prefixed current fullscreen element. */
+  msFullscreenElement?: Element | null;
+  /** Firefox vendor-prefixed current fullscreen element. */
+  mozFullScreenElement?: Element | null;
 }
 
 /** Result of a URL reachability ping check. */
@@ -1071,26 +1077,53 @@ export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTM
  * `requestFullscreen()` API first, then falling back to vendor-prefixed
  * versions for Safari, IE11, and Firefox.
  * Any errors from the standard promise-based fullscreen request are caught
- * and logged using `logger.logPromiseFailed`.
+ * and logged using `logger.logPromiseFailed`, then propagated to the caller.
  *
  * @param element - The element to display in fullscreen mode
+ * @returns A promise that resolves when the fullscreen request succeeds
  */
-export function requestFullscreen(element: TypeHTMLElement): void {
-  if (element.requestFullscreen) {
-    element.requestFullscreen().catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('element.requestFullscreen', error);
-    });
-  } else if (element.webkitRequestFullscreen) {
-    /* Safari */
-    element.webkitRequestFullscreen();
-  } else if (element.msRequestFullscreen) {
-    /* IE11 */
-    element.msRequestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    /* Firefox */
-    element.mozRequestFullScreen();
+export function requestFullscreen(element: TypeHTMLElement): Promise<void> {
+  try {
+    if (element.requestFullscreen) {
+      return element.requestFullscreen().catch((error: unknown): never => {
+        // Log
+        logger.logPromiseFailed('element.requestFullscreen', error);
+        throw error;
+      });
+    }
+    if (element.webkitRequestFullscreen) {
+      /* Safari */
+      element.webkitRequestFullscreen();
+      return Promise.resolve();
+    }
+    if (element.msRequestFullscreen) {
+      /* IE11 */
+      element.msRequestFullscreen();
+      return Promise.resolve();
+    }
+    if (element.mozRequestFullScreen) {
+      /* Firefox */
+      element.mozRequestFullScreen();
+      return Promise.resolve();
+    }
+
+    throw new Error('Fullscreen is not supported by this browser.');
+  } catch (error: unknown) {
+    logger.logPromiseFailed('element.requestFullscreen', error);
+    return Promise.reject(error);
   }
+}
+
+/**
+ * Gets the element currently displayed in fullscreen mode, if any.
+ *
+ * Uses the standard `document.fullscreenElement` and falls back to vendor-prefixed versions for Safari, IE11, and Firefox.
+ *
+ * @returns The fullscreen element, or undefined when the document is not in fullscreen
+ */
+export function getFullscreenElement(): Element | undefined {
+  const doc = document as TypeDocument;
+  return doc.fullscreenElement ?? doc.webkitFullscreenElement ?? doc.msFullscreenElement ?? doc.mozFullScreenElement ?? undefined;
 }
 
 /**
@@ -1098,10 +1131,14 @@ export function requestFullscreen(element: TypeHTMLElement): void {
  *
  * This function uses the standard `exitFullscreen()` API when available,
  * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
+ * Does nothing when the document is not in fullscreen (avoids a rejected `exitFullscreen()` promise).
  * Any errors from the standard promise-based exit request are caught
  * and logged using `logger.logPromiseFailed`.
  */
 export function exitFullscreen(): void {
+  // If nothing is in fullscreen, nothing to exit
+  if (!getFullscreenElement()) return;
+
   if (document.exitFullscreen) {
     document.exitFullscreen().catch((error: unknown) => {
       // Log

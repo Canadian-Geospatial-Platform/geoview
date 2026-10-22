@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -35,6 +33,7 @@ export default function Fullscreen(): JSX.Element {
 
   /**
    * Toggles between fullscreen and window mode.
+   * Exiting (button, `Esc` key or API) is finalized by the UI controller when the browser leaves fullscreen.
    */
   function handleSetFullscreen(): void {
     const element = getGVShellElement(mapId);
@@ -44,33 +43,6 @@ export default function Fullscreen(): JSX.Element {
   }
 
   // #endregion Handlers
-
-  /**
-   * Registers fullscreen change listeners to detect ESC key exit.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FULLSCREEN - mount');
-
-    /**
-     * Exits fullscreen when the browser fullscreen state changes.
-     */
-    function handleExit(): void {
-      if (!document.fullscreenElement) {
-        uiController.setFullScreen(false);
-      }
-    }
-    document.addEventListener('fullscreenchange', handleExit);
-    document.addEventListener('webkitfullscreenchange', handleExit);
-    document.addEventListener('mozfullscreenchange', handleExit);
-    document.addEventListener('MSFullscreenChange', handleExit);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleExit);
-      document.removeEventListener('webkitfullscreenchange', handleExit);
-      document.removeEventListener('mozfullscreenchange', handleExit);
-      document.removeEventListener('MSFullscreenChange', handleExit);
-    };
-  }, [uiController]);
 
   return (
     <IconButton

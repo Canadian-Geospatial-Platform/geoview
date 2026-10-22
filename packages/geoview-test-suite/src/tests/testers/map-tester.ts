@@ -1,9 +1,10 @@
 import type { Coordinate } from 'ol/coordinate';
+import type { Size } from 'ol/size';
 
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { generateId } from 'geoview-core/core/utils/utilities';
+import { delay, generateId } from 'geoview-core/core/utils/utilities';
 import {
   MAP_CENTER,
   MAP_ZOOM_LEVEL,
@@ -25,7 +26,11 @@ import {
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
-import { getStoreAppDisplayLanguage, getStoreAppNotifications } from 'geoview-core/core/stores/states/app-state';
+import {
+  getStoreAppDisplayLanguage,
+  getStoreAppIsFullscreenActive,
+  getStoreAppNotifications,
+} from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
   getStoreMapHoverFeatureInfo,
@@ -34,7 +39,8 @@ import {
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { getGVMapTargetElement } from 'geoview-core/core/utils/dom-helper';
+import { getGVMapTargetElement, getGVShellElement } from 'geoview-core/core/utils/dom-helper';
+import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
 
 /** Captured boundary samples and independent pixel/coordinate expectations. */
 interface TypeViewportBoundarySnapshot {
@@ -506,6 +512,219 @@ export class MapTester extends GVAbstractTester {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
         await this.getControllersRegistry().mapController.zoomMap(currentZoom, GVAbstractTester.USE_ZOOM_ANIMATION);
+      }
+    );
+  }
+
+  /**
+   * Tests that fullscreen exit restores the original view when there was no interaction,
+   * and keeps a changed center and resolution when the user interacted.
+   *
+   * Simulates browser fullscreen events and map size changes so the test does not depend
+   * on transient user activation or an actual fullscreen browser window.
+   *
+   * @returns A promise that resolves with the view states observed for each exit scenario
+   */
+  testFullscreenViewRestoration(): Promise<Test<TypeFullscreenViewRestorationResult>> {
+    const mapViewer = this.getMapViewer();
+    const { map } = mapViewer;
+    const view = mapViewer.getView();
+    const element = getGVShellElement<TypeHTMLElement>(this.getMapId());
+    const originalSize = map.getSize();
+    const originalCenter = view.getCenter();
+    const originalResolution = view.getResolution();
+    const originalRotation = view.getRotation();
+
+    let originalFullscreenElementDescriptor: PropertyDescriptor | undefined;
+    let originalExitFullscreenDescriptor: PropertyDescriptor | undefined;
+    let originalRequestFullscreenDescriptor: PropertyDescriptor | undefined;
+    let mockedFullscreenElement: Element | null = null;
+    let shouldRejectFullscreenRequest = false;
+
+    const getViewState = (): TypeFullscreenViewState => {
+      const center = view.getCenter();
+      const resolution = view.getResolution();
+      if (!center || resolution === undefined) throw new TestError('The map view center and resolution must be defined.');
+      return { center: [...center], resolution, rotation: view.getRotation() };
+    };
+
+    const dispatchFullscreenChange = (fullscreenElement: Element | null): void => {
+      mockedFullscreenElement = fullscreenElement;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    };
+
+    return this.test(
+      'Test fullscreen view restoration and interaction preservation',
+      async (test) => {
+        if (!element) throw new TestError(`The map shell for '${this.getMapId()}' was not found.`);
+        if (!originalSize || !originalCenter || originalResolution === undefined) {
+          throw new TestError('The map size, center and resolution must be defined before testing fullscreen.');
+        }
+
+        originalFullscreenElementDescriptor = Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
+        originalExitFullscreenDescriptor = Object.getOwnPropertyDescriptor(document, 'exitFullscreen');
+        originalRequestFullscreenDescriptor = Object.getOwnPropertyDescriptor(element, 'requestFullscreen');
+
+        Object.defineProperty(document, 'fullscreenElement', {
+          configurable: true,
+          get: () => mockedFullscreenElement,
+        });
+        Object.defineProperty(document, 'exitFullscreen', {
+          configurable: true,
+          value: (): Promise<void> => {
+            dispatchFullscreenChange(null);
+            return Promise.resolve();
+          },
+        });
+        Object.defineProperty(element, 'requestFullscreen', {
+          configurable: true,
+          value: (): Promise<void> => {
+            if (shouldRejectFullscreenRequest) return Promise.reject(new Error('Fullscreen request rejected.'));
+            dispatchFullscreenChange(element);
+            return Promise.resolve();
+          },
+        });
+
+        const initial = getViewState();
+        const fullscreenSize: Size = [Math.max(originalSize[0] * 2, 1200), Math.max(originalSize[1] * 0.75, 500)];
+
+        test.addStep('Entering fullscreen, changing map size, and exiting through the fullscreen API...');
+        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        await delay(50);
+        map.setSize([...fullscreenSize]);
+        this.getControllersRegistry().uiController.setFullScreen(false);
+        await delay(50);
+        await mapViewer.waitForRender();
+        const afterButtonExit = getViewState();
+
+        test.addStep('Repeating fullscreen with an Esc-style fullscreenchange exit...');
+        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        await delay(50);
+        map.setSize([...fullscreenSize]);
+        dispatchFullscreenChange(null);
+        await delay(50);
+        await mapViewer.waitForRender();
+        const afterEscExit = getViewState();
+
+        test.addStep('Changing the view while fullscreen, then exiting...');
+        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        await delay(50);
+        map.setSize([...fullscreenSize]);
+        const centerBeforeInteraction = view.getCenter();
+        const resolutionBeforeInteraction = view.getResolution();
+        if (!centerBeforeInteraction || resolutionBeforeInteraction === undefined) {
+          throw new TestError('The map view center and resolution must remain defined while fullscreen.');
+        }
+        view.setCenter([
+          centerBeforeInteraction[0] + resolutionBeforeInteraction * 5,
+          centerBeforeInteraction[1] + resolutionBeforeInteraction * 3,
+        ]);
+        view.setResolution(resolutionBeforeInteraction / 2);
+        const expectedInteractiveView = getViewState();
+        dispatchFullscreenChange(null);
+        await delay(50);
+        await mapViewer.waitForRender();
+        const afterInteractiveExit = getViewState();
+
+        test.addStep('Changing the view while fullscreen, resizing again (e.g. footer resize), then exiting...');
+        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        await delay(50);
+        map.setSize([...fullscreenSize]);
+        await mapViewer.waitForRender();
+        const centerBeforeResizeInteraction = view.getCenter();
+        const resolutionBeforeResizeInteraction = view.getResolution();
+        if (!centerBeforeResizeInteraction || resolutionBeforeResizeInteraction === undefined) {
+          throw new TestError('The map view center and resolution must remain defined while fullscreen.');
+        }
+        view.setCenter([
+          centerBeforeResizeInteraction[0] - resolutionBeforeResizeInteraction * 5,
+          centerBeforeResizeInteraction[1] - resolutionBeforeResizeInteraction * 3,
+        ]);
+        view.setResolution(resolutionBeforeResizeInteraction / 2);
+        // Let the 'moveend' for the interaction fire before the next size change
+        await delay(50);
+        await mapViewer.waitForRender();
+        map.setSize([fullscreenSize[0], fullscreenSize[1] - 100]);
+        const expectedInteractiveResizeView = getViewState();
+        dispatchFullscreenChange(null);
+        await delay(50);
+        await mapViewer.waitForRender();
+        const afterInteractiveResizeExit = getViewState();
+
+        test.addStep('Rejecting a fullscreen request and verifying fullscreen state cleanup...');
+        shouldRejectFullscreenRequest = true;
+        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        await delay(50);
+        const rejectedRequestIsInactive = !getStoreAppIsFullscreenActive(this.getMapId());
+        shouldRejectFullscreenRequest = false;
+
+        return {
+          initial,
+          afterButtonExit,
+          afterEscExit,
+          expectedInteractiveView,
+          afterInteractiveExit,
+          expectedInteractiveResizeView,
+          afterInteractiveResizeExit,
+          rejectedRequestIsInactive,
+        };
+      },
+      (test, result) => {
+        const assertViewStateEqual = (label: string, actual: TypeFullscreenViewState, expected: TypeFullscreenViewState): void => {
+          test.addStep(`Verifying ${label} center, resolution and rotation...`);
+          Test.assertIsEqual(actual.center[0], expected.center[0]);
+          Test.assertIsEqual(actual.center[1], expected.center[1]);
+          Test.assertIsEqual(actual.resolution, expected.resolution);
+          Test.assertIsEqual(actual.rotation, expected.rotation);
+        };
+
+        test.addStep('Verifying the fullscreen interaction changed the center and resolution...');
+        Test.assertIsNotEqual(result.expectedInteractiveView.center[0], result.initial.center[0]);
+        Test.assertIsNotEqual(result.expectedInteractiveView.resolution, result.initial.resolution);
+        assertViewStateEqual('button exit without interaction restores the original', result.afterButtonExit, result.initial);
+        assertViewStateEqual('Esc exit without interaction restores the original', result.afterEscExit, result.initial);
+        assertViewStateEqual(
+          'fullscreen exit after interaction keeps the current view',
+          result.afterInteractiveExit,
+          result.expectedInteractiveView
+        );
+        Test.assertIsNotEqual(result.expectedInteractiveResizeView.resolution, result.initial.resolution);
+        assertViewStateEqual(
+          'fullscreen exit after interaction then resize keeps the current view',
+          result.afterInteractiveResizeExit,
+          result.expectedInteractiveResizeView
+        );
+        Test.assertIsEqual(result.rejectedRequestIsInactive, true);
+      },
+      async (test) => {
+        test.addStep('Restoring fullscreen APIs, map size and view...');
+        shouldRejectFullscreenRequest = false;
+        if (mockedFullscreenElement) dispatchFullscreenChange(null);
+        if (getStoreAppIsFullscreenActive(this.getMapId())) this.getControllersRegistry().uiController.setFullScreen(false);
+        if (originalFullscreenElementDescriptor) {
+          Object.defineProperty(document, 'fullscreenElement', originalFullscreenElementDescriptor);
+        } else {
+          Reflect.deleteProperty(document, 'fullscreenElement');
+        }
+        if (originalExitFullscreenDescriptor) {
+          Object.defineProperty(document, 'exitFullscreen', originalExitFullscreenDescriptor);
+        } else {
+          Reflect.deleteProperty(document, 'exitFullscreen');
+        }
+        if (element) {
+          if (originalRequestFullscreenDescriptor) {
+            Object.defineProperty(element, 'requestFullscreen', originalRequestFullscreenDescriptor);
+          } else {
+            Reflect.deleteProperty(element, 'requestFullscreen');
+          }
+        }
+        if (originalSize) map.setSize(originalSize);
+        if (originalCenter && originalResolution !== undefined) {
+          view.setRotation(originalRotation);
+          view.setResolution(originalResolution);
+          view.setCenter(originalCenter);
+        }
+        await mapViewer.waitForRender();
       }
     );
   }
@@ -1438,6 +1657,36 @@ export class MapTester extends GVAbstractTester {
 
   // #endregion STATIC METHODS - VIEWPORT BOUNDARY
 }
+
+/** The center, resolution and rotation of a map view. */
+type TypeFullscreenViewState = {
+  /** The view center. */
+  center: Coordinate;
+  /** The view resolution. */
+  resolution: number;
+  /** The view rotation in radians. */
+  rotation: number;
+};
+
+/** The view states observed across fullscreen exit scenarios. */
+type TypeFullscreenViewRestorationResult = {
+  /** The view before entering fullscreen. */
+  initial: TypeFullscreenViewState;
+  /** The view after exiting by the fullscreen button without interaction. */
+  afterButtonExit: TypeFullscreenViewState;
+  /** The view after an Esc-style fullscreenchange without interaction. */
+  afterEscExit: TypeFullscreenViewState;
+  /** The view changed by the test while fullscreen. */
+  expectedInteractiveView: TypeFullscreenViewState;
+  /** The view after exiting fullscreen following interaction. */
+  afterInteractiveExit: TypeFullscreenViewState;
+  /** The view after an interaction followed by a fullscreen size change, just before exiting. */
+  expectedInteractiveResizeView: TypeFullscreenViewState;
+  /** The view after exiting fullscreen following an interaction and a later size change. */
+  afterInteractiveResizeExit: TypeFullscreenViewState;
+  /** Whether a rejected fullscreen request restored the inactive state. */
+  rejectedRequestIsInactive: boolean;
+};
 
 /** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
 type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoResultSetEntry | undefined)[]>;
