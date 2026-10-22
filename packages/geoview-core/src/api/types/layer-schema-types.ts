@@ -1586,9 +1586,19 @@ export type TypeMetadataOGCFeature = {
   collections: TypeMetadataOGCFeatureCollection[];
 };
 
+/** Describes metadata for an OGC API Features collection. */
 export type TypeMetadataOGCFeatureCollection = {
+  /** Collection identifier */
   id: string;
+  /** Collection title */
+  title: string;
+  /** Collection description */
   description: string;
+  /** Collection keywords */
+  keywords: string[];
+  /** The CRS identifiers supported by this collection's items endpoint */
+  crs?: string[];
+  /** The collection extent */
   extent: TypeMetadataOGCFeatureCollectionExtent;
 };
 

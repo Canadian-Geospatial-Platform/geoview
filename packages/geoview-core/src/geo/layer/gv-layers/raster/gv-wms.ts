@@ -1051,21 +1051,55 @@ export class GVWMS extends AbstractGVRaster {
     layerFilters?: LayerFilters,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
+    const outputProjection = Projection.getProjectionFromStringOrNumber(projectionCode);
+    const collectionMetadata = ogcFeatureLayerConfig
+      .getServiceMetadata()
+      ?.collections.find((collection) => collection.id === ogcFeatureLayerConfig.layerId);
+
+    // Request the map CRS only when this collection advertises it; otherwise the GeoJSON reader reprojects client-side.
+    const supportedCrs = collectionMetadata?.crs?.find(
+      (crs) => Projection.getProjectionFromCRS(crs)?.getCode() === outputProjection.getCode()
+    );
     const queryParams = new URLSearchParams({
       f: 'json',
-      // limit: `${this.getGetFeatureInfoFeatureCount()}`,
     });
+
+    if (supportedCrs) queryParams.set('crs', supportedCrs);
 
     if (clickCoordinate && viewResolution) {
       const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
       const mapProjection = Projection.getProjectionFromStringOrNumber(projectionCode);
+      // The default OGC API Features bbox is CRS84, regardless of the requested feature output CRS.
       const bbox = Projection.transformExtentFromProj(bufferedPoint.getExtent(), mapProjection, Projection.getProjectionLonLat());
       queryParams.set('bbox', bbox.join(','));
     }
 
-    const url = `${ogcFeatureLayerConfig.getDataAccessPathProxiedWhenNecessary(true)}collections/${ogcFeatureLayerConfig.layerId}/items?${queryParams}`;
-    const responseData = await Fetch.fetchJson(url, { signal: abortController?.signal });
-    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
+    const url = `${ogcFeatureLayerConfig.getDataAccessPath(true)}collections/${ogcFeatureLayerConfig.layerId}/items?${queryParams}`;
+    const responseData = await Fetch.fetchJson(ogcFeatureLayerConfig.getUrlWithProxyWhenNeeded(url), { signal: abortController?.signal });
+
+    // When the service honored the CRS request, avoid converting from that same CRS a second time.
+    const inputProjection = supportedCrs ? projectionCode : undefined;
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, inputProjection, projectionCode);
+    const requestedPageUrls = new Set([url]);
+    let nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(responseData, url);
+
+    while (nextPageUrl && !requestedPageUrls.has(nextPageUrl)) {
+      requestedPageUrls.add(nextPageUrl);
+
+      // Keep the negotiated CRS on pages whose next link omits the original query parameter.
+      // GV The next page URL comes from the current response, so page requests must be sequential.
+      // eslint-disable-next-line no-await-in-loop
+      const nextPageResponse = await Fetch.fetchJson(ogcFeatureLayerConfig.getUrlWithProxyWhenNeeded(nextPageUrl), {
+        signal: abortController?.signal,
+      });
+
+      // eslint-disable-next-line no-await-in-loop
+      const nextPageFeatures = await GeoUtilities.readFeaturesFromGeoJSON(nextPageResponse, inputProjection, projectionCode);
+      sourceFeaturesInfo.features.push(...nextPageFeatures.features);
+      nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(nextPageResponse, nextPageUrl);
+    }
+
+    // Done fetching the features, time to apply the filters if any
     const filterEquation = layerFilters?.getFilterEquation();
 
     if (filterEquation) {
@@ -1074,6 +1108,7 @@ export class GVWMS extends AbstractGVRaster {
       );
     }
 
+    // Format and return the features
     return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, ogcFeatureLayerConfig, language);
   }
 
@@ -1911,6 +1946,32 @@ export class GVWMS extends AbstractGVRaster {
     // If we have a style, we want to make sure to only get the features for which we have a style
     // If we have no style, we do our best to include any/all features
     return !layerStyle;
+  }
+
+  /**
+   * Resolves the next page URL from an OGC API Features response.
+   *
+   * @param responseData - The OGC API Features response
+   * @param currentPageUrl - The URL of the current page, used to resolve relative links
+   * @returns The absolute next page URL, or undefined when the response has no next link
+   */
+  static #getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: string): string | undefined {
+    if (typeof responseData !== 'object' || responseData === null || !('links' in responseData) || !Array.isArray(responseData.links)) {
+      return undefined;
+    }
+
+    const nextLink = responseData.links.find((link: unknown): link is { rel: 'next'; href: string } => {
+      return (
+        typeof link === 'object' && link !== null && 'rel' in link && link.rel === 'next' && 'href' in link && typeof link.href === 'string'
+      );
+    });
+
+    if (!nextLink) return undefined;
+
+    const nextPageUrl = new URL(nextLink.href, currentPageUrl);
+    const currentPageCrs = new URL(currentPageUrl).searchParams.get('crs');
+    if (currentPageCrs && !nextPageUrl.searchParams.has('crs')) nextPageUrl.searchParams.set('crs', currentPageCrs);
+    return nextPageUrl.toString();
   }
 
   // #endregion STATIC PRIVATE METHODS

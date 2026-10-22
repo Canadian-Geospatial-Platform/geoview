@@ -1,4 +1,9 @@
-﻿import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC } from '@/api/types/layer-schema-types';
+﻿import type {
+  ConfigClassOrType,
+  TypeGeoviewLayerConfig,
+  TypeLayerMetadataOGC,
+  TypeMetadataOGCFeature,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -28,6 +33,15 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    */
   override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide strongly-typed OGC API Features service metadata.
+   *
+   * @returns The service metadata, or undefined if it has not been set
+   */
+  override getServiceMetadata(): TypeMetadataOGCFeature | undefined {
+    return super.getServiceMetadata() as TypeMetadataOGCFeature | undefined;
   }
 
   /**
