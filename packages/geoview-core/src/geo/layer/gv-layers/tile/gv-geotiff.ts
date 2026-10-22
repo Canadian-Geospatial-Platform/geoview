@@ -10,7 +10,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import type { RGBA } from '@/core/utils/utilities';
+import { getGeotiffPaletteStyle } from '@/core/utils/utilities';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -42,7 +42,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
     // If the layer config has an embedded color map, apply the palette style
     if (layerConfig.hasEmbeddedColorMap()) {
-      this.#applyColorMapStyle(layerConfig.getEmbeddedColorMap()!);
+      olLayer.setStyle(getGeotiffPaletteStyle(layerConfig.getEmbeddedColorMap()!));
     }
   }
 
@@ -129,28 +129,6 @@ export class GVGeoTIFF extends AbstractGVTile {
   }
 
   /**
-   * Applies an embedded color palette as a WebGLTile style.
-   *
-   * Makes the nodata index (0) transparent so that pixels outside
-   * the data extent do not render as a solid color.
-   *
-   * @param palette - Array of RGBA color tuples from the GeoTIFF color map.
-   */
-  #applyColorMapStyle(palette: RGBA[]): void {
-    // Make nodata index (0) fully transparent
-    const adjustedPalette = [...palette];
-    adjustedPalette[0] = [0, 0, 0, 0];
-
-    // Convert RGBA tuples to CSS color strings as expected by the OpenLayers palette expression
-    const colorStrings = adjustedPalette.map(([r, g, b, a]) => `rgba(${r},${g},${b},${a / 255})`);
-
-    // Apply the palette style to the WebGLTile layer
-    this.getOLLayer().setStyle({
-      color: ['palette', ['band', 1], colorStrings],
-    });
-  }
-
-  /**
    * Gets the legend image of a layer.
    *
    * @param layerConfig - The layer configuration
@@ -188,8 +166,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
       // If legend image was read
       if (legendImage) {
-        // Create image element directly to avoid recursion
-        // GV: use direct Image constructor to avoid errors using GeoviewRenderer.loadImage
+        // GV: use loadImageFromDataUrl, which throws on failure, rather than GeoviewRenderer.loadImage, which returns null
         const loadedImage = await GeoviewRenderer.loadImageFromDataUrl(legendImage);
 
         // If image was loaded successfully

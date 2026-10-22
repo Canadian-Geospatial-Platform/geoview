@@ -1,4 +1,47 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+import { visuallyHidden } from 'geoview-core/ui/style/default';
+import {
+  FOCUS_OUTLINE_WIDTH,
+  getFocusIndicatorStyles,
+  getFormControlFocusIndicatorStyles,
+} from 'geoview-core/ui/style/themeOptionsGenerator';
+
+/** Default color of the collection extent footprint. */
+export const COLLECTION_COLOR = '#1976d2';
+
+/** Default fill opacity of the collection extent footprint, outline only. */
+export const COLLECTION_FILL_OPACITY = 0;
+
+/** Default color of item footprints. */
+export const ITEM_COLOR = '#FF8C00';
+
+/** Default fill opacity of item footprints shown while browsing a collection or viewing an item, outline only. */
+export const ITEM_FILL_OPACITY = 0;
+
+/** Default fill opacity of search-result footprints, outline only. */
+export const SEARCH_FILL_OPACITY = 0;
+
+/** Colors assigned to the selected items, distinct from the collection and item footprint colors. */
+export const SELECTION_COLORS = ['#e53935', '#43a047', '#fdd835', '#8e24aa', '#00acc1', '#d81b60', '#7cb342', '#5e35b1'];
+
+/** Fill opacity of selected item footprints. */
+export const SELECTED_FILL_OPACITY = 0.25;
+
+/**
+ * Gets the styles of native date and number inputs, which are not InputBase controls and need the shared keyboard focus indicator.
+ *
+ * @param theme - The MUI theme
+ * @returns The native input style definitions
+ */
+const getNativeInputSx = (theme: Theme): ReturnType<typeof getFormControlFocusIndicatorStyles> => ({
+  minWidth: 0,
+  maxWidth: '100%',
+  padding: theme.spacing(0.5),
+  font: 'inherit',
+  '.geoview-keyboard-active &:focus-visible': theme.palette.geoViewColor
+    ? getFormControlFocusIndicatorStyles(theme.palette.geoViewColor)
+    : {},
+});
 
 /**
  * Gets the sx classes for the STAC browser components.
@@ -7,11 +50,24 @@ import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
  * @returns The sx style definitions
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  visuallyHidden,
   mainContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     overflow: 'hidden',
+  },
+  viewContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    // View headings receive programmatic focus only
+    '& [data-stac-view-focus]:focus': { outline: 'none' },
+    '.geoview-keyboard-active & [data-stac-view-focus]:focus-visible': theme.palette.geoViewColor
+      ? getFocusIndicatorStyles(theme.palette.geoViewColor)
+      : {},
   },
   panelContent: {
     display: 'flex',
@@ -65,6 +121,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
     },
+    // Tabs touch the clipped panel edges, so the focus indicator is drawn inside them
+    '&:focus-visible, &.Mui-focusVisible': {
+      outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
+      boxShadow: 'none',
+    },
   },
   modeButtonActive: {
     borderBottom: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
@@ -81,6 +142,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   searchButton: {
     marginTop: 'auto',
   },
+  filterActions: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: theme.spacing(1),
+    marginTop: 'auto',
+    '& > button': {
+      flex: 1,
+    },
+  },
   filterRow: {
     display: 'flex',
     flexDirection: 'column',
@@ -91,8 +161,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.geoViewColor?.textColor.main,
   },
+  propertyFilterRow: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)',
+    gap: theme.spacing(0.75),
+    alignItems: 'center',
+    '& > .MuiFormControl-root': {
+      minWidth: 0,
+    },
+    '& > input': getNativeInputSx(theme),
+  },
   resultsList: {
     padding: theme.spacing(1),
+  },
+  itemList: {
+    listStyle: 'none',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0),
   },
   resultCard: {
     display: 'flex',
@@ -149,6 +234,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.action.hover,
     },
   },
+  assetItemSelected: {
+    backgroundColor: theme.palette.action.selected,
+  },
+  assetTitleSelected: {
+    fontWeight: 600,
+  },
   loading: {
     display: 'flex',
     justifyContent: 'center',
@@ -168,10 +259,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     padding: theme.spacing(1),
   },
+  pageRange: {
+    marginLeft: 'auto',
+    alignSelf: 'center',
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
   dateInputRow: {
     display: 'flex',
     gap: theme.spacing(1),
     alignItems: 'center',
+    '& > input': { ...getNativeInputSx(theme), flex: 1 },
   },
   containedInExtentCheckbox: {
     marginLeft: theme.spacing(0.25),
@@ -186,6 +283,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   collectionsListBox: {
     maxHeight: 150,
     overflow: 'auto',
+    // Room for the checkbox focus indicator, which the scroll container would otherwise clip
+    padding: theme.spacing(1.5),
+    '& .MuiFormControlLabel-root': { marginLeft: 0 },
   },
   detailSection: {
     padding: theme.spacing(0, 1.5),
@@ -198,9 +298,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   // Collection card styles
+  collectionList: {
+    listStyle: 'none',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0),
+  },
   collectionCard: {
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '100%',
+    textAlign: 'left',
+    font: 'inherit',
+    color: 'inherit',
     gap: theme.spacing(0.5),
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
@@ -212,14 +322,34 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   collectionTitle: {
+    display: 'block',
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.geoViewColor?.textColor.main,
   },
   collectionDescription: {
+    display: 'block',
     fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.geoViewColor?.textColor.light[200],
     lineHeight: 1.4,
+  },
+  collectionSearchField: {
+    flex: 1,
+    // The floating label sits on the focus outline, so it needs an opaque background to stay readable
+    '.geoview-keyboard-active & .MuiInputLabel-shrink.Mui-focused': {
+      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
+      padding: theme.spacing(0, 0.5),
+      marginLeft: theme.spacing(-0.5),
+    },
+  },
+  sortToggle: {
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    backgroundColor: 'transparent',
+    borderRadius: theme.shape.borderRadiusSm,
+    '&[aria-pressed="true"]': {
+      color: theme.palette.geoViewColor?.primary.main,
+      backgroundColor: theme.palette.action.selected,
+    },
   },
 
   // Keyword chips
@@ -231,7 +361,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   keywordChip: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 1),
-    fontSize: '0.75rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.geoViewColor?.textColor.main,
     whiteSpace: 'nowrap',
@@ -243,22 +373,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     gap: theme.spacing(1),
     padding: theme.spacing(0, 1.5, 1),
-  },
-  metadataColumnsRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-    padding: theme.spacing(0, 1.5, 1),
-    '@media (min-width: 500px)': {
-      flexDirection: 'row',
-    },
-  },
-  metadataColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(1),
-    flex: 1,
-    minWidth: 0,
   },
   metadataRow: {
     display: 'flex',
@@ -281,17 +395,80 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.geoViewColor?.textColor.main,
     marginBottom: theme.spacing(0.5),
   },
-  itemRow: {
+  itemCard: {
     display: 'flex',
+    flexDirection: 'column',
     gap: theme.spacing(0.5),
-    padding: theme.spacing(0.75, 0.5),
-    marginBottom: theme.spacing(2),
+    padding: theme.spacing(0.75, 1, 0.5, 0.5),
+    marginBottom: theme.spacing(1),
     border: `1px solid ${theme.palette.divider}`,
-    cursor: 'pointer',
+    borderLeftWidth: 5,
+  },
+  itemCardHeader: {
+    display: 'flex',
+    gap: theme.spacing(1),
+    alignItems: 'flex-start',
+  },
+  itemCheckbox: {
+    padding: theme.spacing(0.25),
+  },
+  itemSummary: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    columnGap: theme.spacing(1.5),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.light[200],
+  },
+  itemSummaryLabel: {
+    fontWeight: 600,
+  },
+  itemCardActions: {
+    display: 'flex',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
+    gap: theme.spacing(0.25, 0.5),
+    '& .MuiButton-root': {
+      fontSize: theme.palette.geoViewFontSize?.sm,
+      minWidth: 0,
+      padding: theme.spacing(0.25, 0.75),
     },
+  },
+  selectionBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing(1),
+    padding: theme.spacing(0.5, 1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.action.hover,
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    flexShrink: 0,
+  },
+
+  // Metadata key/value view
+  metadataGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(90px, 35%) 1fr',
+    columnGap: theme.spacing(1),
+    rowGap: theme.spacing(0.25),
+    margin: theme.spacing(0),
+    padding: theme.spacing(0.5, 0.5, 0.5, 1),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+  metadataPair: {
+    display: 'contents',
+  },
+  metadataKey: {
+    fontWeight: 600,
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.main,
+    overflowWrap: 'anywhere',
+  },
+  metadataValue: {
+    margin: theme.spacing(0),
+    fontSize: theme.palette.geoViewFontSize?.sm,
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    overflowWrap: 'anywhere',
   },
   itemRowText: {
     display: 'flex',
@@ -309,7 +486,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetTypeBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: '0.7rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     fontWeight: 600,
     borderRadius: theme.shape.borderRadiusSm,
     backgroundColor: theme.palette.geoViewColor?.primary.main,
@@ -319,7 +496,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetRoleBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: '0.65rem',
+    fontSize: theme.palette.geoViewFontSize?.xs,
     fontWeight: 500,
     borderRadius: theme.shape.borderRadiusSm,
     border: `1px solid ${theme.palette.divider}`,

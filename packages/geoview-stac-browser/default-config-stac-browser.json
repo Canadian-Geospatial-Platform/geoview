@@ -1,13 +1,28 @@
 {
   "stacUrl": "https://datacube.services.geo.ca/stac/api",
+  "browseEnabled": true,
+  "defaultMode": "browse",
   "filters": {
     "collections": true,
     "temporal": true,
     "spatial": true,
-    "keyword": true
+    "keyword": true,
+    "sort": true
   },
   "defaults": {
+    "useMapExtent": false,
+    "containedInExtent": false,
     "limit": 20
+  },
+  "footprintStyles": {
+    "collection": {
+      "color": "#1976d2",
+      "fillOpacity": 0
+    },
+    "search": {
+      "color": "#FF8C00",
+      "fillOpacity": 0
+    }
   },
   "displayPreview": true,
   "isOpen": false,

@@ -1260,6 +1260,59 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Collects every position of a GeoJSON geometry, including the members of a GeometryCollection.
+   *
+   * @param geometry - The GeoJSON geometry value to read
+   * @returns The 2D positions of the geometry, or an empty array when the value is not a GeoJSON geometry
+   */
+  static getGeoJsonCoordinates(geometry: unknown): Coordinate[] {
+    const coordinates: Coordinate[] = [];
+    const visitCoordinates = (value: unknown): void => {
+      if (!Array.isArray(value)) return;
+      if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
+        coordinates.push([value[0], value[1]]);
+        return;
+      }
+      value.forEach(visitCoordinates);
+    };
+    const visitGeometry = (value: unknown): void => {
+      if (!value || typeof value !== 'object') return;
+      const geoJson = value as { coordinates?: unknown; geometries?: unknown };
+      if (geoJson.coordinates !== undefined) visitCoordinates(geoJson.coordinates);
+      if (Array.isArray(geoJson.geometries)) geoJson.geometries.forEach(visitGeometry);
+    };
+
+    visitGeometry(geometry);
+    return coordinates;
+  }
+
+  /**
+   * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
+   *
+   * @param geometry - GeoJSON geometry value
+   * @returns Polygons as arrays of valid rings, in the GeoJSON coordinate order
+   */
+  static getGeoJsonPolygons(geometry: unknown): [number, number][][][] {
+    if (!geometry || typeof geometry !== 'object') return [];
+    const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
+
+    if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+      return geoJson.geometries.flatMap((child) => GeoUtilities.getGeoJsonPolygons(child));
+    }
+
+    if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
+      const rings = GeoUtilities.#readGeoJsonRings(geoJson.coordinates);
+      return rings.length ? [rings] : [];
+    }
+
+    if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
+      return geoJson.coordinates.flatMap((polygon) => GeoUtilities.getGeoJsonPolygons({ type: 'Polygon', coordinates: polygon }));
+    }
+
+    return [];
+  }
+
+  /**
    * Extracts the EPSG code from a GeoJSON object's CRS definition.
    *
    * Accepts either a GeoJSON object or a JSON string. If the GeoJSON contains
@@ -1680,7 +1733,24 @@ export abstract class GeoUtilities {
     return cleanedFeatures;
   }
 
-  // #endregion GEOMETRY - PRIVATE METHODS
+  /**
+   * Reads the valid rings of GeoJSON Polygon coordinates.
+   *
+   * @param coordinates - GeoJSON Polygon coordinates
+   * @returns Rings with at least four valid coordinates
+   */
+  static #readGeoJsonRings(coordinates: unknown[]): [number, number][][] {
+    return coordinates.flatMap((ring) => {
+      if (!Array.isArray(ring)) return [];
+      const points = ring.filter(
+        (coordinate): coordinate is [number, number] =>
+          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
+      );
+      return points.length >= 4 ? [points] : [];
+    });
+  }
+
+  // #endregion GEOMETRY PRIVATE
 
   // #region VARIA
 
@@ -1923,6 +1993,18 @@ export abstract class GeoUtilities {
     )
       return true;
     return false;
+  }
+
+  /**
+   * Converts a 2D or 3D GeoJSON bbox to a 2D extent.
+   *
+   * @param bbox - A bbox ordered as [minX, minY, maxX, maxY] or [minX, minY, minZ, maxX, maxY, maxZ]
+   * @returns The 2D extent [minX, minY, maxX, maxY], or undefined when the bbox length is unsupported
+   */
+  static bboxToExtent2D(bbox?: number[]): [number, number, number, number] | undefined {
+    if (bbox?.length === 4) return [bbox[0], bbox[1], bbox[2], bbox[3]];
+    if (bbox?.length === 6) return [bbox[0], bbox[1], bbox[3], bbox[4]];
+    return undefined;
   }
 
   // #endregion EXTENT

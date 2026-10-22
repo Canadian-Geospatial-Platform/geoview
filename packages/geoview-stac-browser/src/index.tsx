@@ -1,10 +1,13 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
+
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { StacBrowserIcon } from 'geoview-core/ui/icons';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+
 import type { StacBrowserConfig } from './stac-browser-types';
 import { StacBrowser } from './stac-browser';
+
 import schema from '../schema.json';
 import defaultConfig from '../default-config-stac-browser.json';
 
@@ -12,6 +15,8 @@ import defaultConfig from '../default-config-stac-browser.json';
  * STAC Browser plugin — provides a panel for browsing and filtering STAC API catalogs.
  */
 class StacBrowserPlugin extends AppBarPlugin {
+  // #region OVERRIDES
+
   /**
    * Returns the schema that is defined for this package.
    *
@@ -43,12 +48,18 @@ class StacBrowserPlugin extends AppBarPlugin {
           browse: 'Browse',
           search: 'Search',
           temporal: 'Temporal Extent',
+          present: 'present',
+          startDate: 'Start date',
+          endDate: 'End date',
+          modeSelector: 'Browse or search mode',
           keywords: 'Keywords',
           license: 'License',
           items: 'Items',
           noResults: 'No results found',
+          noMatchesYet: 'No matching items in the pages checked so far. Select Next to keep searching.',
           showOnMap: 'Show on Map',
           zoomToExtent: 'Zoom to Extent',
+          zoomToSearch: 'Zoom to search',
           assets: 'Assets',
           useMapExtent: 'Use current map extent',
           containedInExtent: 'Fully contained in extent',
@@ -60,21 +71,44 @@ class StacBrowserPlugin extends AppBarPlugin {
           readLess: 'Read less',
           previous: 'Previous',
           next: 'Next',
-          datetime: 'Date',
-          collection: 'Collection',
-          general: 'General',
-          created: 'Created',
-          updated: 'Updated',
-          projection: 'Projection',
-          epsgCode: 'EPSG Code',
-          imageDimensions: 'Image Dimensions',
-          transform: 'Transform',
           searchCollections: 'Search collections...',
           sortAlphabetical: 'Sort alphabetically',
           goToCollection: 'Go to Collection',
           textSearch: 'Text Search',
-          copyUrl: 'Copy URL',
-          download: 'Download',
+          collections: 'Collections',
+          clearFilters: 'Clear filters',
+          propertyFilters: 'Property filters',
+          propertyOperator: '{{field}} operator',
+          propertyValue: '{{field}} value',
+          anyValue: 'Any value',
+          noQueryableProperties: 'No queryable properties are available for this selection.',
+          sort: 'Sort',
+          sortField: 'Sort field',
+          sortDirection: 'Sort direction',
+          ascending: 'Ascending',
+          descending: 'Descending',
+          metadata: 'Metadata',
+          zoom: 'Zoom',
+          zoomOf: 'Zoom: {{title}}',
+          details: 'Details',
+          detailsOf: 'Details: {{title}}',
+          highlightFootprint: 'Highlight the footprint of {{title}} on the map',
+          selectionSummary: '{{selected}} selected, {{previewed}} on map',
+          clear: 'Clear',
+          searchResults: 'Search results',
+          itemRange: 'Items {{start}} to {{end}}',
+          itemsShown: '{{count}} items shown',
+          noCollectionsFound: 'No collections found',
+          collectionFound: '{{count}} collection found',
+          collectionsFound: '{{count}} collections found',
+          showOnMapOf: 'Show on map: {{title}}',
+          copyUrlOf: 'Copy URL: {{title}}',
+          downloadOf: 'Download: {{title}}',
+          urlCopied: 'URL copied to the clipboard.',
+          errorCopy: 'Unable to copy the URL.',
+          errorRequest: 'Unable to get a response from the STAC service. Please try again later.',
+          errorPreview: 'Unable to display this asset on the map.',
+          errorQueryables: 'Unable to load the available property filters.',
         },
       },
       fr: {
@@ -83,12 +117,18 @@ class StacBrowserPlugin extends AppBarPlugin {
           browse: 'Parcourir',
           search: 'Rechercher',
           temporal: 'Étendue temporelle',
+          present: 'présent',
+          startDate: 'Date de début',
+          endDate: 'Date de fin',
+          modeSelector: 'Mode parcourir ou rechercher',
           keywords: 'Mots-clés',
           license: 'Licence',
           items: 'Éléments',
           noResults: 'Aucun résultat trouvé',
+          noMatchesYet: `Aucun élément correspondant dans les pages vérifiées jusqu'ici. Sélectionnez Suivant pour continuer la recherche.`,
           showOnMap: 'Afficher sur la carte',
           zoomToExtent: `Zoomer sur l'étendue`,
+          zoomToSearch: `Zoomer sur l'étendue de recherche`,
           assets: 'Actifs',
           useMapExtent: "Utiliser l'étendue actuelle de la carte",
           containedInExtent: "Entièrement contenu dans l'étendue",
@@ -100,21 +140,44 @@ class StacBrowserPlugin extends AppBarPlugin {
           readLess: 'Réduire',
           previous: 'Précédent',
           next: 'Suivant',
-          datetime: 'Date',
-          collection: 'Collection',
-          general: 'Général',
-          created: 'Créé',
-          updated: 'Mis à jour',
-          projection: 'Projection',
-          epsgCode: 'Code EPSG',
-          imageDimensions: "Dimensions de l'image",
-          transform: 'Transformation',
           searchCollections: 'Rechercher des collections...',
           sortAlphabetical: 'Trier par ordre alphabétique',
           goToCollection: 'Aller à la collection',
           textSearch: 'Recherche textuelle',
-          copyUrl: "Copier l'URL",
-          download: 'Télécharger',
+          collections: 'Collections',
+          clearFilters: 'Effacer les filtres',
+          propertyFilters: 'Filtres de propriété',
+          propertyOperator: 'Opérateur {{field}}',
+          propertyValue: 'Valeur {{field}}',
+          anyValue: 'Toutes les valeurs',
+          noQueryableProperties: 'Aucune propriété interrogeable n’est disponible pour cette sélection.',
+          sort: 'Trier',
+          sortField: 'Champ de tri',
+          sortDirection: 'Ordre de tri',
+          ascending: 'Croissant',
+          descending: 'Décroissant',
+          metadata: 'Métadonnées',
+          zoom: 'Zoomer',
+          zoomOf: 'Zoomer : {{title}}',
+          details: 'Détails',
+          detailsOf: 'Détails : {{title}}',
+          highlightFootprint: `Mettre en évidence l'empreinte de {{title}} sur la carte`,
+          selectionSummary: '{{selected}} sélectionné(s), {{previewed}} sur la carte',
+          clear: 'Effacer',
+          searchResults: 'Résultats de recherche',
+          itemRange: 'Éléments {{start}} à {{end}}',
+          itemsShown: '{{count}} éléments affichés',
+          noCollectionsFound: 'Aucune collection trouvée',
+          collectionFound: '{{count}} collection trouvée',
+          collectionsFound: '{{count}} collections trouvées',
+          showOnMapOf: 'Afficher sur la carte : {{title}}',
+          copyUrlOf: `Copier l'URL : {{title}}`,
+          downloadOf: 'Télécharger : {{title}}',
+          urlCopied: 'URL copiée dans le presse-papiers.',
+          errorCopy: `Impossible de copier l'URL.`,
+          errorRequest: 'Impossible d’obtenir une réponse du service STAC. Veuillez réessayer plus tard.',
+          errorPreview: 'Impossible d’afficher cet actif sur la carte.',
+          errorQueryables: 'Impossible de charger les filtres de propriété disponibles.',
         },
       },
     };
@@ -165,13 +228,15 @@ class StacBrowserPlugin extends AppBarPlugin {
    * @returns The JSX.Element representing the STAC Browser panel content
    */
   override onCreateContent = (): JSX.Element => {
-    return <StacBrowser config={this.getConfig()} mapId={this.mapViewer.mapId} />;
+    return <StacBrowser config={this.getConfig()} />;
   };
 
   /**
    * Handles cleanup when the plugin is removed.
    */
   override onRemoved(): void {}
+
+  // #endregion OVERRIDES
 }
 
 export default StacBrowserPlugin;

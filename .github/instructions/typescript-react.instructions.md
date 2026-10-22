@@ -1,6 +1,6 @@
 ---
 description: TypeScript/React conventions for GeoView source (types, hooks, memo, errors, helpers)
-applyTo: 'packages/**/*.{ts,tsx}'
+applyTo: "packages/**/*.{ts,tsx}"
 ---
 
 Canonical sections in [best-practices.md](../../docs/programming/best-practices.md) (search the named heading and read only that section):
@@ -11,4 +11,5 @@ Helper/error routing: [typescript-react.md](../ai/typescript-react.md) → **Sou
 - No unexplained any; explicit returns include callbacks/memos. Respect DOM versus mutable refs.
 - Memo values use memo prefix; dependencies reflect actual use; memoization needs concrete benefit.
 - Use existing Fetch/timing/DOM helpers and narrow catches; do not duplicate shared logic.
+- Alias imports whose name matches or closely resembles a local member (e.g. `loadImage as loadImageFromUtils`).
 - Method size/complexity thresholds are review signals, not hard caps or mandatory file splitting.
