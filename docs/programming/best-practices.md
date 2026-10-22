@@ -172,8 +172,8 @@ When you spread two objects in the same object, sooner or later you run the risk
 object to an attribute in order to partition their contents rather than cramming everything in the same level.
 
 ```ts
-const object1 = { a: 'a', collision: 1 };
-const object2 = { b: 'b', collision: 2 };
+const object1 = { a: "a", collision: 1 };
+const object2 = { b: "b", collision: 2 };
 
 // Here, we have a collision and loose value of object1.collision
 const spredingCollision = { ...object1, ...object2 };
@@ -202,20 +202,20 @@ We do the import statement in the following order
 We add an empty line between each group of import from different category
 
 ```ts
-import { useRef, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
+import { useRef, useEffect } from "react";
+import { createRoot } from "react-dom/client";
 
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 
-import View, { ViewOptions } from 'ol/View';
+import View, { ViewOptions } from "ol/View";
 
-import { Box, Card, CardHeader, CardContent, Divider, IconButton } from '@/ui';
-import { CloseIcon } from '@/ui';
-import { logger } from '@/core/utils/logger';
-import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
-import { Plugin } from '@/api/plugin/plugin';
+import { Box, Card, CardHeader, CardContent, Divider, IconButton } from "@/ui";
+import { CloseIcon } from "@/ui";
+import { logger } from "@/core/utils/logger";
+import type { EsriBaseRenderer } from "@/geo/utils/renderer/esri-renderer";
+import { Plugin } from "@/api/plugin/plugin";
 ```
 
 **Note:** MUI UI components (`Box`, `Typography`, `IconButton`, etc.) and icons must be imported from `@/ui`, never directly from `@mui/material` or `@mui/icons-material`. MUI hooks and utilities (`useTheme`, `useMediaQuery`) are imported directly from `@mui/material` or `@mui/material/styles`.
@@ -223,7 +223,18 @@ import { Plugin } from '@/api/plugin/plugin';
 **Note:** For import from a packacge outside of core use
 
 ```ts
-import { logger } from 'geoview-core/core/utils/logger';
+import { logger } from "geoview-core/core/utils/logger";
+```
+
+**Note:** Alias an import when its name is identical or too similar to a function, method or variable declared in the same file, so it is clear which one is called.
+
+```ts
+// Good: GeoviewRenderer.loadImage wraps the shared helper, which keeps a distinct name
+import { loadImage as loadImageFromUtils } from '@/core/utils/utilities';
+
+static loadImage(src: string): Promise<HTMLImageElement | null> {
+  return loadImageFromUtils(src).catch(() => null);
+}
 ```
 
 ## 8- How we order code at the beginning of a component
@@ -304,7 +315,10 @@ It should NOT:
  * @returns A promise that resolves with the parsed layer metadata object
  * @throws {LayerNotGeoJsonError} When an error to ...
  */
-async function fetchMetadata(geoviewLayerId: string, signal?: AbortSignal): Promise<LayerMetadata> {}
+async function fetchMetadata(
+  geoviewLayerId: string,
+  signal?: AbortSignal,
+): Promise<LayerMetadata> {}
 ```
 
 Tags Worth Using
@@ -465,7 +479,9 @@ export class MyController extends AbstractMapViewerController {
 
 // #region EVENT TYPES
 type MyDelegate = EventDelegateBase<MyController, MyEvent, void>;
-export type MyEvent = {/* … */};
+export type MyEvent = {
+  /* … */
+};
 // #endregion EVENT TYPES
 ```
 
@@ -498,7 +514,7 @@ This naming is required for consistency and readability across the codebase. The
 ```ts
 // ✅ Good: EventHelper delegate naming convention
 this.getMapViewer().onMapMoveEnd((sender, event): void => {
-  logger.logDebug('Map moved', event.lonlat);
+  logger.logDebug("Map moved", event.lonlat);
 });
 
 // ✅ Also good when one parameter is intentionally unused
@@ -675,9 +691,9 @@ Multiple GeoView maps can live on the same HTML page. Every DOM id must therefor
 DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Build ids through the helper so the convention lives in one place:
 
 ```ts
-import { buildGVElementId } from '@/core/utils/dom-helper';
+import { buildGVElementId } from "@/core/utils/dom-helper";
 
-const id = buildGVElementId(mapId, 'shell'); // → "map1-shell"
+const id = buildGVElementId(mapId, "shell"); // → "map1-shell"
 ```
 
 ### The wrappers (`@/core/utils/dom-helper`)
@@ -699,9 +715,13 @@ const el = document.getElementById(`${mapId}-appBar`);
 const tab = document.querySelector('[role="tab"][aria-selected="true"]');
 
 // ✅ Good: map-scoped wrappers
-import { getGVElementById, getGVElementByFullId, queryGVSelector } from '@/core/utils/dom-helper';
+import {
+  getGVElementById,
+  getGVElementByFullId,
+  queryGVSelector,
+} from "@/core/utils/dom-helper";
 
-const el = getGVElementById(mapId, 'appBar'); // suffix → builds "map1-appBar", scoped
+const el = getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
 const btn = getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
 const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 ```
@@ -711,11 +731,11 @@ const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 In React components, prefer the reactive hook, which is backed by the store's root element (`useStoreAppGeoviewHTMLElement`). It returns a stable `(suffix) => HTMLElement | undefined` function:
 
 ```tsx
-import { useGVElementById } from '@/core/stores/states/app-state';
+import { useGVElementById } from "@/core/stores/states/app-state";
 
 const getElementById = useGVElementById();
 // ...later, in an effect/handler:
-getElementById('footerbar-header')?.focus();
+getElementById("footerbar-header")?.focus();
 ```
 
 ### Root element vs. specific descendant — which API?

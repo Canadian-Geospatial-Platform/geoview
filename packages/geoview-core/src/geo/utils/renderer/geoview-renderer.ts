@@ -13,7 +13,7 @@ import Feature from 'ol/Feature';
 import { toContext } from 'ol/render';
 import type { SketchCoordType } from 'ol/interaction/Draw';
 
-import { loadImage, setAlphaColor } from '@/core/utils/utilities';
+import { loadImage as loadImageFromUtils, setAlphaColor } from '@/core/utils/utilities';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type {
@@ -367,7 +367,7 @@ export abstract class GeoviewRenderer {
    * @returns A promise that resolves with the loaded image, or null if loading fails
    */
   static loadImage(src: string): Promise<HTMLImageElement | null> {
-    return loadImage(src).catch((error: unknown) => {
+    return loadImageFromUtils(src).catch((error: unknown) => {
       logger.logError('GeoviewRenderer.loadImage - Error while loading the src image =', src, error);
       return null;
     });
@@ -381,7 +381,7 @@ export abstract class GeoviewRenderer {
    * @throws {Error} When the image fails to load
    */
   static loadImageFromDataUrl(src: string): Promise<HTMLImageElement> {
-    return loadImage(src);
+    return loadImageFromUtils(src);
   }
 
   /**
