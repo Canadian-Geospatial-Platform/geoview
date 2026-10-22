@@ -77,7 +77,7 @@ export abstract class StacFieldUtils {
    *
    * @param value - The value to format
    * @param format - Optional display format, defaults to "text"
-   * @param dateDisplay - Optional map date settings, defaults to ISO dates in UTC
+   * @param dateDisplay - Optional map display settings for dates and number locale, defaults to English ISO dates in UTC
    * @returns The formatted value, or an empty string when the value is empty
    */
   static formatValue(value: unknown, format: StacFieldFormat = 'text', dateDisplay: StacDateDisplayOptions = DEFAULT_DATE_DISPLAY): string {
@@ -92,7 +92,7 @@ export abstract class StacFieldUtils {
           dateDisplay
         );
       case 'number':
-        return typeof value === 'number' ? value.toLocaleString() : String(value);
+        return typeof value === 'number' ? value.toLocaleString(dateDisplay.language) : String(value);
       case 'epsg':
         return String(value).toUpperCase().startsWith('EPSG:') ? String(value) : `EPSG:${String(value)}`;
       case 'json':

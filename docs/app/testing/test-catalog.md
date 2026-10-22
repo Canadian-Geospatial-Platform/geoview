@@ -881,9 +881,8 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 3   | `testSwiperPerLayerSides`           | test | Test Swiper per-layer side semantics...                                                  |
 | 4   | `testSwiperProgressiveRegistration` | test | Test Swiper progressive layer registration...                                            |
 | 5   | `testSwiperConfigPersistence`       | test | Test Swiper interactive configuration persistence...                                     |
-| 6   | `testSwiperSettingsGating`          | test | Test Swiper settings-panel gating...                                                     |
-
-`testSwiperHoverSuppression` also exists on the tester but is not currently registered in the full suite; it is excluded from the suite total.
+| 6   | `testSwiperHoverSuppression`        | test | Test Swiper hover-query suppression over the bar and handle...                           |
+| 7   | `testSwiperSettingsGating`          | test | Test Swiper settings-panel gating...                                                     |
 
 ---
 

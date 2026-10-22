@@ -166,7 +166,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
       // If legend image was read
       if (legendImage) {
-        // Create image element directly to avoid recursion
+        // GV: use loadImageFromDataUrl, which throws on failure, rather than GeoviewRenderer.loadImage, which returns null
         const loadedImage = await GeoviewRenderer.loadImageFromDataUrl(legendImage);
 
         // If image was loaded successfully

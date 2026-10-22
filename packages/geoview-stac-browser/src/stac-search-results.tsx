@@ -180,7 +180,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
         )}
         {!isLoading && results.features.length === 0 && (
           <Box sx={memoSxClasses.noResults}>
-            <Typography>{t('stacBrowser.noResults')}</Typography>
+            <Typography>{t(hasNext ? 'stacBrowser.noMatchesYet' : 'stacBrowser.noResults')}</Typography>
           </Box>
         )}
       </Box>

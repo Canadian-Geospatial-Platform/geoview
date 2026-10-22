@@ -463,8 +463,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             setSearchContainedExtent(containedExtent);
             setSearchResultPages([result]);
             applySearchResult(result, 1);
-            if (result.features.length > 0) isViewFocusRequestedRef.current = true;
-            setView(result.features.length > 0 ? 'search-results' : 'search');
+            const hasResults = result.features.length > 0 || !!StacApiService.getPageLink(result, 'next');
+            if (hasResults) isViewFocusRequestedRef.current = true;
+            setView(hasResults ? 'search-results' : 'search');
           }
         } catch (error: unknown) {
           // UI boundary: report the failed request to the user
@@ -766,7 +767,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             isPropertyFilterSupported={!!capabilities?.cql2Json}
             isSortSupported={!!capabilities?.searchSort}
             isSearching={isLoading}
-            hasNoResults={searchResult?.features.length === 0}
+            hasNoResults={searchResult?.features.length === 0 && !nextPageLink}
             filterState={filterPanelState}
             setFilterState={setFilterPanelState}
             onClearFilters={handleClearFilters}

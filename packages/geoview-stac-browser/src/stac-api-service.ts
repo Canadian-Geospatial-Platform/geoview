@@ -19,6 +19,9 @@ import type {
 /** Default number of items per page when not configured. */
 export const DEFAULT_PAGE_LIMIT = 20;
 
+/** Maximum number of API pages fetched to assemble one page of fully contained items. */
+const MAX_CONTAINED_API_PAGES = 10;
+
 /** Capabilities assumed when the server landing page cannot be read. */
 const FALLBACK_CAPABILITIES: StacCapabilities = { freeText: false, searchSort: false, itemsSort: false, cql2Json: false };
 
@@ -297,7 +300,9 @@ export class StacApiService {
   }
 
   /**
-   * Builds one full UI page of strict-contained matches, consuming subsequent API pages as needed.
+   * Builds one UI page of strict-contained matches, consuming subsequent API pages as needed.
+   *
+   * Stops after MAX_CONTAINED_API_PAGES API pages, so a page can hold fewer items while a next cursor remains.
    *
    * @param bufferedItems - Items already fetched and not yet tested or returned
    * @param nextRawLink - Next raw API page to inspect
@@ -315,10 +320,12 @@ export class StacApiService {
     const matchingItems = bufferedItems.filter((item) => StacFieldUtils.isItemWithinExtent(item, extent));
 
     let rawLink = nextRawLink;
-    while (matchingItems.length < pageSize && rawLink) {
+    let fetchedPages = 0;
+    while (matchingItems.length < pageSize && rawLink && fetchedPages < MAX_CONTAINED_API_PAGES) {
       // The next cursor depends on the response from the previous page.
       // eslint-disable-next-line no-await-in-loop
       const rawPage = await StacApiService.#fetchRawSearchPage(rawLink, params);
+      fetchedPages++;
       rawLink = StacApiService.getPageLink(rawPage, 'next');
       matchingItems.push(...rawPage.features.filter((item) => StacFieldUtils.isItemWithinExtent(item, extent)));
     }

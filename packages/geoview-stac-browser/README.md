@@ -91,6 +91,8 @@ Set `searchDescription` to custom text shown at the top of the search form; omit
 
 `defaults.useMapExtent` and `defaults.containedInExtent` pre-select the spatial checkboxes without submitting a search. The current map extent is read when the user searches, so moving the map before searching uses the new extent. Users can change either checkbox; Clear filters restores the configured defaults. When `filters.spatial` is false, the map extent is not selected.
 
+Fully contained results are filtered in the browser. Each results page checks at most 10 API pages, so a page can show fewer items, or none, while **Next** keeps searching.
+
 ### Queryable property filters and sorting
 
 When the STAC API advertises CQL2 JSON and `filters.properties` is enabled, the browser loads catalog `/queryables` or the selected collections' `/queryables` endpoints. It creates type-aware controls for scalar fields and sends them as a CQL2 JSON `filter` with `filter-lang: cql2-json`. With multiple collections selected, only fields shared by every selected collection are offered. Geometry queryables are omitted; use the map extent control for spatial searches.

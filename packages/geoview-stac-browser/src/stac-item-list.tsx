@@ -48,6 +48,17 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
   );
 
   /**
+   * Handles a show-on-map switch change.
+   */
+  const handleTogglePreview = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      const item = items.find((listItem) => StacFieldUtils.getItemKey(listItem) === event.target.name);
+      if (item) onTogglePreview(item);
+    },
+    [items, onTogglePreview]
+  );
+
+  /**
    * Handles a card action button click.
    */
   const handleAction = useCallback(
@@ -56,10 +67,9 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
       const item = items.find((listItem) => StacFieldUtils.getItemKey(listItem) === itemKey);
       if (!item) return;
       if (action === 'zoom') onZoom(item);
-      else if (action === 'preview') onTogglePreview(item);
       else if (action === 'detail') onOpenDetail(item);
     },
-    [items, onZoom, onTogglePreview, onOpenDetail]
+    [items, onZoom, onOpenDetail]
   );
 
   // #endregion
@@ -78,6 +88,7 @@ export function StacItemList(props: StacItemListProps): JSX.Element {
             isPreviewed={!!previewedHrefs[itemKey]}
             sxClasses={sxClasses}
             onToggleSelected={handleToggleSelected}
+            onTogglePreview={handleTogglePreview}
             onAction={handleAction}
           />
         );

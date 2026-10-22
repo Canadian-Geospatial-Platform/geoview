@@ -62,9 +62,6 @@ export class StacBrowserController extends AbstractMapViewerController {
   /** Pending preview requests, used to discard stale layers after replacement or unhook. */
   #overlayRequests = new Map<string, symbol>();
 
-  /** Footprint keys already drawn in each geometry group, used to avoid painting exact duplicates. */
-  #footprintKeysByGroup = new Map<string, Set<string>>();
-
   /**
    * Creates an instance of StacBrowserController.
    *
@@ -104,7 +101,6 @@ export class StacBrowserController extends AbstractMapViewerController {
     this.clearFootprints(groupId);
     const geometryApi = this.getGeometryApi();
     const footprintKeys = new Set<string>();
-    this.#footprintKeysByGroup.set(groupId, footprintKeys);
 
     footprints.forEach((footprint) => {
       const footprintKey = StacBrowserController.#getFootprintKey(footprint);
@@ -142,7 +138,6 @@ export class StacBrowserController extends AbstractMapViewerController {
   clearFootprints(groupId: string): void {
     const geometryApi = this.getGeometryApi();
     if (geometryApi.hasGeometryGroup(groupId)) geometryApi.deleteGeometryGroup(groupId);
-    this.#footprintKeysByGroup.delete(groupId);
   }
 
   /**

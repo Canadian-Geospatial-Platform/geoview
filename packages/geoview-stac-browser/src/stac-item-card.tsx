@@ -1,8 +1,8 @@
-import { memo, useId } from 'react';
+import { memo } from 'react';
 
 import type { SxProps, SxStyles } from 'geoview-core/ui/style/types';
-import { Box, Button, Checkbox, Tooltip, Typography } from 'geoview-core/ui';
-import { ChevronRightIcon, MapIcon, VisibilityIcon, ZoomInSearchIcon } from 'geoview-core/ui/icons';
+import { Box, Button, Checkbox, Switch, Tooltip, Typography } from 'geoview-core/ui';
+import { ChevronRightIcon, ZoomInSearchIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
@@ -27,7 +27,9 @@ interface StacItemCardProps {
   sxClasses: SxStyles;
   /** Callback when the selection checkbox changes; the stable item identity is the checkbox name. */
   onToggleSelected: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  /** Callback for the map/detail actions; the item identity and action are read from data-item-key and data-action. */
+  /** Callback when the show-on-map switch changes; the stable item identity is the switch name. */
+  onTogglePreview: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Callback for the zoom/detail actions; the item identity and action are read from data-item-key and data-action. */
   onAction: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -43,11 +45,10 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-item-card');
 
-  const { item, itemKey, display, selectedColor, isPreviewed, sxClasses, onToggleSelected, onAction } = props;
+  const { item, itemKey, display, selectedColor, isPreviewed, sxClasses, onToggleSelected, onTogglePreview, onAction } = props;
   const effectiveDisplay = StacConfigUtils.resolveItemDisplayOptions(display, item.collection);
   const { itemView, actions, dateDisplay } = effectiveDisplay;
   const { t } = useTranslation();
-  const titleId = useId();
 
   const title = StacFieldUtils.getTitle(item, itemView?.titleField);
   const footprintLabel = t('stacBrowser.highlightFootprint', { title });
@@ -73,9 +74,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
         </Tooltip>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
         <Box sx={sxClasses.itemRowText}>
-          <Typography id={titleId} sx={sxClasses.resultTitle}>
-            {title}
-          </Typography>
+          <Typography sx={sxClasses.resultTitle}>{title}</Typography>
           {(badge || !itemView?.summaryFields?.length) && (
             <Typography sx={sxClasses.resultMeta}>
               {badge && (
@@ -113,26 +112,22 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
             startIcon={<ZoomInSearchIcon fontSize="small" />}
             data-item-key={itemKey}
             data-action="zoom"
-            aria-label={`${t('stacBrowser.zoom')} ${title}`}
+            aria-label={t('stacBrowser.zoomOf', { title })}
             onClick={onAction}
           >
             {t('stacBrowser.zoom')}
           </Button>
         )}
         {canPreview && (
-          <Button
-            type="text"
+          <Switch
             size="small"
-            startIcon={isPreviewed ? <VisibilityIcon fontSize="small" /> : <MapIcon fontSize="small" />}
-            data-item-key={itemKey}
-            data-action="preview"
-            aria-label={`${t('stacBrowser.showOnMap')} ${title}`}
-            onClick={onAction}
-            aria-pressed={isPreviewed}
-            sx={isPreviewed ? sxClasses.itemActionActive : undefined}
-          >
-            {t('stacBrowser.showOnMap')}
-          </Button>
+            name={itemKey}
+            checked={isPreviewed}
+            onChange={onTogglePreview}
+            label={t('stacBrowser.showOnMap')}
+            // Replaces the wrapper input slotProps, so aria-checked is set again here
+            slotProps={{ input: { 'aria-label': t('stacBrowser.showOnMapOf', { title }), 'aria-checked': isPreviewed } }}
+          />
         )}
         <Button
           type="text"
@@ -140,7 +135,7 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
           endIcon={<ChevronRightIcon fontSize="small" />}
           data-item-key={itemKey}
           data-action="detail"
-          aria-label={`${t('stacBrowser.details')} ${title}`}
+          aria-label={t('stacBrowser.detailsOf', { title })}
           onClick={onAction}
         >
           {t('stacBrowser.details')}

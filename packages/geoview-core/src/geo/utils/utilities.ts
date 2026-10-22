@@ -1287,6 +1287,32 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
+   *
+   * @param geometry - GeoJSON geometry value
+   * @returns Polygons as arrays of valid rings, in the GeoJSON coordinate order
+   */
+  static getGeoJsonPolygons(geometry: unknown): [number, number][][][] {
+    if (!geometry || typeof geometry !== 'object') return [];
+    const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
+
+    if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
+      return geoJson.geometries.flatMap((child) => GeoUtilities.getGeoJsonPolygons(child));
+    }
+
+    if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
+      const rings = GeoUtilities.#readGeoJsonRings(geoJson.coordinates);
+      return rings.length ? [rings] : [];
+    }
+
+    if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
+      return geoJson.coordinates.flatMap((polygon) => GeoUtilities.getGeoJsonPolygons({ type: 'Polygon', coordinates: polygon }));
+    }
+
+    return [];
+  }
+
+  /**
    * Extracts the EPSG code from a GeoJSON object's CRS definition.
    *
    * Accepts either a GeoJSON object or a JSON string. If the GeoJSON contains
@@ -1707,7 +1733,24 @@ export abstract class GeoUtilities {
     return cleanedFeatures;
   }
 
-  // #endregion GEOMETRY - PRIVATE METHODS
+  /**
+   * Reads the valid rings of GeoJSON Polygon coordinates.
+   *
+   * @param coordinates - GeoJSON Polygon coordinates
+   * @returns Rings with at least four valid coordinates
+   */
+  static #readGeoJsonRings(coordinates: unknown[]): [number, number][][] {
+    return coordinates.flatMap((ring) => {
+      if (!Array.isArray(ring)) return [];
+      const points = ring.filter(
+        (coordinate): coordinate is [number, number] =>
+          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
+      );
+      return points.length >= 4 ? [points] : [];
+    });
+  }
+
+  // #endregion GEOMETRY PRIVATE
 
   // #region VARIA
 
@@ -1965,49 +2008,6 @@ export abstract class GeoUtilities {
   }
 
   // #endregion EXTENT
-
-  /**
-   * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
-   *
-   * @param geometry - GeoJSON geometry value
-   * @returns Polygons as arrays of valid rings, in the GeoJSON coordinate order
-   */
-  static getGeoJsonPolygons(geometry: unknown): [number, number][][][] {
-    if (!geometry || typeof geometry !== 'object') return [];
-    const geoJson = geometry as { type?: unknown; coordinates?: unknown; geometries?: unknown };
-
-    if (geoJson.type === 'GeometryCollection' && Array.isArray(geoJson.geometries)) {
-      return geoJson.geometries.flatMap((child) => GeoUtilities.getGeoJsonPolygons(child));
-    }
-
-    if (geoJson.type === 'Polygon' && Array.isArray(geoJson.coordinates)) {
-      const rings = GeoUtilities.#readGeoJsonRings(geoJson.coordinates);
-      return rings.length ? [rings] : [];
-    }
-
-    if (geoJson.type === 'MultiPolygon' && Array.isArray(geoJson.coordinates)) {
-      return geoJson.coordinates.flatMap((polygon) => GeoUtilities.getGeoJsonPolygons({ type: 'Polygon', coordinates: polygon }));
-    }
-
-    return [];
-  }
-
-  /**
-   * Reads the valid rings of GeoJSON Polygon coordinates.
-   *
-   * @param coordinates - GeoJSON Polygon coordinates
-   * @returns Rings with at least four valid coordinates
-   */
-  static #readGeoJsonRings(coordinates: unknown[]): [number, number][][] {
-    return coordinates.flatMap((ring) => {
-      if (!Array.isArray(ring)) return [];
-      const points = ring.filter(
-        (coordinate): coordinate is [number, number] =>
-          Array.isArray(coordinate) && typeof coordinate[0] === 'number' && typeof coordinate[1] === 'number'
-      );
-      return points.length >= 4 ? [points] : [];
-    });
-  }
 
   /**
    * Checks if a given coordinate is a valid longitude/latitude pair.
