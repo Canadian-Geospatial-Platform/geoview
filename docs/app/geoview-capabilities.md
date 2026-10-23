@@ -1,68 +1,99 @@
 # GeoView capabilities
 
-**GeoView combines a wide variety of spatial data sources with ready-made exploration tools, optional packages, and APIs for customization.** Configure it as a standalone curated map or embed it in your website, application, or open-data portal. GeoCore integration is available, but is not required for directly configured datasets and services.
+**Turn spatial data into an exploration experience—not another application to build from scratch.** GeoView brings a configurable OpenLayers-based viewer, ready-made tools, and a common layer API to your website, application, or open-data portal. Use it as a standalone curated map or embed it in an existing page.
 
-This guide explains what GeoView can do and what you need to configure or develop. For product categories, alternatives, and the choice between an SDK, viewer, portal, or desktop GIS, see [Where GeoView fits](geoview-comparison.md).
+## GeoView in one minute
 
-**Source review: October 22, 2026.** Claims below link to GeoView documentation or source. **Built-in** means supplied by core, not enabled for every map; **configuration-dependent** requires compatible data and settings; **optional package** must be enabled/configured; **custom integration** is developer-owned work.
+- **[Publish a map with less application assembly](#customize-from-html-scripts-or-packages).** Start with a script, a map container, and configuration; customize from your page or through reusable packages.
+- **[Connect diverse data](#data-exploration-and-sharing).** Bring together over 15 supported service/format types, including OGC, Esri, file-based data, and raster/vector tiles.
+- **[Write less vendor-specific code](#one-layer-api-across-supported-sources).** Use common layer operations while GeoView handles supported source-specific behavior.
+- **[Combine map images with feature exploration](#wms-rendering-with-vector-backed-exploration).** Experimental WMS/vector coupling adds records, tables, and supported class filters, with automatic discovery for compatible services.
+- **[Give users tools ready to explore](#data-exploration-and-sharing).** Configure layers, legends, feature details, tables, search, navigation, and map downloads.
+- **[Add the workflows you need](#optional-packages-extend-the-viewer-you-already-have).** Enable time navigation, charts, drawing, filters, AOI destinations, STAC browsing, and more.
+- **[Share and resume a map](#sharing-and-saved-state).** Share supported view parameters by URL, or capture selected state as configuration for your application to save and reload.
+- **[Adapt to your audience](#language-themes-accessibility-and-standards).** Use English/French UI, themes, and WCAG-oriented keyboard and screen-reader interactions, with documented limitations.
+- **[Choose your delivery model](#hosting).** Load a versioned CDN build or self-host a release; retain responsibility for your data, services, and operations.
 
-## Data, exploration, and sharing
+For product categories and help choosing an approach, see [Where GeoView fits](geoview-comparison.md). For implementation, jump to [Developer starting points](#developer-starting-points).
 
-- **Over 15 service and format types — built-in adapters/imports, configuration-dependent.** The [source type definitions](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/api/types/layer-schema-types.ts) identify 15 runtime layer types plus GeoPackage and Shapefile imports: OGC WMS, WMTS, WFS, OGC API Features; Esri map, feature, and image services; GeoJSON, CSV, KML, WKB, GeoTIFF, GeoPackage, Shapefile; XYZ raster tiles, MVT vector tiles, and static images. These are **17 service/format input types**, not 17 distinct standards or a promise to read every variant. See [Layers](layers/layers.md).
-- **Layer, legend, feature-details, and table workflows — built-in, configuration-dependent.** These panels are present in the [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/schema-default-config.json). You do not need to assemble their UI from individual SDK controls. Queries and attribute tables depend on source capabilities and configuration.
-- **Time-series exploration and charts — optional packages.** Time Slider supports temporal navigation/filtering and animation for supported time-enabled layers; GeoChart supplies configured charting. Other packages add drawing, guided areas of interest, filters, explanatory content, and STAC discovery, as described below. Do not assume every service supplies usable time/chart data.
-- **Reprojection and basemaps — built-in, configuration-dependent.** GeoView handles supported source-to-map transformations and map projections EPSG:3978, EPSG:3857, and EPSG:3573, with basemap switching and labelled/shaded options where available. Service CRS support and raster/vector behavior matter; not all sources can be arbitrarily reprojected. The [projection/basemap constraints](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/api/types/map-schema-types.ts) currently restrict EPSG:3573 to `nogeom` basemap selection.
-- **Sharing and saved state — built-in APIs, configuration-dependent.** GeoView supports two complementary ways to return to a configured map:
-  - **Shareable URLs:** [shared URL configuration](config/create-map.md#data-shared) supports view/projection/basemap parameters and GeoCore keys alongside the base map configuration.
-  - **Saved configuration files:** the API can capture selected current map state as a reusable configuration, including view/basemap settings, layer order and appearance, UI settings, and supported package state. Your application can save it as JSON, then reload the saved configuration to recreate the map. This provides a richer persistence mechanism than the supported URL parameters alone. See [Saving and Restoring Map Configuration](api/map-viewer-api.md#saving-and-restoring-map-configuration).
+## Capabilities in depth
 
-  Neither mechanism is a full session or data backup: credentials, external datasets, drawings, arbitrary plugin state, and every transient interaction are not automatically preserved. The host application supplies file download/upload or other storage; the AOI package is not the state-saving API.
+The sections below explain the benefits and link to specialized guides for configuration, API contracts, examples, and limits. **Built-in** features still depend on map settings and compatible data; **optional packages** must be enabled/configured; **custom integrations** require development. These capabilities are a combination of strengths, not a claim of exclusivity or measured superiority.
 
-- **GeoCore integration — configuration-dependent, external service.** Resolve GeoCore UUIDs through [map attributes](config/create-map.md#data-geocore-keys) or the [layer API](api/layer-api.md). This is an additional way to connect data, not a mandatory catalog backend for every GeoView map.
+### One layer API across supported sources
 
-## Optional packages: extend the viewer you already have
+**Build reusable map controls instead of separate integrations for every vendor.** GeoView's common layer operations cover visibility, opacity, feature queries, and supported filtering. After configuring the source type, application logic targets a GeoView layer rather than repeatedly handling Esri, WMS, WFS, and file-based request formats.
 
-Enable and configure only the packages your map needs. These are optional extensions, not capabilities automatically active in every viewer:
+The benefit is less vendor-specific branching and duplicated integration code. Source capabilities still determine which expressions and queries work, whether filtering runs on the server or against loaded features, and how UI controls are synchronized.
 
-- **Drawing (`drawer`):** draw and edit geometries, measure distances/areas, and import/export drawings. This is a drawing tool, not simply a collapsible content panel.
-- **Area of Interest (`aoi-panel`):** present curated places or geographic extents so users can quickly visit the relevant areas of a map.
-- **About (`about-panel`):** add explanatory map context, credits, links, and configurable Markdown/content for your audience.
-- **Filter (`filter-panel`):** provide configured attribute filters using select, multiselect, numeric-range, and date controls for compatible layer data.
-- **STAC Browser (`stac-browser`):** browse collections/items from a configured SpatioTemporal Asset Catalog API, filter by space/time and other supported criteria, preview items, inspect metadata/assets, and add supported items to the map. It depends on a compatible STAC service and item assets; it is not a bundled catalog server.
-- **Time Slider and GeoChart:** explore supported time-enabled layers and display configured charts alongside the map.
-- **Swiper and Custom Legend:** compare selected layer views and tailor legend organization/presentation.
+**More information:** [Unified Layer Operations](layers/layers.md#unified-layer-operations), [Filtering Layers](layers/layers.md#filtering-layers), and the [Layer API](api/layer-api.md).
 
-See the [Core Packages Reference](packages/geoview-core-packages.md), [AOI package guide](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-aoi-panel/README.md), and [STAC Browser package guide](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-stac-browser/README.md) for capabilities and configuration. Availability depends on the deployed build and package configuration; third-party data/service terms still apply.
+### WMS rendering with vector-backed exploration
 
-## Customize from HTML, scripts, or packages
+**Keep server-rendered map images and add access to the underlying feature records.** GeoView can associate WMS with WFS or OGC API Features for feature information, Data Tables, and supported legend-class visibility/filtering. The WMS stays visible on the map; its counterpart supplies records. This offers a map-image-plus-query workflow similar to Esri Dynamic services, not guaranteed feature parity.
 
-1. **Configure from HTML:** set the map container's attributes and inline or URL-based configuration to select data, panels, language, theme, and packages. A curated map does not require a new application built from an SDK. See [Creating Maps](config/create-map.md).
-2. **Script directly from your page:** after the documented initialization/readiness events, use JavaScript and the public APIs/controllers to connect page controls, change map behavior, or respond to viewer events. Small customizations can stay in the host page without creating a package or modifying core source.
-3. **Develop a reusable package:** build on the existing plugin lifecycle, map/layer capabilities, UI components, localization, controllers, and events. This reduces the infrastructure you need to write; it does not remove the need to implement and test your own behavior. See [package development](packages/core-packages.md) and [Controller Architecture](../programming/controller-architecture.md).
+Discovery is enabled by default: a compatible WFS sharing the endpoint and layer name needs no explicit pairing properties, and recognized URL/name conventions are handled automatically. Override the pairing when the services differ. Try the **Cities** layer in the [experimental WMS navigator](https://canadian-geospatial-platform.github.io/geoview/public/layers-navigator.html?config=./configs/navigator/layers/wms-experimental.json).
 
-The benefit is **reusing the core viewer's capacity at all three levels**, rather than assembling a separate viewer for each customization. Configure UI and layers, create maps dynamically, react to lifecycle/events, and connect host controls through the [API](api/api.md), [controllers](events/controllers.md), and [event system](events/event-system.md).
+This **experimental** capability depends on matching data, usable records, queryable settings, and supported styles/filters. Image rendering can avoid transferring and drawing a large geometry collection just to display the map, but record queries can still be large; performance is service- and dataset-dependent.
 
-Custom scripts/packages remain responsible for lifecycle cleanup, data handling, translations, and accessibility; inheriting viewer components is not automatic WCAG compliance.
+**More information:** [OGC Raster and Vector Interoperability](layers/ogc-raster-vector-interoperability.md) covers discovery, configuration overrides, fallback behavior, WMS-derived vector styling, and practical limits.
 
-## Language, themes, accessibility, and standards
+### Data, exploration, and sharing
 
-- **English/French UI and selectable themes — built-in, configuration-dependent.** See [Theming](ui/theming.md). Host-page content and provider metadata need their own localization; custom branding/layouts may require development and accessibility review.
-- **WCAG-oriented support — built-in, configuration-dependent.** GeoView provides WCAG 2.1 AA-oriented keyboard/crosshair navigation, focus management, accessible control names, and screen-reader announcements. See [Accessibility](accessibility.md), including documented gaps involving imagery/symbol descriptions, language metadata, and focus indicators. Reuse these interaction patterns in custom work and assess the deployed host and viewer; this is not blanket WCAG certification.
-- **Standards-based interoperability — specific, not blanket certification.** GeoView connects to the documented OGC services and uses **ISO 8601 date/time and duration conventions** in its [temporal handling](../programming/time-dimension.md). This does not establish general ISO certification or compliance with every ISO/OGC standard. GeoCore-backed metadata discovery is a separate service integration, not a bundled ISO metadata catalog.
+**Assemble a useful data-exploration experience through configuration.** Core capabilities include:
 
-## Hosting, costs, and boundaries
+- **Mixed data sources:** 17 service/format input types spanning OGC, Esri, files, raster/vector tiles, and static imagery—not 17 separate standards or a promise to read every variant. See the [layer families and full type list](layers/layers.md#layer-categories) and [source definitions](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/api/types/layer-schema-types.ts).
+- **Layer and feature exploration:** groups, visibility, opacity, ordering, legends, feature details, attribute tables, layer zoom, and feature highlighting. See [Working with Layers](layers/layers.md#working-with-layers) and the [Layer API](api/layer-api.md).
+- **Coordinated filtering:** supported layer filters bring together configuration, legend classes, table, time, and Filter package selections. See [Filtering Layers](layers/layers.md#filtering-layers) for syntax and source limitations.
+- **Navigation and context:** zoom, home, fullscreen, rotation, location/measurement controls, overview map, north arrow, and configurable app/footer panels, including a user guide. See [navigation configuration](config/configuration-reference.md#navbar-optional) and [map components](config/configuration-reference.md#components-optional).
+- **Location search:** find places through the configured geolocator service and zoom to a result. See [service configuration](config/configuration-reference.md#serviceurls-optional).
+- **Map downloads:** export PNG, JPEG, or PDF with configurable layout elements such as a title and legend. Available imagery depends on cross-origin access. See the [viewer guide](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/public/locales/en/guide.md).
+- **Projections and basemaps:** use supported reprojection, EPSG:3978/3857/3573 map views, and basemap selection/options where available. Not all sources or basemaps work in every projection; see the [Configuration Reference](config/configuration-reference.md) and [basemap constraints](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/api/types/map-schema-types.ts).
+- **GeoCore discovery:** load supported data through GeoCore identifiers when useful, or configure services/files directly without a GeoCore backend. See [GeoCore map attributes](config/create-map.md#data-geocore-keys).
 
-GeoView's [repository license](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/LICENSE.md) includes MIT terms, separate Canada branding restrictions, and third-party notices. Self-hosting the software does not require purchasing a proprietary GeoView seat license, but **hosting, integration, maintenance, support, and third-party services can cost money**.
+#### Sharing and saved state
 
-- Review **software licensing separately from basemap/data/service terms**: API keys, accounts, usage charges, attribution, caching, and redistribution requirements depend on what you connect.
-- Inventory external requests, including basemaps, data, CDNs, GeoCore/search, proxies, and packages. The [default service URLs](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/schema-default-config.json) are only a starting point. Self-hosting alone does not guarantee offline operation, data residency, or sovereignty.
-- Test realistic data volumes, service availability, CORS/authentication, browser resources, and accessibility. No performance or compliance ranking has been established here.
-- Optional drawing/measurement is not the same as authoritative multiuser GIS editing or desktop geoprocessing. Evaluate those requirements separately rather than assuming a viewer replaces enterprise GIS.
-- A standalone viewer does not need a surrounding portal. If you integrate GeoView into one, the host still supplies catalog/search, metadata pages, publishing, permissions, and governance as needed. See [Standalone product or portal component?](geoview-comparison.md#standalone-product-or-portal-component).
+**Support both a quick return link and a richer saved map configuration.** Shared URLs reproduce supported view parameters alongside a base configuration. The API can also capture selected current state as reusable configuration that your application saves as JSON and reloads later.
+
+Neither is a complete session/data backup. The host provides file persistence, and external data/access must remain available. For captured state and exclusions, see [Saving and Restoring Map Configuration](api/map-viewer-api.md#saving-and-restoring-map-configuration); URL options are documented under [Shared URL Configuration](config/create-map.md#data-shared).
+
+### Optional packages: extend the viewer you already have
+
+**Add focused workflows without assembling a separate viewer.** Enable only the packages needed for the map and its data:
+
+- **Time Slider:** navigate, animate, and filter supported time-enabled layers.
+- **GeoChart:** add configured charts alongside the map.
+- **Drawing (`drawer`):** create/edit geometries, measure, and import/export drawings.
+- **Area of Interest (`aoi-panel`):** guide users to curated places and extents.
+- **About (`about-panel`):** supply explanatory content, credits, and links.
+- **Filter (`filter-panel`):** offer configured attribute-filter controls.
+- **STAC Browser (`stac-browser`):** browse/filter compatible catalogs, inspect items, and add supported assets to the map.
+- **Swiper and Custom Legend:** compare layer views and tailor legend presentation.
+
+Availability depends on the build, package configuration, and source capabilities. The [Core Packages Reference](packages/geoview-core-packages.md) provides feature/configuration details.
+
+### Customize from HTML, scripts, or packages
+
+**Choose the smallest amount of development that meets your need.** A page can host multiple independent maps, and customization can grow without rebuilding the core viewer:
+
+1. **Configure:** choose data, panels, language, theme, and packages from HTML attributes and configuration.
+2. **Script:** connect page controls and viewer events through APIs/controllers; create, reload, or delete maps, or add geometries without enabling the drawing package.
+3. **Package:** build reusable functionality on the existing map/layer APIs, UI components, localization, controllers, and plugin lifecycle.
+
+**More information:** [Creating Maps](config/create-map.md), [API entry points](api/api.md), [Geometry API](api/geometry-api.md), [Events](events/event-system.md), and [package development](packages/core-packages.md). Component developers should follow [Controller Architecture](../programming/controller-architecture.md). Custom code remains responsible for cleanup, data handling, translations, and accessibility.
+
+### Language, themes, accessibility, and standards
+
+**Adapt the same viewer to your audience and presentation.** English/French UI and selectable themes accompany WCAG 2.1 AA-oriented keyboard/crosshair navigation, focus management, accessible control names, and screen-reader announcements. Host content and provider metadata still need localization and accessibility review.
+
+This is not blanket WCAG certification. The [Accessibility guide](accessibility.md) explains interaction patterns and known gaps; [Theming](ui/theming.md) explains appearance customization. GeoView also connects to documented OGC services and uses ISO 8601 temporal conventions; see [Time Dimension Architecture](../programming/time-dimension.md), rather than treating this as general ISO certification.
+
+### Hosting
+
+**Deliver through a versioned CDN or your own hosting** see [Installing GeoView](config/create-map.md#installing-geoview). The [repository license](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/LICENSE.md) includes MIT terms, separate Canada branding restrictions, and third-party notices.
 
 ## Developer starting points
 
-1. [Creating Maps](config/create-map.md): script/container integration, configuration, shared URLs, and lifecycle.
-2. [Layers](layers/layers.md) and [Configuration Reference](config/configuration-reference.md): sources, projections, queries, and enabled panels.
-3. [Core Packages](packages/geoview-core-packages.md), the [STAC Browser guide](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-stac-browser/README.md), and [package development](packages/core-packages.md): drawing, AOI, About, filtering, time, charts, discovery, and custom extensions.
-4. [API entry points](api/api.md), [Events](events/event-system.md), and [Controller Architecture](../programming/controller-architecture.md): extend through supported APIs/controllers rather than manipulating OpenLayers directly from components. Use [TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/) for full signatures.
+- **Create your first map:** [Installing GeoView](config/create-map.md#installing-geoview) and [Creating Maps](config/create-map.md).
+- **Choose data and workflows:** [Layers](layers/layers.md), [Configuration Reference](config/configuration-reference.md), and [Core Packages](packages/geoview-core-packages.md).
+- **Integrate or extend:** [API entry points](api/api.md), [Events](events/event-system.md), [package development](packages/core-packages.md), and the full [TypeDoc reference](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/).
