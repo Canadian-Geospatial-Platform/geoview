@@ -11,13 +11,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   buttonDropDown: {
     display: 'flex',
     fontSize: theme?.typography?.fontSize,
-    color: theme.palette.geoViewColor?.primary.dark,
+    color: theme.palette.primary.dark,
     backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
   },
   buttonText: {},
   buttonArrow: {
     display: 'flex',
-    color: theme?.palette?.primary?.dark,
+    color: theme.palette.primary.dark,
     width: 'auto',
   },
 });

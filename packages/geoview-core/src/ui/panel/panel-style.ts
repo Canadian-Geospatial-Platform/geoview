@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     },
     '& .MuiCardHeader-root': {
       backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
-      borderBottomColor: theme.palette.geoViewColor?.bgColor.dark[100],
+      borderBottomColor: theme.palette.divider,
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',
       height: 48,
@@ -64,7 +64,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     '& .MuiCardHeader-action': {
       alignSelf: 'center',
       '& .MuiButtonBase-root': {
-        border: `1px solid ${theme.palette.geoViewColor?.primary.main}`,
+        border: `1px solid ${theme.palette.primary.main}`,
         height: 36,
         width: 36,
         transition: 'all 0.3s ease-in-out',
@@ -73,7 +73,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
           height: 24,
         },
         '&:hover': {
-          backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
+          backgroundColor: theme.palette.action.hover,
         },
       },
     },

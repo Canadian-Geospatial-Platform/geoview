@@ -46,7 +46,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
       padding: theme.spacing(0.5),
       borderRadius: theme.shape.borderRadiusNone,
       border: '1px solid',
-      borderColor: theme.palette.geoViewColor?.grey.dark[100],
+      borderColor: theme.palette.divider,
       boxShadow: 2,
       background: theme.palette.geoViewColor?.white,
       objectFit: 'scale-down',
@@ -58,7 +58,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     '& a[href]': {
       color: theme.palette.primary.main,
       '*:hover': {
-        color: theme.palette.geoViewColor?.primary.dark[300],
+        color: theme.palette.primary.dark,
       },
     },
 
@@ -67,16 +67,16 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
       height: '8px',
     },
     '& *::-webkit-scrollbar-track': {
-      background: theme.palette.geoViewColor?.secondary.darken(0.5, 0.5),
+      background: theme.palette.surface?.low ?? theme.palette.background.default,
       borderRadius: theme.shape.borderRadiusMd,
     },
     '& *::-webkit-scrollbar-thumb': {
-      background: theme.palette.geoViewColor?.secondary.darken(0.5),
+      background: theme.palette.surface?.high ?? theme.palette.background.paper,
       borderRadius: theme.shape.borderRadiusMd,
     },
 
     '.bordered': {
-      border: `1px solid ${theme.palette.geoViewColor?.bgColor.darken(0.5, 0.5)}`,
+      border: `1px solid ${theme.palette.divider}`,
       boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor?.bgColor.darken(0.2, 0.5)}`,
     },
     '.bordered-primary': {
@@ -89,10 +89,10 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     scrollMarginTop: '20px',
     display: 'flex',
     flexDirection: 'column',
-    top: '0px',
-    right: '0px',
-    left: '0px',
-    bottom: '0px',
+    top: 0,
+    right: 0,
+    left: 0,
+    bottom: 0,
     overflow: 'clip',
     zIndex: 0,
     height: '100%',
@@ -125,11 +125,11 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     width: '1px',
     textAlign: 'left',
     overflow: 'hidden',
-    backgroundColor: theme.palette.geoViewColor?.white,
+    backgroundColor: theme.palette.background.paper,
     zIndex: theme.zIndex.tooltip,
 
     '&:active, &:focus': {
-      left: '0px',
+      left: 0,
       zIndex: theme.zIndex.tooltip,
       width: 'auto',
       height: 'auto',

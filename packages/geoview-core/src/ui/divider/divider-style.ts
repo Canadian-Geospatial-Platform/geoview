@@ -20,6 +20,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   grow: {
     flexGrow: 1,
-    backgroundColor: theme.palette.geoViewColor?.primary.main,
+    backgroundColor: theme.palette.primary.main,
   },
 });

@@ -68,8 +68,8 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       },
       transition: 'background-color 0.3s ease-in-out',
       '&:hover': {
-        backgroundColor: theme.palette.geoViewColor?.primary.light[200],
-        color: theme.palette.geoViewColor?.white,
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
       },
     },
     tabsContainer: {

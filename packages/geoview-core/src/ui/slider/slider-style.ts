@@ -15,9 +15,6 @@ import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   slider: {
-    '& .MuiSlider-root': {
-      color: theme.palette.geoViewColor?.white,
-    },
     '& .MuiSlider-thumb': {
       width: 15,
       height: 15,
@@ -75,11 +72,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiSlider-mark': {
       height: 4,
       width: 4,
-      color: '#000',
+      color: theme.palette.common.black,
     },
     '& .MuiSlider-markLabel': {
-      // Darker than light[200] for WCAG contrast; still lighter than the active-label color for visual distinction.
-      color: theme.palette.geoViewColor?.textColor.light[100],
+      color: theme.palette.text.secondary,
       '&.MuiSlider-markLabelActive': {
         color: theme.palette.text.primary,
       },

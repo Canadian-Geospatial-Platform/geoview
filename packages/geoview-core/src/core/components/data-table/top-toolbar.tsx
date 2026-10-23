@@ -154,7 +154,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
       sx={[sxClasses.toolbarContainer, sxClasses.dataTableTopToolbar] as SxProps}
     >
       <Box sx={sxClasses.toolbarRow}>
-        <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows} aria-live="polite">
+        <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows}>
           {toolbarMessage}
         </Box>
         <Box>

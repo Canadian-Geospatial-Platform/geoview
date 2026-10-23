@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Loading/empty states
   filterLoading: {
-    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    color: theme.palette.text.secondary,
     fontStyle: 'italic',
     fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
@@ -40,7 +40,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Wrapper merging the search input and checkbox list into a single bordered box
   filterMultiselectWrapper: {
     border: 1,
-    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
+    borderColor: theme.palette.divider,
     borderRadius: theme.shape.borderRadiusMd,
     overflow: 'hidden',
     padding: theme.spacing(0.5),
@@ -64,7 +64,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Date range info text
   filterDateInfo: {
-    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    color: theme.palette.text.secondary,
     paddingTop: theme.spacing(0.5),
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),
@@ -84,13 +84,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
-    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    color: theme.palette.text.secondary,
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),
   },
 
   // Select placeholder text (shown when no value is selected)
   selectPlaceholder: {
-    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    color: theme.palette.text.secondary,
   },
 });

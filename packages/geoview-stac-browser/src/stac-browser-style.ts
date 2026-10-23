@@ -115,7 +115,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1),
     fontWeight: 500,
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     cursor: 'pointer',
     textAlign: 'center',
     '&:hover': {
@@ -199,7 +199,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   resultMeta: {
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
@@ -251,7 +251,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     alignItems: 'center',
     padding: theme.spacing(4),
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
   },
   pagination: {
     display: 'flex',
@@ -330,24 +330,24 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   collectionDescription: {
     display: 'block',
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     lineHeight: 1.4,
   },
   collectionSearchField: {
     flex: 1,
     // The floating label sits on the focus outline, so it needs an opaque background to stay readable
     '.geoview-keyboard-active & .MuiInputLabel-shrink.Mui-focused': {
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
+      backgroundColor: theme.palette.background.paper,
       padding: theme.spacing(0, 0.5),
       marginLeft: theme.spacing(-0.5),
     },
   },
   sortToggle: {
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     backgroundColor: 'transparent',
     borderRadius: theme.shape.borderRadiusSm,
     '&[aria-pressed="true"]': {
-      color: theme.palette.geoViewColor?.primary.main,
+      color: theme.palette.primary.main,
       backgroundColor: theme.palette.action.selected,
     },
   },
@@ -417,7 +417,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexWrap: 'wrap',
     columnGap: theme.spacing(1.5),
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
   },
   itemSummaryLabel: {
     fontWeight: 600,
@@ -461,13 +461,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   metadataKey: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     overflowWrap: 'anywhere',
   },
   metadataValue: {
     margin: theme.spacing(0),
     fontSize: theme.palette.geoViewFontSize?.sm,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     overflowWrap: 'anywhere',
   },
   itemRowText: {
@@ -490,7 +490,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontWeight: 600,
     borderRadius: theme.shape.borderRadiusSm,
     backgroundColor: theme.palette.primary.main,
-    color: theme.palette.geoViewColor?.white,
+    color: theme.palette.primary.contrastText,
     marginRight: theme.spacing(0.5),
   },
   assetRoleBadge: {
@@ -500,7 +500,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontWeight: 500,
     borderRadius: theme.shape.borderRadiusSm,
     border: `1px solid ${theme.palette.divider}`,
-    color: theme.palette.geoViewColor?.textColor.light[200],
+    color: theme.palette.text.secondary,
     textTransform: 'uppercase',
   },
   assetActions: {

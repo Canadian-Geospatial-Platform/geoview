@@ -428,7 +428,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
       isHidden: layerHiddenSet[layer.layerPath],
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-        <FilterAltIcon sx={{ color: theme.palette.action.active, verticalAlign: 'middle' }} />
+        <FilterAltIcon sx={{ color: theme.palette.text.secondary, verticalAlign: 'middle' }} />
       ),
     }));
   }, [
@@ -445,7 +445,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     mapId,
     memoOrderedLayerData,
     selectedLayerPath,
-    theme.palette.action.active,
+    theme.palette.text.secondary,
   ]);
 
   return (

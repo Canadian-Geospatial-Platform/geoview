@@ -878,7 +878,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       return (
         <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
           <Box sx={memoSxClasses.rightPanelStatus}>
-            <Box role="status" aria-live="polite" aria-atomic="true">
+            <Box role="status">
               {t('details.featureDetailsTitle')
                 .replace('{count}', `${currentFeatureIndex + 1}`)
                 .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
