@@ -101,18 +101,20 @@ const NotificationItem = memo(
 
     // #endregion Handlers
 
-    const icon = (() => {
-      switch (notification.notificationType) {
-        case 'success':
-          return <CheckCircleIcon color="success" />;
-        case 'info':
-          return <InfoIcon color="info" />;
-        case 'warning':
-          return <WarningIcon color="warning" />;
-        default:
-          return <ErrorIcon color="error" />;
-      }
-    })();
+    let icon: JSX.Element;
+    switch (notification.notificationType) {
+      case 'success':
+        icon = <CheckCircleIcon color="success" />;
+        break;
+      case 'info':
+        icon = <InfoIcon color="info" />;
+        break;
+      case 'warning':
+        icon = <WarningIcon color="warning" />;
+        break;
+      default:
+        icon = <ErrorIcon color="error" />;
+    }
 
     return (
       <Box sx={sxClasses.notificationItem} component="li">

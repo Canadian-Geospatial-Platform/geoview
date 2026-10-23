@@ -98,11 +98,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
-      // GV The loader callback returns void, so run the asynchronous loading work without returning its promise.
-      // GV Report load failures through failureCallback and log errors that escape to prevent unhandled rejections.
+      // GV OpenLayers' loader callback returns void, so handle loading work through a promise chain without returning it.
+      // GV Route load failures through failureCallback; log errors thrown while reporting a failure to avoid unhandled rejections.
       // Asynchronously call vector loading
-      (async (): Promise<void> => {
-        try {
+      Promise.resolve()
+        .then((): Promise<SourceFeaturesInfo> => {
           // Clear last error if any
           vectorSource.clearLoaderError();
 
@@ -110,7 +110,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
 
           // Grab the features to load in the source
-          const sourceFeaturesInfo = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
+          return this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
+        })
+        .then((sourceFeaturesInfo): void => {
           const { features, dataProjection } = sourceFeaturesInfo;
 
           // Keep the read options that were used to interpret the source data
@@ -140,18 +142,22 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
           // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
           successCallback?.(featuresFiltered);
-        } catch (error: unknown) {
+        })
+        .catch((error: unknown): void => {
           // Set the error
           vectorSource.setLoaderError(formatError(error));
 
           // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
           // and this will remove the failed extent so that OpenLayers may retry loading it later.
           failureCallback?.();
-        }
-      })().catch((error: unknown) => {
-        // Log the error
-        logger.logPromiseFailed(`Error occurred while loading vector source for layer ${layerConfig.layerPath}`, error);
-      });
+        })
+        .catch((error: unknown): void => {
+          // Log the error
+          logger.logPromiseFailed(
+            `An error occurred while handling the failure of loading the vector source for layer ${layerConfig.layerPath}`,
+            error
+          );
+        });
     };
 
     // Create the vector source with the source options

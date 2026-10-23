@@ -139,11 +139,9 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     // Only fetch unique values when the layer is ready
     if (!layer.enabled || !layerIsReady) return;
 
-    const getUniqueValues = async (): Promise<void> => {
-      try {
-        // First, ensure the layer is registered and queried
-        await filterPanelController.ensureLayerQueried(layer.layerPath);
-
+    filterPanelController
+      .ensureLayerQueried(layer.layerPath)
+      .then((): void => {
         // Now we can safely get unique values
         const values: Record<string, (string | number)[]> = {};
 
@@ -163,7 +161,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         });
 
         setFieldValues(values);
-      } catch (error: unknown) {
+      })
+      .catch((error: unknown): void => {
         // A newer query for this layer superseded this one; that call will populate the values
         if (error instanceof RequestAbortedError) {
           logger.logDebug(`Query for layer ${layer.layerPath} was superseded by a newer one`);
@@ -179,12 +178,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           }
         });
         setFieldValues(emptyValues);
-      }
-    };
-
-    getUniqueValues().catch((err: unknown) => {
-      logger.logError('Error in getUniqueValues:', err);
-    });
+      });
   }, [filterPanelController, layer, layerIsReady]);
 
   /**
