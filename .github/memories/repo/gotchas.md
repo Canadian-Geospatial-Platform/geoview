@@ -16,3 +16,4 @@
 - Internal core code imports from defining modules, never barrels (`@/ui`, `@/core/stores`, ...); `StoreContext` lives in `core/stores/store-context.ts` and store creation in `store-lifecycle.ts` so state slices do not import the React tree (#3711).
 - Plugins type-check against core's generated `geoview-core/lib/**/*.d.ts` (TS project references), not core `src`. After deleting/moving core files, stale `lib` yields misleading plugin errors (e.g. `List` missing on `ui/index`); run `tsc -b geoview-core/tsconfig.json` or `rush build` (#3711).
 - Dependabot security updates scan any committed `package-lock.json` even though Rush uses `common/config/rush/pnpm-lock.yaml`; stray lock files (from a forbidden `npm install`) produce bogus PRs, so `**/package-lock.json` is git-ignored (#3711).
+- `getUrlWithProxyWhenNeeded()` wraps a raw target URL as `proxy?${url}`; append paging parameters to that raw URL string instead of normalizing it with `URLSearchParams`.

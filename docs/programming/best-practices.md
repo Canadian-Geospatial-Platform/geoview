@@ -137,6 +137,11 @@ Broad suppression is reserved for documented best-effort boundaries such as opti
 `GeoViewError.throwIfAborted(error)` rethrows aborts during format fallback. Update `@throws` for errors
 that now propagate; do not silently replace real failures with warnings.
 
+For fire-and-forget promise chains, attach a terminal `.catch()` that handles rejection. Do not prefix
+the chain with the `void` operator when that handler resolves normally; `void` does not handle
+rejections. If the catch handler can throw or return a rejected promise, handle that resulting
+rejection as well.
+
 ### Shared HTML rendering and error boundaries
 
 For external HTML, `UseHtmlToReact` is the shared converter. A JSX call-site try/catch cannot

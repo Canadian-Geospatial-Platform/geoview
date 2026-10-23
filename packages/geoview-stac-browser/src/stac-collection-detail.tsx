@@ -162,7 +162,9 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Fetch items on mount', collection.id);
-    void tryLoadItems();
+    tryLoadItems().catch((error: unknown) => {
+      logger.logPromiseFailed(`STAC-COLLECTION-DETAIL - useEffect - Failed to fetch items for collection ${collection.id}`, error);
+    });
     return (): void => {
       itemsRequestIdRef.current += 1;
     };
@@ -175,7 +177,9 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const handleNextPage = useCallback((): void => {
     if (isLoading || !nextUrl) return;
-    void tryLoadItems(nextUrl);
+    tryLoadItems(nextUrl).catch((error: unknown) => {
+      logger.logPromiseFailed(`STAC-COLLECTION-DETAIL - handleNextPage - Failed to fetch items at url ${nextUrl}`, error);
+    });
   }, [isLoading, nextUrl, tryLoadItems]);
 
   /**
@@ -183,7 +187,9 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const handlePrevPage = useCallback((): void => {
     if (isLoading || !prevUrl) return;
-    void tryLoadItems(prevUrl);
+    tryLoadItems(prevUrl).catch((error: unknown) => {
+      logger.logPromiseFailed(`STAC-COLLECTION-DETAIL - handlePrevPage - Failed to fetch items at url ${prevUrl}`, error);
+    });
   }, [isLoading, prevUrl, tryLoadItems]);
 
   /**

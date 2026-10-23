@@ -135,14 +135,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
     // Fetch the collections data
     let cancelled = false;
-    const fetchData = async (): Promise<void> => {
-      try {
-        const [serverCapabilities, allCollections] = await Promise.all([
-          memoApiService.fetchCapabilities(),
-          memoApiService.fetchCollections(),
-        ]);
+    Promise.all([memoApiService.fetchCapabilities(), memoApiService.fetchCollections()])
+      .then(([serverCapabilities, allCollections]): void => {
         if (cancelled) return;
-
         const allowedCollections = StacConfigUtils.filterCollections(allCollections, config.collections);
         const startCollection =
           allowedCollections.find((collection) => collection.id === config.collections?.default) ??
@@ -157,16 +152,16 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             setView('collection-detail');
           }
         }
-      } catch (error: unknown) {
+      })
+      .catch((error: unknown): void => {
         // UI boundary: report the failed request to the user
         if (cancelled) return;
         logger.logError('STAC-BROWSER - Failed to initialize the STAC browser', error);
         stacController.showError('stacBrowser.errorRequest');
-      } finally {
+      })
+      .finally((): void => {
         if (!cancelled) setIsInitialized(true);
-      }
-    };
-    void fetchData();
+      });
     return (): void => {
       cancelled = true;
     };
@@ -427,38 +422,43 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const handleSearch = useCallback(
     (filters: StacFilterValues): void => {
       if (isLoading) return;
-      const doSearch = async (): Promise<void> => {
-        try {
-          setIsLoading(true);
-          itemDetailRequestIdRef.current += 1;
-          setSelectedItem(undefined);
-          setSearchResult(undefined);
-          setSearchMapExtent(stacController.captureMapExtent());
+      setIsLoading(true);
 
-          const collectionIds = resolveSearchCollections(filters.collections);
-          const containedExtent = filters.containedInExtent ? filters.bbox : undefined;
+      try {
+        itemDetailRequestIdRef.current += 1;
+        setSelectedItem(undefined);
+        setSearchResult(undefined);
+        setSearchMapExtent(stacController.captureMapExtent());
 
-          if (collectionIds && collectionIds.length === 0) {
-            logger.logInfo('STAC-BROWSER - No collection to search');
-            setSearchParams(undefined);
-            setSearchContainedExtent(undefined);
-            const emptyResult: StacSearchResult = { type: 'FeatureCollection', features: [] };
-            setSearchResultPages([emptyResult]);
-            applySearchResult(emptyResult, 1);
-            setView('search');
-          } else {
-            const params: StacSearchParams = {
-              collections: collectionIds,
-              bbox: filters.bbox,
-              datetime: filters.datetime,
-              q: filters.q,
-              limit,
-              sortby: filters.sortBy ?? searchSortBy,
-              ...(filters.filter && { filter: filters.filter, filterLang: 'cql2-json' as const }),
-            };
-            logger.logInfo('STAC-BROWSER - Searching with params:', params);
+        const collectionIds = resolveSearchCollections(filters.collections);
+        const containedExtent = filters.containedInExtent ? filters.bbox : undefined;
 
-            const result = await memoApiService.searchItems(params, containedExtent);
+        if (collectionIds && collectionIds.length === 0) {
+          logger.logInfo('STAC-BROWSER - No collection to search');
+          setSearchParams(undefined);
+          setSearchContainedExtent(undefined);
+          const emptyResult: StacSearchResult = { type: 'FeatureCollection', features: [] };
+          setSearchResultPages([emptyResult]);
+          applySearchResult(emptyResult, 1);
+          setView('search');
+          setIsLoading(false);
+          return;
+        }
+
+        const params: StacSearchParams = {
+          collections: collectionIds,
+          bbox: filters.bbox,
+          datetime: filters.datetime,
+          q: filters.q,
+          limit,
+          sortby: filters.sortBy ?? searchSortBy,
+          ...(filters.filter && { filter: filters.filter, filterLang: 'cql2-json' as const }),
+        };
+        logger.logInfo('STAC-BROWSER - Searching with params:', params);
+
+        memoApiService
+          .searchItems(params, containedExtent)
+          .then((result): void => {
             logger.logInfo(`STAC-BROWSER - Search returned ${result.features.length} features`);
             setSearchParams(params);
             setSearchContainedExtent(containedExtent);
@@ -467,15 +467,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             const hasResults = result.features.length > 0 || !!StacApiService.getPageLink(result, 'next');
             if (hasResults) isViewFocusRequestedRef.current = true;
             setView(hasResults ? 'search-results' : 'search');
-          }
-        })
-        .catch((error: unknown): void => {
-          // UI boundary: report the failed request to the user
-          logger.logError('STAC-BROWSER - Search failed:', error);
-          stacController.showError('stacBrowser.errorRequest');
-        } finally {
-          setIsLoading(false);
-        });
+          })
+          .catch((error: unknown): void => {
+            // UI boundary: report the failed request to the user
+            logger.logError('STAC-BROWSER - Search failed:', error);
+            stacController.showError('stacBrowser.errorRequest');
+          })
+          .finally((): void => {
+            setIsLoading(false);
+          });
+      } catch (error: unknown) {
+        // UI boundary: report a synchronous failure while preparing the search.
+        logger.logError('STAC-BROWSER - Search failed:', error);
+        stacController.showError('stacBrowser.errorRequest');
+        setIsLoading(false);
+      }
     },
     [isLoading, resolveSearchCollections, limit, searchSortBy, memoApiService, applySearchResult, stacController]
   );

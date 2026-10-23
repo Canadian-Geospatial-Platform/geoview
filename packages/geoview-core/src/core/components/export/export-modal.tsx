@@ -341,6 +341,25 @@ export function ExportModal(): JSX.Element {
 
   // #endregion HANDLERS
 
+  let previewContent: JSX.Element | JSX.Element[];
+  if (isMapLoading || isLegendLoading) {
+    // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
+    const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
+    const skeletonWidth = dialogWidth * 0.8;
+    const mapCanvas = mapElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
+    const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
+    const skeletonHeight = skeletonWidth * mapAspectRatio;
+
+    previewContent = <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={memoSxClasses.mapSkeletonMargin} />;
+  } else if (pngPreviewUrls) {
+    previewContent = pngPreviewUrls.map((imageUrl) => {
+      const key = imageUrl.substring(imageUrl.length - 10);
+      return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')} sx={memoSxClasses.mapPreview} />;
+    });
+  } else {
+    previewContent = <Box sx={memoSxClasses.mapLoading}>{t('exportModal.loadingPreview')}</Box>;
+  }
+
   return (
     <Dialog
       id={`${mapId}-export-dialog`}
@@ -409,29 +428,7 @@ export function ExportModal(): JSX.Element {
         </Box>
 
         {/* PDF Preview */}
-        <Box ref={exportContainerRef}>
-          {(() => {
-            if (isMapLoading || isLegendLoading) {
-              // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
-              const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
-              const skeletonWidth = dialogWidth * 0.8;
-              const mapCanvas = mapElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
-              const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
-              const skeletonHeight = skeletonWidth * mapAspectRatio;
-
-              return <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={memoSxClasses.mapSkeletonMargin} />;
-            }
-
-            if (pngPreviewUrls) {
-              return pngPreviewUrls.map((imageUrl) => {
-                const key = imageUrl.substring(imageUrl.length - 10);
-                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')} sx={memoSxClasses.mapPreview} />;
-              });
-            }
-
-            return <Box sx={memoSxClasses.mapLoading}>{t('exportModal.loadingPreview')}</Box>;
-          })()}
-        </Box>
+        <Box ref={exportContainerRef}>{previewContent}</Box>
       </DialogContent>
       <DialogActions sx={memoSxClasses.dialogActions}>
         <Button onClick={handleCloseModal} type="text" size="medium" variant="outlined">
