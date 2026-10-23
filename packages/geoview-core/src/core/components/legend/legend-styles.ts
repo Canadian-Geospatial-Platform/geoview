@@ -80,7 +80,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
     '& .outOfRange': {
       '& .legendTitle': {
-        color: `${theme.palette.grey[700]}`,
+        color: theme.palette.text.secondary,
         fontStyle: 'italic',
       },
     },

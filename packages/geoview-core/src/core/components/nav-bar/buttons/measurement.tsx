@@ -434,7 +434,7 @@ export default function Measurement(): JSX.Element {
     return (
       <Box sx={memoSxClasses.measurementPanel}>
         {/* WCAG - Screen reader status announcements */}
-        <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
+        <Typography role="status" sx={visuallyHidden}>
           {statusMessage}
         </Typography>
 

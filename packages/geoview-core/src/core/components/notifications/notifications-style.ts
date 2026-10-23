@@ -57,7 +57,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   skipLink: {
     ...visuallyHidden,
-    backgroundColor: theme.palette.geoViewColor?.white,
+    backgroundColor: theme.palette.background.paper,
     zIndex: theme.zIndex.tooltip,
     '&:active, &:focus': {
       position: 'absolute',

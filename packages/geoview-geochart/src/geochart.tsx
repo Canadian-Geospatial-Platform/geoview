@@ -110,7 +110,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
     return {
       backgroundColor: theme.palette.background.default,
-      borderColor: theme.palette.geoViewColor?.grey.light[100] ?? theme.palette.divider,
+      borderColor: theme.palette.divider,
       color: theme.palette.text.primary,
     };
   }, [theme]);

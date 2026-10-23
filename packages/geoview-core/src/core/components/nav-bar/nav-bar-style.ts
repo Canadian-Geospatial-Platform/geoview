@@ -101,18 +101,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       minWidth: '44px',
       padding: 'initial',
       transition: 'background-color 0.3s ease-in-out',
-      '&:hover': {
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-      },
-      '&:focus': {
-        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
-        color: theme.palette.geoViewColor?.bgColor.dark[700],
-      },
-      '&:active': {
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-      },
       '&.highlighted.active': {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,

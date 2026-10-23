@@ -476,14 +476,14 @@ export function Shell(props: ShellProps): JSX.Element {
           tabIndex={-1}
         >
           {/* Map loading */}
-          <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={!mapLoaded}>
+          <Box role="status" aria-busy={!mapLoaded}>
             <CircularProgress isLoaded={mapLoaded} />
             {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
             {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
           </Box>
 
           {/* Processing */}
-          <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={circularProgressActive}>
+          <Box role="status" aria-busy={circularProgressActive}>
             <CircularProgress isLoaded={!circularProgressActive} />
             {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
             {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}

@@ -1152,7 +1152,7 @@ export function AddNewLayer(): JSX.Element {
                       label={t('layers.service')}
                     />
                     {serviceTypeError && (
-                      <FormHelperText id={serviceTypeErrorId} error role="status" aria-live="polite" aria-atomic="true">
+                      <FormHelperText id={serviceTypeErrorId} error role="alert">
                         {serviceTypeErrorMessage}
                       </FormHelperText>
                     )}

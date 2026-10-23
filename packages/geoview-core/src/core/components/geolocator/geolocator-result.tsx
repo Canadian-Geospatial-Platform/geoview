@@ -195,7 +195,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         aria-label={t('geolocator.searchResults')}
       >
         {error && (
-          <Typography role="status" aria-live="polite" aria-atomic="true" component="p" sx={memoSxClasses.resultMessage}>
+          <Typography role="status" component="p" sx={memoSxClasses.resultMessage}>
             {t('error.geolocator.noService')}
           </Typography>
         )}
@@ -203,7 +203,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           <>
             {/* An announcement for screen readers about the number of results found */}
             <Box className="geolocatorResultsStatus" sx={memoSxClasses.geolocatorResultsStatus}>
-              <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
+              <Typography role="status" component="p">
                 {t('geolocator.resultsFound', { count: memoFilteredData.length, searchTerm: searchValue })}
               </Typography>
               {memoActiveFiltersDisplay}
@@ -213,7 +213,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         )}
         {!memoFilteredData.length && searchValue.length >= 3 && (
           <Box sx={memoSxClasses.resultMessage}>
-            <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
+            <Typography role="status" component="p">
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
             {memoActiveFiltersDisplay}

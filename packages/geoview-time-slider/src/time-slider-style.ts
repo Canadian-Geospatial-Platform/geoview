@@ -52,7 +52,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize?.sm,
   },
   hiddenLayerName: {
-    color: theme.palette.grey[600],
+    color: theme.palette.text.secondary,
     fontStyle: 'italic',
   },
 });

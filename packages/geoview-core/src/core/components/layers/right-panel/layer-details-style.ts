@@ -131,7 +131,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   hiddenText: {
-    color: theme.palette.grey[600],
+    color: theme.palette.text.secondary,
     fontStyle: 'italic',
   },
 
@@ -195,10 +195,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.text.secondary,
     fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'center',
-  },
-
-  itemImage: {
-    fontSize: '26px',
   },
 
   itemLabelIndented: {

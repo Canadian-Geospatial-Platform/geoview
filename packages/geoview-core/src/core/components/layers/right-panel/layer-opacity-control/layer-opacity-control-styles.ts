@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     whiteSpace: 'nowrap',
   },
   controlLabelHidden: {
-    color: theme.palette.grey[600],
+    color: theme.palette.text.disabled,
     fontStyle: 'italic',
   },
 });

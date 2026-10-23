@@ -26,7 +26,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
-      background: theme.palette.geoViewColor?.primary.light,
+      background: theme.palette.primary.light,
     },
     '& .MuiSelect-select': {
       padding: theme.spacing(2, 1.5),
