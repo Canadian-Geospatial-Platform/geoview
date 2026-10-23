@@ -562,6 +562,7 @@ export const generateThemeOptions = (
             // Keyboard-only focus indicator for InputBase-derived controls (TextField, Select, Autocomplete, date-pickers).
             // Scoped to .geoview-keyboard-active (GeoView keyboard-navigation mode) because :focus-visible alone still
             // matches text inputs on mouse click; .geoview-keyboard-active ensures mouse users never see the outline.
+            // MUI's theme.focusVisible has no equivalent for this GeoView keyboard-mode gate.
             '.geoview-keyboard-active &:has(:focus-visible)': {
               ...getFormControlFocusIndicatorStyles(geoViewColors),
               outlineOffset: '0',

@@ -245,7 +245,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
                     ...memoSxClasses.scaleCheckmark,
                     fontSize: theme.palette.geoViewFontSize?.lg,
                     opacity: scaleMode === index ? 1 : 0,
-                    color: theme.palette.geoViewColor?.bgColor?.dark?.[650],
+                    color: theme.palette.primary.main,
                   }}
                   aria-hidden="true"
                 />

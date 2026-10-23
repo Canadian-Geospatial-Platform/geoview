@@ -302,7 +302,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   return (
     <ListItem className={containerClass}>
       {/* WCAG - ARIA live region for screen reader announcements */}
-      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status">
         {statusMessage}
       </Box>
       <Tooltip
@@ -493,7 +493,7 @@ export const LayerList = memo((props: LayerListProps): JSX.Element => {
   return (
     <Box sx={{ width: '100%' }}>
       {/* WCAG - ARIA live region announcing when a layer moves between the two lists */}
-      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status">
         {announcement}
       </Box>
 

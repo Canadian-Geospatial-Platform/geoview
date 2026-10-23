@@ -43,6 +43,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     borderRadius: theme.shape.borderRadiusMd,
     gap: theme.spacing(1.5),
+    // Override MUI's selected and selected-hover fills so the parent surface shows through.
     '&.Mui-selected:hover': {
       backgroundColor: 'inherit',
     },
@@ -91,12 +92,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   outOfRange: {
     '.layer-panel &.MuiListItemButton-root': {
-      '& .MuiListItemText-primary': {
-        color: `${theme.palette.grey[700]} !important`,
-        fontStyle: 'italic',
-      },
-      '& .MuiListItemText-secondary': {
-        color: theme.palette.grey[600],
+      '& .MuiListItemText-primary, & .MuiListItemText-secondary': {
+        color: `${theme.palette.text.secondary}`,
         fontStyle: 'italic',
       },
     },
@@ -164,7 +161,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingRight: theme.spacing(5),
     // Match the Layers panel "not visible" symbology: greyed + italic text
     '& .layerTitle': {
-      color: theme.palette.grey[700],
+      color: theme.palette.text.secondary,
       fontStyle: 'italic',
     },
     '& > div > p': {

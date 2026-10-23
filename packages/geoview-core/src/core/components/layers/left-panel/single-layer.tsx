@@ -876,7 +876,7 @@ export function SingleLayer({
     >
       <Box sx={memoSxClasses.containerBox}>
         {/* WCAG - ARIA live region for screen reader announcements */}
-        <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+        <Box sx={memoSxClasses.visuallyHidden} role="status">
           {statusMessage}
         </Box>
         <Tooltip
