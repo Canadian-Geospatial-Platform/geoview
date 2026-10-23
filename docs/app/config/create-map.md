@@ -1,3 +1,61 @@
+### Installing GeoView
+
+GeoView is a single script, `cgpv-main.js`, that loads its other files (packages, workers, translations and images) from the same folder. Load it in one of two ways, then add a map container.
+
+#### Option 1 - Use the GeoView CDN (recommended)
+
+Official releases are hosted at `https://viewer-visualiseur.services.geo.ca/apps/GeoView/{VERSION}/`. Always reference a specific version so a new release cannot change your site without testing:
+
+```html
+<script src="https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.3.0/cgpv-main.js"></script>
+```
+
+#### Option 2 - Host a release on your own web server
+
+Use this option for intranets, offline networks or strict Content Security Policies.
+
+1. Download the release zip file from the [GeoView releases](https://github.com/Canadian-Geospatial-Platform/geoview/releases) page.
+2. Extract the full content into a folder served by your web server (for example `/geoview/`). Keep the folder structure; copying `cgpv-main.js` alone does not work.
+3. Reference the script from that folder:
+
+```html
+<script src="/geoview/cgpv-main.js"></script>
+```
+
+Serve the files over HTTP(S). Opening the page from the file system (`file://`) blocks the packages and workers that GeoView loads at runtime.
+
+**Note:** The bundle at `https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js` is a development preview built from the `develop` branch. It changes with every merge and shows a `-dev.<hash>` version suffix; do not use it in production.
+
+#### Minimal page
+
+Add a `<div>` with the `geoview-map` class, load the script once, then call `cgpv.init()` to render the maps:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>My GeoView map</title>
+  </head>
+  <body>
+    <div
+      id="mapOne"
+      class="geoview-map"
+      style="height: 100vh;"
+      data-lang="en"
+      data-config="{ 'map': { 'interaction': 'dynamic', 'viewSettings': { 'projection': 3978 }, 'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true } } }"
+    ></div>
+
+    <script src="https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.3.0/cgpv-main.js"></script>
+    <script>
+      cgpv.init();
+    </script>
+  </body>
+</html>
+```
+
+The sections below describe the map container attributes and the programmatic approach in detail.
+
 ### Creating Maps in GeoView
 
 There are two main approaches to create maps in GeoView:
@@ -115,7 +173,7 @@ The specified GeoCore layers are appended to any layers already defined in `data
 
 When set, the map will load configuration from URL parameters if they are present. This is especially useful for sharing specific map views or configurations via links.
 
-> **Live demo:** [demo-share.html](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/public/templates/demos/demo-share.html)
+> **Demo:** [demo-share.html](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/public/templates/demos/demo-share.html)
 
 When `data-shared` is used together with `data-config` or `data-config-url`, the base configuration from those attributes is preserved, and URL parameters selectively override specific properties:
 

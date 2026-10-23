@@ -4,6 +4,8 @@
 
 - **Getting Started**
   - [Documentation Overview](README.md)
+  - [Where GeoView Fits](app/geoview-comparison.md)
+  - [GeoView Capabilities](app/geoview-capabilities.md)
 
 - **Configuration**
   - [Creating Maps](app/config/create-map.md)

@@ -2,6 +2,11 @@
 
 Welcome to the GeoView documentation! This documentation is organized by audience and use case.
 
+## For Evaluators and Integrators
+
+- [Where GeoView fits](app/geoview-comparison.md) explains four geospatial product categories and their trade-offs, links to representative examples, and helps you choose a standalone viewer, portal integration, or another approach.
+- [GeoView capabilities](app/geoview-capabilities.md) highlights supported data, exploration tools, optional packages, HTML/API customization, accessibility support, and deployment considerations.
+
 ## 📖 For GeoView Users (API Documentation)
 
 > **🔍 Something not working?** See the **[Troubleshooting Guide](app/ui/troubleshooting.md)** for how GeoView reports errors and what to do when things go wrong.
@@ -126,7 +131,7 @@ Guides for extending GeoView functionality:
 
 ### UI & Theming
 
-- **[Accessibility](./app/accessibility.md)** - WCAG compliance and accessibility features
+- **[Accessibility](./app/accessibility.md)** - Accessibility features, interaction patterns, and documented limitations
 - **[Theming](./app/ui/theming.md)** - UI themes and styling
 - **[Troubleshooting](./app/ui/troubleshooting.md)** - Error messages, notifications, and what to do when something goes wrong
 

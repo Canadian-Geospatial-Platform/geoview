@@ -371,12 +371,20 @@ if (!GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation)) {
 return computedStyle;
 ```
 
-**Orchestration:** `MapController.applyLayerFilters(layerPath)` is the single entry point that:
+**Orchestration:** update the corresponding filter fragment through the regular GV layer's category-specific setter. There is no separate public apply step:
 
-1. Gathers all active filters from the three sources
-2. Creates a `LayerFilters` instance
-3. Calls `layer.setLayerFilters(filters, true)` to apply to the source
-4. The `true` parameter triggers an OL layer change event (re-render)
+- `setLayerFiltersTime(expression)` updates the temporal filter.
+- `setLayerFiltersData(expression)` updates the data-table filter.
+- `setLayerFiltersPanel(expression)` updates the Filter package's filter.
+
+Each setter updates the existing `LayerFilters` object while preserving the other fragments, then invokes the private `AbstractGVLayer.#setLayerFilters()` pipeline:
+
+1. Store the updated `LayerFilters` on the layer.
+2. Call the layer implementation's `onSetLayerFilters()` hook to apply supported source-specific behavior.
+3. Call the OpenLayers layer's `changed()` method to request a re-render.
+4. Emit `LayerFilterAppliedEvent` with the changed filter category.
+
+Pass an expression supported by the layer, or `undefined`/an empty string to clear that fragment. These setters apply the filter but do not automatically update the corresponding UI controls. UI components should use their owning controllers. For temporal updates, `setLayerFiltersTime()` is also the documented replacement for the deprecated `setLayerFiltersDate(date1, date2)` convenience method; it takes a filter expression rather than two date arguments.
 
 ### Feature Queries
 
@@ -438,17 +446,21 @@ filters.getClassFilter(); // string | undefined
 filters.getTimeFilter(); // string | undefined
 filters.getInitialFilter(); // string | undefined
 filters.getDataFilter(); // string | undefined
+filters.getPanelFilter(); // string | undefined
 
 // Get combined filter
 filters.getAllFilters(); // string (all joined with AND)
 
-// Set individual filters
+// Set and apply the corresponding filter fragment (no separate apply call)
 layer.setLayerFiltersTime(filterString);
 layer.setLayerFiltersData(filterString);
+layer.setLayerFiltersPanel(filterString);
 
-// Apply all filters to the OL source
-mapController.applyLayerFilters(layerPath);
+// Clear only the temporal fragment; preserve the other filters
+layer.setLayerFiltersTime(undefined);
 ```
+
+Mutating the `LayerFilters` object directly updates its fragments and cached expression, but does not itself run the GV layer's adapter hook, request a re-render, or emit the filter-applied event. Use the layer setters above for runtime time/data/panel changes. See [Filtering Layers](../app/layers/layers.md#filtering-layers) for integration guidance and source limitations.
 
 ---
 
