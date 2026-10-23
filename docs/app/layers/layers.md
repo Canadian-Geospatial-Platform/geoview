@@ -18,6 +18,14 @@ A **GeoView Layer** is an abstraction that wraps OpenLayers layers and provides 
 - Provides events for lifecycle management (loading, loaded, error)
 - Supports temporal data and filtering
 
+## Unified Layer Operations
+
+GeoView exposes common operations for visibility, opacity, feature queries, and supported filtering across its layer implementations. Applications target a layer through the GeoView API instead of constructing a separate request format for each vendor. The source type still needs to be identified when adding/configuring the layer; the abstraction handles supported runtime operations after that setup.
+
+Filtering illustrates the boundary: Esri map-service adapters produce `layerDefs`, WMS adapters construct supported filter/time parameters, and feature-vector layers can evaluate filters locally against loaded features. Standalone WFS, OGC API Features, and Esri Feature layers use that client-side runtime filtering path; it is not a promise that each filter becomes a server-side query. This encapsulation lets application controls and packages reuse GeoView operations rather than duplicate the source-specific plumbing.
+
+The abstraction does not make all capabilities universal. Filters must use actual field names and expressions supported by the relevant adapter/service. Static images, XYZ/WMTS tiles, GeoTIFF, and vector tiles do not expose this common attribute-filtering path; Esri Image supports temporal filtering through it, not general attribute filtering. Query results and rendered-feature filtering are also separate concerns. See [Filtering Layers](#filtering-layers) and the [Layer API](../api/layer-api.md).
+
 ## Two-Tier Layer System
 
 GeoView uses a **two-tier** layer architecture. Both tiers are created for every layer:
@@ -389,16 +397,13 @@ Temporal layers can be filtered using the layer's built-in filter mechanisms. La
 ```typescript
 // Set a layer filter in the configuration
 {
-  layerFilter: "dateField >= date'2023-01-01T00:00:00Z' AND dateField <= date'2023-12-31T23:59:59Z'";
+  layerFilter: "dateField >= date '2023-01-01T00:00:00Z' AND dateField <= date '2023-12-31T23:59:59Z'";
 }
 ```
 
-For runtime filter changes, use the map controller:
+For runtime temporal changes, use the configured Time Slider or the layer's `setLayerFiltersTime()` operation with an expression supported by that layer. The layer implementation applies the corresponding service parameters or local filtering. See [Unified Layer Operations](#unified-layer-operations) for the execution boundary and [time-dimension.md](../../programming/time-dimension.md) for temporal behavior.
 
-```typescript
-const mapController = mapViewer.controllers.mapController;
-mapController.applyLayerFilters(layerPath);
-```
+`setLayerFiltersTime()` updates and applies only the temporal filter fragment while preserving the other active filters; no separate apply call is needed. Data-table and Filter package expressions belong in `setLayerFiltersData()` and `setLayerFiltersPanel()`, respectively. These programmatic setters do not automatically synchronize the corresponding UI controls.
 
 ## Filtering Layers
 
@@ -412,20 +417,23 @@ Filters are applied through layer configuration using the `layerFilter` property
 }
 ```
 
-For runtime filter changes, use the map controller:
+At runtime, obtain a regular layer through `mapViewer.layer.getGeoviewLayerRegular(layerPath)` and use its common filter operations, such as `setLayerFiltersData(expression)`, `setLayerFiltersPanel(expression)`, or `setLayerFiltersTime(expression)`, for the corresponding filter source. The layer combines its active filter fragments and invokes the appropriate implementation; you do not construct Esri or WMS request parameters yourself. UI components should use their owning controllers, such as the data-table and filter-panel controllers, rather than bypassing them.
 
-```typescript
-const mapController = mapViewer.controllers.mapController;
-mapController.applyLayerFilters(layerPath);
-```
+Expressions use GeoView's SQL-like filter model, not an unrestricted SQL/CQL or spatial-query language. Simple comparisons and logical combinations are supported where the adapter/service permits them, but functions, operators, dates, and field identifiers are not universally portable. For example, `population > 100000` requires a compatible layer with an actual `population` field; a display alias is not a substitute for that field name. Verify the required expression against your layer and service.
 
-**CQL Filter Syntax:**
+**SQL-like filter syntax (adapter support varies):**
 
 - Comparison: `=`, `<>`, `<`, `>`, `<=`, `>=`
-- Logical: `AND`, `OR`, `NOT`
-- Strings: `LIKE`, `IN`
-- Dates: `date'YYYY-MM-DDTHH:MM:SSZ'`
-- Spatial: `INTERSECTS`, `CONTAINS`, `WITHIN`
+- Logical: `AND`, `OR`, `NOT`; parentheses can group expressions.
+- Strings: `LIKE`, `IN`; enclose string values in single quotes.
+- Dates: `date 'YYYY-MM-DDTHH:mm:ssZ'` — include a space after `date`.
+- Null checks: `IS NULL`, `IS NOT NULL`.
+
+These expressions are not all portable across adapters. For example, the client-side evaluator recognizes `<>`, but the current WMS/WFS SQL-to-OGC-XML converter does not accept it directly. Date handling and other operators also depend on the execution path.
+
+**Spatial predicates:** `INTERSECTS`, `CONTAINS`, and `WITHIN` are not supported as SQL-like expressions by these common filter setters. Use the relevant supported spatial-query operation instead; spatial service requests are separate from this attribute/time expression syntax.
+
+Programmatic setters apply filters but do not automatically synchronize the corresponding UI controls. Client-side filtering operates on loaded features and does not remove them from the source or guarantee that every feature-query method returns the same filtered set. The [Unified Layer Operations](#unified-layer-operations) section lists source-type boundaries. Consult the [AbstractGVLayer TypeDoc reference](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/AbstractGVLayer.html) for full method contracts.
 
 ## Feature Information
 

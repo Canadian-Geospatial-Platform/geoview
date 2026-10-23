@@ -14,7 +14,7 @@ This guide explains four product categories, their development and operating tra
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | **1. Mapping libraries and SDKs**             | Rendering, data layers, interactions, and reusable controls/components.                                    | Build and maintain the application: UI composition, coordinated workflows, configuration, localization, accessibility, and integration. | OpenLayers, Leaflet, ArcGIS Maps SDK for JavaScript.                                         |
 | **2. Configurable web viewers and explorers** | An assembled exploration interface that can become a standalone curated map or an embedded viewer.         | Select compatible data, configure the interface, host it, and develop extensions only where needed.                                     | GeoView, TerriaJS through its TerriaMap starter; MapStore also supplies viewer capabilities. |
-| **3. Portals and publishing platforms**       | Broader content publishing, discovery, administration, or managed services, with viewing as one component. | Operate the infrastructure or subscribe to a service; assess whether the viewer can be reused and customized independently.             | ArcGIS Online, CARTO, GeoNode, Lizmap/QGIS Server.                                           |
+| **3. Portals and publishing platforms**       | Broader content publishing, discovery, administration, or managed services, with viewer as one component. | Operate the infrastructure or subscribe to a service; assess whether the viewer can be reused and customized independently.             | ArcGIS Online, CARTO, GeoNode, Lizmap/QGIS Server.                                           |
 | **4. Desktop GIS and analysis tools**         | Authoring, editing, cartography, analysis, and data preparation.                                           | Turn the outputs into a public web experience through exports, published services, or a viewer.                                         | QGIS, ArcGIS Pro, GRASS GIS.                                                                 |
 
 These categories describe different responsibilities, not rigid product labels. Open source versus proprietary, library versus application, and self-hosted versus managed are independent distinctions. Esri's SDK, ArcGIS Online, and ArcGIS Pro are different products; Mapbox GL JS is a library, while Mapbox Studio is style-authoring/publishing tooling. GeoView uses OpenLayers rather than replacing its rendering engine.
@@ -23,7 +23,7 @@ These categories describe different responsibilities, not rigid product labels. 
 
 A mapping SDK is the closest option to **starting the application from scratch**, not starting the rendering engine from scratch. A basic map can be quick to create, but assembling a polished layer browser, synchronized legend/details/table interactions, language handling, and accessible navigation can require substantial development and long-term maintenance. Some SDKs provide rich components; you still own their integration and your application's behavior.
 
-Examples include [OpenLayers](https://openlayers.org/), [Leaflet](https://leafletjs.com/), [ArcGIS Maps SDK for JavaScript](https://developers.arcgis.com/javascript/latest/), [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/), [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/overview), and [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides/). Choose this route when a bespoke application is more important than reusing a configured viewer. Software licensing, provider accounts, API keys, and paid service usage vary independently of development effort.
+Examples include [OpenLayers](https://openlayers.org/), [Leaflet](https://leafletjs.com/), [ArcGIS Maps SDK for JavaScript](https://developers.arcgis.com/javascript/latest/), [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/), [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/overview), and [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/guides/).
 
 ### 2. Viewers: configure a product instead of assembling every workflow
 
@@ -31,7 +31,7 @@ GeoView's starting point is an existing exploration interface. Load its script, 
 
 Alongside shareable URLs, GeoView's API can capture selected current map state as a configuration that your application saves to JSON and reloads later. See [sharing and saved state](geoview-capabilities.md#data-exploration-and-sharing) for this richer map-persistence workflow.
 
-Other examples include [TerriaJS](https://www.npmjs.com/package/terriajs), through its TerriaMap website starter, and [MapStore](https://docs.mapstore.geosolutionsgroup.com/), which also provides broader application capabilities. Related packages such as [GeoJS](https://www.npmjs.com/package/geojs) and [OpenGlobus](https://www.npmjs.com/package/@openglobus/og) supply visualization/mapping libraries rather than equivalent assembled viewer applications; they belong primarily to the SDK route in category 1.
+Other examples include [TerriaJS](https://www.npmjs.com/package/terriajs), through its TerriaMap website starter, and [MapStore](https://docs.mapstore.geosolutionsgroup.com/), which also provides broader application capabilities.
 
 ### 3. Portals: more than a viewer
 
@@ -50,9 +50,7 @@ A desktop geographic information system (GIS) provides tools to create, edit, an
 | **Standalone curated map** | Configured layers, exploration panels, sharing, and enabled packages for a thematic map, dataset viewer, or project website. | Host page/assets, map configuration, data/service access, contextual content, and any custom workflows.                      |
 | **Viewer inside a portal** | The same viewing tools, driven by the selected record or dataset.                                                            | Portal search/catalog, metadata pages, governance, publishing, permissions where required, and record-to-viewer integration. |
 
-**GEO.ca and Open Maps Canada use GeoView as their viewer.** The same Historical Flood Events dataset appears in [GEO.ca's record-and-map page](https://app.geo.ca/en-ca/map-browser/record/fe83a604-aa5a-4e46-903c-685f8b0cc33c) and [Open Maps Canada's map page](https://open.canada.ca/openmap/en.html#fe83a604-aa5a-4e46-903c-685f8b0cc33c). These show how a viewer can be reused without being the entire portal. GeoNode is a portal-level analogy, not a direct equivalent to GeoView alone.
-
-In either case, you still own the integration and operating work. GeoView's [hosting, costs, and boundaries](geoview-capabilities.md#hosting-costs-and-boundaries) are documented separately from its software capabilities.
+**GEO.ca and Open Maps Canada use GeoView as their viewer.** The same Historical Flood Events dataset appears in [GEO.ca's record-and-map page](https://app.geo.ca/en-ca/map-browser/record/fe83a604-aa5a-4e46-903c-685f8b0cc33c) and [Open Maps Canada's map page](https://open.canada.ca/openmap/en.html#fe83a604-aa5a-4e46-903c-685f8b0cc33c). These show how a viewer can be reused without being the entire portal.
 
 ## Which approach should I choose?
 

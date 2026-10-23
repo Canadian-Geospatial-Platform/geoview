@@ -1,9 +1,5 @@
 # GeoView
 
-## Live Demo Site - [GeoView in Action](https://canadian-geospatial-platform.github.io/geoview/public/index.html)
-
-![BigPicture](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
-
 ## Creating and Managing Map Configurations
 
 To assist you in creating or customizing map configurations, we provide a dedicated [Map Configuration Repository on [GitHub]:(https://github.com/Canadian-Geospatial-Platform/geoview-demo). This repository contains a collection of sample configurations, documentation, API functions to help you get started quickly.
@@ -140,6 +136,8 @@ https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js
 ```
 
 _As the viewer is still in development, this bundle will always contain the latest commits. We really recommand to use one of our release on your web server_
+
+_To install an official release from the GeoView CDN or from a release zip file, see [Installing GeoView](./docs/app/config/create-map.md#installing-geoview)._
 
 _Development builds (local `rush serve` / `rush build-dev` and the hosted gh-pages preview) display their version with a `-dev.<shortHash>` suffix in the app bar **Version** popover (e.g. `v.2.3.0-dev.a1b2c3d`), so you can tell them apart from an official release (clean `v.2.3.0`). See [docs/programming/release-workflow.md](./docs/programming/release-workflow.md#build-version-suffix-dev-vs-release) for details._
 

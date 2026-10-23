@@ -15,59 +15,29 @@ GeoView is built with **React**, **TypeScript**, and **OpenLayers**, and is stru
 
 Use GeoView as a standalone web viewer with support for a wide variety of spatial datasets and extensive built-in exploration tools, or integrate it into a website or open-data portal, as GEO.ca and Open Maps Canada do. See [Where GeoView fits](docs/app/geoview-comparison.md) for product categories and alternatives, and [GeoView capabilities](docs/app/geoview-capabilities.md) for features, packages, and customization **(both guides are English only)**.
 
+### Demo
+
+See [GeoView in Action](https://canadian-geospatial-platform.github.io/geoview/public/index.html) **(English only)**.
+
+![GeoView viewer screenshot](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
+
 ### Key Capabilities
 
-**Extensive Layer Support**
+- **Explore diverse spatial data** — view supported OGC and Esri services, files, and raster/vector tiles with consistent layer controls.
+- **Inspect and filter information** — use interactive legends, feature details, and data tables to understand the map and focus on relevant records.
+- **Find places and navigate maps** — search locations, switch basemaps and supported projections, and use familiar navigation and map-reference tools.
+- **Explore changes and patterns** — navigate time-enabled data, view charts, and compare layers with optional extensions.
+- **Draw, measure, and discover** — create and edit drawings, measure distances and areas, visit curated areas of interest, and browse compatible STAC catalogs when enabled.
+- **Share and download maps** — share map links and export PNG, JPEG, or PDF maps with supporting elements such as legends and scale bars.
+- **Use an adaptable, bilingual interface** — English/French UI, themes, keyboard navigation, and screen-reader support, with [documented accessibility limitations](docs/app/accessibility.md).
 
-GeoView supports a wide range of geospatial data sources out of the box:
-
-- **Raster**: OGC WMS, ESRI Dynamic, ESRI Image, static images, XYZ tiles, WMTS
-- **Vector**: OGC API Features, WFS, ESRI Feature Service, GeoJSON, CSV, KML, WKB, GeoPackage, Shapefile
-- **Vector Tiles**: Mapbox Vector Tiles (MVT)
-
-Layers can be organized in hierarchies, filtered, styled, and controlled individually through a consistent API.
-
-**Multiple Map Projections**
-
-Maps can be rendered in Lambert Conformal Conic (EPSG:3978), Web Mercator (EPSG:3857), and North Pole LAEA Canada (EPSG:3573) projections.
-
-**Plugin Architecture**
-
-A plugin system allows functionality to be extended without modifying the core. Official plugins include:
-
-- **Time Slider** – temporal navigation and animation for time-enabled layers
-- **Swiper** – side-by-side layer comparison
-- **GeoChart** – charting of geospatial attribute data
-- **Drawer** – collapsible side panel for custom content
-- **AOI Panel** – area-of-interest selection
-- **Custom Legend** – user-defined legend rendering
-- **About Panel** – configurable about/information panel
-
-**Map Interaction & UI**
-
-- Interactive legend with visibility and opacity controls
-- Feature details panel (click/hover queries)
-- North arrow, scale bar, and overview map
-- Map rotation support
-- Basemap switching
-- Full-screen mode and responsive layout
-- Export to PNG and PDF with legend, scale bar, and attribution
-- Customizable theming (light, dark, and custom color palettes)
-
-**Developer Experience**
-
-- Declarative (HTML `data-config`) and programmatic (`createMapFromConfig`) map creation
-- Shareable map state via URL parameters
-- Zustand-based state management with a clear three-layer architecture (UI → Controllers → Store)
-- Comprehensive event system for map, layer, and interaction events
-- Bilingual support (English and French)
-- WCAG 2.1 accessibility compliance
-- TypeDoc-generated API documentation
+Available tools depend on the map configuration, enabled extensions, and data source.
 
 ## Related Resources
 
 - **GitHub Repository**: Canadian-Geospatial-Platform/geoview
 - **GEO.ca**: [geo.ca](https://app.geo.ca)
+- **Installing GeoView**: [Add GeoView to a web page](docs/app/config/create-map.md#installing-geoview) (CDN or self-hosted release)
 - **Developement**: [Code](README-DEV.md)
 
 ---
@@ -105,38 +75,29 @@ GeoView est construit avec **React**, **TypeScript** et **OpenLayers**, et est s
 
 Utilisez GeoView comme visualisateur web autonome prenant en charge une grande variété de jeux de données spatiales et offrant de nombreux outils d'exploration intégrés, ou intégrez-le à un site web ou à un portail de données ouvertes, comme le font GEO.ca et Cartes ouvertes Canada. Consultez [Où se situe GeoView](docs/app/geoview-comparison.md) pour les catégories de produits et les autres solutions, et [Les capacités de GeoView](docs/app/geoview-capabilities.md) pour les fonctionnalités, les plugiciels et la personnalisation **(les deux guides sont en anglais seulement)**.
 
+### Démo
+
+Consultez [GeoView en action](https://canadian-geospatial-platform.github.io/geoview/public/index.html) **(en anglais seulement)**.
+
+![Capture d'écran du visualisateur GeoView](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
+
 ### Capacités principales
 
-**Prise en charge étendue des couches**
+- **Explorez des données spatiales variées** — consultez les services OGC et Esri, les fichiers et les tuiles matricielles/vectorielles pris en charge à l'aide de contrôles de couches cohérents.
+- **Examinez et filtrez l'information** — utilisez les légendes interactives, les détails des entités et les tableaux de données pour comprendre la carte et cibler les enregistrements pertinents.
+- **Trouvez des lieux et parcourez les cartes** — recherchez des lieux, changez de fond de carte et de projection prise en charge, et utilisez des outils de navigation et de repérage familiers.
+- **Explorez les changements et les tendances** — parcourez les données temporelles, affichez des graphiques et comparez les couches à l'aide de plugiciels optionnels.
+- **Dessinez, mesurez et découvrez** — créez et modifiez des dessins, mesurez des distances et des superficies, visitez des zones d'intérêt prédéfinies et parcourez des catalogues STAC compatibles lorsque ces outils sont activés.
+- **Partagez et téléchargez des cartes** — partagez des liens vers les cartes et exportez-les en PNG, JPEG ou PDF avec des éléments comme la légende et la barre d'échelle.
+- **Utilisez une interface adaptable et bilingue** — interface en français et en anglais, thèmes, navigation au clavier et prise en charge des lecteurs d'écran, avec des [limites d'accessibilité documentées](docs/app/accessibility.md) (en anglais seulement).
 
-GeoView prend en charge un large éventail de sources de données géospatiales :
-
-- **Matricielles** : OGC WMS, ESRI Dynamic, ESRI Image, images statiques, tuiles XYZ, WMTS
-- **Vectorielles** : OGC API Features, WFS, ESRI Feature Service, GeoJSON, CSV, KML, WKB, GeoPackage, Shapefile
-- **Tuiles vectorielles** : Mapbox Vector Tiles (MVT)
-
-**Projections cartographiques multiples**
-
-Les cartes peuvent être rendues en projection conique conforme de Lambert (EPSG:3978), Web Mercator (EPSG:3857) et LAEA pôle Nord Canada (EPSG:3573).
-
-**Architecture de plugiciels**
-
-Un système de plugiciels permet d'étendre les fonctionnalités sans modifier le cœur de l'application. Les plugiciels officiels comprennent : le curseur temporel, le comparateur par balayage (swiper), GeoChart, le tiroir, le panneau de zone d'intérêt, la légende personnalisée et le panneau À propos.
-
-**Interaction et interface utilisateur**
-
-- Légende interactive avec contrôles de visibilité et d'opacité
-- Panneau de détails des entités
-- Flèche du nord, barre d'échelle et carte de survol
-- Exportation en PNG et PDF avec légende, barre d'échelle et attribution
-- Thématisation personnalisable (palettes claires, sombres et personnalisées)
-- Support bilingue (anglais et français)
-- Conformité à l'accessibilité WCAG 2.1
+Les outils disponibles dépendent de la configuration de la carte, des plugiciels activés et de la source de données.
 
 ## Ressources connexes
 
 - **Dépôt GitHub** : Canadian-Geospatial-Platform/geoview
 - **GEO.ca** : [geo.ca](https://app.geo.ca)
+- **Installer GeoView** : [Ajouter GeoView à une page web](docs/app/config/create-map.md#installing-geoview) (CDN ou version hébergée) (En anglais seulement)
 - **Documentation** : [Code](README-DEV.md) (En anglais seulement)
 
 ---
