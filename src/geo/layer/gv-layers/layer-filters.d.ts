@@ -1,4 +1,4 @@
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 /**
  * Aggregates and composes the different filter fragments applied at various
  * levels of the application (initial load, class-level, data table, time slider).
@@ -118,9 +118,12 @@ export declare class LayerFilters {
      * Returns all active filters (including time-based filters) combined into a
      * single expression using the logical AND operator.
      *
+     * @param adjustTimeFilterForVector - Whether to adjust the time filter for vector data
+     * @param vectorTimeField - Optional vector field that corresponds to the time filter
+     * @param dateFieldNames - Names of date-typed feature fields
      * @returns A combined filter expression
      */
-    getAllFilters(): string;
+    getAllFilters(adjustTimeFilterForVector?: boolean, vectorTimeField?: string, dateFieldNames?: string[]): string;
     /**
      * Returns the cached filter equation for this layer.
      *
@@ -131,6 +134,33 @@ export declare class LayerFilters {
      * @returns The cached filter equation or undefined when not set
      */
     getFilterEquation(): FilterNodeType[] | undefined;
+    /**
+     * Adjusts a time filter to match fields available in associated vector data.
+     *
+     * The original predicate is retained when its field exists. Otherwise, the configured vector time field is preferred, followed by a sole
+     * date-typed field. When neither is available, undefined is returned so unrelated client-side filters can still be applied.
+     *
+     * @param timeFilter - Optional time filter predicate
+     * @param vectorTimeField - Optional configured vector time field
+     * @param dateFieldNames - Names of date-typed feature fields
+     * @returns The adjusted time filter, or undefined when no time filter can be applied
+     */
+    static adjustTimeFilterForVectorData(timeFilter: string | undefined, vectorTimeField: string | undefined, dateFieldNames: string[]): string | undefined;
+    /**
+     * Creates a client-side filter equation from class, time, and panel filters.
+     *
+     * When the time filter field is unavailable, the configured vector time field is preferred if present in the feature data.
+     * Otherwise, a sole date-typed feature field is used; if there are multiple or no date fields, the time filter is omitted.
+     * The class and panel filters are always retained.
+     *
+     * @param classFilter - Optional class renderer filter
+     * @param timeFilter - Optional time slider filter
+     * @param panelFilter - Optional filter panel filter
+     * @param vectorTimeField - Optional configured vector time field
+     * @param dateFieldNames - Names of date-typed feature fields
+     * @returns The parsed client-side filter equation
+     */
+    static createClientFilterEquation(classFilter: string | undefined, timeFilter: string | undefined, panelFilter: string | undefined, vectorTimeField: string | undefined, dateFieldNames: string[]): FilterNodeType[];
     /**
      * Joins multiple SQL filter fragments using the AND operator.
      *

@@ -124,6 +124,8 @@ export declare class RequestTimeoutError extends Error {
  * due to a non-success HTTP status.
  */
 export declare class ResponseError extends Error {
+    /** HTTP status code returned for the failed request. */
+    readonly status: number;
     /**
      * Creates an instance of ResponseError.
      *

@@ -1,17 +1,16 @@
 import ImageLayer from 'ol/layer/Image';
 import type { Coordinate } from 'ol/coordinate';
-import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { ImageWMS } from 'ol/source';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeLegend } from '@/api/types/layer-schema-types';
-import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages a WMS layer.
@@ -200,17 +199,11 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     setWmsStyle(wmsStyleId: string): void;
     /**
-     * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
+     * Indicates whether all records can be queried through an associated vector service.
      *
-     * This function is responsible for generating the appropriate filter expression based on the layer configuration,
-     * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
-     *
-     * @param layerConfig - The configuration object for the WMS or Esri Image layer
-     * @param source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied
-     * @param filter - The raw filter string input (defaults to an empty string if not provided)
-     * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied
+     * @returns `true` when a WFS or OGC API Features configuration is associated with the WMS layer
      */
-    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
+    getIsQueryableForAllRecords(): boolean;
     /**
      * Registers a WMS style changed event handler.
      *

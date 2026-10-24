@@ -39,11 +39,6 @@ export type ConfigAbstractBaseClassOrType = AbstractBaseLayerEntryConfig | Abstr
 /** Explicit type to eventually get rid of clearly pointing out the issue with
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigVectorTilesClassOrType = VectorTilesLayerEntryConfig | VectorTilesLayerEntryConfigProps;
-/** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
-export type TypePostSettings = {
-    header?: Record<string, string>;
-    data: unknown;
-};
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType = 'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 /** The possible layer statuses when processing layer configs */
@@ -117,8 +112,13 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
     /** The projection code of the source. */
     dataProjection?: string;
     /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
-    postSettings?: TypePostSettings;
+    initialPostQuery?: TypeBaseVectorSourceInitialPostQuery;
 }
+/** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
+export type TypeBaseVectorSourceInitialPostQuery = {
+    header?: Record<string, string>;
+    data: unknown;
+};
 export interface TypeSourceGeoJSONInitialConfig extends TypeBaseVectorSourceInitialConfig {
     geojson?: string;
 }
@@ -465,7 +465,8 @@ export type TypeUserStyleRule = {
 };
 export type TypeUserStyleRuleFilter = {
     'ogc:And'?: TypeUserStyleRuleFilter;
-    'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
+    'ogc:Or'?: TypeUserStyleRuleFilter;
+    'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails | TypeUserStyleRuleFilterPropertyDetails[];
     'ogc:PropertyIsGreaterThan'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsGreaterThanOrEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsLessThan'?: TypeUserStyleRuleFilterPropertyDetails;
@@ -514,12 +515,27 @@ export type TypeUserStyleGraphic = {
     'se:Mark': TypeUserStyleMark;
     'se:Size': string;
     'se:Rotation': TypeLiteral;
+    /** Optional graphic displacement in pixels. */
+    'se:Displacement'?: TypeUserStyleDisplacement;
+};
+/** Describes the horizontal and vertical displacement of an SLD graphic. */
+export type TypeUserStyleDisplacement = {
+    /** Horizontal displacement. */
+    'se:DisplacementX'?: string;
+    /** Vertical displacement. */
+    'se:DisplacementY'?: string;
 };
 export type TypeLiteral = {
     'ogc:Literal': string;
 };
 export type TypeUserStyleMark = {
     'se:WellKnownName'?: string;
+    /** Optional font resource used by a font mark. */
+    'se:OnlineResource'?: TypeOnlineResourceWMS;
+    /** Optional mark resource format. */
+    'se:Format'?: string;
+    /** Optional Unicode code point used by a font mark. */
+    'se:MarkIndex'?: string;
     'se:Fill'?: TypeUserStyleParameter;
     'se:Stroke'?: TypeUserStyleParameter;
 };
@@ -558,6 +574,7 @@ export type TypeMetadataWMSCapabilityRequest = {
     'sld:DescribeLayer'?: unknown;
     'qgs:GetStyles'?: unknown;
     'ms:GetStyles'?: unknown;
+    'esri_wms:GetStyles'?: unknown;
 };
 export type TypeMetadataWMSCapabilityRequestGetMap = {
     DCPType: TypeMetadataWMSCapabilityRequestGetMapDCPType[];
@@ -746,20 +763,39 @@ export type TypeMetadataWFS = {
     ServiceExceptionReport?: unknown;
 };
 export type TypeMetadataWFSCapabilities = {
-    FeatureTypeList: TypeMetadataWFSFeatureTypeList;
     '@attributes': TypeMetadataWFSAttributes;
-    'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
+    FeatureTypeList: TypeMetadataWFSFeatureTypeList;
+    'wfs:FeatureTypeList'?: TypeMetadataWFSFeatureTypeList;
+    'ows:OperationsMetadata'?: TypeMetadataWFSOperationMetadata;
+    Capability?: TypeMetadataWFSCapability;
     version?: string;
     serverType?: TypeOfServer;
 };
+export type TypeMetadataWFSCapability = {
+    Request: TypeMetadataWFSCapabilityRequest;
+};
+export type TypeMetadataWFSCapabilityRequest = {
+    GetCapabilities: unknown;
+    DescribeFeatureType: TypeMetadataWFSOperationMetadataOperation | undefined;
+    GetFeature: unknown;
+};
 export type TypeMetadataWFSFeatureTypeList = {
     FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
+    'wfs:FeatureType'?: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
 };
 export type TypeMetadataWFSFeatureTypeListFeatureType = {
     Name: string | TypeMetadataWFSTextOnly;
+    'wfs:Name'?: string | TypeMetadataWFSTextOnly;
     Title: string | TypeMetadataWFSTextOnly;
-    DefaultSRS: string | TypeMetadataWFSTextOnly;
+    'wfs:Title'?: string | TypeMetadataWFSTextOnly;
+    SRS?: string | TypeMetadataWFSTextOnly;
+    'wfs:SRS'?: string | TypeMetadataWFSTextOnly;
+    DefaultSRS?: string | TypeMetadataWFSTextOnly;
+    'wfs:DefaultSRS'?: string | TypeMetadataWFSTextOnly;
+    DefaultCRS?: string | TypeMetadataWFSTextOnly;
+    'wfs:DefaultCRS'?: string | TypeMetadataWFSTextOnly;
     OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
+    'wfs:OutputFormats'?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
     'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
 };
 export type TypeMetadataWFSFeatureTypeListFeatureTypeBBox = {
@@ -771,9 +807,11 @@ export type TypeMetadataWFSTextOnly = {
 };
 export type TypeMetadataWFSFeatureTypeListFeatureOutputFormat = {
     Format?: string | (string | TypeMetadataWFSTextOnly)[];
+    'wfs:Format'?: string | (string | TypeMetadataWFSTextOnly)[];
 };
 export type TypeMetadataWFSAttributes = {
     version?: string;
+    [attributeName: string]: string | undefined;
 };
 export type TypeMetadataWFSOperationMetadata = {
     'ows:Operation': TypeMetadataWFSOperationMetadataOperation[];
@@ -781,6 +819,18 @@ export type TypeMetadataWFSOperationMetadata = {
 export type TypeMetadataWFSOperationMetadataOperation = {
     '@attributes': TypeMetadataWFSAttribute;
     'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
+    'ows:DCP'?: TypeMetadataWFSDCP | TypeMetadataWFSDCP[];
+};
+export type TypeMetadataWFSDCP = {
+    'ows:HTTP'?: {
+        'ows:Get'?: TypeMetadataWFSGetPost | TypeMetadataWFSGetPost[];
+        'ows:Post'?: TypeMetadataWFSGetPost | TypeMetadataWFSGetPost[];
+    };
+};
+export type TypeMetadataWFSGetPost = {
+    '@attributes'?: {
+        'xlink:href'?: string;
+    };
 };
 export type TypeMetadataWFSOperationMetadataOperationParameter = {
     '@attributes': TypeMetadataWFSAttribute;
@@ -1051,9 +1101,19 @@ export type TypeLayerMetadataFields = {
 export type TypeMetadataOGCFeature = {
     collections: TypeMetadataOGCFeatureCollection[];
 };
+/** Describes metadata for an OGC API Features collection. */
 export type TypeMetadataOGCFeatureCollection = {
+    /** Collection identifier */
     id: string;
+    /** Collection title */
+    title: string;
+    /** Collection description */
     description: string;
+    /** Collection keywords */
+    keywords: string[];
+    /** The CRS identifiers supported by this collection's items endpoint */
+    crs?: string[];
+    /** The collection extent */
     extent: TypeMetadataOGCFeatureCollectionExtent;
 };
 export type TypeMetadataOGCFeatureCollectionExtent = {

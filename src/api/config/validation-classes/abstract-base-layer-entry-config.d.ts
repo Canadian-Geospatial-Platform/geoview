@@ -350,6 +350,12 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getOutfieldsPK(): TypeOutfields;
     /**
+     * Gets the outfields representing date fields.
+     *
+     * @returns The outfields representing date fields, or an empty array if none are found
+     */
+    getOutfieldsDate(): TypeOutfields[];
+    /**
      * Gets the field name representing the primary key (OID) if available,
      * otherwise returns the provided default field name.
      *

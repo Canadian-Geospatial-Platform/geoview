@@ -115,6 +115,12 @@ export interface TypeLegendLayer {
     mosaicRule?: TypeMosaicRule;
     /** Temporal dimension metadata for time-aware layers. */
     timeDimension?: TimeDimension;
+    /** The name of the time field used for WMS layer with temporal data with an associated vector layer. */
+    vectorTimeField?: string;
+    /** Full URL used to retrieve the vector structure for the layer. */
+    vectorStructureFullUrl?: string;
+    /** Full URL used to retrieve WMS styles for the layer. */
+    wmsGetStylesFullUrl?: string;
     /** Active style for WMS layers. */
     wmsStyle?: string;
     /** Available WMS styles metadata from WMS capabilities. */

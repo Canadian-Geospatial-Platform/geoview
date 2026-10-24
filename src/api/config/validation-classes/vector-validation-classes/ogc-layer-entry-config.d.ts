@@ -1,10 +1,11 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC, TypeMetadataOGCFeature } from '@/api/types/layer-schema-types';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 export declare class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
+    #private;
     /**
      * Creates an instance of OgcFeatureLayerEntryConfig.
      *
@@ -18,11 +19,29 @@ export declare class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
      */
     getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig;
     /**
+     * Overrides the parent class's getter to provide strongly-typed OGC API Features service metadata.
+     *
+     * @returns The service metadata, or undefined if it has not been set
+     */
+    getServiceMetadata(): TypeMetadataOGCFeature | undefined;
+    /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
      * @returns The strongly-typed layer metadata specific to this layer entry config
      */
     getLayerMetadata(): TypeLayerMetadataOGC | undefined;
+    /**
+     * Gets the full Queryables URL used for the layer, if available.
+     *
+     * @returns The Queryables URL, or undefined if none has been set
+     */
+    getQueryablesFullUrl(): string | undefined;
+    /**
+     * Sets the full Queryables URL used for the layer.
+     *
+     * @param queryablesFullUrl - The Queryables URL to store
+     */
+    setQueryablesFullUrl(queryablesFullUrl: string): void;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents an OGC Feature layer type.
      *

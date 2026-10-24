@@ -9,6 +9,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { TemporalMode, TimeDimension, TimeIANA } from '@/core/utils/date-mgt';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -16,11 +17,10 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings, TypeFeatureInfoResult, TypeDisplayLanguage, TypeFieldEntry, TypeDomain } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields, TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { SnackbarType } from '@/core/utils/notifications';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { SnackbarType } from '@/core/utils/notifications';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
-import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
@@ -775,7 +775,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param schemaTag - The Geoview layer type for the features
      * @param nameField - Optional field name to use as the display name for features
      * @param outFields - Optional array of output fields to include in the feature info
-     * @param supportZoomTo - Whether zoom-to functionality is supported for these features
      * @param domainsLookup - Optional array of field metadata for domain lookups
      * @param layerStyle - Optional mapping of geometry type to style settings for icons
      * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
@@ -785,7 +784,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type
      * @returns Array of feature info entries representing each feature with enriched metadata
      */
-    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, includeNoStyleFeatures: boolean, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined, callbackGetFieldValue: GetFieldValueDelegate): TypeFeatureInfoEntry[];
+    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, includeNoStyleFeatures: boolean, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined, callbackGetFieldValue: GetFieldValueDelegate): TypeFeatureInfoEntry[];
     /**
      * Retrieves and formats the value of a field from an OpenLayers feature.
      * - For `date` fields, the raw value (epoch ms or date string) is normalized
@@ -806,10 +805,10 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @returns The processed field value: a formatted date for date fields, the decoded
      * name for coded-value domains, or the raw value otherwise.
      */
-    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
+    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType | undefined, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
 }
 /** Callback signature used to extract and format the value of a single feature field. */
-export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
+export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType | undefined, fieldDomain: TypeDomain | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
 /** Event payload emitted when the layer style changes. */
 export interface StyleChangedEvent extends LayerBaseEvent {
     /** The newly applied layer style. */

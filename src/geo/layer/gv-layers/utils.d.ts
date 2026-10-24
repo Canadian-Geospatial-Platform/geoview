@@ -1,14 +1,19 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { TemporalMode, TimeIANA } from '@/core/utils/date-mgt';
+import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
+import type { TemporalMode, TimeIANA } from '@/core/utils/date-mgt';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 export declare class GVLayerUtilities {
+    #private;
     /**
      * Normalizes ISO 8601 datetime literals in a filter string for use with
      * ESRI Dynamic (MapServer) layers.
      *
      * This function:
-     * - Detects SQL-style date literals containing ISO 8601 datetimes
-     *   (e.g. `date '2020-01-01T05:00:00Z'`)
+     * - Detects canonical quoted ISO 8601 datetimes and legacy SQL-style date literals
+     *   (e.g. `'2020-01-01T05:00:00Z'` or `date '2020-01-01T05:00:00Z'`)
      * - Extracts and normalizes the ISO datetime value
      * - Removes timezone information (`Z` or offsets)
      * - Replaces the original literal with an ESRI- and database-friendly
@@ -20,7 +25,7 @@ export declare class GVLayerUtilities {
      *
      * @example
      * ```
-     * time_field >= date '2020-01-01T05:00:00Z'
+     * time_field >= '2020-01-01T05:00:00Z'
      * ```
      * becomes:
      * ```
@@ -40,8 +45,8 @@ export declare class GVLayerUtilities {
      * ESRI ImageServer and WMS layers.
      *
      * This function:
-     * - Detects SQL-style date literals containing ISO 8601 datetimes
-     *   (e.g. `date '2020-01-01T05:00:00Z'`)
+     * - Detects canonical quoted ISO 8601 datetimes and legacy SQL-style date literals
+     *   (e.g. `'2020-01-01T05:00:00Z'` or `date '2020-01-01T05:00:00Z'`)
      * - Extracts and normalizes the ISO datetime value
      * - Removes the surrounding SQL `date '...'` literal
      *
@@ -50,7 +55,7 @@ export declare class GVLayerUtilities {
      *
      * @example
      * ```
-     * acquisition_date >= date '2020-01-01T05:00:00Z'
+     * acquisition_date >= '2020-01-01T05:00:00Z'
      * ```
      * becomes:
      * ```
@@ -65,6 +70,15 @@ export declare class GVLayerUtilities {
      *   for ESRI ImageServer and WMS services
      */
     static parseDateTimeValuesEsriImageOrWMS(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string;
+    /**
+     * Applies data and time filters to a WMS or Esri Image source.
+     *
+     * @param layerConfig - The WMS or Esri Image layer entry configuration
+     * @param source - The OpenLayers WMS or Esri Image source to update
+     * @param filter - Optional filters to apply to the source
+     * @throws {LayerInvalidLayerFilterError} When a filter cannot be parsed or applied
+     */
+    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
     /**
      * Create lookup dictionary of names to aliases.
      *

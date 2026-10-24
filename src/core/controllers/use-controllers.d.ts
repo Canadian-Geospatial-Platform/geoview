@@ -11,6 +11,7 @@ import type { PluginController } from '@/core/controllers/plugin-controller';
 import type { TimeSliderController } from '@/core/controllers/time-slider-controller';
 import type { GeoChartController } from '@/core/controllers/geochart-controller';
 import type { FilterPanelController } from '@/core/controllers/filter-panel-controller';
+import type { StacBrowserController } from '@/core/controllers/stac-browser-controller';
 /**
  * Hook to access the MapController from the controller context.
  *
@@ -161,4 +162,23 @@ export declare function useFilterPanelController(): FilterPanelController;
  * @throws {Error} When used outside of a ControllerContext.Provider
  */
 export declare function useFilterPanelControllerIfExists(): FilterPanelController | undefined;
+/**
+ * Hook to access the StacBrowserController from the controller context.
+ *
+ * @returns The STAC browser controller instance
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ * @throws {Error} When the STAC browser plugin is not configured
+ */
+export declare function useStacBrowserController(): StacBrowserController;
+/**
+ * Hook to optionally access the StacBrowserController from the controller context.
+ *
+ * Unlike `useStacBrowserController`, this hook does not throw when the STAC browser
+ * plugin is not configured. Use this in shared components that may or may not
+ * have the STAC browser plugin active.
+ *
+ * @returns The STAC browser controller instance, or undefined if the plugin is not configured
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ */
+export declare function useStacBrowserControllerIfExists(): StacBrowserController | undefined;
 //# sourceMappingURL=use-controllers.d.ts.map

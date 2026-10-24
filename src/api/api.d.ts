@@ -7,6 +7,7 @@ import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
@@ -25,6 +26,7 @@ export declare class API {
         geo: typeof GeoUtilities;
         projection: typeof Projection;
         date: typeof DateMgt;
+        renderer: typeof GeoviewRenderer;
         dom: {
             buildGVElementId: typeof buildGVElementId;
             getGVRootElement: typeof getGVRootElement;

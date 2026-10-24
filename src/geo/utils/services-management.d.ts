@@ -22,5 +22,12 @@ export declare class ServicesManagement {
      * @returns The URL with 'cgi-bin/wfs' replaced by 'cgi-bin/wms'
      */
     static checkUrlSwitchWFSToWMS(url: string): string;
+    /**
+     * Toggles the MapServer `ms:` prefix on a WFS/WMS layer identifier.
+     *
+     * @param layerId - The layer identifier to transform
+     * @returns The layer identifier with its `ms:` prefix added or removed
+     */
+    static toggleMsLayerIdPrefix(layerId: string): string;
 }
 //# sourceMappingURL=services-management.d.ts.map
