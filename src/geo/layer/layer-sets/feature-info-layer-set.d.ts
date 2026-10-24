@@ -1,6 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -96,7 +96,7 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
  */
 export interface QueryEndedEvent {
     coordinate: Coordinate;
-    resultSet: TypeResultSet;
+    resultSet: TypeFeatureInfoResultSet;
 }
 /**
  * Define a delegate for the event handler function signature

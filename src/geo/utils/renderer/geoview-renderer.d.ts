@@ -1,12 +1,14 @@
 import { Style } from 'ol/style';
-import type { Geometry } from 'ol/geom';
+import type { Geometry, SimpleGeometry } from 'ol/geom';
+import { Polygon } from 'ol/geom';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { FeatureLike } from 'ol/Feature';
-import type Feature from 'ol/Feature';
+import Feature from 'ol/Feature';
+import type { SketchCoordType } from 'ol/interaction/Draw';
 import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
-type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions) => Style | undefined;
+type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions) => Style | Style[] | undefined;
 type TypeEsriLegendItem = {
     label: string;
     contentType: string;
@@ -96,6 +98,34 @@ export declare abstract class GeoviewRenderer {
      */
     static SVGStringToBase64(svgXML: string): string;
     /**
+     * Creates a star polygon from a fixed SVG path and draw coordinates.
+     *
+     * The first coordinate is treated as the star center and the second as the radius/rotation handle.
+     * When a geometry is provided, it is updated in place for live sketch rendering.
+     *
+     * @param coordinates - Draw coordinates containing the center and outer handle
+     * @param geometry - Optional existing sketch geometry to update
+     * @returns The generated star polygon
+     */
+    static getStarGeometryFromSVG(coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon;
+    /**
+     * Converts an SVG path string to a polygon geometry with auto-centering.
+     *
+     * @param svgPath - SVG path string
+     * @param coordinates - Circle coordinate (center and outer edge)
+     * @param geometry - Optional intermediate geometry for display while expanding
+     * @returns The resulting polygon
+     */
+    static svgPathToGeometry(svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon;
+    /**
+     * Converts an SVG path string to an array of coordinates.
+     *
+     * @param pathData - SVG path string
+     * @param center - Center coordinates
+     * @returns Array of coordinates
+     */
+    static svgPathToCoordinates(pathData: string, center: number[]): number[][];
+    /**
      * Loads the image of an icon that compose the legend.
      *
      * @param src - Source information (base64 image) of the image to load
@@ -105,10 +135,9 @@ export declare abstract class GeoviewRenderer {
     /**
      * Loads the image of an icon that compose the legend.
      *
-     * This is an alternate method of loadImage because the latter had some issues? See the GV comments in the callers. Refactor them together?
-     *
      * @param src - Source information (base64 image) of the image to load
-     * @returns A promise that resolves with the loaded image, or null if loading fails
+     * @returns A promise that resolves with the loaded image
+     * @throws {Error} When the image fails to load
      */
     static loadImageFromDataUrl(src: string): Promise<HTMLImageElement>;
     /**
@@ -161,7 +190,14 @@ export declare abstract class GeoviewRenderer {
      * @param lineStringStyle - Optional style associated to the lineString
      * @returns The created canvas
      */
-    static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement;
+    static createLineStringCanvas(lineStringStyle?: Style | Style[]): HTMLCanvasElement;
+    /**
+     * Creates a line preview canvas after loading endpoint graphic-stroke images.
+     *
+     * @param lineStringStyle - Optional base line and endpoint styles
+     * @returns A promise that resolves with the rendered line canvas
+     */
+    static createLineStringCanvasAsync(lineStringStyle?: Style | Style[]): Promise<HTMLCanvasElement>;
     /**
      * Creates a canvas with the polygon settings that are defined in the style.
      *
@@ -307,7 +343,7 @@ export declare abstract class GeoviewRenderer {
      * @param options - Optional processing options
      * @returns The Style created, or undefined if unable to create it
      */
-    static processSimpleLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
+    static processSimpleLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | Style[] | undefined;
     /**
      * Process a simple solid fill (polygon) using the settings.
      *
@@ -493,7 +529,7 @@ export declare abstract class GeoviewRenderer {
      * @param options - Optional processing options
      * @returns The Style created, or undefined if unable to create it
      */
-    static processUniqueLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
+    static processUniqueLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | Style[] | undefined;
     /**
      * Process the unique value settings using a polygon feature to get its Style.
      *
@@ -549,7 +585,7 @@ export declare abstract class GeoviewRenderer {
      * @param options - Optional processing options
      * @returns The Style created, or undefined if unable to create it
      */
-    static processClassBreaksLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
+    static processClassBreaksLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | Style[] | undefined;
     /**
      * Process the class break settings using a Polygon feature to get its Style.
      *
@@ -571,7 +607,7 @@ export declare abstract class GeoviewRenderer {
      * @param callbackWhenCreatingStyle - Optional callback to execute when a new style had to be created
      * @returns The style applied to the feature, or undefined if not found
      */
-    static getAndCreateFeatureStyle(feature: FeatureLike, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
+    static getAndCreateFeatureStyle(feature: FeatureLike, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | Style[] | undefined;
     /**
      * Gets the image source from the style of the feature using the layer entry config.
      *

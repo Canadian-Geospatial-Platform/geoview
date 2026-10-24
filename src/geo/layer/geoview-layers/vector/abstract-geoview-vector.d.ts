@@ -1,7 +1,7 @@
 import type Feature from 'ol/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { ReadOptions } from 'ol/format/Feature';
-import type { TypePostSettings } from '@/api/types/layer-schema-types';
+import type { TypeBaseVectorSourceInitialPostQuery } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -60,15 +60,25 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource;
     /**
-     * Fetches text data from the given URL using settings defined in the vector source configuration.
+     * Fetches json data from the given URL using settings defined in the vector source configuration.
      *
-     * Supports both GET and POST requests depending on the presence of `postSettings`.
+     * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
      *
      * @param url - The URL to fetch data from
-     * @param postSettings - Optional POST settings from the layer config
+     * @param initialPostQuery - Optional POST settings when querying via POST method
+     * @returns A promise that resolves to the fetched JSON response
+     */
+    static fetchJson(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<unknown>;
+    /**
+     * Fetches text data from the given URL using settings defined in the vector source configuration.
+     *
+     * Supports both GET and POST requests depending on the presence of `initialPostQuery`.
+     *
+     * @param url - The URL to fetch data from
+     * @param initialPostQuery - Optional POST settings when querying via POST method
      * @returns A promise that resolves to the fetched text response
      */
-    static fetchText(url: string, postSettings?: TypePostSettings): Promise<string>;
+    static fetchText(url: string, initialPostQuery?: TypeBaseVectorSourceInitialPostQuery): Promise<string>;
     /**
      * Executes a source fetch for a vector layer and, on failure, throws a specific error naming the layer.
      *
@@ -81,16 +91,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @throws {LayerSourceFailedToLoadError} When the fetch fails (the original error is preserved as the cause)
      */
     protected static fetchSourceForLayer<T>(layerConfig: VectorLayerEntryConfig, fetcher: () => Promise<T>): Promise<T>;
-    /**
-     * Fetches json data from the given URL using settings defined in the vector source configuration.
-     *
-     * Supports both GET and POST requests depending on the presence of `postSettings`.
-     *
-     * @param url - The URL to fetch data from
-     * @param postSettings - Optional POST settings from the layer config
-     * @returns A promise that resolves to the fetched JSON response
-     */
-    static fetchJson(url: string, postSettings?: TypePostSettings): Promise<unknown>;
     /**
      * This method sets the outfields and aliasFields of the source feature info.
      *

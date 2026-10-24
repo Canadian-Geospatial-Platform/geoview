@@ -2,15 +2,17 @@ import type { Extent } from 'ol/extent';
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerStyle, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 import { type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceImageWmsInitialConfig;
 }
 /** Type used to define a GeoView image layer to display on the map. */
-export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
     #private;
     /**
      * Creates an instance of OgcWmsLayerEntryConfig.
@@ -90,11 +92,11 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     getSupportedCRSs(): string[];
     /**
-     * Gets if the config has specified that we should fetch the vectorial information from the WFS.
+     * Gets if the config has specified that we should fetch the vectorial information from an external service such as WFS or OGC API Feature.
      *
-     * @returns True when the vector information should be fetched from the WFS. True by default
+     * @returns True when the vector information should be fetched an external service. True by default
      */
-    getShouldFetchVectorInformationFromWFS(): boolean;
+    getShouldFetchVectorInformationExternally(): boolean;
     /**
      * Gets if the service supports 'GetStyles' requests.
      *
@@ -153,11 +155,42 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     getBoundsExtent(projection: string): [string, Extent] | undefined;
     /**
+     * Gets the full WMS GetStyles URL used to generate the style.
+     *
+     * @returns The recorded WMS GetStyles URL, or undefined if none was recorded
+     */
+    getWmsGetStylesFullUrl(): string | undefined;
+    /**
+     * Stores the full WMS GetStyles URL used to generate the style.
+     *
+     * @param wmsGetStylesFullUrl - Full URL of the WMS GetStyles request
+     */
+    setWmsGetStylesFullUrl(wmsGetStylesFullUrl: string | undefined): void;
+    /**
+     * Gets the explicitly configured WFS URL associated with this WMS layer.
+     *
+     * @returns The configured WFS URL, or undefined when none is configured
+     */
+    getWfsUrl(): string | undefined;
+    /**
+     * Gets the WFS URL, falling back to the layer data access path when none is configured.
+     *
+     * @returns The configured WFS URL or the layer data access path
+     * @throws {LayerDataAccessPathMandatoryError} When neither a WFS URL nor a layer data access path is configured
+     */
+    getWfsUrlOrDefault(): string;
+    /**
      * Gets the WFS styles layer id associated with this WMS layer entry config, defaults on the same layer id as the WMS.
      *
      * @returns The WFS styles layer id
      */
-    getWfsLayerId(): string;
+    getWfsLayerId(): string | undefined;
+    /**
+     * Gets the WFS styles layer id associated with this WMS layer entry config, defaults on the same layer id as the WMS.
+     *
+     * @returns The WFS styles layer id
+     */
+    getWfsLayerIdOrDefault(): string;
     /**
      * Sets the WFS layer ID associated with this WMS layer entry configuration.
      *
@@ -177,6 +210,61 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     setWfsLayerConfig(layerConfig: OgcWfsLayerEntryConfig): void;
     /**
+     * Gets the explicitly configured OGC API Features URL associated with this WMS layer.
+     *
+     * @returns The configured OGC API Features URL, or undefined when none is configured
+     */
+    getOGCApiFeaturesUrl(): string | undefined;
+    /**
+     * Gets the OGC API Features URL, falling back to the layer data access path when none is configured.
+     *
+     * @returns The configured OGC API Features URL or the layer data access path
+     * @throws {LayerDataAccessPathMandatoryError} When neither an OGC API Features URL nor a layer data access path is configured
+     */
+    getOGCApiFeaturesUrlOrDefault(): string;
+    /**
+     * Sets the OGC API Features URL associated with this WMS layer.
+     *
+     * @param url - The OGC API Features URL to set
+     */
+    setOGCApiFeaturesUrl(url: string): void;
+    /**
+     * Gets the explicitly configured OGC API Features layer ID associated with this WMS layer.
+     *
+     * @returns The configured OGC API Features layer ID, or undefined when none is configured
+     */
+    getOGCApiFeaturesLayerId(): string | undefined;
+    /**
+     * Gets the OGC API Features layer ID, falling back to the WMS layer ID when none is configured.
+     *
+     * @returns The configured OGC API Features layer ID or the WMS layer ID
+     */
+    getOGCApiFeaturesLayerIdOrDefault(): string;
+    /**
+     * Sets the OGC API Features layer ID associated with this WMS layer.
+     *
+     * @param layerId - The OGC API Features layer ID to set
+     */
+    setOGCApiFeaturesLayerId(layerId: string): void;
+    /**
+     * Gets the associated OGC API Features layer configuration for this WMS layer.
+     *
+     * @returns The OGC API Features layer configuration instance associated with this WMS layer, or `undefined` if no association exists
+     */
+    getOGCApiFeaturesLayerConfig(): OgcFeatureLayerEntryConfig | undefined;
+    /**
+     * Associates an OGC API Features layer configuration with this WMS layer.
+     *
+     * @param layerConfig - The OGC API Features layer configuration to associate
+     */
+    setOGCApiFeaturesLayerConfig(layerConfig: OgcFeatureLayerEntryConfig): void;
+    /**
+     * Gets the vector field configured for time filtering on the associated vector layer such as the WFS or OGC API Feature.
+     *
+     * @returns The configured vector time field, or `undefined` if none is set
+     */
+    getVectorTimeField(): string | undefined;
+    /**
      * Gets whether the WMS layer was added as part of a group in the config.
      *
      * @returns True when the layer was added as part of a group
@@ -195,12 +283,40 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * 1. Retrieving the metadata access path from the current layer configuration.
      * 2. Using `WFS.processGeoviewLayerConfig` to generate WFS layer configurations.
      * 3. Modifying each generated entry to include the current WMS layer ID.
-     * 4. Returning the first generated WFS layer configuration.
+     * 4. Retrying with an `ms:` layer ID prefix when the service rejects the original layer ID as missing.
+     * 5. Returning the first generated WFS layer configuration.
      *
      * @param configProxyUrl - Proxy URL to use when necessary
      * @returns A promise that resolves with the first generated WFS layer entry configuration
+     * @throws {LayerDataAccessPathMandatoryError} When neither a WFS URL nor a layer data access path is configured
+     * @throws {LayerServiceMetadataUnableToFetchError} When WFS service metadata cannot be fetched
+     * @throws {LayerNoCapabilitiesError} When the WFS capabilities response is empty
+     * @throws {LayerServiceMetadataEmptyError} When the WFS service metadata is incomplete
+     * @throws {LayerEntryConfigLayerIdNotFoundError} When the WFS layer ID is not found after the optional `ms:` prefix retry
+     * @throws {RequestTimeoutError} When the WFS DescribeFeatureType request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the WFS DescribeFeatureType request is aborted
+     * @throws {ResponseError} When the WFS DescribeFeatureType response is not successful
+     * @throws {ResponseEmptyError} When the WFS DescribeFeatureType response is empty
+     * @throws {NetworkError} When the WFS DescribeFeatureType request encounters a network error
      */
     createGeoviewLayerConfigWfs(configProxyUrl: string | undefined): Promise<OgcWfsLayerEntryConfig>;
+    /**
+     * Creates an OGC API Features layer configuration from this WMS layer configuration.
+     *
+     * @param configProxyUrl - Optional proxy URL to use for service requests
+     * @returns A promise that resolves with the generated OGC API Features layer entry configuration
+     * @throws {LayerDataAccessPathMandatoryError} When neither an OGC API Features URL nor a layer data access path is configured
+     * @throws {LayerServiceMetadataUnableToFetchError} When OGC API Features service metadata cannot be fetched
+     * @throws {LayerEntryConfigLayerIdNotFoundError} When the requested collection is not found
+     * @throws {LayerEntryConfigInvalidLayerEntryConfigError} When the OGC API Features service metadata is invalid
+     * @throws {LayerMetadataAccessPathMandatoryError} When the collection queryables metadata path is not configured
+     * @throws {RequestTimeoutError} When the collection queryables request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the collection queryables request is aborted
+     * @throws {ResponseError} When the collection queryables response is not successful
+     * @throws {ResponseEmptyError} When the collection queryables response is empty
+     * @throws {NetworkError} When the collection queryables request encounters a network error
+     */
+    createGeoviewLayerConfigOGCApiFeatures(configProxyUrl: string | undefined): Promise<OgcFeatureLayerEntryConfig>;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a WMS layer type.
      *

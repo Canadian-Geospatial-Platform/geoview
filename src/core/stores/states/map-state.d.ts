@@ -163,6 +163,8 @@ export declare const useStoreMapInteraction: () => TypeInteraction;
 export declare const getStoreMapHighlightedFeatures: (mapId: string) => TypeFeatureInfoEntry[];
 /** Returns highlighted features matching the given feature UID. */
 export declare const getStoreMapHighlightedFeaturesByUid: (mapId: string, featureUid: string | undefined) => TypeFeatureInfoEntry[];
+/** Returns highlighted features not matching the given feature UID. */
+export declare const getStoreMapHighlightedFeaturesExcludingUid: (mapId: string, featureUid: string | undefined) => TypeFeatureInfoEntry[];
 /** Returns the current map extent in the map's projection, or undefined if not yet set. */
 export declare const getStoreMapExtent: (mapId: string) => Extent | undefined;
 /** Selects the current map extent from the store. */

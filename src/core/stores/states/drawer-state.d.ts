@@ -1,5 +1,6 @@
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { DrawerStyleProperties } from '@/core/types/drawer-types';
 /** Represents the Drawer plugin state managed by the Zustand store. */
 export interface IDrawerState {
     /** The currently active geometry type for drawing. */
@@ -7,7 +8,7 @@ export interface IDrawerState {
     /** The list of available geometry types. */
     geomTypes: DrawGeometryType[];
     /** The current drawing style properties. */
-    style: StyleProps;
+    style: DrawerStyleProperties;
     /** Whether the drawer is currently drawing. */
     isDrawing: boolean;
     /** Whether the drawer is in editing mode. */
@@ -31,7 +32,7 @@ export interface IDrawerState {
     /** Actions to mutate the Drawer state. */
     actions: {
         setActiveGeom: (geomType: string) => void;
-        setStyle: (style: StyleProps) => void;
+        setStyle: (style: DrawerStyleProperties) => void;
         setFillColor: (fillColor: string) => void;
         setStrokeColor: (strokeColor: string) => void;
         setStrokeWidth: (strokeWidth: number) => void;
@@ -53,7 +54,7 @@ export interface IDrawerState {
         setIconSrc: (iconSrc: string) => void;
         setUndoDisabled: (undoDisabled: boolean) => void;
         setRedoDisabled: (redoDisabled: boolean) => void;
-        updateStateStyle: (style: StyleProps) => void;
+        updateStateStyle: (style: DrawerStyleProperties) => void;
         setShortcutsEnabled: (shortcutsEnabled: boolean) => void;
     };
 }
@@ -92,9 +93,9 @@ export declare const useStoreDrawerActiveGeom: () => string;
  * @param mapId - The map identifier
  * @returns The style properties
  */
-export declare const getStoreDrawerStyle: (mapId: string) => StyleProps;
+export declare const getStoreDrawerStyle: (mapId: string) => DrawerStyleProperties;
 /** Hooks the current drawing style. */
-export declare const useStoreDrawerStyle: () => StyleProps;
+export declare const useStoreDrawerStyle: () => DrawerStyleProperties;
 /**
  * Checks whether drawing mode is active.
  *
@@ -327,7 +328,7 @@ export declare const setStoreRedoDisabled: (mapId: string, redoDisabled: boolean
  * @param mapId - The map identifier
  * @param style - The style properties to set
  */
-export declare const updateStoreStateStyle: (mapId: string, style: StyleProps) => void;
+export declare const updateStoreStateStyle: (mapId: string, style: DrawerStyleProperties) => void;
 /**
  * Sets the shortcuts enabled state in the drawer store.
  *
@@ -335,37 +336,6 @@ export declare const updateStoreStateStyle: (mapId: string, style: StyleProps) =
  * @param enabled - Whether shortcuts should be enabled
  */
 export declare const setStoreDrawerShortcutsEnabled: (mapId: string, enabled: boolean) => void;
-/** Drawing style properties for fill, stroke, icon, and text. */
-export type StyleProps = {
-    /** The fill color (CSS color string). */
-    fillColor: string;
-    /** The stroke color (CSS color string). */
-    strokeColor: string;
-    /** The stroke width in pixels. */
-    strokeWidth: number;
-    /** Optional icon source URL for point drawings. */
-    iconSrc?: string;
-    /** Optional icon size in pixels. */
-    iconSize?: number;
-    /** Optional text content for text drawings. */
-    text?: string | string[];
-    /** Optional text size in pixels. */
-    textSize?: number;
-    /** Optional text font family name. */
-    textFont?: string;
-    /** Optional text color (CSS color string). */
-    textColor?: string;
-    /** Optional text halo color (CSS color string). */
-    textHaloColor?: string;
-    /** Optional text halo width in pixels. */
-    textHaloWidth?: number;
-    /** Optional flag for bold text. */
-    textBold?: boolean;
-    /** Optional flag for italic text. */
-    textItalic?: boolean;
-    /** Optional text rotation angle in degrees. */
-    textRotation?: number;
-};
 /** Configuration options for the drawer plugin from the map config. */
 export type TypeDrawerConfig = {
     /** Optional initial active geometry type. */
@@ -373,7 +343,7 @@ export type TypeDrawerConfig = {
     /** Optional list of available geometry types. */
     geomTypes?: DrawGeometryType[];
     /** Optional default drawing style overrides. */
-    style?: StyleProps;
+    style?: DrawerStyleProperties;
     /** Optional flag to hide measurements by default. */
     hideMeasurements?: boolean;
 };

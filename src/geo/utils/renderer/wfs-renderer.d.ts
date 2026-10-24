@@ -21,7 +21,8 @@ export declare abstract class WfsRenderer {
      * @param styles - A WMS SLD styles object to parse
      * @param geomTypeMetadata - Optional geometry type from metadata
      * @returns A record mapping geometry types to their layer style settings
-     * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
+     * @throws {GetStylesInvalidResponseError} When the GetStyles input schema is invalid
+     * @throws {GetStylesNotSupportedError} When the symbolizer type in a rule is unsupported
      */
     static buildLayerStyleInfo(styles: TypeStylesWMS, geomTypeMetadata: TypeStyleGeometry | undefined): Record<TypeStyleGeometry, TypeLayerStyleSettings>;
     /**
@@ -49,13 +50,20 @@ export declare abstract class WfsRenderer {
      */
     static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string;
     /**
+     * Determines whether a WFS version uses the version 2.x filter format.
+     *
+     * @param version - The WFS version string to check.
+     * @returns True when the version starts with `2.`, otherwise false.
+     */
+    static versionIsHigherThan2(version: string): boolean;
+    /**
      * Combines a spatial GML filter and an attribute GML filter into a single OGC filter with `<And>`.
      *
      * @param spatialFilter - Optional XML string for spatial filter, e.g. `<ogc:Intersects>...</ogc:Intersects>`
      * @param attributeFilter - Optional XML string for attribute filter, e.g. `<ogc:Or>...</ogc:Or>`
      * @returns Combined XML `<ogc:Filter>` or undefined if nothing to combine
      */
-    static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined;
+    static combineGmlFilters(spatialFilter: string | undefined, attributeFilter: string | undefined, versionHigherThan2: boolean): string | undefined;
     /**
      * Wraps the ogc/fes filter with the appropriate XML node, based on if the service is WMS or WFS and the version of the service.
      *

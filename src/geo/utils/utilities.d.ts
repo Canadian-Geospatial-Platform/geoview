@@ -300,6 +300,14 @@ export declare abstract class GeoUtilities {
      */
     static isVectorLegend(verifyIfLegend: TypeLegend, schemaTag: TypeGeoviewLayerType): verifyIfLegend is TypeVectorLegend;
     /**
+     * Extracts a scalar time position from a parsed GML temporal value.
+     *
+     * @param feature - Feature containing the date field.
+     * @param fieldName - Name of the date field to read.
+     * @returns A date-compatible value, or its string representation when the value is an unsupported object
+     */
+    static readFeatureField(feature: Feature, fieldName: string): unknown;
+    /**
      * Returns the WKT representation of a given geometry.
      *
      * @param geometry - The geometry
@@ -329,6 +337,20 @@ export declare abstract class GeoUtilities {
      * @returns True if the value appears to be a GeoJSON FeatureCollection, otherwise false
      */
     static isGeoJSONObject(value: any): boolean;
+    /**
+     * Collects every position of a GeoJSON geometry, including the members of a GeometryCollection.
+     *
+     * @param geometry - The GeoJSON geometry value to read
+     * @returns The 2D positions of the geometry, or an empty array when the value is not a GeoJSON geometry
+     */
+    static getGeoJsonCoordinates(geometry: unknown): Coordinate[];
+    /**
+     * Extracts polygons from GeoJSON Polygon, MultiPolygon, or GeometryCollection values.
+     *
+     * @param geometry - GeoJSON geometry value
+     * @returns Polygons as arrays of valid rings, in the GeoJSON coordinate order
+     */
+    static getGeoJsonPolygons(geometry: unknown): [number, number][][][];
     /**
      * Extracts the EPSG code from a GeoJSON object's CRS definition.
      *
@@ -515,6 +537,13 @@ export declare abstract class GeoUtilities {
      */
     static isExtentLonLat(extent: Extent): boolean;
     /**
+     * Converts a 2D or 3D GeoJSON bbox to a 2D extent.
+     *
+     * @param bbox - A bbox ordered as [minX, minY, maxX, maxY] or [minX, minY, minZ, maxX, maxY, maxZ]
+     * @returns The 2D extent [minX, minY, maxX, maxY], or undefined when the bbox length is unsupported
+     */
+    static bboxToExtent2D(bbox?: number[]): [number, number, number, number] | undefined;
+    /**
      * Checks if a given coordinate is a valid longitude/latitude pair.
      *
      * @param coord - The coordinate to check
@@ -600,13 +629,20 @@ export declare abstract class GeoUtilities {
      */
     static writeGeometryToGML(geometry: Geometry, srsName: string, gmlNamespace: string): string;
     /**
+     * Determines whether a field type represents a GML geometry property.
+     *
+     * @param fieldType - The field type string to inspect
+     * @returns `true` if the field type is a GML geometry type; otherwise, `false`
+     */
+    static isGmlGeometryField(fieldType: string | undefined): boolean;
+    /**
      * Converts a WFS geometry type string to a TypeStyleGeometry.
      *
      * @param wfsGeometryType - The wfs geometry type to convert
      * @returns The corresponding TypeStyleGeometry
      * @throws {NotSupportedError} When the geometry type is not supported
      */
-    static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry;
+    static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry;
     /**
      * Converts an esri geometry type string to a TypeStyleGeometry.
      *
@@ -614,7 +650,7 @@ export declare abstract class GeoUtilities {
      * @returns The corresponding TypeStyleGeometry
      * @throws {NotSupportedError} When the geometry type is not supported
      */
-    static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
+    static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string | undefined): TypeStyleGeometry;
 }
 /** Result from a fetch operation that may have required a proxy fallback. */
 export type FetchWithProxyResult<T> = {

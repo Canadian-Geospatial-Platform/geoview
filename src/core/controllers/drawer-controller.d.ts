@@ -1,8 +1,7 @@
-import type { StyleLike } from 'ol/style/Style';
-import { DrawerStyle } from '@/geo/style/drawer-style';
+import type { DrawerStyleProperties } from '@/core/types/drawer-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type StyleProps, type DrawGeometryType } from '@/core/stores/states/drawer-state';
+import { type DrawGeometryType } from '@/core/stores/states/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { HandleType } from '@/geo/interaction/transform/transform';
@@ -48,7 +47,7 @@ export declare class DrawerController extends AbstractMapViewerController {
      * @param geomType - Optional geometry type to draw (uses current state if not provided)
      * @param styleInput - Optional style properties to use
      */
-    startDrawing(geomType?: DrawGeometryType, styleInput?: StyleProps): void;
+    startDrawing(geomType?: DrawGeometryType, styleInput?: DrawerStyleProperties): void;
     /**
      * Stops the current drawing operation.
      */
@@ -207,7 +206,7 @@ export declare class DrawerController extends AbstractMapViewerController {
      *
      * @param newStyle - The new style to apply
      */
-    updateTransformingFeatureStyle(newStyle: StyleProps): void;
+    updateTransformingFeatureStyle(newStyle: DrawerStyleProperties): void;
     /**
      * Enables or disables keyboard shortcuts for the drawer.
      *
@@ -338,12 +337,5 @@ export declare class DrawerController extends AbstractMapViewerController {
      * @param file - The GeoJSON file
      */
     uploadDrawings(file: File): void;
-    /**
-     * Clones a given style or array of styles.
-     *
-     * @param styleLike - The style or array of styles to clone
-     * @returns A cloned style or array of cloned styles
-     */
-    static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[];
 }
 //# sourceMappingURL=drawer-controller.d.ts.map
