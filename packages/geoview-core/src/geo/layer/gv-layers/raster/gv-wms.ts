@@ -5,14 +5,15 @@ import type { ImageWMS } from 'ol/source';
 import type { ImageSourceEvent } from 'ol/source/Image';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
-import type { Map as OLMap } from 'ol';
+import type { Feature, Map as OLMap } from 'ol';
+import type { Geometry } from 'ol/geom';
 import { Polygon } from 'ol/geom';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
-import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -44,6 +45,7 @@ import {
   LayerImageFailedToLoadWidthTooBigError,
   InvalidProjectionError,
   NoExtentError,
+  NoPrimaryKeyFieldError,
 } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
@@ -51,7 +53,7 @@ import { formatError, ResponseContentError } from '@/core/exceptions/core-except
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
-import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { WFS, type TypeWFSFeaturePage } from '@/geo/layer/geoview-layers/vector/wfs';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
@@ -577,7 +579,10 @@ export class GVWMS extends AbstractGVRaster {
     if (!wfsLayerConfig) throw new LayerConfigWFSMissingError(this.getLayerPath());
 
     // Get the primary key field name (equivalent of objectid for Esri Dynamic)
-    const pkFieldName = wfsLayerConfig.getOutfieldsPK().name;
+    const pkFieldName = wfsLayerConfig.getOutfieldsPK()?.name;
+
+    // If not found
+    if (!pkFieldName) throw new NoPrimaryKeyFieldError(this.getLayerPath());
 
     // Create the sql filter using the object IDs
     const sqlFilter = objectIds.length === 1 ? `${pkFieldName} = ${objectIds[0]}` : `${pkFieldName} in (${objectIds.join(', ')})`;
@@ -592,20 +597,27 @@ export class GVWMS extends AbstractGVRaster {
     const language = 'en';
 
     // Fetch and parse features using the WFS format fallback strategy.
-    const parsedFeatures = await WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
+    const parsedFeaturePage = await WFS.fetchWithFormatFallback(
       wfsLayerConfig,
-      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, undefined, requestInit),
-      (url, requestInit) =>
-        GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, undefined, requestInit),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, undefined, requestInit),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wfsLayerConfig, undefined, requestInit),
       undefined,
       undefined,
       xmlFilterReady,
       outProjection.getCode()
     );
 
+    // Parse all features
+    const parsedFeatures = GVWMS.#formatFeatureInfoResultFromVectorFeatures(
+      parsedFeaturePage.features,
+      wmsLayerConfig,
+      wfsLayerConfig,
+      language
+    ).results;
+
     // For each feature
     let calculatedExtent: Extent | undefined;
-    parsedFeatures.results.forEach((feature) => {
+    parsedFeatures.forEach((feature) => {
       // If calculatedExtent has not been defined, set it to extent
       if (!calculatedExtent) calculatedExtent = feature.extent;
       else calculatedExtent = GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
@@ -817,16 +829,16 @@ export class GVWMS extends AbstractGVRaster {
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
     // Use the generic format fallback strategy with our own parse pipeline
-    return WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
+    return WFS.fetchWithFormatFallback(
       wfsLayerConfig,
-      (url, requestInit) =>
-        GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController, requestInit),
-      (url, requestInit) =>
-        GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController, requestInit),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, abortController, requestInit),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wfsLayerConfig, abortController, requestInit),
       undefined,
       undefined,
       xmlFilterReady,
       projectionCode
+    ).then((wfsFeaturePage) =>
+      GVWMS.#formatFeatureInfoResultFromVectorFeatures(wfsFeaturePage.features, wmsLayerConfig, wfsLayerConfig, language)
     );
   }
 
@@ -1109,7 +1121,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Format and return the features
-    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, ogcFeatureLayerConfig, language);
+    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo.features, wmsLayerConfig, ogcFeatureLayerConfig, language);
   }
 
   // #endregion PRIVATE METHODS
@@ -1121,27 +1133,13 @@ export class GVWMS extends AbstractGVRaster {
   // #region STATIC PRIVATE METHODS
 
   /**
-   * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
-   * parses the response into OpenLayers features, and converts them into GeoView
-   * Feature Info entries with appropriate attribute formatting.
-   *
-   * This method:
-   * - Performs an HTTP request to a WFS GetFeature endpoint.
-   * - Parses the returned GeoJSON into OL features.
-   * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
-   * - Formats fields according to WFS metadata, including date parsing rules.
-   * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
+   * Fetches and parses one GeoJSON WFS feature page, retaining the page metadata for the shared pager.
    *
    * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
    *   with GeoJSON (e.g., `outputFormat=application/json`)
-   * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
-   *   config are applied when formatting the Feature Info results
-   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
-   *   date formatting
-   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @param abortController - Optional {@link AbortController} used to cancel the fetch request
    * @param requestInit - Optional fetch settings used by the shared WFS format fallback
-   * @returns A promise that resolves with the feature info result
+   * @returns A promise that resolves with parsed WFS features and paging counts
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -1150,75 +1148,68 @@ export class GVWMS extends AbstractGVRaster {
    */
   static async #fetchAndParseFeaturesFromWFSUrl(
     urlWithOutputJson: string,
-    wmsLayerConfig: OgcWmsLayerEntryConfig,
-    wfsLayerConfig: OgcWfsLayerEntryConfig,
-    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined,
     requestInit?: RequestInit
-  ): Promise<TypeFeatureInfoResult> {
+  ): Promise<TypeWFSFeaturePage> {
     // Call the GetFeature
     const responseData = await Fetch.fetchJson(urlWithOutputJson, {
       ...requestInit,
       signal: requestInit?.signal ?? abortController?.signal,
     });
+    const pageMetadata = WFS.readWFSPageMetadata(responseData);
 
     // Read the features
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
     // ? Ignore the data projection of the WFS, because we don't want to confuse it with the data projection of the WMS
 
     // Return the parsed result
-    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+    return { ...sourceFeaturesInfo, ...pageMetadata };
   }
 
   /**
-   * Fetches feature data from a WFS GetFeature request URL and parses XML/GML fallback formats.
+   * Fetches and parses one XML/GML WFS feature page, retaining the page metadata for the shared pager.
    *
    * @param urlWithOutputFormat - The full WFS GetFeature request URL
-   * @param wmsLayerConfig - The associated WMS layer configuration
    * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and date formatting
-   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @param abortController - Optional {@link AbortController} used to cancel the fetch request
    * @param requestInit - Optional fetch settings used by the shared WFS format fallback
-   * @returns A promise that resolves with the feature info result
+   * @returns A promise that resolves with parsed WFS features and paging counts
    */
   static async #fetchAndParseFeaturesFromWFSTextUrl(
     urlWithOutputFormat: string,
-    wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
-    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined,
     requestInit?: RequestInit
-  ): Promise<TypeFeatureInfoResult> {
+  ): Promise<TypeWFSFeaturePage> {
     // Call the GetFeature
     const responseData = await Fetch.fetchText(urlWithOutputFormat, {
       ...requestInit,
       signal: requestInit?.signal ?? abortController?.signal,
     });
+    const pageMetadata = WFS.readWFSPageMetadata(responseData);
 
     // Read the features
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWFS(responseData, wfsLayerConfig.getVersionOrDefault(), undefined);
 
     // Return the parsed result
-    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(sourceFeaturesInfo, wmsLayerConfig, wfsLayerConfig, language);
+    return { ...sourceFeaturesInfo, ...pageMetadata };
   }
 
   /**
    * Formats OpenLayers features returned from an associated vector service into a WMS feature info result.
    *
-   * @param sourceFeaturesInfo - The parsed OpenLayers features and source projection information
+   * @param features - The parsed OpenLayers features
    * @param wmsLayerConfig - The associated WMS layer configuration
    * @param vectorLayerConfig - The vector layer configuration used for schema tags, outfields, metadata, and date formatting
    * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
    * @returns The formatted feature info result
    */
   static #formatFeatureInfoResultFromVectorFeatures(
-    sourceFeaturesInfo: SourceFeaturesInfo,
+    features: Feature<Geometry>[],
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     vectorLayerConfig: VectorLayerEntryConfig,
     language: TypeDisplayLanguage
   ): TypeFeatureInfoResult {
-    const { features } = sourceFeaturesInfo;
-
     // Find the best name field and validate its existance at the same time when one was initially configured
     const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), vectorLayerConfig.getOutfields(), language);
 
