@@ -2,18 +2,18 @@
 
 In GeoView we have a defined list of colors. These colors are defined in the [IGeoViewColors interface](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/ui/style/types.ts#L121). Every theme in our application defines/overrides these colors.
 
-| Color Name | Type                | Description                                        |
-| ---------- | ------------------- | -------------------------------------------------- |
-| white      | `string`            | White color constant (`#FFFFFF`)                   |
-| bgColor    | `GeoViewColorClass` | Background color, used as background of the footer |
-| textColor  | `GeoViewColorClass` | Color for text                                     |
-| primary    | `GeoViewColorClass` | Primary color, replaces the MUI primary color      |
-| secondary  | `GeoViewColorClass` | Replaces the secondary color in MUI                |
-| success    | `GeoViewColorClass` | Replaces the success color in MUI                  |
-| error      | `GeoViewColorClass` | Replaces the error color in MUI                    |
-| warning    | `GeoViewColorClass` | Replaces the warning color in MUI                  |
-| info       | `GeoViewColorClass` | Replaces the info color in MUI                     |
-| grey       | `GeoViewColorClass` | Grey color for borders, dividers, etc.             |
+| Color Name | Type                | Description                                         |
+| ---------- | ------------------- | --------------------------------------------------- |
+| white      | `string`            | White color constant (`#FFFFFF`)                    |
+| bgColor    | `GeoViewColorClass` | Source color for backgrounds and surface roles      |
+| textColor  | `GeoViewColorClass` | Source color for the semantic MUI text palette      |
+| primary    | `GeoViewColorClass` | Source color for the semantic MUI primary palette   |
+| secondary  | `GeoViewColorClass` | Source color for the semantic MUI secondary palette |
+| success    | `GeoViewColorClass` | Source color for the semantic MUI success palette   |
+| error      | `GeoViewColorClass` | Source color for the semantic MUI error palette     |
+| warning    | `GeoViewColorClass` | Source color for the semantic MUI warning palette   |
+| info       | `GeoViewColorClass` | Source color for the semantic MUI info palette      |
+| grey       | `GeoViewColorClass` | GeoView grey ramp for specialized UI and map styles |
 
 ## Defining GeoViewColor object
 
@@ -52,18 +52,32 @@ The class also has a method `.darken(coefficient, opacity)` for getting a darker
 ## Accessing GeoViewColors in the application
 
 - GeoView colors are part of the theme palette — accessible via `theme.palette.geoViewColor`.
-- For example, to access primary color use `theme.palette.geoViewColor.primary`; for text color use `theme.palette.geoViewColor.textColor`.
+- The `geoViewColor` palette provides GeoView-specific colors and ramps. Use semantic MUI palette
+  roles for ordinary application UI, such as `theme.palette.primary.main`,
+  `theme.palette.text.primary`, and `theme.palette.background.paper`.
 - To access the base color use `.main`. e.g. `theme.palette.geoViewColor.bgColor.main`
 - To access a darker shade use `.dark[50...950]`. e.g. `theme.palette.geoViewColor.bgColor.dark[500]`. Possible values are `50, 100, 150, 200, 250, ... 900, 950` (increments of 50).
 - For lighter shades use `.light[50...950]`
 
+MUI semantic palette roles are generated from the selected GeoView colors and adapt to the theme's
+light or dark mode. Use `primary.contrastText` for content on a primary-colored surface. GeoView
+also defines `surface.low` and `surface.high` for depth levels, `inverseContent` for deliberately
+contrast-reversed surfaces, and `layerVisibility` for legend visibility markers. These specialized
+roles are optional in reusable components that may receive an external MUI theme; provide a
+fallback or use optional chaining when accessing them.
+
 ## Customizing An Existing Theme
 
-The system currently has 4 themes: `dark`, `light`, `geo.ca`, and `canada.ca`. All themes are in the [style folder](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/ui/style).
+The system currently has 4 themes: `dark`, `light`, `geo.ca`, and `canada.ca`. The selected theme
+determines both its GeoView colors and MUI palette mode: `dark` uses dark mode; `light`, `geo.ca`,
+and `canada.ca` use light mode. Theme definitions are in the
+[style folder](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/ui/style).
 
-The `canada.ca` theme uses Government of Canada-inspired colours with `#26374a` as the main colour and a Helvetica font stack. The default theme remains `geo.ca`.
+The `canada.ca` theme uses Government of Canada-inspired colours with `#26374a` as the main colour
+and a Helvetica font stack. The default theme remains `geo.ca`.
 
-Our themes are basically involve defining the geoView colors. Below is an example of the dark theme file.
+Themes define GeoView colors, which are used to generate the semantic MUI palette. Below is an
+example of the dark theme colors.
 
 ```
 export  const  darkThemeColors:  IGeoViewColors  = {

@@ -49,6 +49,15 @@ Search `public/locales/{en,fr}/translation.json` before creating keys: namespace
 keep key parity and meaningful French text. Do not copy hypothetical translation keys from examples.
 The public translation convention is in [UI wrappers and translated labels](../../docs/programming/styling-best-practices.md#3--ui-wrappers-and-translated-labels).
 
+## Theme and scrollbar maintenance
+
+Public contracts: [Theme tokens and external-theme safety](../../docs/programming/styling-best-practices.md#2--theme-tokens-and-external-theme-safety)
+and [Accessing GeoViewColors](../../docs/app/ui/theming.md#accessing-geoviewcolors-in-the-application).
+
+- [theme.tsx](../../packages/geoview-core/src/ui/style/theme.tsx) passes an explicit MUI palette mode when generating each display theme; [themeOptionsGenerator.ts](../../packages/geoview-core/src/ui/style/themeOptionsGenerator.ts) defines the semantic roles and custom `surface`, `inverseContent`, and `layerVisibility` palette entries.
+- [AppStart](../../packages/geoview-core/src/core/app-start.tsx) scopes inherited scrollbar colors to the map-specific shell ID using `CSS.escape`, with `primary.main` for the thumb and `surface.low` (or `background.default` for a standard external theme) for the track. Keep this selector map-scoped; never style `html`, `body`, or a shared shell class.
+- Scrollbars inherit these colors only within the shell. When changing portal containers, verify whether the portal is mounted inside that shell; content outside it needs a separate map-ownership strategy rather than an unqualified global selector.
+
 ## Accessibility implementation
 
 Public behavior and shared developer guidance remain in the [accessibility guide](../../docs/app/accessibility.md).
