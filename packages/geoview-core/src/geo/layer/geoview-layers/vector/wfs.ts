@@ -29,10 +29,10 @@ import {
   LayerServiceMetadataUnableToFetchError,
 } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { formatError, NetworkError, RequestTimeoutError, ResponseEmptyError, ResponseError } from '@/core/exceptions/core-exceptions';
 import { parseXMLToJson, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { formatError, NetworkError, RequestTimeoutError, ResponseEmptyError, ResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -468,12 +468,7 @@ export class WFS extends AbstractGeoViewVector {
       layerConfig.setOutfields(outfields);
 
       // If the outfields have no primary key, try to determine one manually
-      if (!layerConfig.hasOutfieldsPK()) {
-        const pkField = outfields.find((field) => field.name.toLowerCase() === 'id');
-        if (pkField) {
-          pkField.type = 'oid';
-        }
-      }
+      ServicesManagement.guessAssignationOfPrimaryKeyField(layerConfig);
     }
   }
 
@@ -572,9 +567,6 @@ export class WFS extends AbstractGeoViewVector {
     const fieldDefinitions = layerConfig.getLayerMetadata();
     const fieldDefinition = fieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
-
-    // GV Special case for CDTK features the pk_lyr_id is the equivalent of the OBJECTID, treat it as such in the getFieldType equivalent of the esriGetFieldType
-    if (fieldDefinition.name === 'pk_lyr_id') return 'oid';
 
     const fieldEntryType = fieldDefinition.type?.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
