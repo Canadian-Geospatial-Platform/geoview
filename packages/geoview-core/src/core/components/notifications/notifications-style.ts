@@ -81,7 +81,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     scrollbarGutter: 'stable',
     padding: theme.spacing(1),
     scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.primary.main} transparent`,
   },
   notificationItem: {
     display: 'flex',

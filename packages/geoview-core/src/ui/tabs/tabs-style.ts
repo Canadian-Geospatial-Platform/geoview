@@ -68,8 +68,11 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       },
       transition: 'background-color 0.3s ease-in-out',
       '&:hover': {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
+        backgroundColor: theme.palette.action.hover,
+        color: theme.palette.text.primary,
+      },
+      '&.Mui-selected:hover': {
+        backgroundColor: theme.palette.primary.dark,
       },
     },
     tabsContainer: {
