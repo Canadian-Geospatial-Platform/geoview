@@ -1,11 +1,12 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWFSCapabilities, TypeMetadataWFSFeatureTypeListFeatureType } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWFSCapabilities, TypeMetadataWFSFeatureTypeListFeatureType, TypeMetadataWFSOperationMetadataOperation } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
-import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
+    #private;
     /**
      * Creates an instance of OgcWfsLayerEntryConfig.
      *
@@ -44,13 +45,13 @@ export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     /**
      * Returns the spatial reference system (SRS) of the layer's data.
      *
-     * This method reads the layer's feature type definition and returns the
-     * default SRS/projection used by the WFS layer. If the `DefaultSRS` is
-     * an object with a `#text` property (common in XML-parsed responses),
-     * the method returns the value of that property. Otherwise, it returns
-     * `DefaultSRS` directly.
+     * Reads the version-specific field: `DefaultCRS` (WFS 2.0), `DefaultSRS` (WFS 1.1), or `SRS` (WFS 1.0), in that order.
+     * A value may be a string or an XML-parsed object with a `#text` property.
      *
-     * @returns The EPSG code or SRS string (e.g., 'EPSG:3857'), or undefined if not determined
+     * The CRS identifier is returned as provided by the service (for example, an EPSG code, OGC URN, or OGC CRS URI);
+     * it is not normalized.
+     *
+     * @returns The CRS identifier declared by the service, or undefined if none is available
      */
     getProjectionOfData(): string | undefined;
     /**
@@ -84,17 +85,47 @@ export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
      */
     getVersionIsHigherThan2(): boolean;
     /**
-     * Gets if the config has specified that we should fetch the styles from the WMS.
+     * Gets the advertised DescribeFeatureType operation metadata.
      *
-     * @returns True when the styles should be fetched from the WMS. True by default
+     * @returns The operation metadata, or undefined when the service does not provide it
      */
-    getShouldFetchStylesFromWMS(): boolean;
+    getMetadataDescribeFeatureTypeOperation(): TypeMetadataWFSOperationMetadataOperation | undefined;
     /**
-     * Gets the WMS styles layer id associated with this WFS layer entry config if any.
+     * Gets the advertised output formats for the DescribeFeatureType operation.
      *
-     * @returns The WMS styles layer id
+     * @returns The advertised output format strings, or an empty array if none are found
      */
-    getWmsStylesLayerId(): string;
+    getMetadataDescribeFeatureTypeOutputFormats(): string[];
+    /**
+     * Gets the advertised GetFeature operation metadata.
+     *
+     * @returns The operation metadata, or undefined when the service does not provide it
+     */
+    getMetadataGetFeatureOperation(): TypeMetadataWFSOperationMetadataOperation | undefined;
+    /**
+     * Gets the advertised HTTP GET URL for the GetFeature operation.
+     *
+     * @returns The advertised GET URL, or undefined when the service does not provide one
+     */
+    getMetadataGetFeatureOperationUrlGet(): string | undefined;
+    /**
+     * Gets the advertised HTTP POST URL for the GetFeature operation.
+     *
+     * @returns The advertised POST URL, or undefined when the service does not provide one
+     */
+    getMetadataGetFeatureOperationUrlPost(): string | undefined;
+    /**
+     * Gets the full URL used for the DescribeFeatureType request.
+     *
+     * @returns The recorded DescribeFeatureType URL, or undefined if none was recorded
+     */
+    getDescribeFeatureTypeFullUrl(): string | undefined;
+    /**
+     * Stores the full DescribeFeatureType URL used for the layer.
+     *
+     * @param describeFeatureTypeFullUrl - Full URL of the DescribeFeatureType request
+     */
+    setDescribeFeatureTypeFullUrl(describeFeatureTypeFullUrl: string): void;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a WFS Feature layer type.
      *
@@ -104,5 +135,19 @@ export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
      * @returns `true` if the config is for a WFS Feature layer; otherwise `false`
      */
     static isClassOrTypeWFSLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWFSLayerConfig;
+    /**
+     * Finds the DescribeFeatureType operation in the WFS service metadata.
+     *
+     * @param metadata - The parsed WFS capabilities metadata
+     * @returns The operation metadata, or undefined when the service does not advertise the operation
+     */
+    static readDescribeFeatureOperation(metadata: TypeMetadataWFSCapabilities | undefined): TypeMetadataWFSOperationMetadataOperation | undefined;
+    /**
+     * Finds the GetFeature operation in the WFS service metadata.
+     *
+     * @param metadata - The parsed WFS capabilities metadata
+     * @returns The operation metadata, or undefined when the service does not advertise the operation
+     */
+    static readGetFeatureOperation(metadata: TypeMetadataWFSCapabilities | undefined): TypeMetadataWFSOperationMetadataOperation | undefined;
 }
 //# sourceMappingURL=wfs-layer-entry-config.d.ts.map

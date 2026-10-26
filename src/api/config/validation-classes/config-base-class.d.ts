@@ -21,8 +21,13 @@ export interface ConfigBaseClassProps {
     bounds?: number[];
     timeDimension?: TimeDimension;
     layerStyle?: TypeLayerStyleConfig;
+    wmsUrl?: string;
     wmsLayerId?: string;
+    wfsUrl?: string;
     wfsLayerId?: string;
+    ogcApiFeaturesUrl?: string;
+    ogcApiFeaturesLayerId?: string;
+    vectorTimeField?: string;
 }
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified, its properties are not part of the schema.
@@ -640,6 +645,19 @@ export declare abstract class ConfigBaseClass {
      */
     protected static isClassOrTypeSchemaTag<T extends ConfigClassOrType | TypeGeoviewLayerConfig>(layerConfig: T, layerType: TypeGeoviewLayerType): layerConfig is T;
     /**
+     * Registers a layer name changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
+     */
+    onLayerNameChanged(callback: LayerNameChangedDelegate): LayerNameChangedDelegate;
+    /**
+     * Unregisters a layer name changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerNameChanged(callback: LayerNameChangedDelegate | undefined): void;
+    /**
      * Returns a promise that resolves the next time the layer status changed event fires and passes the optional filter.
      *
      * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
@@ -684,4 +702,11 @@ export interface LayerStatusChangedEvent {
 }
 /** Defines a delegate for the event handler function signature. */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
+/** Defines a layer name changed event. */
+export interface LayerNameChangedEvent {
+    /** The new layer name. */
+    layerName: string;
+}
+/** Defines a delegate for the event handler function signature. */
+export type LayerNameChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerNameChangedEvent, void>;
 //# sourceMappingURL=config-base-class.d.ts.map

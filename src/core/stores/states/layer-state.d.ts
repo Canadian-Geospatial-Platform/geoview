@@ -670,6 +670,8 @@ export declare const useStoreLayerOpacityMaxFromParent: (layerPath: string) => n
 export declare const useStoreLayerUrl: (layerPath: string) => string | undefined;
 /** Hook that returns the layer name for a specific layer. */
 export declare const useStoreLayerName: (layerPath: string) => string | undefined;
+/** Hook that returns the vector time field for a specific layer with temporal data associated with a WMS layer. */
+export declare const useStoreLayerVectorTimeField: (layerPath: string) => string | undefined;
 /**
  * Hook that returns a record of layer names for all layers.
  *
@@ -764,6 +766,20 @@ export declare const useStoreLayerDisplayDateTimezoneSet: () => Record<string, T
  * @returns Array of available style setting types
  */
 export declare const useStoreLayerStyleSettings: (layerPath: string) => string[];
+/**
+ * Selects the URL used to retrieve a layer's vector structure.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The vector structure URL, or undefined if the layer or URL is unavailable
+ */
+export declare const useStoreLayerVectorStructureFullUrl: (layerPath: string | undefined) => string | undefined;
+/**
+ * Selects the WMS GetStyles request URL recorded for a layer.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The WMS GetStyles URL, or undefined if the layer or URL is unavailable
+ */
+export declare const useStoreLayerWMSGetStylesFullUrl: (layerPath: string | undefined) => string | undefined;
 /**
  * Sets the layers panel display state in the store.
  *

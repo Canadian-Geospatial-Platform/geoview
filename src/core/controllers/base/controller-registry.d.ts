@@ -12,6 +12,7 @@ import { TimeSliderController } from '@/core/controllers/time-slider-controller'
 import { SwiperController } from '@/core/controllers/swiper-controller';
 import { GeoChartController } from '@/core/controllers/geochart-controller';
 import { FilterPanelController } from '@/core/controllers/filter-panel-controller';
+import { StacBrowserController } from '@/core/controllers/stac-browser-controller';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -49,6 +50,8 @@ export declare class ControllerRegistry {
     readonly geoChartController?: GeoChartController;
     /** The filter panel controller used to interact with the filter panel. Only present when the filter panel plugin is configured. */
     readonly filterPanelController?: FilterPanelController;
+    /** The STAC browser controller used to interact with the map from the STAC browser. Only present when the STAC browser plugin is configured. */
+    readonly stacBrowserController?: StacBrowserController;
     /** All controllers registered in this registry. */
     readonly allControllers: AbstractController[];
     /**

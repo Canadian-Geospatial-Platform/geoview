@@ -1,4 +1,6 @@
 import type { Root } from 'react-dom/client';
+import linkifyHtml from 'linkify-html';
+import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -32,6 +34,13 @@ export type RGBA = [r: number, g: number, b: number, a: number];
  * range(50, 1000, 50); // [50, 100, 150, ..., 950]
  */
 export declare function range(start: number, end: number, step?: number): number[];
+/**
+ * Normalizes a value to an array.
+ *
+ * @param value - The value to normalize
+ * @returns The value as an array
+ */
+export declare function toArray<T>(value: T | T[]): T[];
 /**
  * Converts a string to camelCase.
  *
@@ -160,14 +169,21 @@ export declare function deepMergeObjects<T>(...objects: unknown[]): T;
  * @param str - The object to test
  * @returns true if the object is numeric, false otherwise
  */
-export declare function isNumeric(str: string): boolean;
+export declare function isNumeric(str: string | undefined): boolean;
 /**
  * Check if an object is empty.
  *
  * @param obj - The object to test
- * @returns true if the object is empty, false otherwise
+ * @returns true if the object is nullish or has no enumerable properties, false otherwise
  */
-export declare function isObjectEmpty(obj: object): boolean;
+export declare function isObjectEmpty(obj: object | undefined | null): boolean;
+/**
+ * Checks if an object is defined and has enumerable properties.
+ *
+ * @param obj - The object to test
+ * @returns Whether the object is defined and non-empty
+ */
+export declare function isObjectNonEmpty<T extends object>(obj: T | undefined | null): obj is T;
 /**
  * Get the URL of main script cgpv-main so we can access the assets.
  *
@@ -246,6 +262,15 @@ export declare function validateAndPingUrlOGC(targetUrl: string, configProxyUrl?
  * @throws {Error} When the GeoTIFF file cannot be fetched or parsed
  */
 export declare function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined>;
+/**
+ * Builds a WebGLTile style that renders band 1 through an embedded GeoTIFF color palette.
+ *
+ * The nodata index (0) is made fully transparent so that pixels outside the data extent do not render as a solid color.
+ *
+ * @param palette - Array of RGBA color tuples from the GeoTIFF color map
+ * @returns The WebGLTile style using the OpenLayers palette expression
+ */
+export declare function getGeotiffPaletteStyle(palette: RGBA[]): WebGLTileStyle;
 /**
  * Set alpha for a color.
  *
@@ -328,6 +353,15 @@ export declare function containsHtmlTags(text: string): boolean;
  */
 export declare function enhanceLinksAccessibility(html: string, announcementText: string): string;
 /**
+ * Converts URLs in text to accessible external links and sanitizes the resulting HTML.
+ *
+ * @param content - Plain text content that may contain URLs
+ * @param announcementText - Screen reader announcement for links opening in a new tab
+ * @param options - Optional caller-specific link display options
+ * @returns Sanitized HTML with URLs rendered as accessible links
+ */
+export declare function linkifyAndSanitizeHtml(content: string, announcementText: string, options?: Parameters<typeof linkifyHtml>[1]): string;
+/**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
  * is removed from the document.
  *
@@ -409,6 +443,14 @@ export declare function findPropertyByRegexPath<T = Record<string, unknown>>(obj
  * @returns true if it is an image, false otherwise
  */
 export declare function isImage(item: string): boolean;
+/**
+ * Loads an image from a URL or a data URL.
+ *
+ * @param src - The image URL or data URL
+ * @returns A promise that resolves with the loaded image
+ * @throws {Error} When the image fails to load
+ */
+export declare function loadImage(src: string): Promise<HTMLImageElement>;
 /**
  * Checks object to see if it can be converted to a string; if not, returns an empty string
  *

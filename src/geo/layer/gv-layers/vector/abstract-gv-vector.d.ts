@@ -242,9 +242,9 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param feature - Feature that need its style to be defined.
      * @param label - The style label when one has to be created
      * @param filterEquation - Filter equation associated to the layer.
-     * @returns The style for the feature or undefined if no style could be calculated.
+     * @returns The style or styles for the feature, or undefined if none could be calculated.
      */
-    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeType[]): Style | undefined;
+    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeType[]): Style | Style[] | undefined;
     /**
      * Calculates a text-only style (no geometry) for the given feature.
      *

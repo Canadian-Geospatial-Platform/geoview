@@ -1,18 +1,18 @@
 import type { Projection as OLProjection } from 'ol/proj';
 import { ImageWMS } from 'ol/source';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig, TypeOfServer, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeOfServer, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode, TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { type TimeDimension } from '@/core/utils/date-mgt';
 import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
-    fetchVectorsOnWFS?: boolean;
+    fetchVectorsExternally?: boolean;
     useFullWmsSublayers?: boolean;
     listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
@@ -80,8 +80,6 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param mapProjection - Optional map projection
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
-     * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
-     * @throws {InvalidDateError} When input has invalid dates
      */
     protected onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<OgcWmsLayerEntryConfig>;
     /**
@@ -156,6 +154,15 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param isTimeAware - Indicates if the layer is time aware
      * @param useFullWmsSublayers - Optional - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers)
      * @returns A promise that resolves to an array of layer configurations
+     * @throws {LayerServiceMetadataUnableToFetchError} When WMS service metadata cannot be fetched
+     * @throws {LayerServiceMetadataEmptyError} When the WMS service metadata response is empty
+     * @throws {LayerNoCapabilitiesError} When the WMS capabilities response is empty
+     * @throws {LayerEntryConfigLayerIdNotFoundError} When a configured layer ID is not found
+     * @throws {LayerEntryConfigWMSSubLayerNotFoundError} When a configured sublayer is not found
+     * @throws {LayerDataAccessPathMandatoryError} When a layer data access path is not configured
+     * @throws {LayerEntryConfigEmptyLayerGroupError} When an empty layer group prevents the root layer from being created
+     * @throws {LayerEntryConfigUnableToCreateGroupLayerError} When a layer group cannot be created
+     * @throws {AggregateError} When multiple layer entries fail to process
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean, useFullWmsSublayers?: boolean): Promise<ConfigBaseClass[]>;
     /**
@@ -205,29 +212,34 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param url - The WMS service URL used to fetch styles. If a proxy should be used, it has to be part of the URL here.
      * @param geomType - Optional geometry type
      * @returns A promise that resolves to a record mapping geometry types to layer style settings
-     * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     * @throws {NetworkError} When a network issue happened
+     * @throws {GetStylesInvalidResponseError} When the GetStyles input schema is invalid
+     * @throws {GetStylesNotSupportedError} When the symbolizer type in a rule is unsupported
      */
     static createLayerStyleFromWMS(url: string, geomType: TypeStyleGeometry | undefined): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>>;
     /**
-     * Parses the WMS time dimension metadata for a layer or group.
+     * Attempts to derive and apply styling information to a WFS layer using corresponding WMS styles.
      *
-     * It locates the `TIME` dimension entry in the metadata and converts the OGC-formatted values into
-     * GeoView's normalized `TimeDimension` structure, including any group-specific handling required for
-     * inherited or aggregate temporal metadata.
+     * This method:
+     *  - Checks whether the layer has no defined style and is configured to fetch styles from this.
+     *  - Determines the WMS layer identifier associated with the WFS layer.
+     *  - Attempts to infer the geometry type from metadata (non-fatal if it fails).
+     *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` -> `cgi-bin/wms`).
+     * Any failures during the process are logged as warnings but do not throw.
      *
-     * @param metadataDimensions - The metadata dimensions declared by the WMS layer
-     * @param displayDateMode - The preferred display mode used when translating date values for the UI
-     * @param isGroupDimension - Whether the time dimension is a group-level temporal definition
-     * @returns The parsed time dimension, or `undefined` when the layer does not expose a `TIME` dimension
+     * Enables a WFS layer to adopt styling derived from a corresponding WMS service, allowing
+     * consistent symbology between raster and vector representations when the server supports
+     * style retrieval through WMS `GetStyles`.
+     *
+     * @param layerConfig - The WFS layer configuration for which styling should be processed
+     * @returns A promise that resolves with the layer style settings or undefined
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
      */
-    static parseTimeDimension(metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined, displayDateMode: DisplayDateMode | undefined, isGroupDimension: boolean): TimeDimension | undefined;
-    /**
-     * Finds the time dimension in WMS dimension metadata.
-     *
-     * @param metadataDimensions - Optional WMS dimension metadata to search
-     * @returns The time dimension metadata, or undefined when none is found
-     */
-    static findTimeDimensionInDimensions(metadataDimensions: TypeMetadataWMSCapabilityLayerDimension[] | undefined): TypeMetadataWMSCapabilityLayerDimension | undefined;
+    static tryProcessLayerStylingInformationIfAny(layerConfig: VectorLayerEntryConfig): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined>;
 }
 /** Delegate type for the callback when processing group layers */
 export type GroupLayerCreatedDelegate = (config: ConfigBaseClass) => void;

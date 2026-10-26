@@ -132,6 +132,8 @@ export declare abstract class DateMgt {
     static readonly REGEX_ISO_DATE: RegExp;
     /** Regular expression for matching ISO date strings with a 'date' prefix. */
     static readonly REGEX_ISO_DATE_WITH_PREFIX: RegExp;
+    /** Regular expression for matching quoted ISO date literals with an optional legacy 'date' prefix. */
+    static readonly REGEX_ISO_DATE_LITERAL: RegExp;
     /** The default date format for English and French to be used by the application. */
     static DEFAULT_DATE_FORMAT: TypeDisplayDateFormat;
     /** The default date and time format for English and French to be used by the application. */

@@ -1,5 +1,8 @@
+import type Feature from 'ol/Feature';
+import type { Extent } from 'ol/extent';
 import { Style } from 'ol/style';
-import type { Options as StyleOptions } from 'ol/style/Style';
+import type { Options as StyleOptions, StyleLike } from 'ol/style/Style';
+import type { DrawerStyleProperties } from '@/core/types/drawer-types';
 import { DrawerText } from './drawer-text';
 import { DrawerIcon } from './drawer-icon';
 /**
@@ -32,6 +35,51 @@ export declare class DrawerStyle extends Style {
      * @returns True if this style contains DrawerIcon
      */
     isIconStyle(): boolean;
+    /**
+     * Extracts drawer style properties from a feature.
+     *
+     * @param feature - The feature to extract properties from
+     * @returns The extracted style properties
+     */
+    static getFeatureStyleProperties(feature: Feature): DrawerStyleProperties;
+    /**
+     * Extracts drawer style properties from a style object.
+     *
+     * @param style - The style object to extract properties from
+     * @returns The extracted style properties
+     */
+    static getStyleProperties(style: DrawerStyle): DrawerStyleProperties;
+    /**
+     * Checks if a feature has a drawer text style.
+     *
+     * @param feature - The feature to check
+     * @returns Whether the feature has a drawer text style
+     */
+    static isTextFeature(feature: Feature): boolean;
+    /**
+     * Compares two drawer styles by their extracted properties.
+     *
+     * @param style1 - First style to compare
+     * @param style2 - Second style to compare
+     * @returns Whether the styles have different properties
+     */
+    static stylesAreDifferent(style1: StyleLike | undefined, style2: StyleLike | undefined): boolean;
+    /**
+     * Clones a drawer style or array of drawer styles.
+     *
+     * @param styleLike - The style or array of styles to clone
+     * @returns A cloned drawer style or array of cloned drawer styles
+     * @throws {Error} When the style-like value cannot be cloned as a drawer style
+     */
+    static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[];
+    /**
+     * Calculates the visual map extent of a text feature.
+     *
+     * @param feature - The text feature to measure
+     * @param resolution - The current map resolution
+     * @returns The text extent, or null when the feature is not a text point
+     */
+    static calculateTextExtent(feature: Feature, resolution: number): Extent | null;
     /**
      * Override the clone method to ensure proper type.
      *
