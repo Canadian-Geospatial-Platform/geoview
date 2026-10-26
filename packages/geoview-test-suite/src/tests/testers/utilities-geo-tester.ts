@@ -1,4 +1,7 @@
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
+import type { SourceFeaturesInfo } from 'geoview-core/geo/utils/utilities';
+import { Projection } from 'geoview-core/geo/utils/projection';
+import Point from 'ol/geom/Point';
 import type { Extent } from 'ol/extent';
 
 import { Test } from '../core/test';
@@ -8,6 +11,97 @@ import { GVAbstractTester } from './abstract-gv-tester';
  * Geo utilities testing class for cgpv.api.utilities.geo (GeoUtilities) functions.
  */
 export class UtilitiesGeoTester extends GVAbstractTester {
+  /**
+   * Tests transformation using an explicit OpenLayers source projection.
+   *
+   * @returns The parsed features and source projection
+   */
+  testReadFeaturesFromGeoJSONProjectionObject(): Promise<Test<SourceFeaturesInfo>> {
+    return this.test(
+      'Test GeoJSON reader transforms features using an OpenLayers source projection...',
+      (test) => {
+        test.addStep('Reading a longitude/latitude point into Web Mercator...');
+        return GeoUtilities.readFeaturesFromGeoJSON(
+          GVAbstractTester.PROJECTION_POINT_GEOJSON,
+          Projection.getProjectionLonLat(),
+          'EPSG:3857'
+        );
+      },
+      (test, result) => {
+        test.addStep('Verifying projection, feature properties and transformed coordinates...');
+        Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
+        UtilitiesGeoTester.#assertProjectedPoint(result);
+      },
+      () => {}
+    );
+  }
+
+  /**
+   * Tests that embedded GeoJSON CRS takes precedence over an explicit source projection.
+   *
+   * @returns The parsed features and interpreted source projection
+   */
+  testReadFeaturesFromGeoJSONEmbeddedCRSPrecedence(): Promise<Test<SourceFeaturesInfo>> {
+    return this.test(
+      'Test embedded GeoJSON CRS overrides a conflicting source projection...',
+      (test) => {
+        test.addStep('Reading embedded EPSG:4326 with a conflicting EPSG:3857 argument...');
+        return GeoUtilities.readFeaturesFromGeoJSON(
+          { ...GVAbstractTester.PROJECTION_POINT_GEOJSON, crs: { type: 'name', properties: { name: 'urn:ogc:def:crs:EPSG::4326' } } },
+          Projection.getProjectionFromStringOrNumber(3857),
+          'EPSG:3857'
+        );
+      },
+      (test, result) => {
+        test.addStep('Verifying the embedded CRS determined the transform...');
+        Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
+        UtilitiesGeoTester.#assertProjectedPoint(result);
+      },
+      () => {}
+    );
+  }
+
+  /**
+   * Tests a second shared-helper reader with an explicit OpenLayers source projection.
+   *
+   * @returns EsriJSON features and geometry-cleaning status
+   */
+  testReadFeaturesFromEsriJSONProjectionObject(): Promise<Test<Awaited<ReturnType<typeof GeoUtilities.readFeaturesFromEsriJSON>>>> {
+    return this.test(
+      'Test EsriJSON reader accepts an OpenLayers source projection...',
+      (test) => {
+        test.addStep('Reading an Esri point into Web Mercator...');
+        return GeoUtilities.readFeaturesFromEsriJSON(
+          { features: [{ attributes: { name: 'projection-point' }, geometry: { x: 10, y: 0 } }] },
+          Projection.getProjectionLonLat(),
+          'EPSG:3857'
+        );
+      },
+      (test, result) => {
+        test.addStep('Verifying transformed features without geometry-cleaning fallback...');
+        Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
+        Test.assertIsEqual(result.hadInvalidGeometries, false);
+        UtilitiesGeoTester.#assertProjectedPoint(result);
+      },
+      () => {}
+    );
+  }
+
+  /**
+   * Verifies the shared deterministic projection fixture.
+   *
+   * @param result - Reader result to verify
+   */
+  static #assertProjectedPoint(result: Pick<SourceFeaturesInfo, 'features'>): void {
+    Test.assertIsArrayLengthEqual(result.features, 1);
+    Test.assertIsEqual(result.features[0].get('name'), 'projection-point');
+    const geometry = result.features[0].getGeometry();
+    Test.assertIsInstance(geometry, Point);
+    const coordinates = geometry.getCoordinates();
+    Test.assertIsEqualWithinTolerance(coordinates[0], GVAbstractTester.PROJECTION_POINT_MERCATOR_X, 0.01);
+    Test.assertIsEqualWithinTolerance(coordinates[1], 0, 0.01);
+  }
+
   /**
    * Returns the name of the Tester.
    *

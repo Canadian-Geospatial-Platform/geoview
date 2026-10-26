@@ -1,7 +1,8 @@
 import proj4 from 'proj4';
 import type { Coordinate } from 'ol/coordinate';
 import { register } from 'ol/proj/proj4';
-import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection } from 'ol/proj';
+import type { ProjectionLike } from 'ol/proj';
 import {
   get as OLGetProjection,
   getPointResolution,
@@ -318,17 +319,21 @@ export abstract class Projection {
    *
    * Accepts:
    * - A `TypeProjection` object (with `wkid` / `latestWkid` / `wkt`)
-   * - A `ProjectionLike` string (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
+   * - A `ProjectionLike` value (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
    * - A numeric EPSG code (e.g., `4326`)
    *
    * @param projection - The projection identifier to check and register if missing
    * @returns A promise that resolves with the OLProjection
    */
   static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | number): Promise<OLProjection> {
+    if (projection instanceof OLProjection) {
+      return this.#addProjectionIfMissingUsingStringOrNumber(projection);
+    }
+
     // If TypeProjection object
     if (typeof projection === 'object') {
       // Redirect
-      return this.#addProjectionIfMissingUsingObj(projection as TypeProjection);
+      return this.#addProjectionIfMissingUsingObj(projection);
     }
 
     // Redirect

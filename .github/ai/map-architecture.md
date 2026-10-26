@@ -39,3 +39,19 @@ Source: [`map-viewer.ts`](../../packages/geoview-core/src/geo/map/map-viewer.ts)
 - MapViewer/OL access stays in controllers/plugin lifecycle, never rendered React components.
 
 For Swiper render clipping and drag isolation, follow [package-specific runtime routing](packages.md#swiper-runtime).
+
+## GeoJSON injection and projection objects
+
+Public contract: [GeoJSON Source Update](../../docs/app/api/layer-api.md#geojson-source-update).
+
+- `Projection.addProjectionIfMissing` must distinguish OpenLayers projection instances before generic spatial-reference metadata objects.
+  Both are objects, but only the metadata path accepts `wkid`/`latestWkid`/`wkt`; never inspect OL private fields or convert one caller to hide
+  dispatch errors (#3706). Existing instances resolve locally and retain identity.
+- `GVGeoJSON.setGeojsonSource` stores the data projection and original GeoJSON, so replacement and projection-change reinjection exercise
+  the instance path again. `LayerController.setGeojsonSource` starts feature-info refresh asynchronously after replacing the source.
+- A map projection switch resets table query results. Tests should await the injected layer's next loaded event and explicitly query the
+  reprojected source; an already-loaded status alone does not prove asynchronous reinjection has completed.
+
+Sources: [`projection.ts`](../../packages/geoview-core/src/geo/utils/projection.ts),
+[`gv-geojson.ts`](../../packages/geoview-core/src/geo/layer/gv-layers/vector/gv-geojson.ts),
+[`layer-controller.ts`](../../packages/geoview-core/src/core/controllers/layer-controller.ts).

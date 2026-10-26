@@ -47,7 +47,8 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
       <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
-      <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>`;
+      <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>
+      <b>GeoJSON injection</b> — Public object/string replacement, feature-info refresh, and reprojection after injection<br/>`;
   }
 
   /**
@@ -56,7 +57,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 9;
+    return 11;
   }
 
   /**
@@ -114,7 +115,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Test that reloading a layer preserves its position in the layer order — issue #3666
     await this.#layerTester.testReloadLayerPreservesPosition();
 
-    // Resolve when all parallel tests are done
-    return Promise.all([pLayerWMSDuplicateGroupNames]);
+    // Projection mutations must not overlap the outstanding parallel layer test.
+    await pLayerWMSDuplicateGroupNames;
+    await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
+    return this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
   }
 }

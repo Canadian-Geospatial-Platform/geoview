@@ -1,4 +1,7 @@
 import { Projection } from 'geoview-core/geo/utils/projection';
+import { Fetch } from 'geoview-core/core/utils/fetch-helper';
+import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -7,6 +10,55 @@ import { GVAbstractTester } from './abstract-gv-tester';
  * Projection utilities testing class for cgpv.api.utilities.projection (Projection) functions.
  */
 export class UtilitiesProjectionTester extends GVAbstractTester {
+  /**
+   * Tests projection input dispatch without downloading available definitions.
+   *
+   * @returns Resolved projections and observed definition requests
+   */
+  testAddProjectionIfMissingInputs(): Promise<Test<{ projections: OLProjection[]; definitionRequests: number }>> {
+    const originalFetchText = Fetch.fetchText;
+    let definitionRequests = 0;
+    return this.test(
+      'Test addProjectionIfMissing accepts projection objects, identifiers and metadata without fetching...',
+      async (test) => {
+        test.addStep('Observing definition requests while resolving available projections...');
+        Fetch.fetchText = (url: string, init?: RequestInit, timeoutMs?: number): Promise<string> => {
+          if (url === `${GeoUtilities.EPSG_URL}/4326.proj4` || url === `${GeoUtilities.EPSG_URL}/3857.proj4`) definitionRequests++;
+          return originalFetchText.call(Fetch, url, init, timeoutMs);
+        };
+        try {
+          const projections = await Promise.all([
+            Projection.addProjectionIfMissing(Projection.getProjectionLonLat()),
+            Projection.addProjectionIfMissing(Projection.getProjectionFromStringOrNumber(3857)),
+            Projection.addProjectionIfMissing('EPSG:4326'),
+            Projection.addProjectionIfMissing(4326),
+            Projection.addProjectionIfMissing('4326'),
+            Projection.addProjectionIfMissing('http://www.opengis.net/def/crs/EPSG/0/4326'),
+            Projection.addProjectionIfMissing('urn:ogc:def:crs:EPSG::4326'),
+            Projection.addProjectionIfMissing({ wkid: 4326 }),
+            Projection.addProjectionIfMissing({ wkid: 3857, latestWkid: 4326 }),
+            Projection.addProjectionIfMissing({ wkt: GVAbstractTester.WGS84_WKT }),
+          ]);
+          return { projections, definitionRequests };
+        } finally {
+          Fetch.fetchText = originalFetchText;
+        }
+      },
+      (test, result) => {
+        test.addStep('Verifying identity, dispatch, WKT and no definition lookup...');
+        Test.assertIsEqual(result.projections[0], Projection.getProjectionLonLat());
+        Test.assertIsEqual(result.projections[1], Projection.getProjectionFromStringOrNumber(3857));
+        result.projections.slice(2, 9).forEach((projection) => Test.assertIsEqual(projection.getCode(), 'EPSG:4326'));
+        Test.assertIsEqual(result.projections[9].getCode().startsWith('CUSTOM:WGS 84:'), true);
+        Test.assertIsEqual(result.projections[9].getUnits(), 'degree');
+        Test.assertIsEqual(result.definitionRequests, 0);
+      },
+      () => {
+        Fetch.fetchText = originalFetchText;
+      }
+    );
+  }
+
   /**
    * Returns the name of the Tester.
    *

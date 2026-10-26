@@ -33,15 +33,15 @@
       <ul class="demo-function-list">
         <li>
           <button class="btn btn-primary" id="Add-points1">Place points set 1</button><br />
-          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</code>
+          <code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</code>
         </li>
         <li>
           <button class="btn btn-primary" id="Add-points2">Place points set 2</button><br />
-          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</code>
+          <code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</code>
         </li>
         <li>
           <button class="btn btn-primary" id="Add-points3">Place points set 3</button><br />
-          <code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</code>
+          <code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</code>
         </li>
         <li>
           <button class="btn btn-primary" id="Replace-outfields">Replace feature outfields</button><br />
@@ -122,7 +122,12 @@
       };
       // add an event listener when a button is clicked
       addPoints1Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points1)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 1 in GeoJSON injection demo', error);
+          });
       });
 
       // #endregion Add points 1 button
@@ -136,7 +141,12 @@
 
       // add an event listener when a button is clicked
       addPoints2Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points2)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 2 in GeoJSON injection demo', error);
+          });
       });
       // #endregion Add points 2 button
 
@@ -202,7 +212,12 @@
       };
       // add an event listener when a button is clicked
       addPoints3Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points3)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 3 in GeoJSON injection demo', error);
+          });
       });
       // #endregion Add points 3 button
 
