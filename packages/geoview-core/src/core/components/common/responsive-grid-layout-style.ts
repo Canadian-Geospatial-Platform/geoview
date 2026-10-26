@@ -122,21 +122,5 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowY: 'auto',
     paddingTop: theme.spacing(3.75), // To align left list with right panel box and leave room for focus indicator (below 30px right panel toolbar)
     paddingBottom: theme.spacing(3), // To ensure last item can be fully scrolled up to be fully visible
-    '&.MuiGrid-grid-xs-auto': {
-      '& .layer-panel': {
-        width: '52px',
-      },
-      '& .MuiListItemButton-root': {
-        justifyContent: 'center',
-        padding: theme.spacing(0, 1),
-        minHeight: '48px',
-        '& .layer-count': {
-          display: 'block',
-        },
-        '& .layerInfo': {
-          display: 'none',
-        },
-      },
-    },
   },
 });

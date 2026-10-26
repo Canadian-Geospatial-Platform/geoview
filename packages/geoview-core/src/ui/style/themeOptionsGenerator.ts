@@ -134,13 +134,20 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['
     backgroundColor: `transparent`,
     border: `2px solid transparent`,
     color: palette.primary.main,
-    '&:hover, &:focus': {
+    '&:focus': {
       backgroundColor: palette.primary.main,
       color: palette.primary.contrastText,
+    },
+    '&:hover': {
+      backgroundColor: palette.action.hover,
+      color: palette.text.primary,
     },
     '&:active, &.active': {
       backgroundColor: palette.primary.main,
       color: palette.primary.contrastText,
+    },
+    '&.active:hover': {
+      backgroundColor: palette.primary.dark,
     },
     '&:disabled': {
       color: palette.text.disabled,
@@ -151,13 +158,18 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['
     borderRadius: GEOVIEW_SHAPE.borderRadiusFull,
     height: 40,
     width: 40,
-    '&:hover, &:active, &.active': {
-      backgroundColor: palette.primary.main,
+    '&:hover': {
+      backgroundColor: palette.action.hover,
       border: `2px solid ${palette.primary.light}`,
-      color: palette.primary.contrastText,
+      color: palette.text.primary,
     },
     '&:active, &.active': {
-      borderColor: palette.primary.main,
+      backgroundColor: palette.primary.main,
+      border: `2px solid ${palette.primary.main}`,
+      color: palette.primary.contrastText,
+    },
+    '&.active:hover': {
+      backgroundColor: palette.primary.dark,
     },
     '&:disabled': {
       color: palette.text.disabled,

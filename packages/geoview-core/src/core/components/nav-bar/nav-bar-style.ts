@@ -42,7 +42,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       borderRadius: theme.shape.borderRadiusMd,
       pointerEvents: 'all',
       scrollbarWidth: 'thin',
-      scrollbarColor: `${theme.palette.primary.main} transparent`,
     },
     // Add top offset to nav bar when overview map is visible to avoid overlap
     navBarContainerWithOverview: {
@@ -169,7 +168,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
         minHeight: 0,
         overflowY: 'auto',
         scrollbarWidth: 'thin',
-        scrollbarColor: `${theme.palette.primary.main} transparent`,
       },
     },
     listItem: {

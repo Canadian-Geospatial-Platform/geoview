@@ -37,7 +37,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       minHeight: 0,
     },
     '& .MuiTab-root:hover .MuiTab-icon': {
-      color: theme.palette.primary.contrastText,
+      color: theme.palette.text.primary,
     },
     '& .MuiTab-root.Mui-selected .MuiTab-icon': {
       color: theme.palette.primary.contrastText,

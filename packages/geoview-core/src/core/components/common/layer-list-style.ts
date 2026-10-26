@@ -19,13 +19,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiListItem-root': {
       '& .MuiListItemButton-root': {
-        padding: theme.spacing(0, 0.25, 0, 2),
         height: '100%',
         backgroundColor: theme.palette.background.paper,
       },
-    },
-    '& .MuiListItemButton-root': {
-      minHeight: '73px',
     },
     '& .MuiListItemIcon-root': {
       minWidth: '2rem',
@@ -39,8 +35,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  listItemCompact: {
+    width: '52px',
+  },
   listItemButton: {
     width: '100%',
+    padding: theme.spacing(0, 0.25, 0, 2),
+    minHeight: '73px',
     borderRadius: theme.shape.borderRadiusMd,
     gap: theme.spacing(1.5),
     // Override MUI's selected and selected-hover fills so the parent surface shows through.
@@ -54,6 +55,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       outlineOffset: '-2px',
       boxShadow: 'none',
     },
+  },
+  listItemButtonCompact: {
+    padding: theme.spacing(0, 1),
+    minHeight: '48px',
+    justifyContent: 'center',
   },
   listItemButtonHidden: {
     // Hidden rows are not a control (only the eye toggle acts); keep them looking non-clickable
@@ -90,6 +96,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  listPrimaryTextCompact: {
+    display: 'none',
+  },
   outOfRange: {
     '.layer-panel &.MuiListItemButton-root': {
       '& .MuiListItemText-primary, & .MuiListItemText-secondary': {
@@ -118,6 +127,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     position: 'absolute',
     right: '12px',
     top: '12px',
+  },
+  layerCountCompact: {
+    display: 'block',
   },
   orderButtonDisabled: {
     opacity: 0.5,

@@ -27,7 +27,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowY: 'auto',
     overflowX: 'hidden',
     scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.primary.main} transparent`,
     '& p': {
       color: theme.palette.text.secondary,
       margin: theme.spacing(0.5, 0),

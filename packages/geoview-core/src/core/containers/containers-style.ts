@@ -62,19 +62,6 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
       },
     },
 
-    '& *::-webkit-scrollbar': {
-      width: '8px',
-      height: '8px',
-    },
-    '& *::-webkit-scrollbar-track': {
-      background: theme.palette.surface?.low ?? theme.palette.background.default,
-      borderRadius: theme.shape.borderRadiusMd,
-    },
-    '& *::-webkit-scrollbar-thumb': {
-      background: theme.palette.surface?.high ?? theme.palette.background.paper,
-      borderRadius: theme.shape.borderRadiusMd,
-    },
-
     '.bordered': {
       border: `1px solid ${theme.palette.divider}`,
       boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor?.bgColor.darken(0.2, 0.5)}`,
