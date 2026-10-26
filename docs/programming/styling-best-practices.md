@@ -29,13 +29,25 @@ the MUI array syntax, for example `[memoSxClasses.base, condition && memoSxClass
 
 ## 2- Theme tokens and external-theme safety
 
-Use `geoViewColor` and `geoViewFontSize` tokens rather than hard-coded colors and font sizes.
-Spacing and border radius have their own conventions in the sections below.
+For application UI, prefer semantic MUI palette roles over hard-coded colors: use roles such as
+`primary`, `text`, and `background` for controls, text, and surfaces. Use `surface.low` and
+`surface.high` for depth levels, `inverseContent` for deliberately contrast-reversed surfaces, and
+`layerVisibility` for checked and unchecked legend markers.
+
+Use `geoViewColor` where a GeoView-specific color or color ramp is needed, especially for map
+rendering and OpenLayers, and `geoViewFontSize` for GeoView font-size tokens. Spacing and border
+radius have their own conventions in the sections below.
 
 Reusable `@/ui` and `core/components/ui` components may receive a standard external MUI theme,
 which does not contain GeoView's custom extensions. Access those extensions with optional chaining,
 for example `theme.palette.geoViewColor?.primary.main`. Apply the same protection to other
 non-standard extensions rather than assuming every caller supplies a GeoView theme.
+
+Scrollbar colours are inherited from each viewer's uniquely identified shell, using `primary.main`
+for the thumb and `surface.low` for the track. Keep these declarations map-scoped: shared shell
+classes and unqualified MUI portal selectors can leak one viewer's palette into another viewer or
+the host application. GeoView must not set scrollbar colours on `html` or `body`. Portals outside
+the shell do not inherit its scrollbar colours and require a separate map-ownership strategy.
 
 ## 3- UI wrappers and translated labels
 
