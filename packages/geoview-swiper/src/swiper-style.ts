@@ -1,5 +1,6 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
+/** Shared translucent background color for the swiper handle and divider. */
 const SWIPE_CONTROL_BACKGROUND_COLOR = 'rgba(50, 50, 50, 0.75)';
 
 /**

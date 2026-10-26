@@ -37,6 +37,12 @@ which does not contain GeoView's custom extensions. Access those extensions with
 for example `theme.palette.geoViewColor?.primary.main`. Apply the same protection to other
 non-standard extensions rather than assuming every caller supplies a GeoView theme.
 
+Scrollbar colours are inherited from each viewer's uniquely identified shell, using `primary.main`
+for the thumb and `surface.low` for the track. Keep these declarations map-scoped: shared shell
+classes and unqualified MUI portal selectors can leak one viewer's palette into another viewer or
+the host application. GeoView must not set scrollbar colours on `html` or `body`. Portals outside
+the shell do not inherit its scrollbar colours and require a separate map-ownership strategy.
+
 ## 3- UI wrappers and translated labels
 
 Import UI components and icons from the `@/ui` barrel. Only MUI hooks, utilities, and types are

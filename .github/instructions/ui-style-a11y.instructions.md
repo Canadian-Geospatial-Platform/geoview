@@ -1,6 +1,6 @@
 ---
 description: Styling, UI library, accessibility and i18n rules
-applyTo: 'packages/**/*.tsx,packages/**/*-style.ts,packages/**/ui/**,packages/**/locales/**'
+applyTo: "packages/**/*.tsx,packages/**/*-style.ts,packages/**/ui/**,packages/**/locales/**"
 ---
 
 Canonical sections (search the named heading and read only that section):
@@ -17,3 +17,8 @@ For accessibility work, select only the relevant reference:
 - UI/icons from @/ui; reuse style/focus helpers and tokens; custom extensions in reusable UI need optional chaining.
 - Use translated labels, en/fr parity and canonical toggle semantics; preserve WCAG exceptions.
 - Snackbars must also notify; no transient interactive actions or new generic-error paths.
+- Scrollbar colours are global via `GlobalStyles` (`primary.main` thumb, `surface.low` track): never set `scrollbar-color` or `::-webkit-scrollbar-*` in components. Use `scrollbarWidth: 'thin'` only when a narrower scrollbar is wanted; mixing standard properties with WebKit rules makes Chrome silently ignore the WebKit colours.
+- Use `surface.low`/`surface.high` for chrome planes, `inverseContent` for deliberately contrast-reversed surfaces, and `layerVisibility` for checked/unchecked legend markers; MUI's background roles cannot express these project-specific uses.
+- Reserve `geoViewColor` and its 20-step ramps for map rendering and OpenLayers; UI uses MUI roles and the four palette slots to keep application chrome semantic.
+- Use `common.white` only when colour must stay theme-invariant, such as layer symbology backings; on a primary background use `primary.contrastText`, which adapts in the dark theme.
+- Focus outline and halo colours belong to `theme.focusVisible` and the helpers in `themeOptionsGenerator.ts`, not components; ordinary background and text colours in focus states remain component-owned.
