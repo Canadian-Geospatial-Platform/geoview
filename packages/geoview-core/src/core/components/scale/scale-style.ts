@@ -85,10 +85,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontSize: theme.palette.geoViewFontSize?.md,
       fontWeight: 'bold',
       borderBottom: '2px solid',
-      color: theme.palette.text.secondary,
+      color: theme.palette.geoViewColor?.grey.dark[500],
 
       '&.hasScaleLine::before, &.hasScaleLine::after': {
-        backgroundColor: `${theme.palette.text.secondary} !important`,
+        backgroundColor: `${theme.palette.geoViewColor?.grey.dark[500]} !important`,
         width: '2px !important',
       },
     },
@@ -112,6 +112,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleCheckmark: {
     paddingRight: theme.spacing(0.75),
+    fontSize: theme.palette.geoViewFontSize?.lg,
     color: theme.palette.text.primary,
   },
 });

@@ -46,9 +46,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowX: 'hidden',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
     '& li': {
       backgroundColor: 'transparent',
       justifyContent: 'center',

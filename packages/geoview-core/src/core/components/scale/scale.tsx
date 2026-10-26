@@ -8,6 +8,7 @@ import { Radio, RadioGroup, FormControlLabel, CheckIcon, Tooltip, Box, Button } 
 
 import { getSxClasses, getScaleRadioHiddenStyles, getScaleFormControlLabelStyles, SCALE_BOX_STYLES } from './scale-style';
 import type { SxStyles, SxProps, Theme } from '@/ui/style/types';
+import { composeSxProps } from '@/ui/style/types';
 import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -240,15 +241,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
             }
             label={
               <Box sx={memoSxClasses.scaleExpandedCheckmarkText}>
-                <CheckIcon
-                  sx={{
-                    ...memoSxClasses.scaleCheckmark,
-                    fontSize: theme.palette.geoViewFontSize?.lg,
-                    opacity: scaleMode === index ? 1 : 0,
-                    color: theme.palette.primary.main,
-                  }}
-                  aria-hidden="true"
-                />
+                <CheckIcon sx={composeSxProps(memoSxClasses.scaleCheckmark, { opacity: scaleMode === index ? 1 : 0 })} aria-hidden="true" />
                 {renderScaleLabel(index, false)}
               </Box>
             }
@@ -270,7 +263,6 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
     memoScaleRadioHiddenStyles,
     memoScaleFormControlLabelStyles,
     t,
-    theme,
   ]);
 
   return (
