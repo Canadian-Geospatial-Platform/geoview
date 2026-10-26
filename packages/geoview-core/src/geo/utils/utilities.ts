@@ -2022,6 +2022,18 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Checks if a given coordinate is an unwrapped longitude/latitude pair.
+   *
+   * @param coord - The coordinate to check
+   * @returns Whether or not the coordinate is unwrapped
+   */
+  static isUnwrappedLonLatCoord(coord: Coordinate | number[]): boolean {
+    if (!coord || coord.length !== 2) return false;
+    const [lon, lat] = coord;
+    return Math.abs(lat) <= 90 && (lon < -180 || lon > 180);
+  }
+
+  /**
    * Gets the area of a given geometry.
    *
    * @param geometry - The geometry to calculate the area
