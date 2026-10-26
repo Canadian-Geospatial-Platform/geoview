@@ -5,7 +5,7 @@ import type { i18n } from 'i18next';
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
-import { ScopedCssBaseline } from '@mui/material';
+import { GlobalStyles, ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
 import { logger } from '@/core/utils/logger';
@@ -110,6 +110,15 @@ function AppStart(props: AppStartProps): JSX.Element {
         <StoreContext.Provider value={mapViewer.mapId}>
           <ControllerContext.Provider value={mapViewer.controllers}>
             <ThemeProvider theme={getTheme(theme)}>
+              <GlobalStyles
+                styles={(currentTheme) => ({
+                  '.geoview-shell, .MuiPopper-root, .MuiPopover-root, .MuiMenu-root, .MuiDialog-root': {
+                    scrollbarColor: `${currentTheme.palette.primary.main} ${
+                      currentTheme.palette.surface?.low ?? currentTheme.palette.background.default
+                    }`,
+                  },
+                })}
+              />
               <ScopedCssBaseline>
                 <Suspense fallback="">
                   <I18nextProvider i18n={i18nLang}>
