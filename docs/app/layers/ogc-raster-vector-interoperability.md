@@ -12,7 +12,11 @@ A WMS serves map images, not a complete client-side feature collection. When ext
 2. If WFS cannot be initialized, GeoView tries the configured OGC API Features service and collection.
 3. When a vector counterpart is available, GeoView uses its metadata and feature records for vector-based feature queries. If the WMS layer is queryable and the associated vector source is usable, GeoView can register it for all-record queries and the Data Table.
 
+**No explicit pairing configuration is required when the defaults resolve the counterpart.** With discovery enabled by default, GeoView uses the WMS service endpoint and layer name to find an associated WFS, including recognized endpoint conversions and layer-name prefix variants. The [experimental WMS navigator](https://canadian-geospatial-platform.github.io/geoview/public/layers-navigator.html?config=./configs/navigator/layers/wms-experimental.json) demonstrates this with **Cities**, while **Cities Experimental (explicit)** supplies pairing properties for the same data. Use explicit URLs/identifiers when the services do not follow these conventions.
+
 The WMS is still the rendered map layer. The associated vector service supplies records; it is not added as a second visible layer. If no vector counterpart can be initialized, the WMS still renders and may still support location-based feature information through its own GetFeatureInfo response, but it will not provide the vector-backed all-record Data Table query.
+
+When linked vector field metadata and compatible WMS GetStyles/SLD rules are available, GeoView can also build attribute-based legend classes. Class visibility and supported filters can update the WMS image requests while vector records support feature and table workflows. The WMS server must honor the filter parameters; a legend image or a simple style without attribute classes does not by itself provide class-based filtering. Filter behavior, including date-field mappings, should be verified for each service pair.
 
 ```json
 {
@@ -65,17 +69,17 @@ If `vectorTimeField` is not configured or does not match a returned field, GeoVi
 
 ## Configuration Properties
 
-| Property | Used on | Purpose and default |
-| --- | --- | --- |
-| `wfsUrl` | WMS layer entry | Associated WFS service URL. Defaults to the WMS data access path, with known WMS-to-WFS endpoint conversion. WFS is attempted before OGC API Features. |
-| `wfsLayerId` | WMS layer entry | WFS feature type name. Defaults to the WMS `layerId`; GeoView can retry with or without the MapServer `ms:` prefix. |
-| `ogcApiFeaturesUrl` | WMS layer entry | OGC API Features service URL used if WFS initialization fails. Defaults to the WMS data access path. |
-| `ogcApiFeaturesLayerId` | WMS layer entry | OGC API Features collection identifier. Defaults to the WMS `layerId`. |
-| `vectorTimeField` | WMS layer entry | Date attribute used to apply the WMS time selection to associated vector records. |
-| `wmsUrl` | WFS or OGC API Features vector entry | Associated WMS service URL for GetStyles. Defaults to the vector data access path; recognized WFS endpoints may be converted to WMS. |
-| `wmsLayerId` | WFS or OGC API Features vector entry | WMS layer name for GetStyles. Defaults to the vector `layerId`. |
-| `fetchVectorsExternally` | WMS GeoView layer | Enables WFS/OGC API Features enrichment. Defaults to `true`. |
-| `fetchStylesOnWMS` | WFS or OGC API Features GeoView layer | Enables WMS GetStyles retrieval. Defaults to `true`. |
+| Property                 | Used on                               | Purpose and default                                                                                                                                    |
+| ------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `wfsUrl`                 | WMS layer entry                       | Associated WFS service URL. Defaults to the WMS data access path, with known WMS-to-WFS endpoint conversion. WFS is attempted before OGC API Features. |
+| `wfsLayerId`             | WMS layer entry                       | WFS feature type name. Defaults to the WMS `layerId`; GeoView can retry with or without the MapServer `ms:` prefix.                                    |
+| `ogcApiFeaturesUrl`      | WMS layer entry                       | OGC API Features service URL used if WFS initialization fails. Defaults to the WMS data access path.                                                   |
+| `ogcApiFeaturesLayerId`  | WMS layer entry                       | OGC API Features collection identifier. Defaults to the WMS `layerId`.                                                                                 |
+| `vectorTimeField`        | WMS layer entry                       | Date attribute used to apply the WMS time selection to associated vector records.                                                                      |
+| `wmsUrl`                 | WFS or OGC API Features vector entry  | Associated WMS service URL for GetStyles. Defaults to the vector data access path; recognized WFS endpoints may be converted to WMS.                   |
+| `wmsLayerId`             | WFS or OGC API Features vector entry  | WMS layer name for GetStyles. Defaults to the vector `layerId`.                                                                                        |
+| `fetchVectorsExternally` | WMS GeoView layer                     | Enables WFS/OGC API Features enrichment. Defaults to `true`.                                                                                           |
+| `fetchStylesOnWMS`       | WFS or OGC API Features GeoView layer | Enables WMS GetStyles retrieval. Defaults to `true`.                                                                                                   |
 
 ## Practical Limits
 
@@ -84,3 +88,4 @@ If `vectorTimeField` is not configured or does not match a returned field, GeoVi
 - WMS vector enrichment is optional. If the endpoint, collection/feature type, or metadata cannot be resolved, the WMS image layer remains usable without vector-backed all-record queries.
 - WMS `GetStyles` may use SLD constructs GeoView cannot convert. A vector layer can load successfully without reproducing every detail of the WMS appearance.
 - Data Table availability still depends on the layer's queryable settings and on the associated vector service returning usable feature records.
+- WMS rendering does not require transferring the entire feature geometry collection for map drawing, but vector queries can still retrieve substantial data. Server capacity, response sizes, pagination, and network conditions determine performance; coupling services does not guarantee a speedup or complete parity with Esri Dynamic services.
