@@ -1,4 +1,4 @@
-name: Deploy process on Pull Request
+name: Develop preview
 
 on:
   workflow_dispatch:
@@ -6,22 +6,30 @@ on:
     branches:
       - "develop"
 
-# Allow one concurrent deployment
+permissions: {}
+
+# Serialize the complete build/deploy chain; never interrupt a publishing job.
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   install-build:
     name: Build demo files
+    permissions:
+      contents: read
     uses: ./.github/workflows/build.yml
     with:
-      cache_sha: ${{ github.sha }}
+      source_sha: ${{ github.sha }}
 
   deploy-public:
     name: Deploy public
     needs: [install-build]
+    if: github.ref == 'refs/heads/develop'
+    permissions:
+      contents: write
     uses: ./.github/workflows/deploy.yml
     with:
-      cache_sha: ${{ github.sha }}
+      source_sha: ${{ github.sha }}
+      artifact_id: ${{ needs.install-build.outputs.artifact_id }}
       folder: public

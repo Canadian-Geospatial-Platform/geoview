@@ -70,6 +70,8 @@
   - [Notifications](programming/notifications.md)
   - [Object Oriented](programming/object-oriented.md)
   - [Troubleshooting](programming/troubleshooting.md)
+  - [Dependency Management](programming/dependency-management.md)
+  - [CI Workflows](programming/ci-workflows.md)
   - [Using AI Assistants](programming/using-ai.md)
 
 - **TypeDoc API**

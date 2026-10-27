@@ -105,6 +105,8 @@ Best practices and patterns for contributing to GeoView core:
 - **[Adding Layer Types](programming/adding-layer-types.md)** - Implementing new layer types
 - **[Logging](programming/logging.md)** - Logging standards and practices
 - **[Object-Oriented Patterns](programming/object-oriented.md)** - OOP patterns in GeoView
+- **[Dependency Management](programming/dependency-management.md)** - Toolchain, dependency updates and security audits
+- **[CI Workflows](programming/ci-workflows.md)** - GitHub Actions builds, deployment and type publication
 - **[Using AI Assistants](programming/using-ai.md)** - Copilot agents, skills, instructions and CLI for this repo
 
 ## 🔌 For Packages & Extension Developers
