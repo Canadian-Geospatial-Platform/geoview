@@ -10,13 +10,16 @@
 //    node common/scripts/install-run-rushx.js custom-command
 //
 // For more information, see: https://rushjs.io/pages/maintainer/setup_new_repo/
+//
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See the @microsoft/rush package's LICENSE file for details.
 
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 var __webpack_exports__ = {};
-/*!*************************************************!*\
-  !*** ./lib-esnext/scripts/install-run-rushx.js ***!
-  \*************************************************/
+/*!***********************************************************!*\
+  !*** ./lib-intermediate-esm/scripts/install-run-rushx.js ***!
+  \***********************************************************/
 
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.

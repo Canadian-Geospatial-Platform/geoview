@@ -3,30 +3,70 @@ name: Publish to GitHub pages
 on:
   workflow_call:
     inputs:
-      cache_sha:
+      source_sha:
+        type: string
+        required: true
+      artifact_id:
         type: string
         required: true
       folder:
         type: string
         required: true
 
+permissions: {}
+
 jobs:
   deploy-to-pages:
     name: Deploy gh-pages
-    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+
+      - name: Validate deployment inputs
+        env:
+          ARTIFACT_ID: ${{ inputs.artifact_id }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          TARGET_FOLDER: ${{ inputs.folder }}
+        run: |
+          [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$TARGET_FOLDER" = public
 
       - name: Get dist files
-        uses: actions/cache@v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
+          artifact-ids: ${{ inputs.artifact_id }}
           path: packages/geoview-core/dist
-          key: dist-${{ inputs.cache_sha }}
+          digest-mismatch: error
+
+      - name: Verify artifact revision and current develop head
+        id: revision
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          test -s packages/geoview-core/dist/cgpv-main.js
+          test "$(cat packages/geoview-core/dist/build-revision.txt)" = "$SOURCE_SHA"
+          current_sha=$(git ls-remote --exit-code origin refs/heads/develop | cut -f1)
+          if [ "$current_sha" = "$SOURCE_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping superseded preview $SOURCE_SHA; develop is now $current_sha"
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        if: steps.revision.outputs.current == 'true'
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
         with:
           branch: gh-pages
           folder: packages/geoview-core/dist
-          target-folder: ${{inputs.folder}}
+          target-folder: ${{ inputs.folder }}
           single-commit: true
+          commit-message: Deploy preview ${{ inputs.source_sha }} (run ${{ github.run_id }})

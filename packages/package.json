@@ -16,6 +16,8 @@
   },
   "scripts": {
     "format": "prettier --write \"geoview-**/src/**/*.{ts,tsx,js}\"",
+    "format:check": "prettier --check \"geoview-**/src/**/*.{ts,tsx,js}\"",
+    "check": "npm run format:check && npm run lint",
     "lint": "node --max-old-space-size=8192 node_modules/eslint/bin/eslint.js \"geoview-**/src/**/*.{ts,tsx,js}\"",
     "ai:check": "node ../scripts/ai-health-check.cjs",
     "fix": "node --max-old-space-size=8192 node_modules/eslint/bin/eslint.js \"geoview-**/src/**/*.{ts,tsx,js}\" --fix"

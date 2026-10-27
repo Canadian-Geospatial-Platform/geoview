@@ -5,7 +5,7 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 ## Commands
 
 - `rush update` (never `npm install`, never `npm audit fix`), `rush build`, `rush serve` (http://localhost:8080)
-- From `packages/`: `npm run format`, `npm run lint`, `npm run fix`
+- From `packages/`: `npm run format`, `npm run lint`, `npm run fix`, `npm run check` (non-mutating; `rush build` runs it and does not auto-fix)
 
 ## Hard rules
 
