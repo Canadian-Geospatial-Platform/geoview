@@ -224,7 +224,8 @@ const config = {
         ],
       },
       {
-        test: /github.com\+Canadian-Geospatial-Platform\+geochart(.*)\.(ts|tsx|js|jsx)$/,
+        // Match by package path: the pnpm store folder name for git dependencies differs between pnpm versions
+        test: /[\\/]node_modules[\\/]geochart[\\/].*\.(ts|tsx|js|jsx)$/,
         use: [
           {
             loader: 'swc-loader',

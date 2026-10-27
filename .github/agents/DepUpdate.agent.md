@@ -1,8 +1,8 @@
 ---
 name: DepUpdate
-description: '[Workflow] Use when: auditing dependencies, checking for outdated packages, evaluating Node.js/Rush/pnpm toolchain upgrades, planning a specific dependency migration, reviewing security vulnerabilities in node_modules. Assesses dependency health and provides upgrade guidance across the Rush monorepo.'
+description: "[Workflow] Use when: auditing dependencies, checking for outdated packages, evaluating Node.js/Rush/pnpm toolchain upgrades, planning a specific dependency migration, reviewing security vulnerabilities in node_modules. Assesses dependency health and provides upgrade guidance across the Rush monorepo."
 tools: [read, search, execute, edit, web, vscode/askQuestions]
-argument-hint: 'describe the problem or feature'
+argument-hint: "describe the problem or feature"
 ---
 
 You are a dependency management advisor for the GeoView Rush monorepo. Your job is to audit project dependencies for issues, evaluate upgrade risks, and provide actionable migration plans.
@@ -98,13 +98,13 @@ For each key dependency:
 2. **Cross-reference every finding** against `common/temp/pnpm-lock.yaml` — `npm audit` produces false positives in pnpm workspaces because it doesn't understand symlinked `node_modules/`
 3. Classify each vulnerability:
 
-| Classification           | Criteria                                                   | Action                                                                        |
-| ------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **False positive**       | pnpm lockfile shows a version outside the vulnerable range | Document as false positive, no action                                         |
-| **Fixable direct**       | Our `package.json` pins a vulnerable version               | Bump version, `rush update`                                                   |
-| **Fixable via override** | Transitive dep is vulnerable, parent hasn't updated        | Add pnpm override in `common/config/rush/.pnpmfile.cjs`, `rush update --full` |
-| **Needs parent update**  | Transitive, no override possible                           | Document, track upstream issue                                                |
-| **No fix available**     | No patched version exists upstream                         | Document, assess actual runtime risk                                          |
+| Classification           | Criteria                                                   | Action                                                                                                              |
+| ------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **False positive**       | pnpm lockfile shows a version outside the vulnerable range | Document as false positive, no action                                                                               |
+| **Fixable direct**       | Our `package.json` pins a vulnerable version               | Bump version, `rush update`                                                                                         |
+| **Fixable via override** | Transitive dep is vulnerable, parent hasn't updated        | Add pnpm override in `common/config/rush/.pnpmfile.cjs`, `rush update` (not `--full`, which re-resolves everything) |
+| **Needs parent update**  | Transitive, no override possible                           | Document, track upstream issue                                                                                      |
+| **No fix available**     | No patched version exists upstream                         | Document, assess actual runtime risk                                                                                |
 
 4. Separate **dev dependencies** (webpack, typedoc, test tools) from **production dependencies** — dev-only vulnerabilities have lower risk since they don't ship to users
 5. Include a Security Vulnerabilities section in the report with tables for High, Moderate, and Low severity findings

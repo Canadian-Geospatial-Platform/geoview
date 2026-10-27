@@ -11,7 +11,7 @@
   },
   "scripts": {
     "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "npm run format && npm run fix && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "build": "npm run check --prefix ../ && npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "build-dev": "webpack --progress --color --config webpack.dev-build.js",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/typeDocAPI --includeVersion --entryPointStrategy expand",
     "deploy": "gh-pages -d dist -verbose",

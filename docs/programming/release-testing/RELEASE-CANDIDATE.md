@@ -67,19 +67,19 @@ _(Config properties, public API methods, event names — affects external consum
 
 ### Type Changes
 
-| Item                                                                       | Change                                                                                                      | PR    |
-| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----- |
-| `degreeRotation`                                                           | Type changed from `string` to `number`                                                                      | #3544 |
-| `whenThisThen` default timeout                                             | Changed from 10 seconds to `undefined` (no timeout)                                                         | #3544 |
-| `emitLayerFilterApplied`                                                   | Privatized — no longer accessible externally                                                                | #3544 |
-| `createGeoviewLayerConfig` / `processGeoviewLayerConfig`                   | All layer types now accept `TypeLayerEntryShell[]` instead of `layerIds[]`, giving callers more flexibility | #3562 |
-| `ConfigApi.processLayerFromType`                                           | Parameter renamed from `layerIds` to `layerEntries` (`TypeLayerEntryShell[]`)                               | #3562 |
-| `onceEventPromise`                                                         | Now accepts an optional `timeout` parameter (replaces short-lived `onceEventPromiseWithTimeout`)            | #3562 |
-| `CallbackNewMetadataDelegate`                                              | Removed — replaced by `FetchWithProxyResult<T>` return wrapper in `GeoUtilities`                            | #3562 |
-| `GeoUtilities.fetchWMSMetadata` / `fetchWFSMetadata` / `fetchWMTSMetadata` | Now return `FetchWithProxyResult<T>` instead of raw data + callback                                         | #3562 |
-| `OVERVIEW_MAP_MIN_CONTAINER_WIDTH`                                         | Changed from `900` to `700` px                                                                              | #3562 |
-| `GeoViewMUIShape`                                                          | Export removed; use `GeoViewShapeTokens` for the named MUI shape tokens                                     | #3681 |
-| WMS layer config `fetchVectorsOnWFS`                                       | Renamed to `fetchVectorsExternally` to cover WFS and OGC API Features. Update existing configs; `false` still disables external vector retrieval and the default remains `true` | — |
+| Item                                                                       | Change                                                                                                                                                                          | PR    |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `degreeRotation`                                                           | Type changed from `string` to `number`                                                                                                                                          | #3544 |
+| `whenThisThen` default timeout                                             | Changed from 10 seconds to `undefined` (no timeout)                                                                                                                             | #3544 |
+| `emitLayerFilterApplied`                                                   | Privatized — no longer accessible externally                                                                                                                                    | #3544 |
+| `createGeoviewLayerConfig` / `processGeoviewLayerConfig`                   | All layer types now accept `TypeLayerEntryShell[]` instead of `layerIds[]`, giving callers more flexibility                                                                     | #3562 |
+| `ConfigApi.processLayerFromType`                                           | Parameter renamed from `layerIds` to `layerEntries` (`TypeLayerEntryShell[]`)                                                                                                   | #3562 |
+| `onceEventPromise`                                                         | Now accepts an optional `timeout` parameter (replaces short-lived `onceEventPromiseWithTimeout`)                                                                                | #3562 |
+| `CallbackNewMetadataDelegate`                                              | Removed — replaced by `FetchWithProxyResult<T>` return wrapper in `GeoUtilities`                                                                                                | #3562 |
+| `GeoUtilities.fetchWMSMetadata` / `fetchWFSMetadata` / `fetchWMTSMetadata` | Now return `FetchWithProxyResult<T>` instead of raw data + callback                                                                                                             | #3562 |
+| `OVERVIEW_MAP_MIN_CONTAINER_WIDTH`                                         | Changed from `900` to `700` px                                                                                                                                                  | #3562 |
+| `GeoViewMUIShape`                                                          | Export removed; use `GeoViewShapeTokens` for the named MUI shape tokens                                                                                                         | #3681 |
+| WMS layer config `fetchVectorsOnWFS`                                       | Renamed to `fetchVectorsExternally` to cover WFS and OGC API Features. Update existing configs; `false` still disables external vector retrieval and the default remains `true` | —     |
 
 ### Swiper Package — Schema
 
@@ -105,6 +105,8 @@ _(Internal code patterns, MUI props, build tooling — does NOT affect external 
 - MUI v7→v9: Inline system props (padding, direction, fontSize, visibility) moved to `sx={{}}` (#3545)
 - MUI v7→v9: 3 icon renames (`*Outline` → `*Outlined` suffix), Tabs `ScrollButtonComponent` removed (#3545)
 - DOM id convention: several viewer element IDs were flipped from `suffix-${mapId}` to the canonical `${mapId}-suffix` format — `shell-${mapId}`→`${mapId}-shell`, `map-${mapId}`→`${mapId}-map`, `main-map-${mapId}`→`${mapId}-main-map`, `mapTargetElement-${mapId}`→`${mapId}-mapTargetElement`, `toplink-/bottomlink-${mapId}`→`${mapId}-toplink`/`${mapId}-bottomlink`. Plugins, tests, or CSS that query these element IDs directly must update (in-repo swiper and test-suite already updated) (#3221)
+- Toolchain: `rush.json` now requires Node.js `>=24.22.1 <25.0.0` (Node 20 is rejected) with Rush 5.181.0 and pnpm 11.1.1. Existing clones: install Node 24, optionally `npm install -g @microsoft/rush@5.181.0`, then `rush install` (`rush purge` first if old pnpm files cause errors) — see README-DEV "Upgrading an existing clone" (issue #3702)
+- `rush build` (geoview-core `build` script) no longer runs `format` and ESLint `--fix`; it runs the new non-mutating `npm run check` (Prettier `--check` + lint) and fails on issues. Run `npm run format` / `npm run fix` from `packages/` to correct them (issue #3702)
 
 ## New Features
 
@@ -233,6 +235,8 @@ _(Dependency updates, build config changes)_
 - Removed 4 duplicate MUI packages from devDependencies (#3545)
 - Webpack: Added `fullySpecified: false` for .mjs ESM resolution (#3545)
 - Upgraded `@mui/material`, `@mui/system` and `@mui/icons-material` from 9.1.x to 9.4.0 in `geoview-core` (and `@mui/material` in `geoview-drawer`) to adopt the theme-level `focusVisible` option (#3641)
+- **Node 24 toolchain** (October 2026 Node.js security releases): CI and local builds move from end-of-life Node 20 to Node 24.22.1, Rush 5.113.4 → 5.181.0, pnpm 8.15.2 → 11.1.1. Lockfile converted to pnpm 11 format with all 933 resolved package versions unchanged. pnpm settings moved to `common/config/rush/pnpm-config.json`; `@swc/core` build scripts approved via `globalAllowBuilds`; `ensureConsistentVersions` moved to `common-versions.json`; Rush bootstrap scripts regenerated (fixes Windows `npm install` failure on Node 24). Webpack `geochart` loader rule now matches `node_modules/geochart/` so it works with pnpm 11's store layout (issue #3702)
+- **GitHub Actions modernization**: all actions SHA-pinned to Node 24 releases; explicit least-privilege permissions per job; develop preview builds the exact commit and deploys a digest-verified run artifact (no cache handoff; superseded commits skipped); type publication split into read-only generation plus an idempotent bot-attributed `new-types` PR; CodeQL v4 with `build-mode: none`; weekly Dependabot for `github-actions` only; removed `main-deprecated`. The `pull_request: locked` PR build trigger is unchanged. See `docs/programming/ci-workflows.md` (issue #3702)
 
 ## Architecture & Performance
 
@@ -326,6 +330,7 @@ _(Doc updates, demo cleanup, code organization)_
 - Improved HTML descriptions of all test suites (#3562)
 - Documented the map-scoped DOM access rules: new best-practices §18 (wrappers vs. the root store hook/getter, the ban on direct `document.*`, and the legitimate-exception pattern), cross-links in using-store.md and test-templates.md, and a summary note in copilot-instructions.md (#3221)
 - Migrated Add Layer and Focus Trap inline `sx` styles to external `add-new-layer-style.ts` / `containers-style.ts` files (#3630)
+- Developer setup docs updated for Node 24 (portable non-admin Windows setup, bootstrap usage, upgrading an existing clone, zero-churn pnpm-major migration); new CI Workflows guide and Dependency Management added to the docs navigation (issue #3702)
 - Documented the "Hidden layers" section + inline eye toggle in the guide (en/fr) across the Details, Data Table, Time Slider, and Chart panels; added a "Hidden Layers in Component Panel Lists" subsection to copilot-instructions.md capturing the composite `layerHiddenSet` vs `inVisibleRangeSet` split, `setLayerVisibleIncludingParents`, clear-selection-on-hide, and the two-list/remount focus patterns (#3635)
 - Updated all swiper documentation for the new interactive/per-side feature: the `geoview-swiper` README (config table + example), `configuration-reference.md` (structured `layers` schema, `interactive` flag, `side` semantics, version `1.1`), `geoview-core-packages.md` (features + config example + controller methods), and `controllers.md` (swiper controller snippet). Added a "How to use" section to the `package-swiper.html` demo (draggable divider, static vs interactive config, resize behavior, console/controller API), migrated all in-repo swiper configs/demos to the structured `{ layerPath, side }` shape (`14-package-swiper.json`, `geocore-duplicates.json`, `osdp-land_en/fr.json`, `package-swiper3-config-swiper.json`, `wcag.html`, `demo-arctic-sdi.html`, `rt-17c-swiper.html` — the release-test page now loads `interactive: true`), and moved the settings-section inline `sx` into `layer-details-style.ts`. Fixed a pre-existing copy-paste JSDoc bug on `getStoreSwiperOrientation` (#3625)
 

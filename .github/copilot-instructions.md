@@ -18,17 +18,19 @@ GeoView is a lightweight React+TypeScript geospatial viewer built on OpenLayers 
 
 ```bash
 # Install dependencies (run after pulling changes)
-rush update          # Standard install
-rush update --full   # Clean reinstall
+rush install         # Install from the committed lockfile
+rush update          # After changing dependencies in package.json
+rush purge && rush install   # Clean reinstall (rush update --full re-resolves every version)
 
 # Development
-rush build          # Build all packages
+rush build          # Build all packages (fails on format/lint issues; does not fix them)
 rush serve          # Dev server → http://localhost:8080
 
 # Formatting/Linting (run from packages/ directory)
 npm run format      # Prettier formatting
 npm run lint        # ESLint check
 npm run fix         # ESLint auto-fix
+npm run check       # Prettier --check + lint, no changes (what rush build runs)
 ```
 
 **NEVER** run `npm install` directly - always use `rush update`. Rush manages the monorepo and ensures consistent versions.

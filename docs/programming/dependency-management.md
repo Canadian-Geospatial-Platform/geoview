@@ -17,9 +17,13 @@ These files are **committed to git** (not gitignored). They serve as historical 
 
 ## Prerequisites
 
-- Rush monorepo with `ensureConsistentVersions: true` in `rush.json`
-- **Never** run `npm install` directly — always use `rush update`
-- pnpm 8.x under Rush, Node.js >=20.11.0
+- Rush monorepo with `ensureConsistentVersions: true` in `common/config/rush/common-versions.json`
+- **Never** run `npm install` directly for repository dependencies — use `rush install` for the committed lockfile or `rush update` for intentional dependency changes.
+- **Node.js 24 LTS, version 24.22.1 or a newer patched 24.x release**, including its bundled npm. Node 16 and Node 20 are end-of-life and are not the developer baseline.
+- Rush automatically installs and uses the Rush/pnpm versions pinned in `rush.json`; no separate pnpm installation is needed. The pins are not automatically upgraded to the latest releases.
+- A global Rush launcher is optional: from the repository root, use `node common/scripts/install-run-rush.js <command>` instead of `rush <command>`. See [local setup](../../CONTRIBUTING.md#local-setup).
+
+The `rush.json` Node range and Rush/pnpm pins define this repository's supported toolchain. Changing the pnpm major is a tooling change, not a dependency update: migrate the lockfile format without `--full` so resolved versions stay unchanged, and validate install/build before merging. See [README-DEV.md](../../README-DEV.md#updating-the-pinned-pnpm-version) for the procedure.
 
 ## Workflow 1 — Full Dependency Audit
 
@@ -55,15 +59,15 @@ Assign each dependency a risk tier:
 
 Focus on these categories first:
 
-| Category             | Dependencies                                                      |
-| -------------------- | ----------------------------------------------------------------- |
-| **Map Engine**       | `ol` (OpenLayers)                                                 |
+| Category             | Dependencies                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Map Engine**       | `ol` (OpenLayers)                                                                                                          |
 | **UI Framework**     | `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/system`, `@mui/x-date-pickers`, `@mui/x-tree-view`, `@emotion/*` |
-| **State Management** | `zustand`                                                         |
-| **Build**            | `webpack`, `typescript`, `ts-loader`                              |
-| **React Ecosystem**  | `react`, `react-dom`, `react-i18next`, `i18next`                  |
-| **Data/Tables**      | `material-react-table`                                            |
-| **Utilities**        | `lodash`, `axios`, `linkify-html`                                 |
+| **State Management** | `zustand`                                                                                                                  |
+| **Build**            | `webpack`, `typescript`, `ts-loader`                                                                                       |
+| **React Ecosystem**  | `react`, `react-dom`, `react-i18next`, `i18next`                                                                           |
+| **Data/Tables**      | `material-react-table`                                                                                                     |
+| **Utilities**        | `lodash`, `axios`, `linkify-html`                                                                                          |
 
 For each key dependency, document:
 
@@ -221,9 +225,9 @@ If proceeding, create a concrete plan:
 1. Create a feature branch: `git checkout -b dep/package-name-vX upstream/develop`
 2. Update `package.json` version(s)
 3. Run `rush update`
-4. Run `rush build` — fix all compile errors
+4. Run `rush build` — fix all compile errors (the build also fails on formatting or lint issues)
 5. Run `rush serve` — test in browser
-6. Run `npm run lint` and `npm run format` from `packages/`
+6. Run `npm run format` and `npm run fix` from `packages/` to correct issues
 7. Commit and create PR
 
 ---
@@ -243,27 +247,28 @@ With `ensureConsistentVersions: true`, Rush enforces that all packages use the s
 # Install dependencies after version changes
 rush update
 
-# Full clean reinstall (if something seems wrong)
-rush update --full
+# Clean reinstall from the committed lockfile (if something seems wrong)
+rush purge
+rush install
 
 # Build all packages to verify no compile errors
 rush build
 
-# Check formatting and linting
-cd packages && npm run format && npm run lint
+# Check formatting and linting without changing files
+cd packages && npm run check
 ```
 
 ### Common Coordinated Updates
 
 These dependencies must always be updated together:
 
-| Group       | Packages                                                                   |
-| ----------- | -------------------------------------------------------------------------- |
+| Group       | Packages                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------ |
 | **MUI**     | `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/system`, `@mui/x-date-pickers`, `@mui/x-tree-view` |
-| **Emotion** | `@emotion/react`, `@emotion/styled`                                        |
-| **React**   | `react`, `react-dom`, `@types/react`, `@types/react-dom`                   |
-| **i18next** | `i18next`, `react-i18next`                                                 |
-| **Webpack** | `webpack`, `webpack-cli`, `webpack-dev-server`                             |
+| **Emotion** | `@emotion/react`, `@emotion/styled`                                                                          |
+| **React**   | `react`, `react-dom`, `@types/react`, `@types/react-dom`                                                     |
+| **i18next** | `i18next`, `react-i18next`                                                                                   |
+| **Webpack** | `webpack`, `webpack-cli`, `webpack-dev-server`                                                               |
 
 ---
 
@@ -283,10 +288,10 @@ GeoView uses **pnpm** (via Rush) as its package manager — **not npm**. This ha
 
 ### Fixing Vulnerabilities in Rush
 
-| Vulnerability Type | Fix Approach |
-|---|---|
-| **Direct dependency** (in our `package.json`) | Bump version in `package.json`, run `rush update` |
-| **Transitive dependency** (locked by a parent) | Update the parent package, or add pnpm overrides |
+| Vulnerability Type                                                  | Fix Approach                                       |
+| ------------------------------------------------------------------- | -------------------------------------------------- |
+| **Direct dependency** (in our `package.json`)                       | Bump version in `package.json`, run `rush update`  |
+| **Transitive dependency** (locked by a parent)                      | Update the parent package, or add pnpm overrides   |
 | **No fix available** (e.g., lodash <=4.17.23 but latest is 4.17.21) | Document in audit report, monitor for upstream fix |
 
 #### pnpm Overrides (for transitive dependencies)
@@ -296,15 +301,15 @@ When a transitive dependency has a vulnerability but the parent hasn't updated y
 ```javascript
 function readPackage(pkg) {
   // Force serialize-javascript to patched version
-  if (pkg.dependencies && pkg.dependencies['serialize-javascript']) {
-    pkg.dependencies['serialize-javascript'] = '>=6.0.3';
+  if (pkg.dependencies && pkg.dependencies["serialize-javascript"]) {
+    pkg.dependencies["serialize-javascript"] = ">=6.0.3";
   }
   return pkg;
 }
 module.exports = { hooks: { readPackage } };
 ```
 
-After adding overrides, run `rush update --full` to regenerate the lockfile.
+After adding overrides, run `rush update` to apply them to the lockfile. Use `rush update --full` only if you also want every dependency re-resolved to its newest allowed version.
 
 ### Audit Checklist (include in every full audit report)
 

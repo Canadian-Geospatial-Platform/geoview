@@ -47,6 +47,8 @@ see our [contributing guide](CONTRIBUTING.md)
 
 ## Building the project
 
+Use **Node.js 24 LTS, version 24.22.1 or a newer patched 24.x release**, with its bundled npm. Rush installs the repository-pinned pnpm automatically; no separate pnpm installation is needed. See the [contributing guide](CONTRIBUTING.md#tools) for prerequisites and portable Windows setup without administrator rights.
+
 ### First clone this repo
 
 ```
@@ -59,11 +61,13 @@ $ git clone https://github.com/Canadian-Geospatial-Platform/geoview.git
 $ cd geoview
 ```
 
-### Install rush globally
+### Install rush globally (optional)
 
 ```
 $ npm install -g @microsoft/rush
 ```
+
+Without a global installation, replace `rush` in the commands below with `node common/scripts/install-run-rush.js` from the repository root. Both use the versions pinned in `rush.json`, not the latest Rush/pnpm releases.
 
 - Note: you can also use the included `shell.nix` to setup your dev environment if you are on Mac/Linux/WSL.
 
@@ -72,20 +76,66 @@ $ npm install -g @microsoft/rush
 It's always recommended to run the below command if you pull any changes.
 
 ```
-$ rush update
+$ rush install
+```
+
+Use `rush update` when intentionally changing dependencies or regenerating the lockfile.
+
+#### Upgrading an existing clone
+
+When `rush.json` changes the Node, Rush, or pnpm version (for example, the move to
+Node 24, Rush 5.181.0, and pnpm 11.1.1):
+
+1. Install the required Node 24.x release with its bundled npm.
+2. If you use a global launcher, update it to avoid an old-version warning:
+   `npm install -g @microsoft/rush@5.181.0`.
+3. Run `rush install` (not `rush update`). The lockfile and build-script approvals
+   are committed.
+4. If the install fails because of files left by the previous pnpm version, run
+   `rush purge`, then `rush install` again.
+
+#### Updating the pinned pnpm version
+
+Change `pnpmVersion` in `rush.json`, then run `rush update` from the repository
+root. Avoid `--full` for a package-manager upgrade: it re-resolves every dependency
+and pulls newer versions within the declared ranges.
+
+If the new pnpm cannot read the current lockfile format (pnpm 11 cannot read
+format `6.0`), convert it with an intermediate pnpm release first (for example,
+`9.15.9` for `6.0` → `9.0`), copy `common/temp/pnpm-lock.yaml` to
+`common/config/rush/pnpm-lock.yaml`, then switch to the target version and run
+`rush update` again.
+
+pnpm 11 blocks dependency build scripts until approved. Approve trusted packages
+with `rush-pnpm --subspace default approve-builds`; Rush stores them in
+`globalAllowBuilds` in `common/config/rush/pnpm-config.json`.
+
+Confirm the lockfile diff changes only its format, then verify:
+
+```
+node common/scripts/install-run-rush.js install
+node common/scripts/install-run-rush.js build
 ```
 
 If you need to re-download the modules you can run
 
 ```
-$ rush update --full
+$ rush purge
+$ rush install
 ```
+
+Avoid `rush update --full` unless you intend to re-resolve every dependency to
+the newest version allowed by `package.json`.
 
 ### Build the project:
 
 ```
 $ rush build
 ```
+
+The build checks formatting and lint but does not change source files; it fails if
+either check fails. Fix issues from `packages/` with `npm run format` and
+`npm run fix`, or run `npm run check` to verify without building.
 
 Output build files will be placed under
 
