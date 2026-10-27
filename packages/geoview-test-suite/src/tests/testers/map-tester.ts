@@ -127,7 +127,7 @@ export class MapTester extends GVAbstractTester {
     center: Coordinate = MAP_CENTER[projection],
     useRotation = true
   ): Promise<Test<TypeViewportMidpointFitResult>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.test(
       `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
@@ -211,7 +211,7 @@ export class MapTester extends GVAbstractTester {
   testInvalidViewportMidpoints(): Promise<
     Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
   > {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     let original: TypeViewportBoundaryLonLat | undefined;
     return this.test(
@@ -259,7 +259,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the expected cancellation error
    */
   testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.testError(
       'Test viewport midpoint fit interrupted by another interaction',
@@ -297,7 +297,7 @@ export class MapTester extends GVAbstractTester {
     interaction: TypeInteraction = 'dynamic',
     center: Coordinate = MAP_CENTER[projection]
   ): Promise<Test<TypeViewportBoundarySnapshot>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.test(
       `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
@@ -340,7 +340,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the boundary snapshots before and after each change
    */
   testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.test(
       'Test viewport boundary after map-info height, padding, and size changes',
@@ -385,7 +385,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the captured typed errors
    */
   testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.test(
       'Test unavailable viewport conditions without recreating the map',
@@ -429,7 +429,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the expected typed error
    */
   testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
-    const host = this.getViewportHost();
+    const host = this.getGVRootElement();
     const originalWidth = host.style.width;
     return this.testError(
       'Test fitting an unavailable viewport',

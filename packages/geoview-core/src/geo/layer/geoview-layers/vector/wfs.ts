@@ -616,7 +616,14 @@ export class WFS extends AbstractGeoViewVector {
     const postEndpoint = postEndpointHref ? layerConfig.getUrlWithProxyWhenNeeded(postEndpointHref) : undefined;
 
     // Resolve the primary key from the requested fields first, then the configured source outfields.
-    const primaryKeyOutfield = layerConfig.getOutfieldsPK();
+    let primaryKeyOutfield = layerConfig.getOutfieldsPK();
+
+    // If there's no primary key outfield, take the first available field name to at least have something to sort by
+    if (!primaryKeyOutfield && outfields && outfields.length) {
+      primaryKeyOutfield = outfields[0];
+    }
+
+    // Get the sort by field for the request, only applicable for WFS 2.0.0
     const sortBy = layerConfig.getVersionOrDefault() === '2.0.0' ? primaryKeyOutfield?.name : undefined;
 
     // Context object for handling post fallback scenarios
