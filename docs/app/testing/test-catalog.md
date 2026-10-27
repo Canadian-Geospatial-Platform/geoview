@@ -79,7 +79,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
-| 3. Map            | `suite-map`             | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map`             | `MapTester`                                                                                     | 17         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
@@ -87,7 +87,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **271**    |                             |
+| **Total**         |                         |                                                                                                 | **273**    |                             |
 
 ---
 
@@ -588,24 +588,25 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-map` · **File:** `tests/suites/suite-map-functions.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
 **Execution:** Complex mixed — sequential `await` for state-modifying tests · **Guard:** None
 
-| #   | Method                                 | Type | Description                                                            |
-| --- | -------------------------------------- | ---- | ---------------------------------------------------------------------- |
-| 1   | `testInitialMapState`                  | test | Test projection                                                        |
-| 2   | `testMapZoom`                          | test | Test zoom                                                              |
-| 3   | `testSwitchProjectionAndExtent`        | test | Test switch projection back and forth, zoom and zoom to initial extent |
-| 4   | `testGeometryGroupZIndex`              | test | Test geometry group z-index get/set operations                         |
-| 5   | `testZoomToExtent`                     | test | Test zoom to lon/lat extent                                            |
-| 6   | `testZoomToCoordinate`                 | test | Test zoom to lon/lat coordinate                                        |
-| 7   | `testFooterBarSelectTab`               | test | Test footer bar select tab                                             |
-| 8   | `testAppBarSelectTab`                  | test | Test app bar select tab                                                |
-| 9   | `testFooterBarCreateTab`               | test | Test footer bar create custom tab                                      |
-| 10  | `testSetLanguage`                      | test | Test set language to French                                            |
-| 11  | `testCreateAndSetBasemap`              | test | Test create and set basemap                                            |
-| 12  | `testNorthArrowRotationLCC`            | test | Test north arrow rotation in LCC projection for British Columbia       |
-| 13  | `testNonQueryableLayerNotInDetails`    | test | Test non-queryable layer not in details after map click                |
-| 14  | `testLayerHoverableState`              | test | Test layer hoverable state in hoverFeatureInfoLayerSet                 |
-| 15  | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks             |
-| 16  | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch               |
+| #   | Method                                 | Type | Description                                                                                  |
+| --- | -------------------------------------- | ---- | -------------------------------------------------------------------------------------------- |
+| 1   | `testInitialMapState`                  | test | Test projection                                                                              |
+| 2   | `testMapZoom`                          | test | Test zoom                                                                                    |
+| 3   | `testSwitchProjectionAndExtent`        | test | Test switch projection back and forth, zoom and zoom to initial extent                       |
+| 4   | `testGeometryGroupZIndex`              | test | Test geometry group z-index get/set operations                                               |
+| 5   | `testZoomToExtent`                     | test | Test zoom to lon/lat extent                                                                  |
+| 6   | `testZoomToCoordinate`                 | test | Test zoom to lon/lat coordinate                                                              |
+| 7   | `testFooterBarSelectTab`               | test | Test footer bar select tab                                                                   |
+| 8   | `testAppBarSelectTab`                  | test | Test app bar select tab                                                                      |
+| 9   | `testFooterBarCreateTab`               | test | Test footer bar create custom tab                                                            |
+| 10  | `testSetLanguage`                      | test | Test set language to French                                                                  |
+| 11  | `testCreateAndSetBasemap`              | test | Test create and set basemap                                                                  |
+| 12  | `testNorthArrowRotationLCC`            | test | Test north arrow rotation in LCC projection for British Columbia                             |
+| 13  | `testNonQueryableLayerNotInDetails`    | test | Test non-queryable layer not in details after map click                                      |
+| 14  | `testLayerHoverableState`              | test | Test layer hoverable state in hoverFeatureInfoLayerSet                                       |
+| 15  | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                   |
+| 16  | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                     |
+| 17  | `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction |
 
 ---
 

@@ -1898,7 +1898,9 @@ export class MapViewer {
     if (
       !Array.isArray(midpointWSENCoords) ||
       midpointWSENCoords.length !== 4 ||
-      !Array.from(midpointWSENCoords).every((coordinate) => GeoUtilities.isValidLonLatCoord(coordinate))
+      !Array.from(midpointWSENCoords).every(
+        (coordinate) => GeoUtilities.isValidLonLatCoord(coordinate) || GeoUtilities.isUnwrappedLonLatCoord(coordinate)
+      )
     )
       throw new InvalidViewportMidpointsError();
 
