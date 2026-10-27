@@ -697,7 +697,12 @@ const ResponsiveGridLayout = forwardRef(
               </ButtonGroup>
             </Box>
             {!isGuideOpen && (
-              <Box className="panel-content-container">
+              <Box
+                // The enclosing named panel provides context; avoid a redundant nested region landmark.
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable panel region must be keyboard-focusable to scroll it (WCAG 2.1.1)
+                tabIndex={0}
+                className="panel-content-container"
+              >
                 {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
               </Box>
             )}

@@ -46,6 +46,8 @@ In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) 
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
 Sub-panels provide similar functionality.
+Scrollable right-panel content is also a keyboard stop; focus it and use the arrow keys to scroll
+the panel independently of the page. Scrolling stays within the panel at its top and bottom edges.
 
 #### Context-Aware Esc Key
 

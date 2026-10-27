@@ -84,6 +84,11 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
   also checks toggle/mobile mode, content, and right-panel visibility.
+- Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. Preserve its
+  keyboard focusability and vertical scroll containment (#3697).
+- In keyboard mode, reserve space for Exit so full-height content does not extend beyond the focus
+  trap's clipping boundary. Test final-content visibility with Exit shown, and scroll chaining with
+  the page away from its scroll limits.
 - Follow [Layout](../../packages/geoview-core/src/core/components/common/layout.tsx) for selected-layer
   focus restoration. Guide/lightbox handlers must take precedence over enclosing panel dismissal.
   [FullScreenDialog](../../packages/geoview-core/src/core/components/common/full-screen-dialog.tsx)

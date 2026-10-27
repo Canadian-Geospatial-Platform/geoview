@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SxProps } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { FocusTrap, Box, Button } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
+import { composeSxProps } from '@/ui/style/types';
+import { getSxClasses } from './focus-trap-container-style';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -23,12 +26,6 @@ interface FocusTrapContainerProps {
   containerType: TypeContainerBox;
   open?: boolean;
 }
-
-/** Styles for the exit focus trap button. */
-const EXIT_BUTTON_STYLES = {
-  width: '95%',
-  margin: '10px auto',
-} as const;
 
 /**
  * Extracts the tab name from a full tab ID.
@@ -65,6 +62,8 @@ export const FocusTrapContainer = memo(({
 
   // Hooks
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -169,19 +168,6 @@ export const FocusTrapContainer = memo(({
   }, [containerType, activeTrapGeoView]);
 
   /**
-   * Builds the exit button styles, toggling visibility based on keyboard navigation state.
-   */
-  const memoExitButtonStyles = useMemo((): SxProps => {
-    // Log
-    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - memoExitButtonStyles', activeTrapGeoView);
-
-    return {
-      ...EXIT_BUTTON_STYLES,
-      display: activeTrapGeoView ? 'block' : 'none',
-    };
-  }, [activeTrapGeoView]);
-
-  /**
    * Disables the focus trap when keyboard navigation is turned off.
    */
   useEffect(() => {
@@ -281,13 +267,17 @@ export const FocusTrapContainer = memo(({
   // <Box tabIndex={-1}: MUI will add this automatically if not set. Adding here to prevent console log noise
   return (
     <FocusTrap open={memoIsActive} disableAutoFocus disableRestoreFocus>
-      <Box tabIndex={-1} sx={{ overflow: 'clip', height: '100%', paddingTop: memoShowExitButton ? '16px' : undefined }}>
+      <Box
+        tabIndex={-1}
+        sx={composeSxProps(memoSxClasses.container, memoShowExitButton ? memoSxClasses.withExitButton : undefined)}
+      >
         {memoShowExitButton && (
-          <Button id={exitBtnId} type="text" onClick={handleClose} sx={memoExitButtonStyles}>
+          <Button id={exitBtnId} type="text" onClick={handleClose} sx={memoSxClasses.exitButton}>
             {t('general.exit')}
           </Button>
         )}
-        {children}
+        {/* Fit content into the remaining space below Exit so its scroller is not clipped. */}
+        <Box sx={memoSxClasses.content}>{children}</Box>
       </Box>
     </FocusTrap>
   );

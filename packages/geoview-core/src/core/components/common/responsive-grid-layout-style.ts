@@ -99,6 +99,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd}`,
       overflow: 'auto',
+      overscrollBehaviorY: 'contain', // Prevent scrolling the page when the panel reaches its top or bottom.
       '&:focus-visible': {
         ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
         outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
