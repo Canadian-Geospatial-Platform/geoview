@@ -398,7 +398,14 @@ export class UtilitiesDateTester extends GVAbstractTester {
         const fromString = DateMgt.parseDateToDayjs('2024-06-15T12:30:00Z');
         const fromNumber = DateMgt.parseDateToDayjs(946684800000);
         const fromDate = DateMgt.parseDateToDayjs(new Date('2024-01-01T00:00:00Z'));
-        return [fromString.isValid(), fromNumber.isValid(), fromDate.isValid()];
+        return [
+          fromString.isValid(),
+          fromNumber.isValid(),
+          fromDate.isValid(),
+          DateMgt.isDayjs(fromString),
+          DateMgt.isDayjs(new Date('2024-01-01T00:00:00Z')),
+          DateMgt.isDayjs({ format: () => '2024-06-15' }),
+        ];
       },
       (test, results) => {
         test.addStep('Verifying string parsed to valid Dayjs...');
@@ -409,6 +416,15 @@ export class UtilitiesDateTester extends GVAbstractTester {
 
         test.addStep('Verifying Date parsed to valid Dayjs...');
         Test.assertIsEqual(results[2], true);
+
+        test.addStep('Verifying Dayjs instances are recognized...');
+        Test.assertIsEqual(results[3], true);
+
+        test.addStep('Verifying native Date objects are not recognized as Dayjs...');
+        Test.assertIsEqual(results[4], false);
+
+        test.addStep('Verifying objects with a format method are not recognized as Dayjs...');
+        Test.assertIsEqual(results[5], false);
       }
     );
   }

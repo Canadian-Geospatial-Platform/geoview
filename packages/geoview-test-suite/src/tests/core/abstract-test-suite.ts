@@ -56,7 +56,9 @@ export abstract class AbstractTestSuite {
    */
   abstract getDescriptionAsHtml(): string;
 
-  /** Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded. */
+  /**
+   * Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded.
+   */
   abstract getTestsTotalFinal(): number;
 
   /**
