@@ -19,7 +19,9 @@ import type {
   TypeValidMapProjectionCodes,
   TypeFeatureInfoEntryPartial,
   TypeDisplayLanguage,
+  TypeLayerStyleConfig,
 } from '@/api/types/map-schema-types';
+import { isIconSymbolVectorConfig, isSimpleSymbolVectorConfig } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent, TypeLegend } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
@@ -299,11 +301,56 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the hit tolerance of the layer.
    *
+   * The identify REST call has no notion of the rendered symbol (unlike OL's vector hit-testing). For point/icon symbols,
+   * the radius is already known from the style parsed from the service's renderer metadata, so it's used directly. For
+   * other geometries (or when no symbol radius is available), there's nothing to size the tolerance from, so it falls back
+   * to the layer type's default.
+   *
    * @returns The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
-    // Override the hit tolerance for a GVEsriDynamic layer
-    return GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
+    const { radius } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
+    return radius > 0 ? radius : GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
+  }
+
+  /**
+   * Gets the radius and offset, in pixels, of the largest point/icon symbol defined in a style, across its
+   * simple/uniqueValue/classBreaks entries and any size-driven visual variable. The offset is taken from that same largest
+   * symbol, since uniqueValue/classBreaks entries normally share the same symbol placement. Returns all zeros when no point
+   * symbol is found.
+   *
+   * @param style - The layer style to inspect, if any
+   * @returns The largest point symbol's radius and xoffset/yoffset, in pixels
+   */
+  static #getMaxPointSymbolInfo(style: TypeLayerStyleConfig | undefined): { radius: number; offsetX: number; offsetY: number } {
+    const pointStyle = style?.Point ?? style?.MultiPoint;
+    if (!pointStyle) return { radius: 0, offsetX: 0, offsetY: 0 };
+
+    let maxSize = 0;
+    let offsetX = 0;
+    let offsetY = 0;
+    pointStyle.info.forEach(({ settings }) => {
+      let size = 0;
+      let offset: [number, number] = [0, 0];
+      if (isSimpleSymbolVectorConfig(settings)) {
+        size = settings.size ?? 0;
+        offset = settings.offset ?? [0, 0];
+      } else if (isIconSymbolVectorConfig(settings)) {
+        size = Math.max(settings.width ?? 0, settings.height ?? 0);
+        offset = settings.offset ?? [0, 0];
+      }
+      if (size > maxSize) {
+        maxSize = size;
+        [offsetX, offsetY] = offset;
+      }
+    });
+
+    // Data-driven sizing (ESRI visual variables) can render symbols larger than their base 'info' size
+    const visualVariableSizes = (pointStyle.visualVariables ?? [])
+      .filter((visualVar) => visualVar.type === 'sizeInfo')
+      .map((visualVar) => visualVar.maxSize ?? 0);
+
+    return { radius: Math.ceil(Math.max(maxSize, ...visualVariableSizes, 0) / 2), offsetX, offsetY };
   }
 
   /**
@@ -366,6 +413,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
+   * The click coordinate is first re-centered on the symbol's rendered position (its xoffset/yoffset, e.g. a pin whose anchor
+   * sits at the bottom of the icon), since the identify REST call otherwise searches around the raw geometry point.
+   *
    * @param map - The Map where to get Feature Info At Coordinate from
    * @param location - The coordinate that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
@@ -380,8 +430,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
     language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
+    // Shift the click location to the symbol's visual center, in map units, before projecting to lon/lat
+    const { offsetX, offsetY } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
+    const resolution = map.getView().getResolution() ?? 0;
+    const recenteredLocation: Coordinate = [location[0] + offsetX * resolution, location[1] - offsetY * resolution];
+
     // Transform coordinate from map projection to lntlat
-    const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
+    const projCoordinate = Projection.transformToLonLat(recenteredLocation, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLonLat
     return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, language, abortController);
