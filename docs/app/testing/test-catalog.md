@@ -83,7 +83,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 14         | Guarded sequential          |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 15         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
@@ -834,18 +834,19 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | #   | Method                                             | Type | Description                                                                      |
 | --- | -------------------------------------------------- | ---- | -------------------------------------------------------------------------------- |
 | 1   | `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for GeoJSON layer...                      |
-| 2   | `testRowCountMatchesStore`                         | test | Test row count matches allFeaturesDataArray length...                            |
+| 2   | `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for the 600-feature Esri layer...         |
 | 3   | `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                                       |
-| 4   | `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                     |
-| 5   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                       |
-| 6   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                       |
-| 7   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                 |
-| 8   | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                   |
-| 9   | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                      |
-| 10  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |
-| 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                      |
-| 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
-| 13  | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
+| 4   | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
+| 5   | `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                     |
+| 6   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                       |
+| 7   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                       |
+| 8   | `testCitiesNameFilterCount`                        | test | Test Cities name filter for "mo" returns 30; population minimum 1,000,000 returns 6; maximum 1,750,000 returns 3... |
+| 9   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                 |
+| 10  | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                  |
+| 11  | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                      |
+| 12  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |
+| 13  | `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                     |
+| 14  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
 | 14  | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                        |
 
 ---

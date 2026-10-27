@@ -6,7 +6,6 @@ import {
   getStoreSwiperOrientation,
   getStoreSwiperPosition,
 } from 'geoview-core/core/stores/states/swiper-state';
-import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
 
 /** Listener counts and renderer state captured during the swiper render-isolation test. */
@@ -225,7 +224,7 @@ export class SwiperTester extends GVAbstractTester {
     return this.test(
       'Test Swiper settings-panel gating...',
       async (test) => {
-        const mapRoot = getGVRootElement(this.getMapId());
+        const mapRoot = this.getGVRootElement();
         const { layerController } = this.getControllersRegistry();
         const layerPath = SwiperTester.SWIPER_WMS_LAYER_PATH;
 
@@ -234,7 +233,7 @@ export class SwiperTester extends GVAbstractTester {
         layerController.setSelectedLayerPath(layerPath);
         await SwiperTester.waitForCondition(() => !!mapRoot?.querySelector('[aria-label="Layer settings"]'));
 
-        const settingsButton = mapRoot?.querySelector('[aria-label="Layer settings"]') as HTMLElement | null;
+        const settingsButton = mapRoot?.querySelector('[aria-label="Layer settings"]') as HTMLElement | null | undefined;
         settingsButton?.click();
         await SwiperTester.waitForCondition(() => mapRoot?.textContent?.includes('Use with swiper bar') ?? false);
 
