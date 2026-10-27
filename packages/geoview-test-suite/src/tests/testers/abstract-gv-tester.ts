@@ -12,7 +12,7 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
-import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
+import { getGVRootElement as getGVRootElementFromUtils } from 'geoview-core/core/utils/dom-helper';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -1095,14 +1095,14 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Gets the suite's existing map container instead of adding maps to the test runner page.
+   * Gets the existing map container element.
    *
-   * @returns The current suite's map root
-   * @throws {TestError} When the suite's map container is missing
+   * @returns The current test map root element
+   * @throws {TestError} When the suite's map root element is missing
    */
-  protected getViewportHost(): HTMLElement {
-    const host = getGVRootElement(this.getMapId());
-    if (!host) throw new TestError('Viewport test suite has no map container');
+  getGVRootElement(): HTMLElement {
+    const host = getGVRootElementFromUtils(this.getMapId());
+    if (!host) throw new TestError('Map root element for the test suite not found.');
     return host;
   }
 
@@ -1211,6 +1211,8 @@ export abstract class GVAbstractTester extends AbstractTester {
     await promiseMapclick.promiseQueryBatched;
   }
 
+  // #region UI INTERACTION METHODS
+
   /**
    * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
    *
@@ -1305,7 +1307,9 @@ export abstract class GVAbstractTester extends AbstractTester {
     return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}:not(.Mui-selected)`);
   }
 
-  // #region STATIC METHODS
+  // #endregion UI INTERACTION METHODS
+
+  // #region STATIC METHODS PUBLIC
 
   /**
    * Creates the GeoJSON group configuration used by settings and visibility tests.
@@ -1356,5 +1360,5 @@ export abstract class GVAbstractTester extends AbstractTester {
     return layerConfig as TypeGeoviewLayerConfig;
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC METHODS PUBLIC
 }
