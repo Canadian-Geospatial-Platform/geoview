@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'space-between',
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.main,
+    backgroundColor: theme.palette.surface?.high ?? theme.palette.background.paper,
 
     '&.interaction-static': {
       position: 'absolute',
@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '&>nav': {
         border: 'unset !important',
         '&>ul>li': {
-          backgroundColor: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
+          backgroundColor: theme.palette.background.paper,
           padding: theme.spacing(0),
           borderRadius: theme.shape.borderRadiusFull,
         },
@@ -46,9 +46,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowX: 'hidden',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
     '& li': {
       backgroundColor: 'transparent',
       justifyContent: 'center',
@@ -60,7 +57,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     minHeight: 0,
     position: 'relative',
-    borderRight: `1px solid ${theme.palette.geoViewColor?.primary.light[100] ?? theme.palette.divider}`,
+    borderRight: `1px solid ${theme.palette.divider}`,
     width: 48,
     '& button': {
       height: '48px',
@@ -69,7 +66,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       padding: theme.spacing(0),
       borderRadius: theme.shape.borderRadiusNone,
       backgroundColor: 'transparent',
-      color: theme.palette.geoViewColor?.primary.main,
+      color: theme.palette.primary.main,
       transition: 'background-color 0.3s ease-in-out',
       '& span': {
         margin: theme.spacing(0),
@@ -82,7 +79,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         maxWidth: '48px',
       },
       '&[aria-disabled="true"]': {
-        color: theme.palette.geoViewColor?.bgColor.dark[450],
+        color: theme.palette.text.disabled,
         cursor: 'not-allowed',
       },
       // Override global focus indicator for AppBar buttons
@@ -105,7 +102,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       top: 0,
       left: '4px',
       right: '4px',
-      borderTop: `1px solid ${theme.palette.geoViewColor?.grey.light[100] ?? theme.palette.divider}`,
+      borderTop: `1px solid ${theme.palette.divider}`,
     },
   },
   appBarBottomSection: {

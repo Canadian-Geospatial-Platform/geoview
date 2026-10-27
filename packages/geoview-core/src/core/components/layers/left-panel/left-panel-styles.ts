@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        borderBottom: `1px solid ${theme.palette.geoViewColor?.grey.darken(1, 0.12)}`,
+        borderBottom: `1px solid ${theme.palette.divider}`,
       },
     },
 
@@ -78,7 +78,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       },
       '> p': {
         fontSize: theme.palette.geoViewFontSize?.sm,
-        color: `${theme.palette.geoViewColor?.textColor.main} !important`,
+        color: `${theme.palette.text.primary} !important`,
         fontWeight: '400 !important',
       },
     },

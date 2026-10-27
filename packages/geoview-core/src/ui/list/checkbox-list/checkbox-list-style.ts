@@ -23,8 +23,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     padding: theme.spacing(0),
     '&:hover': {
-      backgroundColor: '#dddddd',
-      color: theme.palette.geoViewColor?.primary.dark,
+      // Keep the hover background visible on touch, where MUI resets it to transparent.
+      backgroundColor: theme.palette.action.hover,
+      color: theme.palette.primary.dark,
     },
   },
   listItemIcon: {

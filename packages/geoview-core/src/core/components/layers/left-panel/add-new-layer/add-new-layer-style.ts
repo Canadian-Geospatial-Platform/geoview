@@ -37,12 +37,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: 0,
     zIndex: 9999,
     textAlign: 'center',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     fontSize: theme.palette.geoViewFontSize?.xl,
   },
   stepper: {
     '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
-      color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+      color: theme.palette.text.secondary, // WCAG - Matches global placeholder text color
     },
   },
   layerTreeContainer: {

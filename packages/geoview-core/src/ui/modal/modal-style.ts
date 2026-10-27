@@ -29,10 +29,6 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
         }
       : {}),
   },
-  backdrop: {
-    position: 'absolute',
-    background: theme.palette?.backdrop,
-  },
   content: {
     padding: theme.spacing(0.75, 0),
     whiteSpace: 'pre-line',
@@ -42,7 +38,7 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: theme.spacing(0.5, 1.25),
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   modalTitleLabel: {
     display: 'flex',

@@ -21,7 +21,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     padding: theme.spacing(0),
     height: 'initial',
     minWidth: 'initial',
-    color: 'black',
+    color: theme.palette.common.black,
     zIndex: 150,
     transform: 'rotate(45deg)',
     transition: 'transform 0.3s ease',

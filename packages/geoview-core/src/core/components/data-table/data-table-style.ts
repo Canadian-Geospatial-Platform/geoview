@@ -21,7 +21,7 @@ export const truncatedCellContentSx: SxProps<Theme> = {
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  dataPanel: { background: theme.palette.geoViewColor?.bgColor.main, paddingBottom: theme.spacing(2) },
+  dataPanel: { background: theme.palette.surface?.high ?? theme.palette.background.paper, paddingBottom: theme.spacing(2) },
   gridContainer: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
   selectedRows: {
     fontSize: theme.palette.geoViewFontSize?.sm,
@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       marginRight: theme.spacing(0),
     },
     '& .MuiFormHelperText-root': {
-      color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+      color: theme.palette.text.secondary, // WCAG - Matches global placeholder text color
     },
   },
   dataTableTopToolbar: {
@@ -59,13 +59,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   filterMap: {
-    '& .Mui-checked': {
-      '& .MuiTouchRipple-root': {
-        color: theme.palette.action.active,
-      },
-    },
     '& .MuiTouchRipple-root': {
-      color: theme.palette.geoViewColor?.grey.dark[900],
+      color: theme.palette.action.active,
     },
   },
   filterTextField: {
@@ -114,12 +109,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         },
       },
       '& .MuiTableSortLabel-root': {
-        width: '2rem',
-        height: '2rem',
-        minWidth: '2rem',
-        minHeight: '2rem',
-        maxWidth: '2rem',
-        maxHeight: '2rem',
+        width: '32px',
+        height: '32px',
+        minWidth: '32px',
+        minHeight: '32px',
+        maxWidth: '32px',
+        maxHeight: '32px',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -130,13 +125,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       opacity: 1,
       border: `2px solid transparent`,
       borderRadius: theme.shape.borderRadiusFull,
-      height: '2rem',
-      width: '2rem',
+      height: '32px',
+      width: '32px',
       '& .MuiTableSortLabel-icon': {
         opacity: 1,
         color: `${theme.palette.primary.main}!important`,
-        width: '1.5rem',
-        height: '1.5rem',
+        width: '24px',
+        height: '24px',
       },
       '&:hover': {
         backgroundColor: theme.palette.action.hover,
@@ -144,7 +139,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         border: `2px solid ${theme.palette.divider}`,
       },
       '&:focus-visible': {
-        backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
+        backgroundColor: theme.palette.action.focus,
         borderRadius: theme.shape.borderRadiusFull,
         outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
@@ -175,7 +170,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   rightPanelContainer: {
     overflowY: 'auto',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   toolbarContainer: {
     justifyContent: 'space-between',
@@ -238,7 +233,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   lightboxButton: {
-    height: '2.5rem',
+    height: '40px',
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
     textTransform: 'none',

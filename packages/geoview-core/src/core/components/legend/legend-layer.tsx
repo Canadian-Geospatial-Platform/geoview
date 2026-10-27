@@ -225,7 +225,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
         collapseContainerId={collapseContainerId}
       />
       {/* WCAG - ARIA live region for screen reader announcements */}
-      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status">
         {statusMessage}
       </Box>
       {layerStatus === 'loading' && (

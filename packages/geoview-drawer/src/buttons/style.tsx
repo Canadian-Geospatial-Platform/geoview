@@ -39,7 +39,7 @@ const getSxClasses = (theme: Theme): SxStyles => ({
   numberInput: {
     width: '100%',
     padding: theme.spacing(1),
-    border: '1px solid #ccc',
+    border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadiusSm,
   },
   row: {

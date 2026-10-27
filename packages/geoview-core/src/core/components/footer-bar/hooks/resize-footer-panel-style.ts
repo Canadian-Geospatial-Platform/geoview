@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   panel: {
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
+    backgroundColor: theme.palette.background.paper,
     boxShadow: 2,
   },
   header: {
@@ -27,12 +27,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: theme.spacing(1.25),
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   title: {
     fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: '700',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
   sliderWrapper: {
     height: '300px',

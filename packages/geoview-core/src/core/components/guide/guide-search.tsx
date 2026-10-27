@@ -563,7 +563,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
   return (
     <Box sx={memoSxClasses.guideSearch}>
       {/* WCAG - Live region announces search results and navigation state to screen readers */}
-      <Box role="status" aria-live="polite" aria-atomic="true" sx={memoSxClasses.visuallyHidden}>
+      <Box role="status" sx={memoSxClasses.visuallyHidden}>
         {srAnnouncement}
       </Box>
       <form onSubmit={handleFormSubmit} role="search" aria-label={t('guide.searchFormLabel')}>

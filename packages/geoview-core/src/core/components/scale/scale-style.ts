@@ -41,12 +41,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleContainer: {
     display: 'flex',
-    backgroundColor: 'transparent',
     height: '100%',
-    ':hover': {
-      backgroundColor: 'transparent',
-      color: theme.palette.geoViewColor?.white,
-    },
   },
   scaleContainerButton: {
     height: '100%',
@@ -78,9 +73,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleText: {
     fontSize: theme.palette.geoViewFontSize?.default,
-    color: theme.palette.geoViewColor?.bgColor.dark[650],
+    color: theme.palette.text.primary,
     whiteSpace: 'nowrap',
-    borderBottom: `2px solid ${theme.palette.geoViewColor?.bgColor.dark[650]}`,
+    borderBottom: `2px solid ${theme.palette.text.primary}`,
     textTransform: 'lowercase',
     position: 'relative',
     display: 'inline-block',
@@ -104,19 +99,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       bottom: '-1px',
       width: '1px',
       height: '8px',
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[650],
+      backgroundColor: theme.palette.text.primary,
     },
 
     '&.hasScaleLine::before': {
-      left: '0px',
+      left: 0,
     },
 
     '&.hasScaleLine::after': {
-      right: '0px',
+      right: 0,
     },
   },
   scaleCheckmark: {
     paddingRight: theme.spacing(0.75),
-    color: theme.palette.geoViewColor?.bgColor.light[800],
+    fontSize: theme.palette.geoViewFontSize?.lg,
+    color: theme.palette.text.primary,
   },
 });

@@ -16,8 +16,8 @@ import {
   VisibilityOffOutlinedIcon,
 } from '@/ui';
 
-import type { SxProps } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
+import { composeSxProps } from '@/ui/style/types';
 
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
@@ -67,7 +67,7 @@ interface LayerListProps {
   selectedLayerPath: string | undefined;
   /** Callback invoked when a layer item is clicked. */
   onListItemClick: (layer: LayerListEntry) => void;
-  /** Compact mode for the collapsed app-bar icon view: hides the section headings and the "no layers" instructions item. */
+  /** Renders icon-only rows and omits section headings and empty-list instructions in the collapsed app-bar view. */
   compact?: boolean;
   /** Omits the available-layers heading for non-layer lists such as Guide topics. */
   hideAvailableHeading?: boolean;
@@ -75,6 +75,8 @@ interface LayerListProps {
 
 /** Properties for the LayerListItem component. */
 interface LayerListItemProps {
+  /** Renders a narrow icon-only row with a feature-count badge. */
+  compact?: boolean;
   /** The unique DOM id for this list item. */
   id: string;
   /** Whether this item is currently selected. */
@@ -95,7 +97,7 @@ interface LayerListItemProps {
  * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
  */
-export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element => {
+export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick, compact = false }: LayerListItemProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerListItem');
 
@@ -300,9 +302,9 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   }, [layerStatus, layerName, t]);
 
   return (
-    <ListItem className={containerClass}>
+    <ListItem className={containerClass} sx={compact ? memoSxClasses.listItemCompact : undefined}>
       {/* WCAG - ARIA live region for screen reader announcements */}
-      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status">
         {statusMessage}
       </Box>
       <Tooltip
@@ -330,7 +332,11 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
         <ListItemButton
           id={id}
           component="button"
-          sx={[memoSxClasses.listItemButton, !!isHidden && memoSxClasses.listItemButtonHidden] as SxProps}
+          sx={composeSxProps(
+            memoSxClasses.listItemButton,
+            compact && memoSxClasses.listItemButtonCompact,
+            !!isHidden && memoSxClasses.listItemButtonHidden
+          )}
           onKeyDown={isHidden ? undefined : handleLayerKeyDown}
           onClick={isHidden ? undefined : handleItemClick}
           selected={isSelected}
@@ -347,7 +353,11 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
           {/* Reserve right space for the inline eye toggle so the wrapped layer name doesn't run under it */}
           <Box
             component="span"
-            sx={[memoSxClasses.listPrimaryText, !!isHidden && memoSxClasses.listPrimaryTextHidden] as SxProps}
+            sx={composeSxProps(
+              memoSxClasses.listPrimaryText,
+              compact && memoSxClasses.listPrimaryTextCompact,
+              !!isHidden && memoSxClasses.listPrimaryTextHidden
+            )}
             className="layerInfo"
           >
             <Typography component="span" className="layerTitle" noWrap={!isDisabled}>
@@ -364,7 +374,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
               badgeContent={numOffeatures}
               max={99}
               color="info"
-              sx={memoSxClasses.layerCount}
+              sx={composeSxProps(memoSxClasses.layerCount, compact && memoSxClasses.layerCountCompact)}
               className="layer-count"
               aria-hidden="true"
             ></Badge>
@@ -454,6 +464,7 @@ export const LayerList = memo((props: LayerListProps): JSX.Element => {
   const renderLayerListItem = useCallback(
     (layer: LayerListEntry): JSX.Element => (
       <LayerListItem
+        compact={compact}
         id={`${layer?.layerUniqueId ?? ''}`}
         key={layer.layerPath}
         // Reason:- (layer?.numOffeatures ?? 1) > 0
@@ -466,7 +477,7 @@ export const LayerList = memo((props: LayerListProps): JSX.Element => {
         onListItemClick={onListItemClick}
       />
     ),
-    [selectedLayerPath, onListItemClick]
+    [selectedLayerPath, onListItemClick, compact]
   );
 
   /**
@@ -493,7 +504,7 @@ export const LayerList = memo((props: LayerListProps): JSX.Element => {
   return (
     <Box sx={{ width: '100%' }}>
       {/* WCAG - ARIA live region announcing when a layer moves between the two lists */}
-      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status">
         {announcement}
       </Box>
 

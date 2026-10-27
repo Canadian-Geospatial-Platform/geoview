@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     alignItems: 'center',
     gap: theme.spacing(1),
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     textAlign: 'left',
     transition: 'color 0.2s',
     '&:hover': {
@@ -95,22 +95,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     maxHeight: '400px',
     overflowY: 'auto',
-    // Custom scrollbar styling
-    '&::-webkit-scrollbar': {
-      width: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: 'transparent',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: theme.palette.action.disabled,
-      borderRadius: theme.shape.borderRadiusSm,
-      '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
     scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.action.disabled} transparent`,
   },
 
   settingsCard: {

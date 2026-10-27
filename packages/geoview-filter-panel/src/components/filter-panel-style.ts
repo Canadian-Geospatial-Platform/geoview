@@ -46,7 +46,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterLayerSection: {
     padding: theme.spacing(0.5, 0.75, 0),
     border: 1,
-    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
+    borderColor: theme.palette.divider,
     borderRadius: theme.shape.borderRadiusMd,
     overflow: 'hidden',
   },
@@ -84,7 +84,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Layer section header (expanded state - with bottom border)
   filterLayerHeaderExpanded: {
     borderBottom: 1,
-    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
+    borderColor: theme.palette.divider,
   },
 
   // Toggle icon button
@@ -142,6 +142,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Loading text
   filterLayerLoadingText: {
-    color: 'text.secondary',
+    color: theme.palette.text.secondary,
   },
 });

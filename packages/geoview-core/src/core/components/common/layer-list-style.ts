@@ -19,13 +19,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiListItem-root': {
       '& .MuiListItemButton-root': {
-        padding: theme.spacing(0, 0.25, 0, 2),
         height: '100%',
-        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+        backgroundColor: theme.palette.background.paper,
       },
-    },
-    '& .MuiListItemButton-root': {
-      minHeight: '73px',
     },
     '& .MuiListItemIcon-root': {
       minWidth: '2rem',
@@ -39,10 +35,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  listItemCompact: {
+    width: '52px',
+  },
   listItemButton: {
     width: '100%',
+    padding: theme.spacing(0, 0.25, 0, 2),
+    minHeight: '73px',
     borderRadius: theme.shape.borderRadiusMd,
     gap: theme.spacing(1.5),
+    // Override MUI's selected and selected-hover fills so the parent surface shows through.
     '&.Mui-selected:hover': {
       backgroundColor: 'inherit',
     },
@@ -53,6 +55,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       outlineOffset: '-2px',
       boxShadow: 'none',
     },
+  },
+  listItemButtonCompact: {
+    padding: theme.spacing(0, 1),
+    minHeight: '48px',
+    justifyContent: 'center',
   },
   listItemButtonHidden: {
     // Hidden rows are not a control (only the eye toggle acts); keep them looking non-clickable
@@ -89,14 +96,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  listPrimaryTextCompact: {
+    display: 'none',
+  },
   outOfRange: {
     '.layer-panel &.MuiListItemButton-root': {
-      '& .MuiListItemText-primary': {
-        color: `${theme.palette.grey[700]} !important`,
-        fontStyle: 'italic',
-      },
-      '& .MuiListItemText-secondary': {
-        color: theme.palette.grey[600],
+      '& .MuiListItemText-primary, & .MuiListItemText-secondary': {
+        color: `${theme.palette.text.secondary}`,
         fontStyle: 'italic',
       },
     },
@@ -122,6 +128,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: '12px',
     top: '12px',
   },
+  layerCountCompact: {
+    display: 'block',
+  },
   orderButtonDisabled: {
     opacity: 0.5,
     cursor: 'not-allowed',
@@ -134,8 +143,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   dividerVertical: {
     marginLeft: theme.spacing(0.75),
-    height: '1.5rem',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
+    height: '24px',
   },
   zoomButton: {
     height: 40,
@@ -155,17 +163,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     top: '50%',
     transform: 'translateY(-50%)',
     // Keep the eye toggle looking actionable (not greyed like the disabled item) so users know they can restore visibility
-    color: theme.palette.geoViewColor?.primary.main,
+    color: theme.palette.primary.main,
     '&:hover': {
-      color: theme.palette.geoViewColor?.primary.dark[200],
-      backgroundColor: theme.palette.geoViewColor?.primary.lighten(0.9, 0.3),
+      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.action.hover,
     },
   },
   listPrimaryTextHidden: {
     paddingRight: theme.spacing(5),
     // Match the Layers panel "not visible" symbology: greyed + italic text
     '& .layerTitle': {
-      color: theme.palette.grey[700],
+      color: theme.palette.text.secondary,
       fontStyle: 'italic',
     },
     '& > div > p': {

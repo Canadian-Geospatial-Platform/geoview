@@ -17,7 +17,7 @@ export const getSxClassesMain = (theme: Theme): SxClasses => ({
     overflow: 'hidden',
   },
   container: {
-    background: theme.palette.geoViewColor?.bgColor.main,
+    background: theme.palette.surface?.high ?? theme.palette.background.paper,
     padding: theme.spacing(2),
     display: 'flex',
     flexDirection: 'column',
@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   title: {
     textAlign: 'left',
     fontWeight: '600',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     fontSize: theme.palette.geoViewFontSize?.md,
   },
   layerStackContainer: {
@@ -80,7 +80,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
     '& .outOfRange': {
       '& .legendTitle': {
-        color: `${theme.palette.grey[700]}`,
+        color: theme.palette.text.secondary,
         fontStyle: 'italic',
       },
     },
@@ -90,7 +90,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     display: 'flex',
     gap: theme.spacing(1.5),
     alignItems: 'center',
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   legendTitle: {
     fontSize: theme.palette.geoViewFontSize?.md,
@@ -101,12 +101,12 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
     '>p': {
       margin: theme.spacing(0),
-      color: theme.palette.geoViewColor?.textColor.light[400],
+      color: theme.palette.text.secondary,
       fontSize: theme.palette.geoViewFontSize?.sm,
       lineHeight: 1.43,
     },
     '& .MuiListItemText-secondary': {
-      color: theme.palette.geoViewColor?.textColor.light[400],
+      color: theme.palette.text.secondary,
     },
   },
   layerList: {
@@ -114,7 +114,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     padding: theme.spacing(0),
     width: '100%',
     '& .MuiListItemIcon-root': {
-      minWidth: '1rem',
+      minWidth: '16px',
     },
   },
   layerListItem: {
@@ -130,17 +130,17 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
     '&.unchecked': {
       fontStyle: 'italic',
-      color: theme.palette.geoViewColor?.textColor.light[600],
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
+      color: theme.palette.text.secondary,
+      borderLeft: `5px solid ${theme.palette.layerVisibility?.unchecked ?? theme.palette.action.disabled}`,
     },
     '&.unchecked:focus-visible, &.unchecked.Mui-focusVisible': {
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[200]} !important`,
+      borderLeft: `5px solid ${theme.palette.layerVisibility?.unchecked ?? theme.palette.action.disabled} !important`,
     },
     '&.checked': {
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[600]}`,
+      borderLeft: `5px solid ${theme.palette.layerVisibility?.checked ?? theme.palette.action.active}`,
     },
     '&.checked:focus-visible, &.checked.Mui-focusVisible': {
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[600]} !important`,
+      borderLeft: `5px solid ${theme.palette.layerVisibility?.checked ?? theme.palette.action.active} !important`,
     },
     '&.Mui-disabled': {
       borderLeft: '5px solid transparent',
@@ -162,7 +162,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     fontSize: theme.palette.geoViewFontSize?.default,
   },
   toggleBar: {
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     padding: theme.spacing(1),
     display: 'flex',
     flexWrap: 'wrap',
@@ -182,7 +182,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       top: '15%',
       bottom: '15%',
       width: '1px',
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
+      backgroundColor: theme.palette.divider,
     },
   },
   fullscreenContainer: {

@@ -1,5 +1,8 @@
 import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
+/** Shared translucent background color for the swiper handle and divider. */
+const SWIPE_CONTROL_BACKGROUND_COLOR = 'rgba(50, 50, 50, 0.75)';
+
 /**
  * Gets custom sx classes for the swiper.
  *
@@ -15,15 +18,15 @@ export const getSxClasses = (theme: Theme, mapHeight: number): SxStyles => ({
   },
 
   handle: {
-    backgroundColor: 'rgba(50,50,50,0.75)',
-    color: '#fff',
+    backgroundColor: SWIPE_CONTROL_BACKGROUND_COLOR,
+    color: theme.palette.common.white,
     width: '24px',
     height: '24px',
   },
 
   bar: {
     position: 'absolute',
-    backgroundColor: 'rgba(50,50,50,0.75)',
+    backgroundColor: SWIPE_CONTROL_BACKGROUND_COLOR,
     zIndex: 151,
     boxSizing: 'content-box',
     margin: theme.spacing(0),

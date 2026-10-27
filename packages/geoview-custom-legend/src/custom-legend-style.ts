@@ -17,7 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     overflowY: 'auto',
     overflowX: 'hidden',
-    background: theme.palette.geoViewColor?.bgColor.main,
+    backgroundColor: theme.palette.surface?.high ?? theme.palette.background.paper,
   },
 
   // List container for legend items
@@ -32,6 +32,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiCollapse-vertical': {
       marginLeft: theme.spacing(0.75),
     },
+    // Override MUI ListItemButton's action.hover background to keep legend rows flat.
     '& .MuiListItemButton-root:hover': {
       backgroundColor: 'transparent',
     },
@@ -43,7 +44,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.grey.light[800]}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     padding: theme.spacing(1, 0.5),
   },
 
@@ -51,7 +52,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   headerText: {
     fontSize: theme.palette.geoViewFontSize?.md,
     fontWeight: '600',
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
     maxWidth: '400px',
   },
 
@@ -68,7 +69,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: '1.125rem', // 18px
     fontWeight: '700',
     lineHeight: 1.2,
-    color: theme.palette.geoViewColor?.textColor.main,
+    color: theme.palette.text.primary,
   },
 
   // Group item button
@@ -81,8 +82,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Group icon styling
   groupIcon: {
-    border: '1px solid #515BA5',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[800],
+    border: `1px solid ${theme.palette.primary.main}`,
+    backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(0.25),
     width: '24px',
     height: '24px',
@@ -135,7 +136,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Sublayer count caption
   groupSubLayerCount: {
     display: 'block',
-    color: '#393939',
+    color: theme.palette.text.primary,
     fontSize: '14px',
     margin: theme.spacing(0),
   },
@@ -174,7 +175,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontStyle: 'italic',
     fontWeight: 300,
     textTransform: 'none',
-    color: theme.palette.geoViewColor?.textColor.dark[200],
+    color: theme.palette.text.secondary,
+    // Override MUI text-button hover background to keep this disclosure control flat.
     '&:hover': {
       backgroundColor: 'transparent',
     },
@@ -190,7 +192,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: '0.875rem',
     fontStyle: 'italic',
     fontWeight: 300,
-    color: theme.palette.geoViewColor?.textColor.dark,
+    color: theme.palette.text.primary,
     marginTop: theme.spacing(0.5),
     marginLeft: theme.spacing(2),
   },
