@@ -15,7 +15,30 @@ Below is a list of the software you'll need to download and install before conti
 
 Rush installs everything else it needs, including pnpm; you don't need to install either globally.
 
-On Windows without administrator rights, extract the complete official Node.js ZIP (not just `node.exe`) into a user folder, add it to your `PATH`, and check that `node --version` and `npm --version` both work.
+#### Node.js on Windows without administrator rights
+
+1. Download the official Node.js 24 **Windows ZIP** (`node-v24.x.x-win-x64.zip`) and extract it into a user folder, for example `C:\Users\<you>\tools\nodejs`. Keep the whole folder, not just `node.exe`: npm lives in its `node_modules\npm` subfolder.
+2. Make VS Code terminals use it by adding this to your VS Code **user** settings (`Ctrl+Shift+P` → **Preferences: Open User Settings (JSON)**):
+
+   ```json
+   "terminal.integrated.env.windows": {
+     "PATH": "C:\\Users\\<you>\\tools\\nodejs;${env:PATH}"
+   }
+   ```
+
+   This puts your Node first. Adding the folder only to the Windows user `PATH` is often not enough: the system `PATH` is searched first, so an older Node installed by IT (for example in `C:\Program Files\nodejs`) still wins.
+
+   Keep this in your **user** settings, not in the repository's `.vscode/settings.json`: the folder is different on each machine, and a workspace value would override every developer's own setting.
+
+3. Close all terminals (or restart VS Code), open a new one, and check:
+
+   ```powershell
+   Get-Command node   # should point to your folder
+   node --version     # v24.x
+   npm --version      # must print a version, not an error
+   ```
+
+If `npm` reports `Cannot find module '@npmcli/...'`, the ZIP was not fully extracted; extract it again.
 
 ## Local Setup
 
