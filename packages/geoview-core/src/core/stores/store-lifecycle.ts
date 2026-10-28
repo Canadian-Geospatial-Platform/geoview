@@ -12,8 +12,10 @@ import { isLocalhost } from '@/core/utils/runtime-utilities';
 
 // GV Store creation/removal imports every state slice; never import this file from a slice or stores-managers.ts (#3711)
 
-// Check if running in dev or if the key is set in the local storage
+/** Local storage key that activates the Zustand DevTools outside localhost. */
 const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
+
+/** Whether the Zustand DevTools are mounted (dev environment or local storage key set). */
 const DEVTOOLS_ACTIVE = isLocalhost() || !!LocalStorage.getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
 
 /**

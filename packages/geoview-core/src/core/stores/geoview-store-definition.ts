@@ -18,6 +18,13 @@ import { serializeTypeGeoviewLayerConfig } from '@/api/types/layer-schema-types'
 
 // GV Kept apart from geoview-store.ts, which the state slices import: the definition imports every slice initializer
 
+/**
+ * Creates the initial GeoView store state with the core slices and the setMapConfig action that adds the optional package slices.
+ *
+ * @param set - The Zustand state setter
+ * @param get - The Zustand state getter
+ * @returns The initialized GeoView store state
+ */
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IGeoviewState => {
   // Log
   logger.logTraceCore('Initializing store core states...');
@@ -78,5 +85,5 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
   } as IGeoviewState;
 };
 
-// Wrap the store definition with the subscribveWithSelector middleware
+/** The store definition wrapped with the subscribeWithSelector middleware. */
 export const geoviewStoreDefinitionWithSubscribeSelector = subscribeWithSelector(geoviewStoreDefinition);

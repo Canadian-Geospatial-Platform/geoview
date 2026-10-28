@@ -6,8 +6,8 @@ import type VectorSource from 'ol/source/Vector';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 
-import type { InteractionOptions } from '../interaction';
-import { Interaction } from '../interaction';
+import type { InteractionOptions } from '@/geo/interaction/interaction';
+import { Interaction } from '@/geo/interaction/interaction';
 import { OLTransform, HandleType } from './transform-base';
 import type { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';

@@ -9,7 +9,7 @@ import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from './states/feature-info-state';
 import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state';
 import type { TypeGeochartResultSetEntry } from './states/geochart-state';
-import { logger } from '../utils/logger';
+import { logger } from '@/core/utils/logger';
 
 // GV This file is the equivalent of the controller-manager.ts file, but for the store.
 // GV Store creation/removal lives in store-lifecycle.ts so the state slices can import this file without a cycle.

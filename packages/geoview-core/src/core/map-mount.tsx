@@ -17,10 +17,11 @@ import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { MapViewer } from '@/geo/map/map-viewer';
 
+/** React roots of the mounted maps, keyed by map id. */
 const reactRoots: Record<string, Root> = {};
 
 /**
- * Checks if a root is mounted for a given map ID
+ * Checks if a root is mounted for a given map ID.
  *
  * @param mapId - The map identifier
  * @returns True if the root exists and is mounted
@@ -30,7 +31,7 @@ const isRootMounted = (mapId: string): boolean => {
 };
 
 /**
- * Safely unmounts a map and cleans up its resources
+ * Safely unmounts a map and cleans up its resources.
  *
  * @param mapId - The map identifier to unmount
  * @param mapContainer - Optional, the html element where the map was mounted
@@ -52,7 +53,7 @@ export function unmountMap(mapId: string, mapContainer?: HTMLElement): void {
 }
 
 /**
- * Get a configuration from a div element who contains attributes to read from.
+ * Gets a configuration from a div element who contains attributes to read from.
  *
  * If the div has one of the following atttributes data-config, data-config-url or data-shared,
  * it will try to get a valid configuration from the attribute content. If there is no such attributes,
@@ -150,7 +151,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 }
 
 /**
- * Render the map for inline map and map create from a function call
+ * Renders the map for inline map and map create from a function call.
  *
  * @param api - The API instance that registers the created MapViewer
  * @param mapElement - The html element div who will contain the map
@@ -234,7 +235,7 @@ export async function renderMap(api: API, mapElement: HTMLElement): Promise<MapV
 }
 
 /**
- * Initialize a basic div from a function call.
+ * Initializes a basic div from a function call.
  *
  * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config

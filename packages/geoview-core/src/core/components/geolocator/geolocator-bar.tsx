@@ -1,11 +1,10 @@
 import type { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CloseIcon } from '@/ui/icons';
+import { CloseIcon, SearchIcon } from '@/ui/icons';
 import { AppBarUI } from '@/ui/appbar/appbar';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Toolbar } from '@/ui/toolbar/toolbar';
 import { InputAdornment } from '@/ui/layout';
-import { SearchIcon } from '@/ui/icons';
 import { StyledInputField } from '@/core/components/geolocator/geolocator-style';
 import { logger } from '@/core/utils/logger';
 

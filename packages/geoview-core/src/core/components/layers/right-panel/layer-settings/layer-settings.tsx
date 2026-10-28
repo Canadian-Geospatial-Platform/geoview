@@ -24,7 +24,7 @@ import {
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
 
-import { getSxClasses as getLayerDetailsSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerDetailsSxClasses } from '@/core/components/layers/right-panel/layer-details-style';
 import { getSxClasses as getLayerSettingsSxClasses } from './layer-settings-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';

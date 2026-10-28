@@ -14,7 +14,7 @@ import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import type { SxStyles } from '../style/types';
+import type { SxStyles } from '@/ui/style/types';
 
 /** Properties defining a tab and its panel content. */
 export type TypeTabs = {
