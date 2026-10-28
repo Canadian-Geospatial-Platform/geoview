@@ -58,7 +58,7 @@ import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
-import { getGVElementByFullId, getGVMapTargetElement } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -117,7 +117,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const uiController = useUIController();
   const mapController = useMapController();
 
-  const geoviewElement = getGVMapTargetElement(mapId) as HTMLElement;
+  const geoviewElement = DomHelper.getMapTargetElement(mapId);
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
@@ -271,7 +271,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (isFocusTrapped) {
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          getGVElementByFullId(mapId, getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
+          DomHelper.getGVElementByFullId(mapId, getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
         }, TIMEOUT.dataPanelLoading);
       }
 
@@ -365,7 +365,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     if (!isOpen && tabId) {
       const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`;
-      const buttonElement = getGVElementByFullId(mapId, buttonElementId);
+      const buttonElement = DomHelper.getGVElementByFullId(mapId, buttonElementId);
       if (buttonElement) {
         buttonElement.focus();
       } else {
@@ -386,7 +386,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - trap focus in panel opened from config', tabId, isOpen, isFocusTrapped);
 
     if (!activeTrapGeoView || !isOpen || isFocusTrapped || !tabId) return undefined;
-    const panelElement = getGVElementByFullId(mapId, getButtonElementId(tabId, '-panel'));
+    const panelElement = DomHelper.getGVElementByFullId(mapId, getButtonElementId(tabId, '-panel'));
     if (!panelElement) return undefined;
 
     const handleFocusIn = (): void => uiController.setActiveAppBarTab(tabId, true, true);

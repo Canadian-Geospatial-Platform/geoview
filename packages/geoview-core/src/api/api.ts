@@ -6,18 +6,7 @@ import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import {
-  GV_DOM_SUFFIX,
-  buildGVElementId,
-  getGVElementById,
-  getGVElementByFullId,
-  getGVGuidebox,
-  getGVMapTargetElement,
-  getGVRootElement,
-  getGVShellElement,
-  queryGVSelector,
-  queryGVSelectorAll,
-} from '@/core/utils/dom-helper';
+import { DomHelper, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
@@ -51,16 +40,17 @@ export class API {
     projection: Projection,
     date: DateMgt,
     renderer: GeoviewRenderer,
+    // TODO: CHECK IMPORTANT - Consider changing this to `dom: DomHelper` directly
     dom: {
-      buildGVElementId,
-      getGVRootElement,
-      getGVElementById,
-      getGVElementByFullId,
-      getGVMapTargetElement,
-      getGVShellElement,
-      getGVGuidebox,
-      queryGVSelector,
-      queryGVSelectorAll,
+      buildGVElementId: DomHelper.buildGVElementId,
+      getGVRootElement: DomHelper.getGVRootElement,
+      getGVElementById: DomHelper.getGVElementById,
+      getGVElementByFullId: DomHelper.getGVElementByFullId,
+      getGVMapTargetElement: DomHelper.getMapTargetElement,
+      getGVShellElement: DomHelper.getShellElement,
+      getGVGuidebox: DomHelper.getGuidebox,
+      queryGVSelector: DomHelper.queryGVSelector,
+      queryGVSelectorAll: DomHelper.queryGVSelectorAll,
     },
   };
 
@@ -172,7 +162,7 @@ export class API {
     }
 
     // Get the div container
-    const divContainer = getGVRootElement(mapId);
+    const divContainer = DomHelper.getGVRootElement(mapId);
 
     // Delete the map
     await this.getMapViewer(mapId).delete();
@@ -389,7 +379,7 @@ export class API {
             : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
+          const mapFocus = activeEl?.getAttribute('id') === DomHelper.buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);

@@ -42,7 +42,7 @@ import {
   setStoreAppGuide,
   setStoreAppHeight,
 } from '@/core/stores/states/app-state';
-import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -646,8 +646,9 @@ export class UIController extends AbstractMapViewerController {
    *
    * @returns The footer height as a CSS length string (e.g. '600px')
    */
+  // TODO: Move this function in the DomHelper directly to remove this ui-controller dependency on it?
   getFooterHeight(): string {
-    return getGVRootDataAttribute(this.getMapId(), 'data-footer-height') ?? `${getStoreAppHeight(this.getMapId())}px`;
+    return DomHelper.getGVRootDataAttribute(this.getMapId(), 'data-footer-height') ?? `${getStoreAppHeight(this.getMapId())}px`;
   }
 
   /**

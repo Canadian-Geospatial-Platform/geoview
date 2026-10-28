@@ -90,7 +90,7 @@ import {
 } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import { MapDOMAdapter } from '@/core/containers/dom-adaptor';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { InvalidExtentError, InvalidViewportMidpointsError, MapViewportUnavailableError } from '@/core/exceptions/geoview-exceptions';
 import { CancelledError } from '@/core/exceptions/core-exceptions';
 import { Notifications } from '@/core/utils/notifications';
@@ -191,19 +191,6 @@ export class MapViewer {
    * It is here for legacy reasons, but should be removed in the future.
    */
   controllers: ControllerRegistry;
-
-  // TODO: REFACTOR IMPORTANT - Ideally, the MapViewer class would be a proper 'Domain' class unaware of the 'domAdaptor'.
-  // TO.DOCONT: We should review everywhere in this file where 'this.domAdaptor.' is used - as those are backwards domain (MapViewer) calling a dom adaptor.
-  // TO.DOCONT: However, we can only do this once we have another 'Application class' which holds the DOM Adaptor instead of the MapViewer itself.
-  // TO.DOCONT: That's another big refactor to come, because we sill use the MapViewer very much like an application class instead of a domain class when
-  // TO.DOCONT: we do things like cgpv.api.getMapViewer().doSomething.
-  /**
-   * The DOM adaptor used to interact with the DOM elements related to the map viewer.
-   *
-   * Try not to use this accessor directly, as it creates a backwards dependency from the domain to the DOM.
-   * It is here for legacy reasons, but should be removed in the future.
-   */
-  mapDomAdapter: MapDOMAdapter;
 
   /** Max number of icons cached */
   iconImageCacheSize = 1;
@@ -362,9 +349,6 @@ export class MapViewer {
     // Initialize the controller registry
     this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
 
-    // Initialize the DOM adaptor to interact with the DOM elements related to the map viewer
-    this.mapDomAdapter = new MapDOMAdapter(this.mapId);
-
     // The geometry api
     this.geometry = new GeometryApi(this);
 
@@ -404,9 +388,10 @@ export class MapViewer {
    * This function is called from a useEffect and should be running synchronously.
    *
    * @param mapElement - HTML element to create the map within
+   * @param keyboardTarget - HTML element to attach keyboard events to
    * @returns The OpenLayer map
    */
-  createMap(mapElement: HTMLElement): OLMap {
+  createMap(mapElement: HTMLElement, keyboardTarget: HTMLElement): OLMap {
     // config object
     const mapViewSettings = this.mapFeaturesConfig?.map.viewSettings;
 
@@ -444,7 +429,7 @@ export class MapViewer {
         padding: [0, 0, mapInfoInitialHeight, 0],
       }),
       controls: [],
-      keyboardEventTarget: this.mapDomAdapter.getHTMLElementMapContainer(),
+      keyboardEventTarget: keyboardTarget,
     });
 
     // Set the map
@@ -532,6 +517,7 @@ export class MapViewer {
   /**
    * Initializes the map controls
    */
+  // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it creates application components on top of the map itself
   initMapControls(): void {
     // Log
     logger.logTraceCore('MAP VIEWER - initMapControls', this.mapId);
@@ -543,14 +529,14 @@ export class MapViewer {
     // Add map controls (scale)
     const scaleBarMetric = new ScaleLine({
       units: 'metric',
-      target: this.mapDomAdapter.getHTMLElementScaleControlBarMetric(),
+      target: DomHelper.getScaleControlBarMetric(mapId),
       bar: true,
       text: true,
     });
 
     const scaleBarImperial = new ScaleLine({
       units: 'imperial',
-      target: this.mapDomAdapter.getHTMLElementScaleControlBarImperial(),
+      target: DomHelper.getScaleControlBarImperial(mapId),
       bar: true,
       text: true,
     });
@@ -568,7 +554,7 @@ export class MapViewer {
       id: northPoleId,
       position: northPolePosition,
       positioning: 'center-center',
-      element: this.mapDomAdapter.getHTMLElementNorthPole(),
+      element: DomHelper.getNorthPole(mapId),
       stopEvent: false,
     });
     map.addOverlay(this.#northPoleMarkerOverlay);
@@ -580,7 +566,7 @@ export class MapViewer {
       position: [-1, -1],
       positioning: 'center-center',
       offset: [-18, -30],
-      element: this.mapDomAdapter.getHTMLElementClickMarker(),
+      element: DomHelper.getClickMarker(mapId),
       stopEvent: false,
     });
     map.addOverlay(this.#clickMarkerOverlay);
@@ -605,6 +591,32 @@ export class MapViewer {
     // GV Using '!' here, because initMapControls is always supposed to be executed
     return this.#northPoleMarkerOverlay!;
   }
+
+  //#region MAP DOM ELEMENTS (only core OpenLayers controls here, everything else in DOM Adaptors)
+
+  /**
+   * Retrieves the scale information from the DOM elements.
+   *
+   * @returns The scale information object
+   */
+  getScaleInfoFromDomElement(): TypeScaleInfo {
+    // Get metric values
+    const scaleControlBarMetric = DomHelper.getScaleControlBarMetric(this.mapId);
+    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // Get imperial values
+    const scaleControlBarImperial = DomHelper.getScaleControlBarImperial(this.mapId);
+    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // get resolution value (same for metric and imperial)
+    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
+
+    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
+  }
+
+  //#endregion MAP DOM ELEMENTS
 
   // #region MAP STATES
 
@@ -1604,8 +1616,8 @@ export class MapViewer {
    *
    * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
    */
-  getHTMLElementMapInfoHeightInMapUnits(): number {
-    const mapInfoHeightPx = this.mapDomAdapter.getHTMLElementMapInfo()?.offsetHeight ?? 0;
+  getMapInfoHeightInMapUnits(): number {
+    const mapInfoHeightPx = DomHelper.getMapInfo(this.mapId)?.offsetHeight ?? 0;
     const resolution = this.getView().getResolution() ?? 0;
     return mapInfoHeightPx * resolution;
   }
@@ -1620,8 +1632,7 @@ export class MapViewer {
    */
   updateViewPadding(): void {
     // Static mode: the map-info bar does not overlay the map canvas, so no padding is needed
-    const mapInfoHeight =
-      this.mapFeaturesConfig.map.interaction === 'static' ? 0 : (this.mapDomAdapter.getHTMLElementMapInfo()?.offsetHeight ?? 0);
+    const mapInfoHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : (DomHelper.getMapInfo(this.mapId)?.offsetHeight ?? 0);
     this.getView().padding = [0, 0, mapInfoHeight, 0];
   }
 
@@ -2303,7 +2314,7 @@ export class MapViewer {
       if (!size) return;
 
       // Get the scale information
-      const scale = this.mapDomAdapter.getScaleInfoFromDomElement();
+      const scale = this.getScaleInfoFromDomElement();
 
       // Emit to the outside
       this.#emitMapSizeChanged({ size, scale });

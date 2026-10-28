@@ -4,7 +4,8 @@ import type { Extent } from 'ol/extent';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { getStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
-import { getGVElementById, getGVMapTargetElement } from '@/core/utils/dom-helper';
+// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the controller here, remove?
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -374,8 +375,8 @@ export class StacBrowserController extends AbstractMapViewerController {
     const activeTab = getStoreUIActiveAppBarTab(mapId);
     if (!activeTab.isOpen || activeTab.tabId !== 'stac-browser') return padding;
 
-    const panel = getGVElementById(mapId, 'appBar-stac-browser-panel');
-    const mapTarget = getGVMapTargetElement(mapId);
+    const panel = DomHelper.getGVElementById(mapId, 'appBar-stac-browser-panel');
+    const mapTarget = DomHelper.getMapTargetElement(mapId);
     const mapSize = this.getMapViewer().map.getSize();
     if (!panel || !mapTarget || !mapSize || panel.getAttribute('aria-hidden') === 'true') return padding;
 

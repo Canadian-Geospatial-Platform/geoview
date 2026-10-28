@@ -1,6 +1,5 @@
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { SwiperTester } from '../testers/swiper-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
@@ -17,13 +16,12 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    */
-  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
-    super(api, mapViewer, controllerRegistry);
+  constructor(api: API, mapViewer: MapViewer) {
+    super(api, mapViewer);
 
     // Create the Swiper tester
-    this.#swiperTester = new SwiperTester(api, mapViewer, controllerRegistry);
+    this.#swiperTester = new SwiperTester(api, mapViewer);
     this.addTester(this.#swiperTester);
   }
 

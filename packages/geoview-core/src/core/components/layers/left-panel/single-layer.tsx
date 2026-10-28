@@ -43,7 +43,7 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVElementByFullId } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -179,7 +179,7 @@ export function SingleLayer({
     logger.logTraceUseEffect('SINGLE-LAYER - scroll list item into view', layerIsSelected, layerId);
 
     if (layerIsSelected && layerId) {
-      const listItem = getGVElementByFullId(mapId, layerListItemButtonId);
+      const listItem = DomHelper.getGVElementByFullId(mapId, layerListItemButtonId);
       if (listItem) {
         scrollListItemIntoView(listItem);
       }
@@ -812,13 +812,13 @@ export function SingleLayer({
       if (layerStatus === 'loaded') {
         // Successful reload - focus the main layer button
         requestAnimationFrame(() => {
-          getGVElementByFullId(mapId, layerListItemButtonId)?.focus();
+          DomHelper.getGVElementByFullId(mapId, layerListItemButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       } else if (layerStatus === 'error') {
         // Failed reload - focus the reload button for retry
         requestAnimationFrame(() => {
-          getGVElementByFullId(mapId, reloadButtonId)?.focus();
+          DomHelper.getGVElementByFullId(mapId, reloadButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       }

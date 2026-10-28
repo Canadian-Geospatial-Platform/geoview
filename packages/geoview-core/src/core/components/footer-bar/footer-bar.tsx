@@ -22,7 +22,7 @@ import {
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
@@ -73,7 +73,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const shellContainer = useStoreAppShellContainer();
   const backupAppHeight: number = useStoreAppHeight();
-  const appHeight = getGVRootDataAttribute(mapId, 'data-footer-height') ?? `${backupAppHeight}px`;
+  const appHeight = DomHelper.getGVRootDataAttribute(mapId, 'data-footer-height') ?? `${backupAppHeight}px`;
   const hiddenTabs: string[] = useStoreUIHiddenTabs();
   const uiController = useUIController();
   const pluginController = usePluginController();

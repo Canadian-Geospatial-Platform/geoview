@@ -17,7 +17,7 @@ import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { getGVGuidebox } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { getSxClasses } from './guide-style';
 
 /** Props for the GuideSearch component. */
@@ -406,7 +406,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
 
       setTimeout(() => {
         // Use the visible guide box for this map (inline + portaled copies can coexist in fullscreen).
-        const guideContainer = getGVGuidebox(mapId);
+        const guideContainer = DomHelper.getGuidebox(mapId);
         if (!guideContainer) return;
 
         // Ensure the section is expanded/visible

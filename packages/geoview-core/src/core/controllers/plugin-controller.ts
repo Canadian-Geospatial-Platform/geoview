@@ -5,7 +5,8 @@ import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { getScriptAndAssetURL, whenThisThen } from '@/core/utils/utilities';
-import { getGVRootElement } from '@/core/utils/dom-helper';
+// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the controller here, remove?
+import { DomHelper } from '@/core/utils/dom-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PluginError } from '@/core/exceptions/geoview-exceptions';
@@ -164,7 +165,7 @@ export class PluginController extends AbstractMapViewerController {
     // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
     // ? unknown type cannot be use, need to escape
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, this.getControllersRegistry(), props);
+    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, props);
 
     // Attach to the map plugins object
     mapViewer.plugins[pluginId] = plugin;
@@ -194,7 +195,7 @@ export class PluginController extends AbstractMapViewerController {
        * for custom config for loaded core packages on the same path of the map config.
        * If none exists then load the default config
        */
-      const configUrl = getGVRootElement(mapViewer.mapId)?.getAttribute('data-config-url');
+      const configUrl = DomHelper.getGVRootElement(mapViewer.mapId)?.getAttribute('data-config-url');
 
       // Check if there is a corePackageConfig for the plugin
       const configObj = mapViewer.getCorePackageConfig(pluginId);

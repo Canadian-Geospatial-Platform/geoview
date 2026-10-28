@@ -96,7 +96,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     // If it should be opened from the start
     if (this.getConfig().isOpen) {
       // Make sure the app bar is open if the config says it should be
-      this.controllerRegistry.uiController.setActiveAppBarTab(this.pluginId, true, false);
+      this.mapViewer.controllers.uiController.setActiveAppBarTab(this.pluginId, true, false);
     }
   }
 

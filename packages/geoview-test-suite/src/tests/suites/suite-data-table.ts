@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { DataTableTester } from '../testers/data-table-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
  * Test Suite for Data Table component tests.
@@ -17,13 +16,12 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    */
-  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
-    super(api, mapViewer, controllerRegistry);
+  constructor(api: API, mapViewer: MapViewer) {
+    super(api, mapViewer);
 
     // Create the Data Table tester
-    this.#dataTableTester = new DataTableTester(api, mapViewer, controllerRegistry);
+    this.#dataTableTester = new DataTableTester(api, mapViewer);
     this.addTester(this.#dataTableTester);
   }
 

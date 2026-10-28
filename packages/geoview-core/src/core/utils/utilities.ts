@@ -1667,6 +1667,51 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
   });
 }
 
+/**
+ * Waits for a subscribed value to become defined.
+ *
+ * @param getValue - Returns the current value, or undefined while it is unavailable
+ * @param subscribe - Registers a change listener and returns its unsubscribe function
+ * @returns A promise that resolves with the first defined value
+ * @throws When reading the value or subscribing throws
+ */
+// TODO: CHECK - This function could be moved in a 'state-utility' file if we want to better organize state-related helpers
+export function waitForValueWithSubscription<T>(
+  getValue: () => T | undefined,
+  subscribe: (listener: () => void) => () => void
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let isSettled = false;
+    const subscription: { unsubscribe?: () => void } = {};
+    const checkValue = (): void => {
+      if (isSettled) return;
+
+      try {
+        const value = getValue();
+        if (value === undefined) return;
+
+        isSettled = true;
+        subscription.unsubscribe?.();
+        resolve(value);
+      } catch (error: unknown) {
+        isSettled = true;
+        subscription.unsubscribe?.();
+        reject(error);
+      }
+    };
+
+    try {
+      subscription.unsubscribe = subscribe(checkValue);
+      if (isSettled) subscription.unsubscribe();
+      else checkValue();
+    } catch (error: unknown) {
+      isSettled = true;
+      subscription.unsubscribe?.();
+      reject(error);
+    }
+  });
+}
+
 // #endregion TIMING HELPERS
 
 /**

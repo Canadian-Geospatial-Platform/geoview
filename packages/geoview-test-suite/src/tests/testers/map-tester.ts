@@ -15,8 +15,10 @@ import {
   type TypeValidMapProjectionCodes,
   type TypeViewportBoundaryLonLat,
 } from 'geoview-core/api/types/map-schema-types';
+import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreDetailsFeatures,
   getStoreDetailsSelectedLayerPath,
@@ -39,8 +41,6 @@ import {
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { getGVMapTargetElement, getGVShellElement } from 'geoview-core/core/utils/dom-helper';
-import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
 
 /** Captured boundary samples and independent pixel/coordinate expectations. */
 interface TypeViewportBoundarySnapshot {
@@ -127,7 +127,7 @@ export class MapTester extends GVAbstractTester {
     center: Coordinate = MAP_CENTER[projection],
     useRotation = true
   ): Promise<Test<TypeViewportMidpointFitResult>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.test(
       `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
@@ -211,7 +211,7 @@ export class MapTester extends GVAbstractTester {
   testInvalidViewportMidpoints(): Promise<
     Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
   > {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     let original: TypeViewportBoundaryLonLat | undefined;
     return this.test(
@@ -259,7 +259,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the expected cancellation error
    */
   testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.testError(
       'Test viewport midpoint fit interrupted by another interaction',
@@ -297,7 +297,7 @@ export class MapTester extends GVAbstractTester {
     interaction: TypeInteraction = 'dynamic',
     center: Coordinate = MAP_CENTER[projection]
   ): Promise<Test<TypeViewportBoundarySnapshot>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.test(
       `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
@@ -340,7 +340,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the boundary snapshots before and after each change
    */
   testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.test(
       'Test viewport boundary after map-info height, padding, and size changes',
@@ -348,7 +348,7 @@ export class MapTester extends GVAbstractTester {
         const viewer = await this.#createViewportFixture(test, host, 3978, 'dynamic', MAP_CENTER[3978], 0);
         const snapshots = [MapTester.#captureViewportBoundary(viewer)];
         test.addStep('Increasing map-info bar height and updating view padding...');
-        const info = viewer.getHTMLElementMapInfo();
+        const info = DomHelper.getMapInfo(viewer.mapId);
         if (!info) throw new TestError('Viewport fixture has no map-info bar');
         info.style.height = `${info.offsetHeight + 30}px`;
         viewer.updateViewPadding();
@@ -385,7 +385,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the captured typed errors
    */
   testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.test(
       'Test unavailable viewport conditions without recreating the map',
@@ -429,7 +429,7 @@ export class MapTester extends GVAbstractTester {
    * @returns A promise that resolves with the expected typed error
    */
   testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
-    const host = this.getGVRootElement();
+    const host = DomHelper.getGVRootElement(this.getMapId());
     const originalWidth = host.style.width;
     return this.testError(
       'Test fitting an unavailable viewport',
@@ -529,7 +529,7 @@ export class MapTester extends GVAbstractTester {
     const mapViewer = this.getMapViewer();
     const { map } = mapViewer;
     const view = mapViewer.getView();
-    const element = getGVShellElement<TypeHTMLElement>(this.getMapId());
+    const element = DomHelper.getShellElement<TypeHTMLElement>(this.getMapId());
     const originalSize = map.getSize();
     const originalCenter = view.getCenter();
     const originalResolution = view.getResolution();
@@ -1516,8 +1516,8 @@ export class MapTester extends GVAbstractTester {
   #resetViewportFixture(host: HTMLElement, originalWidth: string): void {
     host.style.setProperty('width', originalWidth);
     const viewer = this.getMapViewer();
-    viewer.map.setTarget(getGVMapTargetElement(this.getMapId()));
-    viewer.getHTMLElementMapInfo()?.style.removeProperty('height');
+    viewer.map.setTarget(DomHelper.getMapTargetElement(this.getMapId()));
+    DomHelper.getMapInfo(this.getMapId())?.style.removeProperty('height');
     viewer.setView({ projection: 3978, initialView: { zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]] } });
     viewer.map.updateSize();
     viewer.updateViewPadding();
@@ -1622,7 +1622,7 @@ export class MapTester extends GVAbstractTester {
       pixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
       expectedPixels,
       bottomPadding: padBottom,
-      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : viewer.getHTMLElementMapInfo()!.offsetHeight,
+      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfo(viewer.mapId)!.offsetHeight,
       canvasSouth: viewer.convertCoordinateMapProjToLonLat(viewer.map.getCoordinateFromPixel([x, height])),
       freshObjects: boundary !== repeatedBoundary && boundary.corners.nw !== repeatedBoundary.corners.nw,
       rotation: view.getRotation(),
