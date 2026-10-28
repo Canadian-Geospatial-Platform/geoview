@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Divider, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Divider } from '@/ui/divider/divider';
+import { Typography } from '@/ui/typography/typography';
 
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';

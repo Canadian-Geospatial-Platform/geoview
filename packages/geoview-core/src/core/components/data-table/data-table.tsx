@@ -28,15 +28,12 @@ import {
   type MRT_DensityState as MRTDensityState,
   type MRT_ColumnVirtualizer as MRTColumnVirtualizer,
   type MRT_TableInstance as MRTTableInstance,
-  Box,
-  Button,
-  IconButton,
-  Tooltip,
-  ZoomInSearchIcon,
-  InfoOutlinedIcon,
-  BrowserNotSupportedIcon,
-  ClearFiltersIcon,
-} from '@/ui';
+} from '@/ui/table/table';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Tooltip } from '@/ui/tooltip/tooltip';
+import { ZoomInSearchIcon, InfoOutlinedIcon, BrowserNotSupportedIcon, ClearFiltersIcon } from '@/ui/icons';
 
 import TopToolbar from './top-toolbar';
 import {
@@ -56,9 +53,11 @@ import { isImage, linkifyAndSanitizeHtml, containsHtmlTags } from '@/core/utils/
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
-import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
+import { useFilterRows } from './hooks/useFilterRows';
+import { useGlobalFilter } from './hooks/useGlobalFilter';
+import { useColumnVisibility } from './hooks/useColumnVisibility';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
-import { useLightBox } from '@/core/components/common';
+import { useLightBox } from '@/core/components/common/hooks/use-light-box';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import type { DataTableProps, DataTableRow } from './data-table-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

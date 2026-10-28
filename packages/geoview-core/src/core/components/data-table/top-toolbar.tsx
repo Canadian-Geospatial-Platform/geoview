@@ -8,7 +8,9 @@ import {
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
 } from 'material-react-table';
 
-import { Box, IconButton, Switch } from '@/ui';
+import { Box } from '@/ui/layout';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Switch } from '@/ui/switch/switch';
 import ExportButton from './export-button';
 import { ShowHideColumnsButton } from './show-hide-columns-button';
 import JSONExportButton from './json-export-button';

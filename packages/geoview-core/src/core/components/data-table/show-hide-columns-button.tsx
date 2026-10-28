@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 
 import type { MRT_TableInstance as MRTTableInstance, MRT_Column as MRTColumn } from 'material-react-table';
 
-import { IconButton, Menu, MenuItem, Switch, Divider, ViewColumnIcon } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Menu } from '@/ui/menu/menu';
+import { MenuItem } from '@/ui/menu/menu-item';
+import { Switch } from '@/ui/switch/switch';
+import { Divider } from '@/ui/divider/divider';
+import { ViewColumnIcon } from '@/ui/icons';
 import { logger } from '@/core/utils/logger';
 import type { DataTableRow } from './data-table-types';
 

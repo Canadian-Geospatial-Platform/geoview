@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { IconButton, ZoomOutIcon } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ZoomOutIcon } from '@/ui/icons';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

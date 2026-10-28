@@ -6,7 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { DialogProps } from '@mui/material';
 
-import { CloseIcon, Dialog, DialogTitle, DialogContent, IconButton, Box } from '@/ui';
+import { CloseIcon } from '@/ui/icons';
+import { Dialog, DialogTitle, DialogContent, Box } from '@/ui/layout';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import type { SxStyles } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './full-screen-dialog-style';

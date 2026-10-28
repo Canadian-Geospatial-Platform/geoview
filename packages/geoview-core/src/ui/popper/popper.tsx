@@ -8,7 +8,7 @@ import { animated } from '@react-spring/web';
 
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
-import { FocusTrap } from '@/ui';
+import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
 import { delay } from '@/core/utils/utilities';
 
 /**

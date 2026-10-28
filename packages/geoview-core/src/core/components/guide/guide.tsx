@@ -9,9 +9,9 @@ import { useTheme } from '@mui/material/styles';
 
 import Markdown from 'markdown-to-jsx';
 
-import { Box } from '@/ui';
-import type { LayerListEntry } from '@/core/components/common';
-import { Layout } from '@/core/components/common';
+import { Box } from '@/ui/layout';
+import type { LayerListEntry } from '@/core/components/common/layer-list';
+import { Layout } from '@/core/components/common/layout';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreAppGuide } from '@/core/stores/states/app-state';

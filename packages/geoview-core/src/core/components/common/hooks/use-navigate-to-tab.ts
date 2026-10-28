@@ -9,7 +9,7 @@ import { getGVElementById } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
-import { useStoreGeoViewMapId } from '@/core/stores';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/use-controllers';
 
 /** Options for navigating to a tab. */

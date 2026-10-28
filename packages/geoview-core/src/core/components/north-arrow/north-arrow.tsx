@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
-import { Box } from '@/ui';
+import { Box } from '@/ui/layout';
 import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';

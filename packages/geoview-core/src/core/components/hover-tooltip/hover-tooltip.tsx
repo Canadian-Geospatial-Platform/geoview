@@ -2,7 +2,8 @@ import { memo, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import { Box, BrowserNotSupportedIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { BrowserNotSupportedIcon } from '@/ui/icons';
 
 import { useStoreMapHoverFeatureInfo, useStoreMapIsMouseInsideMap, useStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { getSxClasses } from './hover-tooltip-styles';

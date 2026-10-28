@@ -2,8 +2,13 @@ import { useCallback, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, ButtonBase, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
-import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ButtonBase, FormControl } from '@/ui/mui-reexports/mui-reexports';
+import { Checkbox } from '@/ui/checkbox/checkbox';
+import { Collapse } from '@/ui/collapse/collapse';
+import { Select } from '@/ui/select/select';
+import { Typography } from '@/ui/typography/typography';
+import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui/icons';
 
 import { getSxClasses } from './layer-settings-style';
 import type { SxStyles } from '@/ui/style/types';

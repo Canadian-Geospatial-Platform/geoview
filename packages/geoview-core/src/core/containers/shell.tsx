@@ -11,7 +11,12 @@ import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
 import { TIMEOUT } from '@/core/utils/constant';
 
-import { Box, CircularProgress, Link, Modal, Snackbar, Typography, type TypeModalProps, type ModalApi, type ModalEvent } from '@/ui';
+import { Box, Link } from '@/ui/layout';
+import { CircularProgress } from '@/ui/circular-progress/circular-progress';
+import { Modal, type TypeModalProps } from '@/ui/modal/modal';
+import type { ModalApi, ModalEvent } from '@/ui/modal/modal-api';
+import { Snackbar } from '@/ui/snackbar/snackbar';
+import { Typography } from '@/ui/typography/typography';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';

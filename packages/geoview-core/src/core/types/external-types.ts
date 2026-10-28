@@ -20,7 +20,7 @@ export * from '@/core/utils/utilities';
 export * from '@/api';
 export * from '@/api/config/config';
 
-export * from '@/app';
+// GV app.tsx exports (api, cgpv, ...) are not re-exported here: app.tsx re-exports this file, so it would form an import cycle
 export * from '@/geo';
 export * from '@/ui';
 

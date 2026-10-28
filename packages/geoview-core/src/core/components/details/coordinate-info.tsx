@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, useMediaQuery } from '@mui/material';
 import { getSxClasses } from './details-style';
 
-import { List, ListItem, Box, Typography, Switch, Tooltip } from '@/ui';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { Box } from '@/ui/layout';
+import { Typography } from '@/ui/typography/typography';
+import { Switch } from '@/ui/switch/switch';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import { CircularProgressBase } from '@/ui/circular-progress/circular-progress-base';
 import {
   useStoreDetailsLayerDataArrayFeature,

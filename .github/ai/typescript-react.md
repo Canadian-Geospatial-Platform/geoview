@@ -21,7 +21,7 @@ Read only the linked section of each doc: search for its heading and read to the
 
 - Explicit return types include `useCallback`/`useMemo`; no unexplained `any`.
 - Prefix memoized values `memo`; use DOM `null` refs versus mutable `undefined` refs deliberately.
-- UI/Icons import from `@/ui`; components mutate through controllers, not store setters or MapViewer.
+- UI/Icons import from their direct `@/ui/...` module, never the `@/ui` barrel; components mutate through controllers, not store setters or MapViewer.
 - Size/complexity thresholds trigger review, not mandatory splitting or a hard complexity cap.
 - Preserve TODO/NOTE/FIXME/WCAG/TO.DOCONT and `// GV` implementation notes.
 

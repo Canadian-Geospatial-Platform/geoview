@@ -75,7 +75,7 @@ import type { TransformOptions } from '@/geo/interaction/transform/transform';
 import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { ModalApi } from '@/ui';
+import { ModalApi } from '@/ui/modal/modal-api';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { getGVElementById } from '@/core/utils/dom-helper';
 import { debounce } from '@/core/utils/debounce';

@@ -6,7 +6,11 @@ import { useStoreDataTableSelectedFeature } from '@/core/stores/states/data-tabl
 import { useStoreUIActiveFocusItem, useStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
 import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
-import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
+import { Modal } from '@/ui/modal/modal';
+import { List } from '@/ui/list/list';
+import { Box } from '@/ui/layout';
+import { Typography } from '@/ui/typography/typography';
+import { BrowserNotSupportedIcon } from '@/ui/icons';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './details-style';

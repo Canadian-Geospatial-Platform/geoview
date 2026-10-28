@@ -2,7 +2,7 @@ import { useRef, useCallback, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Box } from '@/ui';
+import { Box } from '@/ui/layout';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreLayerDisplayState, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';

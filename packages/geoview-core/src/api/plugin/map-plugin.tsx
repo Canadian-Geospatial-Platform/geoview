@@ -1,5 +1,5 @@
 import type { Root } from 'react-dom/client';
-import { StoreContext } from '@/core/app-start';
+import { StoreContext } from '@/core/stores/store-context';
 import { getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { AbstractPlugin } from './abstract-plugin';
 

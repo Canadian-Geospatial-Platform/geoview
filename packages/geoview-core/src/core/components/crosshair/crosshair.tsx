@@ -1,7 +1,9 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { Box, Fade, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Fade } from '@/ui/fade/fade';
+import { Typography } from '@/ui/typography/typography';
 import type { SxStyles } from '@/ui/style/types';
 
 import { getSxClasses } from './crosshair-style';

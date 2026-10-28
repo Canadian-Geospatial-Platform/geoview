@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme, useMediaQuery } from '@mui/material';
 import { useCallback, useMemo } from 'react';
-import { Box, Switch, Tooltip } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Switch } from '@/ui/switch/switch';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import {
   useStoreLayerDisplayState,
   useStoreLayerAllLayersVisibleToggle,

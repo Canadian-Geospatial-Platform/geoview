@@ -8,8 +8,13 @@ import type { SxProps } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 
-import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
-import { FocusTrap } from '@/ui';
+import { Box } from '@/ui/layout';
+import { FullscreenIcon } from '@/ui/icons';
+import { ButtonGroup } from '@/ui/button-group/button-group';
+import { Button } from '@/ui/button/button';
+import { Typography } from '@/ui/typography/typography';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
 import type { SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 

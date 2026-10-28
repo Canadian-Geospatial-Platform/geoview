@@ -15,7 +15,12 @@ import {
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { Box, Button, Slider, Switch, ThreeSixtyIcon, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { Slider } from '@/ui/slider/slider';
+import { Switch } from '@/ui/switch/switch';
+import { ThreeSixtyIcon } from '@/ui/icons';
+import { Typography } from '@/ui/typography/typography';
 import { Projection } from '@/geo/utils/projection';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import type { TypePanelProps } from '@/ui/panel/panel-types';

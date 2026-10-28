@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
 
-import { Box, AddCircleOutlineIcon, Button } from '@/ui';
+import { Box } from '@/ui/layout';
+import { AddCircleOutlineIcon } from '@/ui/icons';
+import { Button } from '@/ui/button/button';
 import type { SxStyles } from '@/ui/style/types';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/states/layer-state';

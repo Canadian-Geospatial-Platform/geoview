@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { Box, ProgressBar } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';

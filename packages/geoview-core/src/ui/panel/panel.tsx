@@ -18,7 +18,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
-import { FocusTrapContainer } from '@/core/components/common';
+import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { doTimeout } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

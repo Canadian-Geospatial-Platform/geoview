@@ -3,19 +3,18 @@ import { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
+import { Box, Stack } from '@/ui/layout';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Typography } from '@/ui/typography/typography';
 import {
-  Box,
-  IconButton,
-  Stack,
   VisibilityOutlinedIcon,
   HighlightOutlinedIcon,
   ZoomInSearchIcon,
-  Typography,
   VisibilityOffOutlinedIcon,
   HighlightIcon,
   CenterFocusScaleIcon,
   LayersIcon,
-} from '@/ui';
+} from '@/ui/icons';
 import {
   useStoreLayerHighlightedLayer,
   useStoreLayerChildPaths,

@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Skeleton } from '@/ui';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@/ui/mui-reexports/mui-reexports';
+import { Paper } from '@/ui/paper/paper';
+import { Skeleton } from '@/ui/skeleton/skeleton';
 import type { SxStyles } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './data-skeleton-style';

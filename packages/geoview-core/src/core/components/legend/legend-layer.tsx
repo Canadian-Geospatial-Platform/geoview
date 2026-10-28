@@ -5,7 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { Box, ListItem, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemText } from '@/ui/list/list-item-text';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
 import { Typography } from '@/ui/typography/typography';
 import {
   useStoreLayerChildPaths,
@@ -19,7 +24,7 @@ import {
   useStoreLayerStyleConfig,
   useStoreLayerIcons,
 } from '@/core/stores/states/layer-state';
-import { useLightBox } from '@/core/components/common';
+import { useLightBox } from '@/core/components/common/hooks/use-light-box';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { layerHasClassItems, layerHasLegendImage } from '@/core/components/layers/types';
 import { SecondaryControls } from './legend-layer-ctrl';

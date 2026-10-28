@@ -2,19 +2,16 @@ import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo, useState, useRef, useEffect, useId } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import {
-  Badge,
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  Tooltip,
-  Typography,
-  ProgressBar,
-  LocationSearchingIcon,
-  IconButton,
-  VisibilityOffOutlinedIcon,
-} from '@/ui';
+import { Badge } from '@/ui/badge/badge';
+import { Box } from '@/ui/layout';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemButton } from '@/ui/list/list-item-button';
+import { Tooltip } from '@/ui/tooltip/tooltip';
+import { Typography } from '@/ui/typography/typography';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
+import { LocationSearchingIcon, VisibilityOffOutlinedIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
 
 import type { SxProps } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';

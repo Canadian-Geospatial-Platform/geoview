@@ -75,8 +75,8 @@ These are the most commonly missed issues:
 
 #### 7. Import Rules
 
-- [ ] UI components (`Box`, `Typography`, `IconButton`, etc.) imported from `@/ui`, NOT from `@mui/material`
-- [ ] Icons imported from `@/ui`, NOT from `@mui/icons-material`
+- [ ] UI components (`Box`, `Typography`, `IconButton`, etc.) imported from their direct `@/ui/...` module, NOT from `@mui/material` or the `@/ui` barrel
+- [ ] Icons imported from `@/ui/icons`, NOT from `@mui/icons-material`
 - [ ] Import groups separated by empty lines (react → react-dom → i18n → MUI hooks → OpenLayers → project)
 
 #### 8. React Performance

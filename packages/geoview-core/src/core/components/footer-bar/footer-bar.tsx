@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
-import type { TypeTabs } from '@/ui';
-import { Box, Tabs } from '@/ui';
+import type { TypeTabs } from '@/ui/tabs/tabs';
+import { Box } from '@/ui/layout';
+import { Tabs } from '@/ui/tabs/tabs';
 // default tabs icon and class
 import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 

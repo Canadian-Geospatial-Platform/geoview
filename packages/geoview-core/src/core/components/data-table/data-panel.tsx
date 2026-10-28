@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Box, FilterAltIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { FilterAltIcon } from '@/ui/icons';
 import DataTable from './data-table';
 
 import {
@@ -22,10 +23,10 @@ import {
 import { useStoreDataTableQueryStatusSet } from '@/core/stores/states/data-table-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab, useStoreUIAppbarComponents } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import type { LayerListEntry } from '@/core/components/common';
-import { Layout } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common/layer-list';
+import { Layout } from '@/core/components/common/layout';
 import { logger } from '@/core/utils/logger';
-import { useFeatureFieldInfos } from './hooks';
+import { useFeatureFieldInfos } from './hooks/useFeatureFieldInfos';
 import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';

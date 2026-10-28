@@ -26,7 +26,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Select, Skeleton, TextField } from '@/ui';
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { LoadingButton } from '@/ui/button/loading-button';
+import { Select } from '@/ui/select/select';
+import { Skeleton } from '@/ui/skeleton/skeleton';
+import { TextField } from '@/ui/text-field/text-field';
 import type { TypeMenuItemProps } from '@/ui/select/select';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';

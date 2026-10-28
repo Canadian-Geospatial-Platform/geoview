@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { Radio, RadioGroup, FormControlLabel, CheckIcon, Tooltip, Box, Button } from '@/ui';
+import { Radio, RadioGroup, FormControlLabel } from '@/ui/mui-reexports/mui-reexports';
+import { CheckIcon } from '@/ui/icons';
+import { Tooltip } from '@/ui/tooltip/tooltip';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
 
 import { getSxClasses, getScaleRadioHiddenStyles, getScaleFormControlLabelStyles, SCALE_BOX_STYLES } from './scale-style';
 import type { SxStyles, SxProps, Theme } from '@/ui/style/types';

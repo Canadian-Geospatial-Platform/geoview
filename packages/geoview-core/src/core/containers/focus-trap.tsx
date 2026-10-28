@@ -2,7 +2,8 @@ import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Modal, Button } from '@/ui';
+import { Modal } from '@/ui/modal/modal';
+import { Button } from '@/ui/button/button';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';

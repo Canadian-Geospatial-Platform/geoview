@@ -7,7 +7,10 @@ import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
-import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { DownloadIcon } from '@/ui/icons';
+import { Menu } from '@/ui/menu/menu';
+import { MenuItem } from '@/ui/menu/menu-item';
 import { logger } from '@/core/utils/logger';
 import type { DataTableRow } from './data-table-types';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
