@@ -473,9 +473,9 @@ export abstract class GeoviewRenderer {
       const iconStyle = pointStyle?.getImage() as Icon;
       const image = await this.loadImage(iconStyle.getSrc()!);
       if (image) {
-        const size = iconStyle.getSize();
-        const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
-        const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
+        // GV: 'width'/'height' are the declared display size (set independently of 'size', which is sprite-crop only)
+        const width = iconStyle.getWidth() ?? (image.width || this.LEGEND_CANVAS_WIDTH);
+        const height = iconStyle.getHeight() ?? (image.height || this.LEGEND_CANVAS_HEIGHT);
         const drawingCanvas = document.createElement('canvas');
         drawingCanvas.width = width;
         drawingCanvas.height = height;
@@ -490,7 +490,7 @@ export abstract class GeoviewRenderer {
           drawingContext.translate(-width / 2, -height / 2);
         }
 
-        drawingContext.drawImage(image, 0, 0);
+        drawingContext.drawImage(image, 0, 0, width, height);
         return drawingCanvas;
       }
       return null;
@@ -1309,8 +1309,10 @@ export abstract class GeoviewRenderer {
   static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
     const iconOptions: IconOptions = {};
     iconOptions.src = this.#getImageSource(settings.src, settings.mimeType);
-    if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
-    if (settings.offset !== undefined) iconOptions.offset = settings.offset;
+    // GV: 'size' (+ 'offset') crops a sub-rectangle from the source image (sprite sheets); 'width'/'height' set the actual display size
+    if (settings.width !== undefined) iconOptions.width = settings.width;
+    if (settings.height !== undefined) iconOptions.height = settings.height;
+    if (settings.offset !== undefined) iconOptions.displacement = settings.offset;
     if (settings.rotation !== undefined) iconOptions.rotation = (settings.rotation * Math.PI) / 180;
     if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
     if (settings.scale !== undefined) iconOptions.scale = settings.scale;
