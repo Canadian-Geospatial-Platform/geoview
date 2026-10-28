@@ -67,6 +67,24 @@ export interface TypeViewportBoundaryLonLat {
   midpointWSENCoords: Coordinate[];
 }
 
+/** Represents the map scale display information for metric and imperial units. */
+export interface TypeScaleInfo {
+  /** The line width for the metric scale bar. */
+  lineWidthMetric: string;
+
+  /** The label text for the metric scale bar. */
+  labelGraphicMetric: string;
+
+  /** The line width for the imperial scale bar. */
+  lineWidthImperial: string;
+
+  /** The label text for the imperial scale bar. */
+  labelGraphicImperial: string;
+
+  /** The numeric scale label. */
+  labelNumeric: string;
+}
+
 /** ISO 639-1 language code prefix. */
 export type TypeDisplayLanguage = 'en' | 'fr';
 
