@@ -350,7 +350,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
       .filter((visualVar) => visualVar.type === 'sizeInfo')
       .map((visualVar) => visualVar.maxSize ?? 0);
 
-    return { radius: Math.ceil(Math.max(maxSize, ...visualVariableSizes, 0) / 2), offsetX, offsetY };
+    // Most real-world point/icon symbols carry a sizable transparent margin around their visible glyph (the service's
+    // declared width/height/size includes that margin), so the plain half-size radius overshoots the actual visible
+    // content on every side; scale it down to better approximate the visible footprint instead of the full declared canvas.
+    const PADDING_COMPENSATION_FACTOR = 0.5;
+    return {
+      radius: Math.ceil((Math.max(maxSize, ...visualVariableSizes, 0) / 2) * PADDING_COMPENSATION_FACTOR),
+      offsetX,
+      offsetY,
+    };
   }
 
   /**
@@ -413,9 +421,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
-   * The click coordinate is first re-centered on the symbol's rendered position (its xoffset/yoffset, e.g. a pin whose anchor
-   * sits at the bottom of the icon), since the identify REST call otherwise searches around the raw geometry point.
-   *
    * @param map - The Map where to get Feature Info At Coordinate from
    * @param location - The coordinate that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
@@ -430,16 +435,32 @@ export class GVEsriDynamic extends AbstractGVRaster {
     language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
-    // Shift the click location to the symbol's visual center, in map units, before projecting to lon/lat
-    const { offsetX, offsetY } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
-    const resolution = map.getView().getResolution() ?? 0;
-    const recenteredLocation: Coordinate = [location[0] + offsetX * resolution, location[1] - offsetY * resolution];
-
     // Transform coordinate from map projection to lntlat
-    const projCoordinate = Projection.transformToLonLat(recenteredLocation, map.getView().getProjection());
+    const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLonLat
     return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, language, abortController);
+  }
+
+  /**
+   * Re-centers a lon/lat location on the symbol's rendered position (its xoffset/yoffset, e.g. a pin whose anchor sits at
+   * the bottom of the icon, or the {@link EsriDynamicLayerEntryConfig.hitToleranceOffset} override), since the identify REST
+   * call otherwise searches around the raw geometry point.
+   *
+   * @param map - The Map used to resolve the current resolution and projection
+   * @param lonlat - The lon/lat location to re-center
+   * @returns The re-centered lon/lat location
+   */
+  #applyHitToleranceOffset(map: OLMap, lonlat: Coordinate): Coordinate {
+    const { offsetX: styleOffsetX, offsetY: styleOffsetY } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
+    const [offsetX, offsetY] = this.getLayerConfig().hitToleranceOffset ?? [styleOffsetX, styleOffsetY];
+    if (offsetX === 0 && offsetY === 0) return lonlat;
+
+    const projection = map.getView().getProjection();
+    const resolution = map.getView().getResolution() ?? 0;
+    const location = Projection.transformFromLonLat(lonlat, projection);
+    const recenteredLocation: Coordinate = [location[0] + offsetX * resolution, location[1] - offsetY * resolution];
+    return Projection.transformToLonLat(recenteredLocation, projection);
   }
 
   /**
@@ -455,7 +476,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
-    lonlat: Coordinate,
+    rawLonLat: Coordinate,
     queryGeometry = true,
     language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
@@ -468,6 +489,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
+
+    // GV: Click/hover identify dispatches directly with 'at_lon_lat' (see FeatureInfoLayerSet), so the hit-tolerance
+    // GV.CONT: offset re-centering must happen here rather than in getFeatureInfoAtCoordinate
+    const lonlat = this.#applyHitToleranceOffset(map, rawLonLat);
 
     // If not queryable return []
     if (!layerConfig.getQueryableSourceDefaulted()) return featureInfoResult;

@@ -18,12 +18,20 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
   source?: TypeSourceEsriDynamicInitialConfig;
   /** Max number of records for query */
   maxRecordCount?: number;
+  /**
+   * Manual pixel offset (x, y) to apply when centering the identify hit-tolerance circle, overriding the service's
+   * xoffset/yoffset (which the legacy esriPMS symbol schema can't carry for CIM-authored symbols with a non-center anchor).
+   */
+  hitToleranceOffset?: [number, number];
 }
 
 /** Type used to define a GeoView image layer to display on the map. */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Max number of records for query. */
   maxRecordCount?: number;
+
+  /** Manual pixel offset (x, y) overriding the computed identify hit-tolerance recentering. See {@link EsriDynamicLayerEntryConfigProps.hitToleranceOffset}. */
+  hitToleranceOffset?: [number, number];
 
   /**
    * Creates an instance of EsriDynamicLayerEntryConfig.
@@ -33,6 +41,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
+    this.hitToleranceOffset = layerConfig.hitToleranceOffset;
   }
 
   // #region OVERRIDES
