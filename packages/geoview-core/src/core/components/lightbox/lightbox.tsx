@@ -10,7 +10,9 @@ import Download from 'yet-another-react-lightbox/plugins/download';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import 'yet-another-react-lightbox/styles.css';
 
-import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip, IconButton } from '@/ui';
+import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon } from '@/ui/icons';
+import { Tooltip } from '@/ui/tooltip/tooltip';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { logger } from '@/core/utils/logger';
 import { getGVShellElement } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

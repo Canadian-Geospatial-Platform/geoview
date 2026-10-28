@@ -17,10 +17,9 @@ export * from '@/core/utils/constant';
 export * from '@/core/utils/date-mgt';
 export * from '@/core/utils/utilities';
 
+// GV Do not re-export '@/app': app.tsx already re-exports this file (cycle); consumers get app exports from 'geoview-core'
 export * from '@/api';
 export * from '@/api/config/config';
-
-export * from '@/app';
 export * from '@/geo';
 export * from '@/ui';
 

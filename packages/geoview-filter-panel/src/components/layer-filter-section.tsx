@@ -13,7 +13,10 @@ import { useStoreLayerStatus, useStoreLayerName } from 'geoview-core/core/stores
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { RequestAbortedError } from 'geoview-core/core/exceptions/core-exceptions';
 
-import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
+import { SelectFilter } from './controls/select-filter';
+import { MultiselectFilter } from './controls/multiselect-filter';
+import { RangeFilter } from './controls/range-filter';
+import { DateFilter } from './controls/date-filter';
 import type { TypeFilterLayer, TypeFilterValue } from '../types';
 import { getSxClasses } from './filter-panel-style';
 

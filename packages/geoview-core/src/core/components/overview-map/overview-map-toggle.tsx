@@ -5,7 +5,8 @@ import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { ChevronLeftIcon, Tooltip } from '@/ui';
+import { ChevronLeftIcon } from '@/ui/icons';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { getSxClasses } from './overview-map-toggle-styles';

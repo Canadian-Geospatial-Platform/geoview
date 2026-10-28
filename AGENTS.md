@@ -15,7 +15,7 @@ Rush monorepo (`packages/`): `geoview-core` (APIs, layers, UI, map) + plugins (`
 - Architecture: UI components -> controllers -> Zustand store; domains -> controllers -> store. Components never touch `MapViewer`/`mapViewer.map`; add a controller method instead.
 - No `any`, explicit return types everywhere, `undefined` over `null`, template literals, named exports.
 - Use `Fetch` (no raw `fetch`), `delay()` (no `setTimeout`), dom-helper wrappers (no `document.getElementById/querySelector`), `logger` (no `console.log`).
-- Imports: UI + icons from `@/ui` only. Strings via `t()`; keep `en`/`fr` translation files in sync.
+- Imports: direct internal module paths, never barrels (`@/ui`, `@/app`, `@/api`, `@/geo`, `@/core/components`, `@/core/stores`); UI + icons from their `@/ui/...` module, not MUI. Strings via `t()`; keep `en`/`fr` translation files in sync.
 - Never delete TODO/NOTE/FIXME/WCAG comments.
 
 ## Before modifying code

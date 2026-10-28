@@ -6,7 +6,7 @@ import { useTheme, type SxProps, type Theme } from '@mui/material/styles';
 
 import type { SxStyles } from '@/ui/style/types';
 
-import { Box } from '@/ui';
+import { Box } from '@/ui/layout';
 import { getSxClasses } from './map-info-style';
 import { Attribution } from '@/core/components/attribution/attribution';
 import { MousePosition } from '@/core/components/mouse-position/mouse-position';

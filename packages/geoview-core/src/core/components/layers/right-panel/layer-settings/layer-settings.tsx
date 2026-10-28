@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Typography, Select } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Typography } from '@/ui/typography/typography';
+import { Select } from '@/ui/select/select';
 import { Switch } from '@/ui/switch/switch';
 
 import {
@@ -22,7 +24,7 @@ import {
   type SwipeSide,
 } from '@/core/stores/states/swiper-state';
 
-import { getSxClasses as getLayerDetailsSxClasses } from '../layer-details-style';
+import { getSxClasses as getLayerDetailsSxClasses } from '@/core/components/layers/right-panel/layer-details-style';
 import { getSxClasses as getLayerSettingsSxClasses } from './layer-settings-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';

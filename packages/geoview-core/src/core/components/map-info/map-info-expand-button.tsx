@@ -2,7 +2,9 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
+import { ExpandMoreIcon, ExpandLessIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Box } from '@/ui/layout';
 import { getSxClasses } from './map-info-expand-button-style';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

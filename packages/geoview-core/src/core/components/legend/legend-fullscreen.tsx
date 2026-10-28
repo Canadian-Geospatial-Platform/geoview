@@ -2,7 +2,11 @@ import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, List, Typography, IconButton, FullscreenIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { List } from '@/ui/list/list';
+import { Typography } from '@/ui/typography/typography';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { FullscreenIcon } from '@/ui/icons';
 
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { getSxClasses } from './legend-styles';

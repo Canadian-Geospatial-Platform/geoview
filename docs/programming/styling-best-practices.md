@@ -55,8 +55,11 @@ the shell do not inherit its scrollbar colours and require a separate map-owners
 
 ## 3- UI wrappers and translated labels
 
-Import UI components and icons from the `@/ui` barrel. Only MUI hooks, utilities, and types are
-imported directly from MUI. GeoView wrappers provide additional behavior: for example, IconButton
+Inside `geoview-core`, import UI components and icons from their defining `@/ui/...` module (for example
+`@/ui/button/button`, `@/ui/layout`, `@/ui/icons`, `@/ui/mui-reexports/mui-reexports`), never from the `@/ui`
+barrel or directly from MUI. Only MUI hooks, utilities, and types are imported directly from MUI. Plugins keep
+using the public `geoview-core/ui` entry. See [Best Practices §7](best-practices.md#7--how-we-order-the-import-statements)
+for the direct-import rule. GeoView wrappers provide additional behavior: for example, IconButton
 requires `aria-label`, uses it as the fallback tooltip, and exposes additional tooltip, ref, and
 visibility props. Inspect the wrapper rather than assuming it has the same interface as MUI.
 

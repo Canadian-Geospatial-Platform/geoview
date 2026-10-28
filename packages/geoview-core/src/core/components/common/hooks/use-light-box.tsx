@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Box } from '@/ui';
+import { Box } from '@/ui/layout';
 import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';

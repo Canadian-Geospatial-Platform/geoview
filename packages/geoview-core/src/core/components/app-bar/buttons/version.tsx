@@ -4,10 +4,16 @@ import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
-import { GeoCaIcon, IconButton, Popper, CloseIcon, Typography, Box, Link, List, Paper } from '@/ui';
+import { GeoCaIcon } from '@/ui/svg/svg-icon';
+import { CloseIcon, GitHubIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Popper } from '@/ui/popper/popper';
+import { Typography } from '@/ui/typography/typography';
+import { Box, Link } from '@/ui/layout';
+import { List } from '@/ui/list/list';
+import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';

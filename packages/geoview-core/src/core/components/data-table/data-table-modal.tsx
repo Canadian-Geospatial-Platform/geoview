@@ -9,7 +9,10 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 
 import linkifyHtml from 'linkify-html';
 
-import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress } from '@/ui';
+import { Modal } from '@/ui/modal/modal';
+import { MRTTable as Table, type MRT_ColumnDef as MRTColumnDef } from '@/ui/table/table';
+import { Box } from '@/ui/layout';
+import { CircularProgress } from '@/ui/circular-progress/circular-progress';
 import { useUIController } from '@/core/controllers/use-controllers';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
@@ -20,7 +23,7 @@ import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/sto
 import { logger } from '@/core/utils/logger';
 import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { getSxClasses } from './data-table-style';
-import { useFeatureFieldInfos } from './hooks';
+import { useFeatureFieldInfos } from './hooks/useFeatureFieldInfos';
 
 /** Linkify configuration options for URL detection and formatting. */
 const linkifyOptions = {

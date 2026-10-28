@@ -1,5 +1,5 @@
 ﻿import type { ErrorInfo } from 'react';
-import { createContext, StrictMode, Suspense, Component, useEffect } from 'react';
+import { StrictMode, Suspense, Component, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { i18n } from 'i18next';
 
@@ -13,9 +13,10 @@ import { useStoreAppDisplayThemeById } from '@/core/stores/states/app-state';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { ControllerContext } from '@/core/controllers/base/controller-manager';
+import { StoreContext } from '@/core/stores/store-context';
 
-/** Create contexts for the map, layer controller, and UI controller */
-export const StoreContext = createContext<string | undefined>(undefined);
+// GV Kept for the public API; internal code imports StoreContext from @/core/stores/store-context
+export { StoreContext };
 
 /** Defines the props for the AppStart component. */
 interface AppStartProps {

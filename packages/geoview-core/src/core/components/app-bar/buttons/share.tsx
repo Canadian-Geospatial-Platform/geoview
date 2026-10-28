@@ -1,7 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ShareIcon, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@/ui';
+import { ShareIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { TextField } from '@/ui/text-field/text-field';
 import { useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import {
   useStoreMapInteraction,

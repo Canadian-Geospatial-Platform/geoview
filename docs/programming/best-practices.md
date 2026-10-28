@@ -195,7 +195,7 @@ We do the import statement in the following order
 - react
 - react-dom
 - react-i18n
-- MUI (hooks/utilities only — UI components come from `@/ui`)
+- MUI (hooks/utilities only — UI components come from their `@/ui/...` module)
 - OpenLayers
 - other project dependecies (@/core, @/geo and @/api)
 
@@ -211,14 +211,18 @@ import { useTheme } from "@mui/material/styles";
 
 import View, { ViewOptions } from "ol/View";
 
-import { Box, Card, CardHeader, CardContent, Divider, IconButton } from "@/ui";
-import { CloseIcon } from "@/ui";
+import { Box } from "@/ui/layout";
+import { Divider } from "@/ui/divider/divider";
+import { IconButton } from "@/ui/icon-button/icon-button";
+import { CloseIcon } from "@/ui/icons";
 import { logger } from "@/core/utils/logger";
 import type { EsriBaseRenderer } from "@/geo/utils/renderer/esri-renderer";
 import { Plugin } from "@/api/plugin/plugin";
 ```
 
-**Note:** MUI UI components (`Box`, `Typography`, `IconButton`, etc.) and icons must be imported from `@/ui`, never directly from `@mui/material` or `@mui/icons-material`. MUI hooks and utilities (`useTheme`, `useMediaQuery`) are imported directly from `@mui/material` or `@mui/material/styles`.
+**Note:** MUI UI components (`Box`, `Typography`, `IconButton`, etc.) and icons must be imported from GeoView's `@/ui/...` modules, never directly from `@mui/material` or `@mui/icons-material`. MUI hooks and utilities (`useTheme`, `useMediaQuery`) are imported directly from `@mui/material` or `@mui/material/styles`.
+
+**Note:** Inside `geoview-core`, import from the module that defines the symbol, never from an aggregate index ("barrel"): `@/ui`, `@/app`, `@/api`, `@/geo`, `@/core/components` or `@/core/stores`. Do not add new folder `index.ts` files that re-export GeoView modules. Barrels re-export modules that import back into them, creating runtime import cycles where a value can be `undefined` depending on load order. Leaf indexes that only re-export third-party code (`@/ui/icons`, `@/ui/layout`, `@/ui/grid`, `@/ui/form-group`, `@/ui/svg/svg-icon`) are allowed. MUI components without a GeoView wrapper (`FocusTrap`, `ButtonBase`, `Table*`, `Radio*`, `FormControl*`, ...) come from `@/ui/mui-reexports/mui-reexports`. The barrels remain the public surface (`app.tsx`, `core/types/external-types.ts`, `geoview-core/ui` for plugins). Plugins follow the same rule: besides the public `geoview-core` and `geoview-core/ui` entries, import from the defining module and do not add folder `index.ts` barrels. ESLint enforces this with `no-restricted-imports` and `import/no-cycle`. Known remaining cycles are listed as narrow exceptions in `packages/eslint.config.js`; when you break one, remove its files from that list, and never add a file to it to silence a new cycle.
 
 **Note:** For import from a packacge outside of core use
 

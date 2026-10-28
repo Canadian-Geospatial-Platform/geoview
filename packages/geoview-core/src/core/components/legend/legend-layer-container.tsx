@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
 
-import { Box, Button, Collapse, List } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { Collapse } from '@/ui/collapse/collapse';
+import { List } from '@/ui/list/list';
 import { getSxClasses } from './legend-styles';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayerProps } from './legend-layer';

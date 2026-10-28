@@ -3,20 +3,24 @@ import { useTranslation } from 'react-i18next';
 import type { SxProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
+import { Box } from '@/ui/layout';
+import { Collapse } from '@/ui/collapse/collapse';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import {
-  Box,
-  Collapse,
-  IconButton,
+  ArrowDownwardIcon,
+  ArrowUpIcon,
+  CenterFocusScaleIcon,
   KeyboardArrowDownIcon,
   KeyboardArrowUpIcon,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ProgressBar,
-  Tooltip,
+  LoopIcon,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
-} from '@/ui';
+} from '@/ui/icons';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemButton } from '@/ui/list/list-item-button';
+import { ListItemText } from '@/ui/list/list-item-text';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import {
   useStoreLayerDisplayState,
   useStoreLayerSelectedLayerPath,
@@ -37,7 +41,6 @@ import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getGVElementByFullId } from '@/core/utils/dom-helper';

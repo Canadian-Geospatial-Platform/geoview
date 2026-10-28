@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
@@ -6,6 +7,29 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettier from 'eslint-plugin-prettier';
 import importPlugin from 'eslint-plugin-import';
+
+const RESTRICTED_IMPORT_PATTERNS = ['@material-ui/*/*/*', '!@material-ui/core/test-utils/*'];
+
+// Aggregate indexes ("barrels") that geoview-core source must not import: they re-export modules that import back into them (runtime cycles)
+const BARREL_IMPORT_MESSAGE =
+  'Import from the module that defines the symbol (e.g. @/ui/button/button, @/ui/icons, @/ui/layout, @/ui/mui-reexports/mui-reexports), not from a barrel. Barrels are public entry points only. See docs/programming/best-practices.md §7.';
+const RESTRICTED_BARREL_PATHS = ['@/ui', '@/app', '@/api', '@/geo', '@/core/components', '@/core/stores', '.', '..'].map((name) => ({
+  name,
+  message: BARREL_IMPORT_MESSAGE,
+}));
+
+// Plugins keep the public entries (geoview-core, geoview-core/ui) but import everything else from defining modules
+const PLUGIN_BARREL_IMPORT_MESSAGE =
+  'Import from the module that defines the symbol (e.g. geoview-core/core/utils/logger, ./components/legend-item), not from a folder index. Only geoview-core and geoview-core/ui are public entry points. See docs/programming/best-practices.md §7.';
+const RESTRICTED_PLUGIN_BARREL_PATHS = [
+  'geoview-core/app',
+  'geoview-core/api',
+  'geoview-core/geo',
+  'geoview-core/core/components',
+  'geoview-core/core/stores',
+  '.',
+  '..',
+].map((name) => ({ name, message: PLUGIN_BARREL_IMPORT_MESSAGE }));
 
 export default [
   js.configs.recommended,
@@ -80,16 +104,12 @@ export default [
           CardMedia: 'img',
         },
       },
+      // Resolves the `@/` alias and relative paths so import/no-cycle can follow internal imports
       'import/resolver': {
-        node: {
-          alias: {
-            map: [
-              ['@', './src'],
-              ['@public', './public'],
-            ],
-          },
-          extensions: ['.js', '.jsx', '.ts', '.tsx'],
-        },
+        [fileURLToPath(new URL('./eslint-import-resolver-geoview.cjs', import.meta.url))]: {},
+      },
+      'import/parsers': {
+        '@typescript-eslint/parser': ['.ts', '.tsx'],
       },
     },
     rules: {
@@ -172,6 +192,7 @@ export default [
       'import/extensions': 'off',
       'import/no-extraneous-dependencies': 'off',
       'import/no-unresolved': 'off',
+      'import/no-cycle': 'error',
 
       // JSX A11y rules
       'jsx-a11y/anchor-is-valid': [
@@ -232,7 +253,7 @@ export default [
       'no-restricted-imports': [
         'error',
         {
-          patterns: ['@material-ui/*/*/*', '!@material-ui/core/test-utils/*'],
+          patterns: RESTRICTED_IMPORT_PATTERNS,
         },
       ],
       'no-restricted-syntax': [
@@ -254,7 +275,7 @@ export default [
         {
           selector: "JSXAttribute[name.name='role'][value.value='button']",
           message:
-            'Do not hand-roll role="button". Use ButtonBase (cards/rows), ListItemButton (list rows), IconButton (icons) or Button from @/ui, which provide focus, Enter/Space and disabled semantics natively. See "Use Semantic Elements for Interactions" in docs/app/accessibility.md.',
+            'Do not hand-roll role="button". Use ButtonBase (cards/rows), ListItemButton (list rows), IconButton (icons) or Button from their @/ui/... module, which provide focus, Enter/Space and disabled semantics natively. See "Use Semantic Elements for Interactions" in docs/app/accessibility.md.',
         },
         {
           selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > Literal',
@@ -288,6 +309,76 @@ export default [
     files: ['**/core/utils/dom-helper.ts'],
     rules: {
       'no-restricted-syntax': 'off',
+    },
+  },
+
+  // geoview-core internal source imports from defining modules, never from barrels
+  {
+    files: ['geoview-core/src/**/*.{ts,tsx}'],
+    // Public entry points / re-export files that intentionally aggregate the barrels
+    ignores: [
+      'geoview-core/src/app.tsx',
+      'geoview-core/src/index.ts',
+      'geoview-core/src/core/types/external-types.ts',
+      'geoview-core/src/core/types/global-types.ts',
+    ],
+    rules: {
+      'no-restricted-imports': ['error', { paths: RESTRICTED_BARREL_PATHS, patterns: RESTRICTED_IMPORT_PATTERNS }],
+    },
+  },
+
+  // Plugin source imports from defining modules too; folder index barrels are not allowed
+  {
+    files: ['geoview-*/src/**/*.{ts,tsx}'],
+    ignores: ['geoview-core/**'],
+    rules: {
+      'no-restricted-imports': ['error', { paths: RESTRICTED_PLUGIN_BARREL_PATHS, patterns: RESTRICTED_IMPORT_PATTERNS }],
+    },
+  },
+
+  // TODO: CYCLES - Remaining runtime import cycles (#3711). Each group only uses the other side inside function/method bodies
+  // TO.DOCONT: so it is load-order safe today. Remove a group from this list once its cycle is broken; do not add new files.
+  {
+    files: [
+      // Recursive React components rendering each other
+      'geoview-core/src/core/components/layers/left-panel/layers-list.tsx',
+      'geoview-core/src/core/components/layers/left-panel/single-layer.tsx',
+      'geoview-custom-legend/src/components/group-item.tsx',
+      'geoview-custom-legend/src/components/legend-item.tsx',
+      // Export canvas layout and export utilities call each other
+      'geoview-core/src/core/components/export/canvas-layout.tsx',
+      'geoview-core/src/core/components/export/utilities.ts',
+      // Generic utilities use Fetch, and Fetch uses delay/XML/encoding helpers from utilities
+      'geoview-core/src/core/utils/fetch-helper.ts',
+      'geoview-core/src/core/utils/utilities.ts',
+      // MapViewer creates the ControllerRegistry; controllers use MapViewer statics (computeEffectiveLayerScales, DEFAULT_STOPS)
+      'geoview-core/src/geo/map/map-viewer.ts',
+      'geoview-core/src/core/controllers/base/controller-registry.ts',
+      'geoview-core/src/core/controllers/layer-controller.ts',
+      'geoview-core/src/core/controllers/layer-set-controller.ts',
+      // Projection, GeoUtilities and GeometryApi static helpers call each other
+      'geoview-core/src/geo/utils/projection.ts',
+      'geoview-core/src/geo/utils/utilities.ts',
+      'geoview-core/src/geo/layer/geometry/geometry.ts',
+      // Layer config entry classes and GeoView/GV layer classes reference each other
+      'geoview-core/src/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config.ts',
+      'geoview-core/src/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config.ts',
+      'geoview-core/src/geo/layer/geoview-layers/esri-layer-common.ts',
+      'geoview-core/src/geo/layer/geoview-layers/raster/esri-dynamic.ts',
+      'geoview-core/src/geo/layer/geoview-layers/raster/wms.ts',
+      'geoview-core/src/geo/layer/geoview-layers/raster/wmts.ts',
+      'geoview-core/src/geo/layer/geoview-layers/vector/esri-feature.ts',
+      'geoview-core/src/geo/layer/geoview-layers/vector/ogc-feature.ts',
+      'geoview-core/src/geo/layer/geoview-layers/vector/wfs.ts',
+      'geoview-core/src/geo/layer/gv-layers/raster/gv-esri-dynamic.ts',
+      'geoview-core/src/geo/layer/gv-layers/raster/gv-wms.ts',
+      // FIXME: AbstractBaseGVLayer imports its subclass GVGroupLayer (instanceof); evaluating the base first would hit a TDZ error
+      'geoview-core/src/geo/layer/gv-layers/abstract-base-layer.ts',
+      'geoview-core/src/geo/layer/gv-layers/abstract-gv-layer.ts',
+      'geoview-core/src/geo/layer/gv-layers/gv-group-layer.ts',
+    ],
+    rules: {
+      'import/no-cycle': 'off',
     },
   },
 

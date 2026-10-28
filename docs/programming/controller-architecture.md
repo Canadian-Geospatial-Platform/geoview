@@ -166,13 +166,25 @@ export class ControllerRegistry {
 
   readonly allControllers: AbstractController[] = [];
 
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
+  constructor(
+    mapViewer: MapViewer,
+    uiDomain: UIDomain,
+    layerDomain: LayerDomain,
+  ) {
     // Always-present controllers
     this.uiController = new UIController(mapViewer, this, uiDomain);
     this.mapController = new MapController(mapViewer, this);
     this.layerController = new LayerController(mapViewer, this, layerDomain);
-    this.layerCreatorController = new LayerCreatorController(mapViewer, this, layerDomain);
-    this.layerSetController = new LayerSetController(mapViewer, this, layerDomain);
+    this.layerCreatorController = new LayerCreatorController(
+      mapViewer,
+      this,
+      layerDomain,
+    );
+    this.layerSetController = new LayerSetController(
+      mapViewer,
+      this,
+      layerDomain,
+    );
     this.pluginController = new PluginController(mapViewer, this);
     this.detailsController = new DetailsController(mapViewer, this);
     this.dataTableController = new DataTableController(mapViewer, this);
@@ -199,12 +211,14 @@ export class ControllerRegistry {
       this.layerController,
       this.layerCreatorController,
       this.layerSetController,
-      this.pluginController
+      this.pluginController,
     );
     if (this.swiperController) this.allControllers.push(this.swiperController);
     if (this.drawerController) this.allControllers.push(this.drawerController);
-    if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
-    if (this.geoChartController) this.allControllers.push(this.geoChartController);
+    if (this.timeSliderController)
+      this.allControllers.push(this.timeSliderController);
+    if (this.geoChartController)
+      this.allControllers.push(this.geoChartController);
   }
 
   hookControllers(): void {
@@ -227,7 +241,11 @@ this.#uiDomain = new UIDomain(i18instance, displayLanguage);
 this.#layerDomain = new LayerDomain();
 
 // Create and hook all controllers
-this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
+this.controllers = new ControllerRegistry(
+  this,
+  this.#uiDomain,
+  this.#layerDomain,
+);
 this.controllers.hookControllers();
 ```
 
@@ -250,14 +268,17 @@ export const ControllerContext = createContext<ControllerRegistry | null>(null);
 
 export function useControllers(): ControllerRegistry {
   const ctx = useContext(ControllerContext);
-  if (!ctx) throw new Error('useControllers must be used inside ControllerContext.Provider');
+  if (!ctx)
+    throw new Error(
+      "useControllers must be used inside ControllerContext.Provider",
+    );
   return ctx;
 }
 ```
 
 ```typescript
 // In use-controllers.ts — individual hooks for each controller
-import { useControllers } from '@/core/controllers/base/controller-manager';
+import { useControllers } from "@/core/controllers/base/controller-manager";
 
 export function useMapController(): MapController {
   return useControllers().mapController;
@@ -269,12 +290,15 @@ export function useLayerController(): LayerController {
 ```
 
 ```typescript
-import { useLayerController, useUIController } from '@/core/controllers/use-controllers';
+import {
+  useLayerController,
+  useUIController,
+} from "@/core/controllers/use-controllers";
 
 // In a React component — prefer individual hooks
 const layerController = useLayerController();
 const uiController = useUIController();
-uiController.setActiveFooterBarTab('layers');
+uiController.setActiveFooterBarTab("layers");
 ```
 
 ## Creating Custom Controllers
@@ -284,9 +308,12 @@ uiController.setActiveFooterBarTab('layers');
 For controllers that react to domain events and propagate changes to the store.
 
 ```typescript
-import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import type { CustomDomain, DomainValueChangedDelegate } from '@/domain/custom-domain';
+import { AbstractMapViewerController } from "@/core/controllers/base/abstract-map-viewer-controller";
+import type { MapViewer } from "@/geo/map/map-viewer";
+import type {
+  CustomDomain,
+  DomainValueChangedDelegate,
+} from "@/domain/custom-domain";
 
 export class CustomController extends AbstractMapViewerController {
   /** The custom domain instance associated with this controller */
@@ -295,7 +322,11 @@ export class CustomController extends AbstractMapViewerController {
   /** The bounded reference to the handle value changed */
   #boundedHandleValueChanged: DomainValueChangedDelegate;
 
-  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, customDomain: CustomDomain) {
+  constructor(
+    mapViewer: MapViewer,
+    controllerRegistry: ControllerRegistry,
+    customDomain: CustomDomain,
+  ) {
     super(mapViewer, controllerRegistry);
     this.#customDomain = customDomain;
 
@@ -367,7 +398,9 @@ export class MapInteractionController extends AbstractMapViewerController {
 
   #handleMapClicked(mapViewer: MapViewer, event: MapSingleClickEvent): void {
     // Query layers, update store, etc.
-    this.getControllersRegistry().layerSetController.queryAtLonLat(event.lonlat);
+    this.getControllersRegistry().layerSetController.queryAtLonLat(
+      event.lonlat,
+    );
   }
 
   #handlePointerMoved(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
@@ -395,14 +428,21 @@ export class TimeSliderController extends AbstractMapViewerController {
    * @param layer - The layer to check
    * @param config - Optional time slider configuration
    */
-  checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer, config?: TypeTimeSliderProps): void {
+  checkInitTimeSliderLayerAndApplyFilters(
+    layer: AbstractGVLayer,
+    config?: TypeTimeSliderProps,
+  ): void {
     const timeDimension = layer.getTimeDimension();
     if (!timeDimension?.isValid) return;
 
-    const values = TimeSliderController.#getInitialTimeSliderValues(layer.getLayerConfig(), timeDimension, config);
+    const values = TimeSliderController.#getInitialTimeSliderValues(
+      layer.getLayerConfig(),
+      timeDimension,
+      config,
+    );
     if (values) {
       addStoreTimeSliderLayer(this.getMapId(), layer.getLayerPath(), values);
-      this.getControllersRegistry().uiController.showTabButton('time-slider');
+      this.getControllersRegistry().uiController.showTabButton("time-slider");
     }
   }
 
@@ -414,7 +454,10 @@ export class TimeSliderController extends AbstractMapViewerController {
    */
   updateTimeSliderValues(layerPath: string, values: number[]): void {
     // Read current state, compute, update store
-    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath)!;
+    const timeSliderValues = getStoreTimeSliderLayer(
+      this.getMapId(),
+      layerPath,
+    )!;
     setStoreTimeSliderValues(this.getMapId(), layerPath, {
       ...timeSliderValues,
       values,
@@ -432,7 +475,12 @@ Add the new controller to `ControllerRegistry`:
 export class ControllerRegistry {
   readonly customController: CustomController; // Add typed property
 
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain, geometryApi: GeometryApi) {
+  constructor(
+    mapViewer: MapViewer,
+    uiDomain: UIDomain,
+    layerDomain: LayerDomain,
+    geometryApi: GeometryApi,
+  ) {
     // ... existing controllers ...
     this.customController = new CustomController(mapViewer, this, customDomain);
     this.allControllers.push(this.customController);
@@ -477,9 +525,11 @@ Components read state through selector hooks — one per state property:
 
 ```typescript
 // Naming pattern: useStore{SliceName}{PropertyName}
-export const useStoreCustomSomeValue = (): string => useStore(useGeoViewStore(), (state) => state.customState.someValue);
+export const useStoreCustomSomeValue = (): string =>
+  useStore(useGeoViewStore(), (state) => state.customState.someValue);
 
-export const useStoreCustomItems = (): CustomItem[] => useStore(useGeoViewStore(), (state) => state.customState.items);
+export const useStoreCustomItems = (): CustomItem[] =>
+  useStore(useGeoViewStore(), (state) => state.customState.items);
 ```
 
 ### Store Getter Functions (Non-Component Code)
@@ -488,11 +538,14 @@ Controllers and other TypeScript code access the store through getter functions:
 
 ```typescript
 // Naming pattern: getStore{SliceName}{PropertyName}
-const getStoreCustomState = (mapId: string): ICustomState => getGeoViewStore(mapId).getState().customState;
+const getStoreCustomState = (mapId: string): ICustomState =>
+  getGeoViewStore(mapId).getState().customState;
 
-export const getStoreCustomSomeValue = (mapId: string): string => getStoreCustomState(mapId).someValue;
+export const getStoreCustomSomeValue = (mapId: string): string =>
+  getStoreCustomState(mapId).someValue;
 
-export const getStoreCustomItems = (mapId: string): CustomItem[] => getStoreCustomState(mapId).items;
+export const getStoreCustomItems = (mapId: string): CustomItem[] =>
+  getStoreCustomState(mapId).items;
 ```
 
 ### Store Setter Functions (State Updates)
@@ -601,7 +654,7 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 4. **Access sibling controllers through the registry**
 
    ```typescript
-   this.getControllersRegistry().uiController.showTabButton('time-slider'); // ✅
+   this.getControllersRegistry().uiController.showTabButton("time-slider"); // ✅
    ```
 
 5. **Unsubscribe in reverse order of subscription**
@@ -666,7 +719,10 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 
    ```tsx
    // ❌ Bad: the component reaches into the MapViewer and OpenLayers
-   <Swiper viewer={this.mapViewer} controllerRegistry={this.controllerRegistry} />;
+   <Swiper
+     viewer={this.mapViewer}
+     controllerRegistry={this.controllerRegistry}
+   />;
    // ...inside the component:
    const size = viewer.map.getSize();
    viewer.map.render();
@@ -685,12 +741,12 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 
    ```typescript
    // ❌ Bad: component directly calls store setter
-   import { setStoreMapZoom } from '@/core/stores/...';
+   import { setStoreMapZoom } from "@/core/stores/...";
    setStoreMapZoom(mapId, 10);
 
    // ✅ Good: component uses controller
    const { uiController } = useControllers();
-   uiController.setActiveFooterBarTab('time-slider');
+   uiController.setActiveFooterBarTab("time-slider");
    ```
 
 4. **Don't create circular dependencies between controllers**
@@ -903,8 +959,11 @@ packages/geoview-core/src/
 │   │   ├── ui-domain.ts                        # Language/i18n management & events
 │   │   └── layer-domain.ts                     # Layer lifecycle, registries & events
 │   └── stores/
-│       ├── geoview-store.ts                    # Store composition (all slices)
-│       ├── stores-managers.ts                  # Store registry (getGeoViewStore)
+│       ├── geoview-store.ts                    # Store types, IGeoviewState, useStoreGeoView* hooks
+│       ├── geoview-store-definition.ts         # Store composition (all slice initializers)
+│       ├── stores-managers.ts                  # Store registry (getGeoViewStore, useGeoViewStore)
+│       ├── store-lifecycle.ts                  # addGeoViewStore / removeGeoviewStore
+│       ├── store-context.ts                    # StoreContext (React context with the map id)
 │       └── states/                             # State slices
 │           ├── map-state.ts                    # useStoreMapZoom(), getStoreMapZoom(), etc.
 │           ├── layer-state.ts                  # useStoreLayerSelectedLayerPath(), etc.

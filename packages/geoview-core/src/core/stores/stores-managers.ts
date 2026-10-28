@@ -1,26 +1,18 @@
 // src/store/index.ts
 import { useContext } from 'react';
-import { create, createStore } from 'zustand';
-import { mountStoreDevtool } from 'simple-zustand-devtools';
+import { createStore } from 'zustand';
 
-import type { IGeoviewState, GeoviewStoreType } from './geoview-store';
-import { geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
-import { StoreContext } from '@/core/app-start';
-import { whenThisThen, isLocalhost, delay } from '@/core/utils/utilities';
-import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { LocalStorage } from '@/core/utils/localStorage';
+import type { GeoviewStoreType } from './geoview-store';
+import { StoreContext } from '@/core/stores/store-context';
+import { whenThisThen, delay } from '@/core/utils/utilities';
 import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
-import {
-  clearDetailsStateSubscriptions,
-  initDetailsStateSubscriptions,
-  type TypeFeatureInfoResultSetEntry,
-  type TypeHoverResultSetEntry,
-} from './states/feature-info-state';
+import type { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from './states/feature-info-state';
 import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state';
-import { clearGeochartStateSubscriptions, initGeochartStateSubscriptions, type TypeGeochartResultSetEntry } from './states/geochart-state';
-import { logger } from '../utils/logger';
+import type { TypeGeochartResultSetEntry } from './states/geochart-state';
+import { logger } from '@/core/utils/logger';
 
 // GV This file is the equivalent of the controller-manager.ts file, but for the store.
+// GV Store creation/removal lives in store-lifecycle.ts so the state slices can import this file without a cycle.
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -29,33 +21,6 @@ export interface StoresManagerState {
 export const useStoresManager = createStore<StoresManagerState>(() => ({
   stores: {},
 }));
-
-// Check if running in dev or if the key is set in the local storage
-const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
-const DEVTOOLS_ACTIVE = isLocalhost() || !!LocalStorage.getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
-
-/**
- * Mounts Zustand DevTools for a specific store instance.
- *
- * @param instanceName - Unique name for this store instance
- * @param store - The Zustand store
- * @param container - The container element
- */
-const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, container: HTMLElement): void => {
-  if (DEVTOOLS_ACTIVE) {
-    // Check if container already has devtools
-    if (!container.hasAttribute('data-zustand-devtools')) {
-      // Create new DevTools container
-      const devToolsContainer = document.createElement('div');
-      devToolsContainer.id = `devtools-${instanceName}`;
-      container.appendChild(devToolsContainer);
-
-      // Mount and mark container as having devtools mounted
-      mountStoreDevtool(instanceName, store, devToolsContainer);
-      container.setAttribute('data-zustand-devtools', 'true');
-    }
-  }
-};
 
 export const getGeoViewStore = (id: string): GeoviewStoreType => {
   return useStoresManager.getState().stores[id];
@@ -89,37 +54,6 @@ export function hasFilterPanelPlugin(store: GeoviewStoreType): boolean {
 export function hasStacBrowserPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.appBar?.tabs?.core?.includes('stac-browser') ?? false;
 }
-
-export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
-  if (!config.mapId) {
-    return;
-  }
-
-  // Create the store
-  const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
-  geoviewStore.getState().setMapConfig(config);
-
-  // Initialize the store subscriptions
-  initDetailsStateSubscriptions(geoviewStore);
-  if (hasGeoChartPlugin(geoviewStore)) initGeochartStateSubscriptions(geoviewStore);
-
-  useStoresManager.setState((state) => ({
-    stores: {
-      ...state.stores,
-      [config.mapId]: geoviewStore,
-    },
-  }));
-
-  mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
-};
-
-export const removeGeoviewStore = (id: string): void => {
-  // Clear the store subscriptions
-  clearDetailsStateSubscriptions(id);
-  if (hasGeoChartPlugin(getGeoViewStore(id))) clearGeochartStateSubscriptions(id);
-
-  delete useStoresManager.getState().stores[id];
-};
 
 /**
  * Hook to access the GeoView store from the context.

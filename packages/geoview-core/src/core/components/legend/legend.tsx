@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
-import { Box, List, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { List } from '@/ui/list/list';
+import { Typography } from '@/ui/typography/typography';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';

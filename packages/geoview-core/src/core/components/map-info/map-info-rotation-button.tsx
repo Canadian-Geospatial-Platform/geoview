@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Tooltip } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { getSxClasses } from './map-info-rotation-button-style';
 

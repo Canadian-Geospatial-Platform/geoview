@@ -5,7 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
-import { Box, CloseIcon, HeightIcon, IconButton, Paper, Popper, Slider, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { CloseIcon, HeightIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Paper } from '@/ui/paper/paper';
+import { Popper } from '@/ui/popper/popper';
+import { Slider } from '@/ui/slider/slider';
+import { Typography } from '@/ui/typography/typography';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, Skeleton } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Skeleton } from '@/ui/skeleton/skeleton';
 import { getSxClasses } from './details-style';
 import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';

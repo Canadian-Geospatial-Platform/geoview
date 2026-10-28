@@ -6,7 +6,10 @@ import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './nav-bar-style';
-import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
+import { Popper } from '@/ui/popper/popper';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { DialogTitle, DialogContent, Box } from '@/ui/layout';
+import { Paper } from '@/ui/paper/paper';
 import { CloseIcon } from '@/ui/icons';
 import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';

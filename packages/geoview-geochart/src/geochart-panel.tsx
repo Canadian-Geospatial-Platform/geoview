@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { SchemaValidator } from 'geochart';
-import type { LayerListEntry } from 'geoview-core/core/components/common';
-import { Layout } from 'geoview-core/core/components/common';
+import type { LayerListEntry } from 'geoview-core/core/components/common/layer-list';
+import { Layout } from 'geoview-core/core/components/common/layout';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';

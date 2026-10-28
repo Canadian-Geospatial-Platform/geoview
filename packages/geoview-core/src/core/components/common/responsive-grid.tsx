@@ -1,8 +1,8 @@
 import type { ReactNode, ForwardedRef } from 'react';
 import { forwardRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import type { GridProps, SxProps } from '@/ui';
-import { Grid } from '@/ui';
+import type { GridProps, SxProps } from '@/ui/grid';
+import { Grid } from '@/ui/grid';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the responsive grid root container. */

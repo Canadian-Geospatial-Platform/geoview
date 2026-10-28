@@ -8,13 +8,11 @@ Canonical sections (search the named heading and read only that section):
 [accessibility.md](../../docs/app/accessibility.md) → **008. Code Review Checklist — Common Accessibility Patterns**;
 [notifications.md](../../docs/programming/notifications.md) → **The generic error message (last-resort failover)**.
 Source/translation routing: [ui-style-a11y-i18n.md](../ai/ui-style-a11y-i18n.md) → **Source navigation and translation workflow**.
-For accessibility work, select only the relevant reference:
-[keyboard/panel focus](../ai/ui-style-a11y-i18n.md#keyboard-mode-and-panel-focus),
-[focus indicators](../ai/ui-style-a11y-i18n.md#focus-indicator-maintenance),
-[wrapper diagnostics](../ai/ui-style-a11y-i18n.md#wrapper-naming-and-diagnostics), or
-[source-search checks](../ai/ui-style-a11y-i18n.md#accessibility-review-procedure).
+For accessibility work, select only the relevant section of [ui-style-a11y-i18n.md](../ai/ui-style-a11y-i18n.md):
+**Keyboard mode and panel focus**, **Focus-indicator maintenance**, **Wrapper naming and diagnostics**, or
+**Accessibility review procedure** (source-search checks).
 
-- UI/icons from @/ui; reuse style/focus helpers and tokens; custom extensions in reusable UI need optional chaining.
+- UI/icons from their direct `@/ui/...` module (never the `@/ui` barrel or MUI); reuse style/focus helpers and tokens; custom extensions in reusable UI need optional chaining.
 - Use translated labels, en/fr parity and canonical toggle semantics; preserve WCAG exceptions.
 - Snackbars must also notify; no transient interactive actions or new generic-error paths.
 - Scrollbar colours are global via `GlobalStyles` (`primary.main` thumb, `surface.low` track): never set `scrollbar-color` or `::-webkit-scrollbar-*` in components. Use `scrollbarWidth: 'thin'` only when a narrower scrollbar is wanted; mixing standard properties with WebKit rules makes Chrome silently ignore the WebKit colours.

@@ -1,7 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Tooltip, useTheme } from '@mui/material';
 import { memo, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Box, ListItem, ListItemButton, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemButton } from '@/ui/list/list-item-button';
+import { ListItemText } from '@/ui/list/list-item-text';
+import { ListItemIcon } from '@/ui/list/list-item-icon';
+import { List } from '@/ui/list/list';
+import { BrowserNotSupportedIcon } from '@/ui/icons';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import {
   useStoreLayerCanToggle,

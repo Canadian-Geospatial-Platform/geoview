@@ -2,7 +2,9 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { IconButton, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon } from '@/ui/icons';
+import { Box } from '@/ui/layout';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
 import {
@@ -29,8 +31,9 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo, TypeQueryStatus } from '@/api/types/map-schema-types';
 
-import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';
-import { Layout } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common/layer-list';
+import type { LayoutExposedMethods } from '@/core/components/common/layout';
+import { Layout } from '@/core/components/common/layout';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { List } from '@/ui';
+import { List } from '@/ui/list/list';
 import { logger } from '@/core/utils/logger';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';

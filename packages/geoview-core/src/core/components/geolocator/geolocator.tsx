@@ -6,14 +6,16 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 
 import { debounce } from '@/core/utils/debounce';
-import { Box, ProgressBar, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
+import { Typography } from '@/ui/typography/typography';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
-import { FocusTrapContainer } from '@/core/components/common';
+import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';

@@ -6,7 +6,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './custom-legend-style';
 import type { TypeCustomLegendConfig } from './custom-legend-types';
 import { generateLegendItemId } from './custom-legend-types';
-import { LegendItem } from './components';
+import { LegendItem } from './components/legend-item';
 
 /** Props for the CustomLegendPanel component. */
 interface CustomLegendPanelProps {

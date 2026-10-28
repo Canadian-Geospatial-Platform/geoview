@@ -93,7 +93,7 @@ Also: `AGENTS.md` (delegation policy), `.github/memories/repo/` (gotchas), `docs
 
 **Knowledge upkeep**: public docs own concepts/behavior; AI references own linked internal maintenance details and workflows; memory holds short gotchas — see `AGENTS.md` → Knowledge upkeep.
 
-**Non-negotiables**: components go through controllers (never `MapViewer`); no `any`, explicit return types, `undefined` over `null`; `Fetch`, `delay()`, dom-helper wrappers, `logger`; UI and icons from `@/ui`; strings via `t()` in `en` and `fr`; never delete TODO/NOTE/FIXME/WCAG comments.
+**Non-negotiables**: components go through controllers (never `MapViewer`); no `any`, explicit return types, `undefined` over `null`; `Fetch`, `delay()`, dom-helper wrappers, `logger`; UI and icons from direct `@/ui/...` modules (no internal barrel imports); strings via `t()` in `en` and `fr`; never delete TODO/NOTE/FIXME/WCAG comments.
 
 ## Key Files to Reference
 

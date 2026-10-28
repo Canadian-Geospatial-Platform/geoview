@@ -7,25 +7,24 @@ import { ClickAwayListener } from '@mui/material';
 
 import { animated } from '@react-spring/web';
 
+import { Box, Link } from '@/ui/layout';
 import {
-  Box,
   InfoIcon,
   ErrorIcon,
   WarningIcon,
   CheckCircleIcon,
   CloseIcon,
   DeleteIcon,
-  IconButton,
   NotificationsIcon,
   NotificationsActiveIcon,
-  Badge,
-  Typography,
-  Popper,
-  Paper,
-  Button,
-  List,
-  Link,
-} from '@/ui';
+} from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Badge } from '@/ui/badge/badge';
+import { Typography } from '@/ui/typography/typography';
+import { Popper } from '@/ui/popper/popper';
+import { Paper } from '@/ui/paper/paper';
+import { Button } from '@/ui/button/button';
+import { List } from '@/ui/list/list';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 import { useUIController } from '@/core/controllers/use-controllers';

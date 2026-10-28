@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, CircularProgressBase, ErrorIcon, Icon, BrowserNotSupportedIcon, LayerGroupIcon, TitleIcon } from '@/ui';
+import { Box, Icon } from '@/ui/layout';
+import { CircularProgressBase } from '@/ui/circular-progress/circular-progress-base';
+import { ErrorIcon, BrowserNotSupportedIcon, LayerGroupIcon, TitleIcon } from '@/ui/icons';
 
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
 import {

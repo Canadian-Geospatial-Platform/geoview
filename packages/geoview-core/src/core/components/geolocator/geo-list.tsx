@@ -1,6 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme, useMediaQuery } from '@mui/material';
-import { List, ListItem, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemButton } from '@/ui/list/list-item-button';
+import { Grid } from '@/ui/grid';
+import { Tooltip } from '@/ui/tooltip/tooltip';
+import { Typography } from '@/ui/typography/typography';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';

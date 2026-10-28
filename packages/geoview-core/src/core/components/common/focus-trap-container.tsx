@@ -2,10 +2,13 @@ import type { ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { FocusTrap, Box, Button } from '@/ui';
+
 import type { SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 import { getSxClasses } from './focus-trap-container-style';
+import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
 
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';

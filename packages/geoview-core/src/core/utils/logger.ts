@@ -1,4 +1,4 @@
-import { isLocalhost, formatDuration } from './utilities';
+import { isLocalhost, formatDuration } from './runtime-utilities';
 import { LocalStorage } from './localStorage';
 
 // The log levels.

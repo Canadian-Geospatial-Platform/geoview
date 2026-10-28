@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import {
-  Box,
-  BrowserNotSupportedIcon,
-  ChartIcon,
-  HighlightIcon,
-  HighlightOutlinedIcon,
-  IconButton,
-  Paper,
-  Typography,
-  ZoomInSearchIcon,
-} from '@/ui';
+import { Box } from '@/ui/layout';
+import { BrowserNotSupportedIcon, ChartIcon, HighlightIcon, HighlightOutlinedIcon, ZoomInSearchIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Paper } from '@/ui/paper/paper';
+import { Typography } from '@/ui/typography/typography';
 import { useStoreDetailsCheckedFeatures } from '@/core/stores/states/feature-info-state';
 import { useStoreGeochartChartsConfig, useStoreGeochartLayerDataArrayBatch } from '@/core/stores/states/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
