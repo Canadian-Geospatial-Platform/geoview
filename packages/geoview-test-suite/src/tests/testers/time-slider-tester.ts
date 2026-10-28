@@ -7,6 +7,7 @@ import {
   removeStoreTimeSliderLayer,
   setStoreTimeSliderValues,
   type TypeTimeSliderValues,
+  waitForStoreTimeSliderLayer,
 } from 'geoview-core/core/stores/states/time-slider-state';
 import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
@@ -48,11 +49,11 @@ type LandcoverGroupDimensionResult = {
   /** Time dimension of the 'landcover_2020_19classes' sub-layer. */
   year2020TimeDimension: TimeDimension | undefined;
   /** Time-slider store entry for the 'landcover_2010_19classes' sub-layer. */
-  year2010TimeSliderValues: TypeTimeSliderValues | undefined;
+  year2010TimeSliderValues: TypeTimeSliderValues;
   /** Time-slider store entry for the 'landcover_2015_19classes' sub-layer. */
-  year2015TimeSliderValues: TypeTimeSliderValues | undefined;
+  year2015TimeSliderValues: TypeTimeSliderValues;
   /** Time-slider store entry for the 'landcover_2020_19classes' sub-layer. */
-  year2020TimeSliderValues: TypeTimeSliderValues | undefined;
+  year2020TimeSliderValues: TypeTimeSliderValues;
 };
 
 /** Main Time Slider testing class. */
@@ -100,12 +101,7 @@ export class TimeSliderTester extends GVAbstractTester {
       async (test) => {
         test.addStep('Waiting for the temporal layer and time-slider values to be registered...');
         await this.getControllersRegistry().layerController.waitForLayerRegistered(TimeSliderTester.TIME_SLIDER_LAYER_PATH);
-        await TimeSliderTester.waitForCondition(
-          () => !!getStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH),
-          GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
-        );
-        const registeredValues = getStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
-        Test.assertIsDefined('registeredValues', registeredValues);
+        const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
 
         originalValues = [...registeredValues.values];
         const defaultValuesBeforeReset = [...registeredValues.defaultValues];
@@ -265,14 +261,11 @@ export class TimeSliderTester extends GVAbstractTester {
 
         // Wait for each sub-layer to be registered in the time-slider store
         test.addStep('Waiting for each sub-layer to be registered in the time-slider store...');
-        await Promise.all(
-          [year2010Path, year2015Path, year2020Path].map((path) =>
-            TimeSliderTester.waitForCondition(
-              () => !!getStoreTimeSliderLayer(this.getMapId(), path),
-              GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
-            )
-          )
-        );
+        const [year2010TimeSliderValues, year2015TimeSliderValues, year2020TimeSliderValues] = await Promise.all([
+          waitForStoreTimeSliderLayer(this.getMapId(), year2010Path),
+          waitForStoreTimeSliderLayer(this.getMapId(), year2015Path),
+          waitForStoreTimeSliderLayer(this.getMapId(), year2020Path),
+        ]);
 
         // Return the test information
         return {
@@ -280,9 +273,9 @@ export class TimeSliderTester extends GVAbstractTester {
           year2010TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2010Path),
           year2015TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2015Path),
           year2020TimeDimension: getStoreLayerTimeDimension(this.getMapId(), year2020Path),
-          year2010TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2010Path),
-          year2015TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2015Path),
-          year2020TimeSliderValues: getStoreTimeSliderLayer(this.getMapId(), year2020Path),
+          year2010TimeSliderValues,
+          year2015TimeSliderValues,
+          year2020TimeSliderValues,
         };
       },
       (test, result) => {

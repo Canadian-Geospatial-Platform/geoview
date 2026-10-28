@@ -25,7 +25,7 @@ import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVElementById } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -343,7 +343,8 @@ const ResponsiveGridLayout = forwardRef(
       if (isGuideOpen) {
         // Use RAF for next frame
         requestAnimationFrame(() => {
-          getGVElementById(mapId, `${containerType}-guide-close-btn`)?.focus();
+          // Focus on the close button for the container type
+          DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
         });
       }
     }, [isGuideOpen, mapId, containerType]);

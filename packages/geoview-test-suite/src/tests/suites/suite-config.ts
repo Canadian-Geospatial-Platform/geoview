@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { ConfigTester } from '../testers/config-tester';
-import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
  * The GeoView Test Suite.
@@ -16,13 +15,12 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    */
-  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
-    super(api, mapViewer, controllerRegistry);
+  constructor(api: API, mapViewer: MapViewer) {
+    super(api, mapViewer);
 
     // Create the Config tester
-    this.#configTester = new ConfigTester(api, mapViewer, controllerRegistry);
+    this.#configTester = new ConfigTester(api, mapViewer);
     this.addTester(this.#configTester);
   }
 

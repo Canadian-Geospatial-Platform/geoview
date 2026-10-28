@@ -14,7 +14,7 @@ import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon } from '@/ui/ico
 import { Tooltip } from '@/ui/tooltip/tooltip';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { logger } from '@/core/utils/logger';
-import { getGVShellElement } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -143,7 +143,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
    * Manages inert attribute on shell children when the lightbox opens or closes.
    */
   useEffect(() => {
-    const shellElement = getGVShellElement(mapId);
+    const shellElement = DomHelper.getShellElement(mapId);
     if (!shellElement) return;
 
     if (activeTrapGeoView && isOpen) {

@@ -15,7 +15,7 @@ import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/s
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { doTimeout } from '@/core/utils/utilities';
-import { getGVElementByFullId, queryGVSelector } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -95,7 +95,7 @@ export const FocusTrapContainer = memo(({
           if (result !== 'timeout') return;
 
           // Only attempt a direct id lookup when the caller opted in via restoreFocusElementId
-          const target = restoreFocusElementId ? getGVElementByFullId(mapId, restoreFocusElementId) : undefined;
+          const target = restoreFocusElementId ? DomHelper.getGVElementByFullId(mapId, restoreFocusElementId) : undefined;
           if (target) {
             target.focus();
           } else {
@@ -105,7 +105,7 @@ export const FocusTrapContainer = memo(({
                 restoreFocusElementId
               );
             }
-            queryGVSelector<HTMLElement>(mapId, '[role="tab"][aria-selected="true"]')?.focus();
+            DomHelper.queryGVSelector<HTMLElement>(mapId, '[role="tab"][aria-selected="true"]')?.focus();
           }
         })
         .catch((error) => {
@@ -196,7 +196,7 @@ export const FocusTrapContainer = memo(({
         .then((result) => {
           if (result === 'timeout') {
             // Explicitly request focus indicator for keyboard users
-            getGVElementByFullId(mapId, exitBtnId)?.focus({ focusVisible: true });
+            DomHelper.getGVElementByFullId(mapId, exitBtnId)?.focus({ focusVisible: true });
           }
         })
         .catch((error) => {
@@ -246,7 +246,7 @@ export const FocusTrapContainer = memo(({
       open &&
       focusTrapContainerId !== focusItem.activeElementId
     ) {
-      const container = getGVElementByFullId(mapId, focusTrapContainerId);
+      const container = DomHelper.getGVElementByFullId(mapId, focusTrapContainerId);
       if (container) {
         // Add focus listener directly to the container
         const handleContainerFocus = (): void => {

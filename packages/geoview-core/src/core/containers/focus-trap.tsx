@@ -11,7 +11,7 @@ import { getFocusTrapSxClasses } from './containers-style';
 import type { SxStyles } from '@/ui/style/types';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { doTimeout } from '@/core/utils/utilities';
-import { getGVElementById, getGVMapTargetElement, getGVRootElement } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -57,7 +57,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Get container and fullscreen state
   const geoviewElement = useStoreAppGeoviewHTMLElement();
-  const mapElementStore = getGVMapTargetElement(mapId) as HTMLElement;
+  const mapElementStore = DomHelper.getMapTargetElement(mapId);
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener
@@ -103,8 +103,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         return;
       }
 
-      const topLink = getGVElementById(focusTrapId, 'toplink');
-      const bottomLink = getGVElementById(focusTrapId, 'bottomlink');
+      const topLink = DomHelper.getGVElementById(focusTrapId, 'toplink');
+      const bottomLink = DomHelper.getGVElementById(focusTrapId, 'bottomlink');
       const currentFocus = document.activeElement;
 
       // Only intercept if focus is within geoview container
@@ -190,12 +190,12 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          getGVElementById(focusTrapId, 'toplink')?.focus({ focusVisible: true });
+          DomHelper.getGVElementById(focusTrapId, 'toplink')?.focus({ focusVisible: true });
         }, FOCUS_DELAY);
         uiController.setCrosshairActive(false);
       },
       handleKeyDown: (evt: KeyboardEvent) => {
-        if (!ARROW_KEY_CODES.includes(evt.code)) {
+        if (mapElementStore && !ARROW_KEY_CODES.includes(evt.code)) {
           mapElementStore.style.border = 'unset';
         }
 
@@ -235,7 +235,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // Focus on the skip to main content link to skip app bar
       setTimeout(() => {
         // Explicitly request focus indicator for keyboard users (WCAG navigation)
-        getGVElementById(mapId, 'main-map')?.focus({ preventScroll: true, focusVisible: true });
+        DomHelper.getGVElementById(mapId, 'main-map')?.focus({ preventScroll: true, focusVisible: true });
       }, FOCUS_DELAY);
     }
   }, [handleExit, mapId, uiController]);
@@ -255,7 +255,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     setOpen(false);
 
     // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-    setTimeout(() => getGVElementById(focusTrapId, navigationLinkRef.current)?.focus(), FOCUS_DELAY);
+    setTimeout(() => DomHelper.getGVElementById(focusTrapId, navigationLinkRef.current)?.focus(), FOCUS_DELAY);
   }, [focusTrapId]);
 
   /**
@@ -315,8 +315,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     },
     [exitFocus, handleScrolling]
   );
-  useEventListener<HTMLElement>('keydown', manageLinks, getGVElementById(focusTrapId, 'bottomlink'));
-  useEventListener<HTMLElement>('keydown', manageLinks, getGVElementById(focusTrapId, 'toplink'));
+  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getGVElementById(focusTrapId, 'bottomlink'));
+  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getGVElementById(focusTrapId, 'toplink'));
 
   /**
    * Focuses the enable button when the modal opens.
@@ -327,7 +327,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     const delayJob = doTimeout(FOCUS_DELAY);
     delayJob.promise
       .then((result) => {
-        if (result === 'timeout') getGVElementById(focusTrapId, 'enable-focus')?.focus();
+        if (result === 'timeout') DomHelper.getGVElementById(focusTrapId, 'enable-focus')?.focus();
       })
       .catch((error) => {
         logger.logError('FocusTrapDialog enable-focus delay rejected unexpectedly:', error);
@@ -363,7 +363,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   return (
     <Modal
-      container={getGVRootElement(focusTrapId)}
+      container={DomHelper.getGVRootElement(focusTrapId)}
       modalId={focusTrapId}
       open={open}
       aria-labelledby={`${focusTrapId}-wcag-dialog-title`}
