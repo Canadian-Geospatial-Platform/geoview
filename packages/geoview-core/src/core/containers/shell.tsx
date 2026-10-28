@@ -44,7 +44,7 @@ import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/util
 import { useMapResize } from './use-map-resize';
 import { useEffectHostResizeSync } from './use-effect-host-resize-sync';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
-import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement, getGVVisibleTabbable } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -137,7 +137,7 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param root - The viewer focus trap root
    * @returns The elements in keyboard order
    */
-  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => getGVVisibleTabbable(mapId, root), [mapId]);
+  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => DomHelper.getGVVisibleTabbable(mapId, root), [mapId]);
 
   // #region HANDLERS
 
@@ -255,7 +255,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const handleSkipLinkClick = useCallback(
     (suffix: string): void => {
       // Explicitly request focus indicator for keyboard users (WCAG 2.4.1 skip links)
-      getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+      DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
     },
     [mapId]
   );
@@ -269,7 +269,7 @@ export function Shell(props: ShellProps): JSX.Element {
     // Intentionally use plain focus() without focusVisible: true because the crosshair itself
     // serves as the visual indicator for keyboard navigation mode. The focus ring is redundant
     // when the crosshair is active and would create visual noise.
-    getGVMapTargetElement(mapId)?.focus();
+    DomHelper.getMapTargetElement(mapId)?.focus();
   }, [mapId, uiController]);
 
   /**
@@ -415,8 +415,8 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     // Wait for both footer elements because the measured element depends on whether the panel is open.
-    const footerContainer = getGVElementById(mapId, 'tabsContainer');
-    const footerHeader = getGVElementById(mapId, 'footerbar-header');
+    const footerContainer = DomHelper.getTabsContainer(mapId);
+    const footerHeader = DomHelper.getFooterBarHeader(mapId);
     if (!footerHeader || !footerContainer) {
       setCollapsedFooterHeight(0);
       return undefined;
@@ -463,8 +463,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={buildGVElementId(mapViewer.mapId, 'toplink')}
-        href={`#${buildGVElementId(mapViewer.mapId, 'bottomlink')}`}
+        id={DomHelper.buildTopLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildBottomLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -495,8 +495,8 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {interaction === 'dynamic' && (
             <Link
-              id={buildGVElementId(mapViewer.mapId, 'main-map')}
-              href={`#${buildGVElementId(mapViewer.mapId, 'main-map')}`}
+              id={DomHelper.buildMainMapId(mapId)}
+              href={`#${DomHelper.buildMainMapId(mapId)}`}
               tabIndex={0}
               sx={{ ...memoSxClasses.skip, top: '0px' }}
               onClick={handleSkipToMap}
@@ -505,12 +505,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Link>
           )}
 
-          <Box
-            id={buildGVElementId(mapViewer.mapId, 'map')}
-            sx={memoSxClasses.mapShellContainer}
-            className="mapContainer"
-            ref={mapShellContainerRef}
-          >
+          <Box id={DomHelper.buildMapId(mapId)} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={memoSxClasses.mapContainer}>
               <Map viewer={mapViewer} />
@@ -528,7 +523,13 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
-            <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={getGVRootElement(mapViewer.mapId)} />
+            <Modal
+              key={modalId}
+              modalId={modalId}
+              open={modalOpen}
+              modalProps={modalProps}
+              container={DomHelper.getGVRootElement(mapViewer.mapId)}
+            />
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
@@ -543,8 +544,8 @@ export function Shell(props: ShellProps): JSX.Element {
         </Box>
       </FocusTrap>
       <Link
-        id={buildGVElementId(mapViewer.mapId, 'bottomlink')}
-        href={`#${buildGVElementId(mapViewer.mapId, 'toplink')}`}
+        id={DomHelper.buildBottomLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildTopLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}

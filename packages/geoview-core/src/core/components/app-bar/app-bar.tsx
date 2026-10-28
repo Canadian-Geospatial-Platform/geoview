@@ -56,11 +56,10 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
-import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
-import { getGVElementByFullId, getGVMapTargetElement } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
-import { camelCase, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
+import { camelCase, sortArrayWithEnforcedValues, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
 /** Scroll step size in pixels (matches single button height). */
@@ -117,7 +116,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const uiController = useUIController();
   const mapController = useMapController();
 
-  const geoviewElement = getGVMapTargetElement(mapId) as HTMLElement;
+  const geoviewElement = DomHelper.getMapTargetElement(mapId);
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
@@ -271,13 +270,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (isFocusTrapped) {
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          getGVElementByFullId(mapId, getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
+          DomHelper.getAppBarButton(mapId, buttonId)?.focus({ focusVisible: true });
         }, TIMEOUT.dataPanelLoading);
       }
 
       uiController.setActiveAppBarTab(buttonId, false, false);
     },
-    [uiController, isFocusTrapped, getButtonElementId, mapId]
+    [uiController, isFocusTrapped, mapId]
   );
 
   /**
@@ -364,8 +363,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - focus restore on close', isOpen, tabId);
 
     if (!isOpen && tabId) {
-      const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`;
-      const buttonElement = getGVElementByFullId(mapId, buttonElementId);
+      // Get the AppBar button element for the current tab
+      const buttonElement = DomHelper.getAppBarButton(mapId, tabId);
       if (buttonElement) {
         buttonElement.focus();
       } else {
@@ -386,13 +385,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseEffect('APP-BAR - trap focus in panel opened from config', tabId, isOpen, isFocusTrapped);
 
     if (!activeTrapGeoView || !isOpen || isFocusTrapped || !tabId) return undefined;
-    const panelElement = getGVElementByFullId(mapId, getButtonElementId(tabId, '-panel'));
+
+    // Get the panel element for the current tab
+    const panelElement = DomHelper.getAppBarPanel(mapId, tabId);
     if (!panelElement) return undefined;
 
     const handleFocusIn = (): void => uiController.setActiveAppBarTab(tabId, true, true);
     panelElement.addEventListener('focusin', handleFocusIn);
     return (): void => panelElement.removeEventListener('focusin', handleFocusIn);
-  }, [activeTrapGeoView, isOpen, isFocusTrapped, tabId, mapId, getButtonElementId, uiController]);
+  }, [activeTrapGeoView, isOpen, isFocusTrapped, tabId, mapId, uiController]);
 
   /**
    * Creates AppBar button panels from configuration tabs.
@@ -493,7 +494,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
     let buttonPanelNames = Object.keys(memoButtonPanels);
-    buttonPanelNames = enforceArrayOrder(buttonPanelNames, DEFAULT_APPBAR_TABS_ORDER);
+    buttonPanelNames = sortArrayWithEnforcedValues(buttonPanelNames, DEFAULT_APPBAR_TABS_ORDER);
     const topPanel = buttonPanelNames.filter((groupName) => groupName !== DEFAULT_APPBAR_CORE.GUIDE);
     const bottomPanel = buttonPanelNames.filter((groupName) => groupName === DEFAULT_APPBAR_CORE.GUIDE);
 

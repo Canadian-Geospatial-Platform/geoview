@@ -10,7 +10,8 @@ import type { NotificationDetailsType } from '@/core/components/notifications/no
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { DrawGeometryType } from '@/core/stores/states/drawer-state';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { buildGVElementId, getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the app-state here, remove?
+import { DomHelper, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -155,7 +156,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage!) ? geoviewConfig.displayLanguage! : 'en';
-      const geoviewHTMLElement = getGVRootElement(get().mapId)!;
+      const geoviewHTMLElement = DomHelper.getGVRootElement(get().mapId);
       set({
         appState: {
           ...get().appState,
@@ -516,11 +517,12 @@ export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoV
  *
  * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
  */
+// TODO: This Zustand store shouldn't be responsible for DOM element lookups; consider moving this logic elsewhere.
 export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
   const root = useStoreAppGeoviewHTMLElement();
   return useCallback(
     (suffix: string): HTMLElement | undefined => {
-      const fullId = buildGVElementId(root.id, suffix);
+      const fullId = DomHelper.buildGVElementId(root.id, suffix);
       return root.querySelector<HTMLElement>(`#${CSS.escape(fullId)}`) ?? undefined;
     },
     [root]
@@ -603,8 +605,8 @@ export const useStoreAppShellContainer = (): HTMLElement => {
 /**
  * Hook that returns the OpenLayers map target element for the current map.
  *
- * Reactive counterpart to `getGVMapTargetElement`: resolved through the reactive-lookup path so a component
- * re-renders once the element is mounted. Use this for render-time needs; use `getGVMapTargetElement(mapId)`
+ * Reactive counterpart to `getMapTargetElement`: resolved through the reactive-lookup path so a component
+ * re-renders once the element is mounted. Use this for render-time needs; use `getMapTargetElement(mapId)`
  * for imperative access in effects, handlers, controllers, or non-React code.
  *
  * @returns The map target element, or undefined when the map is not yet mounted.

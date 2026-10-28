@@ -19,7 +19,7 @@ import {
   getStoreLayerLegendLayerByPath,
   getStoreLayerSelectedLayerPath,
 } from 'geoview-core/core/stores/states/layer-state';
-import { getGVElementById, getGVMapTargetElement, getGVRootElement } from 'geoview-core/core/utils/dom-helper';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreMapPointMarkers,
   getStoreMapConfigOverviewMap,
@@ -60,7 +60,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.#helperCreateMapConfig(test, mapId, ['footerBar', { tabs: { core: [] } }]);
 
         test.addStep('Waiting for layout effects to settle...');
-        await GVAbstractTester.waitForReactIdle();
+        await DomHelper.waitForReactIdle();
 
         return MapConfigTester.#measureMapHeights(mapId);
       },
@@ -89,7 +89,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.#helperCreateMapConfig(test, mapId);
 
         test.addStep('Waiting for collapsed footer measurement to settle...');
-        await GVAbstractTester.waitForReactIdle();
+        await DomHelper.waitForReactIdle();
 
         return MapConfigTester.#measureMapHeights(mapId);
       },
@@ -723,7 +723,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG exists inside the map target element (not the map-info rotation section)
         test.addStep('Verifying north arrow SVG exists inside mapTargetElement...');
-        const northArrowEl = getGVMapTargetElement(mapId)?.querySelector('[data-testid="north-arrow"] svg');
+        const northArrowEl = DomHelper.getNorthArrowSVG(mapId);
         Test.assertIsDefined('northArrowDomElement', northArrowEl);
       }
     );
@@ -758,7 +758,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG does NOT exist inside the map target element
         test.addStep('Verifying north arrow SVG does not exist inside mapTargetElement...');
-        const northArrowEl = getGVMapTargetElement(mapId)?.querySelector('[data-testid="north-arrow"] svg');
+        const northArrowEl = DomHelper.getNorthArrowSVG(mapId);
         Test.assertIsUndefined('northArrowDomElement', northArrowEl ?? undefined);
       }
     );
@@ -2141,14 +2141,14 @@ export class MapConfigTester extends GVAbstractTester {
    * @returns The measured map layout heights
    */
   static #measureMapHeights(mapId: string): TypeMapHeightMeasurements {
-    const geoviewMapElement = getGVRootElement(mapId);
-    const footerContainerElement = getGVElementById(mapId, 'tabsContainer');
+    const geoviewMapElement = DomHelper.getGVRootElement(mapId);
+    const tabsContainer = DomHelper.getTabsContainer(mapId);
 
     Test.assertIsDefined('geoviewMapElement', geoviewMapElement);
 
     return {
       geoviewMapHeight: Math.round(geoviewMapElement.getBoundingClientRect().height),
-      footerChromeHeight: footerContainerElement ? Math.round(footerContainerElement.getBoundingClientRect().height) : 0,
+      footerChromeHeight: tabsContainer ? Math.round(tabsContainer.getBoundingClientRect().height) : 0,
     };
   }
 }

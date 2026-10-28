@@ -9,7 +9,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { useStoreLayerDeletionStartTime } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
-import { getGVElementByFullId } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './delete-undo-button-style';
@@ -113,7 +113,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
         if (deleted && focusTargetIdAfterDelete) {
           const targetId = focusTargetIdAfterDelete;
           requestAnimationFrame(() => {
-            getGVElementByFullId(mapId, targetId)?.focus();
+            DomHelper.getGVElementByFullId(mapId, targetId)?.focus();
           });
         }
       })

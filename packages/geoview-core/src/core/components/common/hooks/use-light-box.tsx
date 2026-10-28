@@ -4,7 +4,7 @@ import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVElementByFullId } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -64,7 +64,7 @@ function BaseLightBoxComponent({
     if (!activeTrapGeoView) return;
 
     setTimeout(() => {
-      const element = getGVElementByFullId(mapId, returnFocusId);
+      const element = DomHelper.getGVElementByFullId(mapId, returnFocusId);
       if (element) {
         // Explicitly request focus indicator for keyboard users
         element.focus({ focusVisible: true });

@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 
-import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, helperWaitForValueWithSubscription, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -439,6 +439,23 @@ export const useStoreTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
 export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeTimeSliderValues | undefined => {
   return getStoreTimeSliderState(mapId).timeSliderLayers[layerPath];
 };
+
+/**
+ * Waits for a time-slider layer to be added to the store.
+ *
+ * @param mapId - The map id
+ * @param layerPath - The layer path to wait for
+ * @returns A promise that resolves with the registered time-slider values
+ * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized
+ */
+export function waitForStoreTimeSliderLayer(mapId: string, layerPath: string): Promise<TypeTimeSliderValues> {
+  const store = getGeoViewStore(mapId);
+  getStoreTimeSliderState(mapId);
+  return helperWaitForValueWithSubscription(
+    () => getStoreTimeSliderLayer(mapId, layerPath),
+    (listener) => store.subscribe(listener)
+  );
+}
 
 /** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
 // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory

@@ -1,9 +1,10 @@
 import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /**
  * Main Map testing class.
@@ -173,7 +174,7 @@ export class GeochartTester extends GVAbstractTester {
     // Set the footer tab to Geochart
     test.addStep(`Setting active footerbar tab to geochart and wait for UI to refresh...`);
     this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
-    await this.waitForFooterTabSelected('geochart');
+    await DomHelper.waitForFooterTabSelected(this.getMapId(), 'geochart');
 
     // Select the right layer path
     test.addStep(`Selecting the geochart for the added layer...`);

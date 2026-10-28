@@ -102,43 +102,43 @@ class TestSuitePlugin extends AbstractPlugin {
     this.getConfig().suites.forEach((suite) => {
       if (suite === 'suite-core') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteCore(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteCore(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-config') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-map') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteMapFunctions(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-layer') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-layer-functions') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteLayerFunctions(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteLayerFunctions(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-geochart') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-map-config') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-ui') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-details') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-data-table') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteDataTable(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteDataTable(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-utilities') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteUtilities(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteUtilities(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-swiper') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteSwiper(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteSwiper(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-time-slider') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteTimeSlider(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+        this.addTestSuite(new GVTestSuiteTimeSlider(window.cgpv.api, this.mapViewer));
       } else {
         // Throw
         throw new TestSuiteInitializationError(suite, this.mapViewer.mapId);
