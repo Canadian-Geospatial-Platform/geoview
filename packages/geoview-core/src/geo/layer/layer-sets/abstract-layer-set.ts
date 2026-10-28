@@ -67,7 +67,7 @@ export abstract class AbstractLayerSet {
    * Constructs a new LayerSet instance.
    *
    * @param mapViewer - The MapViewer instance to work with
-   * @param controllerRegistry - The ControllerRegistry instance to work with
+   * @param controllerRegistry - The Controller Registry instance to work with
    * @param layerDomain - The LayerDomain instance to work with
    */
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {

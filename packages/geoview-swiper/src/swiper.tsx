@@ -48,7 +48,7 @@ type LayerRenderHandlers = {
 /** Properties for the Swiper component. */
 type SwiperProps = {
   /**
-   * The ControllerRegistry associated with the Swiper component.
+   * The Controller Registry associated with the Swiper component.
    *
    * @remarks The controller registry has to be provided via params, because the Swiper itself resides outside of the MapViewer context.
    */

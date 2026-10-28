@@ -96,13 +96,20 @@ export class DataTableController extends AbstractMapViewerController {
 
   /**
    * Sets the column filters state for a specific layer in the data table, which determines the filters applied to individual columns for that layer.
+   * Empty filter values are omitted so the store only contains active filters.
    *
    * @param layerPath - The path of the layer to update
    * @param columnFilters - The column filters state to set for the layer
    */
   setColumnFiltersRecord(layerPath: string, columnFilters: TypeColumnFiltersState): void {
+    const activeColumnFilters = columnFilters.filter(({ value }) =>
+      Array.isArray(value)
+        ? value.some((bound) => bound !== undefined && bound !== null && bound !== '')
+        : value !== undefined && value !== null && value !== ''
+    );
+
     // Save in the store
-    setStoreDataTableColumnFiltersRecord(this.getMapId(), columnFilters, layerPath);
+    setStoreDataTableColumnFiltersRecord(this.getMapId(), activeColumnFilters, layerPath);
   }
 
   /**
