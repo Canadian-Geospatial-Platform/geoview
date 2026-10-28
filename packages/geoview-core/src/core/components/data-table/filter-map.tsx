@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './data-table-style';
-import { Switch } from '@/ui';
+import { Switch } from '@/ui/switch/switch';
 import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { useDataTableController } from '@/core/controllers/use-controllers';

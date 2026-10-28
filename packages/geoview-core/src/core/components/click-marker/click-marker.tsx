@@ -1,7 +1,8 @@
 import { useEffect, useRef, memo } from 'react';
 
 import type { Coordinate } from 'ol/coordinate';
-import { Box, ClickMapMarker } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ClickMapMarker } from '@/ui/icons';
 
 import { useStoreMapClickMarker, useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';

@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-// all lines below (3-5) needs the eslint escape no-var-requires.
-// It is a file for the buid and constant, they are reuse later in the file. It is the reason why we keep it global...
+// It is a file for the build and constant, they are reused later in the file. It is the reason why we keep it global...
 const path = require('path');
 const { merge } = require('webpack-merge');
 
@@ -21,6 +19,12 @@ const config = {
     open: true,
     hot: false,
     liveReload: false,
+    client: {
+      overlay: {
+        // The browser reports this benign ResizeObserver notice as an error; don't cover the map with the overlay for it
+        runtimeErrors: (error) => !error?.message?.includes('ResizeObserver loop'),
+      },
+    },
   },
 };
 

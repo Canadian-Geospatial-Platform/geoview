@@ -3,20 +3,15 @@ import { useTranslation } from 'react-i18next';
 import type { SxProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
-import {
-  Box,
-  Collapse,
-  IconButton,
-  KeyboardArrowDownIcon,
-  KeyboardArrowUpIcon,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ProgressBar,
-  Tooltip,
-  VisibilityOffOutlinedIcon,
-  VisibilityOutlinedIcon,
-} from '@/ui';
+import { Box } from '@/ui/layout';
+import { Collapse } from '@/ui/collapse/collapse';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { KeyboardArrowDownIcon, KeyboardArrowUpIcon, VisibilityOffOutlinedIcon, VisibilityOutlinedIcon } from '@/ui/icons';
+import { ListItem } from '@/ui/list/list-item';
+import { ListItemButton } from '@/ui/list/list-item-button';
+import { ListItemText } from '@/ui/list/list-item-text';
+import { ProgressBar } from '@/ui/linear-progress/linear-progress';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 import {
   useStoreLayerDisplayState,
   useStoreLayerSelectedLayerPath,

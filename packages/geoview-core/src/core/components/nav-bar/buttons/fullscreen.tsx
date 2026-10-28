@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { FullscreenIcon, FullscreenExitIcon } from '@/ui/icons';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';

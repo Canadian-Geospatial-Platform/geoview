@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
-import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui/mui-reexports/mui-reexports';
 import { isImage, stringify, sanitizeHtmlContent, linkifyAndSanitizeHtml } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -17,7 +19,7 @@ import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import { useLightBox } from '@/core/components/common';
+import { useLightBox } from '@/core/components/common/hooks/use-light-box';
 import { getSxClasses } from './details-style';
 
 /** Properties for the FeatureInfoTable component. */

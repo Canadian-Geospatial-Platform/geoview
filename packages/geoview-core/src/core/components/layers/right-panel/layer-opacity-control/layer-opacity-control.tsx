@@ -6,7 +6,9 @@ import { useTheme } from '@mui/material/styles';
 import type { Theme, SxProps } from '@mui/material/styles';
 import type { Mark } from '@mui/material/Slider/useSlider.types';
 
-import { Box, Slider, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Slider } from '@/ui/slider/slider';
+import { Typography } from '@/ui/typography/typography';
 import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './layer-opacity-control-styles';
 import {

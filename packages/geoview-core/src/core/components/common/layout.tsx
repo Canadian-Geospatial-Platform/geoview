@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { Typography } from '@/ui';
+import { Typography } from '@/ui/typography/typography';
 import type { LayerListEntry } from './layer-list';
 import { LayerList } from './layer-list';
 import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';

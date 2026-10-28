@@ -6,29 +6,29 @@ import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
 
 import { delay } from '@/core/utils/utilities';
+import { Box } from '@/ui/layout';
 import {
-  Box,
+  ArrowBackIcon,
   BrowserNotSupportedIcon,
-  Checkbox,
-  Divider,
-  Fade,
-  FormControlLabel,
-  Grid,
   HighlightIcon,
   HighlightOutlinedIcon,
-  IconButton,
   InfoOutlinedIcon,
-  List,
-  ListItem,
-  Paper,
   RestartAltIcon,
   TableViewIcon,
   TimeSliderIcon,
-  Typography,
   SettingsIcon,
   ZoomInSearchIcon,
-} from '@/ui';
-import { ArrowBackIcon } from '@/ui/icons';
+} from '@/ui/icons';
+import { Checkbox } from '@/ui/checkbox/checkbox';
+import { Divider } from '@/ui/divider/divider';
+import { Fade } from '@/ui/fade/fade';
+import { FormControlLabel } from '@/ui/mui-reexports/mui-reexports';
+import { Grid } from '@/ui/grid';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { Paper } from '@/ui/paper/paper';
+import { Typography } from '@/ui/typography/typography';
 import { useTimeSliderControllerIfExists, useUIController, useDataTableController } from '@/core/controllers/use-controllers';
 import { layerHasClassItems, layerHasLegendImage, type TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Geometry } from 'ol/geom';
 import { GeometryCollection, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
-import { MenuItem } from '@/ui';
+import { MenuItem } from '@/ui/menu/menu-item';
 
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
 import type { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';

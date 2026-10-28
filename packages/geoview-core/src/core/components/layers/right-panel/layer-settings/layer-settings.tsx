@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Typography, Select } from '@/ui';
+import { Box } from '@/ui/layout';
+import { Typography } from '@/ui/typography/typography';
+import { Select } from '@/ui/select/select';
 import { Switch } from '@/ui/switch/switch';
 
 import {

@@ -6,20 +6,18 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
-import type { ButtonPropsLayerPanel } from '@/ui';
-import {
-  Box,
-  Button,
-  IconButton,
-  ButtonGroup,
-  CircularProgressBase,
-  FileUploadIcon,
-  FormHelperText,
-  Paper,
-  Select,
-  Stepper,
-  TextField,
-} from '@/ui';
+import type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { ButtonGroup } from '@/ui/button-group/button-group';
+import { CircularProgressBase } from '@/ui/circular-progress/circular-progress-base';
+import { FileUploadIcon } from '@/ui/icons';
+import { FormHelperText } from '@/ui/mui-reexports/mui-reexports';
+import { Paper } from '@/ui/paper/paper';
+import { Select } from '@/ui/select/select';
+import { Stepper } from '@/ui/stepper/stepper';
+import { TextField } from '@/ui/text-field/text-field';
 import { ConfigApi } from '@/api/config/config-api';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';

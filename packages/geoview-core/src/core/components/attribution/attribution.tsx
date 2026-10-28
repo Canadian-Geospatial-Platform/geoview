@@ -5,7 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 
-import { Box, CopyrightIcon, Popper, Paper, IconButton, Typography } from '@/ui';
+import { Box } from '@/ui/layout';
+import { CopyrightIcon } from '@/ui/icons';
+import { Popper } from '@/ui/popper/popper';
+import { Paper } from '@/ui/paper/paper';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { Typography } from '@/ui/typography/typography';
 import type { SxStyles } from '@/ui/style/types';
 import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

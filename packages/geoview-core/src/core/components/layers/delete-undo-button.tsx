@@ -2,7 +2,10 @@ import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { CircularProgressBase } from '@/ui/circular-progress/circular-progress-base';
+import { DeleteOutlineIcon, UndoIcon } from '@/ui/icons';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { useStoreLayerDeletionStartTime } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';

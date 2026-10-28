@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material/styles';
 
-import { ButtonGroup, Box, IconButton } from '@/ui';
+import { ButtonGroup } from '@/ui/button-group/button-group';
+import { Box } from '@/ui/layout';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { MoreVertIcon, MoreHorizIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import type { SxStyles } from '@/ui/style/types';
-import type { NavBarApi } from '@/core/components';
+import type { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion, useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapOverviewShouldBeVisible } from '@/core/stores/states/map-state';

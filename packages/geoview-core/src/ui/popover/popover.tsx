@@ -2,7 +2,7 @@ import { useEffect, isValidElement } from 'react';
 import type { PopoverProps } from '@mui/material';
 import { Popover as MaterialPopover } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { FocusTrap } from '@/ui';
+import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
 import { ARROW_KEYS_WITH_SPACE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { delay } from '@/core/utils/utilities';

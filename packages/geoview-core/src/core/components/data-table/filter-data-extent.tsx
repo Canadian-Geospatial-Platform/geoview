@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useCallback } from 'react';
 
 import { getSxClasses } from './data-table-style';
-import { Switch } from '@/ui';
+import { Switch } from '@/ui/switch/switch';
 import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useMapController, useDataTableController } from '@/core/controllers/use-controllers';
 

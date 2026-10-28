@@ -3,8 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
 
-import { Box, ButtonBase, CircularProgressBase, Collapse, Typography } from '@/ui';
-import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
+import { Box } from '@/ui/layout';
+import { ButtonBase } from '@/ui/mui-reexports/mui-reexports';
+import { CircularProgressBase } from '@/ui/circular-progress/circular-progress-base';
+import { Collapse } from '@/ui/collapse/collapse';
+import { Typography } from '@/ui/typography/typography';
+import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui/icons';
 
 import { getSxClasses } from './layer-settings-style';
 import type { SxStyles } from '@/ui/style/types';

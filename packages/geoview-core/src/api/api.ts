@@ -26,9 +26,9 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerApi } from '@/geo/layer/layer';
 
-import { initMapDivFromFunctionCall, unmountMap } from '@/app';
+import { initMapDivFromFunctionCall, unmountMap } from '@/core/map-mount';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { removeGeoviewStore } from '@/core/stores/stores-managers';
+import { removeGeoviewStore } from '@/core/stores/store-lifecycle';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import { getStoreMapConfigState } from '@/core/stores/states/map-state';
@@ -235,7 +235,7 @@ export class API {
     if (divHeight) mapDiv.style.height = `${divHeight}px`;
 
     // Init by function call
-    const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
+    const mapViewer = await initMapDivFromFunctionCall(this, mapDiv, mapConfig);
 
     // If waiting on the map ready.
     // GV Keep in mind that doing so will make you skip some layer entry config processing happening in parallel.

@@ -14,12 +14,12 @@ import {
 } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
-import type { IconButtonPropsExtend } from '@/ui';
+import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import { Box } from '@/ui/layout';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { Panel } from '@/ui/panel/panel';
 import {
-  Box,
-  List,
-  ListItem,
-  Panel,
   QuestionMarkIcon,
   InfoOutlinedIcon,
   LegendIcon,
@@ -28,7 +28,7 @@ import {
   LayersOutlinedIcon,
   KeyboardArrowUpIcon,
   KeyboardArrowDownIcon,
-} from '@/ui';
+} from '@/ui/icons';
 
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
@@ -45,8 +45,12 @@ import {
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import type { AppBarApi } from '@/core/components';
-import { Guide, Legend, DetailsPanel, Datapanel, LayersPanel } from '@/core/components';
+import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
+import { Guide } from '@/core/components/guide/guide';
+import { Legend } from '@/core/components/legend/legend';
+import { DetailsPanel } from '@/core/components/details/details-panel';
+import { Datapanel } from '@/core/components/data-table/data-panel';
+import { LayersPanel } from '@/core/components/layers/layers-panel';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';

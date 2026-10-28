@@ -8,7 +8,9 @@ import { useTheme } from '@mui/material/styles';
 
 import Markdown from 'markdown-to-jsx';
 
-import { Box, TextField, InputAdornment, IconButton } from '@/ui';
+import { Box, InputAdornment } from '@/ui/layout';
+import { TextField } from '@/ui/text-field/text-field';
+import { IconButton } from '@/ui/icon-button/icon-button';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import type { TypeGuideObject } from '@/core/stores/states/app-state';

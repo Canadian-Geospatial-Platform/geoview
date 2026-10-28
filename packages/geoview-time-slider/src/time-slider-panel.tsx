@@ -1,6 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { LayerListEntry, LayoutExposedMethods } from 'geoview-core/core/components/common';
-import { Layout } from 'geoview-core/core/components/common';
+import type { LayerListEntry } from 'geoview-core/core/components/common/layer-list';
+import type { LayoutExposedMethods } from 'geoview-core/core/components/common/layout';
+import { Layout } from 'geoview-core/core/components/common/layout';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
 import type { TypeTimeSliderValues } from 'geoview-core/core/stores/states/time-slider-state';
 import { useStoreTimeSliderLayers, useStoreTimeSliderSelectedLayerPath } from 'geoview-core/core/stores/states/time-slider-state';

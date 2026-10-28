@@ -11,12 +11,12 @@ import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
-import { MapIcon } from '@/ui';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { Button } from '@/ui/button/button';
-import { List, ListItem } from '@/ui/list';
-import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
+import { List } from '@/ui/list/list';
+import { ListItem } from '@/ui/list/list-item';
+import { BlockIcon, MapIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 import { useLayerController, useMapController } from '@/core/controllers/use-controllers';
 import type { SxStyles } from '@/ui/style/types';
 

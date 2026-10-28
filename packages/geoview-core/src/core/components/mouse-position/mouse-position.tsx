@@ -6,7 +6,11 @@ import { useTheme } from '@mui/material/styles';
 
 import type { Coordinate } from 'ol/coordinate';
 
-import { Radio, RadioGroup, FormControlLabel, Box, Button, CheckIcon, Tooltip } from '@/ui';
+import { Radio, RadioGroup, FormControlLabel } from '@/ui/mui-reexports/mui-reexports';
+import { Box } from '@/ui/layout';
+import { Button } from '@/ui/button/button';
+import { CheckIcon } from '@/ui/icons';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 
 import { useStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
