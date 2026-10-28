@@ -107,6 +107,9 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
   const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
+  // The final filtered row model includes column, global, and upstream filters
+  const hasFilteredRows = table.getFilteredRowModel().rows.length > 0;
+
   // Check if there are any active filters (column filters OR global search filter)
   const hasActiveFilters =
     table.getState().columnFilters?.some((filter) => isFilterValueActive(filter.value)) ||
@@ -132,11 +135,15 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
    * Handles zooming to the extent of the currently filtered rows, or the full layer extent when no filter is active.
    */
   const handleZoomToFilteredExtent = useCallback((): void => {
+    const filteredRows = table.getFilteredRowModel().rows;
+
+    if (filteredRows.length === 0) return;
+
     // Zoom to the currently filtered rows' extent, or the full layer extent when no filter is active
     const zoomPromise = hasActiveFilters
       ? layerController.zoomToFeaturesExtent(
           layerPath,
-          (useTable?.getFilteredRowModel().rows ?? []).map((row) => row.original.gvFeature)
+          filteredRows.map((row) => row.original.gvFeature)
         )
       : layerController.zoomToLayerExtent(layerPath);
 
@@ -144,7 +151,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
       // Log
       logger.logPromiseFailed('in handleZoomToFilteredExtent in TopToolbar', error);
     });
-  }, [hasActiveFilters, layerController, layerPath, useTable]);
+  }, [hasActiveFilters, layerController, layerPath, table]);
 
   // #endregion
 
@@ -170,6 +177,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
           <IconButton
             className="buttonOutline"
             aria-label={t('dataTable.zoomToFilteredExtent')}
+            aria-disabled={!hasFilteredRows}
             color="primary"
             onClick={handleZoomToFilteredExtent}
           >
