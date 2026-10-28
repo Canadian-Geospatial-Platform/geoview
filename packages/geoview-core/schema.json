@@ -2037,6 +2037,13 @@
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
         },
+        "hitToleranceOffset": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Manual pixel offset (x, y) to apply when centering the identify hit-tolerance circle, overriding the service's xoffset/yoffset."
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
