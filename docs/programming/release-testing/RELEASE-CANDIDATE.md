@@ -183,6 +183,8 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed `zoomToExtent` completion behavior so same-extent zoom operations still resolve reliably (#3580)
 - Fixed WMTS metadata handling and style typing (including `LegendURL`) to prevent metadata parsing issues (#3580)
 - Fixed WFS feature query handling to support additional response formats beyond `application/json` and blank defaults (#3580)
+- WFS 2.0 feature queries now detect capped responses through `numberMatched` and `numberReturned`, then fetch remaining pages sequentially with `count` and `startIndex`; primary-key sorting keeps page order stable. WFS primary-key detection is centralized and recognizes `pk_lyr_id`, `fid`, and `id` fallbacks (`3fa868bc66`, `761a0c38d9`, `71cbb6dd9f`)
+- Improved Details-panel highlight synchronization: checked features and the active feature are reconciled with map highlights as selection, panel visibility, and query results change; feature navigation resets when the selected layer or result set changes (`9cf092a48c`)
 - Fixed scale control accessibility labeling by correcting the aria-label translation key wiring for map info scale output (#3581)
 - Fixed overview-map visible on load when `hideOnZoom` threshold should hide it (e.g., outlier-elections-2019.html) (#3562)
 - Fixed Swiper layer opacity handling by rewriting clip logic for features based on slider position (#3562)
@@ -244,6 +246,7 @@ _(Dependency updates, build config changes)_
 - **Node 24 toolchain** (October 2026 Node.js security releases): CI and local builds move from end-of-life Node 20 to Node 24.22.1, Rush 5.113.4 → 5.181.0, pnpm 8.15.2 → 11.1.1. Lockfile converted to pnpm 11 format with all 933 resolved package versions unchanged. pnpm settings moved to `common/config/rush/pnpm-config.json`; `@swc/core` build scripts approved via `globalAllowBuilds`; `ensureConsistentVersions` moved to `common-versions.json`; Rush bootstrap scripts regenerated (fixes Windows `npm install` failure on Node 24). Webpack `geochart` loader rule now matches `node_modules/geochart/` so it works with pnpm 11's store layout (issue #3702)
 - **GitHub Actions modernization**: all actions SHA-pinned to Node 24 releases; explicit least-privilege permissions per job; develop preview builds the exact commit and deploys a digest-verified run artifact (no cache handoff; superseded commits skipped); type publication split into read-only generation plus an idempotent bot-attributed `new-types` PR; CodeQL v4 with `build-mode: none`; weekly Dependabot for `github-actions` only; removed `main-deprecated`. The `pull_request: locked` PR build trigger is unchanged. See `docs/programming/ci-workflows.md` (issue #3702)
 - Removed the stale tracked `package-lock.json` files (repo root and `packages/geoview-core`) that Dependabot security updates were scanning; Rush uses `common/config/rush/pnpm-lock.yaml`, and `**/package-lock.json` is now git-ignored. The webpack dev-server overlay no longer covers the viewer for the benign `ResizeObserver loop` browser notice (issue #3711)
+- Tightened `@typescript-eslint/no-floating-promises` with `ignoreVoid: false`, so `void` no longer suppresses unhandled promise rejections; added contributor guidance on handling terminal promise rejections (`6141b0b89f`, `783ce06291`)
 
 ## Architecture & Performance
 
@@ -328,6 +331,7 @@ _(Doc updates, demo cleanup, code organization)_
 
 - Standardized 30+ component `memo` utilizations to use arrow function syntax (#3544)
 - Categorized many TODOs for better organization (#3544)
+- Extracted nested callbacks into focused helpers across UI, layer, configuration, and STAC-browser code, and documented the promise-rejection and paged-proxy-URL handling conventions (`783ce06291`, `6141b0b89f`)
 - Branch review follow-up cleanup and hardening edits across data table and add-layer flows (6694b74ab, aee29d274)
 - Updated copilot-instructions.md: store region organization rule (getter-then-hook pairs), zoomToExtent/promiseQueryBatched patterns, no-guess/no-remove-assertion rules
 - Updated TestCreator agent: store region rule, zoomToExtent no-await rule, DOM fallback for UI state verification, no-guess field names constraint
@@ -351,12 +355,13 @@ _(Tests added, moved, removed, or reorganized)_
 
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path (`suite-data-table` 12 → 13; `00-automated-suite` total 272 → 273).
 - New automated test case for group layer with `defaultVisibility: false` (#3544)
-- New `suite-data-table` test suite (12 tests): allFeaturesDataArray populated, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
+- New `suite-data-table` test suite (15 tests currently): allFeaturesDataArray populated, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
 - New `suite-details` tests (6 total): details panel query, clear all highlights, zoom to feature, nameField as label, summary false hides field, field alias renames field
 - Added `getStoreDataTableLayerSettings` getter to `data-table-state.ts` (moved paired hook from OTHERS region to main region)
 - Added `getStoreMapClickMarker` and `getStoreMapNorthArrow` getters to `map-state.ts` (moved from OTHERS to main region)
 - Map 11 test page added for `suite-data-table` (GeoJSON + Commemorative Map + Esri Dynamic + Permafrost layers)
-- Updated test-catalog.md and automated-suite documentation to distinguish declared suite totals from release-run executions. The current registered suites declare 229 tests; the release checklist runs the layer suite on both LCC and Web Mercator maps, for 272 executions when all listed suites run.
+- Updated automated-suite documentation to distinguish declared suite totals from release-run executions. The current catalog declares 274 tests; the release checklist totals 323 executions because `suite-layer` runs on both LCC and Web Mercator maps (`71cbb6dd9f`; prior tracked figures were 229/272).
+- Added large WFS and WMS configurations to the layer navigator for experimenting with high-volume services and paging behavior (`3fa868bc66`)
 - Added WMTS, VectorTiles, and XYZTiles layer types to automated functional testing (#3562)
 - Moved `testAddGeocoreWithGroupDefaultVisibilityFalse` to end of suite to reduce resource contention with other tests (#3562)
 - Fixed automated tests for new `viewSettings` padding behavior (#3562)

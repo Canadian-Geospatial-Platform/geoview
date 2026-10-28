@@ -480,6 +480,16 @@ export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSetti
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 /**
+ * Gets the filtered row count recorded for a layer.
+ *
+ * @param layerPath - The layer path whose row count is read
+ * @returns The recorded filtered row count, or zero when no count is recorded
+ */
+export const getStoreDataTableRowsFilteredCount = (mapId: string, layerPath: string): number => {
+  return getStoreDataTableLayerSettings(mapId)[layerPath]?.rowsFilteredRecord ?? 0;
+};
+
+/**
  * Gets the feature info entries for a specific layer from the data table store.
  *
  * @param mapId - The map identifier

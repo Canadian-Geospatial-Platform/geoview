@@ -13,6 +13,7 @@ import type { ButtonPanelType } from './app-bar';
  * @param setterCallback - State setter for the button panels record
  * @param status - Whether the panel should be open (true) or closed (false)
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
+ * @deprecated Not used anymore - delete?
  */
 export const helpOpenClosePanelByIdState = (
   buttonId: string,
@@ -46,6 +47,7 @@ export const helpOpenClosePanelByIdState = (
  * @param buttonId - The id of the button panel to open
  * @param setterCallback - State setter for the button panels record
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
+ * @deprecated Not used anymore - delete?
  */
 export const helpOpenPanelById = (
   buttonId: string,
@@ -65,6 +67,7 @@ export const helpOpenPanelById = (
  * @param buttonId - The id of the button panel to close
  * @param setterCallback - State setter for the button panels record
  * @param focusWhenNoElementCallback - Optional callback invoked when the button element cannot be found
+ * @deprecated Not used anymore - delete?
  */
 export const helpClosePanelById = (
   mapId: string,
@@ -91,6 +94,7 @@ export const helpClosePanelById = (
  *
  * @param buttonPanels - The current button panels state
  * @param setterCallback - State setter for the button panels record
+ * @deprecated Not used anymore - delete?
  */
 export const helpCloseAll = (buttonPanels: ButtonPanelType, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>): void => {
   const panelGroups = {} as ButtonPanelType;
