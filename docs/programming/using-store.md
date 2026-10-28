@@ -37,9 +37,11 @@ Fine-grained hooks that trigger re-renders when the selected state changes.
 
 ```ts
 // Pattern: useStore[SliceName][PropertyName]
-export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
+export const useStoreMapZoom = (): number =>
+  useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
+export const useStoreMapClickMarker = (): TypeClickMarker | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 ```
 
 ### Getter Functions (`getStore*`) — controllers and non-React code
@@ -47,9 +49,12 @@ export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStor
 Point-in-time snapshots. Takes `mapId` as first parameter.
 
 ```ts
-export const getStoreMapZoom = (mapId: string): number => getStoreMapState(mapId).zoom;
+export const getStoreMapZoom = (mapId: string): number =>
+  getStoreMapState(mapId).zoom;
 
-export const getStoreMapOrderedLayerInfo = (mapId: string): TypeOrderedLayerInfo[] => getStoreMapState(mapId).orderedLayerInfo;
+export const getStoreMapOrderedLayerInfo = (
+  mapId: string,
+): TypeOrderedLayerInfo[] => getStoreMapState(mapId).orderedLayerInfo;
 ```
 
 ### Setter Functions (`setStore*`) — controllers only
@@ -61,7 +66,10 @@ export const setStoreMapZoom = (mapId: string, zoom: number): void => {
   getStoreMapState(mapId).actions.setZoom(zoom);
 };
 
-export const setStoreMapClickMarker = (mapId: string, marker: TypeClickMarker): void => {
+export const setStoreMapClickMarker = (
+  mapId: string,
+  marker: TypeClickMarker,
+): void => {
   getStoreMapState(mapId).actions.showClickMarker(marker);
 };
 ```
@@ -104,7 +112,11 @@ For legend toggle-all (#3447), update each item's visibility and its layer's cla
 Controllers import `getStore*` and `setStore*` functions directly. They contain the validation and business logic.
 
 ```ts
-import { getStoreMapZoom, setStoreMapZoom, setStoreMapProjection } from '@/core/stores/states/map-state';
+import {
+  getStoreMapZoom,
+  setStoreMapZoom,
+  setStoreMapProjection,
+} from "@/core/stores/states/map-state";
 
 export class MapController extends AbstractMapViewerController {
   zoomToLevel(zoom: number): void {
@@ -125,7 +137,9 @@ Inside a controller, access other controllers through `this.getControllersRegist
 
 ```ts
 // Inside a controller method
-this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(layerPath);
+this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(
+  layerPath,
+);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
@@ -133,8 +147,12 @@ this.getControllersRegistry().uiController.setCircularProgress(true);
 
 ```ts
 // In a plugin
-const layerPaths = this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
-this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, config);
+const layerPaths =
+  this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
+this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(
+  layer,
+  config,
+);
 ```
 
 ## Summary Table
@@ -151,6 +169,23 @@ this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndAppl
 **Key rule:** Components never receive a `MapViewer` prop. Core and plugin components take a `mapId` (or a `ControllerRegistry` when rendered outside the `MapViewer` React context) and call controller methods. If the controller lacks a method you need, add it — don't reach into `mapViewer.map`. See [Controller Architecture — Best Practices](controller-architecture.md#best-practices).
 
 **Key rule:** Store state files never log business flow. `setStore*` / `addStore*` / `removeStore*` adaptors are thin setters — put `logger.logInfo` (and `logWarning` / `logError`) in the calling controller, which owns the intent behind the change. See [Logging — Where to log](logging.md#where-to-log--controllers-not-store-state-files).
+
+## Store Module Layout and Import Direction
+
+The store files are split so that imports only flow one way and the store never pulls in the React component tree (#3711):
+
+| Module                                    | Owns                                                                  | May be imported by                   |
+| ----------------------------------------- | --------------------------------------------------------------------- | ------------------------------------ |
+| `core/stores/store-context.ts`            | `StoreContext` (map id of the store used by the components below it)  | Everything (no internal imports)     |
+| `core/stores/stores-managers.ts`          | Store registry (`getGeoViewStore`, `useGeoViewStore`), batch helpers  | State slices, controllers, hooks     |
+| `core/stores/geoview-store.ts`            | `IGeoviewState`, store types, `useStoreGeoView*`, `useStableSelector` | State slices, components             |
+| `core/stores/states/*-state.ts`           | One slice: hooks, getters, setters, initializer                       | Components, controllers              |
+| `core/stores/geoview-store-definition.ts` | Store definition composing every slice initializer                    | `store-lifecycle.ts` only            |
+| `core/stores/store-lifecycle.ts`          | `addGeoViewStore` / `removeGeoviewStore`                              | App bootstrap (`map-mount.tsx`, API) |
+
+- State slices must never import `geoview-store-definition.ts` or `store-lifecycle.ts`; both import every slice.
+- Store modules must never import React components, `app-start.tsx` or containers. A single such import (the former `StoreContext` import from `app-start.tsx`) put the whole component tree and every slice in one import cycle.
+- Modules evaluated at load time by the logger (`core/utils/runtime-utilities.ts`) stay free of internal imports.
 
 ## See Also
 
