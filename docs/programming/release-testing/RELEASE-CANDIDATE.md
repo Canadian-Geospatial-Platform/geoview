@@ -312,6 +312,7 @@ _(WCAG fixes and improvements)_
 - Added `jsx-a11y` lint enforcement in `packages/eslint.config.js` (MUI component → DOM element mapping, interaction-handler scoping, `click-events-have-key-events`, `interactive-supports-focus`) plus a `no-restricted-syntax` warning against hand-rolled `role="button"` (#3679)
 - Swiper bar is now exposed as an accessible `slider` (`aria-valuenow`/`aria-valuetext`, orientation-aware label and keyboard instructions, decorative handle hidden), with the announced position updated live while dragging and debounced render cancelled on stop/unmount (new `positionLabel`, `positionFromLeft`, `positionFromTop`, `instructionsHorizontal`, `instructionsVertical` translations in EN/FR) (#3691)
 - Focus ring styling and accessibility documentation updates following the MUI 9.4 focus-indicator migration (tabs, slider and switch styles, guide/app-bar/data-table style clean-up, `docs/app/accessibility.md` and WCAG release-test page).
+- Fixed right-panel and Data Table scrolling: the panel scroller is keyboard-focusable and contains vertical scroll chaining, while flex sizing keeps the table and horizontal scrollbar visible below wrapped toolbar controls and the focus-trap Exit button (#3697).
 
 ## Documentation & Cleanup
 

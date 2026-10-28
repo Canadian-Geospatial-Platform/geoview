@@ -1042,18 +1042,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
     [scrollCellIntoView]
   );
 
-  /** MUI table paper props configuration. */
-  const memoMuiTablePaperProps = useCallback(
-    ({ table }: { table: MRTTableInstance<DataTableRow> }): { style: React.CSSProperties } => ({
-      style: {
-        zIndex: table.getState().isFullScreen ? 999999 : undefined,
-        height: '100%',
-        paddingBottom: '5px', // Add padding to account for by horizontal scrollbar
-      },
-    }),
-    []
-  );
-
   /** MUI table body cell props configuration. */
   const memoMuiTableBodyCellProps = useCallback(
     ({ cell }: { cell: MRTCell<DataTableRow> }): Record<string, unknown> => ({
@@ -1179,8 +1167,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         };
       },
     },
-    // override z-index of table when table is in fullscreen mode
-    muiTablePaperProps: memoMuiTablePaperProps,
+    muiTablePaperProps: {
+      sx: memoSxClasses.tablePaper,
+    },
     muiTableBodyCellProps: memoMuiTableBodyCellProps,
     muiTableBodyProps: {
       sx: memoSxClasses.tableBody,

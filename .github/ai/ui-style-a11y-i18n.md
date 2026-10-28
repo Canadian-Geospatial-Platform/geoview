@@ -84,8 +84,12 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
   also checks toggle/mobile mode, content, and right-panel visibility.
-- Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. Preserve its
-  keyboard focusability and vertical scroll containment (#3697).
+- Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. It takes the
+  remaining flex height below the panel controls. Preserve its keyboard focusability and vertical scroll
+  containment (#3697).
+- Size full-height panel children with flex (flex-column Paper, shrinkable scroller), not a fixed
+  toolbar-height subtraction: that clips the horizontal scrollbar when toolbar controls wrap. Do not
+  compensate with scrollbar padding (#3697).
 - In keyboard mode, reserve space for Exit so full-height content does not extend beyond the focus
   trap's clipping boundary. Test final-content visibility with Exit shown, and scroll chaining with
   the page away from its scroll limits.

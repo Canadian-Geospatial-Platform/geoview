@@ -95,6 +95,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .panel-content-container': {
       backgroundColor: theme.palette.background.paper,
+      flex: '1 1 0%', // Fill the remaining height so children (e.g. data table) can size to it and keep their scrollbars inside the panel
       minHeight: '0',
       border: `2px solid ${theme.palette.primary.main}`,
       borderRadius: `${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusNone} ${theme.shape.borderRadiusMd} ${theme.shape.borderRadiusMd}`,

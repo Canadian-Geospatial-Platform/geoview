@@ -114,6 +114,7 @@ This map is not fully compliant with Web Content Accessibility Guidelines (WCAG)
 
 - Opening panels triggers focus traps to speed up navigation, with Esc closing panels and returning focus to the triggering element.
 - In full-screen mode, the Esc key will exit full-screen rather than close any panels that have been opened.
+- In a side panel, press **Tab** until its scrollable content area has focus, then use the **arrow** keys to scroll. Scrolling stays within the panel at its top and bottom edges.
 
 Mouse movement or placement can cause unexpected behaviour with keyboard navigation mode. To avoid this:
 
