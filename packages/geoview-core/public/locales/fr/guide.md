@@ -113,6 +113,7 @@ La carte n'est pas pleinement conforme au niveau AA des Règles pour l'accessibi
 
 - L'ouverture des panneaux déclenche des pièges de focus pour accélérer la navigation ; la touche Échap ferme les panneaux et ramène le focus sur l'élément déclencheur.
 - En mode plein écran, la touche Échap permet de quitter le mode plein écran plutôt que de fermer les panneaux qui ont été ouverts.
+- Dans un panneau latéral, appuyez sur **Tab** jusqu’à ce que sa zone de contenu défilante reçoive le focus, puis utilisez les touches **fléchées** pour la faire défiler. Le défilement reste dans le panneau lorsqu’il atteint le haut ou le bas.
 
 Le mouvement ou le positionnement de la souris peut provoquer un comportement inattendu en mode de navigation au clavier. Pour éviter ce problème :
 

@@ -54,6 +54,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   dataTableTopToolbar: {
+    flexShrink: 0, // Keep the toolbar at its natural (possibly wrapped) height; only the table container shrinks and scrolls
     '& .MuiInputBase-input[type="search"]': {
       boxSizing: 'content-box',
     },
@@ -219,9 +220,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  tableContainer: {
+  tablePaper: {
+    display: 'flex',
+    flexDirection: 'column',
     height: '100%',
-    maxHeight: 'calc(100% - 97px)',
+  },
+  tableContainer: {
+    flex: '1 1 0%', // Take the height left below the toolbar so the table scrolls (and its scrollbars stay visible) inside the panel
+    minHeight: 0,
+    maxHeight: 'none',
   },
   tableHeaderContent: {
     whiteSpace: 'nowrap',

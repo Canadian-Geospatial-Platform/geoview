@@ -17,6 +17,17 @@ Config: `configs/navigator/layers/all-layers.json` (footerBar includes `data-tab
 | Row count             | Correct feature count              | 1. Check the row count displayed in the toolbar                                    | Row count matches the total number of features for that layer   | C    |
 | Default hidden column | geoviewID hidden                   | 1. Open column visibility menu<br>2. Check the geoviewID column                    | The `geoviewID` column is hidden by default (toggle is off)     | C    |
 
+### Scrollbar containment
+
+Use a layer with enough columns for horizontal overflow and enough rows for vertical overflow.
+
+| Test                 | Steps                                                                                                        | Expected Result                                                                                                                   | Auto |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Horizontal scrollbar | Open the footer Data Table, select the layer, and scroll to the final column and row                         | The entire horizontal scrollbar remains visible inside the panel; the final column and row are reachable                          | M    |
+| Wrapped toolbar      | Narrow the panel until toolbar controls wrap, then change density and toggle column filters                  | The table fits below the toolbar without clipping its scrollbar or hiding controls                                                | M    |
+| Panel modes          | Repeat in the app bar, enlarged and fullscreen views, and on a narrow screen; include a reduced panel height | Scrollbars stay within the panel in every mode; no extra horizontal scrollbar appears when columns fit                            | M    |
+| Keyboard mode        | Enable keyboard navigation with Exit visible, focus the panel/table, and scroll to its limits                | Focus stays visible, the final row/column remain reachable, and vertical scrolling at the panel boundary does not scroll the page | M    |
+
 ## Filter by Map Extent
 
 Config: `configs/navigator/layers/all-layers.json` (vector layers — NOT Esri Dynamic which lacks geometry in responses)
