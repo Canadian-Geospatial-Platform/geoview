@@ -17,6 +17,8 @@ interface UseSelectedRowMessageProps {
   globalFilter: string;
   showUnsymbolizedFeatures: boolean;
   unfilteredFeaturesCount: number;
+  preExtentFeaturesCount: number;
+  filterDataToExtent: boolean;
 }
 
 /**
@@ -32,6 +34,8 @@ export function useToolbarActionMessage({
   tableInstance,
   showUnsymbolizedFeatures,
   unfilteredFeaturesCount,
+  preExtentFeaturesCount,
+  filterDataToExtent,
 }: UseSelectedRowMessageProps): string {
   const { t } = useTranslation();
 
@@ -43,7 +47,12 @@ export function useToolbarActionMessage({
    */
   const memoToolbarMessage = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('USETOOLBARACTIONMESSAGE - combined', { columnFilters, globalFilter });
+    logger.logTraceUseMemo('USETOOLBARACTIONMESSAGE - combined', {
+      columnFilters,
+      globalFilter,
+      filterDataToExtent,
+      preExtentFeaturesCount,
+    });
 
     let message = '';
     let length = 0;
@@ -52,13 +61,14 @@ export function useToolbarActionMessage({
 
     if (tableInstance) {
       const filteredRows = tableInstance.getFilteredRowModel().rows.length;
+      const totalRows = filterDataToExtent ? preExtentFeaturesCount : visibleFeatures;
 
-      if (filteredRows !== visibleFeatures) {
-        // Table has additional filtering applied
+      if (filteredRows !== totalRows) {
+        // The displayed rows differ from the unfiltered, symbol-aware baseline
         length = filteredRows;
         message = t('dataTable.rowsFiltered')
           .replace('{rowsFiltered}', filteredRows.toString())
-          .replace('{totalRows}', visibleFeatures.toString() ?? '');
+          .replace('{totalRows}', totalRows.toString());
         message += !showUnsymbolizedFeatures ? ` (${unfilteredFeaturesCount} ${t('dataTable.total')})` : '';
       } else if (!showUnsymbolizedFeatures && visibleFeatures !== unfilteredFeaturesCount) {
         // Some features hidden due to missing icons
@@ -72,7 +82,17 @@ export function useToolbarActionMessage({
     }
 
     return { message, filteredRowCount: length };
-  }, [columnFilters, globalFilter, data.features?.length, tableInstance, showUnsymbolizedFeatures, unfilteredFeaturesCount, t]);
+  }, [
+    columnFilters,
+    globalFilter,
+    data.features,
+    tableInstance,
+    showUnsymbolizedFeatures,
+    unfilteredFeaturesCount,
+    preExtentFeaturesCount,
+    filterDataToExtent,
+    t,
+  ]);
 
   /**
    * Updates the store with the current filtered row count.

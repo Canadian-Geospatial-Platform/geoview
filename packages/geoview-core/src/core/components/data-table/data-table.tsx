@@ -242,7 +242,15 @@ function FocusAwareTooltipCell({ cellId, title, children }: FocusAwareTooltipCel
  * @param props - Properties defined in DataTableProps interface
  * @returns The data table element
  */
-function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, onRendered }: DataTableProps): JSX.Element {
+function DataTable({
+  data,
+  layerPath,
+  containerType,
+  unfilteredFeaturesCount,
+  preExtentFeaturesCount,
+  filterDataToExtent,
+  onRendered,
+}: DataTableProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-table');
 
@@ -1127,9 +1135,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
           data={data}
           table={props.table}
           unfilteredFeaturesCount={unfilteredFeaturesCount}
+          preExtentFeaturesCount={preExtentFeaturesCount}
+          filterDataToExtent={filterDataToExtent}
         />
       ),
-      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount]
+      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount, preExtentFeaturesCount, filterDataToExtent]
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,

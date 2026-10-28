@@ -460,8 +460,8 @@ export class DataTableTester extends GVAbstractTester {
           includeCount = '3';
         }
 
-        test.addStep(`Verifying extent filter shows correct number of features (got "${summaryTextEnabled}")...`);
-        Test.assertIsEqual(summaryTextEnabled.includes(includeCount), true);
+        test.addStep(`Verifying extent filter shows "${includeCount} of 4 row(s) filtered" (got "${summaryTextEnabled}")...`);
+        Test.assertIsEqual(summaryTextEnabled.includes(`${includeCount} of 4 row(s) filtered`), true);
 
         test.addStep(`Verifying without extent filter shows "3 of 4 row(s) filtered" (got "${summaryTextDisabled}")...`);
         Test.assertIsEqual(summaryTextDisabled.includes('3'), true);

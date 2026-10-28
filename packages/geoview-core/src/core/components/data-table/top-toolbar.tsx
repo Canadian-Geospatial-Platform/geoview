@@ -60,6 +60,12 @@ interface TopToolbarProps<TData extends DataTableRow> {
 
   /** The count of features before any filters are applied. */
   unfilteredFeaturesCount?: number;
+
+  /** The count of features before extent filtering and symbol visibility are applied. */
+  preExtentFeaturesCount: number;
+
+  /** Whether the table is currently filtered to the map extent. */
+  filterDataToExtent: boolean;
 }
 
 /**
@@ -88,7 +94,19 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/top-toolbar');
 
-  const { sxClasses, layerPath, t, globalFilter, useTable, columns, data, table, unfilteredFeaturesCount } = props;
+  const {
+    sxClasses,
+    layerPath,
+    t,
+    globalFilter,
+    useTable,
+    columns,
+    data,
+    table,
+    unfilteredFeaturesCount,
+    preExtentFeaturesCount,
+    filterDataToExtent,
+  } = props;
 
   const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
   const layerController = useLayerController();
@@ -102,6 +120,8 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
     globalFilter: table.getState().globalFilter ?? '',
     showUnsymbolizedFeatures: showUnsymbolizedFeatures,
     unfilteredFeaturesCount: unfilteredFeaturesCount || 0,
+    preExtentFeaturesCount: preExtentFeaturesCount,
+    filterDataToExtent: filterDataToExtent,
   });
 
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
