@@ -24,15 +24,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     gap: theme.spacing(1),
     padding: theme.spacing(0.25),
-    borderTop: 1,
-    borderColor: 'divider',
+    borderTop: `1px solid ${theme.palette.divider}`,
     bgcolor: 'background.default',
   },
 
   filterHeader: {
     padding: theme.spacing(0.5),
-    borderBottom: 1,
-    borderColor: 'divider',
+    borderBottom: `1px solid ${theme.palette.divider}`,
     bgcolor: 'background.default',
     paddingLeft: theme.spacing(0.5),
   },
@@ -90,7 +88,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Toggle icon button
   filterLayerToggleIcon: {
     transform: 'rotate(180deg)',
-    transition: 'transform 0.2s',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shorter,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     flexShrink: 0,
   },
 

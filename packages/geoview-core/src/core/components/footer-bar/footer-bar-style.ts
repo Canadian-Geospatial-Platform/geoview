@@ -16,7 +16,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     background: theme.palette.surface?.high ?? theme.palette.background.paper,
     boxShadow: 2,
     width: '100%',
-    transition: 'height 0.2s ease-out',
+    transition: theme.transitions.create('height', {
+      duration: theme.transitions.duration.shorter,
+      easing: theme.transitions.easing.easeOut,
+    }),
     '& .MuiTab-root': {
       minHeight: '48px',
     },

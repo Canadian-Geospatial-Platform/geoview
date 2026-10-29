@@ -32,7 +32,10 @@ export const getSxClasses = (theme: Theme): MapInfoRotationButtonStyles => ({
     },
   },
   arrow: {
-    transition: 'transform 0.3s ease-in-out',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.standard,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

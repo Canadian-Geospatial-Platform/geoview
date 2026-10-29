@@ -26,7 +26,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderRadius: theme.shape.borderRadiusMd,
     backgroundColor: theme.palette.background.paper,
     border: `2px solid ${theme.palette.divider}`,
-    transition: 'all 0.3s ease-in-out',
+    transition: theme.transitions.create('all', {
+      duration: theme.transitions.duration.standard,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     '&:hover': {
       border: `2px solid ${theme.palette.primary.main}`,
     },
