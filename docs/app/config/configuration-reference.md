@@ -1324,6 +1324,8 @@ hitToleranceOffset?: [number, number];
 
 The hit-tolerance radius is derived automatically from the service's point symbol `width`/`height`, but the symbol's `xoffset`/`yoffset` reported by the legacy ESRI symbol schema can't represent a non-center anchor baked into a modern CIM-authored symbol (e.g. a pin whose tip, not its center, marks the location). When the automatically-detected offset doesn't match the symbol's actual rendered position, set this property to manually correct it (same convention as OpenLayers `displacement`: positive values shift up/right).
 
+For a `uniqueValue`/`classBreaks` renderer, the offset can only be auto-detected when every category's point/icon symbol shares the exact same `xoffset`/`yoffset`; if categories use different offsets (or only some use a pin-style symbol), auto-detection can't know which category will be hit before the identify response comes back, so it falls back to no offset. Use `hitToleranceOffset` to manually set the offset for the category that matters in that case.
+
 **Example:**
 
 ```json

@@ -315,20 +315,22 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Gets the radius and offset, in pixels, of the largest point/icon symbol defined in a style, across its
-   * simple/uniqueValue/classBreaks entries and any size-driven visual variable. The offset is taken from that same largest
-   * symbol, since uniqueValue/classBreaks entries normally share the same symbol placement. Returns all zeros when no point
-   * symbol is found.
+   * simple/uniqueValue/classBreaks entries and any size-driven visual variable. The offset is only auto-applied when every
+   * point/icon entry shares the exact same offset; mixed offsets across categories (e.g. a uniqueValue renderer where some
+   * categories use pins and others don't) can't be resolved before the identify response tells us which category was hit, so
+   * guessing from an arbitrary (e.g. the largest) entry would often apply the wrong category's offset. In that case, use
+   * {@link EsriDynamicLayerEntryConfig.hitToleranceOffset} to target the category that matters. Returns all zeros when no
+   * point symbol is found.
    *
    * @param style - The layer style to inspect, if any
-   * @returns The largest point symbol's radius and xoffset/yoffset, in pixels
+   * @returns The largest point symbol's radius, and the shared xoffset/yoffset in pixels (zero when they're not all equal)
    */
   static #getMaxPointSymbolInfo(style: TypeLayerStyleConfig | undefined): { radius: number; offsetX: number; offsetY: number } {
     const pointStyle = style?.Point ?? style?.MultiPoint;
     if (!pointStyle) return { radius: 0, offsetX: 0, offsetY: 0 };
 
     let maxSize = 0;
-    let offsetX = 0;
-    let offsetY = 0;
+    const offsets: [number, number][] = [];
     pointStyle.info.forEach(({ settings }) => {
       let size = 0;
       let offset: [number, number] = [0, 0];
@@ -339,11 +341,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
         size = Math.max(settings.width ?? 0, settings.height ?? 0);
         offset = settings.offset ?? [0, 0];
       }
-      if (size > maxSize) {
-        maxSize = size;
-        [offsetX, offsetY] = offset;
-      }
+      maxSize = Math.max(maxSize, size);
+      offsets.push(offset);
     });
+
+    // Only trust the offset when every entry agrees on it; otherwise we can't know which one applies until after the query
+    const [firstOffsetX, firstOffsetY] = offsets[0] ?? [0, 0];
+    const offsetsAgree = offsets.every(([x, y]) => x === firstOffsetX && y === firstOffsetY);
+    const [offsetX, offsetY] = offsetsAgree ? [firstOffsetX, firstOffsetY] : [0, 0];
 
     // Data-driven sizing (ESRI visual variables) can render symbols larger than their base 'info' size
     const visualVariableSizes = (pointStyle.visualVariables ?? [])
@@ -353,7 +358,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Most real-world point/icon symbols carry a sizable transparent margin around their visible glyph (the service's
     // declared width/height/size includes that margin), so the plain half-size radius overshoots the actual visible
     // content on every side; scale it down to better approximate the visible footprint instead of the full declared canvas.
-    const PADDING_COMPENSATION_FACTOR = 0.5;
+    const PADDING_COMPENSATION_FACTOR = 0.9;
     return {
       radius: Math.ceil((Math.max(maxSize, ...visualVariableSizes, 0) / 2) * PADDING_COMPENSATION_FACTOR),
       offsetX,
