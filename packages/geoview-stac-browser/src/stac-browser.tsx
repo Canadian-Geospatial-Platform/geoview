@@ -9,7 +9,9 @@ import {
   useStoreAppDisplayDateTimezone,
   useStoreAppDisplayLanguage,
 } from 'geoview-core/core/stores/states/app-state';
-import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
+import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
+import { useStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
+import { useMapController, useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 import type { TypeStacMapExtentSnapshot, TypeStacPreviewAsset } from 'geoview-core/core/controllers/stac-browser-controller';
 
 import type {
@@ -37,6 +39,7 @@ import { StacCollectionList } from './stac-collection-list';
 import { StacCollectionDetail } from './stac-collection-detail';
 import { StacSearchResults } from './stac-search-results';
 import { StacItemDetail } from './stac-item-detail';
+import { StacBrowserLayoutUtils } from './stac-browser-layout-utils';
 import { getSxClasses, SELECTED_FILL_OPACITY, SELECTION_COLORS } from './stac-browser-style';
 
 /** Geometry group used for the selected item footprints. */
@@ -70,6 +73,10 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   const stacController = useStacBrowserController();
+  const mapController = useMapController();
+  const mapId = useStoreGeoViewMapId();
+  const activeAppBarTab = useStoreUIActiveAppBarTab();
+  const isStacPanelOpen = activeAppBarTab.isOpen && activeAppBarTab.tabId === 'stac-browser';
   const displayLanguage = useStoreAppDisplayLanguage();
   const displayDateTimezone = useStoreAppDisplayDateTimezone();
   const displayDateMode = useStoreAppDisplayDateMode();
@@ -654,11 +661,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (item: StacItem): void => {
       const bbox = StacFieldUtils.getBbox(item);
       if (!bbox) return;
-      stacController.zoomToLonLatBbox(bbox).catch((error: unknown) => {
+      const padding = StacBrowserLayoutUtils.getZoomPadding(mapId, isStacPanelOpen, mapController.getMapSize());
+      stacController.zoomToLonLatBbox(bbox, padding).catch((error: unknown) => {
         logger.logError(`STAC-BROWSER - Failed to zoom to item ${item.id}`, error);
       });
     },
-    [stacController]
+    [stacController, mapController, mapId, isStacPanelOpen]
   );
 
   /**
