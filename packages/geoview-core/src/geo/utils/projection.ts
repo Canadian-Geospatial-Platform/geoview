@@ -15,7 +15,6 @@ import type { Extent } from 'ol/extent';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { InvalidProjectionError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
@@ -294,8 +293,9 @@ export abstract class Projection {
     // The projection name
     const projectionName = `EPSG:${code}`;
 
-    // Fetch proj4 definition from epsg.io
-    let definition = await Fetch.fetchText(`${GeoUtilities.EPSG_URL}/${code}.proj4`);
+    // Fetch proj4 definition from epsg.io, retrying through the configured CORS proxy on network/CORS failure
+    const { data: fetchedDefinition } = await GeoUtilities.fetchTextWithProxyFallback(`${GeoUtilities.EPSG_URL}/${code}.proj4`);
+    let definition = fetchedDefinition;
 
     // Sanitize the definition, because sometimes it's giving back something we can't support
     definition = this.#sanitizeProj4Definition(definition);

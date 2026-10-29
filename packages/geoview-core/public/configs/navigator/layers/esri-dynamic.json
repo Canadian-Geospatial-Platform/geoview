@@ -32,6 +32,17 @@
         ]
       },
       {
+        "geoviewLayerId": "offset-icon",
+        "geoviewLayerName": "Administrative Area / Région administrative",
+        "metadataAccessPath": "https://geonb.snb.ca/arcgis/rest/services/GeoNB_NRCan_PlaceNames/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
