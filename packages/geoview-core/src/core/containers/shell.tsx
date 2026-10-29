@@ -528,7 +528,13 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
           {Object.keys(mapViewer.modal.modals).map((modalId) => (
-            <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={DomHelper.getGVRootElement(mapViewer.mapId)} />
+            <Modal
+              key={modalId}
+              modalId={modalId}
+              open={modalOpen}
+              modalProps={modalProps}
+              container={DomHelper.getGVRootElement(mapViewer.mapId)}
+            />
           ))}
           {/* modal section start */}
           <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
