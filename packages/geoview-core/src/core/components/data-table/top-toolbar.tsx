@@ -60,6 +60,12 @@ interface TopToolbarProps<TData extends DataTableRow> {
 
   /** The count of features before any filters are applied. */
   unfilteredFeaturesCount?: number;
+
+  /** The count of features before extent filtering and symbol visibility are applied. */
+  preExtentFeaturesCount: number;
+
+  /** Whether the table is currently filtered to the map extent. */
+  filterDataToExtent: boolean;
 }
 
 /**
@@ -88,7 +94,19 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/top-toolbar');
 
-  const { sxClasses, layerPath, t, globalFilter, useTable, columns, data, table, unfilteredFeaturesCount } = props;
+  const {
+    sxClasses,
+    layerPath,
+    t,
+    globalFilter,
+    useTable,
+    columns,
+    data,
+    table,
+    unfilteredFeaturesCount,
+    preExtentFeaturesCount,
+    filterDataToExtent,
+  } = props;
 
   const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
   const layerController = useLayerController();
@@ -102,10 +120,15 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
     globalFilter: table.getState().globalFilter ?? '',
     showUnsymbolizedFeatures: showUnsymbolizedFeatures,
     unfilteredFeaturesCount: unfilteredFeaturesCount || 0,
+    preExtentFeaturesCount: preExtentFeaturesCount,
+    filterDataToExtent: filterDataToExtent,
   });
 
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
   const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+  // The final filtered row model includes column, global, and upstream filters
+  const hasFilteredRows = table.getFilteredRowModel().rows.length > 0;
 
   // Check if there are any active filters (column filters OR global search filter)
   const hasActiveFilters =
@@ -132,11 +155,15 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
    * Handles zooming to the extent of the currently filtered rows, or the full layer extent when no filter is active.
    */
   const handleZoomToFilteredExtent = useCallback((): void => {
+    const filteredRows = table.getFilteredRowModel().rows;
+
+    if (filteredRows.length === 0) return;
+
     // Zoom to the currently filtered rows' extent, or the full layer extent when no filter is active
     const zoomPromise = hasActiveFilters
       ? layerController.zoomToFeaturesExtent(
           layerPath,
-          (useTable?.getFilteredRowModel().rows ?? []).map((row) => row.original.gvFeature)
+          filteredRows.map((row) => row.original.gvFeature)
         )
       : layerController.zoomToLayerExtent(layerPath);
 
@@ -144,7 +171,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
       // Log
       logger.logPromiseFailed('in handleZoomToFilteredExtent in TopToolbar', error);
     });
-  }, [hasActiveFilters, layerController, layerPath, useTable]);
+  }, [hasActiveFilters, layerController, layerPath, table]);
 
   // #endregion
 
@@ -170,6 +197,7 @@ function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element {
           <IconButton
             className="buttonOutline"
             aria-label={t('dataTable.zoomToFilteredExtent')}
+            aria-disabled={!hasFilteredRows}
             color="primary"
             onClick={handleZoomToFilteredExtent}
           >

@@ -56,7 +56,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 13;
+    return 14;
   }
 
   /**
@@ -111,6 +111,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic('forest_industry/0');
     await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
     await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable('4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8/6', 68, 213);
+    await this.#dataTableTester.testTemporaryZoomHighlightExpires(DataTableTester.GEOJSON_LAYER_PATH);
 
     // Done
     return;

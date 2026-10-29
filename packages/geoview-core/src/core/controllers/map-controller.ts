@@ -221,6 +221,9 @@ export class MapController extends AbstractMapViewerController {
   /** Callback delegates for the feature highlighted event. */
   #onFeatureHighlightedHandlers: FeatureHighlightedDelegate[] = [];
 
+  /** The pending expiry of a temporary feature highlight, if any. */
+  #temporaryHighlightTimer?: ReturnType<typeof doTimeout>;
+
   /** The active measurement Draw interaction, if any. */
   #activeMeasurementDraw?: Draw;
 
@@ -621,13 +624,33 @@ export class MapController extends AbstractMapViewerController {
    * WMS features are excluded since they cannot be individually highlighted.
    *
    * @param feature - The feature to highlight
+   * @param isTemporary - Optional flag to remove the highlight after TIMEOUT.featureHighlight, unless another highlight change happens first
    */
-  addHighlightedFeature(feature: TypeFeatureInfoEntry): void {
+  addHighlightedFeature(feature: TypeFeatureInfoEntry, isTemporary = false): void {
+    // Any newer highlight change supersedes a pending expiry
+    this.#temporaryHighlightTimer?.cancel();
+
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       this.getMapViewer().featureHighlight.highlightFeature(feature);
 
       // Track the highlighted feature so it can be removed by uid later.
       setStoreMapHighlightedFeatures(this.getMapId(), [...getStoreMapHighlightedFeatures(this.getMapId()), feature]);
+
+      if (isTemporary) {
+        const timer = doTimeout(TIMEOUT.featureHighlight);
+        this.#temporaryHighlightTimer = timer;
+        timer.promise
+          .then((result) => {
+            if (result !== 'timeout') return;
+
+            this.removeHighlightedFeature(feature);
+            this.clickMarkerIconHide();
+          })
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('in temporary highlight timer in mapController.addHighlightedFeature', error);
+          });
+      }
     }
 
     // Emit about it
@@ -642,6 +665,8 @@ export class MapController extends AbstractMapViewerController {
    * @param feature - The feature to remove, or 'all' to remove all highlights
    */
   removeHighlightedFeature(feature: TypeFeatureInfoEntry | 'all'): void {
+    this.#temporaryHighlightTimer?.cancel();
+
     if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       // Filter what we want to keep as highlighted features
       let highlightedFeatures: TypeFeatureInfoEntry[] = [];

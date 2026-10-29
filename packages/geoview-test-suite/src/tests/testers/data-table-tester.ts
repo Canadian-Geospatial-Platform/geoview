@@ -7,6 +7,9 @@ import {
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
+import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
+import type { FeatureHighlightedDelegate } from 'geoview-core/core/controllers/map-controller';
+import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { getGVRootElement, queryGVSelectorAll } from 'geoview-core/core/utils/dom-helper';
 
 /**
@@ -460,12 +463,68 @@ export class DataTableTester extends GVAbstractTester {
           includeCount = '3';
         }
 
-        test.addStep(`Verifying extent filter shows correct number of features (got "${summaryTextEnabled}")...`);
-        Test.assertIsEqual(summaryTextEnabled.includes(includeCount), true);
+        test.addStep(`Verifying extent filter shows "${includeCount} of 4 row(s) filtered" (got "${summaryTextEnabled}")...`);
+        Test.assertIsEqual(summaryTextEnabled.includes(`${includeCount} of 4 row(s) filtered`), true);
 
         test.addStep(`Verifying without extent filter shows "3 of 4 row(s) filtered" (got "${summaryTextDisabled}")...`);
         Test.assertIsEqual(summaryTextDisabled.includes('3'), true);
         Test.assertIsEqual(summaryTextDisabled.includes('4'), true);
+      }
+    );
+  }
+
+  /**
+   * Tests that a temporary zoom highlight (as used by the data table row zoom) is removed automatically.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testTemporaryZoomHighlightExpires(layerPath: string): Promise<Test<{ shown: boolean; remaining: boolean }>> {
+    return this.test(
+      'Test temporary zoom highlight is removed automatically...',
+      async (test) => {
+        await this.#helperOpenDataTableAndWait(test, layerPath);
+
+        const { mapController } = this.getControllersRegistry();
+        let highlightedFeatureUid: string | undefined;
+        const featureHighlightedHandler: FeatureHighlightedDelegate = (_sender, event): void => {
+          if (event.operation === 'added' && event.feature !== 'all') highlightedFeatureUid = event.feature.uid;
+        };
+
+        mapController.removeHighlightedFeature('all');
+
+        const zoomButton = queryGVSelectorAll<HTMLButtonElement>(this.getMapId(), 'button[data-feature-index]').find(
+          (button) => !button.disabled
+        );
+        if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
+
+        mapController.onFeatureHighlighted(featureHighlightedHandler);
+        try {
+          test.addStep('Clicking the first row zoom button...');
+          zoomButton.click();
+
+          test.addStep('Waiting for the row zoom highlight to appear...');
+          await GVAbstractTester.waitForCondition(() => highlightedFeatureUid !== undefined, TIMEOUT.featureHighlight * 2);
+
+          const isFeatureHighlighted = (): boolean =>
+            getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === highlightedFeatureUid);
+          await GVAbstractTester.waitForCondition(isFeatureHighlighted, TIMEOUT.featureHighlight * 2);
+          const shown = isFeatureHighlighted();
+
+          test.addStep('Waiting for the row zoom highlight to expire...');
+          await GVAbstractTester.waitForCondition(() => !isFeatureHighlighted(), TIMEOUT.featureHighlight * 2);
+
+          return { shown, remaining: isFeatureHighlighted() };
+        } finally {
+          mapController.offFeatureHighlighted(featureHighlightedHandler);
+        }
+      },
+      (test, result) => {
+        test.addStep('Verifying the row zoom highlight appeared and then expired...');
+        Test.assertIsEqual(result.shown, true);
+        Test.assertIsEqual(result.remaining, false);
+      },
+      () => {
+        this.getControllersRegistry().mapController.removeHighlightedFeature('all');
       }
     );
   }

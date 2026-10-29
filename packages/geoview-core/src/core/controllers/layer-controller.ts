@@ -934,6 +934,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param extent - The extent to restrictively zoom to
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
    * @param fitOptions - Optional fit options to merge scale constraints into
+   * @param isTemporaryHighlight - Optional flag indicating the feature highlight should expire automatically
    * @returns A promise that resolves when the zoom and highlight are complete
    */
   async zoomToExtentRestrictedAndHighlight(
@@ -941,7 +942,8 @@ export class LayerController extends AbstractMapViewerController {
     feature: TypeFeatureInfoEntry,
     extent: Extent,
     useAnimation = true,
-    fitOptions?: GVFitOptions
+    fitOptions?: GVFitOptions,
+    isTemporaryHighlight = false
   ): Promise<void> {
     // Get extent and center
     const center = getCenter(extent);
@@ -959,7 +961,7 @@ export class LayerController extends AbstractMapViewerController {
     this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
     this.getControllersRegistry().mapController.highlightBBox(extent, false);
     this.getControllersRegistry().mapController.removeHighlightedFeature('all');
-    this.getControllersRegistry().mapController.addHighlightedFeature(feature);
+    this.getControllersRegistry().mapController.addHighlightedFeature(feature, isTemporaryHighlight);
   }
 
   /**

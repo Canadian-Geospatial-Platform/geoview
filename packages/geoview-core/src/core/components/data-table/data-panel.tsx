@@ -388,6 +388,10 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
               // Get unfiltered count from orderedLayerData
               const unfilteredLayer = memoOrderedLayerData.find((layer) => layer.layerPath === selectedLayerPath);
               const unfilteredFeaturesCount = unfilteredLayer?.features?.length ?? 0;
+              const featuresBeforeExtent = unfilteredLayer?.features ?? [];
+              const preExtentFeaturesCount = showUnsymbolizedFeatures
+                ? featuresBeforeExtent.length
+                : featuresBeforeExtent.filter((feature) => feature.featureIcon).length;
 
               return (
                 <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>
@@ -396,6 +400,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
                     layerPath={data.layerPath}
                     containerType={containerType}
                     unfilteredFeaturesCount={unfilteredFeaturesCount}
+                    preExtentFeaturesCount={preExtentFeaturesCount}
+                    filterDataToExtent={datatableSettings[data.layerPath]?.filterDataToExtent ?? false}
                     onRendered={handleTableRendered}
                   />
                 </Box>

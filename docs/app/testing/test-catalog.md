@@ -83,11 +83,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 14         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **273**    |                             |
+| **Total**         |                         |                                                                                                 | **274**    |                             |
 
 ---
 
@@ -112,7 +112,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 6   | `testValidateAndPingUrlWmsService`      | test      | Test validateAndPingUrl with a WMS service URL...                                     |
 | 7   | `testGeometryCollectionLegendStyles`    | test      | Test GeometryCollection legend style generation...                                    |
 | 8   | `testEsriPictureFillLegendStyles`       | test      | Test ESRI picture fill legend style generation...                                     |
-| 9   | `testWfsStyleWithTextOnlyRule`          | test      | Test WFS SLD conversion with a text-only rule...                                     |
+| 9   | `testWfsStyleWithTextOnlyRule`          | test      | Test WFS SLD conversion with a text-only rule...                                      |
 | 10  | `testProxyGetWMSServiceMetadata`        | test      | Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...          |
 | 11  | `testProxyGetWMSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWMSServiceMetadata with bad URL...                               |
 | 12  | `testProxyGetWFSServiceMetadata`        | test      | Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...          |
@@ -521,11 +521,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-| #   | Method                                          | Type | Description                                                                    |
-| --- | ----------------------------------------------- | ---- | ------------------------------------------------------------------------------ |
-| 37  | `testAddWMSZpegtGroupWithSiblingLayer`          | test | Test WMS ZPEGT metadata names with a sibling layer...                           |
-| 38  | `testAddWMSZpegtGroupWithGeoviewLayerName`      | test | Test WMS ZPEGT group name with a configured GeoView layer name...               |
-| 39  | `testAddWMSZpegtGroupWithoutGeoviewLayerName`   | test | Test WMS ZPEGT group name without a configured GeoView layer name...            |
+| #   | Method                                        | Type | Description                                                          |
+| --- | --------------------------------------------- | ---- | -------------------------------------------------------------------- |
+| 37  | `testAddWMSZpegtGroupWithSiblingLayer`        | test | Test WMS ZPEGT metadata names with a sibling layer...                |
+| 38  | `testAddWMSZpegtGroupWithGeoviewLayerName`    | test | Test WMS ZPEGT group name with a configured GeoView layer name...    |
+| 39  | `testAddWMSZpegtGroupWithoutGeoviewLayerName` | test | Test WMS ZPEGT group name without a configured GeoView layer name... |
 
 ---
 
@@ -846,6 +846,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                      |
 | 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
 | 13  | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
+| 14  | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                        |
 
 ---
 

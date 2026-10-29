@@ -49,7 +49,8 @@ import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { isImage, linkifyAndSanitizeHtml, containsHtmlTags } from '@/core/utils/utilities';
+import { isImage, linkifyAndSanitizeHtml, containsHtmlTags, scrollIfNotVisible } from '@/core/utils/utilities';
+import { getGVShellElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -242,7 +243,15 @@ function FocusAwareTooltipCell({ cellId, title, children }: FocusAwareTooltipCel
  * @param props - Properties defined in DataTableProps interface
  * @returns The data table element
  */
-function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, onRendered }: DataTableProps): JSX.Element {
+function DataTable({
+  data,
+  layerPath,
+  containerType,
+  unfilteredFeaturesCount,
+  preExtentFeaturesCount,
+  filterDataToExtent,
+  onRendered,
+}: DataTableProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-table');
 
@@ -791,8 +800,12 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
 
       // If the extent was found
       if (extent) {
+        // Bring the map into view, like the map info bar and app bar do
+        const shell = getGVShellElement(mapId);
+        if (shell) scrollIfNotVisible(shell, 'start');
+
         // Zoom to extent and wait for it to finish
-        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true).catch((error: unknown) => {
+        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, undefined, true).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in DataTable', error);
         });
@@ -801,7 +814,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [layerPath, featureHasExtent, featureOidFieldName, layerController]
+    [layerPath, mapId, featureHasExtent, featureOidFieldName, layerController]
   );
 
   /**
@@ -1127,9 +1140,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount, on
           data={data}
           table={props.table}
           unfilteredFeaturesCount={unfilteredFeaturesCount}
+          preExtentFeaturesCount={preExtentFeaturesCount}
+          filterDataToExtent={filterDataToExtent}
         />
       ),
-      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount]
+      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount, preExtentFeaturesCount, filterDataToExtent]
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
