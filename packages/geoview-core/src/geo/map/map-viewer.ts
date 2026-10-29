@@ -1196,6 +1196,8 @@ export class MapViewer {
    */
   async delete(): Promise<void> {
     // Clear highlights, which also cancels any pending temporary highlight expiry
+    // TODO: REFACTOR MAPVIEWER - Move the removal of highlighted features to an application level class or controller.
+    // TD.DOCONT: Consider refactoring this so that the MapViewer does not directly manipulate the mapController.
     this.controllers.mapController.removeHighlightedFeature('all');
 
     // Remove the dom element (remove rendered map and overview map)
