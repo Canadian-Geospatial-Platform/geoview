@@ -8,6 +8,8 @@ import {
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
 import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
+import type { FeatureHighlightedDelegate } from 'geoview-core/core/controllers/map-controller';
+import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { getGVRootElement, queryGVSelectorAll } from 'geoview-core/core/utils/dom-helper';
 
 /**
@@ -476,33 +478,50 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testTemporaryZoomHighlightExpires(layerPath: string): Promise<Test<{ shown: number; remaining: number }>> {
+  testTemporaryZoomHighlightExpires(layerPath: string): Promise<Test<{ shown: boolean; remaining: boolean }>> {
     return this.test(
       'Test temporary zoom highlight is removed automatically...',
       async (test) => {
-        const features = await this.#helperOpenDataTableAndWait(test, layerPath);
-        const feature = features![0];
+        await this.#helperOpenDataTableAndWait(test, layerPath);
 
-        test.addStep('Zooming to the first feature with a temporary highlight...');
-        await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
-          layerPath,
-          feature,
-          feature.extent!,
-          false,
-          undefined,
-          true
+        const mapController = this.getControllersRegistry().mapController;
+        let highlightedFeatureUid: string | undefined;
+        const featureHighlightedHandler: FeatureHighlightedDelegate = (_sender, event): void => {
+          if (event.operation === 'added' && event.feature !== 'all') highlightedFeatureUid = event.feature.uid;
+        };
+
+        mapController.removeHighlightedFeature('all');
+
+        const zoomButton = queryGVSelectorAll<HTMLButtonElement>(this.getMapId(), 'button[data-feature-index]').find(
+          (button) => !button.disabled
         );
-        const shown = getStoreMapHighlightedFeatures(this.getMapId()).length;
+        if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
 
-        test.addStep('Waiting for the highlight to be removed...');
-        await this.getControllersRegistry().mapController.waitForFeatureHighlightedRemoved();
+        mapController.onFeatureHighlighted(featureHighlightedHandler);
+        try {
+          test.addStep('Clicking the first row zoom button...');
+          zoomButton.click();
 
-        return { shown, remaining: getStoreMapHighlightedFeatures(this.getMapId()).length };
+          test.addStep('Waiting for the row zoom highlight to appear...');
+          await GVAbstractTester.waitForCondition(() => highlightedFeatureUid !== undefined, TIMEOUT.featureHighlight * 2);
+
+          const isFeatureHighlighted = (): boolean =>
+            getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === highlightedFeatureUid);
+          await GVAbstractTester.waitForCondition(isFeatureHighlighted, TIMEOUT.featureHighlight * 2);
+          const shown = isFeatureHighlighted();
+
+          test.addStep('Waiting for the row zoom highlight to expire...');
+          await GVAbstractTester.waitForCondition(() => !isFeatureHighlighted(), TIMEOUT.featureHighlight * 2);
+
+          return { shown, remaining: isFeatureHighlighted() };
+        } finally {
+          mapController.offFeatureHighlighted(featureHighlightedHandler);
+        }
       },
       (test, result) => {
-        test.addStep('Verifying the feature was highlighted, then the highlight removed...');
-        Test.assertIsEqual(result.shown, 1);
-        Test.assertIsEqual(result.remaining, 0);
+        test.addStep('Verifying the row zoom highlight appeared and then expired...');
+        Test.assertIsEqual(result.shown, true);
+        Test.assertIsEqual(result.remaining, false);
       },
       () => {
         this.getControllersRegistry().mapController.removeHighlightedFeature('all');

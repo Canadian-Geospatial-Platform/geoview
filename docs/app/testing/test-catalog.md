@@ -112,7 +112,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 6   | `testValidateAndPingUrlWmsService`      | test      | Test validateAndPingUrl with a WMS service URL...                                     |
 | 7   | `testGeometryCollectionLegendStyles`    | test      | Test GeometryCollection legend style generation...                                    |
 | 8   | `testEsriPictureFillLegendStyles`       | test      | Test ESRI picture fill legend style generation...                                     |
-| 9   | `testWfsStyleWithTextOnlyRule`          | test      | Test WFS SLD conversion with a text-only rule...                                     |
+| 9   | `testWfsStyleWithTextOnlyRule`          | test      | Test WFS SLD conversion with a text-only rule...                                      |
 | 10  | `testProxyGetWMSServiceMetadata`        | test      | Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...          |
 | 11  | `testProxyGetWMSServiceMetadataBadUrl`  | testError | Test GeoUtilities.getWMSServiceMetadata with bad URL...                               |
 | 12  | `testProxyGetWFSServiceMetadata`        | test      | Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...          |
@@ -521,11 +521,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-| #   | Method                                          | Type | Description                                                                    |
-| --- | ----------------------------------------------- | ---- | ------------------------------------------------------------------------------ |
-| 37  | `testAddWMSZpegtGroupWithSiblingLayer`          | test | Test WMS ZPEGT metadata names with a sibling layer...                           |
-| 38  | `testAddWMSZpegtGroupWithGeoviewLayerName`      | test | Test WMS ZPEGT group name with a configured GeoView layer name...               |
-| 39  | `testAddWMSZpegtGroupWithoutGeoviewLayerName`   | test | Test WMS ZPEGT group name without a configured GeoView layer name...            |
+| #   | Method                                        | Type | Description                                                          |
+| --- | --------------------------------------------- | ---- | -------------------------------------------------------------------- |
+| 37  | `testAddWMSZpegtGroupWithSiblingLayer`        | test | Test WMS ZPEGT metadata names with a sibling layer...                |
+| 38  | `testAddWMSZpegtGroupWithGeoviewLayerName`    | test | Test WMS ZPEGT group name with a configured GeoView layer name...    |
+| 39  | `testAddWMSZpegtGroupWithoutGeoviewLayerName` | test | Test WMS ZPEGT group name without a configured GeoView layer name... |
 
 ---
 
