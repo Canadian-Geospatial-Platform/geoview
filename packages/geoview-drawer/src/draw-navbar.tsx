@@ -66,7 +66,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
   // Create style button
   buttonConfigs.style = {
     buttonProps: {
-      id: `${mapId}-drawer-style`, // Looked up via querySelector in drawer-controller.ts openStyleMenu()
+      id: `${mapId}-drawer-style`,
       'aria-label': 'drawer.style',
       tooltipPlacement: 'left',
       children: createElement(StyleButton),
