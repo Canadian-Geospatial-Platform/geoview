@@ -484,7 +484,7 @@ export class DataTableTester extends GVAbstractTester {
       async (test) => {
         await this.#helperOpenDataTableAndWait(test, layerPath);
 
-        const mapController = this.getControllersRegistry().mapController;
+        const { mapController } = this.getControllersRegistry();
         let highlightedFeatureUid: string | undefined;
         const featureHighlightedHandler: FeatureHighlightedDelegate = (_sender, event): void => {
           if (event.operation === 'added' && event.feature !== 'all') highlightedFeatureUid = event.feature.uid;
