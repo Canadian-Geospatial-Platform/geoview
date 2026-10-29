@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>App Geo v2 - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>App Geo v2 - Map Svelte</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr><tr><td><p>This page is used to showcase a usecase for app.geo.ca-v2 with map.svelte</p></td></tr><tr><td><a href="#Hmap1">1. Map Svelte</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hmap1">1. Map</h4><a class="ref-link" href="#top">Top</a></div><button onclick="loadMap()">Reload (remount)</button><hr/><div id="map1" data-lang="en"></div><hr/><div><ul><li><a href="./demo-app-geo-v2.html?id=f129611d-7ca1-418b-8390-ebac5adf958e">f129611d-7ca1-418b-8390-ebac5adf958e</a></li><li><a href="./demo-app-geo-v2.html?id=03ccfb5c-a06e-43e3-80fd-09d4f8f69703">03ccfb5c-a06e-43e3-80fd-09d4f8f69703</a></li><li><a href="./demo-app-geo-v2.html?id=230f1f6d-353e-4d02-800b-368f4c48dc86">230f1f6d-353e-4d02-800b-368f4c48dc86</a></li><li><a href="./demo-app-geo-v2.html?id=d8627209-bda2-436f-b22b-0eb19fdc6660">d8627209-bda2-436f-b22b-0eb19fdc6660</a></li><li><a href="./demo-app-geo-v2.html?id=ed9b204b-590c-4b17-9703-f6e167acd6c6">ed9b204b-590c-4b17-9703-f6e167acd6c6</a></li></ul></div><script>// The map id
+      const mapId = 'map1';
+
+      const params = new URLSearchParams(window.location.search);
+      let id = params.get('id');
+      if (!id) {
+        console.warn('Use the URL as such: outlier-app-geo-v2?id=f129611d-7ca1-418b-8390-ebac5adf958e to test different ids')
+        id = 'f129611d-7ca1-418b-8390-ebac5adf958e'; // Default
+      }
+
+      // Create the layer config to check if the geocore record has a map. It is undefined if no map exists.
+      const config = {
+        map: {
+          interaction: 'dynamic', // static
+          viewSettings: {
+            initialView: {
+              layerIds: [id]
+            },
+            projection: 3978
+          },
+          basemapOptions: {
+            basemapId: 'transport',
+            shaded: false,
+            labeled: true
+          },
+        },
+        theme: 'geo.ca',
+        components: ['north-arrow', 'overview-map'],
+        corePackages: ['swiper'],
+        appBar: {
+          tabs: {
+            core: ['geolocator', 'legend']
+          }
+        },
+        footerBar: {
+          tabs: {
+            core: ['layers', 'details', 'data-table', 'time-slider', 'geochart']
+          },
+          collapsed: true,
+          selectedTab: 'time-slider'
+        },
+        corePackagesConfig: [
+          {
+            swiper: {
+              orientation: "horizontal",
+              keyboardOffset: 10,
+              layers: [id]
+            }
+          }
+        ]
+      };
+
+      // As string
+      let configString = JSON.stringify(config);
+
+      async function loadMap() {
+        // Delete
+        cgpv.api.hasMapViewer(mapId) && await cgpv.api.deleteMapViewer(mapId, false)
+
+        // Create the map
+        await cgpv.api.createMapFromConfig(mapId, configString);
+
+        // Add the geoview layer by geocore id
+        cgpv.api.getMapViewer(mapId).layer.addGeoviewLayerByGeoCoreUUID(id);
+      }
+      loadMap();</script></body></html>

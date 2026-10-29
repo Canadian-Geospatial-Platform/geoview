@@ -1,0 +1,104 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-18 Global Settings - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>18 — Global Settings Tests</h4><p>Coord info toggle, unsymbolized features, sublayer removal, disabled layer types, theme, highlight color, and service URL overrides.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/18-global-settings.md" target="_blank">18-global-settings.md</a></p></div><h5>Map 1 — geo.ca Theme + Global Settings</h5><p>Default theme. Coord info visible. Sublayer removal allowed. Highlight layer available.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c'
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['geolocator', 'legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
+          'theme': 'geo.ca'
+        }"></div><h5>Map 2 — Dark Theme</h5><p>Dark backgrounds, light text, correct icon colors.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'dark'
+        }"></div><h5>Map 3 — Light Theme</h5><p>Light backgrounds, dark text.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'light'
+        }"></div><h5>Map 4 — Canada.ca Theme</h5><p>Government of Canada Federal Identity Program colours and Helvetica typography.</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'canada.ca'
+        }"></div><h5>Map 5 — Custom Highlight Color (red)</h5><p>Click a feature — highlight should be red instead of default aqua.</p><div id="map5" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'highlightColor': 'red',
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"></div><h5>Map 6 — Date Display Mode (ISO)</h5><p>globalSettings.displayDateMode set to 'iso'. Click a feature with date fields to see ISO-formatted dates in details/data table.</p><div id="map6" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
+          'globalSettings': { 'displayDateMode': 'iso' },
+          'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible">Map 1 - Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 - Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 - Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 - Configuration Snippet</button><pre id="map4CS" class="panel"></pre><button type="button" class="collapsible">Map 5 - Configuration Snippet</button><pre id="map5CS" class="panel"></pre><button type="button" class="collapsible">Map 6 - Configuration Snippet</button><pre id="map6CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
+      });</script></body></html>

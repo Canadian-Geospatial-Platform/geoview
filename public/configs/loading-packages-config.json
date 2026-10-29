@@ -1,0 +1,41 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    }
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "drawer"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export",
+        "about-panel",
+        "aoi-panel",
+        "custom-legend",
+        "guide",
+        "details",
+        "data-table",
+        "layers"
+      ]
+    }
+  },
+   "footerBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

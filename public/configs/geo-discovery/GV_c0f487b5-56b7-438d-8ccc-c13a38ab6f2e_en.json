@@ -1,0 +1,130 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "RRD_NuclearPowerPlants_Discharge_en",
+        "geoviewLayerName": "Radionuclide Releases - Direct Discharge of Nuclear Power Plants",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/CNSC/RRD_NuclearPowerPlants_Discharge_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "RRD_NuclearPowerPlants_Discharge_en/0",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "facility_substance"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/CNSC/RRD_NuclearPowerPlants_Discharge_en/MapServer/1",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "facility_substance",
+                    "prefix": "'",
+                    "valueFrom": "facility_substance",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "year"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                },
+                "ticksRule": "data",
+                "type": "time",
+                "property": "year",
+                "label": "Year"
+              },
+              "yAxis": {
+                "type": "linear",
+                "property": "direct_discharge",
+                "label": "Annual release",
+                "tooltipSuffix": ""
+              },
+              "borderWidth": 1
+            },
+            "category": {
+              "property": "substance_name"
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": true
+              },
+              "stepsSwitcher": true,
+              "description": "",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
