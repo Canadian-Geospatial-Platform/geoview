@@ -1,4 +1,5 @@
 import type { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
+import type { CSSProperties } from 'react';
 import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from '@/ui/style/types';
 
 /** MUI theme augmentation. See https://material-ui.com/guides/typescript/ */
@@ -71,6 +72,7 @@ declare module '@mui/material/styles/createPalette' {
     surface?: { low: string; high: string };
     // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
+    /** @deprecated Read sizes from the owning map's theme.typography instead. */
     geoViewFontSize?: IGeoViewFontSizes;
     geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;
   }
@@ -81,6 +83,7 @@ declare module '@mui/material/styles/createPalette' {
     surface?: { low?: string; high?: string };
     // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
+    /** @deprecated Configure sizes through scale-key typography overrides instead. */
     geoViewFontSize?: IGeoViewFontSizes;
     geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;
   }
@@ -114,18 +117,30 @@ declare module '@mui/material/styles/zIndex' {
 }
 
 declare module '@mui/material/styles/createTypography' {
-  interface Typography {
+  interface TypographyVariants {
+    label: CSSProperties;
+    /** @deprecated Retained at 11px until the next breaking release. Use a standard variant or label. */
     control: {
       fontSize: number;
       fontWeight: number;
     };
   }
 
-  interface TypographyOptions {
+  interface TypographyVariantsOptions {
+    label?: CSSProperties;
+    /** @deprecated Retained for compatibility until the next breaking release. */
     control?: {
       fontSize?: number;
       fontWeight?: number;
     };
+  }
+}
+
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    label: true;
+    /** @deprecated Retained until the next breaking release. Use a standard variant or label. */
+    control: true;
   }
 }
 

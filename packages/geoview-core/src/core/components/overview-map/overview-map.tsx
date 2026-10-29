@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 
 import type { i18n } from 'i18next';
-
-import { ThemeProvider } from '@mui/material/styles';
+import type { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import { Box } from '@/ui/layout';
-import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapOverviewShouldBeVisible } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
@@ -35,14 +31,13 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
 
   // Store
   const overviewShouldBeVisible = useStoreMapOverviewShouldBeVisible();
-  const displayLanguage = useStoreAppDisplayLanguage();
   const mapController = useMapController();
 
   // State
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [overviewMapControl, setOverviewMapControl] = useState<OLOverviewMap>();
 
   // Values
-  const shouldBeVisible = isInitialized && overviewShouldBeVisible;
+  const shouldBeVisible = overviewMapControl !== undefined && overviewShouldBeVisible;
 
   /**
    * Updates visibility based on zoom level changes.
@@ -61,32 +56,29 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
     logger.logTraceUseEffect('OVERVIEW-MAP - mount');
 
     const toggleButton = document.createElement('div');
-    const overviewMapControl = mapController.initOverviewMapControl(toggleButton);
-
-    const root = createRoot(toggleButton);
-    root.render(
-      <I18nextProvider i18n={i18n}>
-        <ThemeProvider theme={cgpvTheme}>
-          <OverviewMapToggle overviewMap={overviewMapControl} />
-        </ThemeProvider>
-      </I18nextProvider>
-    );
-    // Store the root reference for cleanup
-    mapController.setMapOverviewMapRoot(root);
-
-    // Set initialized to true after everything is set up
-    setIsInitialized(true);
+    setOverviewMapControl(mapController.initOverviewMapControl(toggleButton));
 
     // Cleanup
     return () => {
       logger.logTraceUseEffectUnmount('OVERVIEW-MAP - unmount');
       // Hide the overview map control when component unmounts
       mapController.setOverviewMapVisibility(false);
-      setIsInitialized(false);
-      // Defer unmount to avoid "synchronously unmount a root while React was already rendering" error. A setTimeout with 0 ms is the standard workaround for this.
-      setTimeout(() => root.unmount(), 0);
+      setOverviewMapControl(undefined);
     };
-  }, [mapController, displayLanguage, i18n]);
+  }, [mapController]);
 
-  return <Box />;
+  // OverviewMapToggle creates its portal inside the OpenLayers button while retaining
+  // this map's ThemeProvider context; no separate provider is needed.
+
+  // TODO: Review the obsolete separate-root tracking: MapController.setMapOverviewMapRoot,
+  // MapViewer.overviewRoot and its unmount path. Check downstream compatibility before removal.
+  return (
+    <Box>
+      {overviewMapControl && (
+        <I18nextProvider i18n={i18n}>
+          <OverviewMapToggle overviewMap={overviewMapControl} />
+        </I18nextProvider>
+      )}
+    </Box>
+  );
 }

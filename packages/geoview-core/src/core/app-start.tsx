@@ -1,5 +1,5 @@
 ﻿import type { ErrorInfo } from 'react';
-import { StrictMode, Suspense, Component, useEffect } from 'react';
+import { StrictMode, Suspense, Component, useEffect, useMemo } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { i18n } from 'i18next';
 
@@ -91,6 +91,12 @@ function AppStart(props: AppStartProps): JSX.Element {
   // once context is define, map id is available
   const theme = useStoreAppDisplayThemeById(mapViewer.mapId);
 
+  /** Reuses this map's theme across renders, rebuilding only when the map ID or display theme changes. */
+  const memoTheme = useMemo((): ReturnType<typeof getTheme> => {
+    logger.logTraceUseMemo('AppStart memoTheme', mapViewer.mapId, theme);
+    return getTheme(theme);
+  }, [mapViewer.mapId, theme]);
+
   /**
    * Logs the mounting and unmounting of the AppStart component for debugging.
    */
@@ -110,7 +116,7 @@ function AppStart(props: AppStartProps): JSX.Element {
       <StyledEngineProvider injectFirst>
         <StoreContext.Provider value={mapViewer.mapId}>
           <ControllerContext.Provider value={mapViewer.controllers}>
-            <ThemeProvider theme={getTheme(theme)}>
+            <ThemeProvider theme={memoTheme}>
               {/* Scope inherited scrollbar colours to this map without styling other viewers or the host page. */}
               <GlobalStyles
                 styles={(currentTheme) => ({
