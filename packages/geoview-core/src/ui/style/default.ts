@@ -7,6 +7,18 @@ export const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 /** Default base font size multiplier in rem units */
 export const defaultFontSize = 1;
 
+/** Canonical typography sizes in design pixels, converted through the owning theme's pxToRem. */
+export const TYPOGRAPHY_SCALE = {
+  xs: 12,
+  sm: 14,
+  default: 16,
+  md: 18,
+  lg: 20,
+  xl: 24,
+  xxl: 32,
+  display: 48,
+} as const;
+
 /**
  * Named border-radius tokens, spread onto `theme.shape`.
  *
@@ -122,20 +134,30 @@ export const geoViewColors: IGeoViewColors = {
   },
 };
 
-const fontSizes: IGeoViewFontSizes = {
-  xs: `${defaultFontSize * 0.7}rem`,
-  sm: `${defaultFontSize * 0.875}rem`,
-  md: `${defaultFontSize * 1.125}rem`,
-  lg: `${defaultFontSize * 1.3}rem`,
-  xl: `${defaultFontSize * 1.6}rem`,
-  xxl: `${defaultFontSize * 2}rem`,
-  default: `${defaultFontSize}rem`,
+/**
+ * Generates compatibility font sizes using the owning theme's calibrated conversion.
+ *
+ * @param pxToRem - Calibrated theme conversion from design pixels to rem
+ * @returns Named scale sizes and retained legacy multiplier entries
+ */
+export const getGeoViewFontSizes = (pxToRem: (size: number) => string): IGeoViewFontSizes => {
+  const fontSizes: IGeoViewFontSizes = {
+    xs: pxToRem(TYPOGRAPHY_SCALE.xs),
+    sm: pxToRem(TYPOGRAPHY_SCALE.sm),
+    default: pxToRem(TYPOGRAPHY_SCALE.default),
+    md: pxToRem(TYPOGRAPHY_SCALE.md),
+    lg: pxToRem(TYPOGRAPHY_SCALE.lg),
+    xl: pxToRem(TYPOGRAPHY_SCALE.xl),
+    xxl: pxToRem(TYPOGRAPHY_SCALE.xxl),
+    display: pxToRem(TYPOGRAPHY_SCALE.display),
+  };
+
+  for (let multiplier = 0.2; multiplier <= 10; multiplier += 0.1) {
+    const key = `${multiplier}x`;
+    fontSizes[key] = pxToRem(TYPOGRAPHY_SCALE.default * defaultFontSize * multiplier);
+  }
+  return fontSizes;
 };
 
-for (let multiplier = 0.2; multiplier <= 10; multiplier += 0.1) {
-  const key = `${multiplier}x`;
-  fontSizes[key] = `${defaultFontSize * multiplier}rem`;
-}
-
-/** GeoView font size scale from xs to xxl with dynamic multiplier entries */
-export const geoViewFontSizes = fontSizes;
+/** @deprecated Uses an uncalibrated 16px root. Read the owning map's theme.typography instead. */
+export const geoViewFontSizes = getGeoViewFontSizes((size: number): string => `${size / 16}rem`);
