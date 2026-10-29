@@ -130,6 +130,9 @@ export class MapViewer {
   /** Map features configuration properties */
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
+  /** URL used to load the map configuration, when initialized from a config URL. */
+  readonly mapConfigUrl: string | undefined;
+
   /** The id of the map */
   mapId: string;
 
@@ -332,10 +335,12 @@ export class MapViewer {
    *
    * @param mapFeaturesConfig - Map properties
    * @param i18instance - Language instance
+   * @param mapConfigUrl - Optional URL used to load the map configuration
    */
-  constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
+  constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n, mapConfigUrl?: string) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
+    this.mapConfigUrl = mapConfigUrl;
 
     // Initialize the ui domain
     this.#uiDomain = new UIDomain(

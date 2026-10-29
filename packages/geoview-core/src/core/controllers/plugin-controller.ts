@@ -5,8 +5,6 @@ import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { getScriptAndAssetURL, whenThisThen } from '@/core/utils/utilities';
-// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the controller here, remove?
-import { DomHelper } from '@/core/utils/dom-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PluginError } from '@/core/exceptions/geoview-exceptions';
@@ -195,7 +193,7 @@ export class PluginController extends AbstractMapViewerController {
        * for custom config for loaded core packages on the same path of the map config.
        * If none exists then load the default config
        */
-      const configUrl = DomHelper.getDataConfigUrl(mapViewer.mapId);
+      const configUrl = mapViewer.mapConfigUrl;
 
       // Check if there is a corePackageConfig for the plugin
       const configObj = mapViewer.getCorePackageConfig(pluginId);

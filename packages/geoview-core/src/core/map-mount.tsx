@@ -201,7 +201,7 @@ export async function renderMap(api: API, mapElement: HTMLElement): Promise<MapV
   addGeoViewStore(configuration, mapElement);
 
   // create a new map viewer instance and add it to the api
-  const mapViewer = new MapViewer(configuration, i18n);
+  const mapViewer = new MapViewer(configuration, i18n, mapElement.getAttribute('data-config-url') ?? undefined);
   api.setMapViewer(mapId, mapViewer);
 
   // If schema validation errors were detected, notify the user
