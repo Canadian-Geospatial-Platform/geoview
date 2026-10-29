@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 
 // #region USE MAP RESIZE
@@ -44,8 +45,14 @@ export const useMapResize = ({
   geoviewElement,
   appHeight,
 }: UseMapResizeProps): TypeUseMapResize => {
+  const theme = useTheme();
   const mapShellContainerRef = useRef<HTMLDivElement>(null);
   const hostOriginalHeightRef = useRef<string | undefined>(undefined);
+  const heightTransition = theme.transitions.create('height', {
+    duration: theme.transitions.duration.shorter,
+    easing: theme.transitions.easing.easeOut,
+    delay: theme.transitions.duration.shorter,
+  });
 
   /**
    * Updates map height when toggling fullscreen and changing footer panel size.
@@ -101,10 +108,10 @@ export const useMapResize = ({
 
       Object.assign(geoviewElement.style, {
         height: 'fit-content',
-        transition: 'height 0.2s ease-out 0.2s',
+        transition: heightTransition,
       });
     }
-  }, [geoviewElement, isFooterBar]);
+  }, [geoviewElement, isFooterBar, heightTransition]);
 
   return { mapShellContainerRef, hostOriginalHeightRef };
 };

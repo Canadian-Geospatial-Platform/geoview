@@ -27,7 +27,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0),
     borderRadius: theme.shape.borderRadiusNone,
     boxShadow: 2,
-    transition: 'transform .3s ease-in-out',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.standard,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     '&:hover': {
       transform: 'rotate(-18deg) translateX(-8px)',
     },

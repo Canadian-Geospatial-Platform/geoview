@@ -63,9 +63,14 @@ export const getFormControlFocusIndicatorStyles = (geoViewColors: IGeoViewColors
  *
  * @param geoViewColors - GeoView color palette to derive button styles from
  * @param palette - Generated MUI palette for semantic button colours
+ * @param transitions - Current theme transitions for button interactions
  * @returns Style override object for MUI Button and IconButton components
  */
-const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['palette']): CSSObject => ({
+const getButtonStyleOverrides = (
+  geoViewColors: IGeoViewColors,
+  palette: Theme['palette'],
+  transitions: Theme['transitions']
+): CSSObject => ({
   '&.highlighted': {
     '&:hover, &:active, &.active': {
       backgroundColor: palette.primary.main,
@@ -103,7 +108,10 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['
     color: palette.primary.main,
     height: 36,
     width: 36,
-    transition: 'background-color 0.3s ease-in-out',
+    transition: transitions.create('background-color', {
+      duration: transitions.duration.standard,
+      easing: transitions.easing.easeInOut,
+    }),
     '&:hover': {
       backgroundColor: palette.action.hover,
     },
@@ -495,12 +503,12 @@ export const generateThemeOptions = (
       },
       MuiButton: {
         styleOverrides: {
-          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette, theme.transitions),
         },
       },
       MuiIconButton: {
         styleOverrides: {
-          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette, theme.transitions),
         },
       },
       MuiFab: {
