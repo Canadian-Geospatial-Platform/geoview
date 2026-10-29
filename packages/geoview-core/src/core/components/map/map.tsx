@@ -87,21 +87,25 @@ export function Map(props: MapProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('MAP - Crosshair shortcut listener');
+    logger.logTraceUseEffect('MAP - Keyboard event listener');
 
     const handleGlobalShortcut = (event: KeyboardEvent): void => {
+      const { activeElement } = document;
+
+      // Only handle shortcuts while focus is within this specific map instance.
+      if (!activeElement || !gvRootElement.contains(activeElement)) return;
+
+      const isTextInputFocused =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        (activeElement instanceof HTMLElement && activeElement.isContentEditable);
+      const isMapTargetFocused = mapElement.current?.contains(activeElement) ?? false;
+      viewer.notifyMapKeyboardEvent({ keyboardEvent: event, isTextInputFocused, isMapTargetFocused });
+
       // Ctrl+M (or Cmd+M on Mac)
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey) {
         // Only activate if map interaction is not static
         if (mapInteraction !== 'static' && mapElement.current) {
-          // Check if the currently focused element is within the GeoView app
-          const { activeElement } = document;
-
-          // Only respond if focus is within this specific map instance
-          if (!activeElement || !gvRootElement.contains(activeElement)) {
-            return; // Focus is not in this map - let another map instance handle it
-          }
-
           event.preventDefault();
 
           // Focus the map element (this will trigger crosshair activation)
@@ -121,7 +125,7 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [mapInteraction, mapId, uiController, gvRootElement]);
+  }, [viewer, mapInteraction, mapId, uiController, gvRootElement]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)

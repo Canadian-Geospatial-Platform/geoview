@@ -132,6 +132,23 @@ export class NavBarApi {
   }
 
   /**
+   * Sets the open state of a registered nav-bar panel.
+   *
+   * @param buttonPanelId - The id of the button panel
+   * @param isOpen - Whether the panel should be open
+   * @returns Whether the panel exists and can be opened
+   */
+  setButtonPanelOpen(buttonPanelId: string, isOpen: boolean): boolean {
+    const buttonPanel = this.getNavBarButtonPanelById(buttonPanelId);
+    if (!buttonPanel?.panel) return false;
+    if (buttonPanel.panel.status === isOpen) return true;
+
+    buttonPanel.panel.status = isOpen;
+    this.#uiController.bumpNavBarButtonPanelVersion();
+    return true;
+  }
+
+  /**
    * Removes a nav-bar button or panel using its id.
    *
    * @param buttonPanelId - The id of the panel or button to remove

@@ -268,6 +268,9 @@ export class MapViewer {
   /** Callback delegates for the map projection changed event */
   #onMapProjectionChangedHandlers: MapProjectionChangedDelegate[] = [];
 
+  /** Callback delegates for map-scoped keyboard events */
+  #onMapKeyboardEventHandlers: MapKeyboardEventDelegate[] = [];
+
   /** Callback delegates for the map component added event */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
@@ -2585,6 +2588,43 @@ export class MapViewer {
   // #region EVENTS
 
   /**
+   * Receives a map-scoped keyboard event from the React map component.
+   *
+   * @param event - The keyboard event and map focus context
+   */
+  notifyMapKeyboardEvent(event: MapKeyboardEvent): void {
+    this.#emitMapKeyboardEvent(event);
+  }
+
+  /**
+   * Emits a map keyboard event to all handlers.
+   *
+   * @param event - The keyboard event and map focus context
+   */
+  #emitMapKeyboardEvent(event: MapKeyboardEvent): void {
+    EventHelper.emitEvent(this, this.#onMapKeyboardEventHandlers, event);
+  }
+
+  /**
+   * Registers a map keyboard event callback.
+   *
+   * @param callback - The callback to be executed whenever a keyboard event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onMapKeyboardEvent(callback: MapKeyboardEventDelegate): MapKeyboardEventDelegate {
+    return EventHelper.onEvent(this.#onMapKeyboardEventHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map keyboard event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapKeyboardEvent(callback: MapKeyboardEventDelegate): void {
+    EventHelper.offEvent(this.#onMapKeyboardEventHandlers, callback);
+  }
+
+  /**
    * Emits a map init event to all handlers.
    */
   #emitMapInit(): void {
@@ -3259,6 +3299,16 @@ export type GeometryJsonResponseGeometry = {
 
 /** Base interface for map events */
 export interface MapBaseEvent {}
+
+/** Event raised for a keyboard event scoped to a map instance. */
+export interface MapKeyboardEvent extends MapBaseEvent {
+  keyboardEvent: KeyboardEvent;
+  isTextInputFocused: boolean;
+  isMapTargetFocused: boolean;
+}
+
+/** Delegate for the map keyboard event handler function signature. */
+export type MapKeyboardEventDelegate = EventDelegateBase<MapViewer, MapKeyboardEvent, void>;
 
 /**
  * Delegate for the map init event handler function signature.

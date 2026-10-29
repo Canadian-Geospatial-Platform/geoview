@@ -34,7 +34,6 @@ import {
   getStoreDrawerIsEditing,
   getStoreDrawerIsSnapping,
   getStoreDrawerStyle,
-  getStoreDrawerShortcutsEnabled,
   isStoreDrawerInitialized,
   updateStoreStateStyle,
   setStoreActiveGeom,
@@ -66,11 +65,15 @@ import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
-// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the controller here, remove?
-import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 
-import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
+import type {
+  MapKeyboardEvent,
+  MapKeyboardEventDelegate,
+  MapProjectionChangedDelegate,
+  MapProjectionChangedEvent,
+  MapViewer,
+} from '@/geo/map/map-viewer';
 import {
   HandleType,
   type Transform,
@@ -105,12 +108,6 @@ export class DrawerController extends AbstractMapViewerController {
 
   /** The ID for the shortcuts indicator element */
   static readonly SHORTCUTS_INDICATOR_ID = 'shortcuts-enabled';
-
-  /** Keyboard handler for undo/redo - always active */
-  #undoRedoHandler?: (event: KeyboardEvent) => void;
-
-  /** Keyboard handler for other shortcuts - togglable */
-  #shortcutsHandler?: (event: KeyboardEvent) => void;
 
   /** Track whether optional shortcuts are enabled */
   #shortcutsEnabled = false;
@@ -164,6 +161,9 @@ export class DrawerController extends AbstractMapViewerController {
   /** The map projection changed event subscription reference. */
   #hookMapProjectionChanged?: MapProjectionChangedDelegate;
 
+  /** The map keyboard event subscription reference. */
+  #hookMapKeyboardEvent?: MapKeyboardEventDelegate;
+
   /**
    * Creates an instance of DrawerController.
    *
@@ -184,14 +184,14 @@ export class DrawerController extends AbstractMapViewerController {
    * Hooks the controller into action.
    */
   protected override onHook(): void {
-    // Setup the keyboard handlers for undo/redo
-    this.#hookUndoRedoEscapeHandler();
-
     // Listen when the language is changed in the UI domain
     this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged(this.#handleDisplayLanguageChanged.bind(this));
 
     // Listen when the map projection changes on the MapViewer
     this.#hookMapProjectionChanged = this.getMapViewer().onMapProjectionChanged(this.#handleMapReprojection.bind(this));
+
+    // Listen for map-scoped keyboard events
+    this.#hookMapKeyboardEvent = this.getMapViewer().onMapKeyboardEvent(this.#handleKeyboardEvent.bind(this));
   }
 
   /**
@@ -210,16 +210,10 @@ export class DrawerController extends AbstractMapViewerController {
       this.#hookMapProjectionChanged = undefined;
     }
 
-    // Remove undo/redo handler
-    if (this.#undoRedoHandler) {
-      document.removeEventListener('keydown', this.#undoRedoHandler);
-      this.#undoRedoHandler = undefined;
-    }
-
-    // Remove shortcuts handler if enabled
-    if (this.#shortcutsHandler) {
-      document.removeEventListener('keydown', this.#shortcutsHandler);
-      this.#shortcutsHandler = undefined;
+    // Unsubscribe from map keyboard events
+    if (this.#hookMapKeyboardEvent) {
+      this.getMapViewer().offMapKeyboardEvent(this.#hookMapKeyboardEvent);
+      this.#hookMapKeyboardEvent = undefined;
     }
 
     this.#shortcutsEnabled = false;
@@ -1502,13 +1496,7 @@ export class DrawerController extends AbstractMapViewerController {
    */
   openStyleMenu(): void {
     const mapId = this.getMapId();
-    const gvRootElement = DomHelper.getGVRootElement(mapId);
-
-    // Find the style button within this map's container
-    const styleButton = gvRootElement.querySelector(`#${mapId}-drawer-style`) as HTMLElement;
-    if (styleButton) {
-      styleButton.click();
-    } else {
+    if (!this.getMapViewer().navBarApi.setButtonPanelOpen(`${mapId}-drawer-style`, true)) {
       logger.logWarning('Style button not found - drawer plugin may not be loaded');
     }
   }
@@ -1550,7 +1538,6 @@ export class DrawerController extends AbstractMapViewerController {
   enableKeyboardShortcuts(): void {
     if (this.#shortcutsEnabled) return;
 
-    this.#hookShortcutsHandler();
     this.#shortcutsEnabled = true;
   }
 
@@ -1562,12 +1549,123 @@ export class DrawerController extends AbstractMapViewerController {
   disableKeyboardShortcuts(): void {
     if (!this.#shortcutsEnabled) return;
 
-    if (this.#shortcutsHandler) {
-      document.removeEventListener('keydown', this.#shortcutsHandler);
-      this.#shortcutsHandler = undefined;
+    this.#shortcutsEnabled = false;
+  }
+
+  /**
+   * Handles a keyboard event scoped to this map and routes drawer shortcuts.
+   *
+   * @param _sender - The map viewer that emitted the event
+   * @param mapKeyboardEvent - The keyboard event and map focus context
+   */
+  #handleKeyboardEvent(_sender: MapViewer, mapKeyboardEvent: MapKeyboardEvent): void {
+    const { keyboardEvent: event, isTextInputFocused, isMapTargetFocused } = mapKeyboardEvent;
+    const mapId = this.getMapId();
+
+    if (event.key === 'Escape') {
+      if (!isStoreDrawerInitialized(mapId)) return;
+
+      const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
+      if (transformInstance && transformInstance.getSelectedFeature()) {
+        transformInstance.clearSelection();
+
+        if (this.#tempTextTransformInstance) {
+          this.#cleanupTempTransformAndResume();
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      return;
     }
 
-    this.#shortcutsEnabled = false;
+    if (event.key === '`') {
+      this.setShortcutsEnabled(!this.#shortcutsEnabled);
+    }
+
+    if (event.ctrlKey || event.metaKey) {
+      switch (event.key.toLowerCase()) {
+        case 'z':
+          if (event.shiftKey ? this.redo() : this.undo()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          break;
+
+        case 'y':
+          if (this.redo()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    if (!this.#shortcutsEnabled || !isMapTargetFocused || isTextInputFocused || event.altKey || event.ctrlKey || event.metaKey) return;
+
+    switch (event.key.toLowerCase()) {
+      case 'd':
+        this.toggleDrawing();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 'e':
+        this.toggleEditing();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 'g':
+        this.cycleGeometryType(!event.shiftKey);
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 's':
+        if (event.shiftKey) {
+          this.downloadDrawings();
+        } else {
+          this.openStyleMenu();
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 'm':
+        this.toggleHideMeasurements();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 'n':
+        this.toggleSnapping();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+
+      case 'c':
+        if (event.shiftKey) {
+          this.clearDrawings();
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        break;
+
+      case 'o':
+        if (event.shiftKey) {
+          this.triggerUploadDialog();
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        break;
+
+      default:
+        break;
+    }
   }
 
   /**
@@ -2639,202 +2737,6 @@ export class DrawerController extends AbstractMapViewerController {
       // Update the undo redo state
       this.#updateUndoRedoState();
     };
-  }
-
-  /**
-   * Sets up keyboard event handling for undo, redo, and escape shortcuts (Ctrl+Z, Ctrl+Y, and Escape)
-   */
-  #hookUndoRedoEscapeHandler(): void {
-    if (this.#undoRedoHandler) return;
-
-    const handler = (event: KeyboardEvent): void => {
-      // Check if focus is within the GeoView shell
-      const mapId = this.getMapId();
-      const { activeElement } = document;
-      const gvRootElement = DomHelper.getGVRootElement(mapId);
-      if (!activeElement || !gvRootElement.contains(activeElement)) {
-        return;
-      }
-
-      // Handle Escape key separately for exiting transform interactions
-      if (event.key === 'Escape') {
-        if (!isStoreDrawerInitialized(mapId)) return;
-
-        // If editing with a selected feature, clear selection
-        const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
-        if (transformInstance && transformInstance.getSelectedFeature()) {
-          transformInstance.clearSelection();
-
-          // If this was a temp text transform, clean it up
-          if (this.#tempTextTransformInstance) {
-            this.#cleanupTempTransformAndResume();
-          }
-
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
-        return;
-      }
-
-      // Toggle shortcuts on/off with the ` key
-      if (event.key === '`') {
-        this.setShortcutsEnabled(!this.#shortcutsEnabled);
-      }
-
-      if (event.ctrlKey || event.metaKey) {
-        switch (event.key.toLowerCase()) {
-          case 'z':
-            if (event.shiftKey) {
-              if (this.redo()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-            } else if (this.undo()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            break;
-
-          case 'y':
-            if (this.redo()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            break;
-
-          default:
-            break;
-        }
-      }
-    };
-
-    this.#undoRedoHandler = handler;
-    document.addEventListener('keydown', handler);
-  }
-
-  /**
-   * Sets up keyboard event handling for drawer shortcuts.
-   *
-   * Shortcuts:
-   * - D: Toggle Drawing
-   * - E: Toggle Editing
-   * - G: Cycle Geometry Type (forward)
-   * - Shift+G: Cycle Geometry Type (backward)
-   * - S: Open Style Menu
-   * - M: Toggle Measurements
-   * - N: Toggle Snapping
-   * - Shift+C: Clear All
-   * - Shift+S: Download drawings
-   * - Shift+O: Upload drawings
-   */
-  #hookShortcutsHandler(): void {
-    if (this.#shortcutsHandler) return;
-
-    const handler = (event: KeyboardEvent): void => {
-      const mapId = this.getMapId();
-
-      // Check if shortcuts are enabled via store (can be toggled by navbar button)
-      if (!getStoreDrawerShortcutsEnabled(mapId)) return;
-
-      // Check if focus is within this map's container (multi-map safety)
-      const { activeElement } = document;
-      const mapElement = this.getMapViewer().map.getTargetElement();
-      if (!activeElement || !mapElement?.contains(activeElement)) {
-        return;
-      }
-
-      // Prevent shortcuts when typing in input fields
-      if (
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement ||
-        (activeElement as HTMLElement).isContentEditable
-      ) {
-        return;
-      }
-
-      // Only proceed with shortcuts no modifier keys are pressed
-      if (event.altKey || event.ctrlKey || event.metaKey) return;
-
-      switch (event.key.toLowerCase()) {
-        case 'd':
-          // Toggle Drawing
-          this.toggleDrawing();
-          event.preventDefault();
-          event.stopPropagation();
-          break;
-
-        case 'e':
-          // Toggle Editing
-          this.toggleEditing();
-          event.preventDefault();
-          event.stopPropagation();
-          break;
-
-        case 'g':
-          // Cycle Geometry Type
-          if (event.shiftKey) {
-            this.cycleGeometryType(false); // Backward
-          } else {
-            this.cycleGeometryType(true); // Forward
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          break;
-
-        case 's':
-          // Save (Download) or Style Menu
-          if (event.shiftKey) {
-            this.downloadDrawings();
-          } else {
-            this.openStyleMenu();
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          break;
-
-        case 'm':
-          if (!event.ctrlKey && !event.metaKey) {
-            // Toggle Measurements
-            this.toggleHideMeasurements();
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          break;
-
-        case 'n':
-          // Toggle Snapping
-          this.toggleSnapping();
-          event.preventDefault();
-          event.stopPropagation();
-          break;
-
-        case 'c':
-          // Clear All
-          if (event.shiftKey) {
-            this.clearDrawings();
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          break;
-
-        case 'o':
-          // Upload Drawings
-          if (event.shiftKey) {
-            this.triggerUploadDialog();
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          break;
-
-        default:
-          break;
-      }
-    };
-
-    this.#shortcutsHandler = handler;
-    document.addEventListener('keydown', handler);
   }
 
   // #endregion DOMAIN HANDLERS
