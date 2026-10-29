@@ -20,12 +20,7 @@ import { Typography } from '@/ui/typography/typography';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
-import {
-  useStoreAppIsCircularProgressActive,
-  useStoreAppIsFullscreenActive,
-  useStoreAppGeoviewHTMLElement,
-  useStoreAppHeight,
-} from '@/core/stores/states/app-state';
+import { useStoreAppIsCircularProgressActive, useStoreAppIsFullscreenActive, useStoreAppHeight } from '@/core/stores/states/app-state';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
@@ -105,7 +100,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const isMapFullScreen = useStoreAppIsFullscreenActive();
   const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const { isOpen } = useStoreUIActiveFooterBarTab();
-  const geoviewElement = useStoreAppGeoviewHTMLElement();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
@@ -113,6 +107,8 @@ export function Shell(props: ShellProps): JSX.Element {
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
   const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
+
+  const gvRootElement = DomHelper.getGVRootElement(mapId);
 
   /**
    * Computes the style classes for the shell container.
@@ -129,7 +125,7 @@ export function Shell(props: ShellProps): JSX.Element {
     footerPanelResizeValue,
     isFooterBar,
     collapsedFooterHeight,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     appHeight,
   });
 
@@ -322,7 +318,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Keep the viewer height in sync when an external layout resizes the host (e.g. 100% height in a resizable parent)
   useEffectHostResizeSync({
     mapId,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     isMapFullScreen,
     hostOriginalHeightRef,
     onHostHeightChange: handleHostHeightChange,
@@ -534,16 +530,10 @@ export function Shell(props: ShellProps): JSX.Element {
             </Box>
             {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
             {Object.keys(mapViewer.modal.modals).map((modalId) => (
-              <Modal
-                key={modalId}
-                modalId={modalId}
-                open={modalOpen}
-                modalProps={modalProps}
-                container={DomHelper.getGVRootElement(mapViewer.mapId)}
-              />
+              <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
             ))}
             {/* modal section start */}
-            <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
+            <FocusTrapDialog mapId={mapViewer.mapId} />
             {mapLoaded && <ExportModal />}
             {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
             {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}

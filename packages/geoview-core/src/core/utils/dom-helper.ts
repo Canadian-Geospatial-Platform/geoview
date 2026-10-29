@@ -414,6 +414,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets the guide content container in a map's right panel.
+   *
+   * @param mapId - The map identifier
+   * @returns The guide content container, if found
+   */
+  static getGuideContainer(mapId: string): HTMLElement | undefined {
+    return DomHelper.queryGVSelector<HTMLElement>(mapId, '.guide-container');
+  }
+
+  /**
    * Gets the guide close button for an app bar or footer bar container.
    *
    * @param mapId - The map identifier

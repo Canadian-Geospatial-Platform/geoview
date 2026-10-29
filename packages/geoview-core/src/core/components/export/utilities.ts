@@ -12,7 +12,6 @@ import {
   isStoreTimeSliderInitialized,
 } from '@/core/stores/states/time-slider-state';
 import { getStoreMapStateForExportLayout } from '@/core/stores/states/map-state';
-import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { getStoreLayerLegendLayers } from '@/core/stores/states/layer-state';
 
 import { logger } from '@/core/utils/logger';
@@ -20,6 +19,7 @@ import { getLocalizedMessage, loadImage } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 import { SHARED_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 import { CanvasDocument } from '@/core/components/export/canvas-layout';
@@ -915,12 +915,12 @@ export class ExportUtilities {
     layerDateTemporalModes: Record<string, TemporalMode>
   ): Promise<TypeMapInfoResult> {
     // Get all needed data from store state
-    const mapElement = getStoreAppGeoviewHTMLElement(mapId);
+    const gvRootElement = DomHelper.getGVRootElement(mapId);
     const mapState = getStoreMapStateForExportLayout(mapId);
     const { northArrow, northArrowElement, attribution, mapRotation, mapScale, currentProjection } = mapState;
 
     // Get browser map dimensions from viewport element (not canvas, which changes size when rotated)
-    const viewport = mapElement.getElementsByClassName('ol-viewport')[0] as HTMLElement;
+    const viewport = gvRootElement.getElementsByClassName('ol-viewport')[0] as HTMLElement;
     const viewportRect = viewport.getBoundingClientRect();
 
     // Use viewport dimensions, not canvas dimensions (canvas size changes when map rotates)

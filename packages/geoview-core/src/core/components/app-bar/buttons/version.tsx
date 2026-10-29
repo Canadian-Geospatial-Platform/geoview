@@ -69,7 +69,7 @@ export default function Version(): JSX.Element {
   const uiController = useUIController();
 
   // Get container
-  const mapElem = useShellContainer();
+  const shellContainer = useShellContainer();
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -133,7 +133,7 @@ export default function Version(): JSX.Element {
           placement="right-end"
           strategy="fixed"
           onClose={handleClickAway}
-          container={mapElem}
+          container={shellContainer}
           focusSelector="button"
           modifiers={[
             {

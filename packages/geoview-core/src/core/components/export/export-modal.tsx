@@ -37,17 +37,18 @@ import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useShellContainer } from '@/core/containers/shell-container-context';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
-import { useStoreLayerDateTemporalModeSet, useStoreLayerDisplayDateFormatSet } from '@/core/stores/states/layer-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { TIMEOUT } from '@/core/utils/constant';
+import { logger } from '@/core/utils/logger';
 import { exportFile } from '@/core/utils/utilities';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DomHelper } from '@/core/utils/dom-helper';
+import { useStoreLayerDateTemporalModeSet, useStoreLayerDisplayDateFormatSet } from '@/core/stores/states/layer-state';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
-import { TIMEOUT } from '@/core/utils/constant';
-import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
 
 /** Supported export file formats. */
@@ -101,10 +102,9 @@ export function ExportModal(): JSX.Element {
 
   // Store
   const mapId = useStoreGeoViewMapId();
-  const mapElement = useStoreAppGeoviewHTMLElement();
+  const shellContainer = useShellContainer();
   const uiController = useUIController();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
-  const shellContainer = useShellContainer();
   const language = useStoreAppDisplayLanguage();
   const layerDateFormats = useStoreLayerDisplayDateFormatSet();
   const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
@@ -122,6 +122,7 @@ export function ExportModal(): JSX.Element {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
+  const gvRootElement = DomHelper.getGVRootElement(mapId);
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
   /**
@@ -260,14 +261,14 @@ export function ExportModal(): JSX.Element {
    * Generates the image preview when the modal opens.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect', activeModalId, generatePreview, mapElement);
+    logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect', activeModalId, generatePreview, gvRootElement);
     if (activeModalId !== 'export') return;
 
     // Reset loading states to show skeleton immediately when modal opens
     setIsMapLoading(true);
     setIsLegendLoading(true);
 
-    const overviewMap = mapElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
+    const overviewMap = gvRootElement?.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
     if (overviewMap) overviewMap.style.visibility = 'hidden';
 
     const timer = setTimeout(() => {
@@ -278,7 +279,7 @@ export function ExportModal(): JSX.Element {
       clearTimeout(timer);
       if (overviewMap) overviewMap.style.visibility = 'visible';
     };
-  }, [activeModalId, generatePreview, mapElement]);
+  }, [activeModalId, generatePreview, gvRootElement]);
 
   // #region HANDLERS
 
@@ -347,7 +348,7 @@ export function ExportModal(): JSX.Element {
     // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
     const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
     const skeletonWidth = dialogWidth * 0.8;
-    const mapCanvas = mapElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement;
+    const mapCanvas = gvRootElement?.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement | undefined;
     const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
     const skeletonHeight = skeletonWidth * mapAspectRatio;
 

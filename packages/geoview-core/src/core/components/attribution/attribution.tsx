@@ -53,7 +53,7 @@ export const Attribution = memo((): JSX.Element => {
   const mapAttribution = useStoreMapAttribution();
 
   // Get container
-  const mapElem = useShellContainer();
+  const shellContainer = useShellContainer();
 
   // Set color for type of interaction (dynamic vs static)
   const iconButtonColor =
@@ -127,7 +127,7 @@ export const Attribution = memo((): JSX.Element => {
           anchorEl={anchorEl}
           placement="top-end"
           strategy="fixed"
-          container={mapElem}
+          container={shellContainer}
           handleKeyDown={handleEscapeKey}
           onClose={handleClose}
           modifiers={[

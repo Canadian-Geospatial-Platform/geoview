@@ -72,7 +72,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = useShellContainer();
+  const shellContainer = useShellContainer();
 
   // Element IDs for accessibility and focus management
   const closeButtonId = `${mapId}-resize-close-button`;
@@ -257,7 +257,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           anchorEl={anchorEl}
           placement="top-start"
           strategy="fixed"
-          container={mapElem}
+          container={shellContainer}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           handleKeyDown={handleEscapeKey}

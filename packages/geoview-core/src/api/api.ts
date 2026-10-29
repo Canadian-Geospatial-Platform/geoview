@@ -162,7 +162,7 @@ export class API {
     }
 
     // Get the div container
-    const divContainer = DomHelper.getGVRootElement(mapId);
+    const gvRootElement = DomHelper.getGVRootElement(mapId);
 
     // Delete the map
     await this.getMapViewer(mapId).delete();
@@ -171,7 +171,7 @@ export class API {
     delete this.#maps[mapId];
 
     // Unmount the map
-    unmountMap(mapId, divContainer);
+    unmountMap(mapId, gvRootElement);
 
     // GV Now that we're unmounted, we can remove the store, best practice
     try {
@@ -183,18 +183,18 @@ export class API {
     }
 
     // If the div container was found
-    if (divContainer) {
+    if (gvRootElement) {
       // Remove geoview-class if we need to reuse the div
-      divContainer.classList.remove('geoview-map');
+      gvRootElement.classList.remove('geoview-map');
 
       // If we have a data-config-url and a data-config attribute
-      if (divContainer.getAttribute('data-config-url') && divContainer.getAttribute('data-config')) {
+      if (gvRootElement.getAttribute('data-config-url') && gvRootElement.getAttribute('data-config')) {
         // Delete the data-config property, because it'll clash with the data-config-url if we try to reload a map in the current div
-        divContainer.removeAttribute('data-config');
+        gvRootElement.removeAttribute('data-config');
       }
 
       // If deleteContainer, delete the HTML div
-      if (deleteContainer) divContainer.remove();
+      if (deleteContainer) gvRootElement.remove();
     }
   }
 

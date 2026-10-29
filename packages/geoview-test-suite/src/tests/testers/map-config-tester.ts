@@ -2149,13 +2149,13 @@ export class MapConfigTester extends GVAbstractTester {
    * @returns The measured map layout heights
    */
   static #measureMapHeights(mapId: string): TypeMapHeightMeasurements {
-    const geoviewMapElement = DomHelper.getGVRootElement(mapId);
+    const gvRootElement = DomHelper.getGVRootElement(mapId);
     const tabsContainer = DomHelper.getTabsContainer(mapId);
 
-    Test.assertIsDefined('geoviewMapElement', geoviewMapElement);
+    Test.assertIsDefined('geoviewMapElement', gvRootElement);
 
     return {
-      geoviewMapHeight: Math.round(geoviewMapElement.getBoundingClientRect().height),
+      geoviewMapHeight: Math.round(gvRootElement.getBoundingClientRect().height),
       footerChromeHeight: tabsContainer ? Math.round(tabsContainer.getBoundingClientRect().height) : 0,
     };
   }

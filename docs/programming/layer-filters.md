@@ -263,6 +263,8 @@ User types in data table column filter
 
 Multiple column filters are joined with `and` into a single filter string.
 
+When column-filter state is saved, the controller omits entries with no active value (including range entries with no populated bounds). Clearing the final active column filter therefore removes the stale filter entry instead of preserving a constraint that matches no rows.
+
 ### Map Filtering Toggle
 
 The data table has a "Filter Map" toggle per layer (`mapFilteredRecord`). When disabled:

@@ -8,8 +8,6 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the app-state here, remove?
-import { DomHelper } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -45,9 +43,6 @@ export interface IAppState {
 
   /** The URL of the metadata service used for layer metadata lookups. */
   metadataServiceURL: string | undefined;
-
-  /** The root HTML element that hosts the GeoView map instance. */
-  geoviewHTMLElement: HTMLElement;
 
   /** The current height (in pixels) of the map container. */
   height: number;
@@ -119,7 +114,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     guide: {},
     geolocatorServiceURL: '',
     metadataServiceURL: '',
-    geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
     height: 0,
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
@@ -132,7 +126,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage!) ? geoviewConfig.displayLanguage! : 'en';
-      const geoviewHTMLElement = DomHelper.getGVRootElement(get().mapId);
       set({
         appState: {
           ...get().appState,
@@ -142,8 +135,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme!, // Was defaulted so can use '!'
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement,
-          height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures!, // Was defaulted so can use '!'
           showLayerHighlightLayerBbox: geoviewConfig.globalSettings?.showLayerHighlightLayerBbox ?? true,
         },
@@ -456,17 +447,6 @@ export const getStoreAppMetadataServiceURL = (mapId: string): string | undefined
 /** Hook that returns the metadata service URL. */
 export const useStoreAppMetadataServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
-
-/**
- * Gets the root GeoView HTML element for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The HTML element hosting the map.
- */
-export const getStoreAppGeoviewHTMLElement = (mapId: string): HTMLElement => getStoreAppState(mapId).geoviewHTMLElement;
-
-/** Hook that returns the root GeoView HTML element for the current map. */
-export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 
 /**
  * Gets the map container height for the given map.
