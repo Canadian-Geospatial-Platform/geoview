@@ -39,8 +39,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       alignItems: 'center',
     },
     panel: {
-      borderTop: 1,
-      borderTopColor: 'divider',
+      borderTop: `1px solid ${theme.palette.divider}`,
       flexGrow: 1,
       height: isMapFullScreen ? 'calc(100% - 56px)' : `calc(${appHeight} - 56px)`,
       overflow: 'hidden',
@@ -66,7 +65,10 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
         outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: `inset 0 0 0 ${FOCUS_HALO_SIZE} ${focusIndicator.halo}`,
       },
-      transition: 'background-color 0.3s ease-in-out',
+      transition: theme.transitions.create('background-color', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
       '&:hover': {
         backgroundColor: theme.palette.action.hover,
         color: theme.palette.text.primary,

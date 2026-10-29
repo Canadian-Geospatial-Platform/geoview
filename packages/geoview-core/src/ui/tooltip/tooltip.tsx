@@ -2,6 +2,7 @@ import type { Ref } from 'react';
 import { forwardRef } from 'react';
 import type { TooltipProps } from '@mui/material';
 import { Tooltip as MaterialTooltip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -31,8 +32,13 @@ import { logger } from '@/core/utils/logger';
 function TooltipUI(props: TooltipProps, ref: Ref<HTMLElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/Tooltip/Tooltip', props);
 
+  const theme = useTheme();
+
   // TODO: open issue about this behavior in the Material-UI GitHub repository (multiple tooltip)
-  return <MaterialTooltip enterDelay={1000} enterNextDelay={200} {...props} ref={ref} />;
+  // enterNextDelay stays a literal 200ms: it is interaction timing, and no theme
+  // value exists for it (`shorter` is an animation duration). enterDelay reads
+  // GeoView's tooltipDelay.
+  return <MaterialTooltip enterDelay={theme.transitions.duration.tooltipDelay ?? 1000} enterNextDelay={200} {...props} ref={ref} />;
 }
 
 // Export the Tooltip using forwardRef so that passing ref is permitted and functional in the react standards

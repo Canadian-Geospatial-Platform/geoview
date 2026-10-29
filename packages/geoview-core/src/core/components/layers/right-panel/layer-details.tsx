@@ -62,7 +62,7 @@ import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-contr
 import { LayerSettingsPanel } from './layer-settings/layer-settings';
 import { LayerInfoPanel } from './layer-info/layer-info';
 import { logger } from '@/core/utils/logger';
-import { LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
+import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
@@ -161,6 +161,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const { t } = useTranslation<string>();
 
   const theme = useTheme();
+  const fadingPanelDuration = theme.transitions.duration.standard;
   const sxClasses = getSxClasses(theme);
   const hiddenStyle = sxClasses.hiddenText;
 
@@ -382,54 +383,54 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    */
   const handleSettingsBackToDetails = useCallback((): void => {
     setContentVisible(false);
-    delay(TIMEOUT.fadingPanelDuration)
+    delay(fadingPanelDuration)
       .then(() => {
         setActiveView('details');
         setContentVisible(true);
         requestAnimationFrame(() => settingsButtonRef.current?.focus());
       })
       .catch((error) => logger.logPromiseFailed('in delay in handleSettingsBackToDetails', error));
-  }, []);
+  }, [fadingPanelDuration]);
 
   /**
    * Crossfades from details view to settings view.
    */
   const handleOpenSettings = useCallback((): void => {
     setContentVisible(false);
-    delay(TIMEOUT.fadingPanelDuration)
+    delay(fadingPanelDuration)
       .then(() => {
         setActiveView('settings');
         setContentVisible(true);
       })
       .catch((error) => logger.logPromiseFailed('in delay in handleOpenSettings', error));
-  }, []);
+  }, [fadingPanelDuration]);
 
   /**
    * Crossfades from info view back to details view, restoring focus to the info button.
    */
   const handleInfoBackToDetails = useCallback((): void => {
     setContentVisible(false);
-    delay(TIMEOUT.fadingPanelDuration)
+    delay(fadingPanelDuration)
       .then(() => {
         setActiveView('details');
         setContentVisible(true);
         requestAnimationFrame(() => infoButtonRef.current?.focus());
       })
       .catch((error) => logger.logPromiseFailed('in delay in handleInfoBackToDetails', error));
-  }, []);
+  }, [fadingPanelDuration]);
 
   /**
    * Crossfades from details view to info view.
    */
   const handleOpenInfo = useCallback((): void => {
     setContentVisible(false);
-    delay(TIMEOUT.fadingPanelDuration)
+    delay(fadingPanelDuration)
       .then(() => {
         setActiveView('info');
         setContentVisible(true);
       })
       .catch((error) => logger.logPromiseFailed('in delay in handleOpenInfo', error));
-  }, []);
+  }, [fadingPanelDuration]);
 
   /**
    * Sets visibility for all children of the layer, skipping children in error state.
@@ -796,7 +797,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       </Box>
 
       {/* Sequential crossfade: fade out → swap content → fade in */}
-      <Fade in={contentVisible} timeout={TIMEOUT.fadingPanelDuration}>
+      <Fade in={contentVisible} timeout={fadingPanelDuration}>
         <Box>
           {activeView === TABS.DETAILS && (
             <>

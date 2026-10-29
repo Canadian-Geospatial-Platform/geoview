@@ -99,7 +99,10 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       maxWidth: '44px',
       minWidth: '44px',
       padding: 'initial',
-      transition: 'background-color 0.3s ease-in-out',
+      transition: theme.transitions.create('background-color', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
       '&.highlighted.active': {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
@@ -224,7 +227,10 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      transition: 'transform 0.3s ease-in-out',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
     },
     measurementPanel: {
       display: 'flex',

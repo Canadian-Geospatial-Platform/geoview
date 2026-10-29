@@ -66,7 +66,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Group title styling
   groupTitle: {
     textWrapMode: 'wrap',
-    fontSize: '1.125rem', // 18px
+    fontSize: theme.palette.geoViewFontSize?.md ?? '1.125rem', // 18px
     fontWeight: '700',
     lineHeight: 1.2,
     color: theme.palette.text.primary,
@@ -189,7 +189,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   descriptionText: {
-    fontSize: '0.875rem',
+    fontSize: theme.palette.geoViewFontSize?.sm ?? '0.875rem',
     fontStyle: 'italic',
     fontWeight: 300,
     color: theme.palette.text.primary,
