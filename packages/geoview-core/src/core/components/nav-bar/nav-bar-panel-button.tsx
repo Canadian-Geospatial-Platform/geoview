@@ -1,5 +1,4 @@
-import { useMemo, cloneElement, isValidElement, useId } from 'react';
-import type { ReactNode } from 'react';
+import { useMemo, useRef, useState, cloneElement, isValidElement, useId } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +30,8 @@ interface NavbarPanelButtonType {
   keepPanelMounted?: boolean;
   /** Accessible live-region content that must remain available when the panel is closed. */
   liveRegionContent?: ReactNode;
+  /** Requests a change to the panel's open state. */
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 /**
@@ -44,7 +45,9 @@ export default function NavbarPanelButton({
   isActive = false,
   keepPanelMounted = false,
   liveRegionContent,
+  onOpenChange
 }: NavbarPanelButtonType): JSX.Element {
+export default function NavbarPanelButton({ buttonPanel, isActive = false, onOpenChange }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
@@ -73,17 +76,33 @@ export default function NavbarPanelButton({
 
   // States
   const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [localOpen, setLocalOpen] = useState(buttonPanel.panel?.status ?? false);
+  const open = onOpenChange ? (buttonPanel.panel?.status ?? false) : localOpen;
+  const anchorEl = buttonRef.current;
 
   // #region Handlers
 
   /**
+   * Closes the panel and clears the anchor element.
+   */
+  const closePanel = (): void => {
+    if (onOpenChange) {
+      onOpenChange(false);
+    } else {
+      setLocalOpen(false);
+    }
+  };
+
+  /**
    * Handles when the user clicks the navbar button to toggle the panel.
    */
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (open) {
-      closePanel();
+  const handleClick = (): void => {
+    if (onOpenChange) {
+      onOpenChange(!open);
     } else {
       openAt(event.currentTarget);
+      setLocalOpen(!open);
     }
   };
 
@@ -121,6 +140,7 @@ export default function NavbarPanelButton({
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
+          iconRef={buttonRef}
           aria-label={t(buttonPanel.button['aria-label'])}
           aria-expanded={open}
           aria-haspopup="dialog"

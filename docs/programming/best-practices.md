@@ -693,11 +693,13 @@ The [accessibility guide](../app/accessibility.md) owns the shared guidance:
 
 ## <a id="dom-access"></a>18- Map-scoped DOM access (no direct `document.*`)
 
-Multiple GeoView maps can live on the same HTML page. Every DOM id must therefore be **map-scoped**, and every DOM lookup must be **restricted to a single map's subtree** so it never resolves an element that belongs to a different map. To enforce this, direct `document.getElementById` / `document.querySelector` / `document.querySelectorAll` calls are **banned** in `geoview-core` and flagged by an ESLint `no-restricted-syntax` rule. Use the helpers below instead.
+Multiple GeoView maps can live on the same HTML page. Every DOM id must therefore be **map-scoped**, and every DOM lookup must be **restricted to a single map's subtree** so it never resolves an element that belongs to a different map. To enforce this, direct `document.getElementById` / `document.querySelector` / `document.querySelectorAll` calls are **banned** in `geoview-core` and flagged by an ESLint `no-restricted-syntax` rule.
+
+Map scoping is necessary, but it does not make DOM access appropriate in every layer. React components own the rendered UI. Keep element lookup, measurement, focus, and other DOM operations at that UI or browser-integration boundary. Controllers should request semantic UI actions or consume semantic values through APIs and events; domains should remain independent of the DOM. Moving a selector behind a helper and calling that helper from a controller only hides the dependency; it does not remove it.
 
 ### The `${mapId}-suffix` id convention
 
-DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Build ids through the helper so the convention lives in one place:
+DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Use the pure ID builder so the convention lives in one place:
 
 ```ts
 import { DomHelper } from "@/core/utils/dom-helper";
@@ -707,7 +709,9 @@ const id = DomHelper.buildGVElementId(mapId, "shell"); // → "map1-shell"
 
 ### The wrappers (`@/core/utils/dom-helper`)
 
-DOM lookup helpers scope queries to the map's root element. `DomHelper.getGVRootElement(mapId)` throws when the root is absent; other root-scoped lookup helpers also throw in that case. When the root exists, a missing descendant returns `undefined` (or an empty array for `queryGVSelectorAll`).
+DOM lookup helpers scope queries to the map's root element. Use them from UI or browser-integration code that genuinely needs an imperative DOM operation and does not already have the element through a React ref or context. `DomHelper.getGVRootElement(mapId)` throws when the root is absent; other root-scoped lookup helpers also throw in that case. When the root exists, a missing descendant returns `undefined` (or an empty array for `queryGVSelectorAll`).
+
+`buildGVElementId` only constructs a string and can be used wherever a canonical DOM id is needed. The lookup helpers return live DOM elements and belong at the UI boundary; their map-scoped behavior is not a reason for controllers or domains to query or manipulate rendered UI.
 
 | Helper | Use for | Returns |
 | --- | --- | --- |
@@ -748,12 +752,12 @@ This is the key decision:
 | You need…                                                                                               | Use                                                                                                |
 | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | **The root element itself** in React (measure it, scope a listener, or inspect descendants)             | `useGeoViewRootElement()`                                                                           |
-| The root element in a non-React one-shot, from the **live DOM**                                         | `DomHelper.getGVRootElement(mapId)`                                                                 |
-| A **specific descendant by id**, imperatively (effects, handlers, controllers, utils, plugins)          | `DomHelper.getGVElementById(mapId, suffix)` / `DomHelper.getGVElementByFullId(mapId, fullId)`       |
-| A **CSS selector** scoped to one map                                                                    | `DomHelper.queryGVSelector(mapId, selector)` / `DomHelper.queryGVSelectorAll(mapId, selector)`      |
+| The root element in UI or browser-integration code, from the **live DOM**                               | `DomHelper.getGVRootElement(mapId)`                                                                 |
+| A **specific descendant by id** in UI code when no ref is available                                     | `DomHelper.getGVElementById(mapId, suffix)` / `DomHelper.getGVElementByFullId(mapId, fullId)`       |
+| A **CSS selector** scoped to one map in UI or browser-integration code                                   | `DomHelper.queryGVSelector(mapId, selector)` / `DomHelper.queryGVSelectorAll(mapId, selector)`      |
 | The shell element as a React portal/container target                                                    | `useShellContainer()`                                                                               |
 
-`useGeoViewRootElement()` reads the host reference supplied by the map mount. It is not stored in Zustand, and the same host is available for the lifetime of the mounted React tree, including through portals. For descendant lookups in effects, handlers, controllers, and utilities, use the map-scoped `DomHelper` wrappers rather than rebuilding ids or using global `document.*` selectors.
+`useGeoViewRootElement()` reads the host reference supplied by the map mount. It is not stored in Zustand, and the same host is available for the lifetime of the mounted React tree, including through portals. In UI effects and handlers, prefer an existing ref or context; use the map-scoped `DomHelper` wrappers only when an imperative descendant lookup is actually needed. Controllers should not receive DOM elements or call `DomHelper` to implement UI behavior. Expose a semantic action or value instead, such as a request to open a registered panel or a measured layout inset.
 
 **`useGeoViewRootElement` vs. `DomHelper.getGVRootElement`:** use the context hook in React render and lifecycle code; it returns the exact host element used to mount that map. Use the helper for imperative code that has a `mapId`; it resolves the live DOM element and throws if the host is absent.
 
@@ -764,8 +768,10 @@ The root is supplied by the map mount before React descendants render, so React 
 | Moment of use                                                                                                                                      | Use                                                                                               |
 | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | **During React render** — access the map root or shell portal container                                                                            | **context hooks** (`useGeoViewRootElement`, `useShellContainer`)                                 |
-| **In an effect or event handler** — find a descendant when acting on it                                                                            | **DomHelper** (`getGVElementById`, `queryGVSelector`, `getGVRootElement`)                        |
-| **Non-React code** — controllers, utilities, plugins, and tests                                                                                    | **DomHelper**                                                                                    |
+| **In an effect or event handler** — find a descendant when no ref is available                                                                     | **DomHelper** (`getGVElementById`, `queryGVSelector`, `getGVRootElement`)                        |
+| **In non-React UI or browser-integration code** — perform a necessary map-scoped DOM operation                                                    | **DomHelper**                                                                                    |
+| **In a controller or domain** — request UI behavior or use layout/state information                                                               | **A semantic API, event, or value; not `DomHelper` or an `HTMLElement`**                         |
+| **In tests** — locate a map-owned element for an assertion or interaction                                                                          | **DomHelper**                                                                                    |
 
 ### Legitimate exceptions (keep `document.*`, add a disable)
 
