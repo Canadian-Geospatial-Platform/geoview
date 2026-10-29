@@ -1195,6 +1195,9 @@ export class MapViewer {
    * @returns A promise that resolves when the deletion is complete
    */
   async delete(): Promise<void> {
+    // Clear highlights, which also cancels any pending temporary highlight expiry
+    this.controllers.mapController.removeHighlightedFeature('all');
+
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
 

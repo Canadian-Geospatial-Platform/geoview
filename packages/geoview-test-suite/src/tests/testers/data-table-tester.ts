@@ -7,6 +7,7 @@ import {
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
+import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
 import { getGVRootElement, queryGVSelectorAll } from 'geoview-core/core/utils/dom-helper';
 
 /**
@@ -466,6 +467,45 @@ export class DataTableTester extends GVAbstractTester {
         test.addStep(`Verifying without extent filter shows "3 of 4 row(s) filtered" (got "${summaryTextDisabled}")...`);
         Test.assertIsEqual(summaryTextDisabled.includes('3'), true);
         Test.assertIsEqual(summaryTextDisabled.includes('4'), true);
+      }
+    );
+  }
+
+  /**
+   * Tests that a temporary zoom highlight (as used by the data table row zoom) is removed automatically.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testTemporaryZoomHighlightExpires(layerPath: string): Promise<Test<{ shown: number; remaining: number }>> {
+    return this.test(
+      'Test temporary zoom highlight is removed automatically...',
+      async (test) => {
+        const features = await this.#helperOpenDataTableAndWait(test, layerPath);
+        const feature = features![0];
+
+        test.addStep('Zooming to the first feature with a temporary highlight...');
+        await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
+          layerPath,
+          feature,
+          feature.extent!,
+          false,
+          undefined,
+          true
+        );
+        const shown = getStoreMapHighlightedFeatures(this.getMapId()).length;
+
+        test.addStep('Waiting for the highlight to be removed...');
+        await this.getControllersRegistry().mapController.waitForFeatureHighlightedRemoved();
+
+        return { shown, remaining: getStoreMapHighlightedFeatures(this.getMapId()).length };
+      },
+      (test, result) => {
+        test.addStep('Verifying the feature was highlighted, then the highlight removed...');
+        Test.assertIsEqual(result.shown, 1);
+        Test.assertIsEqual(result.remaining, 0);
+      },
+      () => {
+        this.getControllersRegistry().mapController.removeHighlightedFeature('all');
       }
     );
   }

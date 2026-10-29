@@ -49,7 +49,8 @@ import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { isImage, linkifyAndSanitizeHtml, containsHtmlTags } from '@/core/utils/utilities';
+import { isImage, linkifyAndSanitizeHtml, containsHtmlTags, scrollIfNotVisible } from '@/core/utils/utilities';
+import { getGVShellElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -799,8 +800,12 @@ function DataTable({
 
       // If the extent was found
       if (extent) {
+        // Bring the map into view, like the map info bar and app bar do
+        const shell = getGVShellElement(mapId);
+        if (shell) scrollIfNotVisible(shell, 'start');
+
         // Zoom to extent and wait for it to finish
-        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true).catch((error: unknown) => {
+        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, undefined, true).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in DataTable', error);
         });
@@ -809,7 +814,7 @@ function DataTable({
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [layerPath, featureHasExtent, featureOidFieldName, layerController]
+    [layerPath, mapId, featureHasExtent, featureOidFieldName, layerController]
   );
 
   /**

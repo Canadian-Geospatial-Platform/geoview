@@ -83,11 +83,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 13         | Guarded sequential          |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 14         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **273**    |                             |
+| **Total**         |                         |                                                                                                 | **274**    |                             |
 
 ---
 
@@ -846,6 +846,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                      |
 | 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
 | 13  | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
+| 14  | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                        |
 
 ---
 
