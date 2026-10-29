@@ -76,9 +76,9 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
 | 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | 16         | Parallel                    |
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
-| 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
+| 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 57         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
-| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 11         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 17         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
@@ -87,7 +87,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **274**    |                             |
+| **Total**         |                         |                                                                                                 | **280**    |                             |
 
 ---
 
@@ -261,7 +261,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-utilities` · **File:** `tests/suites/suite-utilities.ts` · **Guard:** None
-**Execution:** Fully parallel (`Promise.all`)
+**Execution:** Parallel (`Promise.all`), followed by sequential projection definition-request observation
 
 #### 1.3.1 UtilitiesCoreTester
 
@@ -322,19 +322,22 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 **File:** `tests/testers/utilities-geo-tester.ts`
 
-| #   | Method                        | Type | Description                                                        |
-| --- | ----------------------------- | ---- | ------------------------------------------------------------------ |
-| 1   | `testGetBaseUrl`              | test | Test GeoUtilities.getBaseUrl() extracts base URL...                |
-| 2   | `testGetMapServerUrl`         | test | Test GeoUtilities.getMapServerUrl() truncates at MapServer...      |
-| 3   | `testCoordFormatDMS`          | test | Test GeoUtilities.coordFormatDMS() converts decimal degrees...     |
-| 4   | `testIsPointInExtent`         | test | Test GeoUtilities.isPointInExtent() checks containment...          |
-| 5   | `testGetExtentUnion`          | test | Test GeoUtilities.getExtentUnion() computes union...               |
-| 6   | `testIsExtentLonLat`          | test | Test GeoUtilities.isExtentLonLat() validates lon/lat...            |
-| 7   | `testBufferExtent`            | test | Test GeoUtilities.bufferExtent() expands extent...                 |
-| 8   | `testIsGeoJSONObject`         | test | Test GeoUtilities.isGeoJSONObject() detects GeoJSON...             |
-| 9   | `testGeometryTypeConversions` | test | Test geometry type conversions...                                  |
-| 10  | `testEnsureServiceRequestUrl` | test | Test GeoUtilities.ensureServiceRequestUrl() normalizes params...   |
-| 11  | `testGetExtentIntersection`   | test | Test GeoUtilities.getExtentIntersection() computes intersection... |
+| #   | Method                                             | Type | Description                                                                      |
+| --- | -------------------------------------------------- | ---- | -------------------------------------------------------------------------------- |
+| 1   | `testGetBaseUrl`                                   | test | Test GeoUtilities.getBaseUrl() extracts base URL...                              |
+| 2   | `testGetMapServerUrl`                              | test | Test GeoUtilities.getMapServerUrl() truncates at MapServer...                    |
+| 3   | `testCoordFormatDMS`                               | test | Test GeoUtilities.coordFormatDMS() converts decimal degrees...                   |
+| 4   | `testIsPointInExtent`                              | test | Test GeoUtilities.isPointInExtent() checks containment...                        |
+| 5   | `testGetExtentUnion`                               | test | Test GeoUtilities.getExtentUnion() computes union...                             |
+| 6   | `testIsExtentLonLat`                               | test | Test GeoUtilities.isExtentLonLat() validates lon/lat...                          |
+| 7   | `testBufferExtent`                                 | test | Test GeoUtilities.bufferExtent() expands extent...                               |
+| 8   | `testIsGeoJSONObject`                              | test | Test GeoUtilities.isGeoJSONObject() detects GeoJSON...                           |
+| 9   | `testGeometryTypeConversions`                      | test | Test geometry type conversions...                                                |
+| 10  | `testEnsureServiceRequestUrl`                      | test | Test GeoUtilities.ensureServiceRequestUrl() normalizes params...                 |
+| 11  | `testGetExtentIntersection`                        | test | Test GeoUtilities.getExtentIntersection() computes intersection...               |
+| 12  | `testReadFeaturesFromGeoJSONProjectionObject`      | test | Test GeoJSON reader transforms features using an OpenLayers source projection... |
+| 13  | `testReadFeaturesFromGeoJSONEmbeddedCRSPrecedence` | test | Test embedded GeoJSON CRS overrides a conflicting source projection...           |
+| 14  | `testReadFeaturesFromEsriJSONProjectionObject`     | test | Test EsriJSON reader accepts an OpenLayers source projection...                  |
 
 #### 1.3.4 UtilitiesProjectionTester
 
@@ -342,14 +345,15 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 **File:** `tests/testers/utilities-projection-tester.ts`
 
-| #   | Method                        | Type | Description                                                       |
-| --- | ----------------------------- | ---- | ----------------------------------------------------------------- |
-| 1   | `testProjectionNames`         | test | Test Projection.PROJECTION_NAMES contains expected entries...     |
-| 2   | `testReadEPSGNumber`          | test | Test Projection.readEPSGNumber() extracts EPSG codes...           |
-| 3   | `testGetProjectionLonLat`     | test | Test Projection.getProjectionLonLat() returns EPSG:4326...        |
-| 4   | `testTransformPoints`         | test | Test Projection.transformPoints() transforms coordinates...       |
-| 5   | `testTransformExtentFromProj` | test | Test Projection.transformExtentFromProj() transforms extents...   |
-| 6   | `testGetProjectionFromString` | test | Test Projection.getProjectionFromString() resolves projections... |
+| #   | Method                             | Type | Description                                                                                          |
+| --- | ---------------------------------- | ---- | ---------------------------------------------------------------------------------------------------- |
+| 1   | `testProjectionNames`              | test | Test Projection.PROJECTION_NAMES contains expected entries...                                        |
+| 2   | `testReadEPSGNumber`               | test | Test Projection.readEPSGNumber() extracts EPSG codes...                                              |
+| 3   | `testGetProjectionLonLat`          | test | Test Projection.getProjectionLonLat() returns EPSG:4326...                                           |
+| 4   | `testTransformPoints`              | test | Test Projection.transformPoints() transforms coordinates...                                          |
+| 5   | `testTransformExtentFromProj`      | test | Test Projection.transformExtentFromProj() transforms extents...                                      |
+| 6   | `testGetProjectionFromString`      | test | Test Projection.getProjectionFromString() resolves projections...                                    |
+| 7   | `testAddProjectionIfMissingInputs` | test | Test addProjectionIfMissing accepts projection objects, identifiers and metadata without fetching... |
 
 ---
 
@@ -534,7 +538,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-layer-functions` · **File:** `tests/suites/suite-layer-functions.ts` · **Tester:** `LayerTester` (`tests/testers/layer-tester.ts`)
-**Execution:** Mixed — parallel for the duplicate-group-names test, then sequential for zoom/query tests (they change zoom level) · **Guard:** None
+**Execution:** Mixed — parallel for the duplicate-group-names test, then sequential for zoom/query tests; injection/projection tests run after all parallel work settles · **Guard:** None
 
 > **Note:** This suite runs on a single map with EPSG: 3857, testing layer controller functions and feature-query behavior.
 
@@ -574,6 +578,15 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | #   | Method                             | Type | Description                                                                                     |
 | --- | ---------------------------------- | ---- | ----------------------------------------------------------------------------------------------- |
 | 9   | `testReloadLayerPreservesPosition` | test | Test reloading a layer rebuilds it from scratch and keeps it at the same layer order (#3666)... |
+
+#### 2.2.5 GeoJSON Injection (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                   | Type | Description                                                                         |
+| --- | ---------------------------------------- | ---- | ----------------------------------------------------------------------------------- |
+| 10  | `testSetGeojsonSourceReplacesFeatures`   | test | Test public GeoJSON object injection and JSON-string replacement...                 |
+| 11  | `testSetGeojsonSourceReprojectsFeatures` | test | Test public GeoJSON replacement features reproject after a map projection change... |
 
 ---
 

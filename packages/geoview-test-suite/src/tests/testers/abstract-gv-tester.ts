@@ -1,4 +1,5 @@
 import type { Coordinate } from 'ol/coordinate';
+import type { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
@@ -21,6 +22,19 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /** Timeout value for waiting for layer registration. */
   static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
+
+  /** WGS84 definition used to exercise local WKT resolution. */
+  static readonly WGS84_WKT =
+    'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]';
+
+  /** Point with an independently known Web Mercator easting. */
+  static readonly PROJECTION_POINT_GEOJSON: GeoJSONObject = {
+    type: 'FeatureCollection',
+    features: [{ type: 'Feature', properties: { name: 'projection-point' }, geometry: { type: 'Point', coordinates: [10, 0] } }],
+  };
+
+  /** Web Mercator easting at ten degrees longitude, in metres. */
+  static readonly PROJECTION_POINT_MERCATOR_X = 1113194.9079327357;
 
   /** Some long lat coordinates for map investigations */
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];

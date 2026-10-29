@@ -64,8 +64,8 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
       <b>Date</b> — formatDate, ISO short, toMilliseconds, tryParseDate, hasTimeComponents,<br/>
       &nbsp;&nbsp;isValidTimezone, createRangeOGC, epoch timestamps, US standard, special formats<br/>
       <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union/intersection,<br/>
-      &nbsp;&nbsp;bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl<br/>
-      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent`;
+      &nbsp;&nbsp;bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl, GeoJSON/EsriJSON projection readers<br/>
+      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, object/identifier/metadata dispatch`;
   }
 
   /**
@@ -74,7 +74,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 53;
+    return 57;
   }
 
   /**
@@ -82,7 +82,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
+  protected override async onLaunchTestSuite(): Promise<unknown> {
     // Core tester tests
     const pRange = this.#coreTester.testRange();
     const pCamelCase = this.#coreTester.testCamelCase();
@@ -144,7 +144,10 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
     const pTransformExtentFromProj = this.#projectionTester.testTransformExtentFromProj();
     const pGetProjectionFromString = this.#projectionTester.testGetProjectionFromString();
 
-    return Promise.all([
+    await Promise.all([
+      this.#geoTester.testReadFeaturesFromGeoJSONProjectionObject(),
+      this.#geoTester.testReadFeaturesFromGeoJSONEmbeddedCRSPrecedence(),
+      this.#geoTester.testReadFeaturesFromEsriJSONProjectionObject(),
       // Core
       pRange,
       pCamelCase,
@@ -203,5 +206,8 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
       pTransformExtentFromProj,
       pGetProjectionFromString,
     ]);
+
+    // Definition-request observation must not overlap the other utility tests.
+    return this.#projectionTester.testAddProjectionIfMissingInputs();
   }
 }
