@@ -5,7 +5,9 @@ import { ArrowBackIcon, ArrowForwardIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
-import { useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
+import { useMapController, useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
+import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
+import { useStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
 import type { TypeStacStyledFootprint } from 'geoview-core/core/controllers/stac-browser-controller';
 
 import type {
@@ -21,6 +23,7 @@ import { StacConfigUtils } from './stac-config-utils';
 import { StacItemList } from './stac-item-list';
 import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
+import { StacBrowserLayoutUtils } from './stac-browser-layout-utils';
 
 /** Geometry group used for the collection and its items footprints. */
 const FOOTPRINT_GROUP = 'stac-collection-footprints';
@@ -63,6 +66,11 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const descriptionId = useId();
 
   const stacController = useStacBrowserController();
+  const mapController = useMapController();
+  const mapId = useStoreGeoViewMapId();
+  const activeAppBarTab = useStoreUIActiveAppBarTab();
+  const isStacPanelOpen = activeAppBarTab.isOpen && activeAppBarTab.tabId === 'stac-browser';
+
   /**
    * Resolves the collection extent and item footprint styles over package defaults.
    */
@@ -204,10 +212,11 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const handleZoomToExtent = useCallback((): void => {
     if (!memoUnionExtent) return;
-    stacController.zoomToLonLatBbox(memoUnionExtent).catch((error: unknown) => {
+    const padding = StacBrowserLayoutUtils.getZoomPadding(mapId, isStacPanelOpen, mapController.getMapSize());
+    stacController.zoomToLonLatBbox(memoUnionExtent, padding).catch((error: unknown) => {
       logger.logError('STAC-COLLECTION-DETAIL - Failed to zoom to collection extent', error);
     });
-  }, [stacController, memoUnionExtent]);
+  }, [stacController, mapController, memoUnionExtent, mapId, isStacPanelOpen]);
 
   // #endregion
 
