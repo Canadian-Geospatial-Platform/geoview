@@ -43,6 +43,17 @@
         ]
       },
       {
+        "geoviewLayerId": "offset-icon",
+        "geoviewLayerName": "Informations sur le parc ou la place",
+        "metadataAccessPath": "https://services1.arcgis.com/4GCvRJNX6LNyFVQ0/arcgis/rest/services/CI_LOISIRS_SPORTS/FeatureServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
