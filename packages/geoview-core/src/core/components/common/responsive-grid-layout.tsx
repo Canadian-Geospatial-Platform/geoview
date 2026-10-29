@@ -22,11 +22,12 @@ import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
 import { FullScreenDialog } from './full-screen-dialog';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
-import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreAppGuide, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -132,7 +133,7 @@ const ResponsiveGridLayout = forwardRef(
     const isFocusTrap = useStoreUIActiveTrapGeoView();
     const isMapFullScreen = useStoreAppIsFullscreenActive();
     const focusItem = useStoreUIActiveFocusItem();
-    const shellContainer = useStoreAppShellContainer();
+    const shellContainer = useShellContainer();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);

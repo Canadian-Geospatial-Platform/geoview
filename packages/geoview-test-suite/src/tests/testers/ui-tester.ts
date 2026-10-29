@@ -1,5 +1,5 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { getStoreAppGeoviewHTMLElement, getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
+import { getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 
@@ -32,13 +32,9 @@ export class UITester extends GVAbstractTester {
         this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
         await DomHelper.waitForAppbarTabSelected(mapId, 'details');
 
-        // Get the GeoView HTML element
-        test.addStep('Getting GeoView HTML element...');
-        const geoviewElement = getStoreAppGeoviewHTMLElement(mapId);
-
         // Find the guide-container div
         test.addStep('Finding guide-container div...');
-        const guideContainer = geoviewElement.querySelector('.guide-container');
+        const guideContainer = DomHelper.getGuideContainer(mapId);
 
         if (!guideContainer) {
           throw new Error('guide-container div not found');

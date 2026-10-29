@@ -13,12 +13,12 @@ import 'yet-another-react-lightbox/styles.css';
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon } from '@/ui/icons';
 import { Tooltip } from '@/ui/tooltip/tooltip';
 import { IconButton } from '@/ui/icon-button/icon-button';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
 /** Slide definition for the lightbox. */
 export interface LightBoxSlides {
@@ -129,7 +129,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   /**
    * Syncs internal open state when the prop changes.
@@ -219,7 +219,7 @@ export const LightboxImg = memo(({ open, slides, index, exited, onSlideChange }:
         root: { zIndex: LIGHTBOX_CONSTANTS.Z_INDEX },
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
       }}
-      portal={{ root: shellContainer }}
+      portal={shellContainer ? { root: shellContainer } : undefined}
       open={isOpen}
       close={() => setIsOpen(false)}
       slides={slides}

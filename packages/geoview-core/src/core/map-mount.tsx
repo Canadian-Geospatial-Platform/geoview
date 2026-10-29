@@ -198,7 +198,7 @@ export async function renderMap(api: API, mapElement: HTMLElement): Promise<MapV
   reactRoots[mapId] = createRoot(mapElement);
 
   // add config to store
-  addGeoViewStore(configuration);
+  addGeoViewStore(configuration, mapElement);
 
   // create a new map viewer instance and add it to the api
   const mapViewer = new MapViewer(configuration, i18n);

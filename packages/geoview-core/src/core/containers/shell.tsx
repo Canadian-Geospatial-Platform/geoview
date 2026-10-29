@@ -20,12 +20,7 @@ import { Typography } from '@/ui/typography/typography';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
-import {
-  useStoreAppIsCircularProgressActive,
-  useStoreAppIsFullscreenActive,
-  useStoreAppGeoviewHTMLElement,
-  useStoreAppHeight,
-} from '@/core/stores/states/app-state';
+import { useStoreAppIsCircularProgressActive, useStoreAppIsFullscreenActive, useStoreAppHeight } from '@/core/stores/states/app-state';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
@@ -40,6 +35,7 @@ import { logger } from '@/core/utils/logger';
 import type { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
 
 import { FocusTrapDialog } from './focus-trap';
+import { ShellContainerContext } from '@/core/containers/shell-container-context';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { useEffectHostResizeSync } from './use-effect-host-resize-sync';
@@ -78,6 +74,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const shellRef = useRef<HTMLDivElement>(null);
+  const [shellElement, setShellElement] = useState<HTMLElement | undefined>();
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -103,7 +100,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const isMapFullScreen = useStoreAppIsFullscreenActive();
   const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const { isOpen } = useStoreUIActiveFooterBarTab();
-  const geoviewElement = useStoreAppGeoviewHTMLElement();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
@@ -111,6 +107,8 @@ export function Shell(props: ShellProps): JSX.Element {
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
   const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
+
+  const gvRootElement = DomHelper.getGVRootElement(mapId);
 
   /**
    * Computes the style classes for the shell container.
@@ -127,7 +125,7 @@ export function Shell(props: ShellProps): JSX.Element {
     footerPanelResizeValue,
     isFooterBar,
     collapsedFooterHeight,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     appHeight,
   });
 
@@ -138,6 +136,14 @@ export function Shell(props: ShellProps): JSX.Element {
    * @returns The elements in keyboard order
    */
   const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => DomHelper.getGVVisibleTabbable(mapId, root), [mapId]);
+
+  /**
+   * Keeps the shell element available to its React descendants without resolving it through the store.
+   */
+  const setShellElementRef = useCallback((element: HTMLDivElement | null): void => {
+    shellRef.current = element;
+    setShellElement(element ?? undefined);
+  }, []);
 
   // #region HANDLERS
 
@@ -312,7 +318,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Keep the viewer height in sync when an external layout resizes the host (e.g. 100% height in a resizable parent)
   useEffectHostResizeSync({
     mapId,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     isMapFullScreen,
     hostOriginalHeightRef,
     onHostHeightChange: handleHostHeightChange,
@@ -473,74 +479,70 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
         <Box
-          ref={shellRef}
+          ref={setShellElementRef}
           id={`${mapViewer.mapId}-shell`}
           sx={memoSxClasses.shell}
           // geoview-keyboard-active scopes keyboard-only focus outlines (form controls) to GeoView's keyboard-navigation mode
           className={`geoview-shell${activeTrapGeoView ? ' geoview-keyboard-active' : ' geoview-keyboard-inactive'}`}
           tabIndex={-1}
         >
-          {/* Map loading */}
-          <Box role="status" aria-busy={!mapLoaded}>
-            <CircularProgress isLoaded={mapLoaded} />
-            {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
-            {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
-          </Box>
-
-          {/* Processing */}
-          <Box role="status" aria-busy={circularProgressActive}>
-            <CircularProgress isLoaded={!circularProgressActive} />
-            {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
-            {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}
-          </Box>
-          {interaction === 'dynamic' && (
-            <Link
-              id={DomHelper.buildMainMapId(mapId)}
-              href={`#${DomHelper.buildMainMapId(mapId)}`}
-              tabIndex={0}
-              sx={{ ...memoSxClasses.skip, top: '0px' }}
-              onClick={handleSkipToMap}
-            >
-              {t('keyboardnav.map')}
-            </Link>
-          )}
-
-          <Box id={DomHelper.buildMapId(mapId)} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
-            <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
-            <Box sx={memoSxClasses.mapContainer}>
-              <Map viewer={mapViewer} />
+          <ShellContainerContext.Provider value={shellElement}>
+            {/* Map loading */}
+            <Box role="status" aria-busy={!mapLoaded}>
+              <CircularProgress isLoaded={mapLoaded} />
+              {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
+              {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
             </Box>
-            {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
-            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
-            <Snackbar
-              snackBarId={`${mapViewer.mapId}-snackbar`}
-              message={snackbarMessage}
-              open={snackbarOpen}
-              type={snackbarType}
-              closeButtonText={t('general.close')}
-              onClose={handleSnackBarClose}
-            />
-          </Box>
-          {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
-          {Object.keys(mapViewer.modal.modals).map((modalId) => (
-            <Modal
-              key={modalId}
-              modalId={modalId}
-              open={modalOpen}
-              modalProps={modalProps}
-              container={DomHelper.getGVRootElement(mapViewer.mapId)}
-            />
-          ))}
-          {/* modal section start */}
-          <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
-          {mapLoaded && <ExportModal />}
-          {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
-          {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
-          {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
-          {/* modal section end */}
-          {Object.keys(components).map((key: string) => {
-            return <Fragment key={key}>{components[key]}</Fragment>;
-          })}
+
+            {/* Processing */}
+            <Box role="status" aria-busy={circularProgressActive}>
+              <CircularProgress isLoaded={!circularProgressActive} />
+              {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
+              {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}
+            </Box>
+            {interaction === 'dynamic' && (
+              <Link
+                id={DomHelper.buildMainMapId(mapId)}
+                href={`#${DomHelper.buildMainMapId(mapId)}`}
+                tabIndex={0}
+                sx={{ ...memoSxClasses.skip, top: '0px' }}
+                onClick={handleSkipToMap}
+              >
+                {t('keyboardnav.map')}
+              </Link>
+            )}
+
+            <Box id={DomHelper.buildMapId(mapId)} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+              <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+              <Box sx={memoSxClasses.mapContainer}>
+                <Map viewer={mapViewer} />
+              </Box>
+              {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
+              <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
+              <Snackbar
+                snackBarId={`${mapViewer.mapId}-snackbar`}
+                message={snackbarMessage}
+                open={snackbarOpen}
+                type={snackbarType}
+                closeButtonText={t('general.close')}
+                onClose={handleSnackBarClose}
+              />
+            </Box>
+            {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
+            {Object.keys(mapViewer.modal.modals).map((modalId) => (
+              <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
+            ))}
+            {/* modal section start */}
+            <FocusTrapDialog mapId={mapViewer.mapId} />
+            {mapLoaded && <ExportModal />}
+            {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
+            {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
+            {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
+            {/* modal section end */}
+            {Object.keys(components).map((key: string) => {
+              return <Fragment key={key}>{components[key]}</Fragment>;
+            })}
+          </ShellContainerContext.Provider>
         </Box>
       </FocusTrap>
       <Link

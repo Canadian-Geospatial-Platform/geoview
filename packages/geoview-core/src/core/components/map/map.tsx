@@ -23,7 +23,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
-import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { DomHelper } from '@/core/utils/dom-helper';
 
@@ -58,9 +58,9 @@ export function Map(props: MapProps): JSX.Element {
   const mapLoaded = useStoreMapLoaded();
   const mapInteraction = useStoreMapInteraction();
   const layersAreLoading = useStoreLayerAreLayersLoading();
-  const geoviewHTMLElement = useStoreAppGeoviewHTMLElement();
-
   const uiController = useUIController();
+
+  const gvRootElement = DomHelper.getGVRootElement(mapId);
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
@@ -98,7 +98,7 @@ export function Map(props: MapProps): JSX.Element {
           const { activeElement } = document;
 
           // Only respond if focus is within this specific map instance
-          if (!activeElement || !geoviewHTMLElement?.contains(activeElement)) {
+          if (!activeElement || !gvRootElement.contains(activeElement)) {
             return; // Focus is not in this map - let another map instance handle it
           }
 
@@ -121,7 +121,7 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [mapInteraction, mapId, uiController, geoviewHTMLElement]);
+  }, [mapInteraction, mapId, uiController, gvRootElement]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)

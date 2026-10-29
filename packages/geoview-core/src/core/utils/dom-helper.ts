@@ -292,7 +292,7 @@ export abstract class DomHelper {
   /**
    * Resolves a map's shell container element (the wrapper around the whole viewer chrome).
    *
-   * Imperative counterpart to the reactive `useStoreAppShellContainer` hook, for non-React callers
+   * Imperative counterpart to the React `useShellContainer` hook, for non-React callers
    * (plugins, controllers, utils) that hold a `mapId` rather than the React context.
    *
    * @param mapId - The map identifier
@@ -411,6 +411,16 @@ export abstract class DomHelper {
    */
   static getScaleControlBarImperial(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'scaleControlBarImperial');
+  }
+
+  /**
+   * Gets the guide content container in a map's right panel.
+   *
+   * @param mapId - The map identifier
+   * @returns The guide content container, if found
+   */
+  static getGuideContainer(mapId: string): HTMLElement | undefined {
+    return DomHelper.queryGVSelector<HTMLElement>(mapId, '.guide-container');
   }
 
   /**

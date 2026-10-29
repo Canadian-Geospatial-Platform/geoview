@@ -12,13 +12,13 @@ import { ListItemText } from '@/ui/list/list-item-text';
 import { Paper } from '@/ui/paper/paper';
 import { Select } from '@/ui/select/select';
 import { Typography } from '@/ui/typography/typography';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { useStoreMapSize } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
 /** Props for the GeolocatorResult component. */
 interface GeolocatorFiltersType {
@@ -49,7 +49,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   }, [theme]);
 
   // Store
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // State
   const [province, setProvince] = useState<string>('');
