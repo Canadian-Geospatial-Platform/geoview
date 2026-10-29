@@ -13,13 +13,13 @@ import { Box, Link } from '@/ui/layout';
 import { List } from '@/ui/list/list';
 import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './version-style';
 
@@ -69,7 +69,7 @@ export default function Version(): JSX.Element {
   const uiController = useUIController();
 
   // Get container
-  const mapElem = useStoreAppShellContainer();
+  const mapElem = useShellContainer();
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);

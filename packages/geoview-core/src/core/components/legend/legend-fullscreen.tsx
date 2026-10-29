@@ -14,7 +14,7 @@ import { LegendLayer } from './legend-layer';
 import { logger } from '@/core/utils/logger';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { getStoreLayerLegendCollapsedSet } from '@/core/stores/states/layer-state';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
@@ -111,7 +111,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
     logger.logTraceUseMemo('LEGEND-FULLSCREEN - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // State
   const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<string[][]>([]);

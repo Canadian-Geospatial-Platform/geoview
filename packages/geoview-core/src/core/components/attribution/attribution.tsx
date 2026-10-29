@@ -12,11 +12,11 @@ import { Paper } from '@/ui/paper/paper';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Typography } from '@/ui/typography/typography';
 import type { SxStyles } from '@/ui/style/types';
+import { useShellContainer } from '@/core/containers/shell-container-context';
+import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { getSxClasses } from './attribution-style';
 
 /**
@@ -53,7 +53,7 @@ export const Attribution = memo((): JSX.Element => {
   const mapAttribution = useStoreMapAttribution();
 
   // Get container
-  const mapElem = useStoreAppShellContainer();
+  const mapElem = useShellContainer();
 
   // Set color for type of interaction (dynamic vs static)
   const iconButtonColor =

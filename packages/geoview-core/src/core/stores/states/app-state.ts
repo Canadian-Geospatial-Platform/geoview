@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useStore } from 'zustand';
 
 import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
@@ -10,7 +9,7 @@ import type { NotificationDetailsType } from '@/core/components/notifications/no
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 // TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the app-state here, remove?
-import { DomHelper, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -470,26 +469,6 @@ export const getStoreAppGeoviewHTMLElement = (mapId: string): HTMLElement => get
 export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
 
 /**
- * Hook that returns a map-scoped element lookup for the current map.
- *
- * The returned function resolves an element by its map-relative suffix (without the `${mapId}-`
- * prefix) inside the current map's root element, so lookups never collide across maps on the page.
- *
- * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
- */
-// TODO: This Zustand store shouldn't be responsible for DOM element lookups; consider moving this logic elsewhere.
-export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
-  const root = useStoreAppGeoviewHTMLElement();
-  return useCallback(
-    (suffix: string): HTMLElement | undefined => {
-      const fullId = DomHelper.buildGVElementId(root.id, suffix);
-      return root.querySelector<HTMLElement>(`#${CSS.escape(fullId)}`) ?? undefined;
-    },
-    [root]
-  );
-};
-
-/**
  * Gets the map container height for the given map.
  *
  * @param mapId - The map identifier.
@@ -549,31 +528,6 @@ export const useStoreAppShowUnsymbolizedFeatures = (): boolean =>
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
-
-/**
- * Hook that returns the shell container HTML element for the current map.
- *
- * Delegates to `useGVElementById` so the shell is resolved through the single reactive-lookup path
- * (map-scoped query anchored on the reactively-stored root element), rather than a hand-written query.
- *
- * @returns The shell container element.
- */
-export const useStoreAppShellContainer = (): HTMLElement => {
-  return useGVElementById()(GV_DOM_SUFFIX.shell) as HTMLElement;
-};
-
-/**
- * Hook that returns the OpenLayers map target element for the current map.
- *
- * Reactive counterpart to `getMapTargetElement`: resolved through the reactive-lookup path so a component
- * re-renders once the element is mounted. Use this for render-time needs; use `getMapTargetElement(mapId)`
- * for imperative access in effects, handlers, controllers, or non-React code.
- *
- * @returns The map target element, or undefined when the map is not yet mounted.
- */
-export const useStoreAppMapTargetElement = (): HTMLElement | undefined => {
-  return useGVElementById()(GV_DOM_SUFFIX.mapTarget);
-};
 
 /**
  * Gets whether to show highlight bounding boxes around layer features for the given map.

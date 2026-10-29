@@ -292,7 +292,7 @@ export abstract class DomHelper {
   /**
    * Resolves a map's shell container element (the wrapper around the whole viewer chrome).
    *
-   * Imperative counterpart to the reactive `useStoreAppShellContainer` hook, for non-React callers
+   * Imperative counterpart to the React `useShellContainer` hook, for non-React callers
    * (plugins, controllers, utils) that hold a `mapId` rather than the React context.
    *
    * @param mapId - The map identifier

@@ -36,7 +36,8 @@ import type { TypeMenuItemProps } from '@/ui/select/select';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useShellContainer } from '@/core/containers/shell-container-context';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreLayerDateTemporalModeSet, useStoreLayerDisplayDateFormatSet } from '@/core/stores/states/layer-state';
 import { exportFile } from '@/core/utils/utilities';
 
@@ -103,7 +104,7 @@ export function ExportModal(): JSX.Element {
   const mapElement = useStoreAppGeoviewHTMLElement();
   const uiController = useUIController();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
   const language = useStoreAppDisplayLanguage();
   const layerDateFormats = useStoreLayerDisplayDateFormatSet();
   const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
