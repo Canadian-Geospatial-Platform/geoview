@@ -13,15 +13,16 @@ import { Modal } from '@/ui/modal/modal';
 import { MRTTable as Table, type MRT_ColumnDef as MRTColumnDef } from '@/ui/table/table';
 import { Box } from '@/ui/layout';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
-import { useUIController } from '@/core/controllers/use-controllers';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
+import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
+import { useShellContainer } from '@/core/containers/shell-container-context';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
-import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/states/data-table-state';
 import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
-import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { getSxClasses } from './data-table-style';
 import { useFeatureFieldInfos } from './hooks/useFeatureFieldInfos';
 
@@ -59,7 +60,7 @@ export default function DataTableModal(): JSX.Element {
   const selectedLayerPath = useStoreLayerSelectedLayerPath();
   const layersData = useStoreDataTableAllFeaturesDataArray();
   const language = useStoreAppDisplayLanguage();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
   const layerNames = useStoreLayerNameSet();
   const uiController = useUIController();
 

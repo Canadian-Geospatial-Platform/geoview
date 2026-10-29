@@ -12,14 +12,14 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { DialogTitle, DialogContent, Box } from '@/ui/layout';
 import { Paper } from '@/ui/paper/paper';
 import { CloseIcon } from '@/ui/icons';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
+
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
-import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
-import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -56,7 +56,7 @@ export default function NavbarPanelButton({
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // Extract panel width if provided
   const panelWidth = buttonPanel.panel?.width;

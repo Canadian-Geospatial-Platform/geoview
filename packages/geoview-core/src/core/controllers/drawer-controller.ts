@@ -62,11 +62,13 @@ import {
   setStoreDrawerShortcutsEnabled,
   type DrawGeometryType,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { formatArea, formatLength, generateId, isEditableElement } from '@/core/utils/utilities';
 import { GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the controller here, remove?
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
@@ -1527,10 +1529,10 @@ export class DrawerController extends AbstractMapViewerController {
    */
   openStyleMenu(): void {
     const mapId = this.getMapId();
-    const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
+    const gvRootElement = DomHelper.getGVRootElement(mapId);
 
     // Find the style button within this map's container
-    const styleButton = geoViewElement.querySelector(`#${mapId}-drawer-style`) as HTMLElement;
+    const styleButton = gvRootElement.querySelector(`#${mapId}-drawer-style`) as HTMLElement;
     if (styleButton) {
       styleButton.click();
     } else {
@@ -2765,8 +2767,8 @@ export class DrawerController extends AbstractMapViewerController {
       // Check if focus is within the GeoView shell
       const mapId = this.getMapId();
       const { activeElement } = document;
-      const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
-      if (!activeElement || !geoViewElement?.contains(activeElement)) {
+      const gvRootElement = DomHelper.getGVRootElement(mapId);
+      if (!activeElement || !gvRootElement.contains(activeElement)) {
         return;
       }
 
