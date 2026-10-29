@@ -107,8 +107,7 @@ export class DataTableTester extends GVAbstractTester {
 
         // Wait for the table element to render; MRT throws during render if a column has an empty id + accessorFn
         test.addStep('Waiting for the data table to be created...');
-        // TODO: Create a specific wait in DomHelper for the table in the data-table-container
-        const table = await DomHelper.waitForDomElement(`#${this.getMapId()} .data-table-container table`);
+        const table = await DomHelper.DataTable.waitForDataTable(this.getMapId());
 
         // The table was created (rendered) for the layer
         return !!table;
@@ -569,8 +568,7 @@ export class DataTableTester extends GVAbstractTester {
 
         // Get the dom element we want to track for changes
         test.addStep('Waiting for filter-results-summary to render...');
-        // TODO: Create a specific wait in DomHelper for the filter-results-summary
-        const summaryEl = await DomHelper.waitForDomElement(`#${this.getMapId()} .filter-results-summary`);
+        const summaryEl = await DomHelper.DataTable.waitForFilterResultsSummary(this.getMapId());
 
         // Trigger the store change
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
@@ -691,8 +689,7 @@ export class DataTableTester extends GVAbstractTester {
 
         // Wait for the dom element we want to check for content
         test.addStep('Waiting for filter-results-summary to render with the content...');
-        // TODO: Create a specific wait in DomHelper for the filter-results-summary
-        const summaryEl = await DomHelper.waitForDomElement(`#${this.getMapId()} .filter-results-summary`);
+        const summaryEl = await DomHelper.DataTable.waitForFilterResultsSummary(this.getMapId());
 
         // Check the DOM for the filter results summary text
         test.addStep('Checking DOM for filter-results-summary...');

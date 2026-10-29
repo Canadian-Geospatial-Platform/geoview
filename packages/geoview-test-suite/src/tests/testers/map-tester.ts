@@ -15,7 +15,6 @@ import {
   type TypeValidMapProjectionCodes,
   type TypeViewportBoundaryLonLat,
 } from 'geoview-core/api/types/map-schema-types';
-import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
@@ -529,7 +528,7 @@ export class MapTester extends GVAbstractTester {
     const mapViewer = this.getMapViewer();
     const { map } = mapViewer;
     const view = mapViewer.getView();
-    const element = DomHelper.getShellElement<TypeHTMLElement>(this.getMapId());
+    const element = DomHelper.getShellElement(this.getMapId());
     const originalSize = map.getSize();
     const originalCenter = view.getCenter();
     const originalResolution = view.getResolution();
@@ -1622,7 +1621,7 @@ export class MapTester extends GVAbstractTester {
       pixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
       expectedPixels,
       bottomPadding: padBottom,
-      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfo(viewer.mapId)!.offsetHeight,
+      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(viewer.mapId),
       canvasSouth: viewer.convertCoordinateMapProjToLonLat(viewer.map.getCoordinateFromPixel([x, height])),
       freshObjects: boundary !== repeatedBoundary && boundary.corners.nw !== repeatedBoundary.corners.nw,
       rotation: view.getRotation(),

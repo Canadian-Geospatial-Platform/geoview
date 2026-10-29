@@ -3,7 +3,7 @@ import KeyboardZoom from 'ol/interaction/KeyboardZoom';
 import type { Coordinate } from 'ol/coordinate';
 import type View from 'ol/View';
 
-import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
@@ -29,7 +29,6 @@ import {
 import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
-  getStoreAppHeight,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -42,8 +41,7 @@ import {
   setStoreAppGuide,
   setStoreAppHeight,
 } from '@/core/stores/states/app-state';
-import { DomHelper } from '@/core/utils/dom-helper';
-import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
+import { getStoreMapConfigNavBar } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
@@ -625,30 +623,6 @@ export class UIController extends AbstractMapViewerController {
       // Log error
       logger.logError(mapId, error, 'createGuide');
     }
-  }
-
-  /**
-   * Gets the current geolocator search area from the store.
-   *
-   * @returns The current geolocator search area, or undefined if not set
-   */
-  getMapGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
-    // Return the store value
-    return getStoreMapGeolocatorSearchArea(this.getMapId());
-  }
-
-  /**
-   * Gets the effective footer height for the map.
-   *
-   * Prefers a consumer-provided `data-footer-height` attribute on the root element, falling back to the store's
-   * app height. Combines a DOM read with a store value, so it lives on the controller rather than in `dom-helper`
-   * (which must stay store-free). Callable from non-React code via `mapViewer.controllers.uiController`.
-   *
-   * @returns The footer height as a CSS length string (e.g. '600px')
-   */
-  // TODO: Move this function in the DomHelper directly to remove this ui-controller dependency on it?
-  getFooterHeight(): string {
-    return DomHelper.getGVRootDataAttribute(this.getMapId(), 'data-footer-height') ?? `${getStoreAppHeight(this.getMapId())}px`;
   }
 
   /**

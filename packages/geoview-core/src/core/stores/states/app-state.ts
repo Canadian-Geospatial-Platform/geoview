@@ -477,6 +477,7 @@ export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoV
  *
  * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
  */
+// TODO: This Zustand store shouldn't be responsible for DOM element lookups; consider moving this logic elsewhere.
 export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
   const root = useStoreAppGeoviewHTMLElement();
   return useCallback(

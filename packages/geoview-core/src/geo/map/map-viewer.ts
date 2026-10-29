@@ -98,6 +98,7 @@ import {
   getStoreMapCurrentBasemapOptionsOrInitial,
   getStoreMapConfigViewSettings,
   getStoreMapStateJson,
+  getStoreMapGeolocatorSearchArea,
 } from '@/core/stores/states/map-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -592,7 +593,7 @@ export class MapViewer {
     return this.#northPoleMarkerOverlay!;
   }
 
-  //#region MAP DOM ELEMENTS (only core OpenLayers controls here, everything else in DOM Adaptors)
+  //#region MAP DOM ELEMENTS (only core OpenLayers controls in this region, because they are directly attached to the map behavior, everything else in DOM Adaptors)
 
   /**
    * Retrieves the scale information from the DOM elements.
@@ -910,7 +911,7 @@ export class MapViewer {
   // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it has nothing to do with the map itself
   getGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
     // Redirect to controller
-    return this.controllers.uiController.getMapGeolocatorSearchArea();
+    return getStoreMapGeolocatorSearchArea(this.mapId);
   }
 
   /**
@@ -1617,7 +1618,7 @@ export class MapViewer {
    * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
    */
   getMapInfoHeightInMapUnits(): number {
-    const mapInfoHeightPx = DomHelper.getMapInfo(this.mapId)?.offsetHeight ?? 0;
+    const mapInfoHeightPx = DomHelper.getMapInfoOffsetHeight(this.mapId);
     const resolution = this.getView().getResolution() ?? 0;
     return mapInfoHeightPx * resolution;
   }
@@ -1632,7 +1633,7 @@ export class MapViewer {
    */
   updateViewPadding(): void {
     // Static mode: the map-info bar does not overlay the map canvas, so no padding is needed
-    const mapInfoHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : (DomHelper.getMapInfo(this.mapId)?.offsetHeight ?? 0);
+    const mapInfoHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(this.mapId);
     this.getView().padding = [0, 0, mapInfoHeight, 0];
   }
 

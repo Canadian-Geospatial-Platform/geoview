@@ -73,7 +73,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const shellContainer = useStoreAppShellContainer();
   const backupAppHeight: number = useStoreAppHeight();
-  const appHeight = DomHelper.getGVRootDataAttribute(mapId, 'data-footer-height') ?? `${backupAppHeight}px`;
+  const appHeight = DomHelper.getDataFooterHeight(mapId, backupAppHeight);
   const hiddenTabs: string[] = useStoreUIHiddenTabs();
   const uiController = useUIController();
   const pluginController = usePluginController();

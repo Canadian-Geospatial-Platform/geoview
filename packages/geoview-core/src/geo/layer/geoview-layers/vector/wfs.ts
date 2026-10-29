@@ -1221,6 +1221,7 @@ export class WFS extends AbstractGeoViewVector {
       url = `${url}&bbox=${bboxExtent}`;
     }
 
+    // If sorting by a field name
     if (sortBy) {
       url = `${url}&sortBy=${sortBy}`;
     }

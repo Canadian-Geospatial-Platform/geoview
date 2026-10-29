@@ -61,7 +61,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
           }
 
           // Scroll the footer into view
-          const footer = DomHelper.getGVElementById(mapId, 'tabsContainer');
+          const footer = DomHelper.getTabsContainer(mapId);
           if (footer) {
             scrollIfNotVisible(footer, 'start');
           }

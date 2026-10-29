@@ -415,8 +415,8 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     // Wait for both footer elements because the measured element depends on whether the panel is open.
-    const footerContainer = DomHelper.getGVElementById(mapId, 'tabsContainer');
-    const footerHeader = DomHelper.getGVElementById(mapId, 'footerbar-header');
+    const footerContainer = DomHelper.getTabsContainer(mapId);
+    const footerHeader = DomHelper.getFooterBarHeader(mapId);
     if (!footerHeader || !footerContainer) {
       setCollapsedFooterHeight(0);
       return undefined;
@@ -463,8 +463,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={DomHelper.buildGVElementId(mapViewer.mapId, 'toplink')}
-        href={`#${DomHelper.buildGVElementId(mapViewer.mapId, 'bottomlink')}`}
+        id={DomHelper.buildTopLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildBottomLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -495,8 +495,8 @@ export function Shell(props: ShellProps): JSX.Element {
           </Box>
           {interaction === 'dynamic' && (
             <Link
-              id={DomHelper.buildGVElementId(mapViewer.mapId, 'main-map')}
-              href={`#${DomHelper.buildGVElementId(mapViewer.mapId, 'main-map')}`}
+              id={DomHelper.buildMainMapId(mapId)}
+              href={`#${DomHelper.buildMainMapId(mapId)}`}
               tabIndex={0}
               sx={{ ...memoSxClasses.skip, top: '0px' }}
               onClick={handleSkipToMap}
@@ -505,12 +505,7 @@ export function Shell(props: ShellProps): JSX.Element {
             </Link>
           )}
 
-          <Box
-            id={DomHelper.buildGVElementId(mapViewer.mapId, 'map')}
-            sx={memoSxClasses.mapShellContainer}
-            className="mapContainer"
-            ref={mapShellContainerRef}
-          >
+          <Box id={DomHelper.buildMapId(mapId)} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={memoSxClasses.mapContainer}>
               <Map viewer={mapViewer} />
@@ -549,8 +544,8 @@ export function Shell(props: ShellProps): JSX.Element {
         </Box>
       </FocusTrap>
       <Link
-        id={DomHelper.buildGVElementId(mapViewer.mapId, 'bottomlink')}
-        href={`#${DomHelper.buildGVElementId(mapViewer.mapId, 'toplink')}`}
+        id={DomHelper.buildBottomLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildTopLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}

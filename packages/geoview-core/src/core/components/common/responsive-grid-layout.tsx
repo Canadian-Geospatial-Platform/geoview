@@ -343,7 +343,8 @@ const ResponsiveGridLayout = forwardRef(
       if (isGuideOpen) {
         // Use RAF for next frame
         requestAnimationFrame(() => {
-          DomHelper.getGVElementById(mapId, `${containerType}-guide-close-btn`)?.focus();
+          // Focus on the close button for the container type
+          DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
         });
       }
     }, [isGuideOpen, mapId, containerType]);

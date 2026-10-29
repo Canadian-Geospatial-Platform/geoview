@@ -637,6 +637,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (coordinatesChanged) {
       // Clear all highlights
       mapController.removeHighlightedFeature('all');
+
       // Keep the cleared targets from being restored by the synchronization effect.
       previousHighlightedFeaturesRef.current = memoFeaturesToHighlight;
 

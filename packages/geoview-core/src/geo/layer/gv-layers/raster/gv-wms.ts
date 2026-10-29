@@ -596,28 +596,17 @@ export class GVWMS extends AbstractGVRaster {
     // GV Using 'en' as default language in the callback as the language is unnecessary to get extent from features here anyways
     const language = 'en';
 
-    // Fetch and parse features using the WFS format fallback strategy.
-    const parsedFeaturePage = await WFS.fetchWithFormatFallback(
-      wfsLayerConfig,
-      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, undefined, requestInit),
-      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wfsLayerConfig, undefined, requestInit),
-      undefined,
-      undefined,
-      xmlFilterReady,
-      outProjection.getCode()
-    );
-
-    // Parse all features
-    const parsedFeatures = GVWMS.#formatFeatureInfoResultFromVectorFeatures(
-      parsedFeaturePage.features,
+    const featureInfoResult = await GVWMS.#fetchAndFormatFeatureInfoFromWFS(
       wmsLayerConfig,
       wfsLayerConfig,
+      xmlFilterReady,
+      outProjection.getCode(),
       language
-    ).results;
+    );
 
     // For each feature
     let calculatedExtent: Extent | undefined;
-    parsedFeatures.forEach((feature) => {
+    featureInfoResult.results.forEach((feature) => {
       // If calculatedExtent has not been defined, set it to extent
       if (!calculatedExtent) calculatedExtent = feature.extent;
       else calculatedExtent = GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
@@ -762,7 +751,7 @@ export class GVWMS extends AbstractGVRaster {
    *        allow cancellation of the WFS request.
    * @returns A promise that resolves with the feature info result
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {LayerInvalidFeatureInfoFormatWMSError} When no supported format returns usable feature info data
+   * @throws {LayerInvalidFeatureInfoFormatWFSError} When no supported WFS format returns usable feature info data
    */
   #fetchFeatureInfoWithFormatFallbackForWFS(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
@@ -828,17 +817,13 @@ export class GVWMS extends AbstractGVRaster {
     // Wrap the ogc filter request
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
-    // Use the generic format fallback strategy with our own parse pipeline
-    return WFS.fetchWithFormatFallback(
+    return GVWMS.#fetchAndFormatFeatureInfoFromWFS(
+      wmsLayerConfig,
       wfsLayerConfig,
-      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, abortController, requestInit),
-      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wfsLayerConfig, abortController, requestInit),
-      undefined,
-      undefined,
       xmlFilterReady,
-      projectionCode
-    ).then((wfsFeaturePage) =>
-      GVWMS.#formatFeatureInfoResultFromVectorFeatures(wfsFeaturePage.features, wmsLayerConfig, wfsLayerConfig, language)
+      projectionCode,
+      language,
+      abortController
     );
   }
 
@@ -1131,6 +1116,39 @@ export class GVWMS extends AbstractGVRaster {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Fetches features through the WFS format fallback and formats them as WMS feature info.
+   *
+   * @param wmsLayerConfig - The WMS layer configuration for the result
+   * @param wfsLayerConfig - The associated WFS layer configuration to query
+   * @param filter - Optional WFS filter to apply to the request
+   * @param projectionCode - The output projection code
+   * @param language - The display language used to resolve the feature name field
+   * @param abortController - Optional {@link AbortController} used to cancel the request
+   * @returns A promise that resolves with the formatted feature info result
+   * @throws {LayerInvalidFeatureInfoFormatWFSError} When no supported WFS format returns usable results
+   */
+  static async #fetchAndFormatFeatureInfoFromWFS(
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    wfsLayerConfig: OgcWfsLayerEntryConfig,
+    filter: string | undefined,
+    projectionCode: string,
+    language: TypeDisplayLanguage,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
+    const wfsFeaturePage = await WFS.fetchWithFormatFallback(
+      wfsLayerConfig,
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSUrl(url, abortController, requestInit),
+      (url, requestInit) => GVWMS.#fetchAndParseFeaturesFromWFSTextUrl(url, wfsLayerConfig, abortController, requestInit),
+      undefined,
+      undefined,
+      filter,
+      projectionCode
+    );
+
+    return GVWMS.#formatFeatureInfoResultFromVectorFeatures(wfsFeaturePage.features, wmsLayerConfig, wfsLayerConfig, language);
+  }
 
   /**
    * Fetches and parses one GeoJSON WFS feature page, retaining the page metadata for the shared pager.

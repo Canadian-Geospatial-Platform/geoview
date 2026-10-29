@@ -731,7 +731,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG exists inside the map target element (not the map-info rotation section)
         test.addStep('Verifying north arrow SVG exists inside mapTargetElement...');
-        const northArrowEl = DomHelper.getMapTargetElement(mapId)?.querySelector('[data-testid="north-arrow"] svg');
+        const northArrowEl = DomHelper.getNorthArrowSVG(mapId);
         Test.assertIsDefined('northArrowDomElement', northArrowEl);
       }
     );
@@ -766,7 +766,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify the north arrow SVG does NOT exist inside the map target element
         test.addStep('Verifying north arrow SVG does not exist inside mapTargetElement...');
-        const northArrowEl = DomHelper.getMapTargetElement(mapId)?.querySelector('[data-testid="north-arrow"] svg');
+        const northArrowEl = DomHelper.getNorthArrowSVG(mapId);
         Test.assertIsUndefined('northArrowDomElement', northArrowEl ?? undefined);
       }
     );
@@ -2150,14 +2150,13 @@ export class MapConfigTester extends GVAbstractTester {
    */
   static #measureMapHeights(mapId: string): TypeMapHeightMeasurements {
     const geoviewMapElement = DomHelper.getGVRootElement(mapId);
-    // TODO: Create a specific getter in DomHelper for the 'tabsContainer'
-    const footerContainerElement = DomHelper.getGVElementById(mapId, 'tabsContainer');
+    const tabsContainer = DomHelper.getTabsContainer(mapId);
 
     Test.assertIsDefined('geoviewMapElement', geoviewMapElement);
 
     return {
       geoviewMapHeight: Math.round(geoviewMapElement.getBoundingClientRect().height),
-      footerChromeHeight: footerContainerElement ? Math.round(footerContainerElement.getBoundingClientRect().height) : 0,
+      footerChromeHeight: tabsContainer ? Math.round(tabsContainer.getBoundingClientRect().height) : 0,
     };
   }
 }

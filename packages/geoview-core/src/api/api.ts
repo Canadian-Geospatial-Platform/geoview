@@ -6,7 +6,7 @@ import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { DomHelper, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
@@ -379,7 +379,7 @@ export class API {
             : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === DomHelper.buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
+          const mapFocus = activeEl?.getAttribute('id') === DomHelper.buildMapTargetElementId(mapId);
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);

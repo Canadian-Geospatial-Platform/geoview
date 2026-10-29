@@ -11,10 +11,11 @@ import { createI18nInstance } from '@/core/translation/i18n';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { addGeoViewStore } from '@/core/stores/store-lifecycle';
 import { logger } from '@/core/utils/logger';
-import { removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
+import { removeCommentsFromJSON } from '@/core/utils/utilities';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { MapViewer } from '@/geo/map/map-viewer';
 
 /** React roots of the mounted maps, keyed by map id. */
@@ -219,7 +220,7 @@ export async function renderMap(api: API, mapElement: HTMLElement): Promise<MapV
   reactRoots[mapId].render(<AppStart mapViewer={mapViewer} i18nLang={i18n} />);
 
   // Set up MutationObserver to watch for removal of the map div where our MapViewer is mounted
-  watchHtmlElementRemoval(mapId, mapElement, (removedMapId: string): void => {
+  DomHelper.watchHtmlElementRemoval(mapId, mapElement, (removedMapId: string): void => {
     // If the MapViewer is still present
     if (api.hasMapViewer(removedMapId)) {
       // Delete the MapViewer to clean up, sending 'false', because the div is already gone.

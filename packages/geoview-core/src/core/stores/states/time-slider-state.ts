@@ -1,11 +1,10 @@
 import { useStore } from 'zustand';
 
-import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, helperWaitForValueWithSubscription, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { DateTimeStepUnit, RangeItems, TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import { waitForValueWithSubscription } from '@/core/utils/utilities';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
 // #region INTERFACE DEFINITION
@@ -452,7 +451,7 @@ export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeT
 export function waitForStoreTimeSliderLayer(mapId: string, layerPath: string): Promise<TypeTimeSliderValues> {
   const store = getGeoViewStore(mapId);
   getStoreTimeSliderState(mapId);
-  return waitForValueWithSubscription(
+  return helperWaitForValueWithSubscription(
     () => getStoreTimeSliderLayer(mapId, layerPath),
     (listener) => store.subscribe(listener)
   );

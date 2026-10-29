@@ -1,8 +1,10 @@
 /* eslint-disable max-classes-per-file */
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-types';
 import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { DateMgt } from './date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 /**
  * Canonical map-relative id suffixes for well-known GeoView landmark elements.
@@ -17,17 +19,17 @@ export const GV_DOM_SUFFIX = {
   mapTarget: 'mapTargetElement',
 } as const;
 
-/** CSS class marking the guide's scrollable content container. */
-const GUIDEBOX_CONTAINER_CLASS = 'guidebox-container';
-
 /** Selectors for elements that can participate in a viewer's keyboard focus cycle. */
 const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex], [contenteditable]:not([contenteditable="false"])';
+
+/** The observers to monitor element removals from the DOM tree */
+const observers: Record<string, MutationObserver> = {};
 
 /**
  * Provides stateless, map-scoped DOM utilities.
  */
 export abstract class DomHelper {
-  // #region GENERIC (id & root helpers - prefix is getGV)
+  // #region GENERIC IDs
 
   /**
    * Builds a DOM id in the canonical `${mapId}-suffix` format (generic to specific).
@@ -43,6 +45,64 @@ export abstract class DomHelper {
     return `${mapId}-${suffix}`;
   }
 
+  // #endregion GENERIC IDs
+
+  // #region SPECIFIC IDs
+
+  /**
+   * Builds the DOM id for a map's container.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped map container id
+   */
+  static buildMapId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'map');
+  }
+
+  /**
+   * Builds the DOM id for a map's OpenLayers target element.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped target element id
+   */
+  static buildMapTargetElementId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
+  }
+
+  /**
+   * Builds the DOM id for a map's main map skip-link target.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped main map id
+   */
+  static buildMainMapId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'main-map');
+  }
+
+  /**
+   * Builds the DOM id for a map's top skip link.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped top skip link id
+   */
+  static buildTopLinkId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'toplink');
+  }
+
+  /**
+   * Builds the DOM id for a map's bottom skip link.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped bottom skip link id
+   */
+  static buildBottomLinkId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'bottomlink');
+  }
+
+  // #endregion SPECIFIC IDs
+
+  // #region GETTERS - GENERIC
+
   /**
    * Resolves a map's root GeoView HTML element from the live DOM.
    *
@@ -57,21 +117,6 @@ export abstract class DomHelper {
     const rootElement = document.getElementById(mapId);
     if (rootElement) return rootElement;
     throw new Error(`Root element not found for mapId: ${mapId}`);
-  }
-
-  /**
-   * Reads a `data-*` attribute from a map's root GeoView element.
-   *
-   * The root element is the host-provided `geoview-map` div, so consumers can set declarative hints on it
-   * (e.g. `data-footer-height`). Centralizing the read here keeps every consumer using the same map-scoped
-   * root lookup instead of composing `document`/`getAttribute` calls by hand.
-   *
-   * @param mapId - The map identifier
-   * @param dataAttribute - The full attribute name, including the `data-` prefix (e.g. 'data-footer-height')
-   * @returns The attribute value, or undefined when the root is not mounted or the attribute is absent
-   */
-  static getGVRootDataAttribute(mapId: string, dataAttribute: string): string | undefined {
-    return DomHelper.getGVRootElement(mapId)?.getAttribute(dataAttribute) ?? undefined;
   }
 
   /**
@@ -117,10 +162,6 @@ export abstract class DomHelper {
     logger.logWarning(`getGVElementByFullId: root element for map '${mapId}' not found, falling back to global document lookup`, fullId);
     return (document.getElementById(fullId) as T | null) ?? undefined;
   }
-
-  // #endregion GENERIC (id & root helpers)
-
-  // #region CSS (scoped selector queries - prefix is queryGV)
 
   /**
    * Runs a CSS selector scoped inside a map's root element.
@@ -198,9 +239,9 @@ export abstract class DomHelper {
     return [...ordered, ...candidates.filter((element) => element.tabIndex === 0)];
   }
 
-  // #endregion CSS (scoped selector queries)
+  // #endregion GETTERS - GENERIC
 
-  // #region MAP SPECIFIC
+  // #region GETTERS - MAP SPECIFIC
 
   /**
    * Gets the map container HTML element for the specified map.
@@ -213,6 +254,26 @@ export abstract class DomHelper {
     const mapContainer = DomHelper.getGVElementById(mapId, 'map');
     if (mapContainer) return mapContainer;
     throw new Error(`Map container element not found for mapId: ${mapId}`);
+  }
+
+  /**
+   * Gets the footer tabs container element.
+   *
+   * @param mapId - The map identifier
+   * @returns The footer tabs container element, if found
+   */
+  static getTabsContainer(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'tabsContainer');
+  }
+
+  /**
+   * Gets the footer bar header element.
+   *
+   * @param mapId - The map identifier
+   * @returns The footer bar header element, if found
+   */
+  static getFooterBarHeader(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'footerbar-header');
   }
 
   /**
@@ -237,8 +298,29 @@ export abstract class DomHelper {
    * @param mapId - The map identifier
    * @returns The shell container element, or undefined when the map is not yet mounted
    */
-  static getShellElement<T extends HTMLElement = HTMLElement>(mapId: string): T | undefined {
-    return DomHelper.getGVElementById<T>(mapId, GV_DOM_SUFFIX.shell);
+  static getShellElement(mapId: string): TypeHTMLElement | undefined {
+    return DomHelper.getGVElementById<TypeHTMLElement>(mapId, GV_DOM_SUFFIX.shell);
+  }
+
+  /**
+   * Gets the footer height override from the map root, or returns the provided fallback.
+   *
+   * @param mapId - The map identifier
+   * @param defaultHeight - The height to use (in px) when the map root has no `data-footer-height` value
+   * @returns The configured footer height or the provided default
+   */
+  static getDataFooterHeight(mapId: string, defaultHeight: number): string {
+    return DomHelper.getGVRootElement(mapId)?.getAttribute('data-footer-height') ?? `${defaultHeight}px`;
+  }
+
+  /**
+   * Gets the map configuration URL from the root element.
+   *
+   * @param mapId - The map identifier
+   * @returns The configured URL, or undefined when the attribute is absent
+   */
+  static getDataConfigUrl(mapId: string): string | undefined {
+    return DomHelper.getGVRootElement(mapId).getAttribute('data-config-url') ?? undefined;
   }
 
   /**
@@ -253,7 +335,7 @@ export abstract class DomHelper {
    */
   static getGuidebox(mapId: string): HTMLElement | undefined {
     // Map-scoped via data-map-id; intentionally global because the guide is portaled out of the map root in fullscreen.
-    const containers = Array.from(document.querySelectorAll<HTMLElement>(`.${GUIDEBOX_CONTAINER_CLASS}[data-map-id="${mapId}"]`));
+    const containers = Array.from(document.querySelectorAll<HTMLElement>(`.guidebox-container[data-map-id="${mapId}"]`));
 
     // Prefer the visible copy — the hidden inline one reports no client rects.
     return containers.find((el) => el.getClientRects().length > 0) ?? containers[0];
@@ -267,6 +349,16 @@ export abstract class DomHelper {
    */
   static getNorthPole(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'northpole');
+  }
+
+  /**
+   * Gets the north arrow SVG rendered inside a map's target element.
+   *
+   * @param mapId - The map identifier
+   * @returns The north arrow SVG element, if found
+   */
+  static getNorthArrowSVG(mapId: string): SVGSVGElement | undefined {
+    return DomHelper.getMapTargetElement(mapId)?.querySelector<SVGSVGElement>('[data-testid="north-arrow"] svg') ?? undefined;
   }
 
   /**
@@ -290,6 +382,18 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets the map info bar's height in pixels.
+   *
+   * Returns zero when the map info bar is not present.
+   *
+   * @param mapId - The map identifier
+   * @returns The map info bar height in pixels, or zero when it is not present
+   */
+  static getMapInfoOffsetHeight(mapId: string): number {
+    return DomHelper.getMapInfo(mapId)?.offsetHeight ?? 0;
+  }
+
+  /**
    * Gets the metric scale control bar element.
    *
    * @param mapId - The map identifier
@@ -309,9 +413,42 @@ export abstract class DomHelper {
     return DomHelper.getGVElementById(mapId, 'scaleControlBarImperial');
   }
 
-  // #endregion MAP SPECIFIC
+  /**
+   * Gets the guide close button for an app bar or footer bar container.
+   *
+   * @param mapId - The map identifier
+   * @param containerType - The container where the guide is displayed
+   * @returns The guide close button element, if found
+   */
+  static getGuideCloseButton(mapId: string, containerType: TypeContainerBox): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, `${containerType}-guide-close-btn`);
+  }
 
-  // #region DATA-TABLE SPECIFIC
+  /**
+   * Gets an app bar tab button element.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The app bar button element, if found
+   */
+  static getAppBarButton(mapId: string, tabId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`);
+  }
+
+  /**
+   * Gets an app bar panel element.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The app bar panel element, if found
+   */
+  static getAppBarPanel(mapId: string, tabId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
+  }
+
+  // #endregion GETTERS - MAP SPECIFIC
+
+  // #region GETTERS - DATA-TABLE SPECIFIC
 
   static readonly DataTable = class DataTable {
     /**
@@ -332,6 +469,26 @@ export abstract class DomHelper {
      */
     static getDataTableContainer(mapId: string): HTMLElement | undefined {
       return this.getDataTablePanel(mapId)?.querySelector('.data-table-container') ?? undefined;
+    }
+
+    /**
+     * Waits for the data table element to render inside this map's data table container.
+     *
+     * @param mapId - The map identifier
+     * @returns A promise that resolves with the rendered table element
+     */
+    static waitForDataTable(mapId: string): Promise<Element> {
+      return DomHelper.waitForDomElement('.data-table-container table', DomHelper.getGVRootElement(mapId));
+    }
+
+    /**
+     * Waits for the data table filter results summary to render within this map.
+     *
+     * @param mapId - The map identifier
+     * @returns A promise that resolves with the filter results summary element
+     */
+    static waitForFilterResultsSummary(mapId: string): Promise<Element> {
+      return DomHelper.waitForDomElement('.filter-results-summary', DomHelper.getGVRootElement(mapId));
     }
 
     /**
@@ -532,9 +689,9 @@ export abstract class DomHelper {
     }
   };
 
-  // #endregion DATA-TABLE SPECIFIC
+  // #endregion GETTERS - DATA-TABLE SPECIFIC
 
-  // #region SWIPER SPECIFIC
+  // #region GETTERS - SWIPER SPECIFIC
 
   static readonly Swiper = class Swiper {
     /**
@@ -563,9 +720,9 @@ export abstract class DomHelper {
     }
   };
 
-  // #endregion SWIPER SPECIFIC
+  // #endregion GETTERS - SWIPER SPECIFIC
 
-  // #region SETTERS
+  // #region SETTERS - GENERIC
 
   /**
    * Sets an input's value and dispatches bubbling input and change events.
@@ -597,9 +754,9 @@ export abstract class DomHelper {
     return DateMgt.formatDate(value, format, language, DateMgt.TIME_UTC, 'calendar');
   }
 
-  // #endregion SETTERS
+  // #endregion SETTERS - GENERIC
 
-  // #region WAIT HELPERS GENERIC
+  // #region WAIT HELPERS - GENERIC
 
   /**
    * Returns a promise that resolves when an element matching the given selector exists in the DOM.
@@ -644,6 +801,51 @@ export abstract class DomHelper {
         });
       observer.observe(root, { childList: true, subtree: true });
     });
+  }
+
+  /**
+   * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
+   * is removed from the document.
+   *
+   * When the element is removed, it triggers a cleanup callback and disconnects the observer to prevent memory leaks.
+   *
+   * @param key - A unique identifier for the element, used to manage observer references
+   * @param element - The DOM element to monitor for removal from the DOM tree
+   * @param onHTMLElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree
+   */
+  static watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void {
+    if (!element || !element.parentNode) return;
+
+    // Get the parent to set the MutationObserver on
+    const parent = element.parentNode;
+
+    // Disconnect prior observer if it exists
+    if (observers[key]) {
+      // Disconnect the observer, we're replacing it
+      observers[key].disconnect();
+      delete observers[key];
+    }
+
+    // Create the MutationObserver
+    const observer = new MutationObserver((mutations: MutationRecord[]) => {
+      for (const mutation of mutations) {
+        for (const node of Array.from(mutation.removedNodes)) {
+          if (node === element || (node instanceof HTMLElement && node.contains(element))) {
+            // Callback
+            onHTMLElementRemoved(key);
+
+            // Disconnect the observer, we're done
+            observer.disconnect();
+            delete observers[key];
+            return;
+          }
+        }
+      }
+    });
+
+    // Store and activate the observer
+    observers[key] = observer;
+    observer.observe(parent, { childList: true });
   }
 
   /**
@@ -769,9 +971,9 @@ export abstract class DomHelper {
     });
   }
 
-  // #endregion WAIT HELPERS GENERIC
+  // #endregion WAIT HELPERS - GENERIC
 
-  // #region WAIT HELPERS SPECIFIC
+  // #region WAIT HELPERS - SPECIFIC
 
   /**
    * Waits for an app bar tab button to receive the active class.
@@ -817,5 +1019,5 @@ export abstract class DomHelper {
     return DomHelper.waitForClass(`#${mapId}-tab-${tabId}:not(.Mui-selected)`, this.getGVRootElement(mapId));
   }
 
-  // #endregion WAIT HELPERS SPECIFIC
+  // #endregion WAIT HELPERS - SPECIFIC
 }

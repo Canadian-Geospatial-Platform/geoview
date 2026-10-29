@@ -195,7 +195,7 @@ export class PluginController extends AbstractMapViewerController {
        * for custom config for loaded core packages on the same path of the map config.
        * If none exists then load the default config
        */
-      const configUrl = DomHelper.getGVRootElement(mapViewer.mapId)?.getAttribute('data-config-url');
+      const configUrl = DomHelper.getDataConfigUrl(mapViewer.mapId);
 
       // Check if there is a corePackageConfig for the plugin
       const configObj = mapViewer.getCorePackageConfig(pluginId);

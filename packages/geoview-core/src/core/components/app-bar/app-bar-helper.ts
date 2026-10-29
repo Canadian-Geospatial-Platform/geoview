@@ -1,7 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
 
 import type { ButtonPanelType } from './app-bar';
@@ -13,7 +12,7 @@ import type { ButtonPanelType } from './app-bar';
  * @param setterCallback - State setter for the button panels record
  * @param status - Whether the panel should be open (true) or closed (false)
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
- * @deprecated Not used anymore - delete?
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export const helpOpenClosePanelByIdState = (
   buttonId: string,
@@ -47,7 +46,7 @@ export const helpOpenClosePanelByIdState = (
  * @param buttonId - The id of the button panel to open
  * @param setterCallback - State setter for the button panels record
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
- * @deprecated Not used anymore - delete?
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export const helpOpenPanelById = (
   buttonId: string,
@@ -67,7 +66,7 @@ export const helpOpenPanelById = (
  * @param buttonId - The id of the button panel to close
  * @param setterCallback - State setter for the button panels record
  * @param focusWhenNoElementCallback - Optional callback invoked when the button element cannot be found
- * @deprecated Not used anymore - delete?
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export const helpClosePanelById = (
   mapId: string,
@@ -78,8 +77,7 @@ export const helpClosePanelById = (
   // Close the panel
   helpOpenClosePanelByIdState(buttonId, setterCallback, false);
 
-  const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}-panel-btn`;
-  const buttonElement = DomHelper.getGVElementByFullId(mapId, buttonElementId);
+  const buttonElement = DomHelper.getAppBarButton(mapId, buttonId);
   if (buttonElement) {
     // Explicitly request focus indicator for keyboard users
     buttonElement.focus({ focusVisible: true });
@@ -94,7 +92,7 @@ export const helpClosePanelById = (
  *
  * @param buttonPanels - The current button panels state
  * @param setterCallback - State setter for the button panels record
- * @deprecated Not used anymore - delete?
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export const helpCloseAll = (buttonPanels: ButtonPanelType, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>): void => {
   const panelGroups = {} as ButtonPanelType;
@@ -106,38 +104,4 @@ export const helpCloseAll = (buttonPanels: ButtonPanelType, setterCallback: Disp
   });
 
   setterCallback(panelGroups);
-};
-
-/**
- * Sorts a source array so that items in the enforce array appear first in the specified order.
- *
- * Items not in the enforce array retain their original relative order.
- *
- * @param sourceArray - The array to sort
- * @param enforce - The ordered list of items to prioritize
- * @returns The sorted array with enforced items first
- */
-export const enforceArrayOrder = (sourceArray: string[], enforce: string[]): string[] => {
-  const filteredEnforce = enforce.filter((item) => sourceArray.includes(item)); // Filter out items not present in sourceArray
-  const sortedArray = [...sourceArray].sort((a, b) => {
-    const indexA = filteredEnforce.indexOf(a);
-    const indexB = filteredEnforce.indexOf(b);
-
-    // If both items are enforced, sort based on their positions in enforce
-    if (indexA !== -1 && indexB !== -1) {
-      return indexA - indexB;
-    }
-    // If only one of the items is enforced, prioritize it
-    if (indexA !== -1) {
-      return -1;
-    }
-    if (indexB !== -1) {
-      return 1;
-    }
-    // If neither item is enforced, maintain the original order
-
-    return 0;
-  });
-
-  return sortedArray;
 };

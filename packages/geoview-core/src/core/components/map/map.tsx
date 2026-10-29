@@ -25,7 +25,7 @@ import { logger } from '@/core/utils/logger';
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { DomHelper, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Props for the Map component. */
 type MapProps = {
@@ -126,7 +126,7 @@ export function Map(props: MapProps): JSX.Element {
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
     <Box
-      id={DomHelper.buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget)}
+      id={DomHelper.buildMapTargetElementId(mapId)}
       ref={mapElement}
       sx={memoSxClasses.mapContainer}
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the map region is keyboard-operable (arrow-key panning, crosshair) when interaction is dynamic

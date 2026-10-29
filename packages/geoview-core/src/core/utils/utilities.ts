@@ -18,9 +18,6 @@ import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX, DISPLAY_LANGUAGE_LOCALE } from '@
 // GV Re-exported to keep the existing public import path
 export { isLocalhost, formatDuration } from '@/core/utils/runtime-utilities';
 
-/** The observers to monitor element removals from the DOM tree */
-const observers: Record<string, MutationObserver> = {};
-
 /** Regex patterns for image URL validation - compiled once to avoid recreation on every isImage() call. */
 const IMAGE_VALIDATION_PATTERNS = {
   /** URLs ending with image extensions (with optional query params/fragments). */
@@ -485,7 +482,7 @@ export function getScriptAndAssetURL(): string {
  * @param getName - Callback that returns the item name used for sorting
  * @returns A sorted copy of the items
  */
-export function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[] {
+export function sortArrayByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[] {
   return [...items].sort((itemA, itemB): number => {
     const nameA = getName(itemA).trim();
     const nameB = getName(itemB).trim();
@@ -503,6 +500,28 @@ export function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => stri
     if (isNameANumber || isNameBNumber) return isNameANumber ? -1 : 1;
 
     return nameA.localeCompare(nameB, undefined, { sensitivity: 'base', numeric: true });
+  });
+}
+
+/**
+ * Sorts a source array so that items in the enforce array appear first in the specified order.
+ *
+ * Items not in the enforce array retain their original relative order.
+ *
+ * @param sourceArray - The array to sort
+ * @param enforce - The ordered list of items to prioritize
+ * @returns The sorted array with enforced items first
+ */
+export function sortArrayWithEnforcedValues(sourceArray: string[], enforce: string[]): string[] {
+  const filteredEnforce = enforce.filter((item) => sourceArray.includes(item));
+  return [...sourceArray].sort((first, second) => {
+    const firstPriority = filteredEnforce.indexOf(first);
+    const secondPriority = filteredEnforce.indexOf(second);
+
+    if (firstPriority !== -1 && secondPriority !== -1) return firstPriority - secondPriority;
+    if (firstPriority !== -1) return -1;
+    if (secondPriority !== -1) return 1;
+    return 0;
   });
 }
 
@@ -1091,51 +1110,6 @@ export function linkifyAndSanitizeHtml(content: string, announcementText: string
 }
 
 /**
- * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
- * is removed from the document.
- *
- * When the element is removed, it triggers a cleanup callback and disconnects the observer to prevent memory leaks.
- *
- * @param key - A unique identifier for the element, used to manage observer references
- * @param element - The DOM element to monitor for removal from the DOM tree
- * @param onHTMLElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree
- */
-export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void {
-  if (!element || !element.parentNode) return;
-
-  // Get the parent to set the MutationObserver on
-  const parent = element.parentNode;
-
-  // Disconnect prior observer if it exists
-  if (observers[key]) {
-    // Disconnect the observer, we're replacing it
-    observers[key].disconnect();
-    delete observers[key];
-  }
-
-  // Create the MutationObserver
-  const observer = new MutationObserver((mutations: MutationRecord[]) => {
-    for (const mutation of mutations) {
-      for (const node of Array.from(mutation.removedNodes)) {
-        if (node === element || (node instanceof HTMLElement && node.contains(element))) {
-          // Callback
-          onHTMLElementRemoved(key);
-
-          // Disconnect the observer, we're done
-          observer.disconnect();
-          delete observers[key];
-          return;
-        }
-      }
-    }
-  });
-
-  // Store and activate the observer
-  observers[key] = observer;
-  observer.observe(parent, { childList: true });
-}
-
-/**
  * Attempts to place the given HTML element into fullscreen mode.
  *
  * This function handles browser compatibility by trying the standard
@@ -1664,51 +1638,6 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
   return new Promise<T>((resolve, reject) => {
     // Redirect
     whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
-  });
-}
-
-/**
- * Waits for a subscribed value to become defined.
- *
- * @param getValue - Returns the current value, or undefined while it is unavailable
- * @param subscribe - Registers a change listener and returns its unsubscribe function
- * @returns A promise that resolves with the first defined value
- * @throws When reading the value or subscribing throws
- */
-// TODO: CHECK - This function could be moved in a 'state-utility' file if we want to better organize state-related helpers
-export function waitForValueWithSubscription<T>(
-  getValue: () => T | undefined,
-  subscribe: (listener: () => void) => () => void
-): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    let isSettled = false;
-    const subscription: { unsubscribe?: () => void } = {};
-    const checkValue = (): void => {
-      if (isSettled) return;
-
-      try {
-        const value = getValue();
-        if (value === undefined) return;
-
-        isSettled = true;
-        subscription.unsubscribe?.();
-        resolve(value);
-      } catch (error: unknown) {
-        isSettled = true;
-        subscription.unsubscribe?.();
-        reject(error);
-      }
-    };
-
-    try {
-      subscription.unsubscribe = subscribe(checkValue);
-      if (isSettled) subscription.unsubscribe();
-      else checkValue();
-    } catch (error: unknown) {
-      isSettled = true;
-      subscription.unsubscribe?.();
-      reject(error);
-    }
   });
 }
 
