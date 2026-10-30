@@ -73,6 +73,13 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   is the OpenLayers canvas container. [Map](../../packages/geoview-core/src/core/components/map/map.tsx)
   assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
   focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
+  Flush map-control popover closure (navbar, About/Version, Notifications) before focusing the map
+  so MUI focus restoration cannot reclaim focus; clear the registered focus item without restoring caller focus.
+  Derive panel openness from the close-request version during render; closing through a passive
+  effect schedules a second render whose focus-trap cleanup can run after map focus.
+  Keep the animated Popper wrapper at module scope: creating it during render remounts its focus trap.
+  Crosshair coordinate checks must measure the SVG artwork center, not just its element box;
+  off-center artwork can leave a visible offset even when viewport coordinates are correct.
 - [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
   on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
@@ -80,6 +87,8 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,
   Ctrl+Q exit, and the shell mousemove listener. Check `movementX`/`movementY`: zero movement must not
   exit keyboard mode during resize/fullscreen transitions. Keep listener cleanup paired with exit.
+  Fullscreen exit restores map focus for active crosshair drawing/measurement on the next animation
+  frame, after browser focus restoration. Cancel pending restoration on controller unhook or fullscreen re-entry.
 - [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
   coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)

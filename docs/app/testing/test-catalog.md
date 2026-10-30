@@ -79,7 +79,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 53         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
-| 3. Map            | `suite-map`             | `MapTester`                                                                                     | 17         | Complex mixed               |
+| 3. Map            | `suite-map`             | `MapTester`                                                                                     | 18         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
 | 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
@@ -87,7 +87,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **273**    |                             |
+| **Total**         |                         |                                                                                                 | **274**    |                             |
 
 ---
 
@@ -607,6 +607,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 15  | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                   |
 | 16  | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                     |
 | 17  | `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction |
+| 18  | `testCrosshairCoordinates`             | test | Test SVG artwork center alignment, stale pointer reset, and Enter/Space drawing with padding, panning, and rotation |
 
 ---
 

@@ -17,9 +17,16 @@ about/notification controls and attribution/scale.
 With focus inside a dynamic viewer, Ctrl+M (or Cmd+M on macOS) focuses the map element
 and **activates**, not toggles, the crosshair. Ctrl+Q exits keyboard navigation mode and
 deactivates the crosshair. Tabbing to another control within the viewer also deactivates it.
+Ctrl+M closes open navigation, About/Version, and Notifications popovers before transferring focus, so Enter acts on the map
+rather than reopening the previous panel.
 Escape is not a general crosshair-exit shortcut; drawer editing can use it to cancel a grabbed transform.
 Arrow keys pan by 128px by default. Shift+ArrowUp increases the step by 10px;
 Shift+ArrowDown decreases it by 10px (minimum 10px).
+
+Enter/Space map actions (including drawing) use the coordinate under the visible crosshair at
+the full map viewport center, not the logical view center shifted by map-info-bar padding.
+This remains true after panning, rotating, or expanding/collapsing the map info bar.
+Activating the keyboard crosshair replaces any stale mouse pointer position.
 
 On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. This mode enables a focus trap within the viewer; focusing the map activates crosshair-based interaction.
 

@@ -13,6 +13,19 @@ import { buildGVElementId, getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
+/** Supported geometry workflows for on-map drawing guidance. */
+export type TypeDrawingHintGeometry = 'line' | 'polygon' | 'point' | 'text' | 'circle' | 'rectangle' | 'star';
+
+/** Describes the visible map hint for drawing, measurement, or editing. */
+export type TypeDrawingHint =
+  | {
+      tool: 'drawing' | 'measurement';
+      geometry: TypeDrawingHintGeometry;
+      started: boolean;
+    }
+  | { tool: 'editing' }
+  | undefined;
+
 // #region INTERFACE DEFINITION
 
 /**
@@ -61,6 +74,9 @@ export interface IAppState {
   /** Whether the map crosshairs overlay is currently active. */
   isCrosshairsActive: boolean;
 
+  /** Current drawing instructions displayed on the map, if any. */
+  drawingHint: TypeDrawingHint;
+
   /** Whether the viewer is currently in fullscreen mode. */
   isFullscreenActive: boolean;
 
@@ -84,6 +100,7 @@ export interface IAppState {
   actions: {
     setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
+    setDrawingHint: (drawingHint: TypeDrawingHint) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
     setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
     setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
@@ -124,6 +141,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
     isCrosshairsActive: false,
+    drawingHint: undefined,
     isFullscreenActive: false,
     notifications: [],
     showUnsymbolizedFeatures: true, // default: true to always have features by default, some WMS will not expose the GetStyles for their WFS equivalent
@@ -175,6 +193,20 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           appState: {
             ...get().appState,
             isCrosshairsActive,
+          },
+        });
+      },
+
+      /**
+       * Sets the current on-map drawing instructions.
+       *
+       * @param drawingHint - The drawing type and whether its sketch has started
+       */
+      setDrawingHint: (drawingHint: TypeDrawingHint): void => {
+        set({
+          appState: {
+            ...get().appState,
+            drawingHint,
           },
         });
       },
@@ -339,6 +371,9 @@ export const getStoreAppIsCrosshairsActive = (mapId: string): boolean => getStor
 
 /** Hook that returns whether the crosshairs overlay is active. */
 export const useStoreAppIsCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
+
+/** Hook that returns the current on-map drawing instructions. */
+export const useStoreAppDrawingHint = (): TypeDrawingHint => useStore(useGeoViewStore(), (state) => state.appState.drawingHint);
 
 /**
  * Gets the disabled layer types for the given map.
@@ -653,6 +688,16 @@ export const setStoreAppDisplayDateTimezone = (mapId: string, displayDateTimezon
  */
 export const setStoreAppCrosshairActive = (mapId: string, active: boolean): void => {
   getStoreAppState(mapId).actions.setCrosshairActive(active);
+};
+
+/**
+ * Sets the current on-map drawing instructions.
+ *
+ * @param mapId - The map identifier
+ * @param drawingHint - The drawing type and whether its sketch has started
+ */
+export const setStoreAppDrawingHint = (mapId: string, drawingHint: TypeDrawingHint): void => {
+  getStoreAppState(mapId).actions.setDrawingHint(drawingHint);
 };
 
 /**

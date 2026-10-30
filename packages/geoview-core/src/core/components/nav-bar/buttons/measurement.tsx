@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { LineString, Polygon, Point } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import { unByKey } from 'ol/Observable';
 import { Style, Stroke, Fill, Text } from 'ol/style';
 import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
@@ -27,9 +28,10 @@ import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { useMapController } from '@/core/controllers/use-controllers';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** The geometry group key for measurement features. */
 const MEASURE_GROUP_KEY = 'geoview-measurement';
@@ -85,6 +87,7 @@ export default function Measurement(): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
   const mapController = useMapController();
+  const uiController = useUIController();
 
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
@@ -247,10 +250,7 @@ export default function Measurement(): JSX.Element {
       // Early return if no type
       if (!type) return;
 
-      // Stop existing measurement if any
-      if (drawInstance) {
-        drawInstance.stopInteraction();
-      }
+      mapController.stopActiveMeasurement();
 
       // Create or get the geometry group for measurements
       mapController.createGeometryGroup(MEASURE_GROUP_KEY);
@@ -263,8 +263,36 @@ export default function Measurement(): JSX.Element {
         fillColor: FILL_COLORS,
       });
 
+      mapController.setActiveMeasurementDraw(draw);
+      uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
+
+      // Announce added vertices without repeating announcements for pointer movement.
+      draw.onDrawStart((_sender: unknown, event: OLDrawEvent): void => {
+        const geometry = event.feature.getGeometry();
+        if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
+
+        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: true });
+
+        let lastVertexCount =
+          geometry instanceof LineString ? geometry.getCoordinates().length : (geometry.getCoordinates()[0]?.length ?? 0);
+        setStatusMessage(t('measurement.status.vertexAdded'));
+
+        const geometryChangeKey = geometry.on('change', (): void => {
+          const vertexCount =
+            geometry instanceof LineString ? geometry.getCoordinates().length : (geometry.getCoordinates()[0]?.length ?? 0);
+          if (vertexCount > lastVertexCount) {
+            lastVertexCount = vertexCount;
+            setStatusMessage(t('measurement.status.vertexAdded'));
+          }
+        });
+
+        draw.onDrawEnd((): void => unByKey(geometryChangeKey));
+        draw.onDrawAbort((): void => unByKey(geometryChangeKey));
+      });
+
       // Handle draw end
       draw.onDrawEnd((_sender: unknown, event: OLDrawEvent) => {
+        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
         const { feature } = event;
         const geometry = feature.getGeometry();
 
@@ -299,36 +327,90 @@ export default function Measurement(): JSX.Element {
         }
       });
 
+      draw.onDrawAbort((): void => {
+        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
+        setStatusMessage(t('measurement.status.cancelled'));
+      });
+
       setDrawInstance(draw);
       setActiveMeasurement(type);
-
-      // Register the draw instance for keyboard accessibility via crosshair
-      // This also suppresses hover and click-marker handlers (like drawer does)
-      mapController.setActiveMeasurementDraw(draw);
 
       // Announce measurement mode started
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
     },
-    [drawInstance, createSegmentStyle, mapController, displayLanguage, t]
+    [createSegmentStyle, mapController, uiController, displayLanguage, t]
   );
 
   /**
    * Stops the current measurement.
    */
   const stopMeasurement = useCallback((): void => {
-    if (drawInstance) {
-      drawInstance.stopInteraction();
-      setDrawInstance(null);
-    }
+    mapController.stopActiveMeasurement();
+    setDrawInstance(null);
     setActiveMeasurement(null);
+    uiController.setDrawingHint(undefined);
 
     // Unregister the draw instance for keyboard accessibility
     mapController.setActiveMeasurementDraw(undefined);
 
     // Announce measurement stopped
     setStatusMessage(t('measurement.status.stopped'));
-  }, [drawInstance, mapController, t]);
+  }, [mapController, uiController, t]);
+
+  /**
+   * Synchronizes the measurement controls when drawer drawing or editing takes over.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - measurement stopped subscription');
+    const handler = mapController.onMeasurementStopped((_sender, _event): void => {
+      setDrawInstance(null);
+      setActiveMeasurement(null);
+      setStatusMessage(t('measurement.status.stopped'));
+    });
+    return (): void => mapController.offMeasurementStopped(handler);
+  }, [mapController, t]);
+
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - undo keyboard shortcuts', activeMeasurement, drawInstance);
+
+    if (!activeMeasurement || !drawInstance) return undefined;
+
+    const handleUndoShortcut = (event: KeyboardEvent): void => {
+      const { activeElement } = document;
+      const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
+      if (!activeElement || !geoViewElement?.contains(activeElement)) return;
+      if (
+        (activeElement instanceof HTMLInputElement &&
+          ['text', 'search', 'url', 'email', 'tel', 'password', 'number'].includes(activeElement.type)) ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement instanceof HTMLSelectElement ||
+        (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+      ) {
+        return;
+      }
+
+      const isUndoShortcut =
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) ||
+        (event.key === 'Backspace' && !event.ctrlKey && !event.metaKey && !event.altKey);
+      const isRedoShortcut =
+        (event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === 'y' || (event.key.toLowerCase() === 'z' && event.shiftKey));
+      if (!isUndoShortcut && !isRedoShortcut) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      if (isRedoShortcut) {
+        setStatusMessage(t('measurement.status.redoUnavailable'));
+      } else {
+        setStatusMessage(drawInstance.undo() ? t('measurement.status.vertexUndone') : t('measurement.status.nothingToUndo'));
+      }
+    };
+
+    document.addEventListener('keydown', handleUndoShortcut, true);
+    return (): void => {
+      document.removeEventListener('keydown', handleUndoShortcut, true);
+    };
+  }, [activeMeasurement, drawInstance, mapId, t]);
 
   /**
    * Clears all measurements.
@@ -435,11 +517,6 @@ export default function Measurement(): JSX.Element {
 
     return (
       <Box sx={memoSxClasses.measurementPanel}>
-        {/* WCAG - Screen reader status announcements */}
-        <Typography role="status" sx={visuallyHidden}>
-          {statusMessage}
-        </Typography>
-
         {/* Enable/Disable Toggle */}
         <Switch
           label={!isMeasurementActive ? t('general.enable') : t('general.disable')}
@@ -508,5 +585,16 @@ export default function Measurement(): JSX.Element {
     content: renderButtons(),
   };
 
-  return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'measurement', button, panel }} isActive={activeMeasurement !== null} />;
+  return (
+    <NavbarPanelButton
+      buttonPanel={{ buttonPanelId: 'measurement', button, panel }}
+      isActive={activeMeasurement !== null}
+      keepPanelMounted
+      liveRegionContent={
+        <Typography role="status" sx={visuallyHidden}>
+          {statusMessage}
+        </Typography>
+      }
+    />
+  );
 }

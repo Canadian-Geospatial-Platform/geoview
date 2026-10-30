@@ -14,7 +14,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: 0,
     left: 0,
     bottom: 0,
-    paddingBottom: theme.spacing(1),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -32,5 +31,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   crosshairIcon: {
     width: theme.overrides.crosshairIcon.size.width,
     height: theme.overrides.crosshairIcon?.size.height,
+    // Keep the SVG box centered without an inline baseline offset.
+    '& svg': {
+      display: 'block',
+      width: '100%',
+      height: '100%',
+    },
   },
 });
