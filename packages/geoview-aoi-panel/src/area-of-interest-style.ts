@@ -53,7 +53,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       alignItems: 'center',
       backgroundColor: theme.palette.geoViewColor?.grey.dark[900],
       color: theme.palette.geoViewColor?.grey.light[900],
-      fontSize: theme.palette.geoViewFontSize?.sm,
+      fontSize: theme.typography.body2.fontSize,
       fontWeight: 400,
       padding: theme.spacing(0, 1.5),
       height: 60,

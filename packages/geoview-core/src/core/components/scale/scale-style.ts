@@ -72,7 +72,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxHeight: '18px',
   },
   scaleText: {
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     color: theme.palette.text.primary,
     whiteSpace: 'nowrap',
     borderBottom: `2px solid ${theme.palette.text.primary}`,
@@ -82,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textAlign: 'center',
 
     '&.interaction-static': {
-      fontSize: theme.palette.geoViewFontSize?.md,
+      fontSize: theme.typography.h5.fontSize,
       fontWeight: 'bold',
       borderBottom: '2px solid',
       color: theme.palette.geoViewColor?.grey.dark[500],
@@ -112,7 +112,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleCheckmark: {
     paddingRight: theme.spacing(0.75),
-    fontSize: theme.palette.geoViewFontSize?.lg,
     color: theme.palette.text.primary,
   },
 });

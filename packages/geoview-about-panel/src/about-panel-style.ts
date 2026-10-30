@@ -61,7 +61,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   title: {
     marginTop: theme.spacing(2),
-    fontSize: theme.palette.geoViewFontSize?.xl,
     fontWeight: theme.typography.fontWeightBold,
   },
   logoContainer: {

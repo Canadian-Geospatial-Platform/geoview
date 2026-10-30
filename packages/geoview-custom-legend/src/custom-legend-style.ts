@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Header text styling
   headerText: {
-    fontSize: theme.palette.geoViewFontSize?.md,
+    fontSize: theme.typography.h5.fontSize,
     fontWeight: '600',
     color: theme.palette.text.primary,
     maxWidth: '400px',
@@ -66,9 +66,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Group title styling
   groupTitle: {
     textWrapMode: 'wrap',
-    fontSize: theme.palette.geoViewFontSize?.md ?? '1.125rem', // 18px
     fontWeight: '700',
-    lineHeight: 1.2,
     color: theme.palette.text.primary,
   },
 
@@ -137,7 +135,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   groupSubLayerCount: {
     display: 'block',
     color: theme.palette.text.primary,
-    fontSize: '14px',
     margin: theme.spacing(0),
   },
 
@@ -146,9 +143,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
-    '& .MuiSvgIcon-root': {
-      fontSize: '1.25rem',
-    },
   },
 
   // Collapse button container
@@ -171,7 +165,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   descriptionToggleButton: {
     padding: theme.spacing(0, 0.25, 0, 0),
     minWidth: 'auto',
-    fontSize: '0.75rem',
+    fontSize: theme.typography.caption.fontSize,
     fontStyle: 'italic',
     fontWeight: 300,
     textTransform: 'none',
@@ -189,7 +183,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   descriptionText: {
-    fontSize: theme.palette.geoViewFontSize?.sm ?? '0.875rem',
+    fontSize: theme.typography.body2.fontSize,
     fontStyle: 'italic',
     fontWeight: 300,
     color: theme.palette.text.primary,

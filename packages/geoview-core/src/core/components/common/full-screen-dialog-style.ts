@@ -22,7 +22,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   dialogTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
+    fontSize: theme.typography.h4.fontSize,
     fontWeight: '600',
   },
 });

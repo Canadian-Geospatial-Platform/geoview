@@ -21,14 +21,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(0.75),
     marginTop: theme.spacing(0.5),
     fontWeight: 500,
-    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
+    fontSize: theme.typography.label.fontSize,
   },
 
   // Loading/empty states
   filterLoading: {
     color: theme.palette.text.secondary,
     fontStyle: 'italic',
-    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
 
   // Multiselect checkbox item
@@ -69,7 +68,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),
     display: 'block',
-    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
   },
 
   // Range slider container
@@ -83,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterRangeValues: {
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
+    fontSize: theme.typography.body2.fontSize,
     color: theme.palette.text.secondary,
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),

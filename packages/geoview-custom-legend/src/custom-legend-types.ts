@@ -1,3 +1,5 @@
+import type { TypographyScaleKey } from 'geoview-core/ui/style/types';
+
 /** Union type for all possible legend item types. */
 export type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 
@@ -19,6 +21,9 @@ export interface TypeHeaderLayer {
   type: 'header';
   text: string;
   description?: TypeDescription;
+  /** Named size in the owning map's calibrated typography scale; takes precedence over fontSize. */
+  fontSizeStep?: TypographyScaleKey;
+  /** @deprecated Use fontSizeStep instead. Numeric values remain supported as exact design pixels. */
   fontSize?: number;
   fontWeight?: 'normal' | 'bold';
 }

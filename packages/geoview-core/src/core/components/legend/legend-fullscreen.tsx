@@ -221,9 +221,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         <Typography component="div" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
-        <Typography component="p" sx={memoSxClasses.legendInstructionsBody}>
-          {t('legend.noLayersAddedDescription')}
-        </Typography>
+        <Typography component="p">{t('legend.noLayersAddedDescription')}</Typography>
       </Box>
     );
   }, [t, memoSxClasses]);

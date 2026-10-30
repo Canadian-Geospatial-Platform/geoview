@@ -862,10 +862,18 @@ export function SingleLayer({
 
     return [
       memoSxClasses.listItemButton,
-      { minHeight: '4.51rem' },
+      memoSxClasses.singleLayerListItemButton,
       (!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && memoSxClasses.outOfRange,
     ] as SxProps;
-  }, [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.listItemButton, memoSxClasses.outOfRange]);
+  }, [
+    inVisibleRange,
+    parentHidden,
+    isVisible,
+    layerStatus,
+    memoSxClasses.listItemButton,
+    memoSxClasses.singleLayerListItemButton,
+    memoSxClasses.outOfRange,
+  ]);
 
   return (
     <ListItem
@@ -903,8 +911,8 @@ export function SingleLayer({
               primary={layerName !== undefined ? layerName : layerId}
               secondary={memoLayerDescription}
               slotProps={{
-                primary: { noWrap: true },
-                secondary: { noWrap: true },
+                primary: { component: 'span', noWrap: true },
+                secondary: { variantMapping: { body2: 'span' }, noWrap: true },
               }}
             />
           </ListItemButton>

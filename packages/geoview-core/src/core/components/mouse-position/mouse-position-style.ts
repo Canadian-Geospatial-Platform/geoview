@@ -9,6 +9,9 @@ import { ellipsisOverflow } from '@/ui/style/default';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  container: {
+    minWidth: 'fit-content',
+  },
   mousePosition: {
     display: 'flex',
     minWidth: 'fit-content',
@@ -44,7 +47,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     alignItems: 'center',
     '& span': {
-      fontSize: theme.palette.geoViewFontSize?.default,
+      fontSize: theme.typography.body1.fontSize,
       ...ellipsisOverflow,
     },
   },
@@ -82,11 +85,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   mousePositionCheckmark: {
     paddingRight: theme.spacing(0.75),
-    fontSize: theme.palette.geoViewFontSize?.lg,
     color: theme.palette.action.active,
   },
   mousePositionText: {
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     ...ellipsisOverflow,
   },
 });

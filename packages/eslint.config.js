@@ -31,7 +31,97 @@ const RESTRICTED_PLUGIN_BARREL_PATHS = [
   '..',
 ].map((name) => ({ name, message: PLUGIN_BARREL_IMPORT_MESSAGE }));
 
-export default [
+const FONT_SIZE_MESSAGE =
+  'Use a Typography variant or theme.typography.<variant>.fontSize, not a literal size. Icons use small/medium/large/inherit. See docs/programming/styling-best-practices.md#typography.';
+const FONT_SIZE_PROPERTY = 'Property:matches([key.name="fontSize"], [key.value="fontSize"])';
+const PACKAGES_ROOT = fileURLToPath(new URL('.', import.meta.url));
+const LITERAL_SIZE = ':matches(Literal[value=/[0-9](px|rem|em|%)/i], Literal[raw=/^[0-9.]/])';
+const FONT_SIZE_ROOT = `:matches(${FONT_SIZE_PROPERTY}, JSXAttribute[name.name="fontSize"])`;
+const SIZE_VALUE_CONTAINERS =
+  'ObjectExpression, Property, ArrayExpression, ConditionalExpression, LogicalExpression, UnaryExpression, JSXExpressionContainer, TSAsExpression, TSSatisfiesExpression, TSNonNullExpression';
+
+// Follow only value-producing containers, never helper arguments, lookup keys or condition tests.
+const sizeValueSelector = (value) =>
+  `${FONT_SIZE_ROOT} ${value}:not(${FONT_SIZE_ROOT} :not(${SIZE_VALUE_CONTAINERS}) *):not(Property > *.key):not(ConditionalExpression > *.test):not(${FONT_SIZE_ROOT} ConditionalExpression > *.test *)`;
+
+const TYPOGRAPHY_RESTRICTIONS = [
+  {
+    selector: sizeValueSelector(LITERAL_SIZE),
+    message: FONT_SIZE_MESSAGE,
+  },
+  {
+    selector: `${sizeValueSelector('TemplateLiteral[expressions.length=0]')} > TemplateElement[value.raw=/[0-9](px|rem|em|%)/i], TaggedTemplateExpression > TemplateLiteral > TemplateElement[value.raw=/font-size\\s*:\\s*[+-]?([0-9]*[.])?[0-9]+(px|rem|em|%)/i]`,
+    message: FONT_SIZE_MESSAGE,
+  },
+  {
+    selector:
+      'MemberExpression:matches([property.name="geoViewFontSize"], [property.value="geoViewFontSize"]), ObjectPattern > Property:matches([key.name="geoViewFontSize"], [key.value="geoViewFontSize"])',
+    message: 'palette.geoViewFontSize is deprecated. Read theme.typography.<variant>.fontSize instead.',
+  },
+  {
+    selector: 'MemberExpression[property.value=/^[0-9]+([.][0-9]+)?x$/], ObjectPattern > Property[key.value=/^[0-9]+([.][0-9]+)?x$/]',
+    message: 'Generated font-size multiplier keys are deprecated. Read theme.typography.<variant>.fontSize instead.',
+  },
+  {
+    selector:
+      'MemberExpression:matches([object.property.name="typography"], [object.property.value="typography"]):matches([property.name="control"], [property.value="control"])',
+    message: 'The control typography variant is deprecated. Use a standard typography variant such as body2 or caption.',
+  },
+  {
+    selector:
+      'JSXAttribute[name.name="variant"] Literal[value="control"], Property:matches([key.name="variant"], [key.value="variant"], [key.name="typography"], [key.value="typography"]) > Literal[value="control"]',
+    message: 'The control typography variant is deprecated. Use a standard typography variant such as body2 or caption.',
+  },
+  {
+    selector:
+      'VariableDeclarator:matches([init.property.name="typography"], [init.property.value="typography"]) > ObjectPattern > Property:matches([key.name="control"], [key.value="control"])',
+    message: 'The control typography variant is deprecated. Use a standard typography variant such as body2 or caption.',
+  },
+  {
+    selector:
+      'Property:matches([key.name="typography"], [key.value="typography"]) > ObjectPattern > Property:matches([key.name="control"], [key.value="control"])',
+    message: 'The control typography variant is deprecated. Use a standard typography variant such as body2 or caption.',
+  },
+];
+
+const BASE_SYNTAX_RESTRICTIONS = [
+  {
+    selector: ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
+    message: 'Use # prefix for private instead',
+  },
+  {
+    selector: "CallExpression[callee.object.name='document'][callee.property.name='getElementById']",
+    message:
+      'Do not use document.getElementById directly. Use getGVElementById(mapId, suffix) / getGVElementByFullId(mapId, fullId) / getGVRootElement(mapId) from @/core/utils/dom-helper, or the useGVElementById() hook. This keeps DOM ids map-scoped and avoids cross-map collisions.',
+  },
+  {
+    selector: "CallExpression[callee.object.name='document'][callee.property.name=/^querySelector(All)?$/]",
+    message:
+      'Do not use document.querySelector(All) directly. Use queryGVSelector(mapId, selector) / queryGVSelectorAll(mapId, selector) from @/core/utils/dom-helper. This keeps DOM queries map-scoped and avoids cross-map collisions.',
+  },
+  {
+    selector: "JSXAttribute[name.name='role'][value.value='button']",
+    message:
+      'Do not hand-roll role="button". Use ButtonBase (cards/rows), ListItemButton (list rows), IconButton (icons) or Button from their @/ui/... module, which provide focus, Enter/Space and disabled semantics natively. See "Use Semantic Elements for Interactions" in docs/app/accessibility.md.',
+  },
+  {
+    selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > Literal',
+    message:
+      'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. Literal values are off-scale, and numbers are multiplied by the base inside sx.',
+  },
+  {
+    selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > TemplateLiteral[expressions.length=0]',
+    message:
+      'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3.',
+  },
+  {
+    selector: "Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > MemberExpression[property.name='borderRadius']",
+    message:
+      'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. theme.shape.borderRadius is a number, so inside sx it renders 6 × 6 = 36px.',
+  },
+];
+
+const config = [
   js.configs.recommended,
   // Ignores (actually recommended to be first in the whole config logic)
   {
@@ -256,43 +346,7 @@ export default [
           patterns: RESTRICTED_IMPORT_PATTERNS,
         },
       ],
-      'no-restricted-syntax': [
-        1, // Warning
-        {
-          selector: ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
-          message: 'Use # prefix for private instead',
-        },
-        {
-          selector: "CallExpression[callee.object.name='document'][callee.property.name='getElementById']",
-          message:
-            'Do not use document.getElementById directly. Use getGVElementById(mapId, suffix) / getGVElementByFullId(mapId, fullId) / getGVRootElement(mapId) from @/core/utils/dom-helper, or the useGVElementById() hook. This keeps DOM ids map-scoped and avoids cross-map collisions.',
-        },
-        {
-          selector: "CallExpression[callee.object.name='document'][callee.property.name=/^querySelector(All)?$/]",
-          message:
-            'Do not use document.querySelector(All) directly. Use queryGVSelector(mapId, selector) / queryGVSelectorAll(mapId, selector) from @/core/utils/dom-helper. This keeps DOM queries map-scoped and avoids cross-map collisions.',
-        },
-        {
-          selector: "JSXAttribute[name.name='role'][value.value='button']",
-          message:
-            'Do not hand-roll role="button". Use ButtonBase (cards/rows), ListItemButton (list rows), IconButton (icons) or Button from their @/ui/... module, which provide focus, Enter/Space and disabled semantics natively. See "Use Semantic Elements for Interactions" in docs/app/accessibility.md.',
-        },
-        {
-          selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > Literal',
-          message:
-            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. Literal values are off-scale, and numbers are multiplied by the base inside sx.',
-        },
-        {
-          selector: 'Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > TemplateLiteral[expressions.length=0]',
-          message:
-            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3.',
-        },
-        {
-          selector: "Property[key.name=/^border(Top|Bottom)?(Left|Right)?Radius$/] > MemberExpression[property.name='borderRadius']",
-          message:
-            'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. theme.shape.borderRadius is a number, so inside sx it renders 6 × 6 = 36px.',
-        },
-      ],
+      'no-restricted-syntax': [1, ...BASE_SYNTAX_RESTRICTIONS],
 
       // Prettier rules
       'prettier/prettier': [
@@ -405,5 +459,53 @@ export default [
       'no-console': 'off',
       'no-unused-vars': 'warn',
     },
+  },
+];
+
+export default [
+  ...config,
+  {
+    basePath: PACKAGES_ROOT,
+    files: ['geoview-*/src/**/*.{js,jsx,ts,tsx}'],
+    ignores: [
+      // Theme definitions own the scale and deprecated compatibility values.
+      'geoview-core/src/ui/style/**',
+      // Owned elsewhere; see TYPOGRAPHY_PLAN.md drawer hand-off
+      'geoview-drawer/**',
+      // Out of scope for typography normalization; must migrate before palette.geoViewFontSize is removed (see TYPOGRAPHY_PLAN.md)
+      'geoview-stac-browser/**',
+      '**/*.d.ts',
+      // PDF/canvas layout sizes describe exported artwork, not viewer UI.
+      'geoview-core/src/core/components/export/layout-styles.ts',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        1, // Match the existing restricted-syntax warning level.
+        ...BASE_SYNTAX_RESTRICTIONS,
+        ...TYPOGRAPHY_RESTRICTIONS,
+      ],
+    },
+  },
+  {
+    basePath: PACKAGES_ROOT,
+    files: ['geoview-core/src/core/controllers/drawer-controller.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        1,
+        ...BASE_SYNTAX_RESTRICTIONS,
+        ...TYPOGRAPHY_RESTRICTIONS.map((restriction) => ({
+          ...restriction,
+          // Owned elsewhere; see TYPOGRAPHY_PLAN.md drawer hand-off
+          // Restrict only the measurement-label helper, not the rest of DrawerController.
+          selector: `:matches(${restriction.selector}):not(MethodDefinition[key.name="createMeasureTooltip"] *)`,
+        })),
+      ],
+    },
+  },
+  {
+    // Keep dom-helper's existing DOM-access allowance without disabling typography checks.
+    basePath: PACKAGES_ROOT,
+    files: ['geoview-core/src/core/utils/dom-helper.ts'],
+    rules: { 'no-restricted-syntax': [1, ...TYPOGRAPHY_RESTRICTIONS] },
   },
 ];

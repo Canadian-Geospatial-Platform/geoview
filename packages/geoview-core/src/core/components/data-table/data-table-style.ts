@@ -24,7 +24,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dataPanel: { background: theme.palette.surface?.high ?? theme.palette.background.paper, paddingBottom: theme.spacing(2) },
   gridContainer: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
   selectedRows: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     margin: theme.spacing(0),
     padding: theme.spacing(0.75),
   },
@@ -93,7 +93,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         gridTemplateColumns: '1fr',
       },
     },
-    '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize?.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiInput-root': { fontSize: theme.typography.body2.fontSize, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
     '& .MuiBadge-root': {
       marginLeft: theme.spacing(1),
       svg: {
@@ -162,12 +162,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   dataTableInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
+    fontSize: theme.typography.h4.fontSize,
     fontWeight: '600',
     lineHeight: '1.5em',
   },
   dataTableInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
   },
   rightPanelContainer: {
     overflowY: 'auto',

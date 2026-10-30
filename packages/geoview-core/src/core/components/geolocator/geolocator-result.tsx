@@ -139,12 +139,18 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       <List sx={memoSxClasses.filterListError}>
         {!!province.length && (
           <ListItem>
-            <ListItemText primary={`${t('geolocator.province')}: ${province}`} />
+            <ListItemText
+              primary={`${t('geolocator.province')}: ${province}`}
+              slotProps={{ primary: { variant: 'body1', component: 'span' } }}
+            />
           </ListItem>
         )}
         {!!category.length && (
           <ListItem>
-            <ListItemText primary={`${t('geolocator.category')}: ${category}`} />
+            <ListItemText
+              primary={`${t('geolocator.category')}: ${category}`}
+              slotProps={{ primary: { variant: 'body1', component: 'span' } }}
+            />
           </ListItem>
         )}
       </List>
@@ -191,7 +197,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               aria-disabled={!memoHasActiveFilters}
             >
-              <ClearFiltersIcon sx={memoSxClasses.clearFiltersIcon} />
+              <ClearFiltersIcon fontSize="small" />
             </IconButton>
           </Box>
         </Box>

@@ -940,8 +940,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             className="buttonOutline"
             aria-disabled={checkedFeatures.length === 0}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', height: 24 }}>
-              <ClearHighlightIcon sx={{ fontSize: 24 }} />
+            <Box sx={memoSxClasses.clearHighlightIconContainer}>
+              <ClearHighlightIcon fontSize="medium" />
             </Box>
           </IconButton>
         </Box>
