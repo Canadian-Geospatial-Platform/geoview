@@ -38,6 +38,6 @@ Source: [`map-viewer.ts`](../../packages/geoview-core/src/geo/map/map-viewer.ts)
 - Use pixel-space direction/containment; do not replace it with singular geographic bearings.
 - MapViewer/OL access stays in controllers/plugin lifecycle, never rendered React components.
 - Crosshair pixel/coordinate alignment (#3712): follow the [keyboard contract](../../docs/app/accessibility.md#keyboard-navigation-mode).
-  `Crosshair` samples the viewport midpoint through `MapController.getMapPositionFromPixel`; keep its CSS center and sampled pixel aligned.
+  `Crosshair` samples the viewport midpoint through `MapController.getViewportCenterPosition` (built on `getMapPositionFromPixel`); keep its CSS center and sampled pixel aligned.
 
 For Swiper render clipping and drag isolation, follow [package-specific runtime routing](packages.md#swiper-runtime).

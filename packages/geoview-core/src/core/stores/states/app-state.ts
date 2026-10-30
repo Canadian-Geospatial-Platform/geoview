@@ -8,13 +8,11 @@ import { getGeoViewStore, getGeoViewStoreAsync, useGeoViewStore } from '@/core/s
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { DrawGeometryType } from '@/core/stores/states/drawer-state';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import { buildGVElementId, getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
-
-/** Supported geometry workflows for on-map drawing guidance. */
-export type TypeDrawingHintGeometry = 'line' | 'polygon' | 'point' | 'text' | 'circle' | 'rectangle' | 'star';
 
 /** Describes the visible map hint for drawing, measurement, or editing. */
 export type TypeDrawingHint =
@@ -22,7 +20,7 @@ export type TypeDrawingHint =
       /** The tool that owns the drawing workflow. */
       tool: 'drawing' | 'measurement';
       /** Geometry workflow described by the hint. */
-      geometry: TypeDrawingHintGeometry;
+      geometry: DrawGeometryType;
       /** Whether the first coordinate has been placed. */
       started: boolean;
     }
