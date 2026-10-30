@@ -145,7 +145,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation                        | 15 min       | 20 (2/7/11)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers                      | 15 min       | 23 (6/16/1)          |
 | 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                               | 5 min        | 9 (0/6/3)            |
-| 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer                             | 15 min       | 20 (0/9/11)          |
+| 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer                             | 15 min       | 28 (0/9/19)          |
 | 6   | [06-overview-map.md](06-overview-map.md)                       | Overview map, hide on zoom, projection switch                         | 5 min        | 8 (5/0/3)            |
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen                              | 15 min       | 31 (0/12/19)         |
 | 8   | [08-layers.md](08-layers.md)                                   | Layer panel, add, settings, Available/Hidden lists                    | 55 min       | 133 (1/23/109)       |
@@ -161,7 +161,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 17b | [17b-package-geochart.md](17b-package-geochart.md)             | Geochart, all chart types, slider/stepper                             | 10 min       | 11 (0/0/11)          |
 | 17c | [17c-package-swiper.md](17c-package-swiper.md)                 | Swiper, add/remove layers, orientation, rotation, resize, interactive | 15 min       | 20 (3/7/10)          |
 | 17d | [17d-package-panels.md](17d-package-panels.md)                 | About, AOI, Custom Legend, STAC Browser panels                        | 15 min       | 31 (0/4/27)          |
-| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import                              | 25 min       | 38 (0/3/35)          |
+| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import                              | 25 min       | 41 (0/3/38)          |
 | 18  | [18-global-settings.md](18-global-settings.md)                 | Coord info, theme, highlight color, date mode, URLs                   | 15 min       | 22 (0/8/14)          |
 | 19  | [19-integration-flows.md](19-integration-flows.md)             | Multi-step workflows and cross-panel interactions                     | 25 min       | 18 (0/7/11)          |
 | 19b | [19b-store-verification.md](19b-store-verification.md)         | Zustand store state assertions (automation candidates)                | 10 min       | 13 (0/13/0)          |
@@ -173,7 +173,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                               | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests                    | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator                      | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                                       | **~445 min** | **916 (60/169/687)** |
+|     | **TOTAL**                                                      |                                                                       | **~445 min** | **933 (60/169/704)** |
 
 **Test breakdown:**
 
@@ -181,8 +181,8 @@ Each release gets its own issue. Previous release test results are preserved as 
 | ----------------- | ------- | ---------------------------------------------------------- |
 | **A** — Automated | 60      | Covered by `geoview-test-suite` (no manual effort needed)  |
 | **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 687     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **916** | All tests across all files                                 |
+| **M** — Manual    | 704     | Requires manual verification (UI, visual, interaction)     |
+| **Total**         | **933** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 
