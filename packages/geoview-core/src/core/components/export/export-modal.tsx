@@ -268,7 +268,7 @@ export function ExportModal(): JSX.Element {
     setIsMapLoading(true);
     setIsLegendLoading(true);
 
-    const overviewMap = gvRootElement?.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
+    const overviewMap = gvRootElement.getElementsByClassName('ol-overviewmap')[0] as HTMLDivElement;
     if (overviewMap) overviewMap.style.visibility = 'hidden';
 
     const timer = setTimeout(() => {
@@ -348,7 +348,7 @@ export function ExportModal(): JSX.Element {
     // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
     const dialogWidth = dialogRef.current?.offsetWidth || window.innerWidth * 0.8;
     const skeletonWidth = dialogWidth * 0.8;
-    const mapCanvas = gvRootElement?.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement | undefined;
+    const mapCanvas = gvRootElement.querySelector('.ol-viewport canvas:not(.ol-overviewmap canvas)') as HTMLCanvasElement | undefined;
     const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
     const skeletonHeight = skeletonWidth * mapAspectRatio;
 

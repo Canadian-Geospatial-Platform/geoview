@@ -12,6 +12,7 @@ import { useStoreAppDrawingHint, useStoreAppIsCrosshairsActive } from '@/core/st
 import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useDrawerControllerIfExists, useLayerSetController, useMapController, useUIController } from '@/core/controllers/use-controllers';
@@ -71,14 +72,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
       if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) return;
 
       // Prevent interactions when typing in input fields
-      const { activeElement } = document;
-      if (
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement ||
-        (activeElement as HTMLElement).isContentEditable
-      ) {
-        return;
-      }
+      if (DomHelper.isActiveElementInputOrContentEditableElement()) return;
 
       if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
         panDelta.current = event.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
@@ -171,10 +165,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
    */
   const handleTextDrawingMode = useCallback(
     (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
-      const { activeElement } = document;
-      if (activeElement instanceof HTMLElement && activeElement.isContentEditable) {
-        return;
-      }
+      if (DomHelper.isContentEditableElement(DomHelper.getActiveElement())) return;
 
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -274,14 +265,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
       if (!isCrosshairsActive && (!isActionKey || event.repeat)) return;
 
       // Prevent interactions when typing in input fields
-      const { activeElement } = document;
-      if (
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement ||
-        (activeElement as HTMLElement).isContentEditable
-      ) {
-        return;
-      }
+      if (DomHelper.isActiveElementInputOrContentEditableElement()) return;
 
       // Resolve from the rendered pixel on every interaction; mouse and move-end positions may be stale.
       const pointer = pointerClientPosition.current;
