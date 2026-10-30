@@ -28,6 +28,10 @@ Read only the linked section of each doc: search for its heading and read to the
 - Use `@/ui` components/icons, not direct MUI UI imports. Standard MUI hooks/types are allowed.
 - Components take mapId/ControllerRegistry, never MapViewer.
 - Preserve WCAG notes and intentional interaction exceptions.
+- For repeated-action status messages, check consecutive updates rather than only the first one;
+  follow the [live-region content-change contract](../../docs/app/accessibility.md#aria-live).
+- Measurement point counts exclude OpenLayers' cursor coordinate and polygon closing coordinate.
+  Update the tracked count on decreases too, so adding a point after undo produces feedback.
 
 ## Source navigation and translation workflow
 

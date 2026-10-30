@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createElement, useState, useCallback, useEffect, useMemo } from 'react';
+import { createElement, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -95,6 +95,9 @@ export default function Measurement(): JSX.Element {
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
   const [statusMessage, setStatusMessage] = useState<string>('');
+
+  /** Number of committed points in the current measurement sketch. */
+  const sketchVertexCount = useRef(0);
 
   /**
    * Builds custom sx classes for the measurement component.
@@ -273,16 +276,19 @@ export default function Measurement(): JSX.Element {
 
         uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: true });
 
-        let lastVertexCount =
-          geometry instanceof LineString ? geometry.getCoordinates().length : (geometry.getCoordinates()[0]?.length ?? 0);
-        setStatusMessage(t('measurement.status.vertexAdded'));
+        sketchVertexCount.current = 1;
+        setStatusMessage(t('measurement.status.vertexAdded', { count: sketchVertexCount.current }));
 
         const geometryChangeKey = geometry.on('change', (): void => {
-          const vertexCount =
-            geometry instanceof LineString ? geometry.getCoordinates().length : (geometry.getCoordinates()[0]?.length ?? 0);
-          if (vertexCount > lastVertexCount) {
-            lastVertexCount = vertexCount;
-            setStatusMessage(t('measurement.status.vertexAdded'));
+          // Exclude the cursor coordinate and, for polygons, the closing coordinate.
+          const vertexCount = Math.max(
+            1,
+            geometry instanceof LineString ? geometry.getCoordinates().length - 1 : (geometry.getCoordinates()[0]?.length ?? 0) - 2
+          );
+          const previousVertexCount = sketchVertexCount.current;
+          sketchVertexCount.current = vertexCount;
+          if (vertexCount > previousVertexCount) {
+            setStatusMessage(t('measurement.status.vertexAdded', { count: vertexCount }));
           }
         });
 
@@ -292,6 +298,7 @@ export default function Measurement(): JSX.Element {
 
       // Handle draw end
       draw.onDrawEnd((_sender: unknown, event: OLDrawEvent) => {
+        sketchVertexCount.current = 0;
         uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
         const { feature } = event;
         const geometry = feature.getGeometry();
@@ -328,6 +335,7 @@ export default function Measurement(): JSX.Element {
       });
 
       draw.onDrawAbort((): void => {
+        sketchVertexCount.current = 0;
         uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
         setStatusMessage(t('measurement.status.cancelled'));
       });
@@ -402,7 +410,11 @@ export default function Measurement(): JSX.Element {
       if (isRedoShortcut) {
         setStatusMessage(t('measurement.status.redoUnavailable'));
       } else {
-        setStatusMessage(drawInstance.undo() ? t('measurement.status.vertexUndone') : t('measurement.status.nothingToUndo'));
+        setStatusMessage(
+          drawInstance.undo()
+            ? t('measurement.status.vertexUndone', { count: sketchVertexCount.current })
+            : t('measurement.status.nothingToUndo')
+        );
       }
     };
 

@@ -458,6 +458,7 @@ Avoid duplicate or excessively frequent announcements:
 
 - When focus moves to updated content or a control already announces its changed state/value, an extra live announcement may be unnecessary. A user action can still need a status announcement, such as the number of search results
 - When content updates frequently (e.g. a progress bar advancing during a layer load), announce meaningful milestones or the final outcome rather than every update. Users can also inspect the named progress bar
+- Repeated discrete actions that require feedback must produce a live-region content change. Setting the same React state string again does not create a new announcement; include a meaningful changing result, such as the current vertex count, and verify consecutive actions with a screen reader.
 
 **aria-atomic**
 
