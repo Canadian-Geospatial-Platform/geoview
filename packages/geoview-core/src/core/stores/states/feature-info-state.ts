@@ -22,6 +22,8 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { doUntil } from '@/core/utils/utilities';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

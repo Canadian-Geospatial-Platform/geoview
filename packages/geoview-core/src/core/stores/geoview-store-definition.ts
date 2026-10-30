@@ -16,6 +16,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { serializeTypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 
+// GV Store shouldn't import DomHelper
 // GV Kept apart from geoview-store.ts, which the state slices import: the definition imports every slice initializer
 
 /**

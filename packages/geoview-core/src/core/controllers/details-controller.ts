@@ -11,6 +11,8 @@ import {
   setStoreDetailsSelectedLayerPath,
 } from '@/core/stores/states/feature-info-state';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for details interactions and
  * bridging the details state with the UI domain.

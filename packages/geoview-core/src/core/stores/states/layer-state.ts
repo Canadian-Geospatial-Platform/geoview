@@ -23,6 +23,8 @@ import type {
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayDateTimezone } from './app-state';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

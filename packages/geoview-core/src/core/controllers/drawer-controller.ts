@@ -86,6 +86,8 @@ import type { Snap } from '@/geo/interaction/snap';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
  * bridging the drawer state with the UI domain and map projection changes.

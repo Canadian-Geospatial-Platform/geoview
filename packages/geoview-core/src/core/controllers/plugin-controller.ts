@@ -13,6 +13,8 @@ import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import i18next from 'i18next';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for Plugin interactions.
  */

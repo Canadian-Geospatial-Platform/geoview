@@ -41,6 +41,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * LayerSetController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
  */

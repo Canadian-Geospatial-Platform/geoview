@@ -18,6 +18,8 @@ import type { IUIState } from '@/core/stores/states/ui-state';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { shallowObjectEqual } from '@/core/utils/utilities';
 
+// GV Store shouldn't import DomHelper
+
 export type TypeSetStore = (
   partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>),
   replace?: false | undefined

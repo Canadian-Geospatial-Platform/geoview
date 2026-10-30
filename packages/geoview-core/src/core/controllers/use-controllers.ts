@@ -18,6 +18,8 @@ import type { FilterPanelController } from '@/core/controllers/filter-panel-cont
 import type { StacBrowserController } from '@/core/controllers/stac-browser-controller';
 import { useControllers } from '@/core/controllers/base/controller-manager';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Hook to access the MapController from the controller context.
  *

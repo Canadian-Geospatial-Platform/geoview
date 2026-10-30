@@ -26,6 +26,8 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for time slider interactions, keyboard shortcuts, and
  * bridging the time slider state with the UI domain and map projection changes.
