@@ -38,7 +38,8 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1"
+            "layerId": "1",
+            "hitToleranceOffset": [0, 7]
           }
         ]
       },
