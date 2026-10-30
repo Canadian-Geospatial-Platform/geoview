@@ -1258,7 +1258,8 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+        // GV Current Conditions isn't returning a legend for us anymore, sending acceptNoIconsOrNoData = true now
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
       },
       (test) => {
         // Perform assertions
