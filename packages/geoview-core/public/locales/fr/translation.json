@@ -86,12 +86,45 @@
     "area": "Surface",
     "clear": "Effacer",
     "segmentLabels": "Afficher les étiquettes des segments",
+    "startMouse": "Cliquez pour commencer la mesure.",
+    "startKeyboard": "Appuyez sur Entrée ou Espace pour commencer la mesure.",
     "status": {
-      "started": "Mesure {{type}} démarrée. Cliquez sur la carte pour commencer.",
+      "started": "Mesure {{type}} activée.",
       "stopped": "Mode de mesure désactivé.",
       "cleared": "{{count}} mesure(s) effacée(s) de la carte.",
+      "cancelled": "Mesure annulée. Vous pouvez commencer une autre mesure.",
+      "vertexAdded": "Point de mesure ajouté. Points dans le tracé : {{count}}.",
+      "vertexUndone": "Dernier point de mesure supprimé. Points restants : {{count}}.",
+      "nothingToUndo": "Aucun point de mesure à annuler.",
+      "redoUnavailable": "Il n'est pas possible de rétablir une action pendant une mesure.",
       "completedLine": "Mesure de distance terminée : {{distance}}.",
       "completedArea": "Mesure de surface terminée : {{perimeter}} de périmètre, {{area}} de surface."
+    }
+  },
+  "drawingHint": {
+    "startMouse": "Cliquez pour commencer le dessin.",
+    "startKeyboard": "Appuyez sur Entrée ou Espace pour commencer le dessin.",
+    "mouse": {
+      "point": "Cliquez pour placer un point.",
+      "text": "Cliquez pour placer du texte.",
+      "center": "Cliquez pour définir le centre.",
+      "radius": "Cliquez pour définir la taille et terminer. Appuyez sur Échap pour annuler.",
+      "firstCorner": "Cliquez pour définir le premier coin.",
+      "oppositeCorner": "Cliquez pour définir le coin opposé et terminer. Appuyez sur Échap pour annuler.",
+      "editing": "Cliquez sur une géométrie pour la sélectionner, puis faites glisser la géométrie ou ses poignées pour la modifier. Appuyez sur Échap pour désélectionner.",
+      "line": "Cliquez pour ajouter des points, double-cliquez pour terminer, Échap pour annuler, Ctrl+Z ou Retour arrière pour défaire.",
+      "polygon": "Cliquez pour ajouter des points, double-cliquez pour terminer ou cliquez sur le premier point pour fermer. Appuyez sur Échap pour annuler; Ctrl+Z ou Retour arrière pour défaire."
+    },
+    "keyboard": {
+      "point": "Appuyez sur Entrée ou Espace pour placer un point au pointeur en croix.",
+      "text": "Appuyez sur Entrée ou Espace pour placer du texte au pointeur en croix.",
+      "center": "Appuyez sur Entrée ou Espace pour définir le centre au pointeur en croix.",
+      "radius": "Déplacez le pointeur en croix, puis appuyez sur Entrée ou Espace pour définir la taille et terminer. Appuyez sur Échap pour annuler.",
+      "firstCorner": "Appuyez sur Entrée ou Espace pour définir le premier coin au pointeur en croix.",
+      "oppositeCorner": "Déplacez le pointeur en croix, puis appuyez sur Entrée ou Espace pour définir le coin opposé et terminer. Appuyez sur Échap pour annuler.",
+      "editing": "Appuyez sur Entrée ou Espace sur une géométrie pour la sélectionner, puis sur une poignée pour la saisir. Utilisez les flèches pour déplacer; Entrée ou Espace pour relâcher; Échap pour annuler la saisie ou désélectionner.",
+      "line": "Appuyez sur Entrée ou Espace pour ajouter un point, Maj.+Entrée ou Maj.+Espace pour terminer, Échap pour annuler, et Ctrl+Z ou Retour arrière pour défaire.",
+      "polygon": "Appuyez sur Entrée ou Espace pour ajouter un point, Maj.+Entrée ou Maj.+Espace pour terminer, Échap pour annuler, et Ctrl+Z ou Retour arrière pour défaire."
     }
   },
   "basemaps": {
@@ -103,6 +136,9 @@
     "nogeom": "Aucun"
   },
   "mapctrl": {
+    "keyboardShortcut": {
+      "focused": "La navigation au clavier est activée et la carte est focalisée."
+    },
     "rotation": {
       "rotation": "Rotation de la carte",
       "projection": "Projection",

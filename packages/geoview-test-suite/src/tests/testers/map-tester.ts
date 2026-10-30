@@ -1,5 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { Size } from 'ol/size';
+import { Draw } from 'geoview-core/geo/interaction/draw';
 
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
@@ -12,6 +13,7 @@ import {
   type TypeBasemapId,
   type TypeInteraction,
   type TypeMapState,
+  type TypeMapMouseInfo,
   type TypeValidMapProjectionCodes,
   type TypeViewportBoundaryLonLat,
 } from 'geoview-core/api/types/map-schema-types';
@@ -28,63 +30,22 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreAppDisplayLanguage,
+  getStoreAppIsCrosshairsActive,
   getStoreAppIsFullscreenActive,
   getStoreAppNotifications,
 } from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
   getStoreMapHoverFeatureInfo,
+  getStoreMapPointerPosition,
   getStoreMapStateJson,
+  setStoreMapPointerPosition,
 } from 'geoview-core/core/stores/states/map-state';
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { getGVMapTargetElement, getGVShellElement } from 'geoview-core/core/utils/dom-helper';
+import { getGVMapTargetElement, getGVShellElement, queryGVSelector } from 'geoview-core/core/utils/dom-helper';
 import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
-
-/** Captured boundary samples and independent pixel/coordinate expectations. */
-interface TypeViewportBoundarySnapshot {
-  /** Public viewer result. */
-  boundary: TypeViewportBoundaryLonLat;
-  /** Second snapshot from the same rendered frame. */
-  repeatedBoundary: TypeViewportBoundaryLonLat;
-  /** Samples calculated from view center, resolution, rotation, and padding. */
-  expected: Coordinate[];
-  /** Returned coordinates projected back to viewport pixels. */
-  pixels: (number[] | null)[];
-  /** Expected screen positions. */
-  expectedPixels: number[][];
-  /** Bottom padding at sampling time. */
-  bottomPadding: number;
-  /** Actual map-info bar overlay height (zero for static maps). */
-  infoHeight: number;
-  /** Southern sample calculated at the full canvas bottom. */
-  canvasSouth: Coordinate;
-  /** Indicates independent objects were returned by consecutive calls. */
-  freshObjects: boolean;
-  /** Rendered view rotation in radians. */
-  rotation: number;
-  /** Rendered logical center in longitude/latitude. */
-  center: Coordinate;
-  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
-  extentSouth: Coordinate;
-}
-
-/** Fit outcome captured before assertion so operations stay in the execution phase. */
-interface TypeViewportMidpointFitResult {
-  /** Rendered geometry after fitting. */
-  snapshot: TypeViewportBoundarySnapshot;
-  /** Original coordinates copied before fitting. */
-  original: Coordinate[];
-  /** Caller-owned array after fitting. */
-  input: Coordinate[];
-  /** Original coordinates projected to pixels after fitting. */
-  pixels: (number[] | null)[];
-  /** Original pixel positions before the view was changed. */
-  originalPixels: number[][];
-  /** Source rotation to restore when the projection is unchanged. */
-  rotation: number;
-}
 
 /**
  * Main Map testing class.
@@ -450,6 +411,8 @@ export class MapTester extends GVAbstractTester {
 
   // #endregion PUBLIC METHODS - VIEWPORT BOUNDARY
 
+  // #region PUBLIC METHODS - MAP FUNCTIONS
+
   /**
    * Tests the map state upon initial loading.
    *
@@ -475,6 +438,139 @@ export class MapTester extends GVAbstractTester {
         // Perform assertions
         test.addStep('Verifying expected projection config...');
         Test.assertJsonObject(result, expectedConfig);
+      }
+    );
+  }
+
+  /**
+   * Tests keyboard crosshair coordinates with collapsed/expanded padding, rotation, and stale mouse positions.
+   *
+   * @returns A promise that resolves with the activation and drawing observations
+   */
+  testCrosshairCoordinates(): Promise<Test<TypeCrosshairCoordinateResult[]>> {
+    const viewer = this.getMapViewer();
+    const view = viewer.getView();
+    const { mapController, uiController } = this.getControllersRegistry();
+    const mapId = this.getMapId();
+    const originalPadding = view.padding?.slice();
+    const originalCenter = view.getCenter()?.slice();
+    const originalRotation = view.getRotation();
+    const originalPointer = getStoreMapPointerPosition(mapId);
+    const originalActive = getStoreAppIsCrosshairsActive(mapId);
+    const originalDraw = mapController.getActiveMeasurementDraw();
+    const originalFocus = document.activeElement;
+    const geometryGroupKey = generateId();
+    const draw = new Draw({ mapViewer: viewer, geometryGroupKey, type: 'LineString' }, this.getGeometryApi());
+    const coordinates: Coordinate[] = [];
+    draw.appendCoordinates = (points: Coordinate[]): void => {
+      coordinates.push(...points.map((point) => [...point]));
+    };
+
+    return this.test(
+      'Test crosshair pixel coordinates for Enter/Space with view padding and rotation',
+      async (test): Promise<TypeCrosshairCoordinateResult[]> => {
+        const target = getGVMapTargetElement(mapId);
+        const svg = queryGVSelector<SVGSVGElement>(mapId, 'svg[viewBox="0 0 275 275"]');
+        if (!target || !svg) throw new TestError('Crosshair and map target must be mounted');
+        const results: TypeCrosshairCoordinateResult[] = [];
+        mapController.setActiveMeasurementDraw(draw);
+        target.focus();
+
+        for (const rotation of [0, 0.65]) {
+          // Return to collapsed padding after expansion to catch cached pixel/coordinate transforms.
+          for (const bottom of [0, 35, 100, 35]) {
+            test.addStep(`Testing bottom padding ${bottom}px at rotation ${rotation}...`);
+            uiController.setCrosshairActive(false);
+            // eslint-disable-next-line no-await-in-loop -- Each case must commit crosshair deactivation before reactivation.
+            await delay(50);
+            view.padding = [0, 0, bottom, 0];
+            view.setRotation(rotation);
+            const center = view.getCenter()!;
+            view.setCenter([center[0] + view.getResolution()! * 20, center[1]]);
+            viewer.map.renderSync();
+            const stale = mapController.getMapPositionFromPixel([10, 10]);
+            if (!stale) throw new TestError('Rendered map coordinate transform must be available');
+            setStoreMapPointerPosition(mapId, stale);
+            uiController.setCrosshairActive(true);
+            // eslint-disable-next-line no-await-in-loop -- Observe the activation effect before dispatching this case's keys.
+            await delay(50);
+
+            const size = viewer.map.getSize()!;
+            const mapRect = target.getBoundingClientRect();
+            const artworkBounds = svg.getBBox();
+            const screenTransform = svg.getScreenCTM();
+            if (!screenTransform) throw new TestError('Crosshair screen transform must be available');
+            const artworkCenter = new DOMPoint(
+              artworkBounds.x + artworkBounds.width / 2,
+              artworkBounds.y + artworkBounds.height / 2
+            ).matrixTransform(screenTransform);
+            const pixel = [
+              ((artworkCenter.x - mapRect.left) * size[0]) / mapRect.width,
+              ((artworkCenter.y - mapRect.top) * size[1]) / mapRect.height,
+            ];
+            const pointer = getStoreMapPointerPosition(mapId);
+            const position = mapController.getMapPositionFromPixel(pixel);
+            const expected = viewer.map.getCoordinateFromPixel(pixel);
+            const viewportCenter = [size[0] / 2, size[1] / 2];
+            const expectedCenter = viewer.map.getCoordinateFromPixel(viewportCenter);
+            coordinates.length = 0;
+            const prevented = ['Enter', ' '].map((key): boolean => {
+              // Activation reset alone is insufficient: each key must resolve the current rendered pixel.
+              setStoreMapPointerPosition(mapId, stale);
+              const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+              target.dispatchEvent(event);
+              return event.defaultPrevented;
+            });
+            results.push({
+              pixel,
+              viewportCenter,
+              pointer,
+              expected,
+              expectedCenter,
+              expectedLonLat: Projection.transformToLonLat(expected, viewer.getProjection()),
+              position,
+              drawnPixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(coordinate)),
+              prevented,
+            });
+          }
+        }
+        return results;
+      },
+      (test, results): void => {
+        test.addStep('Verifying rendered alignment, activation reset, and both keyboard drawing coordinates...');
+        Test.assertIsEqual(results.length, 8);
+        for (const result of results) {
+          Test.assertIsDefined('activation pointer', result.pointer);
+          Test.assertIsDefined('converted position', result.position);
+          Test.assertIsEqual(result.position.dragging, false);
+          Test.assertIsEqual(result.drawnPixels.length, 2);
+          Test.assertIsArrayEqual(result.prevented, [true, true]);
+          for (const axis of [0, 1]) {
+            Test.assertIsEqualWithinTolerance(result.pixel[axis], result.viewportCenter[axis], 0.01);
+            Test.assertIsEqualWithinTolerance(result.pointer.pixel[axis], result.pixel[axis], 0.01);
+            // The pointer comes from the viewport center; layout can leave the SVG a fraction of a pixel off, so compare that exact pixel.
+            Test.assertIsEqualWithinTolerance(result.pointer.projected[axis], result.expectedCenter[axis], 0.01);
+            Test.assertIsEqualWithinTolerance(result.position.projected[axis], result.expected[axis], 0.01);
+            Test.assertIsEqualWithinTolerance(result.position.lonlat[axis], result.expectedLonLat[axis], 1e-9);
+            for (const drawnPixel of result.drawnPixels) {
+              Test.assertIsDefined('drawn pixel', drawnPixel);
+              Test.assertIsEqualWithinTolerance(drawnPixel[axis], result.pixel[axis], 0.01);
+            }
+          }
+        }
+      },
+      (): void => {
+        uiController.setCrosshairActive(false);
+        mapController.setActiveMeasurementDraw(originalDraw);
+        draw.stopInteraction();
+        this.getGeometryApi().deleteGeometryGroup(geometryGroupKey);
+        view.padding = originalPadding;
+        view.setRotation(originalRotation);
+        view.setCenter(originalCenter);
+        viewer.map.renderSync();
+        setStoreMapPointerPosition(mapId, originalPointer ?? mapController.getMapCenterPosition());
+        if (originalFocus instanceof HTMLElement) originalFocus.focus();
+        uiController.setCrosshairActive(originalActive);
       }
     );
   }
@@ -1505,6 +1601,8 @@ export class MapTester extends GVAbstractTester {
     );
   }
 
+  // #endregion PUBLIC METHODS - MAP FUNCTIONS
+
   // #region PRIVATE METHODS - VIEWPORT BOUNDARY
 
   /**
@@ -1658,6 +1756,74 @@ export class MapTester extends GVAbstractTester {
   // #endregion STATIC METHODS - VIEWPORT BOUNDARY
 }
 
+// #region TYPES AND INTERFACES
+
+/** Captured boundary samples and independent pixel/coordinate expectations. */
+interface TypeViewportBoundarySnapshot {
+  /** Public viewer result. */
+  boundary: TypeViewportBoundaryLonLat;
+  /** Second snapshot from the same rendered frame. */
+  repeatedBoundary: TypeViewportBoundaryLonLat;
+  /** Samples calculated from view center, resolution, rotation, and padding. */
+  expected: Coordinate[];
+  /** Returned coordinates projected back to viewport pixels. */
+  pixels: (number[] | null)[];
+  /** Expected screen positions. */
+  expectedPixels: number[][];
+  /** Bottom padding at sampling time. */
+  bottomPadding: number;
+  /** Actual map-info bar overlay height (zero for static maps). */
+  infoHeight: number;
+  /** Southern sample calculated at the full canvas bottom. */
+  canvasSouth: Coordinate;
+  /** Indicates independent objects were returned by consecutive calls. */
+  freshObjects: boolean;
+  /** Rendered view rotation in radians. */
+  rotation: number;
+  /** Rendered logical center in longitude/latitude. */
+  center: Coordinate;
+  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
+  extentSouth: Coordinate;
+}
+
+/** Fit outcome captured before assertion so operations stay in the execution phase. */
+interface TypeViewportMidpointFitResult {
+  /** Rendered geometry after fitting. */
+  snapshot: TypeViewportBoundarySnapshot;
+  /** Original coordinates copied before fitting. */
+  original: Coordinate[];
+  /** Caller-owned array after fitting. */
+  input: Coordinate[];
+  /** Original coordinates projected to pixels after fitting. */
+  pixels: (number[] | null)[];
+  /** Original pixel positions before the view was changed. */
+  originalPixels: number[][];
+  /** Source rotation to restore when the projection is unchanged. */
+  rotation: number;
+}
+
+/** Crosshair activation and drawing observations from a rendered view. */
+interface TypeCrosshairCoordinateResult {
+  /** Crosshair SVG center in map pixels. */
+  pixel: Coordinate;
+  /** Full viewport center, independent of view padding. */
+  viewportCenter: Coordinate;
+  /** Pointer position immediately after keyboard activation. */
+  pointer: TypeMapMouseInfo | undefined;
+  /** Coordinate expected under the rendered crosshair. */
+  expected: Coordinate;
+  /** Coordinate at the full viewport center, which the keyboard position must resolve to. */
+  expectedCenter: Coordinate;
+  /** Expected longitude/latitude at that coordinate. */
+  expectedLonLat: Coordinate;
+  /** Position converted by the controller. */
+  position: TypeMapMouseInfo | undefined;
+  /** Coordinates submitted by Enter and Space, converted back to pixels. */
+  drawnPixels: (Coordinate | null)[];
+  /** Whether both keyboard events were handled. */
+  prevented: boolean[];
+}
+
 /** The center, resolution and rotation of a map view. */
 type TypeFullscreenViewState = {
   /** The view center. */
@@ -1711,3 +1877,5 @@ type LayerDetails = {
   /** The number of features found in the alternate layer. */
   secondFeatureCount: number;
 };
+
+// #endregion TYPES AND INTERFACES

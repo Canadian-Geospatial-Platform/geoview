@@ -86,12 +86,45 @@
     "area": "Area",
     "clear": "Clear",
     "segmentLabels": "Show segment labels",
+    "startMouse": "Click to start measuring.",
+    "startKeyboard": "Press Enter or Space to start measuring.",
     "status": {
-      "started": "{{type}} measurement started. Click on the map to begin.",
+      "started": "{{type}} measurement enabled.",
       "stopped": "Measurement mode disabled.",
       "cleared": "{{count}} measurement(s) cleared from map.",
+      "cancelled": "Measurement cancelled. You can start another measurement.",
+      "vertexAdded": "Measurement point added. Points in sketch: {{count}}.",
+      "vertexUndone": "Last measurement point removed. Points remaining: {{count}}.",
+      "nothingToUndo": "There are no measurement points to undo.",
+      "redoUnavailable": "Redo is not available while measuring.",
       "completedLine": "Distance measurement completed: {{distance}}.",
       "completedArea": "Area measurement completed: {{perimeter}} perimeter, {{area}} area."
+    }
+  },
+  "drawingHint": {
+    "startMouse": "Click to start drawing.",
+    "startKeyboard": "Press Enter or Space to start drawing.",
+    "mouse": {
+      "point": "Click to place a point.",
+      "text": "Click to place text.",
+      "center": "Click to set the center.",
+      "radius": "Click to set the size and finish. Press Esc to cancel.",
+      "firstCorner": "Click to set the first corner.",
+      "oppositeCorner": "Click to set the opposite corner and finish. Press Esc to cancel.",
+      "editing": "Click a geometry to select it, then drag it or its handles to edit. Press Esc to deselect.",
+      "line": "Click to add points, double-click to finish, Esc to cancel, Ctrl+Z or Backspace to undo.",
+      "polygon": "Click to add points, double-click to finish, or click the first point to close. Press Esc to cancel; Ctrl+Z or Backspace to undo."
+    },
+    "keyboard": {
+      "point": "Press Enter or Space to place a point at the crosshair.",
+      "text": "Press Enter or Space to place text at the crosshair.",
+      "center": "Press Enter or Space to set the center at the crosshair.",
+      "radius": "Move the crosshair, then press Enter or Space to set the size and finish. Press Esc to cancel.",
+      "firstCorner": "Press Enter or Space to set the first corner at the crosshair.",
+      "oppositeCorner": "Move the crosshair, then press Enter or Space to set the opposite corner and finish. Press Esc to cancel.",
+      "editing": "Press Enter or Space over a geometry to select it, then over a handle to grab it. Use arrows to move; Enter or Space to release; Esc to cancel the grab or deselect.",
+      "line": "Press Enter or Space to add a point, Shift+Enter or Shift+Space to finish, Esc to cancel, and Ctrl+Z or Backspace to undo.",
+      "polygon": "Press Enter or Space to add a point, Shift+Enter or Shift+Space to finish, Esc to cancel, and Ctrl+Z or Backspace to undo."
     }
   },
   "basemaps": {
@@ -103,6 +136,9 @@
     "nogeom": "None"
   },
   "mapctrl": {
+    "keyboardShortcut": {
+      "focused": "Keyboard navigation is active and the map is focused."
+    },
     "rotation": {
       "rotation": "Map rotation",
       "projection": "Projection",

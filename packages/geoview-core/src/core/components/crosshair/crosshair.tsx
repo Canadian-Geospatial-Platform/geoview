@@ -9,7 +9,7 @@ import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
-import { getStoreMapPointerPosition, setStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
+import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
@@ -273,7 +273,9 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         return;
       }
 
-      const currentPointerPosition = getStoreMapPointerPosition(mapId) ?? mapController.getMapCenterPosition();
+      // Resolve from the rendered pixel on every interaction; mouse and move-end positions may be stale.
+      const currentPointerPosition = mapController.getViewportCenterPosition();
+      if (!currentPointerPosition) return;
 
       // Handle Shift+Click logic first
       if (handleShiftClick(event, currentPointerPosition)) {
@@ -287,7 +289,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, mapId, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
+    [isCrosshairsActive, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
 
   // #endregion
@@ -315,12 +317,10 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
     if (isCrosshairsActive) {
       layerSetController.hoverFeatureInfoLayerSet.clearResults();
 
-      // Initialize pointer position to map center so the coordinate display updates immediately
-      if (!getStoreMapPointerPosition(mapId)) {
-        setStoreMapPointerPosition(mapId, mapController.getMapCenterPosition());
-      }
+      // Replace any stale mouse position so the coordinate display updates immediately.
+      mapController.synchronizeCrosshairPointerPosition();
     }
-  }, [isCrosshairsActive, mapId, mapController, layerSetController]);
+  }, [isCrosshairsActive, mapController, layerSetController]);
 
   // Event listeners
   useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);

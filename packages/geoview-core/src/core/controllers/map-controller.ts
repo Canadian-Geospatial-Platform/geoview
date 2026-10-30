@@ -161,6 +161,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import { getStoreDrawerIsDrawing, getStoreDrawerIsEditing } from '@/core/stores/states/drawer-state';
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 
 /**
@@ -226,6 +227,9 @@ export class MapController extends AbstractMapViewerController {
 
   /** The active measurement Draw interaction, if any. */
   #activeMeasurementDraw?: Draw;
+
+  /** Subscribers notified when measurement is stopped by another interaction. */
+  #onMeasurementStoppedHandlers: MeasurementStoppedDelegate[] = [];
 
   /**
    * Creates an instance of MapController.
@@ -857,10 +861,48 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Gets map position information at a rendered viewport pixel, accounting for view padding and rotation.
+   *
+   * @param pixel - The pixel relative to the map viewport
+   * @returns The position information, or undefined before a coordinate transform is available
+   */
+  getMapPositionFromPixel(pixel: Pixel): TypeMapMouseInfo | undefined {
+    const mapViewer = this.getMapViewer();
+    const projected = mapViewer.map?.getCoordinateFromPixel(pixel) ?? undefined;
+    if (!projected) return undefined;
+
+    return {
+      projected,
+      pixel: [...pixel],
+      lonlat: Projection.transformToLonLat(projected, mapViewer.getProjection()),
+      dragging: false,
+    };
+  }
+
+  /**
+   * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
+   *
+   * @returns The position, or undefined before the viewport has a size
+   */
+  getViewportCenterPosition(): TypeMapMouseInfo | undefined {
+    const size = this.getMapSize();
+    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
+    return this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+  }
+
+  /**
+   * Synchronizes the pointer store with the center of the rendered crosshair viewport.
+   */
+  synchronizeCrosshairPointerPosition(): void {
+    const position = this.getViewportCenterPosition();
+    if (position) setStoreMapPointerPosition(this.getMapId(), position);
+  }
+
+  /**
    * Gets the current map center as a TypeMapMouseInfo object.
    *
-   * Useful as a fallback when the pointer position store has not been set yet
-   * (e.g., when the crosshair is first activated and the user hasn't panned).
+   * This is the logical view center, which can differ from the viewport midpoint when padding is set.
+   * Use getMapPositionFromPixel for interactions anchored to a rendered pixel.
    *
    * @returns The map center position info
    */
@@ -1544,6 +1586,9 @@ export class MapController extends AbstractMapViewerController {
     const viewer = this.getMapViewer();
 
     if (draw) {
+      const { drawerController } = this.getControllersRegistry();
+      if (drawerController && getStoreDrawerIsDrawing(this.getMapId())) drawerController.stopDrawing();
+      if (drawerController && getStoreDrawerIsEditing(this.getMapId())) drawerController.stopEditing();
       // Suppress hover and details while measuring
       viewer.unregisterMapPointerHandlers(viewer.map);
       this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
@@ -1554,6 +1599,26 @@ export class MapController extends AbstractMapViewerController {
     }
 
     this.#activeMeasurementDraw = draw;
+  }
+
+  /**
+   * Stops measurement before another drawing or editing interaction takes ownership.
+   */
+  stopActiveMeasurement(): void {
+    if (!this.#activeMeasurementDraw) return;
+    this.#activeMeasurementDraw.stopInteraction();
+    this.setActiveMeasurementDraw(undefined);
+    this.getControllersRegistry().uiController.setDrawingHint(undefined);
+    EventHelper.emitEvent(this, this.#onMeasurementStoppedHandlers, undefined);
+  }
+
+  /**
+   * Removes the last point from the active measurement sketch.
+   *
+   * @returns Whether a point was removed
+   */
+  undoActiveMeasurement(): boolean {
+    return this.#activeMeasurementDraw?.undo() ?? false;
   }
 
   /**
@@ -2229,6 +2294,25 @@ export class MapController extends AbstractMapViewerController {
   // #region EVENTS
 
   /**
+   * Registers a measurement-stopped callback.
+   *
+   * @param callback - The callback to register
+   * @returns The registered callback
+   */
+  onMeasurementStopped(callback: MeasurementStoppedDelegate): MeasurementStoppedDelegate {
+    return EventHelper.onEvent(this.#onMeasurementStoppedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a measurement-stopped callback.
+   *
+   * @param callback - The callback to remove
+   */
+  offMeasurementStopped(callback: MeasurementStoppedDelegate): void {
+    EventHelper.offEvent(this.#onMeasurementStoppedHandlers, callback);
+  }
+
+  /**
    * Emits a geolocator search event to all handlers.
    *
    * @param event - The geolocator search event payload
@@ -2338,3 +2422,6 @@ export interface FeatureHighlightedEvent {
  * Delegate for the feature highlighted event handler function signature.
  */
 export type FeatureHighlightedDelegate = EventDelegateBase<MapController, FeatureHighlightedEvent, void>;
+
+/** Notifies subscribers that measurement has stopped. */
+export type MeasurementStoppedDelegate = EventDelegateBase<MapController, undefined, void>;

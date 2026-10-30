@@ -52,7 +52,7 @@ Selon la configuration de la visionneuse, le coin inférieur droit de la carte c
 | <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="Une icône représentant la fonction « Rotation de la carte »" />               | Rotation de la carte     | Permet de contrôler la rotation de la carte avec un curseur de -180° à +180°. Le panneau comprend un bouton à bascule **Nord fixe** (disponible pour la projection LCC) pour garder la carte orientée le nord au haut, et un bouton de réinitialisation pour revenir à l'orientation initiale. |
 | <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="Une icône représentant la fonction « Géolocalisation »" />            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                                                                                                                                                      |
 | <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="Une icône représentant la fonction « Vue initiale »" />                      | Zoom à la vue initiale   | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="Une icône représentant la fonction « Mesurer »" />                        | Mesurer                  | Permet de mesurer des distances et des surfaces sur la carte. Basculez entre les modes distance (ligne) et surface (polygone). Prend en charge la navigation au clavier — consultez la section Navigation avec le clavier pour plus de détails.                                                |
+| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="Une icône représentant la fonction « Mesurer »" />                        | Mesurer                  | Permet de mesurer des distances et des surfaces sur la carte. Basculez entre les modes distance (ligne) et surface (polygone). Consultez [Mesurer](#mesurer) pour les instructions à la souris et au clavier.                                |
 | <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="Une icône représentant la fonction « Changer la carte de base »" /> | Changer la carte de base | Permet de changer la carte de base.                                                                                                                                                                                                                                                            |
 | <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="Une icône représentant la fonction « Changer la projection »" />       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                                                                                                                                                         |
 
@@ -92,16 +92,26 @@ Utilisez les touches **fléchées** pour déplacer la carte et les touches **+**
 
 Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
 
-### Mesure avec le clavier
+## Mesurer
 
-Lorsque l'outil **Mesurer** est actif et que la navigation au clavier est activée, vous pouvez tracer des géométries de mesure entièrement au clavier :
+#### Avec une souris
 
-- Appuyez sur **Entrée** ou la **barre d'espace** pour placer un sommet à la position du pointeur en croix
-- Appuyez sur **Maj.+Entrée** ou **Maj.+barre d'espace** pour terminer la géométrie et compléter la mesure
-- Utilisez les touches **fléchées** pour déplacer le pointeur en croix entre les sommets
+1. Ouvrez **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
+2. Cliquez sur la carte pour commencer, puis cliquez pour ajouter des points.
+3. Double-cliquez pour terminer une ligne ou un polygone. Pour fermer un polygone, vous pouvez aussi cliquer sur son premier point.
+4. Appuyez sur **Échap** pour annuler le tracé en cours. L'outil reste activé et vous pouvez recommencer.
+5. Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point. Utilisez **Effacer** dans le panneau Mesurer pour supprimer les mesures terminées.
 
-Le résultat de la mesure (distance ou surface) est annoncé aux lecteurs d'écran une fois la mesure terminée.
-Appuyez sur **Ctrl** et **Q** pour quitter la navigation avec le clavier.
+#### Avec le pointeur en croix
+
+La mesure au clavier nécessite la navigation au clavier : appuyez sur **Tabulation** pour focaliser la carte, sélectionnez **Activer** et vérifiez que le pointeur en croix est visible. Ouvrez ensuite **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
+
+- Appuyez sur **Entrée** ou **Espace** pour commencer et ajouter un point à la position du pointeur en croix.
+- Appuyez sur **Maj.+Entrée** ou **Maj.+Espace** pour terminer la mesure.
+- Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point; appuyez sur **Échap** pour annuler le tracé. Appuyez de nouveau sur **Échap**, lorsqu'il n'y a plus rien à annuler, pour ramener le focus sur le bouton **Mesurer**.
+- Utilisez les touches **fléchées** pour déplacer la carte. **Ctrl+M** focalise la carte et ferme le panneau de navigation ouvert sans désactiver l'outil Mesurer.
+
+Le résultat de la mesure et les actions de tracé sont annoncés aux lecteurs d'écran. En plein écran, **Échap** annule le tracé en cours et quitte également le plein écran, car le navigateur réserve cette touche.
 
 _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonctionnent. La carte est focalisée lorsque le pointeur en croix s’affiche._
 
@@ -147,12 +157,16 @@ Lorsque le module drawer est activé, les outils de dessin et d'édition de géo
 
 Activez le mode dessin en cliquant sur le bouton **Dessiner** dans la barre de navigation ou en appuyant sur **Alt+D**. Sélectionnez un type de géométrie, puis :
 
+Une indication sur la carte explique les étapes à la souris ou au pointeur en croix pour chaque géométrie, y compris la deuxième coordonnée des cercles, rectangles et étoiles.
+
 - **Souris** : Cliquez sur la carte pour placer des sommets. Double-cliquez pour terminer les géométries multi-sommets (lignes, polygones).
 - **Pointeur en croix** (navigation au clavier) : Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur en croix. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer la géométrie.
 
 ## Mode édition
 
 Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant sur **Alt+E**. En mode édition :
+
+Une indication sur la carte explique comment sélectionner une géométrie et utiliser ses poignées de modification.
 
 - **Sélectionnez une géométrie** en cliquant dessus (souris) ou en positionnant le pointeur en croix dessus et en appuyant sur **Entrée** ou **Barre d'espace**
 - **Déplacez les sommets** en faisant glisser les poignées (souris) ou en utilisant les touches fléchées avec une poignée saisie (pointeur en croix)
@@ -198,6 +212,8 @@ Lorsque la navigation au clavier est activée (pointeur en croix actif), les out
 - **Cercle, Rectangle, Étoile** : Appuyez sur **Entrée**/**Barre d'espace** pour définir la première coordonnée (centre ou coin). Un marqueur apparaît. Appuyez à nouveau sur **Entrée**/**Barre d'espace** pour définir la deuxième coordonnée, complétant automatiquement la géométrie.
 - **Point, Texte** : Appuyez une fois sur **Entrée**/**Barre d'espace** pour placer l'élément.
 - **Éléments textuels** : Par défaut horizontaux lors de la création au clavier.
+
+Appuyez sur **Échap** pour annuler un tracé ou une première coordonnée en attente. Appuyez de nouveau sur **Échap**, lorsqu'il n'y a plus rien à annuler, pour ramener le focus sur le bouton **Basculer le dessin**.
 
 ### Éditer avec le pointeur en croix
 

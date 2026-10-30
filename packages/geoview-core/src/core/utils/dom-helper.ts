@@ -11,6 +11,10 @@ export const GV_DOM_SUFFIX = {
   shell: 'shell',
   /** The OpenLayers map target element (the canvas container). */
   mapTarget: 'mapTargetElement',
+  /** The navbar button that opens the measurement panel; focus returns to it when keyboard measuring ends. */
+  measureButton: 'button-measurement',
+  /** The drawer navbar button that toggles drawing; focus returns to it when keyboard drawing ends. */
+  drawerDrawButton: 'drawer-draw',
 } as const;
 
 /** CSS class marking the guide's scrollable content container. */

@@ -467,6 +467,8 @@ export class DetailsTester extends GVAbstractTester {
   // #endregion
 }
 
+// #region TYPES AND INTERFACES
+
 /** Result type for the testClearAllHighlights test execution. */
 export type TestDetailsHighlights = {
   /** The click marker state after the first map click (before any cleanup). */
@@ -484,3 +486,5 @@ export type TestDetailsHighlights = {
   /** The highlighted features after the details panel is reopened. */
   highlighted3After: TypeFeatureInfoEntry[];
 };
+
+// #endregion TYPES AND INTERFACES

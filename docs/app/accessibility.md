@@ -17,9 +17,18 @@ about/notification controls and attribution/scale.
 With focus inside a dynamic viewer, Ctrl+M (or Cmd+M on macOS) focuses the map element
 and **activates**, not toggles, the crosshair. Ctrl+Q exits keyboard navigation mode and
 deactivates the crosshair. Tabbing to another control within the viewer also deactivates it.
+Ctrl+M closes open navigation, About/Version, and Notifications popovers before transferring focus, so Enter acts on the map
+rather than reopening the previous panel.
 Escape is not a general crosshair-exit shortcut; drawer editing can use it to cancel a grabbed transform.
+While measuring or drawing with the crosshair, Escape cancels an in-progress sketch or pending coordinate; pressing it again with nothing left to cancel returns focus to the tool's navbar button (Measure or Toggle Drawing).
+This applies only when the map itself has focus, and not in fullscreen, where Escape exits fullscreen.
 Arrow keys pan by 128px by default. Shift+ArrowUp increases the step by 10px;
 Shift+ArrowDown decreases it by 10px (minimum 10px).
+
+Enter/Space map actions (including drawing) use the coordinate under the visible crosshair at
+the full map viewport center, not the logical view center shifted by map-info-bar padding.
+This remains true after panning, rotating, or expanding/collapsing the map info bar.
+Activating the keyboard crosshair replaces any stale mouse pointer position.
 
 On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. This mode enables a focus trap within the viewer; focusing the map activates crosshair-based interaction.
 
@@ -451,6 +460,7 @@ Avoid duplicate or excessively frequent announcements:
 
 - When focus moves to updated content or a control already announces its changed state/value, an extra live announcement may be unnecessary. A user action can still need a status announcement, such as the number of search results
 - When content updates frequently (e.g. a progress bar advancing during a layer load), announce meaningful milestones or the final outcome rather than every update. Users can also inspect the named progress bar
+- Repeated discrete actions that require feedback must produce a live-region content change. Setting the same React state string again does not create a new announcement; include a meaningful changing result, such as the current vertex count, and verify consecutive actions with a screen reader.
 
 **aria-atomic**
 

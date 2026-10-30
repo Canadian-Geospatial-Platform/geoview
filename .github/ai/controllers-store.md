@@ -21,6 +21,13 @@ Read only the linked section of each doc: search for its heading and read to the
 
 ## Enforcement reminders
 
+- Drawer drawing/editing stops measurement synchronously through `MapController.stopActiveMeasurement()`;
+  registering measurement stops drawer drawing/editing. The measurement-stopped delegate updates
+  React controls without deferring interaction teardown to an effect.
+- Drawer drawing restarts must call `stopDrawing(false)` to avoid restoring Details pointer
+  handlers mid-transition. Both drawing and editing entry explicitly suppress pointer handlers,
+  including transitions from another tool; ordinary tool exit restores them.
+
 - Components read hooks/getters and call controllers; setters are controller-only.
 - Add a dedicated missing getter and move the matched pair out of OTHERS; never read a JSON snapshot as a workaround.
 - Subscribe/unsubscribe symmetrically; EventHelper callbacks use `(sender, event)`, even when unused.

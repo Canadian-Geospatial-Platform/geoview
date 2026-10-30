@@ -28,6 +28,10 @@ Read only the linked section of each doc: search for its heading and read to the
 - Use `@/ui` components/icons, not direct MUI UI imports. Standard MUI hooks/types are allowed.
 - Components take mapId/ControllerRegistry, never MapViewer.
 - Preserve WCAG notes and intentional interaction exceptions.
+- For repeated-action status messages, check consecutive updates rather than only the first one;
+  follow the [live-region content-change contract](../../docs/app/accessibility.md#aria-live).
+- Measurement point counts exclude OpenLayers' cursor coordinate and polygon closing coordinate.
+  Update the tracked count on decreases too, so adding a point after undo produces feedback.
 
 ## Source navigation and translation workflow
 
@@ -73,6 +77,20 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   is the OpenLayers canvas container. [Map](../../packages/geoview-core/src/core/components/map/map.tsx)
   assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
   focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
+  Flush map-control popover closure (navbar, About/Version, Notifications) before focusing the map
+  so MUI focus restoration cannot reclaim focus; clear the registered focus item without restoring caller focus.
+  Derive panel openness from the close-request version during render; closing through a passive
+  effect schedules a second render whose focus-trap cleanup can run after map focus. New map-control
+  popovers use the `useMapPopover` hook, which owns that derivation, rather than re-implementing it.
+  Keep the animated Popper wrapper at module scope: creating it during render remounts its focus trap.
+  Crosshair coordinate checks must measure the SVG artwork center, not just its element box;
+  off-center artwork can leave a visible offset even when viewport coordinates are correct.
+  Compare tolerances in the unit being measured: layout snaps to 1/64 px, which is meters at low zoom,
+  so assert the keyboard position against the viewport-center coordinate, not the SVG's pixel.
+  Escape with nothing left to cancel returns focus to the tool button (`UIController.focusToolButton`, ids from
+  `GV_DOM_SUFFIX`) only while the map has focus and outside fullscreen. Decide "nothing left" from state read
+  before the Draw interaction aborts its sketch: measurement uses a capture-phase listener, and the drawer's
+  handler is registered in `onHook`, ahead of any Draw instance. Reordering either makes one Escape do both.
 - [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
   on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
@@ -80,6 +98,8 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,
   Ctrl+Q exit, and the shell mousemove listener. Check `movementX`/`movementY`: zero movement must not
   exit keyboard mode during resize/fullscreen transitions. Keep listener cleanup paired with exit.
+  Fullscreen exit restores map focus for active crosshair drawing/measurement on the next animation
+  frame, after browser focus restoration. Cancel pending restoration on controller unhook or fullscreen re-entry.
 - [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
   coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)

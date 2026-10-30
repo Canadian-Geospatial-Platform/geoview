@@ -52,7 +52,7 @@ Depending on the viewer configuration, the map's bottom right corner contains th
 | <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="An icon representing the Map Rotation function" />             | Map Rotation           | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
 | <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="An icon representing the Geolocation function" />      | Geolocation            | Zoom and pan to your current geographical location.                                                                                                                                                                                       |
 | <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="An icon representing the Initial extent function" />          | Zoom to initial extent | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="An icon representing the Measure function" />              | Measure                | Measure distances and areas on the map. Toggle between distance (line) and area (polygon) modes. Supports keyboard navigation — see the Keyboard Navigation section for details.                                                          |
+| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="An icon representing the Measure function" />              | Measure                | Measure distances and areas on the map. Toggle between distance (line) and area (polygon) modes. See [Measure](#measure) for mouse and keyboard instructions.                                                                            |
 | <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="An icon representing the Change Basemap function" /> | Change Basemap         | Change the basemap.                                                                                                                                                                                                                       |
 | <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="An icon representing the Change Projection function" /> | Change Projection      | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                   |
 
@@ -92,17 +92,26 @@ Use the **arrow** keys to move the map and **+** / **-** keys or **Ctrl+Up** / *
 
 Information will be shown for supported features when the crosshair is positioned over them.
 
-### Measurement with Keyboard
+## Measure
 
-When the **Measure** tool is active and keyboard navigation is enabled, you can draw measurement geometries entirely from the keyboard:
+#### With a mouse
 
-- Press **Enter** or **Spacebar** to place a vertex at the crosshair position
-- Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry and complete the measurement
-- Use the **arrow** keys to move the crosshair between vertices
+1. Open **Measure**, enable the tool, and choose **Distance** or **Area**.
+2. Click the map to start, then click to add points.
+3. Double-click to finish a line or polygon. To close a polygon, you can also click its first point.
+4. Press **Esc** to cancel the sketch in progress. The tool stays enabled so you can start again.
+5. While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point. Use **Clear** in the Measure panel to remove completed measurements.
 
-The measurement result (distance or area) is announced to screen readers upon completion.
+#### With the crosshair
 
-Press **CTRL** and **Q** to exit keyboard navigation.
+Keyboard measuring requires keyboard navigation: press **Tab** to focus the map, select **Enable**, and make sure the crosshair is visible. Then open **Measure**, enable the tool, and choose **Distance** or **Area**.
+
+- Press **Enter** or **Spacebar** to start and add a point at the crosshair.
+- Press **Shift+Enter** or **Shift+Spacebar** to finish the measurement.
+- While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point; press **Esc** to cancel the sketch. Press **Esc** again, with nothing left to cancel, to return focus to the **Measure** button.
+- Use the **arrow** keys to pan the map. **Ctrl+M** focuses the map and closes an open navigation panel without disabling Measure.
+
+The measurement result and drawing actions are announced to screen readers. In fullscreen, **Esc** cancels the current sketch and also exits fullscreen because the browser reserves that key.
 
 _Note: The map must be focused for key binding to work. The map has focus when the crosshairs marker is present._
 
@@ -148,12 +157,16 @@ When the drawer package is enabled, drawing and geometry editing tools become av
 
 Activate drawing mode by clicking the **Draw** button in the navigation bar or pressing **Alt+D**. Select a geometry type, then:
 
+An on-map hint explains the mouse or crosshair steps for every geometry, including the second coordinate for circles, rectangles, and stars.
+
 - **Mouse**: Click on the map to place vertices. Double-click to finish multi-vertex geometries (lines, polygons).
 - **Crosshair** (keyboard navigation): Press **Enter** or **Spacebar** to place a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
 
 ## Editing Mode
 
 Activate editing mode by clicking the **Edit** button or pressing **Alt+E**. In editing mode:
+
+An on-map hint explains how to select a geometry and use its editing handles.
 
 - **Select a geometry** by clicking on it (mouse) or positioning the crosshair over it and pressing **Enter** or **Spacebar**
 - **Move vertices** by dragging handles (mouse) or using arrow keys with a grabbed handle (crosshair)
@@ -199,6 +212,8 @@ When keyboard navigation is enabled (crosshair active), the drawing tools provid
 - **Circle, Rectangle, Star**: Press **Enter**/**Spacebar** to set the first coordinate (center or corner). A marker appears. Press **Enter**/**Spacebar** again to set the second coordinate, completing the geometry automatically.
 - **Point, Text**: Press **Enter**/**Spacebar** once to place the feature.
 - **Text features**: Default to horizontal orientation when created via keyboard.
+
+Press **Esc** to cancel a sketch or a pending first coordinate. Press **Esc** again, with nothing left to cancel, to return focus to the **Toggle Drawing** button.
 
 ### Editing with Crosshairs
 

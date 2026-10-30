@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
@@ -17,6 +17,7 @@ import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
@@ -72,8 +73,7 @@ export default function Version(): JSX.Element {
   const mapElem = useStoreAppShellContainer();
 
   // State
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const { open, anchorEl, openAt, close } = useMapPopover();
 
   // #region Handlers
 
@@ -82,8 +82,12 @@ export default function Version(): JSX.Element {
    */
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
-      setAnchorEl(event.currentTarget);
-      setOpen((prev) => !prev);
+      if (open) {
+        close();
+        uiController.disableFocusTrap();
+        return;
+      }
+      openAt(event.currentTarget);
 
       // Register focus trap with button as the return target
       uiController.enableFocusTrap({
@@ -91,7 +95,7 @@ export default function Version(): JSX.Element {
         callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`,
       });
     },
-    [mapId, uiController]
+    [mapId, uiController, open, openAt, close]
   );
 
   /**
@@ -99,11 +103,11 @@ export default function Version(): JSX.Element {
    */
   const handleClickAway = useCallback((): void => {
     if (open) {
-      setOpen(false);
+      close();
       // Restore focus to the button that opened the panel
       uiController.disableFocusTrap();
     }
-  }, [open, uiController]);
+  }, [open, close, uiController]);
 
   // #endregion
 

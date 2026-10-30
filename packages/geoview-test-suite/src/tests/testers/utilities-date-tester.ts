@@ -1203,6 +1203,8 @@ export class UtilitiesDateTester extends GVAbstractTester {
   // #endregion STATIC METHODS PRIVATE
 }
 
+// #region TYPES AND INTERFACES
+
 /**
  * Holds a set of formatted date results.
  */
@@ -1226,3 +1228,5 @@ type DatesSet = {
   /** Formatted in Toronto, instant mode, input from Toronto. */
   dateTorontoInstantToronto: string;
 };
+
+// #endregion TYPES AND INTERFACES

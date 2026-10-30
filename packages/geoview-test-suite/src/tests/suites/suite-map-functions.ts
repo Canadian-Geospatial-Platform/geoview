@@ -60,7 +60,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 17;
+    return 18;
   }
 
   /**
@@ -85,6 +85,10 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
 
     // Wait until this test finishes before starting manipulating the map
     await pmapState;
+
+    // Crosshair checks mutate padding, rotation, and pointer state; keep them sequential.
+    const pCrosshairCoordinates = this.#mapTester.testCrosshairCoordinates();
+    await pCrosshairCoordinates;
 
     // Test the zoom
     const pZoom = this.#mapTester.testMapZoom(7);
@@ -187,6 +191,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     // Resolve when all
     return Promise.all([
       pmapState,
+      pCrosshairCoordinates,
       pZoom,
       pProjection,
       pZoomToExtent,
