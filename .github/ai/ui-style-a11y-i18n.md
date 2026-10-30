@@ -80,10 +80,17 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   Flush map-control popover closure (navbar, About/Version, Notifications) before focusing the map
   so MUI focus restoration cannot reclaim focus; clear the registered focus item without restoring caller focus.
   Derive panel openness from the close-request version during render; closing through a passive
-  effect schedules a second render whose focus-trap cleanup can run after map focus.
+  effect schedules a second render whose focus-trap cleanup can run after map focus. New map-control
+  popovers use the `useMapPopover` hook, which owns that derivation, rather than re-implementing it.
   Keep the animated Popper wrapper at module scope: creating it during render remounts its focus trap.
   Crosshair coordinate checks must measure the SVG artwork center, not just its element box;
   off-center artwork can leave a visible offset even when viewport coordinates are correct.
+  Compare tolerances in the unit being measured: layout snaps to 1/64 px, which is meters at low zoom,
+  so assert the keyboard position against the viewport-center coordinate, not the SVG's pixel.
+  Escape with nothing left to cancel returns focus to the tool button (`UIController.focusToolButton`, ids from
+  `GV_DOM_SUFFIX`) only while the map has focus and outside fullscreen. Decide "nothing left" from state read
+  before the Draw interaction aborts its sketch: measurement uses a capture-phase listener, and the drawer's
+  handler is registered in `onHook`, ahead of any Draw instance. Reordering either makes one Escape do both.
 - [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
   on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch

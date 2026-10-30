@@ -26,8 +26,8 @@ import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { formatLength, formatArea } from '@/core/utils/utilities';
-import type { Draw } from '@/geo/interaction/draw';
+import { formatLength, formatArea, isEditableElement } from '@/core/utils/utilities';
+import { buildGVElementId, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
@@ -92,7 +92,6 @@ export default function Measurement(): JSX.Element {
 
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
-  const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
   const [statusMessage, setStatusMessage] = useState<string>('');
@@ -280,7 +279,10 @@ export default function Measurement(): JSX.Element {
       });
 
       mapController.setActiveMeasurementDraw(draw);
-      uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
+
+      /** Updates the on-map hint for this measurement type. */
+      const setHint = (started: boolean): void => uiController.setDrawingHint({ tool: 'measurement', geometry: geomType, started });
+      setHint(false);
 
       // Announce added vertices without repeating announcements for pointer movement.
       draw.onDrawStart((_sender: unknown, event: OLDrawEvent): void => {
@@ -288,7 +290,7 @@ export default function Measurement(): JSX.Element {
         const geometry = event.feature.getGeometry();
         if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
 
-        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: true });
+        setHint(true);
 
         sketchVertexCount.current = 1;
         setStatusMessage(t('measurement.status.vertexAdded', { count: sketchVertexCount.current }));
@@ -310,7 +312,7 @@ export default function Measurement(): JSX.Element {
       // Handle draw end
       draw.onDrawEnd((_sender: unknown, event: OLDrawEvent): void => {
         clearSketchListener();
-        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
+        setHint(false);
         const { feature } = event;
         const geometry = feature.getGeometry();
 
@@ -347,11 +349,10 @@ export default function Measurement(): JSX.Element {
 
       draw.onDrawAbort((): void => {
         clearSketchListener();
-        uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
+        setHint(false);
         setStatusMessage(t('measurement.status.cancelled'));
       });
 
-      setDrawInstance(draw);
       setActiveMeasurement(type);
 
       // Announce measurement mode started
@@ -362,30 +363,12 @@ export default function Measurement(): JSX.Element {
   );
 
   /**
-   * Stops the current measurement.
-   */
-  const stopMeasurement = useCallback((): void => {
-    clearSketchListener();
-    mapController.stopActiveMeasurement();
-    setDrawInstance(null);
-    setActiveMeasurement(null);
-    uiController.setDrawingHint(undefined);
-
-    // Unregister the draw instance for keyboard accessibility
-    mapController.setActiveMeasurementDraw(undefined);
-
-    // Announce measurement stopped
-    setStatusMessage(t('measurement.status.stopped'));
-  }, [clearSketchListener, mapController, uiController, t]);
-
-  /**
-   * Synchronizes the measurement controls when drawer drawing or editing takes over.
+   * Synchronizes the measurement controls when measurement stops, including when drawer drawing or editing takes over.
    */
   useEffect(() => {
     logger.logTraceUseEffect('MEASUREMENT - measurement stopped subscription');
     const handler = mapController.onMeasurementStopped((_sender, _event): void => {
       clearSketchListener();
-      setDrawInstance(null);
       setActiveMeasurement(null);
       setStatusMessage(t('measurement.status.stopped'));
     });
@@ -393,24 +376,21 @@ export default function Measurement(): JSX.Element {
   }, [clearSketchListener, mapController, t]);
 
   /**
-   * Registers measurement undo shortcuts without intercepting editable controls.
+   * Registers measurement keyboard shortcuts: undo/redo, and Escape returning focus to the Measure button.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('MEASUREMENT - undo keyboard shortcuts', activeMeasurement, drawInstance);
+    logger.logTraceUseEffect('MEASUREMENT - keyboard shortcuts', activeMeasurement);
 
-    if (!activeMeasurement || !drawInstance) return undefined;
+    if (!activeMeasurement) return undefined;
 
-    const handleUndoShortcut = (event: KeyboardEvent): void => {
+    const handleShortcut = (event: KeyboardEvent): void => {
       const { activeElement } = document;
       const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
-      if (!activeElement || !geoViewElement?.contains(activeElement)) return;
-      if (
-        (activeElement instanceof HTMLInputElement &&
-          ['text', 'search', 'url', 'email', 'tel', 'password', 'number'].includes(activeElement.type)) ||
-        activeElement instanceof HTMLTextAreaElement ||
-        activeElement instanceof HTMLSelectElement ||
-        (activeElement instanceof HTMLElement && activeElement.isContentEditable)
-      ) {
+      if (!activeElement || !geoViewElement?.contains(activeElement) || isEditableElement(activeElement)) return;
+
+      // Capture phase: this sees the sketch before the Draw interaction cancels it, so one Escape never does both.
+      if (event.key === 'Escape') {
+        if (sketchVertexCount.current === 0) uiController.focusToolButton(GV_DOM_SUFFIX.measureButton);
         return;
       }
 
@@ -434,11 +414,11 @@ export default function Measurement(): JSX.Element {
       }
     };
 
-    document.addEventListener('keydown', handleUndoShortcut, true);
+    document.addEventListener('keydown', handleShortcut, true);
     return (): void => {
-      document.removeEventListener('keydown', handleUndoShortcut, true);
+      document.removeEventListener('keydown', handleShortcut, true);
     };
-  }, [activeMeasurement, drawInstance, mapController, mapId, t]);
+  }, [activeMeasurement, mapController, uiController, mapId, t]);
 
   /**
    * Clears all measurements.
@@ -453,13 +433,13 @@ export default function Measurement(): JSX.Element {
     mapController.deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
 
     // Stop current drawing
-    stopMeasurement();
+    mapController.stopActiveMeasurement();
 
     // Announce cleared with count
     if (featureCount > 0) {
       setStatusMessage(t('measurement.status.cleared', { count: featureCount }));
     }
-  }, [stopMeasurement, mapController, measurementFeatures.length, t]);
+  }, [mapController, measurementFeatures.length, t]);
 
   /**
    * Handles the measurement enable/disable toggle switch.
@@ -470,10 +450,10 @@ export default function Measurement(): JSX.Element {
         // Default to line when enabling
         startMeasurement('line');
       } else {
-        stopMeasurement();
+        mapController.stopActiveMeasurement();
       }
     },
-    [startMeasurement, stopMeasurement]
+    [startMeasurement, mapController]
   );
 
   /**
@@ -603,6 +583,7 @@ export default function Measurement(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
+    id: buildGVElementId(mapId, GV_DOM_SUFFIX.measureButton),
     'aria-label': 'mapnav.measurement',
     children: createElement(StraightenIcon),
     tooltipPlacement: 'left',

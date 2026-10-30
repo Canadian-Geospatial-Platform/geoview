@@ -62,10 +62,11 @@ import {
   setStoreDrawerShortcutsEnabled,
   type DrawGeometryType,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive, type TypeDrawingHintGeometry } from '@/core/stores/states/app-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
-import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
+import { formatArea, formatLength, generateId, isEditableElement } from '@/core/utils/utilities';
+import { GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
@@ -1921,16 +1922,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @param started - Whether the first coordinate has been placed
    */
   #updateDrawingHint(geometry: DrawGeometryType, started: boolean): void {
-    const hintGeometries: Record<DrawGeometryType, TypeDrawingHintGeometry> = {
-      Point: 'point',
-      Text: 'text',
-      LineString: 'line',
-      Polygon: 'polygon',
-      Circle: 'circle',
-      Rectangle: 'rectangle',
-      Star: 'star',
-    };
-    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'drawing', geometry: hintGeometries[geometry], started });
+    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'drawing', geometry, started });
   }
 
   /**
@@ -2669,7 +2661,7 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Handles Escape for pending coordinates and editing selections.
+   * Handles Escape for pending coordinates, editing selections, and returning focus once keyboard drawing has nothing left to cancel.
    *
    * @param event - The keyboard event to consume when an operation is cancelled
    */
@@ -2699,6 +2691,12 @@ export class DrawerController extends AbstractMapViewerController {
 
       event.preventDefault();
       event.stopPropagation();
+      return;
+    }
+
+    // This handler runs before the Draw interaction cancels its sketch, so an active sketch is cancelled by this Escape
+    if (getStoreDrawerIsDrawing(mapId) && !this.#drawInstance?.hasActiveSketch()) {
+      this.getControllersRegistry().uiController.focusToolButton(GV_DOM_SUFFIX.drawerDrawButton);
     }
   }
 
@@ -2757,15 +2755,7 @@ export class DrawerController extends AbstractMapViewerController {
       }
 
       // Preserve native typing, undo, and selection behavior instead of triggering drawer shortcuts in editable controls.
-      const isTextInput =
-        activeElement instanceof HTMLInputElement &&
-        ['text', 'search', 'url', 'email', 'tel', 'password', 'number'].includes(activeElement.type);
-      const isEditableElement =
-        isTextInput ||
-        activeElement instanceof HTMLTextAreaElement ||
-        activeElement instanceof HTMLSelectElement ||
-        (activeElement instanceof HTMLElement && activeElement.isContentEditable);
-      if (isEditableElement) {
+      if (isEditableElement(activeElement)) {
         return;
       }
 

@@ -3,6 +3,7 @@ import type { TypeDrawerConfig } from 'geoview-core/core/stores/states/drawer-st
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
 import { logger } from 'geoview-core/core/utils/logger';
+import { buildGVElementId, GV_DOM_SUFFIX } from 'geoview-core/core/utils/dom-helper';
 
 import Draw from './buttons/draw';
 import { GeometryPickerButton, GeometryPickerPanel } from './buttons/geometry-picker';
@@ -38,7 +39,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.toggleDrawing',
       tooltipPlacement: 'left',
-      children: createElement(Draw),
+      children: createElement(Draw, { id: buildGVElementId(mapId, GV_DOM_SUFFIX.drawerDrawButton) }),
       visible: true,
     },
     groupName: 'drawer',

@@ -108,7 +108,7 @@ Keyboard measuring requires keyboard navigation: press **Tab** to focus the map,
 
 - Press **Enter** or **Spacebar** to start and add a point at the crosshair.
 - Press **Shift+Enter** or **Shift+Spacebar** to finish the measurement.
-- While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point; press **Esc** to cancel the sketch.
+- While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point; press **Esc** to cancel the sketch. Press **Esc** again, with nothing left to cancel, to return focus to the **Measure** button.
 - Use the **arrow** keys to pan the map. **Ctrl+M** focuses the map and closes an open navigation panel without disabling Measure.
 
 The measurement result and drawing actions are announced to screen readers. In fullscreen, **Esc** cancels the current sketch and also exits fullscreen because the browser reserves that key.
@@ -212,6 +212,8 @@ When keyboard navigation is enabled (crosshair active), the drawing tools provid
 - **Circle, Rectangle, Star**: Press **Enter**/**Spacebar** to set the first coordinate (center or corner). A marker appears. Press **Enter**/**Spacebar** again to set the second coordinate, completing the geometry automatically.
 - **Point, Text**: Press **Enter**/**Spacebar** once to place the feature.
 - **Text features**: Default to horizontal orientation when created via keyboard.
+
+Press **Esc** to cancel a sketch or a pending first coordinate. Press **Esc** again, with nothing left to cancel, to return focus to the **Toggle Drawing** button.
 
 ### Editing with Crosshairs
 

@@ -58,17 +58,6 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
   // #region Handlers
 
   /**
-   * Gets the position under the crosshair, centered on the full viewport rather than the padded view.
-   *
-   * @returns The position under the crosshair, or undefined before the viewport is ready
-   */
-  const getCrosshairPosition = useCallback((): TypeMapMouseInfo | undefined => {
-    const size = mapController.getMapSize();
-    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
-    return mapController.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
-  }, [mapController]);
-
-  /**
    * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
    */
   const handlePanDelta = useCallback(
@@ -285,7 +274,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
       }
 
       // Resolve from the rendered pixel on every interaction; mouse and move-end positions may be stale.
-      const currentPointerPosition = getCrosshairPosition();
+      const currentPointerPosition = mapController.getViewportCenterPosition();
       if (!currentPointerPosition) return;
 
       // Handle Shift+Click logic first
@@ -300,7 +289,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, getCrosshairPosition, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
+    [isCrosshairsActive, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
 
   // #endregion

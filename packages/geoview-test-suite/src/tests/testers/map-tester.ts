@@ -101,6 +101,8 @@ interface TypeCrosshairCoordinateResult {
   pointer: TypeMapMouseInfo | undefined;
   /** Coordinate expected under the rendered crosshair. */
   expected: Coordinate;
+  /** Coordinate at the full viewport center, which the keyboard position must resolve to. */
+  expectedCenter: Coordinate;
   /** Expected longitude/latitude at that coordinate. */
   expectedLonLat: Coordinate;
   /** Position converted by the controller. */
@@ -575,6 +577,8 @@ export class MapTester extends GVAbstractTester {
             const pointer = getStoreMapPointerPosition(mapId);
             const position = mapController.getMapPositionFromPixel(pixel);
             const expected = viewer.map.getCoordinateFromPixel(pixel);
+            const viewportCenter = [size[0] / 2, size[1] / 2];
+            const expectedCenter = viewer.map.getCoordinateFromPixel(viewportCenter);
             coordinates.length = 0;
             const prevented = ['Enter', ' '].map((key): boolean => {
               // Activation reset alone is insufficient: each key must resolve the current rendered pixel.
@@ -585,9 +589,10 @@ export class MapTester extends GVAbstractTester {
             });
             results.push({
               pixel,
-              viewportCenter: [size[0] / 2, size[1] / 2],
+              viewportCenter,
               pointer,
               expected,
+              expectedCenter,
               expectedLonLat: Projection.transformToLonLat(expected, viewer.getProjection()),
               position,
               drawnPixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(coordinate)),
@@ -609,7 +614,8 @@ export class MapTester extends GVAbstractTester {
           for (const axis of [0, 1]) {
             Test.assertIsEqualWithinTolerance(result.pixel[axis], result.viewportCenter[axis], 0.01);
             Test.assertIsEqualWithinTolerance(result.pointer.pixel[axis], result.pixel[axis], 0.01);
-            Test.assertIsEqualWithinTolerance(result.pointer.projected[axis], result.expected[axis], 0.01);
+            // The pointer comes from the viewport center; layout can leave the SVG a fraction of a pixel off, so compare that exact pixel.
+            Test.assertIsEqualWithinTolerance(result.pointer.projected[axis], result.expectedCenter[axis], 0.01);
             Test.assertIsEqualWithinTolerance(result.position.projected[axis], result.expected[axis], 0.01);
             Test.assertIsEqualWithinTolerance(result.position.lonlat[axis], result.expectedLonLat[axis], 1e-9);
             for (const drawnPixel of result.drawnPixels) {

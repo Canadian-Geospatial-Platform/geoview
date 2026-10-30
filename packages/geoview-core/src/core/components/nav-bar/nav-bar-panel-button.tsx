@@ -1,4 +1,4 @@
-import { useMemo, useState, cloneElement, isValidElement, useId } from 'react';
+import { useMemo, cloneElement, isValidElement, useId } from 'react';
 import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,8 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
-import { useStoreUIActiveTrapGeoView, useStoreUIPopoverCloseVersion } from '@/core/stores/states/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
@@ -55,7 +56,6 @@ export default function NavbarPanelButton({
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const popoverCloseVersion = useStoreUIPopoverCloseVersion();
   const shellContainer = useStoreAppShellContainer();
 
   // Extract panel width if provided
@@ -72,19 +72,9 @@ export default function NavbarPanelButton({
   }, [theme, panelWidth]);
 
   // States
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
-  // Close in the request's render, not a later effect, so focus restoration finishes before map focus.
-  const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
+  const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
 
   // #region Handlers
-
-  /**
-   * Closes the panel and clears the anchor element.
-   */
-  const closePanel = (): void => {
-    setAnchorEl(null);
-  };
 
   /**
    * Handles when the user clicks the navbar button to toggle the panel.
@@ -93,8 +83,7 @@ export default function NavbarPanelButton({
     if (open) {
       closePanel();
     } else {
-      setOpenedAtCloseVersion(popoverCloseVersion);
-      setAnchorEl(event.currentTarget);
+      openAt(event.currentTarget);
     }
   };
 
