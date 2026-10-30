@@ -328,6 +328,8 @@ export abstract class EsriRenderer {
           type: 'iconSymbol',
           mimeType: symbol.contentType,
           src: symbol.imageData,
+          width: symbol.width,
+          height: symbol.height,
           rotation: symbol.angle !== undefined ? symbol.angle : 0,
           opacity: 1,
           offset,

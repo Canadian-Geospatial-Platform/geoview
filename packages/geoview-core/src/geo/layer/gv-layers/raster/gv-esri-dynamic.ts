@@ -19,7 +19,9 @@ import type {
   TypeValidMapProjectionCodes,
   TypeFeatureInfoEntryPartial,
   TypeDisplayLanguage,
+  TypeLayerStyleConfig,
 } from '@/api/types/map-schema-types';
+import { isIconSymbolVectorConfig, isSimpleSymbolVectorConfig } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent, TypeLegend } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
@@ -299,11 +301,69 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the hit tolerance of the layer.
    *
+   * The identify REST call has no notion of the rendered symbol (unlike OL's vector hit-testing). For point/icon symbols,
+   * the radius is already known from the style parsed from the service's renderer metadata, so it's used directly. For
+   * other geometries (or when no symbol radius is available), there's nothing to size the tolerance from, so it falls back
+   * to the layer type's default.
+   *
    * @returns The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
-    // Override the hit tolerance for a GVEsriDynamic layer
-    return GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
+    const { radius } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
+    return radius > 0 ? radius : GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
+  }
+
+  /**
+   * Gets the radius and offset, in pixels, of the largest point/icon symbol defined in a style, across its
+   * simple/uniqueValue/classBreaks entries and any size-driven visual variable. The offset is only auto-applied when every
+   * point/icon entry shares the exact same offset; mixed offsets across categories (e.g. a uniqueValue renderer where some
+   * categories use pins and others don't) can't be resolved before the identify response tells us which category was hit, so
+   * guessing from an arbitrary (e.g. the largest) entry would often apply the wrong category's offset. In that case, use
+   * {@link EsriDynamicLayerEntryConfig.hitToleranceOffset} to target the category that matters. Returns all zeros when no
+   * point symbol is found.
+   *
+   * @param style - The layer style to inspect, if any
+   * @returns The largest point symbol's radius, and the shared xoffset/yoffset in pixels (zero when they're not all equal)
+   */
+  static #getMaxPointSymbolInfo(style: TypeLayerStyleConfig | undefined): { radius: number; offsetX: number; offsetY: number } {
+    const pointStyle = style?.Point ?? style?.MultiPoint;
+    if (!pointStyle) return { radius: 0, offsetX: 0, offsetY: 0 };
+
+    let maxSize = 0;
+    const offsets: [number, number][] = [];
+    pointStyle.info.forEach(({ settings }) => {
+      let size = 0;
+      let offset: [number, number] = [0, 0];
+      if (isSimpleSymbolVectorConfig(settings)) {
+        size = settings.size ?? 0;
+        offset = settings.offset ?? [0, 0];
+      } else if (isIconSymbolVectorConfig(settings)) {
+        size = Math.max(settings.width ?? 0, settings.height ?? 0);
+        offset = settings.offset ?? [0, 0];
+      }
+      maxSize = Math.max(maxSize, size);
+      offsets.push(offset);
+    });
+
+    // Only trust the offset when every entry agrees on it; otherwise we can't know which one applies until after the query
+    const [firstOffsetX, firstOffsetY] = offsets[0] ?? [0, 0];
+    const offsetsAgree = offsets.every(([x, y]) => x === firstOffsetX && y === firstOffsetY);
+    const [offsetX, offsetY] = offsetsAgree ? [firstOffsetX, firstOffsetY] : [0, 0];
+
+    // Data-driven sizing (ESRI visual variables) can render symbols larger than their base 'info' size
+    const visualVariableSizes = (pointStyle.visualVariables ?? [])
+      .filter((visualVar) => visualVar.type === 'sizeInfo')
+      .map((visualVar) => visualVar.maxSize ?? 0);
+
+    // Most real-world point/icon symbols carry a sizable transparent margin around their visible glyph (the service's
+    // declared width/height/size includes that margin), so the plain half-size radius overshoots the actual visible
+    // content on every side; scale it down to better approximate the visible footprint instead of the full declared canvas.
+    const PADDING_COMPENSATION_FACTOR = 0.9;
+    return {
+      radius: Math.ceil((Math.max(maxSize, ...visualVariableSizes, 0) / 2) * PADDING_COMPENSATION_FACTOR),
+      offsetX,
+      offsetY,
+    };
   }
 
   /**
@@ -388,6 +448,27 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
+   * Re-centers a lon/lat location on the symbol's rendered position (its xoffset/yoffset, e.g. a pin whose anchor sits at
+   * the bottom of the icon, or the {@link EsriDynamicLayerEntryConfig.hitToleranceOffset} override), since the identify REST
+   * call otherwise searches around the raw geometry point.
+   *
+   * @param map - The Map used to resolve the current resolution and projection
+   * @param lonlat - The lon/lat location to re-center
+   * @returns The re-centered lon/lat location
+   */
+  #applyHitToleranceOffset(map: OLMap, lonlat: Coordinate): Coordinate {
+    const { offsetX: styleOffsetX, offsetY: styleOffsetY } = GVEsriDynamic.#getMaxPointSymbolInfo(this.getStyle());
+    const [offsetX, offsetY] = this.getLayerConfig().hitToleranceOffset ?? [styleOffsetX, styleOffsetY];
+    if (offsetX === 0 && offsetY === 0) return lonlat;
+
+    const projection = map.getView().getProjection();
+    const resolution = map.getView().getResolution() ?? 0;
+    const location = Projection.transformFromLonLat(lonlat, projection);
+    const recenteredLocation: Coordinate = [location[0] + offsetX * resolution, location[1] - offsetY * resolution];
+    return Projection.transformToLonLat(recenteredLocation, projection);
+  }
+
+  /**
    * Overrides the return of feature information at the provided long lat coordinate.
    *
    * @param map - The Map where to get Feature Info At LonLat from
@@ -400,7 +481,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
-    lonlat: Coordinate,
+    rawLonLat: Coordinate,
     queryGeometry = true,
     language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
@@ -413,6 +494,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
+
+    // GV: Click/hover identify dispatches directly with 'at_lon_lat' (see FeatureInfoLayerSet), so the hit-tolerance
+    // GV.CONT: offset re-centering must happen here rather than in getFeatureInfoAtCoordinate
+    const lonlat = this.#applyHitToleranceOffset(map, rawLonLat);
 
     // If not queryable return []
     if (!layerConfig.getQueryableSourceDefaulted()) return featureInfoResult;
