@@ -32,17 +32,17 @@ export function DrawingHint(): JSX.Element | null {
   let hint: string;
   if (drawingHint.tool === 'editing') {
     hint = isCrosshairsActive ? t('drawingHint.keyboard.editing') : t('drawingHint.mouse.editing');
-  } else if (drawingHint.geometry === 'point') {
+  } else if (drawingHint.geometry === 'Point') {
     hint = isCrosshairsActive ? t('drawingHint.keyboard.point') : t('drawingHint.mouse.point');
-  } else if (drawingHint.geometry === 'text') {
+  } else if (drawingHint.geometry === 'Text') {
     hint = isCrosshairsActive ? t('drawingHint.keyboard.text') : t('drawingHint.mouse.text');
-  } else if (drawingHint.geometry === 'circle' || drawingHint.geometry === 'star') {
+  } else if (drawingHint.geometry === 'Circle' || drawingHint.geometry === 'Star') {
     if (drawingHint.started) {
       hint = isCrosshairsActive ? t('drawingHint.keyboard.radius') : t('drawingHint.mouse.radius');
     } else {
       hint = isCrosshairsActive ? t('drawingHint.keyboard.center') : t('drawingHint.mouse.center');
     }
-  } else if (drawingHint.geometry === 'rectangle') {
+  } else if (drawingHint.geometry === 'Rectangle') {
     if (drawingHint.started) {
       hint = isCrosshairsActive ? t('drawingHint.keyboard.oppositeCorner') : t('drawingHint.mouse.oppositeCorner');
     } else {
@@ -54,7 +54,7 @@ export function DrawingHint(): JSX.Element | null {
     } else {
       hint = isCrosshairsActive ? t('measurement.startKeyboard') : t('measurement.startMouse');
     }
-  } else if (drawingHint.geometry === 'line') {
+  } else if (drawingHint.geometry === 'LineString') {
     hint = isCrosshairsActive ? t('drawingHint.keyboard.line') : t('drawingHint.mouse.line');
   } else {
     hint = isCrosshairsActive ? t('drawingHint.keyboard.polygon') : t('drawingHint.mouse.polygon');

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
@@ -16,7 +16,8 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useStoreUIActiveTrapGeoView, useStoreUIPopoverCloseVersion } from '@/core/stores/states/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
@@ -66,16 +67,13 @@ export default function Version(): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const popoverCloseVersion = useStoreUIPopoverCloseVersion();
   const uiController = useUIController();
 
   // Get container
   const mapElem = useStoreAppShellContainer();
 
   // State
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
-  const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
+  const { open, anchorEl, openAt, close } = useMapPopover();
 
   // #region Handlers
 
@@ -85,12 +83,11 @@ export default function Version(): JSX.Element {
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       if (open) {
-        setAnchorEl(null);
+        close();
         uiController.disableFocusTrap();
         return;
       }
-      setOpenedAtCloseVersion(popoverCloseVersion);
-      setAnchorEl(event.currentTarget);
+      openAt(event.currentTarget);
 
       // Register focus trap with button as the return target
       uiController.enableFocusTrap({
@@ -98,7 +95,7 @@ export default function Version(): JSX.Element {
         callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`,
       });
     },
-    [mapId, uiController, open, popoverCloseVersion]
+    [mapId, uiController, open, openAt, close]
   );
 
   /**
@@ -106,11 +103,11 @@ export default function Version(): JSX.Element {
    */
   const handleClickAway = useCallback((): void => {
     if (open) {
-      setAnchorEl(null);
+      close();
       // Restore focus to the button that opened the panel
       uiController.disableFocusTrap();
     }
-  }, [open, uiController]);
+  }, [open, close, uiController]);
 
   // #endregion
 

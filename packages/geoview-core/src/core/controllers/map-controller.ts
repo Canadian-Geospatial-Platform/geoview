@@ -880,12 +880,21 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
+   *
+   * @returns The position, or undefined before the viewport has a size
+   */
+  getViewportCenterPosition(): TypeMapMouseInfo | undefined {
+    const size = this.getMapSize();
+    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
+    return this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+  }
+
+  /**
    * Synchronizes the pointer store with the center of the rendered crosshair viewport.
    */
   synchronizeCrosshairPointerPosition(): void {
-    const size = this.getMapSize();
-    if (!size || size[0] <= 0 || size[1] <= 0) return;
-    const position = this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+    const position = this.getViewportCenterPosition();
     if (position) setStoreMapPointerPosition(this.getMapId(), position);
   }
 

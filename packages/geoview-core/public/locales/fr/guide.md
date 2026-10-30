@@ -108,7 +108,7 @@ La mesure au clavier nécessite la navigation au clavier : appuyez sur **Tabulat
 
 - Appuyez sur **Entrée** ou **Espace** pour commencer et ajouter un point à la position du pointeur en croix.
 - Appuyez sur **Maj.+Entrée** ou **Maj.+Espace** pour terminer la mesure.
-- Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point; appuyez sur **Échap** pour annuler le tracé.
+- Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point; appuyez sur **Échap** pour annuler le tracé. Appuyez de nouveau sur **Échap**, lorsqu'il n'y a plus rien à annuler, pour ramener le focus sur le bouton **Mesurer**.
 - Utilisez les touches **fléchées** pour déplacer la carte. **Ctrl+M** focalise la carte et ferme le panneau de navigation ouvert sans désactiver l'outil Mesurer.
 
 Le résultat de la mesure et les actions de tracé sont annoncés aux lecteurs d'écran. En plein écran, **Échap** annule le tracé en cours et quitte également le plein écran, car le navigateur réserve cette touche.
@@ -212,6 +212,8 @@ Lorsque la navigation au clavier est activée (pointeur en croix actif), les out
 - **Cercle, Rectangle, Étoile** : Appuyez sur **Entrée**/**Barre d'espace** pour définir la première coordonnée (centre ou coin). Un marqueur apparaît. Appuyez à nouveau sur **Entrée**/**Barre d'espace** pour définir la deuxième coordonnée, complétant automatiquement la géométrie.
 - **Point, Texte** : Appuyez une fois sur **Entrée**/**Barre d'espace** pour placer l'élément.
 - **Éléments textuels** : Par défaut horizontaux lors de la création au clavier.
+
+Appuyez sur **Échap** pour annuler un tracé ou une première coordonnée en attente. Appuyez de nouveau sur **Échap**, lorsqu'il n'y a plus rien à annuler, pour ramener le focus sur le bouton **Basculer le dessin**.
 
 ### Éditer avec le pointeur en croix
 

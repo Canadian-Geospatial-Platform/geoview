@@ -78,7 +78,7 @@ Shortcuts are toggled on/off with the `` ` `` (backtick) key or the Shortcuts to
 | Shift+S — Download  | Drawings are downloaded               | 1. Press `Shift+S`                                                    | Drawings are downloaded                      | M    |
 | Shift+O — Upload    | Upload dialog opens                   | 1. Press `Shift+O`                                                    | Upload dialog opens                          | M    |
 | Shift+C — Clear all | All drawings are cleared              | 1. Press `Shift+C`                                                    | All drawings are cleared                     | M    |
-| Escape — Exit mode  | Exits current mode                    | 1. Press `Escape` while editing/transforming<br>2. Place the first coordinate of Circle, Rectangle, or Star and press Escape<br>3. Start another shape<br>4. Repeat while measuring | Editing selection or pending coordinate is cleared; two-step guidance resets and the next shape starts normally; drawer does not intercept measurement cancellation | M    |
+| Escape — Exit mode  | Exits current mode                    | 1. Press `Escape` while editing/transforming<br>2. Place the first coordinate of Circle, Rectangle, or Star and press Escape<br>3. Start another shape<br>4. Repeat while measuring<br>5. While drawing a Line or Circle with the crosshair, press Escape to cancel, then Escape again | Editing selection or pending coordinate is cleared; two-step guidance resets and the next shape starts normally; drawer does not intercept measurement cancellation; the first Escape keeps focus on the map and the second returns focus to the Toggle Drawing button | M    |
 
 ## Projection Switch
 
