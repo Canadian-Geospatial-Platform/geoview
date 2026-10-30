@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,11 +7,15 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui/layout';
 import { ProgressBar } from '@/ui/linear-progress/linear-progress';
+import { Typography } from '@/ui/typography/typography';
+import { visuallyHidden } from '@/ui/style/default';
+
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
+import { DrawingHint } from '@/core/components/common/drawing-hint';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { getSxClasses } from './map-style';
 import {
@@ -61,6 +66,7 @@ export function Map(props: MapProps): JSX.Element {
   const geoviewHTMLElement = useStoreAppGeoviewHTMLElement();
 
   const uiController = useUIController();
+  const [shortcutMessage, setShortcutMessage] = useState<string>('');
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
@@ -104,14 +110,17 @@ export function Map(props: MapProps): JSX.Element {
 
           event.preventDefault();
 
-          // Focus the map element (this will trigger crosshair activation)
-          mapElement.current.focus();
+          // Finish closing panels and restoring their focus before transferring focus to the map.
+          flushSync((): void => {
+            uiController.closeMapPopovers();
+            setShortcutMessage('');
+          });
 
-          // Explicitly toggle crosshair on if it's not already active
-          // (focus alone should activate it, but this ensures it's on)
+          mapElement.current.focus({ preventScroll: true });
           if (!getStoreAppIsCrosshairsActive(mapId)) {
             uiController.setCrosshairActive(true);
           }
+          setShortcutMessage(t('mapctrl.keyboardShortcut.focused'));
         }
       }
     };
@@ -121,7 +130,7 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [mapInteraction, mapId, uiController, geoviewHTMLElement]);
+  }, [mapInteraction, mapId, uiController, geoviewHTMLElement, t]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
@@ -134,10 +143,14 @@ export function Map(props: MapProps): JSX.Element {
       role="region"
       aria-label={t('map.container', { mapId })}
     >
+      <Typography role="status" aria-live="polite" sx={visuallyHidden}>
+        {shortcutMessage}
+      </Typography>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
+          <DrawingHint />
           <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />

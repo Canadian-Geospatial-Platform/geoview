@@ -15,6 +15,7 @@ Config: `configs/navigator/demos/15-package-drawer.json`
 | Test            | Description                     | Steps                                                 | Expected Result                            | Auto |
 | --------------- | ------------------------------- | ----------------------------------------------------- | ------------------------------------------ | ---- |
 | Activate draw   | Draw mode activates from navbar | 1. Click the Draw button in the navbar                | Draw mode activates                        | M    |
+| Drawing guidance | Every geometry has guidance | 1. Select each geometry type<br>2. Check mouse and keyboard hints in EN/FR<br>3. Place the first coordinate of Circle, Rectangle, and Star, then complete or cancel | Each type has appropriate instructions; two-step hints advance and reset on completion/cancellation; no measurement wording appears | M |
 | Draw Point      | Point geometry created on click | 1. Select Point geometry type<br>2. Click the map     | A point is created on the map              | M    |
 | Draw LineString | LineString renders correctly    | 1. Select LineString<br>2. Draw a line on the map     | Line renders correctly                     | M    |
 | Draw Polygon    | Polygon closes and renders      | 1. Select Polygon<br>2. Draw a polygon on the map     | Polygon closes and renders correctly       | M    |
@@ -29,6 +30,8 @@ Config: `configs/navigator/demos/15-package-drawer.json`
 | Test         | Description                                    | Steps                                                | Expected Result                                     | Auto |
 | ------------ | ---------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------- | ---- |
 | Edit mode    | Existing geometries become editable            | 1. Toggle Edit mode                                  | Existing geometries become editable (move, reshape) | M    |
+| Details suppression | Drawing/editing clicks do not query layers | 1. Start drawing and switch geometry types<br>2. Switch to Edit and click the map<br>3. Stop editing and click a queryable layer | No Details query or click marker appears during drawing/editing; normal querying resumes after stopping | M |
+| Editing guidance | Editing instructions follow the input mode | 1. Activate Edit<br>2. Switch between mouse and keyboard navigation in EN/FR<br>3. Stop editing or switch tools | A hint explains selection and handle editing; it clears or changes when editing stops | M |
 | Snap         | Drawn geometries snap to nearby features       | 1. Toggle Snap<br>2. Draw near an existing feature   | Drawn geometries snap to nearby features/vertices   | M    |
 | Undo / Redo  | Undo reverts, Redo restores                    | 1. Draw a geometry<br>2. Click Undo<br>3. Click Redo | Undo reverts the action; Redo restores it           | M    |
 | Measurements | Length/area measurements display on geometries | 1. Toggle Measurements                               | Length/area measurements display on geometries      | M    |

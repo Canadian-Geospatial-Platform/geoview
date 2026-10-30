@@ -1,4 +1,5 @@
 import { useMemo, useState, cloneElement, isValidElement, useId } from 'react';
+import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +17,7 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreUIActiveTrapGeoView, useStoreUIPopoverCloseVersion } from '@/core/stores/states/ui-state';
 import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
@@ -25,6 +26,10 @@ interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
   /** Whether the button is in an active state. */
   isActive?: boolean;
+  /** Whether to keep the panel mounted while closed so its state is preserved. */
+  keepPanelMounted?: boolean;
+  /** Accessible live-region content that must remain available when the panel is closed. */
+  liveRegionContent?: ReactNode;
 }
 
 /**
@@ -33,7 +38,12 @@ interface NavbarPanelButtonType {
  * @param props - The navbar panel button properties
  * @returns The navbar panel button component
  */
-export default function NavbarPanelButton({ buttonPanel, isActive = false }: NavbarPanelButtonType): JSX.Element {
+export default function NavbarPanelButton({
+  buttonPanel,
+  isActive = false,
+  keepPanelMounted = false,
+  liveRegionContent,
+}: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
@@ -45,6 +55,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const popoverCloseVersion = useStoreUIPopoverCloseVersion();
   const shellContainer = useStoreAppShellContainer();
 
   // Extract panel width if provided
@@ -62,7 +73,9 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState(popoverCloseVersion);
+  // Close in the request's render, not a later effect, so focus restoration finishes before map focus.
+  const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
 
   // #region Handlers
 
@@ -70,7 +83,6 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
    * Closes the panel and clears the anchor element.
    */
   const closePanel = (): void => {
-    setOpen(false);
     setAnchorEl(null);
   };
 
@@ -81,8 +93,8 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
     if (open) {
       closePanel();
     } else {
+      setOpenedAtCloseVersion(popoverCloseVersion);
       setAnchorEl(event.currentTarget);
-      setOpen(true);
     }
   };
 
@@ -131,9 +143,11 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
         >
           {buttonPanel.button.children}
         </IconButton>
+        {liveRegionContent}
 
         <Popper
           open={open}
+          keepMounted={keepPanelMounted}
           anchorEl={anchorEl}
           placement="left-end"
           modifiers={[
