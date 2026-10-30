@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Esri Dynamic layer examples covering simple, uniqueValue and classBreaks renderers, annotation sub-layers and geoCore. The 'offset-icon' layer tests the automatic and manual (hitToleranceOffset) identify hit-tolerance recentering for offset point symbols. The 'uniqueValueId' layer combines a manual layerFilter with layerStyle entries defaulted to 'visible: false', to show that hiding a class in the legend sends a server-side exclusion filter (via layerDefs), not just a client-side/legend-only change."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857

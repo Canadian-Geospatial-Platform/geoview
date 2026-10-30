@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Esri Feature layer examples covering simple, uniqueValue and classBreaks renderers. The 'offset-icon' layer mainly demonstrates using layerStyle's icon offset so a pin-style symbol's bottom point, rather than its center, lands on the geometry (icons otherwise render centered on the point)."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
