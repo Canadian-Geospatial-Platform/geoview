@@ -12,7 +12,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   categoryTitle: {
     textAlign: 'left',
     fontWeight: '600',
-    fontSize: theme.palette.geoViewFontSize?.lg,
+    fontSize: theme.typography.h5.fontSize,
   },
   layerDetails: {
     padding: theme.spacing(2),
@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tableIconLabel: {
     color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     alignSelf: 'center',
   },
   wmsImage: {
@@ -47,7 +47,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layerInfo: {
     color: theme.palette.text.secondary,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     '& .info-container': {
       display: 'flex',
       alignItems: 'center',
@@ -65,7 +65,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   infoSectionTitle: {
     fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.h6.fontSize,
     color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.25),
   },
@@ -164,10 +164,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: 0,
   },
 
-  subTitle: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
-  },
-
   layerButtonsGroup: {
     display: 'flex',
     flexDirection: 'row',
@@ -193,7 +189,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   attributionText: {
     marginTop: theme.spacing(1.25),
     color: theme.palette.text.secondary,
-    fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'center',
   },
 

@@ -59,6 +59,25 @@ Search `public/locales/{en,fr}/translation.json` before creating keys: namespace
 keep key parity and meaningful French text. Do not copy hypothetical translation keys from examples.
 The public translation convention is in [UI wrappers and translated labels](../../docs/programming/styling-best-practices.md#3--ui-wrappers-and-translated-labels).
 
+## Typography lint maintenance
+
+Public contract: [Typography](../../docs/programming/styling-best-practices.md#typography).
+The shared [ESLint config](../../packages/eslint.config.js) adds typography selectors to
+`no-restricted-syntax`, retaining existing restrictions and their warning severity.
+Run `npm run lint` from `packages/`; do not replace the rule array in package configs.
+
+Keep exemptions narrow: theme definitions and declarations own tokens/types; export `layout-styles.ts`
+owns PDF/canvas artwork; the measurement button has a line-level OpenLayers text exemption.
+Drawer source is owned elsewhere, with only the `createMeasureTooltip` method exempt in DrawerController.
+STAC Browser is the other approved package exemption: its 23 legacy palette reads must migrate before
+the breaking release that removes `palette.geoViewFontSize`. The OpenLayers renderer's destructuring
+font default is not a style value and needs no disable.
+Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
+Do not exempt export modal UI, whole geo folders, or whole custom-legend files.
+Size selectors follow value containers (responsive objects/arrays, conditional branches and JSX
+expressions), not helper-call arguments, lookup keys or condition tests. Preserve both positive and
+negative cases when changing these selectors.
+
 ## Theme and scrollbar maintenance
 
 Public contracts: [Theme tokens and external-theme safety](../../docs/programming/styling-best-practices.md#2--theme-tokens-and-external-theme-safety)

@@ -52,7 +52,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   settingsSectionTitle: {
     display: 'block',
     fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.h6.fontSize,
   },
 
   settingsSectionHeaderText: {
@@ -65,7 +65,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionSummary: {
     display: 'block',
-    fontSize: theme.palette.geoViewFontSize?.sm,
   },
 
   settingsSectionContentCollapsed: {

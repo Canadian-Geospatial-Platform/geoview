@@ -4,7 +4,7 @@ import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useR
 import { useTranslation } from 'react-i18next';
 
 import { useMediaQuery } from '@mui/material';
-import type { SxProps } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 
@@ -19,7 +19,7 @@ import type { SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 
 import { ResponsiveGrid } from './responsive-grid';
-import { getSxClasses } from './responsive-grid-layout-style';
+import { getSxClasses, TOP_PANEL_STYLES } from './responsive-grid-layout-style';
 import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
@@ -174,29 +174,17 @@ const ResponsiveGridLayout = forwardRef(
     }, [theme]);
 
     /** Sx props for the left-top panel. */
-    const leftTopSxProps = { zIndex: isFullScreen ? 'unset' : 200 };
+    const leftTopSxProps = isFullScreen ? TOP_PANEL_STYLES.leftFullscreen : TOP_PANEL_STYLES.left;
 
     /** Sx props for the right-top panel. */
-    const rightTopSxProps = { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
+    const rightTopSxProps = isFullScreen ? TOP_PANEL_STYLES.rightFullscreen : TOP_PANEL_STYLES.right;
 
     /** Memoized sx for the right-top content box layout. */
-    const memoRightTopContentSx = useMemo((): SxProps => {
+    const memoRightTopContentSx = useMemo((): SxProps<Theme> | undefined => {
       logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopContentSx', containerType, theme.breakpoints);
 
-      return {
-        display: 'flex',
-        alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
-        flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
-        gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
-        [theme.breakpoints.up('sm')]: {
-          justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
-        },
-        [theme.breakpoints.down('sm')]: {
-          justifyContent: 'space-between',
-        },
-        width: '100%',
-      };
-    }, [containerType, theme.breakpoints]);
+      return composeSxProps(memoSxClasses.rightTopContent, containerType === CONTAINER_TYPE.APP_BAR && memoSxClasses.rightTopContentAppBar);
+    }, [containerType, theme.breakpoints, memoSxClasses]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(
@@ -481,7 +469,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
-          sx={{ boxShadow: 'none' }}
+          sx={memoSxClasses.enlargeButton}
           onClick={handleEnlargeToggle}
           tooltip={isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
         >
@@ -521,7 +509,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           color="primary"
-          startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />}
+          startIcon={<CloseIcon />}
           onClick={handleClosePanel}
           tooltip={t('general.closeSelection')}
           aria-label={t('general.closeSelection')}

@@ -36,7 +36,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       boxShadow: 'none',
     },
     '& .MuiFormControlLabel-label': {
-      fontSize: theme.palette.geoViewFontSize?.default,
       color: 'inherit',
       whiteSpace: 'normal',
     },

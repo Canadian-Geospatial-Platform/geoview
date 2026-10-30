@@ -50,7 +50,6 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       },
     },
     tab: {
-      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
       fontWeight: 'bold',
       minWidth: 'min(4vw, 24px)',
       padding: theme.spacing(1, 3),

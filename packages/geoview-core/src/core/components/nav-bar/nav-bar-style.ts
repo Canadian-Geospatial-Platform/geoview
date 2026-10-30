@@ -143,7 +143,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       gap: theme.spacing(1),
     },
     popoverTitleLabel: {
-      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
+      fontSize: theme.typography.h6.fontSize,
       fontWeight: '700',
       color: theme.palette.text.primary,
       flexShrink: 1,
@@ -155,7 +155,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       color: theme.palette.text.primary,
     },
     popoverTitle: {
-      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
+      fontSize: theme.typography.h6.fontSize,
       fontWeight: '700',
       color: theme.palette.text.primary,
       minHeight: '48px',

@@ -8,6 +8,7 @@ import type { SelectChangeEvent } from '@mui/material';
 
 import type { ButtonPropsLayerPanel } from '@/ui/panel/panel-types';
 import { Box } from '@/ui/layout';
+import { Typography } from '@/ui/typography/typography';
 import { Button } from '@/ui/button/button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { ButtonGroup } from '@/ui/button-group/button-group';
@@ -222,7 +223,9 @@ function FileUploadSection({
     >
       {drag && (
         <Box ref={dragPopover} sx={memoSxClasses.dragOverlay}>
-          <h3>{t('layers.dropzone')}</h3>
+          <Typography component="h3" variant="h4">
+            {t('layers.dropzone')}
+          </Typography>
         </Box>
       )}
       <Box>

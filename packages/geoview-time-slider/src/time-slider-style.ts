@@ -14,8 +14,7 @@ export const SLIDER_WIDTH_STYLE: CSSProperties = {
 /**
  * Gets custom sx classes for the time slider.
  *
- * Uses optional chaining (?.) for theme.palette.geoViewFontSize properties
- * because plugins may render before GeoView's custom theme is fully initialized.
+ * Uses typography from the owning map's theme.
  *
  * @param theme - The MUI theme object
  * @returns The sx classes object
@@ -34,7 +33,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexWrap: 'wrap',
   },
   panelTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
+    fontSize: theme.typography.h4.fontSize,
     fontWeight: '600',
   },
   centeredContainer: {
@@ -49,7 +48,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   descriptionText: {
     padding: theme.spacing(2, 2.5, 0, 2.5),
-    fontSize: theme.palette.geoViewFontSize?.sm,
   },
   hiddenLayerName: {
     color: theme.palette.text.secondary,

@@ -1,6 +1,7 @@
 import type { Theme } from '@mui/material/styles';
 
 import type { SxStyles } from '@/ui/style/types';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 /**
  * Gets the sx classes for the add-new-layer component.
@@ -9,6 +10,14 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  layerTree: {
+    fontSize: theme.typography.label.fontSize,
+    '& .MuiTreeItem-label': {
+      fontSize: theme.typography.label.fontSize,
+      padding: theme.spacing(0.5, 0),
+      ...ellipsisOverflow,
+    },
+  },
   paper: {
     padding: theme.spacing(2.5),
   },
@@ -38,7 +47,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     zIndex: 9999,
     textAlign: 'center',
     color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize?.xl,
   },
   stepper: {
     '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {

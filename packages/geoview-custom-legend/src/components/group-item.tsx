@@ -138,7 +138,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
           {/* Title, subtext, and visibility button */}
           <Box sx={sxClasses.groupItemContent}>
             {/* Group title */}
-            <Typography id={groupTitleId} noWrap sx={sxClasses.groupTitle}>
+            <Typography id={groupTitleId} variant="h5" component="p" noWrap sx={sxClasses.groupTitle}>
               {item.text}
             </Typography>
 
@@ -147,7 +147,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
             <Box sx={sxClasses.groupTitleRow}>
               {/* Sublayer count */}
-              <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
+              <Typography variant="body2" sx={sxClasses.groupSubLayerCount}>
                 {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
               </Typography>
 
@@ -162,7 +162,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
                   aria-pressed={allVisible}
                   sx={sxClasses.groupActionIconButton}
                 >
-                  {allVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                  {allVisible ? <VisibilityOutlinedIcon fontSize="small" /> : <VisibilityOffOutlinedIcon fontSize="small" />}
                 </IconButton>
               </Box>
             </Box>

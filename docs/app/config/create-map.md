@@ -56,6 +56,13 @@ Add a `<div>` with the `geoview-map` class, load the script once, then call `cgp
 
 The sections below describe the map container attributes and the programmatic approach in detail.
 
+#### Host-page font size
+
+GeoView text sizes are independent of the host page's root font size and follow the user's browser
+default. Set the host's root font size **before the first map initializes**: GeoView calibrates once
+per document and does not change the host's root styles. This guarantee applies to calibrated GeoView
+themes, not standalone components using a plain external MUI theme. See [typography](../ui/theming.md#typography).
+
 ### Creating Maps in GeoView
 
 There are two main approaches to create maps in GeoView:

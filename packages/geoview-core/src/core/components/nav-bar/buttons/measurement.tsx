@@ -50,6 +50,7 @@ const STROKE_WIDTH = 2;
 const TOOLTIP_BASE_STYLE = {
   backgroundColor: 'rgba(0, 0, 0, 0.7)',
   textColor: '#fff',
+  // eslint-disable-next-line no-restricted-syntax -- OpenLayers/canvas measurement text, not viewer UI.
   fontSize: '13px',
   fontWeight: 'bold',
   padding: { top: 4, right: 8, bottom: 4, left: 8 },
