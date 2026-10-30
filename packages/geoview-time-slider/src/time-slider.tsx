@@ -1025,7 +1025,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       {/* Description */}
       {(description || additionalLayerpaths?.length) && (
-        <Typography component="div" sx={memoSxClasses.descriptionText}>
+        <Typography variant="body2" component="div" sx={memoSxClasses.descriptionText}>
           {description || renderLayerNames()}
         </Typography>
       )}

@@ -146,9 +146,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         <Typography variant="h3" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
-        <Typography component="p" sx={memoSxClasses.legendInstructionsBody}>
-          {t('legend.noLayersAddedDescription')}
-        </Typography>
+        <Typography component="p">{t('legend.noLayersAddedDescription')}</Typography>
       </Box>
     );
   }, [t, memoSxClasses]);

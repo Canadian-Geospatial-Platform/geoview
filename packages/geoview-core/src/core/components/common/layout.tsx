@@ -15,6 +15,9 @@ import { logger } from '@/core/utils/logger';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
+import { composeSxProps } from '@/ui/style/types';
+import type { SxStyles } from '@/ui/style/types';
+import { getSxClasses } from './layout-style';
 
 /** Properties for the Layout component. */
 interface LayoutProps {
@@ -38,11 +41,6 @@ interface LayoutProps {
   /** Omits the available-layers heading for non-layer lists such as Guide topics. */
   hideAvailableHeading?: boolean;
 }
-
-/** Styles for the layer title in the right panel header. */
-const TITLE_STYLES = {
-  fontWeight: '600',
-} as const;
 
 /** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
@@ -92,7 +90,8 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-      const { t } = useTranslation();
+    const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+    const { t } = useTranslation();
     let layerName = useStoreLayerName(selectedLayerPath!);
     if (!layerName && selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
       layerName = t('details.coordinateInfoTitle');
@@ -150,26 +149,25 @@ const Layout = forwardRef(
         containerType,
         layerName,
         theme.breakpoints,
-        theme.palette.geoViewFontSize?.lg,
+        theme.typography.h3.fontSize,
         toggleMode
       );
 
       if (!layerName) return null; // Don't render when no layer selected
 
       // clamping code copied from https://tailwindcss.com/docs/line-clamp
-      const sxClasses = {
-        ...TITLE_STYLES,
-        fontSize: theme.palette.geoViewFontSize?.lg,
-        width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
-        ...(!toggleMode && { [theme.breakpoints.up('sm')]: { display: 'none' } }),
-      };
+      const sxClasses = composeSxProps(
+        memoSxClasses.layerTitle,
+        containerType === CONTAINER_TYPE.APP_BAR ? memoSxClasses.layerTitleAppBar : memoSxClasses.layerTitleFooterBar,
+        !toggleMode && memoSxClasses.layerTitleWithoutToggle
+      );
 
       return (
         <Typography sx={sxClasses} component="h3">
           {layerName}
         </Typography>
       );
-    }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize?.lg, toggleMode]);
+    }, [containerType, layerName, theme.breakpoints, theme.typography.h3.fontSize, toggleMode, memoSxClasses]);
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({

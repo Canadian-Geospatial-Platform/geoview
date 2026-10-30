@@ -1,5 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
+import { TYPOGRAPHY_SCALE } from 'geoview-core/ui/style/default';
 
 import { DescriptionText } from './description-text';
 import type { TypeHeaderLayer } from '../custom-legend-types';
@@ -24,12 +25,19 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
   const { Box, Typography } = ui.elements;
+  const theme = ui.useTheme();
 
   if (!isHeaderLayer(item)) return;
 
   // Create the override object and if values are present, they will override the default values
+  let fontSize: string | undefined;
+  if (item.fontSizeStep !== undefined) {
+    const size = TYPOGRAPHY_SCALE[item.fontSizeStep];
+    if (typeof size === 'number') fontSize = theme.typography.pxToRem(size);
+    else logger.logWarning(`Custom legend: unknown fontSizeStep "${item.fontSizeStep}"; keeping the default header size.`);
+  } else if (item.fontSize !== undefined) fontSize = theme.typography.pxToRem(item.fontSize);
   const styleOverrides = {
-    ...(item.fontSize && { fontSize: `${item.fontSize}px` }),
+    ...(fontSize !== undefined && { fontSize }),
     ...(item.fontWeight && { fontWeight: item.fontWeight }),
   };
 

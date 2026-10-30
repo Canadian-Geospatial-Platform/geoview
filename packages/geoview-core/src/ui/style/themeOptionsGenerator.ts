@@ -443,7 +443,8 @@ export const generateThemeOptions = ({
           },
         },
         styleOverrides: {
-          tooltip: ({ theme }) => ({
+          tooltip: ({ theme, ownerState }) => ({
+            fontSize: ownerState.touch ? theme.typography.body2.fontSize : theme.typography.caption.fontSize,
             backgroundColor: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
             color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
           }),

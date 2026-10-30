@@ -10,7 +10,7 @@ import type { SxStyles } from '@/ui/style/types';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   buttonDropDown: {
     display: 'flex',
-    fontSize: theme?.typography?.fontSize,
+    fontSize: theme.typography.button.fontSize,
     color: theme.palette.primary.dark,
     backgroundColor: theme.palette.surface?.low ?? theme.palette.background.default,
   },

@@ -245,7 +245,11 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
             }
             label={
               <Box sx={memoSxClasses.scaleExpandedCheckmarkText}>
-                <CheckIcon sx={composeSxProps(memoSxClasses.scaleCheckmark, { opacity: scaleMode === index ? 1 : 0 })} aria-hidden="true" />
+                <CheckIcon
+                  fontSize="small"
+                  sx={composeSxProps(memoSxClasses.scaleCheckmark, { opacity: scaleMode === index ? 1 : 0 })}
+                  aria-hidden="true"
+                />
                 {renderScaleLabel(index, false)}
               </Box>
             }
@@ -283,7 +287,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
           <Button
             onClick={handleCycleScale}
             type="text"
-            sx={{ ...memoSxClasses.scaleContainerButton }}
+            sx={memoSxClasses.scaleContainerButton}
             disableRipple
             className={`interaction-${interaction}`}
             aria-label={t('mapnav.cycleHint')}

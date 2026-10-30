@@ -6,6 +6,7 @@ This document collects GeoView-specific conventions for styling, CSS, and themin
 
 - [1- Organizing component styles](#1--organizing-component-styles)
 - [2- Theme tokens and external-theme safety](#2--theme-tokens-and-external-theme-safety)
+  - [Typography](#typography)
 - [3- UI wrappers and translated labels](#3--ui-wrappers-and-translated-labels)
 - [4- Registering display themes](#4--registering-display-themes)
 - [5- Spacing in style modules](#5--spacing-themespacing-in-style-modules-no-sx-shorthand)
@@ -39,8 +40,8 @@ For application UI, prefer semantic MUI palette roles over hard-coded colors: us
 `layerVisibility` for checked and unchecked legend markers.
 
 Use `geoViewColor` where a GeoView-specific color or color ramp is needed, especially for map
-rendering and OpenLayers, and `geoViewFontSize` for GeoView font-size tokens. Spacing and border
-radius have their own conventions in the sections below.
+rendering and OpenLayers. Text sizes come from typography variants, not `palette.geoViewFontSize`.
+Spacing and border radius have their own conventions in the sections below.
 
 Reusable `@/ui` and `core/components/ui` components may receive a standard external MUI theme,
 which does not contain GeoView's custom extensions. Access those extensions with optional chaining,
@@ -52,6 +53,33 @@ for the thumb and `surface.low` for the track. Keep these declarations map-scope
 classes and unqualified MUI portal selectors can leak one viewer's palette into another viewer or
 the host application. GeoView must not set scrollbar colours on `html` or `body`. Portals outside
 the shell do not inherit its scrollbar colours and require a separate map-ownership strategy.
+
+### Typography
+
+Read the owning map's theme with `useTheme()`; never import a global default theme for component sizes.
+
+- **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
+- **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
+- **Icons:** use MUI named sizes, for example `<InfoIcon fontSize="small" />`; buttons manage their own icon sizes. `fontSize: 'inherit'` is also allowed.
+- **Display-theme overrides:** select scale keys, for example `scaleOverrides: { h3: 'xxl' }`. The generator converts them with the owning theme's calibrated `pxToRem`; components do not choose literal px/rem/em/% sizes.
+
+The shared ESLint `no-restricted-syntax` checks flag literal sizes, legacy palette reads/generated
+multiplier keys and the deprecated `control` variant in core/plugin source. They do not require an
+explicit Typography variant. Theme definitions, type declarations, export PDF/canvas layout,
+OpenLayers text, console formatting and numeric legend compatibility are exceptions; drawer work
+is owned separately, and STAC Browser is temporarily exempt until its legacy reads are migrated
+before the breaking release. See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
+
+| Deprecated API                                              | Replacement                                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------------- |
+| `palette.geoViewFontSize`                                   | `theme.typography.<variant>.fontSize`                                |
+| Generated multiplier keys such as `geoViewFontSize['1.2x']` | A typography variant; display themes customize it through scale keys |
+| `control` typography variant                                | An appropriate standard MUI variant or GeoView `label`               |
+| Custom-legend numeric `fontSize`                            | Named `fontSizeStep`, for example `"lg"` instead of `20`             |
+
+All four deprecated APIs are retained for compatibility and **removed in the next breaking release**.
+Numeric legend sizes remain exact during this transition. See [theme typography](../app/ui/theming.md#typography)
+and [host-page font-size timing](../app/config/create-map.md#host-page-font-size).
 
 ## 3- UI wrappers and translated labels
 

@@ -54,7 +54,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       width: 'auto',
     },
     '& .MuiInputLabel-formControl': {
-      fontSize: theme.palette.geoViewFontSize?.default,
+      fontSize: theme.typography.body1.fontSize,
       marginTop: theme.spacing(0),
     },
     '& .MuiInputLabel-formControl.Mui-focused': {

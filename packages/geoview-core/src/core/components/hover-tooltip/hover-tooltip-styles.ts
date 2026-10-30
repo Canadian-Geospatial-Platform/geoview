@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
     background: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
     opacity: 0.9,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     padding: theme.spacing(0.5, 1),
     borderRadius: theme.shape.borderRadiusMd,
     textAlign: 'center',
@@ -31,7 +31,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
   },
   tooltipText: {
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',

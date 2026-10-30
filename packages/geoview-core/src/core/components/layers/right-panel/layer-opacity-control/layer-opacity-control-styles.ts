@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderRadius: theme.shape.borderRadiusFull,
     },
     '& .MuiSlider-markLabel': {
-      fontSize: theme.palette.geoViewFontSize?.xs,
+      fontSize: theme.typography.caption.fontSize,
       color: theme.palette.text.primary,
     },
   },
