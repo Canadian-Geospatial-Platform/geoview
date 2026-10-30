@@ -8,6 +8,8 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Base class for controllers that operate on a specific map instance.
  *

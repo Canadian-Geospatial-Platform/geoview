@@ -200,7 +200,12 @@ export function NavBar(props: NavBarProps): JSX.Element {
             {buttonPanel.button.children}
           </IconButton>
         ) : (
-          <NavbarPanelButton buttonPanel={buttonPanel} />
+          <NavbarPanelButton
+            buttonPanel={buttonPanel}
+            onOpenChange={(isOpen) => {
+              navBarApi.setButtonPanelOpen(buttonPanel.buttonPanelId, isOpen);
+            }}
+          />
         )}
       </Fragment>
     );

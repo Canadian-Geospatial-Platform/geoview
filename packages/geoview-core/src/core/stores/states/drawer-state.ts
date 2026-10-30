@@ -6,6 +6,8 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { DrawerStyleProperties } from '@/core/types/drawer-types';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /** Represents the Drawer plugin state managed by the Zustand store. */

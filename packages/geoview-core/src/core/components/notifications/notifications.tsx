@@ -27,8 +27,10 @@ import { Button } from '@/ui/button/button';
 import { List } from '@/ui/list/list';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
+
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreAppNotifications, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useShellContainer } from '@/core/containers/shell-container-context';
+import { useStoreAppNotifications } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -100,18 +102,20 @@ const NotificationItem = memo(
 
     // #endregion Handlers
 
-    const icon = (() => {
-      switch (notification.notificationType) {
-        case 'success':
-          return <CheckCircleIcon color="success" />;
-        case 'info':
-          return <InfoIcon color="info" />;
-        case 'warning':
-          return <WarningIcon color="warning" />;
-        default:
-          return <ErrorIcon color="error" />;
-      }
-    })();
+    let icon: JSX.Element;
+    switch (notification.notificationType) {
+      case 'success':
+        icon = <CheckCircleIcon color="success" />;
+        break;
+      case 'info':
+        icon = <InfoIcon color="info" />;
+        break;
+      case 'warning':
+        icon = <WarningIcon color="warning" />;
+        break;
+      default:
+        icon = <ErrorIcon color="error" />;
+    }
 
     return (
       <Box sx={sxClasses.notificationItem} component="li">
@@ -302,7 +306,7 @@ const Notifications = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // Element IDs for accessibility and focus management
   const dialogId = `${mapId}-notification-dialog`;
@@ -470,7 +474,7 @@ const Notifications = memo((): JSX.Element => {
           placement="right-end"
           strategy="fixed"
           onClose={handleClickAway}
-          container={mapElem}
+          container={shellContainer}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           modifiers={[

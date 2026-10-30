@@ -10,6 +10,8 @@ import {
   setStoreGeochartSelectedLayerPath,
 } from '@/core/stores/states/geochart-state';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for geochart interactions and
  * bridging the geochart state with the UI domain.

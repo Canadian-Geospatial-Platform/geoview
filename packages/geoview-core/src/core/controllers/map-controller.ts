@@ -163,6 +163,8 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for Map interactions.
  */

@@ -43,7 +43,7 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVElementByFullId } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -179,7 +179,7 @@ export function SingleLayer({
     logger.logTraceUseEffect('SINGLE-LAYER - scroll list item into view', layerIsSelected, layerId);
 
     if (layerIsSelected && layerId) {
-      const listItem = getGVElementByFullId(mapId, layerListItemButtonId);
+      const listItem = DomHelper.getGVElementByFullId(mapId, layerListItemButtonId);
       if (listItem) {
         scrollListItemIntoView(listItem);
       }
@@ -198,8 +198,13 @@ export function SingleLayer({
    * Blurs any focused button element that is not within this layer.
    */
   const blurOtherLayerButtons = useCallback((): void => {
-    const activeElement = document.activeElement as HTMLElement;
-    if (activeElement && activeElement.tagName === 'BUTTON' && !layerListItemRef.current?.contains(activeElement)) {
+    const activeElement = DomHelper.getActiveElement();
+    if (
+      activeElement instanceof HTMLElement &&
+      activeElement.tagName === 'BUTTON' &&
+      typeof activeElement.blur === 'function' &&
+      !layerListItemRef.current?.contains(activeElement)
+    ) {
       activeElement.blur();
     }
   }, []);
@@ -435,7 +440,11 @@ export function SingleLayer({
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
-    void layerCreatorController.reloadLayer(layerPath);
+    // Asynchronously reload the layer
+    layerCreatorController.reloadLayer(layerPath).catch((error: unknown) => {
+      // Log error
+      logger.logPromiseFailed(`Reload failed for GeoView layer ${layerPath}`, error);
+    });
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 
   /**
@@ -450,8 +459,11 @@ export function SingleLayer({
         // Set ref to indicate a reload has been requested so focus can be set to the reload button after status updates
         reloadRequestedRef.current = true;
 
-        // Reload layer
-        void layerCreatorController.reloadLayer(layerPath);
+        // Asynchronously reload the layer
+        layerCreatorController.reloadLayer(layerPath).catch((error: unknown) => {
+          // Log error
+          logger.logPromiseFailed(`Reload failed for GeoView layer ${layerPath}`, error);
+        });
 
         // Prevent double-firing via native button click event
         event.preventDefault();
@@ -805,13 +817,13 @@ export function SingleLayer({
       if (layerStatus === 'loaded') {
         // Successful reload - focus the main layer button
         requestAnimationFrame(() => {
-          getGVElementByFullId(mapId, layerListItemButtonId)?.focus();
+          DomHelper.getGVElementByFullId(mapId, layerListItemButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       } else if (layerStatus === 'error') {
         // Failed reload - focus the reload button for retry
         requestAnimationFrame(() => {
-          getGVElementByFullId(mapId, reloadButtonId)?.focus();
+          DomHelper.getGVElementByFullId(mapId, reloadButtonId)?.focus();
           reloadRequestedRef.current = false;
         });
       }

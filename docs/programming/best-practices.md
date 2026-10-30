@@ -137,6 +137,11 @@ Broad suppression is reserved for documented best-effort boundaries such as opti
 `GeoViewError.throwIfAborted(error)` rethrows aborts during format fallback. Update `@throws` for errors
 that now propagate; do not silently replace real failures with warnings.
 
+For fire-and-forget promise chains, attach a terminal `.catch()` that handles rejection. Do not prefix
+the chain with the `void` operator when that handler resolves normally; `void` does not handle
+rejections. If the catch handler can throw or return a rejected promise, handle that resulting
+rejection as well.
+
 ### Shared HTML rendering and error boundaries
 
 For external HTML, `UseHtmlToReact` is the shared converter. A JSX call-site try/catch cannot
@@ -676,6 +681,12 @@ onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQ
 
 **Checklist when adding a new event:** After writing the `#emit*`, `once*`, `on*`, `off*` group, verify that `once*` has `filter?: (event: EventType) => boolean` in its signature and passes it to `onceEventPromise`.
 
+### Testing transient state
+
+When a test triggers an action that emits an event, create the filtered `once*` promise **before** triggering the action. The event may be emitted synchronously, so subscribing afterward can miss it. Filter by the relevant operation and, when available, a stable entity identifier. Use the event payload to identify what changed, then read the owning store to verify its current state; receiving an event alone does not prove that the state is still present.
+
+Keep the test isolated by clearing pre-existing state and registering cleanup for state created by the test.
+
 ## <a id="accessibility"></a>17- Accessibility (WCAG 2.1 Level AA)
 
 The [accessibility guide](../app/accessibility.md) owns the shared guidance:
@@ -688,30 +699,34 @@ The [accessibility guide](../app/accessibility.md) owns the shared guidance:
 
 ## <a id="dom-access"></a>18- Map-scoped DOM access (no direct `document.*`)
 
-Multiple GeoView maps can live on the same HTML page. Every DOM id must therefore be **map-scoped**, and every DOM lookup must be **restricted to a single map's subtree** so it never resolves an element that belongs to a different map. To enforce this, direct `document.getElementById` / `document.querySelector` / `document.querySelectorAll` calls are **banned** in `geoview-core` and flagged by an ESLint `no-restricted-syntax` rule. Use the helpers below instead.
+Multiple GeoView maps can live on the same HTML page. Every DOM id must therefore be **map-scoped**, and every DOM lookup must be **restricted to a single map's subtree** so it never resolves an element that belongs to a different map. To enforce this, direct `document.getElementById` / `document.querySelector` / `document.querySelectorAll` calls are **banned** in `geoview-core` and flagged by an ESLint `no-restricted-syntax` rule.
+
+Map scoping is necessary, but it does not make DOM access appropriate in every layer. React components own the rendered UI. Keep element lookup, measurement, focus, and other DOM operations at that UI or browser-integration boundary. Controllers should request semantic UI actions or consume semantic values through APIs and events; domains should remain independent of the DOM. Moving a selector behind a helper and calling that helper from a controller only hides the dependency; it does not remove it.
 
 ### The `${mapId}-suffix` id convention
 
-DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Build ids through the helper so the convention lives in one place:
+DOM ids follow the **generic → specific** format `` `${mapId}-${suffix}` `` (e.g. `map1-shell`, `map1-appBar`, `map1-footerbar-header`). Never use the reversed `` `${suffix}-${mapId}` `` form, and never create an id without a `mapId` prefix. Use the pure ID builder so the convention lives in one place:
 
 ```ts
-import { buildGVElementId } from "@/core/utils/dom-helper";
+import { DomHelper } from "@/core/utils/dom-helper";
 
-const id = buildGVElementId(mapId, "shell"); // → "map1-shell"
+const id = DomHelper.buildGVElementId(mapId, "shell"); // → "map1-shell"
 ```
 
 ### The wrappers (`@/core/utils/dom-helper`)
 
-All wrappers scope the lookup to the map's root element. When the root is not mounted yet, they fall back to a global lookup **and log a warning** (a global lookup is not map-scoped and can hit another map).
+DOM lookup helpers scope queries to the map's root element. Use them from UI or browser-integration code that genuinely needs an imperative DOM operation and does not already have the element through a React ref or context. `DomHelper.getGVRootElement(mapId)` throws when the root is absent; other root-scoped lookup helpers also throw in that case. When the root exists, a missing descendant returns `undefined` (or an empty array for `queryGVSelectorAll`).
 
-| Helper                             | Use for                                                    | Returns                    |
-| ---------------------------------- | ---------------------------------------------------------- | -------------------------- |
-| `buildGVElementId(mapId, suffix)`  | Creating a canonical `${mapId}-suffix` id                  | `string`                   |
-| `getGVElementById(mapId, suffix)`  | Finding a descendant by its map-relative **suffix**        | `HTMLElement \| undefined` |
-| `getGVElementByFullId(mapId, id)`  | Finding a descendant when you already hold the **full** id | `HTMLElement \| undefined` |
-| `getGVRootElement(mapId)`          | Getting the map's **root** element (live DOM)              | `HTMLElement \| undefined` |
-| `queryGVSelector(mapId, selector)` | A CSS selector scoped inside the map                       | `Element \| undefined`     |
-| `queryGVSelectorAll(mapId, sel)`   | A CSS selector (all matches) scoped inside the map         | `Element[]`                |
+`buildGVElementId` only constructs a string and can be used wherever a canonical DOM id is needed. The lookup helpers return live DOM elements and belong at the UI boundary; their map-scoped behavior is not a reason for controllers or domains to query or manipulate rendered UI.
+
+| Helper | Use for | Returns |
+| --- | --- | --- |
+| `DomHelper.buildGVElementId(mapId, suffix)` | Creating a canonical `${mapId}-suffix` id | `string` |
+| `DomHelper.getGVElementById(mapId, suffix)` | Finding a descendant by its map-relative **suffix** | `HTMLElement \| undefined` |
+| `DomHelper.getGVElementByFullId(mapId, id)` | Finding a descendant when you already hold the **full** id | `HTMLElement \| undefined` |
+| `DomHelper.getGVRootElement(mapId)` | Getting the map's **root** element (live DOM) | `HTMLElement` (throws when the root is absent) |
+| `DomHelper.queryGVSelector(mapId, selector)` | A CSS selector scoped inside the map | `HTMLElement \| undefined` |
+| `DomHelper.queryGVSelectorAll(mapId, sel)` | A CSS selector (all matches) scoped inside the map | `HTMLElement[]` |
 
 ```ts
 // ❌ Bad: global, collides across maps, banned by ESLint
@@ -719,27 +734,21 @@ const el = document.getElementById(`${mapId}-appBar`);
 const tab = document.querySelector('[role="tab"][aria-selected="true"]');
 
 // ✅ Good: map-scoped wrappers
-import {
-  getGVElementById,
-  getGVElementByFullId,
-  queryGVSelector,
-} from "@/core/utils/dom-helper";
+import { DomHelper } from "@/core/utils/dom-helper";
 
-const el = getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
-const btn = getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
-const tab = queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
+const el = DomHelper.getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
+const btn = DomHelper.getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
+const tab = DomHelper.queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
 ```
 
-### TSX: the `useGVElementById` hook
+### TSX: accessing the root element
 
-In React components, prefer the reactive hook, which is backed by the store's root element (`useStoreAppGeoviewHTMLElement`). It returns a stable `(suffix) => HTMLElement | undefined` function:
+The map mount provides the host element to the React tree through `GeoViewRootElementContext`. A React component that needs the root can use `useGeoViewRootElement()` without querying the DOM during render:
 
 ```tsx
-import { useGVElementById } from "@/core/stores/states/app-state";
+import { useGeoViewRootElement } from '@/core/containers/geoview-root-context';
 
-const getElementById = useGVElementById();
-// ...later, in an effect/handler:
-getElementById("footerbar-header")?.focus();
+const geoviewElement = useGeoViewRootElement();
 ```
 
 ### Root element vs. specific descendant — which API?
@@ -748,30 +757,27 @@ This is the key decision:
 
 | You need…                                                                                               | Use                                                                                                |
 | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **The root element itself** (attach a listener to the whole map, measure it, use as a portal container) | `useStoreAppGeoviewHTMLElement()` (TSX hook) or `getStoreAppGeoviewHTMLElement(mapId)` (TS getter) |
-| The root element in a non-React one-shot, from the **live DOM**                                         | `getGVRootElement(mapId)`                                                                          |
-| A **specific descendant by id**, imperatively (effects, handlers, controllers, utils, plugins)          | `getGVElementById(mapId, suffix)` / `getGVElementByFullId(mapId, fullId)`                          |
-| A **specific descendant by id**, reactively in TSX                                                      | `useGVElementById()`                                                                               |
-| A **CSS selector** scoped to one map                                                                    | `queryGVSelector(mapId, selector)` / `queryGVSelectorAll(mapId, selector)`                         |
+| **The root element itself** in React (measure it, scope a listener, or inspect descendants)             | `useGeoViewRootElement()`                                                                           |
+| The root element in UI or browser-integration code, from the **live DOM**                               | `DomHelper.getGVRootElement(mapId)`                                                                 |
+| A **specific descendant by id** in UI code when no ref is available                                     | `DomHelper.getGVElementById(mapId, suffix)` / `DomHelper.getGVElementByFullId(mapId, fullId)`       |
+| A **CSS selector** scoped to one map in UI or browser-integration code                                   | `DomHelper.queryGVSelector(mapId, selector)` / `DomHelper.queryGVSelectorAll(mapId, selector)`      |
+| The shell element as a React portal/container target                                                    | `useShellContainer()`                                                                               |
 
-**Why the store getter/hook is fine for the root but not for descendant lookups:** the store getter/hook returns the map's root element (a legitimate store value, not a raw DOM query, so it is not banned). For a **descendant**, hand-rolling `useStoreAppGeoviewHTMLElement().querySelector('#' + CSS.escape(...))` re-implements the id-building, escaping, scoping, and fallback at every call site — exactly the duplication the wrappers remove.
+`useGeoViewRootElement()` reads the host reference supplied by the map mount. It is not stored in Zustand, and the same host is available for the lifetime of the mounted React tree, including through portals. In UI effects and handlers, prefer an existing ref or context; use the map-scoped `DomHelper` wrappers only when an imperative descendant lookup is actually needed. Controllers should not receive DOM elements or call `DomHelper` to implement UI behavior. Expose a semantic action or value instead, such as a request to open a registered panel or a measured layout inset.
 
-**`getGVRootElement` vs `getStoreAppGeoviewHTMLElement`:** the wrapper reads the **live DOM** (`document.getElementById(mapId)`) each call — robust during init/teardown; the store getter returns a **cached** reference (which is the placeholder `<div>` until config is applied). Use the store getter/hook when you want the React-tracked root (and no null handling); use `getGVRootElement` for imperative one-shots that must reflect the current DOM.
+**`useGeoViewRootElement` vs. `DomHelper.getGVRootElement`:** use the context hook in React render and lifecycle code; it returns the exact host element used to mount that map. Use the helper for imperative code that has a `mapId`; it resolves the live DOM element and throws if the host is absent.
 
-### Store hook vs. dom-helper: reactive vs. imperative
+### React context vs. DomHelper
 
-A common question is "now that the dom-helper does the same map-scoped lookup, why keep the root cached in the store at all?" The answer: **the store does not cache a faster lookup — it caches a _reactive anchor_.** Only the **root** element is stored (`appState.geoviewHTMLElement`); the descendant hooks (`useGVElementById`, `useStoreAppShellContainer`) still do a live scoped query — they just anchor it on that reactive root. The store provides two things the dom-helper does not:
-
-1. **Reactivity (the main reason).** The stored root starts as a throwaway placeholder `<div>` and is assigned the real element **once** at startup. That `set()` **re-renders every subscriber**, which is exactly what makes a descendant hook re-run and finally resolve (e.g. `#map1-shell`). A `getGVRootElement(mapId)` called in a render body returns `undefined` on the early renders and **never triggers a re-render** when the element later mounts — there is no subscription.
-2. **Render-safety / purity.** Reading the store in render is pure and concurrent-safe. Calling `document.getElementById` (or `getGVRootElement`) **in the render body** is a DOM read during render — impure and unsafe under concurrent React. It is perfectly fine inside an event handler, `useEffect`, controller, or util, but not in render.
-
-So they are **layered, not competing** — the store even populates itself _using_ the dom-helper (`getGVRootElement`). Pick by moment of use:
+The root is supplied by the map mount before React descendants render, so React components do not need a store subscription or a DOM lookup during render. Choose the API by where the element is needed:
 
 | Moment of use                                                                                                                                      | Use                                                                                               |
 | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **During render** — portal `container`, focus-trap container, a prop, or the component must **re-render** when the element appears                 | **store hook** (`useStoreAppGeoviewHTMLElement`, `useStoreAppShellContainer`, `useGVElementById`) |
-| **At the moment of an action** — click/keydown handler, `useEffect` body, controller method, scroll-into-view (element is guaranteed present then) | **dom-helper** (`getGVElementById`, `queryGVSelector`, `getGVRootElement`)                        |
-| **Non-React `.ts`** — controllers, layer code (no hooks available)                                                                                 | **dom-helper**                                                                                    |
+| **During React render** — access the map root or shell portal container                                                                            | **context hooks** (`useGeoViewRootElement`, `useShellContainer`)                                 |
+| **In an effect or event handler** — find a descendant when no ref is available                                                                     | **DomHelper** (`getGVElementById`, `queryGVSelector`, `getGVRootElement`)                        |
+| **In non-React UI or browser-integration code** — perform a necessary map-scoped DOM operation                                                    | **DomHelper**                                                                                    |
+| **In a controller or domain** — request UI behavior or use layout/state information                                                               | **A semantic API, event, or value; not `DomHelper` or an `HTMLElement`**                         |
+| **In tests** — locate a map-owned element for an assertion or interaction                                                                          | **DomHelper**                                                                                    |
 
 ### Legitimate exceptions (keep `document.*`, add a disable)
 
@@ -783,7 +789,7 @@ A few lookups are genuinely **not** a single map's descendant. Keep the raw `doc
 - **Generic `@/ui` components** (`slider`, `popover`) that receive a `containerId` prop and have **no** `mapId`.
 - **The fullscreen-portaled guide**, which is map-scoped via `[data-map-id="${mapId}"]` but must be queried globally because the portal moves it out of the map root.
 
-> Note: `document.getElementsByClassName` / `getElementsByTagName` are **not** flagged by the rule, but still scope them to a map's root (e.g. `getGVRootElement(mapId)?.getElementsByClassName(...)`) whenever the result should be map-specific.
+> Note: `document.getElementsByClassName` / `getElementsByTagName` are **not** flagged by the rule, but still scope them to a map's root (e.g. `DomHelper.getGVRootElement(mapId).getElementsByClassName(...)`) whenever the result should be map-specific.
 
 ## <a id="where-to-log"></a>19- Where to log — controllers, not store state files
 

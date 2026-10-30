@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { DataTableTester } from '../testers/data-table-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
  * Test Suite for Data Table component tests.
@@ -17,13 +16,12 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    */
-  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
-    super(api, mapViewer, controllerRegistry);
+  constructor(api: API, mapViewer: MapViewer) {
+    super(api, mapViewer);
 
     // Create the Data Table tester
-    this.#dataTableTester = new DataTableTester(api, mapViewer, controllerRegistry);
+    this.#dataTableTester = new DataTableTester(api, mapViewer);
     this.addTester(this.#dataTableTester);
   }
 
@@ -45,7 +43,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     return `Tests the Data Table footer panel store and DOM behavior:<br/>
       <b>Features</b> — allFeaturesDataArray population (GeoJSON + ESRI)<br/>
       <b>Settings</b> — geoviewID column hidden, column visibility toggle, rows filtered count<br/>
-      <b>Filters</b> — mapFilteredRecord default/set, global filter disables toggle, column filter set/clear<br/>
+      <b>Filters</b> — mapFilteredRecord default/set, global filter disables toggle, column filter set/clear, Cities name and population range filters<br/>
       <b>Extent filter</b> — Available for vector, unavailable for ESRI Dynamic, zoom-to-Ontario filtering<br/>
       <b>Style filter</b> — showUnsymbolizedFeatures:false pre-filters table rows`;
   }
@@ -56,7 +54,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 14;
+    return 16;
   }
 
   /**
@@ -84,7 +82,9 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
+    // await this.#dataTableTester.testLayerDataIsFiltered();
+    await this.#dataTableTester.testCitiesNameFilterCount();
+    await this.#dataTableTester.testPolygonsAdditionalFilters();
     return Promise.resolve();
   }
 
@@ -99,9 +99,11 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 600);
     await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable(DataTableTester.GEOPACKAGE_EMPTY_FIELD_LAYER_PATH);
-    await this.#dataTableTester.testMapFilteredRecordDefault(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testLayerDataIsFiltered();
+    await this.#dataTableTester.testPolygonsAdditionalFilters();
     await this.#dataTableTester.testSetMapFilteredRecordFalse(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testGlobalFilterRecord(DataTableTester.GEOJSON_LAYER_PATH, 'Ontario');
+    await this.#dataTableTester.testCitiesNameFilterCount();
     await this.#dataTableTester.testClearFiltersResetsState('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', [
       { id: 'JUR_EN', value: 'Ontario' },
       { id: 'CONFLICT_EN', value: 'First' },

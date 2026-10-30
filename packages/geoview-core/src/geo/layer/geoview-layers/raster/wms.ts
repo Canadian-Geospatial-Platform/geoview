@@ -1242,11 +1242,8 @@ export class WMS extends AbstractGeoViewRaster {
 
       // Avoid duplicate fetches for the same layerId
       if (!seen.has(layerConfig.layerId)) {
-        const promise = (async (): Promise<MetatadaFetchResult> => {
-          try {
-            // Perform the actual metadata fetch
-            const result = await this.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal);
-
+        const promise: Promise<MetatadaFetchResult> = this.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal)
+          .then((result): MetatadaFetchResult => {
             // Validate capabilities exist
             if (!result.data.Capability) {
               // Wrap error about no capabilities found. Search id: 8c97d776.
@@ -1257,7 +1254,8 @@ export class WMS extends AbstractGeoViewRaster {
             }
 
             return { metadata: result.data, proxyUsed: result.proxyUsed, layerConfig };
-          } catch (error: unknown) {
+          })
+          .catch((error: unknown): never => {
             // If already wrapped, rethrow as-is
             if (error instanceof PromiseRejectErrorWrapper) throw error;
 
@@ -1270,8 +1268,7 @@ export class WMS extends AbstractGeoViewRaster {
               ),
               layerConfig
             );
-          }
-        })();
+          });
 
         // Store the promise for this layerId to avoid duplicate requests
         seen.set(layerConfig.layerId, promise);

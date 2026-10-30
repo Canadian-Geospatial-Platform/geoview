@@ -232,6 +232,16 @@ export abstract class DateMgt {
   // #region STATIC PUBLIC METHODS
 
   /**
+   * Checks whether a value is a Dayjs instance.
+   *
+   * @param value - The value to check
+   * @returns Whether the value is a Dayjs instance
+   */
+  static isDayjs(value: unknown): value is Dayjs {
+    return dayjs.isDayjs(value);
+  }
+
+  /**
    * Checks whether an OGC time dimension contains comma-separated discrete values.
    *
    * @param ogcTimeDimension - The OGC time dimension value to check

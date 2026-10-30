@@ -19,8 +19,9 @@ import { Select } from '@/ui/select/select';
 import { Stepper } from '@/ui/stepper/stepper';
 import { TextField } from '@/ui/text-field/text-field';
 import { ConfigApi } from '@/api/config/config-api';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapConfigServiceUrlsProxyUrl } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay, generateId, isValidUUID, validateAndPingUrlOGC } from '@/core/utils/utilities';
@@ -409,7 +410,7 @@ export function AddNewLayer(): JSX.Element {
   const serviceTypeErrorId = `${baseId}-service-type-error`;
   const disabledLayerTypes = useStoreAppDisabledLayerTypes();
   const language = useStoreAppDisplayLanguage();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
   const configProxyUrl = useStoreMapConfigServiceUrlsProxyUrl();
   const uiController = useUIController();
   const geoChartController = useGeoChartControllerIfExists();
@@ -1047,9 +1048,13 @@ export function AddNewLayer(): JSX.Element {
 
     if (activeStep === 0) {
       // Focus the upload button using the ref
-      void delay(0).then(() => {
-        uploadButtonRef.current?.focus();
-      });
+      delay(0)
+        .then(() => {
+          uploadButtonRef.current?.focus();
+        })
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('Focus management failed', error);
+        });
 
       return undefined;
     }

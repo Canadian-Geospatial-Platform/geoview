@@ -7,10 +7,13 @@ import { Tabs } from '@/ui/tabs/tabs';
 // default tabs icon and class
 import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 
-import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './footer-bar-style';
+import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
+import { FooterPlugin } from '@/api/plugin/footer-plugin';
+import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import { useStoreAppIsFullscreenActive, useStoreAppHeight, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreAppIsFullscreenActive, useStoreAppHeight } from '@/core/stores/states/app-state';
 import { useStoreDetailsLayerDataArrayBatch } from '@/core/stores/states/feature-info-state';
 import {
   useStoreUIActiveFooterBarTab,
@@ -19,10 +22,9 @@ import {
   useStoreUIHiddenTabs,
   useStoreUIFooterTabs,
 } from '@/core/stores/states/ui-state';
-import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
@@ -32,7 +34,6 @@ import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 import { Guide } from '@/core/components/guide/guide';
-import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import type { FooterBarApi } from './footer-bar-api';
 
 /** Props for the FooterBar component. */
@@ -71,9 +72,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const arrayOfLayerDataBatch = useStoreDetailsLayerDataArrayBatch();
   const activeFooterBarTab = useStoreUIActiveFooterBarTab();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
   const backupAppHeight: number = useStoreAppHeight();
-  const appHeight = getGVRootDataAttribute(mapId, 'data-footer-height') ?? `${backupAppHeight}px`;
+  const appHeight = DomHelper.getDataFooterHeight(mapId, backupAppHeight);
   const hiddenTabs: string[] = useStoreUIHiddenTabs();
   const uiController = useUIController();
   const pluginController = usePluginController();

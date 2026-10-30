@@ -6,8 +6,10 @@ import {
   getStoreSwiperOrientation,
   getStoreSwiperPosition,
 } from 'geoview-core/core/stores/states/swiper-state';
-import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { whenThisThen } from 'geoview-core/core/utils/utilities';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /** Listener counts and renderer state captured during the swiper render-isolation test. */
 type SwiperRenderIsolationResult = {
@@ -194,14 +196,16 @@ export class SwiperTester extends GVAbstractTester {
         const wmsOLLayer = wmsLayer.getOLLayer();
         const nonTargetOLLayer = nonTargetLayer.getOLLayer();
         const wmsBaseline = wmsOLLayer.getListeners('prerender')?.length ?? 0;
+        const wmsPostRenderBaseline = wmsOLLayer.getListeners('postrender')?.length ?? 0;
         const nonTargetBaseline = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
+        const nonTargetPostRenderBaseline = nonTargetOLLayer.getListeners('postrender')?.length ?? 0;
 
         test.addStep('Selecting both layers for the Swiper...');
         controller.setLayerPaths(targetPaths);
-        await SwiperTester.waitForCondition(() => (wmsOLLayer.getListeners('prerender')?.length ?? 0) === wmsBaseline + 1);
+        await SwiperTester.#waitForLayerRenderHandlers(wmsLayer, wmsBaseline + 1, wmsPostRenderBaseline + 1);
         const wmsHandlers = wmsOLLayer.getListeners('prerender')?.length ?? 0;
 
-        await SwiperTester.waitForCondition(() => (nonTargetOLLayer.getListeners('prerender')?.length ?? 0) === nonTargetBaseline + 1);
+        await SwiperTester.#waitForLayerRenderHandlers(nonTargetLayer, nonTargetBaseline + 1, nonTargetPostRenderBaseline + 1);
         const nonTargetHandlers = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
         return { wmsHandlers, nonTargetHandlers };
       },
@@ -225,18 +229,14 @@ export class SwiperTester extends GVAbstractTester {
     return this.test(
       'Test Swiper settings-panel gating...',
       async (test) => {
-        const mapRoot = getGVRootElement(this.getMapId());
         const { layerController } = this.getControllersRegistry();
         const layerPath = SwiperTester.SWIPER_WMS_LAYER_PATH;
 
         test.addStep('Enabling interactive Swiper mode and selecting a layer...');
         this.getControllersRegistry().swiperController!.setInteractive(true);
         layerController.setSelectedLayerPath(layerPath);
-        await SwiperTester.waitForCondition(() => !!mapRoot?.querySelector('[aria-label="Layer settings"]'));
-
-        const settingsButton = mapRoot?.querySelector('[aria-label="Layer settings"]') as HTMLElement | null;
-        settingsButton?.click();
-        await SwiperTester.waitForCondition(() => mapRoot?.textContent?.includes('Use with swiper bar') ?? false);
+        const settingsButton = await DomHelper.Swiper.waitAndClickLayerSettingsButton(this.getMapId());
+        await DomHelper.Swiper.waitForSwiperBarOption(this.getMapId());
 
         return {
           interactive: getStoreSwiperInteractive(this.getMapId()),
@@ -314,12 +314,7 @@ export class SwiperTester extends GVAbstractTester {
         this.getControllersRegistry().swiperController!.setLayerPaths([SwiperTester.SWIPER_WMS_ROOT_LAYER_PATH]);
 
         test.addStep('Waiting for React to attach render handlers to the target descendant...');
-        await SwiperTester.waitForCondition(() => {
-          return (
-            (targetOLLayer.getListeners('prerender')?.length ?? 0) === targetPreRenderBaseline + 1 &&
-            (targetOLLayer.getListeners('postrender')?.length ?? 0) === targetPostRenderBaseline + 1
-          );
-        });
+        await SwiperTester.#waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline + 1, targetPostRenderBaseline + 1);
 
         const targetPreRenderActive = targetOLLayer.getListeners('prerender')?.length ?? 0;
         const targetPostRenderActive = targetOLLayer.getListeners('postrender')?.length ?? 0;
@@ -334,12 +329,7 @@ export class SwiperTester extends GVAbstractTester {
 
         test.addStep('Removing swiper paths and waiting for target render handlers to detach...');
         this.getControllersRegistry().swiperController!.removeAllLayerPaths();
-        await SwiperTester.waitForCondition(() => {
-          return (
-            (targetOLLayer.getListeners('prerender')?.length ?? 0) === targetPreRenderBaseline &&
-            (targetOLLayer.getListeners('postrender')?.length ?? 0) === targetPostRenderBaseline
-          );
-        });
+        await SwiperTester.#waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline, targetPostRenderBaseline);
 
         return {
           targetPreRenderBaseline,
@@ -373,12 +363,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsEqual(result.nonTargetPreRenderClean, result.nonTargetPreRenderBaseline);
         Test.assertIsEqual(result.nonTargetPostRenderClean, result.nonTargetPostRenderBaseline);
       },
-      async () => {
+      () => {
         this.getControllersRegistry().swiperController!.removeAllLayerPaths();
         this.getControllersRegistry().swiperController!.setOrientation('vertical');
-        await SwiperTester.waitForCondition(() => {
-          return getStoreSwiperLayerPaths(this.getMapId()).length === 0 && getStoreSwiperOrientation(this.getMapId()) === 'vertical';
-        });
       }
     );
   }
@@ -477,6 +464,27 @@ export class SwiperTester extends GVAbstractTester {
         const finalLayerPaths = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(finalLayerPaths, 0);
       }
+    );
+  }
+
+  /**
+   * Waits for a layer's Swiper render handlers to reach the expected listener counts.
+   *
+   * @param layer - The layer to inspect
+   * @param expectedPreRenderCount - Expected prerender listener count
+   * @param expectedPostRenderCount - Expected postrender listener count
+   * @returns A promise that resolves when both listener counts match
+   */
+  static async #waitForLayerRenderHandlers(
+    layer: AbstractBaseGVLayer,
+    expectedPreRenderCount: number,
+    expectedPostRenderCount: number
+  ): Promise<void> {
+    const olLayer = layer.getOLLayer();
+    await whenThisThen(
+      () =>
+        (olLayer.getListeners('prerender')?.length ?? 0) === expectedPreRenderCount &&
+        (olLayer.getListeners('postrender')?.length ?? 0) === expectedPostRenderCount
     );
   }
 }

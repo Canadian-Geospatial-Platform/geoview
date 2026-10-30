@@ -13,12 +13,12 @@ import { Popper } from '@/ui/popper/popper';
 import { Slider } from '@/ui/slider/slider';
 import { Typography } from '@/ui/typography/typography';
 
+import { getSxClasses } from './resize-footer-panel-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getSxClasses } from './resize-footer-panel-style';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreUIFooterPanelResizeValue, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -72,7 +72,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Get container
   const mapId = useStoreGeoViewMapId();
-  const mapElem = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // Element IDs for accessibility and focus management
   const closeButtonId = `${mapId}-resize-close-button`;
@@ -257,7 +257,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           anchorEl={anchorEl}
           placement="top-start"
           strategy="fixed"
-          container={mapElem}
+          container={shellContainer}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           handleKeyDown={handleEscapeKey}

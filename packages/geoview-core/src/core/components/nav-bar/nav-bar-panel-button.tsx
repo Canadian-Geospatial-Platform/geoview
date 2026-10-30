@@ -1,4 +1,4 @@
-import { useMemo, useState, cloneElement, isValidElement, useId } from 'react';
+import { useMemo, useRef, useState, cloneElement, isValidElement, useId } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,13 +11,14 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { DialogTitle, DialogContent, Box } from '@/ui/layout';
 import { Paper } from '@/ui/paper/paper';
 import { CloseIcon } from '@/ui/icons';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
+
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
-import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -25,6 +26,8 @@ interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
   /** Whether the button is in an active state. */
   isActive?: boolean;
+  /** Requests a change to the panel's open state. */
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 /**
@@ -33,7 +36,7 @@ interface NavbarPanelButtonType {
  * @param props - The navbar panel button properties
  * @returns The navbar panel button component
  */
-export default function NavbarPanelButton({ buttonPanel, isActive = false }: NavbarPanelButtonType): JSX.Element {
+export default function NavbarPanelButton({ buttonPanel, isActive = false, onOpenChange }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
@@ -45,7 +48,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // Extract panel width if provided
   const panelWidth = buttonPanel.panel?.width;
@@ -61,8 +64,10 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   }, [theme, panelWidth]);
 
   // States
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [localOpen, setLocalOpen] = useState(buttonPanel.panel?.status ?? false);
+  const open = onOpenChange ? (buttonPanel.panel?.status ?? false) : localOpen;
+  const anchorEl = buttonRef.current;
 
   // #region Handlers
 
@@ -70,19 +75,21 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
    * Closes the panel and clears the anchor element.
    */
   const closePanel = (): void => {
-    setOpen(false);
-    setAnchorEl(null);
+    if (onOpenChange) {
+      onOpenChange(false);
+    } else {
+      setLocalOpen(false);
+    }
   };
 
   /**
    * Handles when the user clicks the navbar button to toggle the panel.
    */
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (open) {
-      closePanel();
+  const handleClick = (): void => {
+    if (onOpenChange) {
+      onOpenChange(!open);
     } else {
-      setAnchorEl(event.currentTarget);
-      setOpen(true);
+      setLocalOpen(!open);
     }
   };
 
@@ -120,6 +127,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
+          iconRef={buttonRef}
           aria-label={t(buttonPanel.button['aria-label'])}
           aria-expanded={open}
           aria-haspopup="dialog"

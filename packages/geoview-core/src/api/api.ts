@@ -6,18 +6,7 @@ import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import {
-  GV_DOM_SUFFIX,
-  buildGVElementId,
-  getGVElementById,
-  getGVElementByFullId,
-  getGVGuidebox,
-  getGVMapTargetElement,
-  getGVRootElement,
-  getGVShellElement,
-  queryGVSelector,
-  queryGVSelectorAll,
-} from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
@@ -51,16 +40,17 @@ export class API {
     projection: Projection,
     date: DateMgt,
     renderer: GeoviewRenderer,
+    // TODO: CHECK IMPORTANT - Consider changing this to `dom: DomHelper` directly
     dom: {
-      buildGVElementId,
-      getGVRootElement,
-      getGVElementById,
-      getGVElementByFullId,
-      getGVMapTargetElement,
-      getGVShellElement,
-      getGVGuidebox,
-      queryGVSelector,
-      queryGVSelectorAll,
+      buildGVElementId: DomHelper.buildGVElementId,
+      getGVRootElement: DomHelper.getGVRootElement,
+      getGVElementById: DomHelper.getGVElementById,
+      getGVElementByFullId: DomHelper.getGVElementByFullId,
+      getGVMapTargetElement: DomHelper.getMapTargetElement,
+      getGVShellElement: DomHelper.getShellElement,
+      getGVGuidebox: DomHelper.getGuidebox,
+      queryGVSelector: DomHelper.queryGVSelector,
+      queryGVSelectorAll: DomHelper.queryGVSelectorAll,
     },
   };
 
@@ -172,7 +162,7 @@ export class API {
     }
 
     // Get the div container
-    const divContainer = getGVRootElement(mapId);
+    const gvRootElement = DomHelper.getGVRootElement(mapId);
 
     // Delete the map
     await this.getMapViewer(mapId).delete();
@@ -181,7 +171,7 @@ export class API {
     delete this.#maps[mapId];
 
     // Unmount the map
-    unmountMap(mapId, divContainer);
+    unmountMap(mapId, gvRootElement);
 
     // GV Now that we're unmounted, we can remove the store, best practice
     try {
@@ -193,18 +183,18 @@ export class API {
     }
 
     // If the div container was found
-    if (divContainer) {
+    if (gvRootElement) {
       // Remove geoview-class if we need to reuse the div
-      divContainer.classList.remove('geoview-map');
+      gvRootElement.classList.remove('geoview-map');
 
       // If we have a data-config-url and a data-config attribute
-      if (divContainer.getAttribute('data-config-url') && divContainer.getAttribute('data-config')) {
+      if (gvRootElement.getAttribute('data-config-url') && gvRootElement.getAttribute('data-config')) {
         // Delete the data-config property, because it'll clash with the data-config-url if we try to reload a map in the current div
-        divContainer.removeAttribute('data-config');
+        gvRootElement.removeAttribute('data-config');
       }
 
       // If deleteContainer, delete the HTML div
-      if (deleteContainer) divContainer.remove();
+      if (deleteContainer) gvRootElement.remove();
     }
   }
 
@@ -376,9 +366,9 @@ export class API {
 
       // get array of map elements
       const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));
-      const activeEl = document.activeElement;
+      const activeEl = DomHelper.getActiveElement();
 
-      if (elements.some((element) => element.contains(activeEl))) {
+      if (elements.some((element) => activeEl && element.contains(activeEl))) {
         // Check if the focus element is a map and set store value for crosshair
         const mapId =
           activeEl?.closest('.geoview-shell') !== null
@@ -389,7 +379,7 @@ export class API {
             : undefined;
 
         if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget);
+          const mapFocus = activeEl?.getAttribute('id') === DomHelper.buildMapTargetElementId(mapId);
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);

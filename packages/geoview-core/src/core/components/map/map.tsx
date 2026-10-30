@@ -23,9 +23,9 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
-import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { buildGVElementId, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Props for the Map component. */
 type MapProps = {
@@ -58,8 +58,6 @@ export function Map(props: MapProps): JSX.Element {
   const mapLoaded = useStoreMapLoaded();
   const mapInteraction = useStoreMapInteraction();
   const layersAreLoading = useStoreLayerAreLayersLoading();
-  const geoviewHTMLElement = useStoreAppGeoviewHTMLElement();
-
   const uiController = useUIController();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
@@ -77,7 +75,7 @@ export function Map(props: MapProps): JSX.Element {
       hasRun.current = true;
 
       // Create map
-      viewer.createMap(mapElement.current);
+      viewer.createMap(mapElement.current, DomHelper.getMapContainer(viewer.mapId));
     }
     // NOTE: `viewer` is included for React exhaustive-deps compliance but does not change during component lifetime.
   }, [viewer]);
@@ -87,21 +85,22 @@ export function Map(props: MapProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('MAP - Crosshair shortcut listener');
+    logger.logTraceUseEffect('MAP - Keyboard event listener');
 
     const handleGlobalShortcut = (event: KeyboardEvent): void => {
+      const activeElement = DomHelper.getActiveElementWithinMap(mapId);
+
+      // Only handle shortcuts while focus is within this specific map instance.
+      if (!activeElement) return;
+
+      const isTextInputFocused = DomHelper.isInputOrContentEditableElement(activeElement);
+      const isMapTargetFocused = mapElement.current?.contains(activeElement) ?? false;
+      viewer.notifyMapKeyboardEvent({ keyboardEvent: event, isTextInputFocused, isMapTargetFocused });
+
       // Ctrl+M (or Cmd+M on Mac)
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey) {
         // Only activate if map interaction is not static
         if (mapInteraction !== 'static' && mapElement.current) {
-          // Check if the currently focused element is within the GeoView app
-          const { activeElement } = document;
-
-          // Only respond if focus is within this specific map instance
-          if (!activeElement || !geoviewHTMLElement?.contains(activeElement)) {
-            return; // Focus is not in this map - let another map instance handle it
-          }
-
           event.preventDefault();
 
           // Focus the map element (this will trigger crosshair activation)
@@ -121,12 +120,12 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [mapInteraction, mapId, uiController, geoviewHTMLElement]);
+  }, [viewer, mapInteraction, mapId, uiController]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
     <Box
-      id={buildGVElementId(mapId, GV_DOM_SUFFIX.mapTarget)}
+      id={DomHelper.buildMapTargetElementId(mapId)}
       ref={mapElement}
       sx={memoSxClasses.mapContainer}
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the map region is keyboard-operable (arrow-key panning, crosshair) when interaction is dynamic

@@ -92,7 +92,7 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-      const { t } = useTranslation();
+    const { t } = useTranslation();
     let layerName = useStoreLayerName(selectedLayerPath!);
     if (!layerName && selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
       layerName = t('details.coordinateInfoTitle');
@@ -187,15 +187,9 @@ const Layout = forwardRef(
     const handleRightPanelClosed = useCallback((): void => {
       onRightPanelClosed?.();
 
-      // Compute focus target once
-      const focusTargetId = (() => {
-        if (!selectedLayerPath) return 'no-focus';
+      const selectedLayer = selectedLayerPath ? layerList.find((layer) => layer.layerPath === selectedLayerPath) : undefined;
 
-        const layer = layerList.find((l) => l.layerPath === selectedLayerPath);
-        return layer?.layerUniqueId ?? 'no-focus';
-      })();
-
-      uiController.disableFocusTrap(focusTargetId);
+      uiController.disableFocusTrap(selectedLayer?.layerUniqueId ?? 'no-focus');
     }, [onRightPanelClosed, selectedLayerPath, layerList, uiController]);
 
     return (

@@ -6,7 +6,7 @@
  * attach and detach event subscriptions.
  */
 export class AbstractController {
-  //#region PUBLIC METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Activates the controller by calling the `onHook()` template method.
@@ -26,9 +26,9 @@ export class AbstractController {
     this.onUnhook();
   }
 
-  //#endregion PUBLIC METHODS
+  // #endregion PUBLIC METHODS
 
-  //#region PROTECTED METHODS
+  // #region PROTECTED METHODS
 
   /**
    * Template method for subclasses to attach event subscriptions.
@@ -51,5 +51,5 @@ export class AbstractController {
     // To be implemented by subclasses
   }
 
-  //#endregion PROTECTED METHODS
+  // #endregion PROTECTED METHODS
 }

@@ -4,6 +4,7 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -150,7 +151,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
-        await this.waitForAppbarTabSelected('details');
+        await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
 
         // Keep track of the store state
         const clickMarkerBefore = getStoreMapClickMarker(this.getMapId());
@@ -175,7 +176,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open (should already be open in fact)...`);
-        await this.waitForAppbarTabSelected('details');
+        await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
 
         // Keep track of the store state
         const highlighted2Before = getStoreMapHighlightedFeatures(this.getMapId());

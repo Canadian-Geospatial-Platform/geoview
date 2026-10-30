@@ -34,6 +34,7 @@ import type {
   TypeValidAppBarCoreProps,
   TypeValidFooterBarTabsCoreProps,
   TypeViewportBoundaryLonLat,
+  TypeScaleInfo,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -77,7 +78,6 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui/modal/modal-api';
 import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
-import { getGVElementById } from '@/core/utils/dom-helper';
 import { debounce } from '@/core/utils/debounce';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -90,6 +90,7 @@ import {
 } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { InvalidExtentError, InvalidViewportMidpointsError, MapViewportUnavailableError } from '@/core/exceptions/geoview-exceptions';
 import { CancelledError } from '@/core/exceptions/core-exceptions';
 import { Notifications } from '@/core/utils/notifications';
@@ -97,7 +98,7 @@ import {
   getStoreMapCurrentBasemapOptionsOrInitial,
   getStoreMapConfigViewSettings,
   getStoreMapStateJson,
-  type TypeScaleInfo,
+  getStoreMapGeolocatorSearchArea,
 } from '@/core/stores/states/map-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -128,6 +129,9 @@ export class MapViewer {
 
   /** Map features configuration properties */
   mapFeaturesConfig: TypeMapFeaturesConfig;
+
+  /** URL used to load the map configuration, when initialized from a config URL. */
+  readonly mapConfigUrl: string | undefined;
 
   /** The id of the map */
   mapId: string;
@@ -264,6 +268,9 @@ export class MapViewer {
   /** Callback delegates for the map projection changed event */
   #onMapProjectionChangedHandlers: MapProjectionChangedDelegate[] = [];
 
+  /** Callback delegates for map-scoped keyboard events */
+  #onMapKeyboardEventHandlers: MapKeyboardEventDelegate[] = [];
+
   /** Callback delegates for the map component added event */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
@@ -331,10 +338,12 @@ export class MapViewer {
    *
    * @param mapFeaturesConfig - Map properties
    * @param i18instance - Language instance
+   * @param mapConfigUrl - Optional URL used to load the map configuration
    */
-  constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
+  constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n, mapConfigUrl?: string) {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
+    this.mapConfigUrl = mapConfigUrl;
 
     // Initialize the ui domain
     this.#uiDomain = new UIDomain(
@@ -388,9 +397,10 @@ export class MapViewer {
    * This function is called from a useEffect and should be running synchronously.
    *
    * @param mapElement - HTML element to create the map within
+   * @param keyboardTarget - HTML element to attach keyboard events to
    * @returns The OpenLayer map
    */
-  createMap(mapElement: HTMLElement): OLMap {
+  createMap(mapElement: HTMLElement, keyboardTarget: HTMLElement): OLMap {
     // config object
     const mapViewSettings = this.mapFeaturesConfig?.map.viewSettings;
 
@@ -428,7 +438,7 @@ export class MapViewer {
         padding: [0, 0, mapInfoInitialHeight, 0],
       }),
       controls: [],
-      keyboardEventTarget: this.getHTMLElementMapContainer(),
+      keyboardEventTarget: keyboardTarget,
     });
 
     // Set the map
@@ -516,6 +526,7 @@ export class MapViewer {
   /**
    * Initializes the map controls
    */
+  // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it creates application components on top of the map itself
   initMapControls(): void {
     // Log
     logger.logTraceCore('MAP VIEWER - initMapControls', this.mapId);
@@ -527,14 +538,14 @@ export class MapViewer {
     // Add map controls (scale)
     const scaleBarMetric = new ScaleLine({
       units: 'metric',
-      target: this.getHTMLElementScaleControlBarMetric(),
+      target: DomHelper.getScaleControlBarMetric(mapId),
       bar: true,
       text: true,
     });
 
     const scaleBarImperial = new ScaleLine({
       units: 'imperial',
-      target: this.getHTMLElementScaleControlBarImperial(),
+      target: DomHelper.getScaleControlBarImperial(mapId),
       bar: true,
       text: true,
     });
@@ -552,7 +563,7 @@ export class MapViewer {
       id: northPoleId,
       position: northPolePosition,
       positioning: 'center-center',
-      element: this.getHTMLElementNorthPole(),
+      element: DomHelper.getNorthPole(mapId),
       stopEvent: false,
     });
     map.addOverlay(this.#northPoleMarkerOverlay);
@@ -564,7 +575,7 @@ export class MapViewer {
       position: [-1, -1],
       positioning: 'center-center',
       offset: [-18, -30],
-      element: this.getHTMLElementClickMarker(),
+      element: DomHelper.getClickMarker(mapId),
       stopEvent: false,
     });
     map.addOverlay(this.#clickMarkerOverlay);
@@ -589,6 +600,32 @@ export class MapViewer {
     // GV Using '!' here, because initMapControls is always supposed to be executed
     return this.#northPoleMarkerOverlay!;
   }
+
+  // #region MAP DOM ELEMENTS (only core OpenLayers controls in this region, because they are directly attached to the map behavior, everything else in DOM Adaptors)
+
+  /**
+   * Retrieves the scale information from the DOM elements.
+   *
+   * @returns The scale information object
+   */
+  getScaleInfoFromDomElement(): TypeScaleInfo {
+    // Get metric values
+    const scaleControlBarMetric = DomHelper.getScaleControlBarMetric(this.mapId);
+    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // Get imperial values
+    const scaleControlBarImperial = DomHelper.getScaleControlBarImperial(this.mapId);
+    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // get resolution value (same for metric and imperial)
+    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
+
+    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
+  }
+
+  // #endregion MAP DOM ELEMENTS
 
   // #region MAP STATES
 
@@ -882,7 +919,7 @@ export class MapViewer {
   // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it has nothing to do with the map itself
   getGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
     // Redirect to controller
-    return this.controllers.uiController.getMapGeolocatorSearchArea();
+    return getStoreMapGeolocatorSearchArea(this.mapId);
   }
 
   /**
@@ -1580,60 +1617,6 @@ export class MapViewer {
   // #region HTML DOM MANIPULATIONS
 
   /**
-   * Gets the map keyboard event target element.
-   *
-   * @returns The map container HTML element, if found
-   */
-  getHTMLElementMapContainer(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'map');
-  }
-
-  /**
-   * Gets the scale control bar metric element.
-   *
-   * @returns The scale control bar metric HTML element, if found
-   */
-  getHTMLElementScaleControlBarMetric(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'scaleControlBarMetric');
-  }
-
-  /**
-   * Gets the scale control bar imperial element.
-   *
-   * @returns The scale control bar imperial HTML element, if found
-   */
-  getHTMLElementScaleControlBarImperial(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'scaleControlBarImperial');
-  }
-
-  /**
-   * Gets the north pole marker element.
-   *
-   * @returns The north pole marker HTML element, if found
-   */
-  getHTMLElementNorthPole(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'northpole');
-  }
-
-  /**
-   * Gets the click marker element.
-   *
-   * @returns The click marker HTML element, if found
-   */
-  getHTMLElementClickMarker(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'clickmarker');
-  }
-
-  /**
-   * Gets the map info bar element.
-   *
-   * @returns The map info bar HTML element, if found
-   */
-  getHTMLElementMapInfo(): HTMLElement | undefined {
-    return getGVElementById(this.mapId, 'mapInfo');
-  }
-
-  /**
    * Calculates the height of the map-info bar in map coordinate units.
    *
    * This is useful for understanding how much of the map extent is hidden beneath the map-info bar overlay.
@@ -1642,8 +1625,8 @@ export class MapViewer {
    *
    * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
    */
-  getHTMLElementMapInfoHeightInMapUnits(): number {
-    const mapInfoHeightPx = this.getHTMLElementMapInfo()?.offsetHeight ?? 0;
+  getMapInfoHeightInMapUnits(): number {
+    const mapInfoHeightPx = DomHelper.getMapInfoOffsetHeight(this.mapId);
     const resolution = this.getView().getResolution() ?? 0;
     return mapInfoHeightPx * resolution;
   }
@@ -1658,30 +1641,8 @@ export class MapViewer {
    */
   updateViewPadding(): void {
     // Static mode: the map-info bar does not overlay the map canvas, so no padding is needed
-    const mapInfoHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : (this.getHTMLElementMapInfo()?.offsetHeight ?? 0);
+    const mapInfoHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(this.mapId);
     this.getView().padding = [0, 0, mapInfoHeight, 0];
-  }
-
-  /**
-   * Retrieves the scale information from the DOM elements.
-   *
-   * @returns The scale information object
-   */
-  getScaleInfoFromDomElement(): TypeScaleInfo {
-    // Get metric values
-    const scaleControlBarMetric = this.getHTMLElementScaleControlBarMetric();
-    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
-
-    // Get imperial values
-    const scaleControlBarImperial = this.getHTMLElementScaleControlBarImperial();
-    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
-    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
-
-    // get resolution value (same for metric and imperial)
-    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
-
-    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
   }
 
   // #endregion HTML DOM MANIPULATIONS
@@ -2627,6 +2588,43 @@ export class MapViewer {
   // #region EVENTS
 
   /**
+   * Receives a map-scoped keyboard event from the React map component.
+   *
+   * @param event - The keyboard event and map focus context
+   */
+  notifyMapKeyboardEvent(event: MapKeyboardEvent): void {
+    this.#emitMapKeyboardEvent(event);
+  }
+
+  /**
+   * Emits a map keyboard event to all handlers.
+   *
+   * @param event - The keyboard event and map focus context
+   */
+  #emitMapKeyboardEvent(event: MapKeyboardEvent): void {
+    EventHelper.emitEvent(this, this.#onMapKeyboardEventHandlers, event);
+  }
+
+  /**
+   * Registers a map keyboard event callback.
+   *
+   * @param callback - The callback to be executed whenever a keyboard event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onMapKeyboardEvent(callback: MapKeyboardEventDelegate): MapKeyboardEventDelegate {
+    return EventHelper.onEvent(this.#onMapKeyboardEventHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map keyboard event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapKeyboardEvent(callback: MapKeyboardEventDelegate): void {
+    EventHelper.offEvent(this.#onMapKeyboardEventHandlers, callback);
+  }
+
+  /**
    * Emits a map init event to all handlers.
    */
   #emitMapInit(): void {
@@ -3301,6 +3299,16 @@ export type GeometryJsonResponseGeometry = {
 
 /** Base interface for map events */
 export interface MapBaseEvent {}
+
+/** Event raised for a keyboard event scoped to a map instance. */
+export interface MapKeyboardEvent extends MapBaseEvent {
+  keyboardEvent: KeyboardEvent;
+  isTextInputFocused: boolean;
+  isMapTargetFocused: boolean;
+}
+
+/** Delegate for the map keyboard event handler function signature. */
+export type MapKeyboardEventDelegate = EventDelegateBase<MapViewer, MapKeyboardEvent, void>;
 
 /**
  * Delegate for the map init event handler function signature.

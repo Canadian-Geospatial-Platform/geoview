@@ -16,7 +16,7 @@ import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
-import { normalizeDatacubeAccessPath, sortByNameDefaultFirst } from '@/core/utils/utilities';
+import { normalizeDatacubeAccessPath, sortArrayByNameDefaultFirst } from '@/core/utils/utilities';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
@@ -262,7 +262,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig impleme
     if (!styles) return undefined;
 
     // Sort by the style names and return
-    return sortByNameDefaultFirst(styles, (style) => style.Name);
+    return sortArrayByNameDefaultFirst(styles, (style) => style.Name);
   }
 
   /**
