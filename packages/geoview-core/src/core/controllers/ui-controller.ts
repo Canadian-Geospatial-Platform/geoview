@@ -11,6 +11,7 @@ import {
   addStoreUIAppBarPanelId,
   addStoreUIFooterTab,
   bumpStoreUINavBarButtonPanelVersion,
+  closeStoreUIMapPopovers,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
   hideStoreUITabButton,
@@ -30,6 +31,7 @@ import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
   getStoreAppHeight,
+  getStoreAppIsCrosshairsActive,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -38,11 +40,14 @@ import {
   setStoreAppDisplayDateTimezone,
   setStoreAppDisplayLanguage,
   setStoreAppDisplayTheme,
+  setStoreAppDrawingHint,
   setStoreAppFullScreenActive,
   setStoreAppGuide,
   setStoreAppHeight,
+  type TypeDrawingHint,
 } from '@/core/stores/states/app-state';
-import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { getGVMapTargetElement, getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
 import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -101,6 +106,9 @@ export class UIController extends AbstractMapViewerController {
 
   /** Whether the view was changed (user or programmatic) while in fullscreen, sticky until exit. */
   #fullscreenViewChanged = false;
+
+  /** Pending map-focus restoration after the browser finishes leaving fullscreen. */
+  #fullscreenFocusFrame?: number;
 
   /** The bounded reference to the browser fullscreen change handler. */
   #boundedHandleFullscreenChanged: () => void;
@@ -165,6 +173,7 @@ export class UIController extends AbstractMapViewerController {
    * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
+    if (this.#fullscreenFocusFrame !== undefined) cancelAnimationFrame(this.#fullscreenFocusFrame);
     // Unhooks the fullscreen listeners, if fullscreen is active
     if (this.#fullscreenElement) this.#removeFullscreenListeners();
 
@@ -436,6 +445,23 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
+   * Closes map-control popovers and releases their focus trap without restoring caller focus.
+   */
+  closeMapPopovers(): void {
+    this.disableFocusTrap('no-focus');
+    closeStoreUIMapPopovers(this.getMapId());
+  }
+
+  /**
+   * Sets the current on-map drawing instructions.
+   *
+   * @param drawingHint - The drawing type and whether its sketch has started
+   */
+  setDrawingHint(drawingHint: TypeDrawingHint): void {
+    setStoreAppDrawingHint(this.getMapId(), drawingHint);
+  }
+
+  /**
    * Activates or deactivates WCAG keyboard map interactions (pan and zoom).
    *
    * @param active - Whether to activate or deactivate keyboard interactions
@@ -484,6 +510,11 @@ export class UIController extends AbstractMapViewerController {
     if (status) {
       // If already active or no element to make fullscreen, nothing to do
       if (this.#fullscreenElement || !element) return;
+
+      if (this.#fullscreenFocusFrame !== undefined) {
+        cancelAnimationFrame(this.#fullscreenFocusFrame);
+        this.#fullscreenFocusFrame = undefined;
+      }
 
       const view = this.getMapViewer().getView();
       const viewState = UIController.#getViewState(view);
@@ -781,6 +812,25 @@ export class UIController extends AbstractMapViewerController {
 
     // Save in store
     setStoreAppFullScreenActive(this.getMapId(), false);
+
+    const mapId = this.getMapId();
+    const { mapController, drawerController } = this.getControllersRegistry();
+    if (
+      getStoreAppIsCrosshairsActive(mapId) &&
+      (mapController.getActiveMeasurementDraw() || (drawerController && getStoreDrawerIsDrawing(mapId)))
+    ) {
+      // The browser can restore focus to the fullscreen caller after fullscreenchange.
+      this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
+        this.#fullscreenFocusFrame = undefined;
+        if (
+          !getFullscreenElement() &&
+          getStoreAppIsCrosshairsActive(mapId) &&
+          (mapController.getActiveMeasurementDraw() || (drawerController && getStoreDrawerIsDrawing(mapId)))
+        ) {
+          getGVMapTargetElement(mapId)?.focus({ preventScroll: true });
+        }
+      });
+    }
   }
 
   /**

@@ -808,6 +808,7 @@ Subscribes to `UIDomain.onLanguageChanged()`. Provides a large public API for ma
 
 - `setFullScreen(true, element)` saves the view center, resolution and rotation. The fullscreen button, `Esc` and `setFullScreen(false)` all finish through one controller-owned `fullscreenchange` handler, scoped to the map's own shell element. UI components must not register their own exit listeners.
 - On exit, if the view was not changed in fullscreen, the controller restores the saved view exactly (`setCenter`/`setResolution`, no `fit`). Otherwise it keeps the current center and resolution. Never refit the fullscreen extent: fitting a wide extent into a smaller or squarer viewer zooms out (#3674).
+- With crosshair navigation and drawing or measurement active, exiting fullscreen restores focus to the map so keyboard input can continue without tabbing back.
 - The restore can run before the viewer shrinks. Views use a `maxExtent` with OpenLayers' default size-dependent constraints, and OpenLayers re-applies those constraints on every map `change:size` before user listeners run. So a resize can change the view without any user interaction. The controller records the view after each `change:size`, and sets a sticky "changed" flag on `moveend` when the view differs from that record. `moveend` fires only after the next render, so a resize alone never sets the flag, and an earlier interaction stays recorded even if a later in-fullscreen resize (for example a footer resize) happens.
 
 ### MapController
@@ -889,6 +890,12 @@ Also provides `propagateLegendToStore()` to push legend results into the Zustand
 No domain subscriptions. Manages plugin lifecycle: `loadAndAddPlugin()`, `addPlugin()`, `removePlugin()`, `removePlugins()`. Also exposes a static `loadScript()` for dynamically loading plugin modules.
 
 ### DrawerController
+
+Drawer drawing/editing and navbar measurement are mutually exclusive per map. Activating either stops
+the other interaction without removing completed geometries; its controls and on-map guidance reflect
+the newly active tool.
+Map clicks while drawing or editing operate on geometries rather than querying layer Details.
+Normal Details queries resume when the tool is stopped.
 
 Subscribes to `UIDomain.onLanguageChanged()` and subscribes to store projection changes in `onHook()`. Also sets up keyboard event listeners for undo/redo. Provides a comprehensive drawing API (start/stop drawing, editing, style management, transforms, etc.).
 

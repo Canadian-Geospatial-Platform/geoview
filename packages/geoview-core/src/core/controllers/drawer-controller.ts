@@ -62,7 +62,7 @@ import {
   setStoreDrawerShortcutsEnabled,
   type DrawGeometryType,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive, type TypeDrawingHintGeometry } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
@@ -243,14 +243,13 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return;
 
     // Get the map viewer instance and stop map pointer events if not already stopped
+    this.getControllersRegistry().mapController.stopActiveMeasurement();
     const viewer = this.getMapViewer();
-    if (!getStoreDrawerIsEditing(mapId)) {
-      viewer.unregisterMapPointerHandlers(viewer.map);
+    viewer.unregisterMapPointerHandlers(viewer.map);
 
-      // Clear the hover state and any click marker
-      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
-      setStoreMapClickMarker(mapId, undefined);
-    }
+    // Clear the hover state and any click marker
+    this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
+    setStoreMapClickMarker(mapId, undefined);
 
     // If editing already, stop it
     // GV Moved the stop editing up so the rotation is set properly for any active text drawing
@@ -268,7 +267,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     // If drawing already, stop and restart as it's likely a style change
     if (this.#drawInstance) {
-      this.stopDrawing();
+      this.stopDrawing(false);
     }
 
     // Record of GeometryFunctions for creating custom geometries
@@ -288,6 +287,11 @@ export class DrawerController extends AbstractMapViewerController {
     } else {
       draw = viewer.initDrawInteractions(DrawerController.DRAW_GROUP_KEY, currentGeomType as OLGeomType, currentStyle);
     }
+
+    this.#updateDrawingHint(currentGeomType, false);
+    draw.onDrawStart((): void => this.#updateDrawingHint(currentGeomType, true));
+    draw.onDrawEnd((): void => this.#updateDrawingHint(currentGeomType, false));
+    draw.onDrawAbort((): void => this.#updateDrawingHint(currentGeomType, false));
 
     // Set up draw end event handler
     draw.onDrawEnd(this.#handleDrawEnd());
@@ -326,9 +330,29 @@ export class DrawerController extends AbstractMapViewerController {
     this.#pendingFirstCoordinate = undefined;
 
     this.#drawInstance?.stopInteraction();
+    this.getControllersRegistry().uiController.setDrawingHint(undefined);
 
     // Update state
     this.#setDrawInstance(undefined);
+  }
+
+  /**
+   * Updates guidance for the active drawer geometry and sketch phase.
+   *
+   * @param geometry - The drawer geometry type
+   * @param started - Whether the first coordinate has been placed
+   */
+  #updateDrawingHint(geometry: DrawGeometryType, started: boolean): void {
+    const hintGeometries: Record<DrawGeometryType, TypeDrawingHintGeometry> = {
+      Point: 'point',
+      Text: 'text',
+      LineString: 'line',
+      Polygon: 'polygon',
+      Circle: 'circle',
+      Rectangle: 'rectangle',
+      Star: 'star',
+    };
+    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'drawing', geometry: hintGeometries[geometry], started });
   }
 
   /**
@@ -362,18 +386,17 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return;
 
     // Get the map viewer instance and stop map pointer events
+    this.getControllersRegistry().mapController.stopActiveMeasurement();
     const viewer = this.getMapViewer();
 
     // Get the geometry api
     const geometryApi = this.getGeometryApi();
 
-    if (!getStoreDrawerIsDrawing(mapId)) {
-      viewer.unregisterMapPointerHandlers(viewer.map);
+    viewer.unregisterMapPointerHandlers(viewer.map);
 
-      // Clear the hover state and any click marker
-      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
-      setStoreMapClickMarker(mapId, undefined);
-    }
+    // Clear the hover state and any click marker
+    this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
+    setStoreMapClickMarker(mapId, undefined);
 
     const oldTransformInstance = this.#transformInstance;
 
@@ -414,6 +437,8 @@ export class DrawerController extends AbstractMapViewerController {
       this.stopDrawing(false);
     }
 
+    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'editing' });
+
     if (getStoreDrawerIsSnapping(mapId)) {
       this.refreshSnappingInstance();
     }
@@ -441,6 +466,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!transformInstance) return;
     transformInstance.stopInteraction();
     this.#setTransformInstance(undefined);
+    this.getControllersRegistry().uiController.setDrawingHint(undefined);
   }
 
   /**
@@ -972,6 +998,7 @@ export class DrawerController extends AbstractMapViewerController {
         this.#createAutoCompleteFeature(activeGeom, this.#pendingFirstCoordinate, coordinate);
         this.#clearPendingMarker();
         this.#pendingFirstCoordinate = undefined;
+        this.#updateDrawingHint(activeGeom, false);
 
         return true;
       }
@@ -982,6 +1009,7 @@ export class DrawerController extends AbstractMapViewerController {
           // Two-step drawing: store the first coordinate
           this.#pendingFirstCoordinate = coordinate;
           this.#createPendingMarker(coordinate);
+          this.#updateDrawingHint(activeGeom, true);
           return true;
         }
 
@@ -1012,6 +1040,7 @@ export class DrawerController extends AbstractMapViewerController {
       // Clear pending coordinate on error
       this.#clearPendingMarker();
       this.#pendingFirstCoordinate = undefined;
+      this.#updateDrawingHint(getStoreDrawerActiveGeom(mapId), false);
       return false;
     }
   }
@@ -2654,9 +2683,32 @@ export class DrawerController extends AbstractMapViewerController {
         return;
       }
 
+      // Preserve native typing, undo, and selection behavior instead of triggering drawer shortcuts in editable controls.
+      const isTextInput =
+        activeElement instanceof HTMLInputElement &&
+        ['text', 'search', 'url', 'email', 'tel', 'password', 'number'].includes(activeElement.type);
+      const isEditableElement =
+        isTextInput ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement instanceof HTMLSelectElement ||
+        (activeElement instanceof HTMLElement && activeElement.isContentEditable);
+      if (isEditableElement) {
+        return;
+      }
+
       // Handle Escape key separately for exiting transform interactions
       if (event.key === 'Escape') {
+        if (this.getControllersRegistry().mapController.getActiveMeasurementDraw()) return;
         if (!isStoreDrawerInitialized(mapId)) return;
+
+        if (this.#pendingFirstCoordinate) {
+          this.#clearPendingMarker();
+          this.#pendingFirstCoordinate = undefined;
+          this.#updateDrawingHint(getStoreDrawerActiveGeom(mapId), false);
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
 
         // If editing with a selected feature, clear selection
         const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
@@ -2676,6 +2728,15 @@ export class DrawerController extends AbstractMapViewerController {
         return;
       }
 
+      if (event.key === 'Backspace' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const drawInstance = this.#drawInstance;
+        if (drawInstance) {
+          event.preventDefault();
+          if (drawInstance.undo()) event.stopPropagation();
+        }
+        return;
+      }
+
       // Toggle shortcuts on/off with the ` key
       if (event.key === '`') {
         this.setShortcutsEnabled(!this.#shortcutsEnabled);
@@ -2689,6 +2750,10 @@ export class DrawerController extends AbstractMapViewerController {
                 event.preventDefault();
                 event.stopPropagation();
               }
+            } else if (getStoreDrawerIsDrawing(mapId) && this.#drawInstance) {
+              event.preventDefault();
+              event.stopPropagation();
+              this.#drawInstance.undo();
             } else if (this.undo()) {
               event.preventDefault();
               event.stopPropagation();

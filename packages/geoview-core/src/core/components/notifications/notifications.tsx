@@ -31,7 +31,7 @@ import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreAppNotifications, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreUIActiveTrapGeoView, useStoreUIPopoverCloseVersion } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { handleEscapeKey } from '@/core/utils/utilities';
@@ -283,7 +283,6 @@ const Notifications = memo((): JSX.Element => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [hasNewNotification, setHasNewNotification] = useState(false);
   const [notificationsCount, setNotificationsCount] = useState(0);
-  const [open, setOpen] = useState(false);
 
   // Refs
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -298,6 +297,9 @@ const Notifications = memo((): JSX.Element => {
   const notifications = useStoreAppNotifications();
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const popoverCloseVersion = useStoreUIPopoverCloseVersion();
+  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState(popoverCloseVersion);
+  const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
   const uiController = useUIController();
 
   // Get container
@@ -321,16 +323,19 @@ const Notifications = memo((): JSX.Element => {
   /**
    * Handles when the user clicks the notification bell button.
    */
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
-    setAnchorEl(event.currentTarget);
-    setOpen((prev) => !prev);
-  }, []);
+  const handleOpenPopover = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      setOpenedAtCloseVersion(popoverCloseVersion);
+      setAnchorEl(open ? null : event.currentTarget);
+    },
+    [open, popoverCloseVersion]
+  );
 
   /**
    * Handles when the user clicks away from the notification popover.
    */
   const handleClickAway = useCallback((): void => {
-    if (open) setOpen(false);
+    if (open) setAnchorEl(null);
   }, [open]);
 
   /**
