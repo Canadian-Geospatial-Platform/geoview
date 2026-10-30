@@ -7,6 +7,8 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { DateTimeStepUnit, RangeItems, TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

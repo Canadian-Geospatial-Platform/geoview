@@ -13,6 +13,8 @@ import type { GeoviewStoreType, TypeGetStore, TypeSetStore } from '@/core/stores
 import { logger } from '@/core/utils/logger';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

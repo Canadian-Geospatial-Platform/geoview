@@ -6,6 +6,8 @@ import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-st
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
+// GV States shouldn't import DomHelper
+
 // #region TYPE DEFINITIONS
 
 // GV These types are the core equivalent of the homonyms in the geoview-filter-panel package.

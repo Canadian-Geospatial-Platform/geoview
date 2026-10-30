@@ -12,6 +12,7 @@ import {
   addStoreUIFooterTab,
   bumpStoreUINavBarButtonPanelVersion,
   closeStoreUIMapPopovers,
+  clearStoreUIFocusRestoreRequest,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
   hideStoreUITabButton,
@@ -65,6 +66,8 @@ import type {
   UIDomain,
 } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
+
+// GV Controllers shouldn't import DomHelper
 
 /**
  * Controller responsible for managing the UI state interactions.
@@ -324,6 +327,15 @@ export class UIController extends AbstractMapViewerController {
   disableFocusTrap(callbackElementId?: string): void {
     // Save in store
     disableStoreUIFocusTrap(this.getMapId(), callbackElementId);
+  }
+
+  /**
+   * Completes a focus restoration request handled by the UI shell.
+   *
+   * @param requestId - The identifier of the completed request
+   */
+  completeFocusRestore(requestId: number): void {
+    clearStoreUIFocusRestoreRequest(this.getMapId(), requestId);
   }
 
   /**

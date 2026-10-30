@@ -10,6 +10,8 @@ import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
+// GV Controllers shouldn't import DomHelper
+
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
 

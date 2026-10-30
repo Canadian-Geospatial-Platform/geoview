@@ -3,6 +3,8 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { IDataTableSettings, TypeColumnFiltersState } from 'geoview-core/core/stores/states/data-table-state';
 import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
+import { getStoreLayerDisplayDateFormat } from 'geoview-core/core/stores/states/layer-state';
+import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreDataTableFeaturesByPath,
   getStoreDataTableLayerSettings,
@@ -10,14 +12,10 @@ import {
   getStoreDataTableRowsFilteredCount,
 } from 'geoview-core/core/stores/states/data-table-state';
 import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
-import type { FeatureHighlightedDelegate } from 'geoview-core/core/controllers/map-controller';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
-import { getGVRootElement, queryGVSelectorAll } from 'geoview-core/core/utils/dom-helper';
-import { getStoreLayerDisplayDateFormat } from 'geoview-core/core/stores/states/layer-state';
-import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
-import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
 /**
@@ -620,41 +618,37 @@ export class DataTableTester extends GVAbstractTester {
     return this.test(
       'Test temporary zoom highlight is removed automatically...',
       async (test) => {
-        await this.#helperOpenDataTableAndWait(test, layerPath);
+        // Wait for layer registration and data-table to be loaded with the layer in question
+        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
 
         const { mapController } = this.getControllersRegistry();
-        let highlightedFeatureUid: string | undefined;
-        const featureHighlightedHandler: FeatureHighlightedDelegate = (_sender, event): void => {
-          if (event.operation === 'added' && event.feature !== 'all') highlightedFeatureUid = event.feature.uid;
-        };
-
         mapController.removeHighlightedFeature('all');
 
-        const zoomButton = queryGVSelectorAll<HTMLButtonElement>(this.getMapId(), 'button[data-feature-index]').find(
-          (button) => !button.disabled
-        );
+        const zoomButton = DomHelper.DataTable.getFirstRowZoomButton(this.getMapId());
         if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
 
-        mapController.onFeatureHighlighted(featureHighlightedHandler);
-        try {
-          test.addStep('Clicking the first row zoom button...');
-          zoomButton.click();
+        test.addStep('Clicking the first row zoom button...');
+        zoomButton.click();
 
-          test.addStep('Waiting for the row zoom highlight to appear...');
-          await GVAbstractTester.waitForCondition(() => highlightedFeatureUid !== undefined, TIMEOUT.featureHighlight * 2);
-
-          const isFeatureHighlighted = (): boolean =>
-            getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === highlightedFeatureUid);
-          await GVAbstractTester.waitForCondition(isFeatureHighlighted, TIMEOUT.featureHighlight * 2);
-          const shown = isFeatureHighlighted();
-
-          test.addStep('Waiting for the row zoom highlight to expire...');
-          await GVAbstractTester.waitForCondition(() => !isFeatureHighlighted(), TIMEOUT.featureHighlight * 2);
-
-          return { shown, remaining: isFeatureHighlighted() };
-        } finally {
-          mapController.offFeatureHighlighted(featureHighlightedHandler);
+        test.addStep('Waiting for the row zoom highlight to appear...');
+        const highlightEvent = await mapController.onceFeatureHighlighted(
+          (event) => event.operation === 'added' && event.feature !== 'all' && Boolean(event.feature.uid)
+        );
+        if (highlightEvent.feature === 'all' || !highlightEvent.feature.uid) {
+          throw new Error(`No feature UID was included in the row zoom highlight event for ${layerPath}.`);
         }
+
+        // Get the feature uid from the highlight event
+        const featureUid = highlightEvent.feature.uid;
+        const shown = getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === featureUid);
+
+        test.addStep('Waiting for the row zoom highlight to expire...');
+        await delay(TIMEOUT.featureHighlight * 2);
+        const remaining = getStoreMapHighlightedFeatures(this.getMapId()).some(
+          (highlightedFeature) => highlightedFeature.uid === featureUid
+        );
+
+        return { shown, remaining };
       },
       (test, result) => {
         test.addStep('Verifying the row zoom highlight appeared and then expired...');

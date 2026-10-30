@@ -80,6 +80,8 @@ import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
+// GV Controllers shouldn't import DomHelper
+
 export class LayerCreatorController extends AbstractMapViewerController {
   /** Reference on the UI domain. */
   #uiDomain: UIDomain;

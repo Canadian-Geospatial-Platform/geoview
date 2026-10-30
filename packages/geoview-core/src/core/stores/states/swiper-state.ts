@@ -4,6 +4,8 @@ import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers'
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 /** A single layer entry participating in the swiper, with its visible side. */
 export type TypeSwiperLayerEntry = {

@@ -39,6 +39,8 @@ import type { TypeHoverFeatureInfo } from './feature-info-state';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import { OVERVIEW_MAP_MIN_CONTAINER_WIDTH, OVERVIEW_MAP_MIN_CONTAINER_HEIGHT } from '@/core/utils/constant';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

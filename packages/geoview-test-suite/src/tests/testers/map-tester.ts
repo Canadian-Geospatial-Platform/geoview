@@ -624,7 +624,7 @@ export class MapTester extends GVAbstractTester {
     const mapViewer = this.getMapViewer();
     const { map } = mapViewer;
     const view = mapViewer.getView();
-    const element = DomHelper.getShellElement(this.getMapId());
+    const shellElement = DomHelper.getShellElement(this.getMapId());
     const originalSize = map.getSize();
     const originalCenter = view.getCenter();
     const originalResolution = view.getResolution();
@@ -651,14 +651,14 @@ export class MapTester extends GVAbstractTester {
     return this.test(
       'Test fullscreen view restoration and interaction preservation',
       async (test) => {
-        if (!element) throw new TestError(`The map shell for '${this.getMapId()}' was not found.`);
+        if (!shellElement) throw new TestError(`The map shell for '${this.getMapId()}' was not found.`);
         if (!originalSize || !originalCenter || originalResolution === undefined) {
           throw new TestError('The map size, center and resolution must be defined before testing fullscreen.');
         }
 
         originalFullscreenElementDescriptor = Object.getOwnPropertyDescriptor(document, 'fullscreenElement');
         originalExitFullscreenDescriptor = Object.getOwnPropertyDescriptor(document, 'exitFullscreen');
-        originalRequestFullscreenDescriptor = Object.getOwnPropertyDescriptor(element, 'requestFullscreen');
+        originalRequestFullscreenDescriptor = Object.getOwnPropertyDescriptor(shellElement, 'requestFullscreen');
 
         Object.defineProperty(document, 'fullscreenElement', {
           configurable: true,
@@ -671,11 +671,11 @@ export class MapTester extends GVAbstractTester {
             return Promise.resolve();
           },
         });
-        Object.defineProperty(element, 'requestFullscreen', {
+        Object.defineProperty(shellElement, 'requestFullscreen', {
           configurable: true,
           value: (): Promise<void> => {
             if (shouldRejectFullscreenRequest) return Promise.reject(new Error('Fullscreen request rejected.'));
-            dispatchFullscreenChange(element);
+            dispatchFullscreenChange(shellElement);
             return Promise.resolve();
           },
         });
@@ -684,7 +684,7 @@ export class MapTester extends GVAbstractTester {
         const fullscreenSize: Size = [Math.max(originalSize[0] * 2, 1200), Math.max(originalSize[1] * 0.75, 500)];
 
         test.addStep('Entering fullscreen, changing map size, and exiting through the fullscreen API...');
-        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50);
         map.setSize([...fullscreenSize]);
         this.getControllersRegistry().uiController.setFullScreen(false);
@@ -693,7 +693,7 @@ export class MapTester extends GVAbstractTester {
         const afterButtonExit = getViewState();
 
         test.addStep('Repeating fullscreen with an Esc-style fullscreenchange exit...');
-        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50);
         map.setSize([...fullscreenSize]);
         dispatchFullscreenChange(null);
@@ -702,7 +702,7 @@ export class MapTester extends GVAbstractTester {
         const afterEscExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, then exiting...');
-        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50);
         map.setSize([...fullscreenSize]);
         const centerBeforeInteraction = view.getCenter();
@@ -722,7 +722,7 @@ export class MapTester extends GVAbstractTester {
         const afterInteractiveExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, resizing again (e.g. footer resize), then exiting...');
-        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50);
         map.setSize([...fullscreenSize]);
         await mapViewer.waitForRender();
@@ -748,7 +748,7 @@ export class MapTester extends GVAbstractTester {
 
         test.addStep('Rejecting a fullscreen request and verifying fullscreen state cleanup...');
         shouldRejectFullscreenRequest = true;
-        this.getControllersRegistry().uiController.setFullScreen(true, element);
+        this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50);
         const rejectedRequestIsInactive = !getStoreAppIsFullscreenActive(this.getMapId());
         shouldRejectFullscreenRequest = false;
@@ -806,11 +806,11 @@ export class MapTester extends GVAbstractTester {
         } else {
           Reflect.deleteProperty(document, 'exitFullscreen');
         }
-        if (element) {
+        if (shellElement) {
           if (originalRequestFullscreenDescriptor) {
-            Object.defineProperty(element, 'requestFullscreen', originalRequestFullscreenDescriptor);
+            Object.defineProperty(shellElement, 'requestFullscreen', originalRequestFullscreenDescriptor);
           } else {
-            Reflect.deleteProperty(element, 'requestFullscreen');
+            Reflect.deleteProperty(shellElement, 'requestFullscreen');
           }
         }
         if (originalSize) map.setSize(originalSize);

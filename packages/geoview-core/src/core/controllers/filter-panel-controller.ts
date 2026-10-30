@@ -27,6 +27,8 @@ import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
 import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { LayerFilterPanelClearError, LayerFilterPanelQueryError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
+// GV Controllers shouldn't import DomHelper
+
 // #region TYPES (minimal config types for reading filter panel configuration)
 
 /** Minimal filter layer config for reading layer paths from map config. */

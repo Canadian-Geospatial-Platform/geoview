@@ -12,6 +12,8 @@ import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
+// GV States shouldn't import DomHelper
+
 /** Describes the visible map hint for drawing, measurement, or editing. */
 export type TypeDrawingHint =
   | {
