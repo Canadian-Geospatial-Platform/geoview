@@ -7,7 +7,8 @@ import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
-// DomHelper should only be referenced by application-level code and the DomHelper itself should definitely not import Controllers or Zustand Store States.
+// GV DomHelper should only be referenced by application-level code
+// GV DomHelper itself should definitely not import Controllers or Zustand Store States.
 
 /** Selectors for elements that can participate in a viewer's keyboard focus cycle. */
 const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex], [contenteditable]:not([contenteditable="false"])';
