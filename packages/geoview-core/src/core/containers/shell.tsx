@@ -24,6 +24,7 @@ import { useStoreAppIsCircularProgressActive, useStoreAppIsFullscreenActive, use
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
+  useStoreUIFocusRestoreRequest,
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
 } from '@/core/stores/states/ui-state';
@@ -97,12 +98,29 @@ export function Shell(props: ShellProps): JSX.Element {
   const interaction = useStoreMapInteraction();
   const geoviewConfig = useStoreGeoViewConfig();
   const focusItem = useStoreUIActiveFocusItem();
+  const focusRestoreRequest = useStoreUIFocusRestoreRequest();
   const isMapFullScreen = useStoreAppIsFullscreenActive();
   const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const { isOpen } = useStoreUIActiveFooterBarTab();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
+
+  // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
+  // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
+  // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
+  // See issue #3222 for more detail.
+  useEffect(() => {
+    if (!focusRestoreRequest) return undefined;
+
+    const requestId = requestAnimationFrame(() => {
+      DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId)?.focus({ focusVisible: true });
+      uiController.completeFocusRestore(focusRestoreRequest.requestId);
+    });
+    return (): void => {
+      cancelAnimationFrame(requestId);
+    };
+  }, [focusRestoreRequest, mapId, uiController]);
 
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);

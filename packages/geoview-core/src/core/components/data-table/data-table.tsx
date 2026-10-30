@@ -48,9 +48,9 @@ import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-
 import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useDataTableController, useLayerController, useUIController } from '@/core/controllers/use-controllers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, linkifyAndSanitizeHtml, containsHtmlTags, scrollIfNotVisible } from '@/core/utils/utilities';
-import { getGVShellElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -60,11 +60,11 @@ import { useColumnVisibility } from './hooks/useColumnVisibility';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common/hooks/use-light-box';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { DataTableProps, DataTableRow } from './data-table-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import { useDataTableController, useLayerController, useUIController } from '@/core/controllers/use-controllers';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
@@ -801,8 +801,8 @@ function DataTable({
       // If the extent was found
       if (extent) {
         // Bring the map into view, like the map info bar and app bar do
-        const shell = getGVShellElement(mapId);
-        if (shell) scrollIfNotVisible(shell, 'start');
+        const shellElement = DomHelper.getShellElement(mapId);
+        if (shellElement) scrollIfNotVisible(shellElement, 'start');
 
         // Zoom to extent and wait for it to finish
         layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, undefined, true).catch((error: unknown) => {

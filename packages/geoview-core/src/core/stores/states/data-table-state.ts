@@ -6,6 +6,8 @@ import { getGeoViewStore, helperDeleteFromArray, useGeoViewStore } from '@/core/
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 
+// GV States shouldn't import DomHelper
+
 // #region INTERFACE DEFINITION
 
 /**

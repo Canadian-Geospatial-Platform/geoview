@@ -7,10 +7,10 @@ import type {
   TypeValidNavBarProps,
 } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-// TODO: CHECK - This DomHelper dependency probably shouldn't be referenced by the ui-state here, remove?
-import { DomHelper } from '@/core/utils/dom-helper';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+
+// GV States shouldn't import DomHelper
 
 // #region INTERFACE DEFINITION
 
@@ -49,6 +49,12 @@ export interface IUIState {
   /** Identifies which element currently holds focus-trap control. */
   focusItem: FocusItemProps;
 
+  /** One-shot request for the UI shell to restore focus after a focus trap closes. */
+  focusRestoreRequest: TypeFocusRestoreRequest | undefined;
+
+  /** Monotonic identifier used to distinguish successive focus restoration requests. */
+  focusRestoreSequence: number;
+
   /** Tab identifiers that are hidden from the footer bar. */
   hiddenTabs: string[];
 
@@ -78,8 +84,11 @@ export interface IUIState {
     /** Enables the focus trap on a specific UI element. */
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
 
-    /** Disables the focus trap and optionally restores focus to a callback element. */
+    /** Disables the focus trap and publishes an optional focus restoration request. */
     disableFocusTrap: (callbackElementId?: string) => void;
+
+    /** Clears a focus restoration request after the UI shell handles it. */
+    clearFocusRestoreRequest: (requestId: number) => void;
 
     /** Sets the active footer-bar tab by id. */
     setActiveFooterBarTab: (id: string | undefined) => void;
@@ -141,6 +150,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
+    focusRestoreRequest: undefined,
+    focusRestoreSequence: 0,
     hiddenTabs: ['data-table', 'time-slider', 'geochart'],
     footerTabs: [],
     appBarPanelIds: [],
@@ -191,39 +202,47 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        * @param uiFocus - The focus item properties
        */
       enableFocusTrap: (uiFocus: FocusItemProps): void => {
+        const { uiState } = get();
         set({
           uiState: {
-            ...get().uiState,
+            ...uiState,
             focusItem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
+            focusRestoreRequest: undefined,
           },
         });
       },
 
-      // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
-      // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
-      // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
-      // See issue #3222 for more detail.
       /**
-       * Disables the focus trap and restores focus to the callback element.
+       * Disables the focus trap and requests focus restoration from the UI shell.
        *
        * @param callBackElementId - The element ID to restore focus to
        */
-      disableFocusTrap: (callBackElementId: string): void => {
-        const id = callBackElementId ?? (get().uiState.focusItem.callbackElementId as string);
-        requestAnimationFrame(() => {
-          // Don't focus if 'no-focus' is passed
-          if (id !== 'no-focus') {
-            const element = DomHelper.getGVElementByFullId(get().mapId, id);
-            if (element) {
-              // Explicitly request focus indicator for keyboard users
-              element.focus({ focusVisible: true });
-            }
-          }
-        });
+      disableFocusTrap: (callBackElementId?: string): void => {
+        const { uiState } = get();
+        const elementId = callBackElementId ?? uiState.focusItem.callbackElementId;
+        const requestId = uiState.focusRestoreSequence + 1;
         set({
           uiState: {
-            ...get().uiState,
+            ...uiState,
             focusItem: { activeElementId: false, callbackElementId: false },
+            focusRestoreSequence: requestId,
+            focusRestoreRequest: elementId && elementId !== 'no-focus' ? { requestId, elementId } : undefined,
+          },
+        });
+      },
+
+      /**
+       * Clears a focus restoration request after the UI shell handles it.
+       *
+       * @param requestId - The identifier of the completed request
+       */
+      clearFocusRestoreRequest: (requestId: number): void => {
+        const { uiState } = get();
+        if (uiState.focusRestoreRequest?.requestId !== requestId) return;
+        set({
+          uiState: {
+            ...uiState,
+            focusRestoreRequest: undefined,
           },
         });
       },
@@ -556,6 +575,10 @@ export const useStoreUINavBarButtonPanelVersion = (): number =>
 /** Hooks the current focus-trap item from the UI state. */
 export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
 
+/** Hooks the pending focus restoration request for the UI shell. */
+export const useStoreUIFocusRestoreRequest = (): TypeFocusRestoreRequest | undefined =>
+  useStore(useGeoViewStore(), (state) => state.uiState.focusRestoreRequest);
+
 /** Hooks whether the GeoView-level keyboard focus trap is active. */
 export const useStoreUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 
@@ -633,6 +656,15 @@ export const enableStoreUIFocusTrap = (mapId: string, uiFocus: FocusItemProps): 
  */
 export const disableStoreUIFocusTrap = (mapId: string, callbackElementId?: string): void => {
   getStoreUIState(mapId).actions.disableFocusTrap(callbackElementId);
+};
+
+/** Clears a focus restoration request after the UI shell handles it.
+ *
+ * @param mapId - The map identifier
+ * @param requestId - The identifier of the completed request
+ */
+export const clearStoreUIFocusRestoreRequest = (mapId: string, requestId: number): void => {
+  getStoreUIState(mapId).actions.clearFocusRestoreRequest(requestId);
 };
 
 /**
@@ -757,6 +789,15 @@ export type FocusItemProps = {
 
   /** The id of the element to restore focus to when the trap is released, or false. */
   callbackElementId: string | false;
+};
+
+/** A one-shot request for the UI shell to restore focus after a focus trap closes. */
+export type TypeFocusRestoreRequest = {
+  /** Unique identifier for this request. */
+  requestId: number;
+
+  /** Map-scoped element id to receive focus. */
+  elementId: string;
 };
 
 /** Describes the active app-bar tab state. */

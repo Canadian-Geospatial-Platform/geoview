@@ -23,6 +23,8 @@ import {
 } from '@/core/stores/states/swiper-state';
 import { logger } from '@/core/utils/logger';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for time swiper interactions and
  * bridging the swiper state with the UI domain.

@@ -482,6 +482,18 @@ export abstract class DomHelper {
     }
 
     /**
+     * Gets the first enabled row zoom button in the data table.
+     *
+     * @param mapId - The ID of the map containing the data table
+     * @returns The first enabled row zoom button, if found
+     */
+    static getFirstRowZoomButton(mapId: string): HTMLButtonElement | undefined {
+      return Array.from(this.getDataTableContainer(mapId)?.querySelectorAll<HTMLButtonElement>('button[data-feature-index]') ?? []).find(
+        (button) => !button.disabled
+      );
+    }
+
+    /**
      * Waits for the data table element to render inside this map's data table container.
      *
      * @param mapId - The map identifier

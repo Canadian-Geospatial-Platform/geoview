@@ -18,6 +18,8 @@ import {
 } from '@/core/stores/states/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for Data Table interactions.
  */
