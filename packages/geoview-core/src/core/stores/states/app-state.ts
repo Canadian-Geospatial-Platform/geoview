@@ -19,11 +19,17 @@ export type TypeDrawingHintGeometry = 'line' | 'polygon' | 'point' | 'text' | 'c
 /** Describes the visible map hint for drawing, measurement, or editing. */
 export type TypeDrawingHint =
   | {
+      /** The tool that owns the drawing workflow. */
       tool: 'drawing' | 'measurement';
+      /** Geometry workflow described by the hint. */
       geometry: TypeDrawingHintGeometry;
+      /** Whether the first coordinate has been placed. */
       started: boolean;
     }
-  | { tool: 'editing' }
+  | {
+      /** Identifies the editing workflow. */
+      tool: 'editing';
+    }
   | undefined;
 
 // #region INTERFACE DEFINITION
@@ -100,6 +106,7 @@ export interface IAppState {
   actions: {
     setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
+    /** Sets the visible drawing or editing instructions. */
     setDrawingHint: (drawingHint: TypeDrawingHint) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
     setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;

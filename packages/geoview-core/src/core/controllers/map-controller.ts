@@ -855,6 +855,16 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Synchronizes the pointer store with the center of the rendered crosshair viewport.
+   */
+  synchronizeCrosshairPointerPosition(): void {
+    const size = this.getMapSize();
+    if (!size || size[0] <= 0 || size[1] <= 0) return;
+    const position = this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+    if (position) setStoreMapPointerPosition(this.getMapId(), position);
+  }
+
+  /**
    * Gets the current map center as a TypeMapMouseInfo object.
    *
    * This is the logical view center, which can differ from the viewport midpoint when padding is set.
@@ -1569,22 +1579,12 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Registers a measurement-stopped callback.
+   * Removes the last point from the active measurement sketch.
    *
-   * @param callback - The callback to register
-   * @returns The registered callback
+   * @returns Whether a point was removed
    */
-  onMeasurementStopped(callback: MeasurementStoppedDelegate): MeasurementStoppedDelegate {
-    return EventHelper.onEvent(this.#onMeasurementStoppedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a measurement-stopped callback.
-   *
-   * @param callback - The callback to remove
-   */
-  offMeasurementStopped(callback: MeasurementStoppedDelegate): void {
-    EventHelper.offEvent(this.#onMeasurementStoppedHandlers, callback);
+  undoActiveMeasurement(): boolean {
+    return this.#activeMeasurementDraw?.undo() ?? false;
   }
 
   /**
@@ -2258,6 +2258,25 @@ export class MapController extends AbstractMapViewerController {
   // #endregion STATIC PRIVATE METHODS - CONFIG CREATION
 
   // #region EVENTS
+
+  /**
+   * Registers a measurement-stopped callback.
+   *
+   * @param callback - The callback to register
+   * @returns The registered callback
+   */
+  onMeasurementStopped(callback: MeasurementStoppedDelegate): MeasurementStoppedDelegate {
+    return EventHelper.onEvent(this.#onMeasurementStoppedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a measurement-stopped callback.
+   *
+   * @param callback - The callback to remove
+   */
+  offMeasurementStopped(callback: MeasurementStoppedDelegate): void {
+    EventHelper.offEvent(this.#onMeasurementStoppedHandlers, callback);
+  }
 
   /**
    * Emits a geolocator search event to all handlers.

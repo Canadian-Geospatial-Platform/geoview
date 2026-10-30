@@ -337,25 +337,6 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Updates guidance for the active drawer geometry and sketch phase.
-   *
-   * @param geometry - The drawer geometry type
-   * @param started - Whether the first coordinate has been placed
-   */
-  #updateDrawingHint(geometry: DrawGeometryType, started: boolean): void {
-    const hintGeometries: Record<DrawGeometryType, TypeDrawingHintGeometry> = {
-      Point: 'point',
-      Text: 'text',
-      LineString: 'line',
-      Polygon: 'polygon',
-      Circle: 'circle',
-      Rectangle: 'rectangle',
-      Star: 'star',
-    };
-    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'drawing', geometry: hintGeometries[geometry], started });
-  }
-
-  /**
    * Toggles the drawing state.
    */
   toggleDrawing(): void {
@@ -1934,6 +1915,25 @@ export class DrawerController extends AbstractMapViewerController {
   // #region PRIVATE METHODS - DRAWING
 
   /**
+   * Updates guidance for the active drawer geometry and sketch phase.
+   *
+   * @param geometry - The drawer geometry type
+   * @param started - Whether the first coordinate has been placed
+   */
+  #updateDrawingHint(geometry: DrawGeometryType, started: boolean): void {
+    const hintGeometries: Record<DrawGeometryType, TypeDrawingHintGeometry> = {
+      Point: 'point',
+      Text: 'text',
+      LineString: 'line',
+      Polygon: 'polygon',
+      Circle: 'circle',
+      Rectangle: 'rectangle',
+      Star: 'star',
+    };
+    this.getControllersRegistry().uiController.setDrawingHint({ tool: 'drawing', geometry: hintGeometries[geometry], started });
+  }
+
+  /**
    * Cleans up the temporary text transform interaction.
    */
   #cleanupTempTransform(): void {
@@ -2669,7 +2669,80 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets up keyboard event handling for undo, redo, and escape shortcuts (Ctrl+Z, Ctrl+Y, and Escape)
+   * Handles Escape for pending coordinates and editing selections.
+   *
+   * @param event - The keyboard event to consume when an operation is cancelled
+   */
+  #handleDrawingEscape(event: KeyboardEvent): void {
+    if (this.getControllersRegistry().mapController.getActiveMeasurementDraw()) return;
+    const mapId = this.getMapId();
+    if (!isStoreDrawerInitialized(mapId)) return;
+
+    if (this.#pendingFirstCoordinate) {
+      this.#clearPendingMarker();
+      this.#pendingFirstCoordinate = undefined;
+      this.#updateDrawingHint(getStoreDrawerActiveGeom(mapId), false);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    // If editing with a selected feature, clear selection
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
+    if (transformInstance && transformInstance.getSelectedFeature()) {
+      transformInstance.clearSelection();
+
+      // If this was a temp text transform, clean it up
+      if (this.#tempTextTransformInstance) {
+        this.#cleanupTempTransformAndResume();
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
+  /**
+   * Handles Backspace undo for the active drawing sketch.
+   *
+   * @param event - The keyboard event to consume for sketch undo
+   */
+  #handleDrawingBackspace(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const drawInstance = this.#drawInstance;
+    if (drawInstance) {
+      event.preventDefault();
+      if (drawInstance.undo()) event.stopPropagation();
+    }
+  }
+
+  /**
+   * Routes modified undo and redo keys to the sketch or drawing history.
+   *
+   * @param event - The keyboard event to consume when an action is handled
+   */
+  #handleDrawingHistoryShortcut(event: KeyboardEvent): void {
+    if (!event.ctrlKey && !event.metaKey) return;
+    const key = event.key.toLowerCase();
+    if (key === 'y' || (key === 'z' && event.shiftKey)) {
+      if (this.redo()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    } else if (key === 'z') {
+      if (getStoreDrawerIsDrawing(this.getMapId()) && this.#drawInstance) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.#drawInstance.undo();
+      } else if (this.undo()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  }
+
+  /**
+   * Sets up keyboard event handling for undo, redo, and escape shortcuts (Ctrl+Z, Ctrl+Y, and Escape).
    */
   #hookUndoRedoEscapeHandler(): void {
     if (this.#undoRedoHandler) return;
@@ -2698,42 +2771,12 @@ export class DrawerController extends AbstractMapViewerController {
 
       // Handle Escape key separately for exiting transform interactions
       if (event.key === 'Escape') {
-        if (this.getControllersRegistry().mapController.getActiveMeasurementDraw()) return;
-        if (!isStoreDrawerInitialized(mapId)) return;
-
-        if (this.#pendingFirstCoordinate) {
-          this.#clearPendingMarker();
-          this.#pendingFirstCoordinate = undefined;
-          this.#updateDrawingHint(getStoreDrawerActiveGeom(mapId), false);
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
-        // If editing with a selected feature, clear selection
-        const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
-        if (transformInstance && transformInstance.getSelectedFeature()) {
-          transformInstance.clearSelection();
-
-          // If this was a temp text transform, clean it up
-          if (this.#tempTextTransformInstance) {
-            this.#cleanupTempTransformAndResume();
-          }
-
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
+        this.#handleDrawingEscape(event);
         return;
       }
 
-      if (event.key === 'Backspace' && !event.ctrlKey && !event.metaKey && !event.altKey) {
-        const drawInstance = this.#drawInstance;
-        if (drawInstance) {
-          event.preventDefault();
-          if (drawInstance.undo()) event.stopPropagation();
-        }
+      if (event.key === 'Backspace') {
+        this.#handleDrawingBackspace(event);
         return;
       }
 
@@ -2742,35 +2785,7 @@ export class DrawerController extends AbstractMapViewerController {
         this.setShortcutsEnabled(!this.#shortcutsEnabled);
       }
 
-      if (event.ctrlKey || event.metaKey) {
-        switch (event.key.toLowerCase()) {
-          case 'z':
-            if (event.shiftKey) {
-              if (this.redo()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-            } else if (getStoreDrawerIsDrawing(mapId) && this.#drawInstance) {
-              event.preventDefault();
-              event.stopPropagation();
-              this.#drawInstance.undo();
-            } else if (this.undo()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            break;
-
-          case 'y':
-            if (this.redo()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            break;
-
-          default:
-            break;
-        }
-      }
+      this.#handleDrawingHistoryShortcut(event);
     };
 
     this.#undoRedoHandler = handler;

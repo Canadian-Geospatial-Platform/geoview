@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { LineString, Polygon, Point } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import type { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
 import { Style, Stroke, Fill, Text } from 'ol/style';
 import type { StyleFunction } from 'ol/style/Style';
@@ -99,6 +100,9 @@ export default function Measurement(): JSX.Element {
   /** Number of committed points in the current measurement sketch. */
   const sketchVertexCount = useRef(0);
 
+  /** Listener for point-count changes in the active sketch. */
+  const sketchGeometryChangeKey = useRef<EventsKey | undefined>(undefined);
+
   /**
    * Builds custom sx classes for the measurement component.
    */
@@ -109,6 +113,15 @@ export default function Measurement(): JSX.Element {
   }, [theme]);
 
   // #region Handlers
+
+  /**
+   * Releases the active sketch listener and resets its point count.
+   */
+  const clearSketchListener = useCallback((): void => {
+    if (sketchGeometryChangeKey.current) unByKey(sketchGeometryChangeKey.current);
+    sketchGeometryChangeKey.current = undefined;
+    sketchVertexCount.current = 0;
+  }, []);
 
   /**
    * Creates a style function that shows segment lengths.
@@ -271,6 +284,7 @@ export default function Measurement(): JSX.Element {
 
       // Announce added vertices without repeating announcements for pointer movement.
       draw.onDrawStart((_sender: unknown, event: OLDrawEvent): void => {
+        clearSketchListener();
         const geometry = event.feature.getGeometry();
         if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
 
@@ -279,7 +293,7 @@ export default function Measurement(): JSX.Element {
         sketchVertexCount.current = 1;
         setStatusMessage(t('measurement.status.vertexAdded', { count: sketchVertexCount.current }));
 
-        const geometryChangeKey = geometry.on('change', (): void => {
+        sketchGeometryChangeKey.current = geometry.on('change', (): void => {
           // Exclude the cursor coordinate and, for polygons, the closing coordinate.
           const vertexCount = Math.max(
             1,
@@ -291,14 +305,11 @@ export default function Measurement(): JSX.Element {
             setStatusMessage(t('measurement.status.vertexAdded', { count: vertexCount }));
           }
         });
-
-        draw.onDrawEnd((): void => unByKey(geometryChangeKey));
-        draw.onDrawAbort((): void => unByKey(geometryChangeKey));
       });
 
       // Handle draw end
-      draw.onDrawEnd((_sender: unknown, event: OLDrawEvent) => {
-        sketchVertexCount.current = 0;
+      draw.onDrawEnd((_sender: unknown, event: OLDrawEvent): void => {
+        clearSketchListener();
         uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
         const { feature } = event;
         const geometry = feature.getGeometry();
@@ -335,7 +346,7 @@ export default function Measurement(): JSX.Element {
       });
 
       draw.onDrawAbort((): void => {
-        sketchVertexCount.current = 0;
+        clearSketchListener();
         uiController.setDrawingHint({ tool: 'measurement', geometry: type === 'line' ? 'line' : 'polygon', started: false });
         setStatusMessage(t('measurement.status.cancelled'));
       });
@@ -347,13 +358,14 @@ export default function Measurement(): JSX.Element {
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
     },
-    [createSegmentStyle, mapController, uiController, displayLanguage, t]
+    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, t]
   );
 
   /**
    * Stops the current measurement.
    */
   const stopMeasurement = useCallback((): void => {
+    clearSketchListener();
     mapController.stopActiveMeasurement();
     setDrawInstance(null);
     setActiveMeasurement(null);
@@ -364,7 +376,7 @@ export default function Measurement(): JSX.Element {
 
     // Announce measurement stopped
     setStatusMessage(t('measurement.status.stopped'));
-  }, [mapController, uiController, t]);
+  }, [clearSketchListener, mapController, uiController, t]);
 
   /**
    * Synchronizes the measurement controls when drawer drawing or editing takes over.
@@ -372,13 +384,17 @@ export default function Measurement(): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('MEASUREMENT - measurement stopped subscription');
     const handler = mapController.onMeasurementStopped((_sender, _event): void => {
+      clearSketchListener();
       setDrawInstance(null);
       setActiveMeasurement(null);
       setStatusMessage(t('measurement.status.stopped'));
     });
     return (): void => mapController.offMeasurementStopped(handler);
-  }, [mapController, t]);
+  }, [clearSketchListener, mapController, t]);
 
+  /**
+   * Registers measurement undo shortcuts without intercepting editable controls.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('MEASUREMENT - undo keyboard shortcuts', activeMeasurement, drawInstance);
 
@@ -411,7 +427,7 @@ export default function Measurement(): JSX.Element {
         setStatusMessage(t('measurement.status.redoUnavailable'));
       } else {
         setStatusMessage(
-          drawInstance.undo()
+          mapController.undoActiveMeasurement()
             ? t('measurement.status.vertexUndone', { count: sketchVertexCount.current })
             : t('measurement.status.nothingToUndo')
         );
@@ -422,7 +438,7 @@ export default function Measurement(): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleUndoShortcut, true);
     };
-  }, [activeMeasurement, drawInstance, mapId, t]);
+  }, [activeMeasurement, drawInstance, mapController, mapId, t]);
 
   /**
    * Clears all measurements.
@@ -506,6 +522,7 @@ export default function Measurement(): JSX.Element {
     logger.logTraceUseEffect('MEASUREMENT, Clean up on mount');
 
     return () => {
+      clearSketchListener();
       // GV IMPORTANT: This method may be called during React cleanup effects after a map has been deleted.
       // GV Wrap in try-catch to silently handle this expected race condition without throwing errors.
       try {
@@ -603,6 +620,7 @@ export default function Measurement(): JSX.Element {
       isActive={activeMeasurement !== null}
       keepPanelMounted
       liveRegionContent={
+        /* WCAG - Screen reader status announcements */
         <Typography role="status" sx={visuallyHidden}>
           {statusMessage}
         </Typography>

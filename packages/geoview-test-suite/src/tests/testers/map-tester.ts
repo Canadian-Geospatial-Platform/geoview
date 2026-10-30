@@ -475,6 +475,8 @@ export class MapTester extends GVAbstractTester {
 
   // #endregion PUBLIC METHODS - VIEWPORT BOUNDARY
 
+  // #region PUBLIC METHODS - MAP FUNCTIONS
+
   /**
    * Tests the map state upon initial loading.
    *
@@ -1658,6 +1660,8 @@ export class MapTester extends GVAbstractTester {
       }
     );
   }
+
+  // #endregion PUBLIC METHODS - MAP FUNCTIONS
 
   // #region PRIVATE METHODS - VIEWPORT BOUNDARY
 
