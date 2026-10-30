@@ -296,20 +296,59 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Waits for a layer config to be registered in the all-feature-info-layer-set.
+   * Waits for a layer's GV layer to be registered in this layer set.
    *
-   * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+   * The layer config must reach `processed` before its GV layer can be created and registered.
    *
    * @param layerPath - The unique path identifying the layer to check for registration
-   * @returns A promise that resolves when the layer is registered
+   * @returns A promise that resolves with the registration event
+   * @throws {Error} When the layer config is already in an error state or enters one before registration
    */
   waitForLayerToGetRegistered(layerPath: string): Promise<LayerRegisteredEvent> {
-    // First, check synchronously — it may ALREADY be registered
+    // The GV layer may already be registered by the time the caller starts waiting.
     const registeredLayer = this.getRegisteredLayerIfExists(layerPath);
     if (registeredLayer) return Promise.resolve({ layer: registeredLayer });
 
-    // Otherwise, subscribe and wait
-    return this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath);
+    // Config registration can precede processing, so its GV layer may not exist yet.
+    const layerConfig = this.layerDomain.getLayerEntryConfigIfExists(layerPath);
+    const errorMessage = `Layer '${layerPath}' failed before it could be registered.`;
+
+    // Fail immediately if processing has already ended in an error state.
+    if (layerConfig?.layerStatus === 'error') return Promise.reject(new Error(errorMessage));
+
+    // Otherwise, wait for either the GV-layer registration event or a config error.
+    return new Promise<LayerRegisteredEvent>((resolve, reject) => {
+      const handlers: {
+        layerRegistered?: LayerRegisteredDelegate;
+        layerStatusChanged?: LayerStatusChangedDelegate;
+      } = {};
+
+      // Retain both callbacks so whichever outcome occurs can remove both listeners.
+      const cleanup = (): void => {
+        if (handlers.layerRegistered) this.offLayerRegistered(handlers.layerRegistered);
+        if (handlers.layerStatusChanged) layerConfig?.offLayerStatusChanged(handlers.layerStatusChanged);
+      };
+
+      const onLayerRegistered: LayerRegisteredDelegate = (_sender, event): void => {
+        // This event is shared by the set; only the requested layer path completes this wait.
+        if (event.layer.getLayerPath() !== layerPath) return;
+        cleanup();
+        resolve(event);
+      };
+
+      handlers.layerRegistered = onLayerRegistered;
+      const onLayerStatusChanged: LayerStatusChangedDelegate = (_sender, event): void => {
+        // A config error ends the wait because registration did not produce the requested GV layer.
+        if (event.layerStatus !== 'error') return;
+        cleanup();
+        reject(new Error(errorMessage));
+      };
+      handlers.layerStatusChanged = onLayerStatusChanged;
+
+      // Listen to the set for success and the config for processing failure.
+      this.onLayerRegistered(onLayerRegistered);
+      layerConfig?.onLayerStatusChanged(onLayerStatusChanged);
+    });
   }
 
   // #endregion PUBLIC METHODS
