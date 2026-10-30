@@ -9,6 +9,7 @@ import { Box } from '@/ui/layout';
 import { ProgressBar } from '@/ui/linear-progress/linear-progress';
 import { Typography } from '@/ui/typography/typography';
 import { visuallyHidden } from '@/ui/style/default';
+import type { SxStyles } from '@/ui/style/types';
 
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
@@ -51,7 +52,7 @@ export function Map(props: MapProps): JSX.Element {
   const { viewer } = props;
   const { t } = useTranslation();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement>(null);

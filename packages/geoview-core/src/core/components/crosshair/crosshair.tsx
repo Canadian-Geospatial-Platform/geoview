@@ -9,7 +9,7 @@ import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
-import { setStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
+import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
@@ -59,6 +59,8 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
 
   /**
    * Gets the position under the crosshair, centered on the full viewport rather than the padded view.
+   *
+   * @returns The position under the crosshair, or undefined before the viewport is ready
    */
   const getCrosshairPosition = useCallback((): TypeMapMouseInfo | undefined => {
     const size = mapController.getMapSize();
@@ -327,10 +329,9 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
       layerSetController.hoverFeatureInfoLayerSet.clearResults();
 
       // Replace any stale mouse position so the coordinate display updates immediately.
-      const position = getCrosshairPosition();
-      if (position) setStoreMapPointerPosition(mapId, position);
+      mapController.synchronizeCrosshairPointerPosition();
     }
-  }, [isCrosshairsActive, mapId, getCrosshairPosition, layerSetController]);
+  }, [isCrosshairsActive, mapController, layerSetController]);
 
   // Event listeners
   useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);

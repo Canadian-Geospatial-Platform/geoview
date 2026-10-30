@@ -73,7 +73,7 @@ export default function NavbarPanelButton({
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState(popoverCloseVersion);
+  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
   // Close in the request's render, not a later effect, so focus restoration finishes before map focus.
   const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
 

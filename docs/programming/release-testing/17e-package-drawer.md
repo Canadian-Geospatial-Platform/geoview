@@ -73,12 +73,12 @@ Shortcuts are toggled on/off with the `` ` `` (backtick) key or the Shortcuts to
 | S — Style Menu      | Style menu opens                      | 1. Press `S`                                                          | Style menu opens                             | M    |
 | M — Measurements    | Measurements toggle on/off            | 1. Press `M`                                                          | Measurements toggle on/off                   | M    |
 | N — Snapping        | Snapping toggles on/off               | 1. Press `N`                                                          | Snapping toggles on/off                      | M    |
-| Ctrl+Z — Undo       | Last action is undone                 | 1. Press `Ctrl+Z`                                                     | Last action is undone                        | M    |
+| Ctrl+Z — Undo       | Last action is undone                 | 1. Add sketch points and press `Ctrl+Z`, then Backspace<br>2. Finish a drawing and undo it<br>3. Repeat with focus in text, number, and editable text controls | Sketch points are removed before completed drawing history; editable controls retain native undo and Backspace behavior | M    |
 | Ctrl+Shift+Z — Redo | Undone action is restored             | 1. Press `Ctrl+Shift+Z`                                               | Undone action is restored                    | M    |
 | Shift+S — Download  | Drawings are downloaded               | 1. Press `Shift+S`                                                    | Drawings are downloaded                      | M    |
 | Shift+O — Upload    | Upload dialog opens                   | 1. Press `Shift+O`                                                    | Upload dialog opens                          | M    |
 | Shift+C — Clear all | All drawings are cleared              | 1. Press `Shift+C`                                                    | All drawings are cleared                     | M    |
-| Escape — Exit mode  | Exits current mode                    | 1. Press `Escape` while editing/transforming                          | Exits the current mode                       | M    |
+| Escape — Exit mode  | Exits current mode                    | 1. Press `Escape` while editing/transforming<br>2. Place the first coordinate of Circle, Rectangle, or Star and press Escape<br>3. Start another shape<br>4. Repeat while measuring | Editing selection or pending coordinate is cleared; two-step guidance resets and the next shape starts normally; drawer does not intercept measurement cancellation | M    |
 
 ## Projection Switch
 

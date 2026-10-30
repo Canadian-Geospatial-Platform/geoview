@@ -74,7 +74,7 @@ export default function Version(): JSX.Element {
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState(popoverCloseVersion);
+  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
   const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
 
   // #region Handlers
