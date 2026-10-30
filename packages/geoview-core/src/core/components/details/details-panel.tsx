@@ -430,10 +430,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     const previousFeatures = previousHighlightedFeaturesRef.current;
     const layerFeaturesChanged = previousLayerFeaturesRef.current !== memoSelectedLayerDataFeatures;
+
     // Remove features that are no longer checked or selected.
     previousFeatures
       .filter((feature) => !memoFeaturesToHighlight.includes(feature))
       .forEach((feature) => mapController.removeHighlightedFeature(feature));
+
     // Add newly checked or selected features.
     memoFeaturesToHighlight
       .filter((feature) => !previousFeatures.includes(feature))

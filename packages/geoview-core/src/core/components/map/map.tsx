@@ -60,8 +60,6 @@ export function Map(props: MapProps): JSX.Element {
   const layersAreLoading = useStoreLayerAreLayersLoading();
   const uiController = useUIController();
 
-  const gvRootElement = DomHelper.getGVRootElement(mapId);
-
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
 
@@ -90,15 +88,12 @@ export function Map(props: MapProps): JSX.Element {
     logger.logTraceUseEffect('MAP - Keyboard event listener');
 
     const handleGlobalShortcut = (event: KeyboardEvent): void => {
-      const { activeElement } = document;
+      const activeElement = DomHelper.getActiveElementWithinMap(mapId);
 
       // Only handle shortcuts while focus is within this specific map instance.
-      if (!activeElement || !gvRootElement.contains(activeElement)) return;
+      if (!activeElement) return;
 
-      const isTextInputFocused =
-        activeElement instanceof HTMLInputElement ||
-        activeElement instanceof HTMLTextAreaElement ||
-        (activeElement instanceof HTMLElement && activeElement.isContentEditable);
+      const isTextInputFocused = DomHelper.isInputOrContentEditableElement(activeElement);
       const isMapTargetFocused = mapElement.current?.contains(activeElement) ?? false;
       viewer.notifyMapKeyboardEvent({ keyboardEvent: event, isTextInputFocused, isMapTargetFocused });
 
@@ -125,7 +120,7 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [viewer, mapInteraction, mapId, uiController, gvRootElement]);
+  }, [viewer, mapInteraction, mapId, uiController]);
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
