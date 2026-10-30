@@ -13,48 +13,6 @@ import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
-/** Values captured while testing time-slider reset behavior. */
-type TimeSliderResetResult = {
-  /** Values placed in the store before reset. */
-  changedValues: number[];
-  /** Defaults captured before reset. */
-  defaultValuesBeforeReset: number[];
-  /** Defaults remaining after reset. */
-  defaultValuesAfterReset: number[];
-  /** Current values after reset. */
-  valuesAfterReset: number[];
-};
-
-/** Constrained values captured for each overlap scenario. */
-type TimeSliderConstraintResult = {
-  /** Discrete values constrained while moving the left thumb. */
-  discreteLeftThumb: number[];
-  /** Discrete values constrained while moving the right thumb. */
-  discreteRightThumb: number[];
-  /** Absolute values constrained while moving the left thumb. */
-  absoluteLeftThumb: number[];
-  /** Absolute values constrained while moving the right thumb. */
-  absoluteRightThumb: number[];
-};
-
-/** Time dimensions captured for the landcover group and each of its sub-layers. */
-type LandcoverGroupDimensionResult = {
-  /** Time dimension of the 'landcover_groupe' group layer. */
-  groupTimeDimension: TimeDimension | undefined;
-  /** Time dimension of the 'landcover_2010_19classes' sub-layer. */
-  year2010TimeDimension: TimeDimension | undefined;
-  /** Time dimension of the 'landcover_2015_19classes' sub-layer. */
-  year2015TimeDimension: TimeDimension | undefined;
-  /** Time dimension of the 'landcover_2020_19classes' sub-layer. */
-  year2020TimeDimension: TimeDimension | undefined;
-  /** Time-slider store entry for the 'landcover_2010_19classes' sub-layer. */
-  year2010TimeSliderValues: TypeTimeSliderValues | undefined;
-  /** Time-slider store entry for the 'landcover_2015_19classes' sub-layer. */
-  year2015TimeSliderValues: TypeTimeSliderValues | undefined;
-  /** Time-slider store entry for the 'landcover_2020_19classes' sub-layer. */
-  year2020TimeSliderValues: TypeTimeSliderValues | undefined;
-};
-
 /** Main Time Slider testing class. */
 export class TimeSliderTester extends GVAbstractTester {
   /** Layer path for the temporal ESRI Dynamic layer used in reset tests. */
@@ -310,3 +268,49 @@ export class TimeSliderTester extends GVAbstractTester {
     );
   }
 }
+
+// #region TYPES AND INTERFACES
+
+/** Values captured while testing time-slider reset behavior. */
+type TimeSliderResetResult = {
+  /** Values placed in the store before reset. */
+  changedValues: number[];
+  /** Defaults captured before reset. */
+  defaultValuesBeforeReset: number[];
+  /** Defaults remaining after reset. */
+  defaultValuesAfterReset: number[];
+  /** Current values after reset. */
+  valuesAfterReset: number[];
+};
+
+/** Constrained values captured for each overlap scenario. */
+type TimeSliderConstraintResult = {
+  /** Discrete values constrained while moving the left thumb. */
+  discreteLeftThumb: number[];
+  /** Discrete values constrained while moving the right thumb. */
+  discreteRightThumb: number[];
+  /** Absolute values constrained while moving the left thumb. */
+  absoluteLeftThumb: number[];
+  /** Absolute values constrained while moving the right thumb. */
+  absoluteRightThumb: number[];
+};
+
+/** Time dimensions captured for the landcover group and each of its sub-layers. */
+type LandcoverGroupDimensionResult = {
+  /** Time dimension of the 'landcover_groupe' group layer. */
+  groupTimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2010_19classes' sub-layer. */
+  year2010TimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2015_19classes' sub-layer. */
+  year2015TimeDimension: TimeDimension | undefined;
+  /** Time dimension of the 'landcover_2020_19classes' sub-layer. */
+  year2020TimeDimension: TimeDimension | undefined;
+  /** Time-slider store entry for the 'landcover_2010_19classes' sub-layer. */
+  year2010TimeSliderValues: TypeTimeSliderValues | undefined;
+  /** Time-slider store entry for the 'landcover_2015_19classes' sub-layer. */
+  year2015TimeSliderValues: TypeTimeSliderValues | undefined;
+  /** Time-slider store entry for the 'landcover_2020_19classes' sub-layer. */
+  year2020TimeSliderValues: TypeTimeSliderValues | undefined;
+};
+
+// #endregion TYPES AND INTERFACES

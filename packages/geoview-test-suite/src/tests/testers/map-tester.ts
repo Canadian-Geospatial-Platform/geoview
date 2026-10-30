@@ -47,72 +47,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { getGVMapTargetElement, getGVShellElement, queryGVSelector } from 'geoview-core/core/utils/dom-helper';
 import type { TypeHTMLElement } from 'geoview-core/core/types/global-types';
 
-/** Captured boundary samples and independent pixel/coordinate expectations. */
-interface TypeViewportBoundarySnapshot {
-  /** Public viewer result. */
-  boundary: TypeViewportBoundaryLonLat;
-  /** Second snapshot from the same rendered frame. */
-  repeatedBoundary: TypeViewportBoundaryLonLat;
-  /** Samples calculated from view center, resolution, rotation, and padding. */
-  expected: Coordinate[];
-  /** Returned coordinates projected back to viewport pixels. */
-  pixels: (number[] | null)[];
-  /** Expected screen positions. */
-  expectedPixels: number[][];
-  /** Bottom padding at sampling time. */
-  bottomPadding: number;
-  /** Actual map-info bar overlay height (zero for static maps). */
-  infoHeight: number;
-  /** Southern sample calculated at the full canvas bottom. */
-  canvasSouth: Coordinate;
-  /** Indicates independent objects were returned by consecutive calls. */
-  freshObjects: boolean;
-  /** Rendered view rotation in radians. */
-  rotation: number;
-  /** Rendered logical center in longitude/latitude. */
-  center: Coordinate;
-  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
-  extentSouth: Coordinate;
-}
-
-/** Fit outcome captured before assertion so operations stay in the execution phase. */
-interface TypeViewportMidpointFitResult {
-  /** Rendered geometry after fitting. */
-  snapshot: TypeViewportBoundarySnapshot;
-  /** Original coordinates copied before fitting. */
-  original: Coordinate[];
-  /** Caller-owned array after fitting. */
-  input: Coordinate[];
-  /** Original coordinates projected to pixels after fitting. */
-  pixels: (number[] | null)[];
-  /** Original pixel positions before the view was changed. */
-  originalPixels: number[][];
-  /** Source rotation to restore when the projection is unchanged. */
-  rotation: number;
-}
-
-/** Crosshair activation and drawing observations from a rendered view. */
-interface TypeCrosshairCoordinateResult {
-  /** Crosshair SVG center in map pixels. */
-  pixel: Coordinate;
-  /** Full viewport center, independent of view padding. */
-  viewportCenter: Coordinate;
-  /** Pointer position immediately after keyboard activation. */
-  pointer: TypeMapMouseInfo | undefined;
-  /** Coordinate expected under the rendered crosshair. */
-  expected: Coordinate;
-  /** Coordinate at the full viewport center, which the keyboard position must resolve to. */
-  expectedCenter: Coordinate;
-  /** Expected longitude/latitude at that coordinate. */
-  expectedLonLat: Coordinate;
-  /** Position converted by the controller. */
-  position: TypeMapMouseInfo | undefined;
-  /** Coordinates submitted by Enter and Space, converted back to pixels. */
-  drawnPixels: (Coordinate | null)[];
-  /** Whether both keyboard events were handled. */
-  prevented: boolean[];
-}
-
 /**
  * Main Map testing class.
  *
@@ -1822,6 +1756,74 @@ export class MapTester extends GVAbstractTester {
   // #endregion STATIC METHODS - VIEWPORT BOUNDARY
 }
 
+// #region TYPES AND INTERFACES
+
+/** Captured boundary samples and independent pixel/coordinate expectations. */
+interface TypeViewportBoundarySnapshot {
+  /** Public viewer result. */
+  boundary: TypeViewportBoundaryLonLat;
+  /** Second snapshot from the same rendered frame. */
+  repeatedBoundary: TypeViewportBoundaryLonLat;
+  /** Samples calculated from view center, resolution, rotation, and padding. */
+  expected: Coordinate[];
+  /** Returned coordinates projected back to viewport pixels. */
+  pixels: (number[] | null)[];
+  /** Expected screen positions. */
+  expectedPixels: number[][];
+  /** Bottom padding at sampling time. */
+  bottomPadding: number;
+  /** Actual map-info bar overlay height (zero for static maps). */
+  infoHeight: number;
+  /** Southern sample calculated at the full canvas bottom. */
+  canvasSouth: Coordinate;
+  /** Indicates independent objects were returned by consecutive calls. */
+  freshObjects: boolean;
+  /** Rendered view rotation in radians. */
+  rotation: number;
+  /** Rendered logical center in longitude/latitude. */
+  center: Coordinate;
+  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
+  extentSouth: Coordinate;
+}
+
+/** Fit outcome captured before assertion so operations stay in the execution phase. */
+interface TypeViewportMidpointFitResult {
+  /** Rendered geometry after fitting. */
+  snapshot: TypeViewportBoundarySnapshot;
+  /** Original coordinates copied before fitting. */
+  original: Coordinate[];
+  /** Caller-owned array after fitting. */
+  input: Coordinate[];
+  /** Original coordinates projected to pixels after fitting. */
+  pixels: (number[] | null)[];
+  /** Original pixel positions before the view was changed. */
+  originalPixels: number[][];
+  /** Source rotation to restore when the projection is unchanged. */
+  rotation: number;
+}
+
+/** Crosshair activation and drawing observations from a rendered view. */
+interface TypeCrosshairCoordinateResult {
+  /** Crosshair SVG center in map pixels. */
+  pixel: Coordinate;
+  /** Full viewport center, independent of view padding. */
+  viewportCenter: Coordinate;
+  /** Pointer position immediately after keyboard activation. */
+  pointer: TypeMapMouseInfo | undefined;
+  /** Coordinate expected under the rendered crosshair. */
+  expected: Coordinate;
+  /** Coordinate at the full viewport center, which the keyboard position must resolve to. */
+  expectedCenter: Coordinate;
+  /** Expected longitude/latitude at that coordinate. */
+  expectedLonLat: Coordinate;
+  /** Position converted by the controller. */
+  position: TypeMapMouseInfo | undefined;
+  /** Coordinates submitted by Enter and Space, converted back to pixels. */
+  drawnPixels: (Coordinate | null)[];
+  /** Whether both keyboard events were handled. */
+  prevented: boolean[];
+}
+
 /** The center, resolution and rotation of a map view. */
 type TypeFullscreenViewState = {
   /** The view center. */
@@ -1875,3 +1877,5 @@ type LayerDetails = {
   /** The number of features found in the alternate layer. */
   secondFeatureCount: number;
 };
+
+// #endregion TYPES AND INTERFACES

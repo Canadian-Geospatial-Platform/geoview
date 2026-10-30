@@ -9,60 +9,6 @@ import {
 import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
 import type { SwipeSide } from 'geoview-core/core/stores/states/swiper-state';
 
-/** Listener counts and renderer state captured during the swiper render-isolation test. */
-type SwiperRenderIsolationResult = {
-  /** Target prerender listener count before swiper activation. */
-  targetPreRenderBaseline: number;
-  /** Target postrender listener count before swiper activation. */
-  targetPostRenderBaseline: number;
-  /** Non-target prerender listener count before swiper activation. */
-  nonTargetPreRenderBaseline: number;
-  /** Non-target postrender listener count before swiper activation. */
-  nonTargetPostRenderBaseline: number;
-  /** Target prerender listener count while swiper is active. */
-  targetPreRenderActive: number;
-  /** Target postrender listener count while swiper is active. */
-  targetPostRenderActive: number;
-  /** Non-target prerender listener count while swiper is active. */
-  nonTargetPreRenderActive: number;
-  /** Non-target postrender listener count while swiper is active. */
-  nonTargetPostRenderActive: number;
-  /** Target renderer container CSS clip-path while swiper is active. */
-  targetClipPath: string;
-  /** Target prerender listener count after swiper cleanup. */
-  targetPreRenderClean: number;
-  /** Target postrender listener count after swiper cleanup. */
-  targetPostRenderClean: number;
-  /** Non-target prerender listener count after swiper cleanup. */
-  nonTargetPreRenderClean: number;
-  /** Non-target postrender listener count after swiper cleanup. */
-  nonTargetPostRenderClean: number;
-};
-
-/** Results captured while testing per-side Swiper query semantics. */
-type SwiperSideResult = {
-  /** Whether the left-side layer accepts a left-side query. */
-  leftVisible: boolean;
-  /** Whether the left-side layer rejects a right-side query. */
-  leftHidden: boolean;
-  /** Whether the right-side layer accepts a right-side query. */
-  rightVisible: boolean;
-  /** Whether the right-side layer rejects a left-side query. */
-  rightHidden: boolean;
-  /** Whether the up-side layer accepts an upper query. */
-  upVisible: boolean;
-  /** Whether the down-side layer accepts a lower query. */
-  downVisible: boolean;
-};
-
-/** Results captured while testing Swiper configuration persistence. */
-type SwiperPersistenceResult = {
-  /** Persisted interactive flag. */
-  interactive: boolean;
-  /** Persisted layer entries. */
-  layers: { layerPath: string; side: SwipeSide }[];
-};
-
 /**
  * Main Swiper testing class.
  */
@@ -480,3 +426,61 @@ export class SwiperTester extends GVAbstractTester {
     );
   }
 }
+
+// #region TYPES AND INTERFACES
+
+/** Listener counts and renderer state captured during the swiper render-isolation test. */
+type SwiperRenderIsolationResult = {
+  /** Target prerender listener count before swiper activation. */
+  targetPreRenderBaseline: number;
+  /** Target postrender listener count before swiper activation. */
+  targetPostRenderBaseline: number;
+  /** Non-target prerender listener count before swiper activation. */
+  nonTargetPreRenderBaseline: number;
+  /** Non-target postrender listener count before swiper activation. */
+  nonTargetPostRenderBaseline: number;
+  /** Target prerender listener count while swiper is active. */
+  targetPreRenderActive: number;
+  /** Target postrender listener count while swiper is active. */
+  targetPostRenderActive: number;
+  /** Non-target prerender listener count while swiper is active. */
+  nonTargetPreRenderActive: number;
+  /** Non-target postrender listener count while swiper is active. */
+  nonTargetPostRenderActive: number;
+  /** Target renderer container CSS clip-path while swiper is active. */
+  targetClipPath: string;
+  /** Target prerender listener count after swiper cleanup. */
+  targetPreRenderClean: number;
+  /** Target postrender listener count after swiper cleanup. */
+  targetPostRenderClean: number;
+  /** Non-target prerender listener count after swiper cleanup. */
+  nonTargetPreRenderClean: number;
+  /** Non-target postrender listener count after swiper cleanup. */
+  nonTargetPostRenderClean: number;
+};
+
+/** Results captured while testing per-side Swiper query semantics. */
+type SwiperSideResult = {
+  /** Whether the left-side layer accepts a left-side query. */
+  leftVisible: boolean;
+  /** Whether the left-side layer rejects a right-side query. */
+  leftHidden: boolean;
+  /** Whether the right-side layer accepts a right-side query. */
+  rightVisible: boolean;
+  /** Whether the right-side layer rejects a left-side query. */
+  rightHidden: boolean;
+  /** Whether the up-side layer accepts an upper query. */
+  upVisible: boolean;
+  /** Whether the down-side layer accepts a lower query. */
+  downVisible: boolean;
+};
+
+/** Results captured while testing Swiper configuration persistence. */
+type SwiperPersistenceResult = {
+  /** Persisted interactive flag. */
+  interactive: boolean;
+  /** Persisted layer entries. */
+  layers: { layerPath: string; side: SwipeSide }[];
+};
+
+// #endregion TYPES AND INTERFACES

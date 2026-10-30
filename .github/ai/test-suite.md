@@ -31,6 +31,8 @@ Read only the linked section of each doc: search for its heading and read to the
 - After any automated test change, audit **all suites** against actual full-pipeline calls and both count docs;
   include heavy-gated tests, exclude debug/commented calls, count suite-layer twice only in the release checklist.
 - Do not modify framework `tests/core/` merely to implement a feature test.
+- Tester files declare every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class
+  (see [Step 1](../../docs/app/testing/creating-tests.md#step-1-create-a-tester)); never above the class.
 
 ### Gotchas & Pitfalls
 

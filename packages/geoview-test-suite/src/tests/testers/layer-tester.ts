@@ -44,24 +44,6 @@ import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-fea
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 
-/** Result captured by the parent-crawl visibility test at each stage. */
-type ParentCrawlVisibilityResult = {
-  /** State snapshot taken after the parent group has been hidden. */
-  afterHide: {
-    groupVisible: boolean;
-    childOwnVisible: boolean;
-    childEffectiveVisible: boolean;
-    childHidden: boolean;
-    childInRange: boolean;
-  };
-  /** State snapshot taken after setLayerVisibleIncludingParents walked the parents. */
-  afterShow: {
-    groupVisible: boolean;
-    childEffectiveVisible: boolean;
-    childHidden: boolean;
-  };
-};
-
 /**
  * Main Layer testing class.
  */
@@ -3387,3 +3369,25 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion PRIVATE METHODS
 }
+
+// #region TYPES AND INTERFACES
+
+/** Result captured by the parent-crawl visibility test at each stage. */
+type ParentCrawlVisibilityResult = {
+  /** State snapshot taken after the parent group has been hidden. */
+  afterHide: {
+    groupVisible: boolean;
+    childOwnVisible: boolean;
+    childEffectiveVisible: boolean;
+    childHidden: boolean;
+    childInRange: boolean;
+  };
+  /** State snapshot taken after setLayerVisibleIncludingParents walked the parents. */
+  afterShow: {
+    groupVisible: boolean;
+    childEffectiveVisible: boolean;
+    childHidden: boolean;
+  };
+};
+
+// #endregion TYPES AND INTERFACES
