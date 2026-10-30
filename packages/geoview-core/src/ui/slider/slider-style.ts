@@ -44,7 +44,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       boxShadow: 'rgba(1, 0, 155, 0.7) 0px 0px 0px 3px !important',
     },
     '& .MuiSlider-valueLabel': {
-      fontSize: theme.palette.geoViewFontSize?.xs ?? '0.7rem',
+      fontSize: theme.typography.caption.fontSize,
       padding: theme.spacing(0.5, 0.75),
       [theme.breakpoints.down('md')]: {
         ...visuallyHidden, // Hide value tooltips on tablets and below

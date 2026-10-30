@@ -14,7 +14,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'fit-content',
     width: '100%',
     '& .MuiListItemText-primary': {
-      fontSize: theme.palette.geoViewFontSize?.lg,
+      fontSize: theme.typography.body1.fontSize,
       fontWeight: '600',
     },
     '& .MuiListItem-root': {
@@ -28,15 +28,21 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiListItemText-root': {
       '> span': {
-        fontSize: theme.palette.geoViewFontSize?.default,
+        fontSize: theme.typography.body1.fontSize,
       },
       '> p': {
-        fontSize: theme.palette.geoViewFontSize?.sm,
+        fontSize: theme.typography.body2.fontSize,
       },
     },
   },
   listItemCompact: {
     width: '52px',
+  },
+  layerListContainer: {
+    width: '100%',
+  },
+  singleLayerListItemButton: {
+    minHeight: '4.51rem',
   },
   listItemButton: {
     width: '100%',
@@ -75,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     margin: theme.spacing(0.75, 0),
     '& .layerTitle': {
-      fontSize: theme.palette.geoViewFontSize?.default,
+      fontSize: theme.typography.body1.fontSize,
       fontWeight: '600',
       lineHeight: 1.5,
       paddingRight: theme.spacing(1.25),
@@ -86,7 +92,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       alignItems: 'center',
       marginTop: theme.spacing(0.5),
       '>p': {
-        fontSize: `${theme.palette.geoViewFontSize?.sm} !important`,
         color: theme.palette.text.secondary,
         fontWeight: 400,
       },
@@ -95,6 +100,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         height: '0.75em',
       },
     },
+  },
+  listSecondaryTextContainer: {
+    display: 'flex',
+    alignContent: 'center',
+  },
+  listSecondaryText: {
+    display: 'block',
   },
   listPrimaryTextCompact: {
     display: 'none',
@@ -152,7 +164,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   listSectionHeader: {
     display: 'block',
     padding: theme.spacing(1.5, 0, 0.5, 2),
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     fontWeight: 700,
     textTransform: 'uppercase',
     color: theme.palette.text.primary,

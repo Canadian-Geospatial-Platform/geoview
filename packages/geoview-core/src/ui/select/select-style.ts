@@ -9,7 +9,7 @@ import type { SxStyles } from '@/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     width: '100%',
     color: theme.palette.text.primary,
     '& .MuiOutlinedInput-notchedOutline': {
@@ -37,9 +37,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   label: {
     color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
   },
   menuItem: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
   },
 });

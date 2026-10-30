@@ -66,6 +66,22 @@ contrast-reversed surfaces, and `layerVisibility` for legend visibility markers.
 roles are optional in reusable components that may receive an external MUI theme; provide a
 fallback or use optional chaining when accessing them.
 
+## Typography
+
+Use the owning map's typography variants for text sizes: `<Typography variant="body2">` for text,
+or `theme.typography.body2.fontSize` for size-only styling. Icons use named MUI sizes such as
+`fontSize="small"`, not literal sizes.
+
+Display themes can override a variant with a scale key, for example
+`scaleOverrides: { h3: 'xxl' }`. Available keys are `xs`, `sm`, `default`, `md`, `lg`, `xl`, `xxl`
+and `display`; the theme generator converts them with calibrated `pxToRem`.
+
+`palette.geoViewFontSize`, its generated multiplier keys and the `control` variant are deprecated
+and removed in the next breaking release. Use typography variants and scale-key overrides instead.
+Custom-legend numeric `fontSize` is also deprecated and removed in the next breaking release;
+use `fontSizeStep`. See the [styling rules](../../programming/styling-best-practices.md#typography)
+and [host-page font-size timing](../config/create-map.md#host-page-font-size).
+
 ## Customizing An Existing Theme
 
 The system currently has 4 themes: `dark`, `light`, `geo.ca`, and `canada.ca`. The selected theme

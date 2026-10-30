@@ -5,7 +5,7 @@ import { ListItemText as MaterialListItemText } from '@mui/material';
 
 const typographyProps = {
   primary: {
-    fontSize: 14,
+    variant: 'body2' as const,
     noWrap: true,
   },
 };

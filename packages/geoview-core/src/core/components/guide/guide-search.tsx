@@ -612,7 +612,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowUpIcon sx={memoSxClasses.searchNavigationIcon} />
+                          <KeyboardArrowUpIcon fontSize="small" />
                         </IconButton>
                         <IconButton
                           sx={memoSxClasses.searchNavigationButton}
@@ -623,7 +623,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowDownIcon sx={memoSxClasses.searchNavigationIcon} />
+                          <KeyboardArrowDownIcon fontSize="small" />
                         </IconButton>
                       </>
                     )}
@@ -642,7 +642,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                       onKeyDown={handleClearKeyDown}
                       sx={memoSxClasses.searchClearButton}
                     >
-                      <CloseIcon sx={memoSxClasses.searchClearIcon} />
+                      <CloseIcon fontSize="small" />
                     </IconButton>
                   </Box>
                 </InputAdornment>

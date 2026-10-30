@@ -86,15 +86,19 @@ The time slider is typically included in the GeoView build. To use it:
 
 ```typescript
 // Access time slider state via store getter functions
-import { isStoreTimeSliderInitialized, getStoreTimeSliderLayers, getStoreTimeSliderFilters } from 'geoview-core';
+import {
+  isStoreTimeSliderInitialized,
+  getStoreTimeSliderLayers,
+  getStoreTimeSliderFilters,
+} from "geoview-core";
 
 // Check if time slider is initialized
-if (isStoreTimeSliderInitialized('mapId')) {
+if (isStoreTimeSliderInitialized("mapId")) {
   // Get time-enabled layers
-  const timeLayers = getStoreTimeSliderLayers('mapId');
+  const timeLayers = getStoreTimeSliderLayers("mapId");
 
   // Get current filters
-  const filters = getStoreTimeSliderFilters('mapId');
+  const filters = getStoreTimeSliderFilters("mapId");
 }
 ```
 
@@ -324,7 +328,10 @@ timestamp >= date '2024-01-15T14:30:00Z' AND timestamp < date '2024-01-15T15:30:
               "field": "time",
               "nearestValues": "continuous",
               "singleHandle": true,
-              "displayPattern": [{ "datePrecision": "day" }, { "timePrecision": "hour" }],
+              "displayPattern": [
+                { "datePrecision": "day" },
+                { "timePrecision": "hour" }
+              ],
               "rangeItems": {
                 "type": "relative",
                 "range": ["2024-01-01T00:00:00Z", "2024-01-07T23:00:00Z"]
@@ -347,7 +354,10 @@ timestamp >= date '2024-01-15T14:30:00Z' AND timestamp < date '2024-01-15T15:30:
       "time-slider": {
         "sliders": [
           {
-            "layerPaths": ["temperature-layer/data", "precipitation-layer/data"],
+            "layerPaths": [
+              "temperature-layer/data",
+              "precipitation-layer/data"
+            ],
             "fields": ["timestamp", "date"],
             "title": "Climate Data Time Range",
             "description": "Select a time range for temperature and precipitation",
@@ -390,7 +400,7 @@ timestamp >= date '2024-01-15T14:30:00Z' AND timestamp < date '2024-01-15T15:30:
 The time slider state is managed through the `TimeSliderController` and Zustand store hooks. Configuration is the primary way to set up time slider behavior:
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
+const mapViewer = cgpv.api.getMapViewer("mapId");
 
 // Access time slider controller
 const timeSliderController = mapViewer.controllers.timeSliderController;
@@ -499,8 +509,8 @@ interface TypeTimeSliderValues {
 **Programmatic:**
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
-const geochartPlugin = mapViewer.plugins['geochart'];
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const geochartPlugin = mapViewer.plugins["geochart"];
 
 if (geochartPlugin) {
   // Geochart state is managed via Zustand store
@@ -536,8 +546,8 @@ if (geochartPlugin) {
 ### API Methods
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
-const geochartPlugin = mapViewer.plugins['geochart'];
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const geochartPlugin = mapViewer.plugins["geochart"];
 
 // Geochart state is managed through Zustand store hooks
 // Configure charts via corePackagesConfig in map configuration
@@ -594,12 +604,12 @@ const geochartPlugin = mapViewer.plugins['geochart'];
 **Programmatic:**
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
-const swiperPlugin = mapViewer.plugins['swiper'];
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
-  swiperPlugin.activateForLayer('layerPath', 'right');
-  swiperPlugin.setOrientation('vertical');
+  swiperPlugin.activateForLayer("layerPath", "right");
+  swiperPlugin.setOrientation("vertical");
 }
 ```
 
@@ -642,21 +652,21 @@ if (swiperPlugin) {
 ### API Methods
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
-const swiperPlugin = mapViewer.plugins['swiper'];
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const swiperPlugin = mapViewer.plugins["swiper"];
 
 if (swiperPlugin) {
   // Activate swiper for a layer on the right side
-  swiperPlugin.activateForLayer('layerPath', 'right');
+  swiperPlugin.activateForLayer("layerPath", "right");
 
   // Deactivate for a layer
-  swiperPlugin.deActivateForLayer('layerPath');
+  swiperPlugin.deActivateForLayer("layerPath");
 
   // Change the visible side for an active layer
-  swiperPlugin.setLayerSide('layerPath', 'left');
+  swiperPlugin.setLayerSide("layerPath", "left");
 
   // Set orientation
-  swiperPlugin.setOrientation('vertical');
+  swiperPlugin.setOrientation("vertical");
 
   // Deactivate all
   swiperPlugin.deActivateAll();
@@ -726,7 +736,7 @@ Swiper behavior spans the package UI and core controllers; it is not owned by Ma
 **Programmatic:**
 
 ```typescript
-const mapViewer = cgpv.api.getMapViewer('mapId');
+const mapViewer = cgpv.api.getMapViewer("mapId");
 // The drawer plugin wraps the DrawerController
 // Drawing operations are managed via the controller
 ```
@@ -745,7 +755,15 @@ const mapViewer = cgpv.api.getMapViewer('mapId');
           "strokeWidth": 1.3
         },
         "activeGeom": "LineString",
-        "geomTypes": ["Point", "Text", "LineString", "Polygon", "Rectangle", "Circle", "Star"],
+        "geomTypes": [
+          "Point",
+          "Text",
+          "LineString",
+          "Polygon",
+          "Rectangle",
+          "Circle",
+          "Star"
+        ],
         "hideMeasurements": false
       }
     }
@@ -944,20 +962,30 @@ interface CustomLegendConfig {
 type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 
 interface TypeLegendLayer {
-  type: 'layer';
+  type: "layer";
   layerPath: string;
 }
 
 interface TypeHeaderLayer {
-  type: 'header';
+  type: "header";
   text: string;
   description?: TypeDescription;
+  fontSizeStep?:
+    | "xs"
+    | "sm"
+    | "default"
+    | "md"
+    | "lg"
+    | "xl"
+    | "xxl"
+    | "display";
+  /** @deprecated Use fontSizeStep instead. */
   fontSize?: number;
-  fontWeight?: 'normal' | 'bold';
+  fontWeight?: "normal" | "bold";
 }
 
 interface TypeGroupLayer {
-  type: 'group';
+  type: "group";
   text: string;
   description?: TypeDescription;
   collapsed?: boolean;
@@ -991,7 +1019,8 @@ interface TypeDescription {
    - **description**: Optional description object with:
      - **text** (required): Descriptive text to display below header
      - **collapsed** (optional): Whether description starts collapsed (default: false)
-   - **fontSize** (number, range: 8-32, default: 16): Font size in pixels
+   - **fontSizeStep**: Named typography size: `xs` (12), `sm` (14), `default` (16), `md` (18), `lg` (20), `xl` (24), `xxl` (32), or `display` (48 design pixels). Uses the owning map's calibrated theme and takes precedence over `fontSize`.
+   - **fontSize** (deprecated; removed in the next breaking release; number, range: 8-32, schema default: 16): Exact design-pixel size converted through the owning map's calibrated `pxToRem`, without rounding. Prefer `fontSizeStep`. With neither property, existing default sizing is unchanged.
    - **fontWeight** (string, default: "bold"): Font weight ("normal" or "bold")
 
 3. **TypeGroupLayer** - Display a collapsible group of legend items:
@@ -1057,7 +1086,7 @@ interface TypeDescription {
               "text": "Current weather conditions and forecasts",
               "collapsed": false
             },
-            "fontSize": 18,
+            "fontSizeStep": "md",
             "fontWeight": "bold"
           },
           {
@@ -1082,7 +1111,7 @@ interface TypeDescription {
           {
             "type": "header",
             "text": "Administrative Boundaries",
-            "fontSize": 16
+            "fontSizeStep": "default"
           },
           {
             "type": "layer",
@@ -1320,7 +1349,7 @@ interface TypeDescription {
 ```typescript
 // About Panel is automatically loaded when included in appBar.tabs.core
 // Access via AppBar tabs
-const appBarApi = cgpv.api.maps['mapId'].appBar;
+const appBarApi = cgpv.api.maps["mapId"].appBar;
 ```
 
 ### Content Formats
@@ -1641,7 +1670,7 @@ The panel gracefully handles:
 ```typescript
 // Filter Panel is automatically loaded when included in appBar.tabs.core
 // Access via AppBar tabs
-const appBarApi = cgpv.api.maps['mapId'].appBar;
+const appBarApi = cgpv.api.maps["mapId"].appBar;
 ```
 
 ### Filter Types
@@ -1667,14 +1696,19 @@ interface FilterPanelConfig {
     filterName?: string;
     enabled?: boolean;
     defaultCollapsed?: boolean;
-    attributes?: Array<SelectFilterAttribute | MultiselectFilterAttribute | RangeFilterAttribute | DateFilterAttribute>;
+    attributes?: Array<
+      | SelectFilterAttribute
+      | MultiselectFilterAttribute
+      | RangeFilterAttribute
+      | DateFilterAttribute
+    >;
   }>;
 }
 
 type SelectFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'select';
+  filterType: "select";
   enabled?: boolean;
   defaultValues?: string | number | null;
   domain?: Array<{ value: string | number; label: string }>;
@@ -1684,7 +1718,7 @@ type SelectFilterAttribute = {
 type MultiselectFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'multiselect';
+  filterType: "multiselect";
   enabled?: boolean;
   defaultValues?: Array<string | number> | null;
   domain?: Array<{ value: string | number; label: string }>;
@@ -1695,10 +1729,10 @@ type MultiselectFilterAttribute = {
 type RangeFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'range';
+  filterType: "range";
   enabled?: boolean;
   rangeStep?: number;
-  numberFormat?: 'number' | 'currency';
+  numberFormat?: "number" | "currency";
   currency?: string;
   defaultValues?: { min: number | null; max: number | null } | null;
 };
@@ -1706,9 +1740,9 @@ type RangeFilterAttribute = {
 type DateFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'date';
+  filterType: "date";
   enabled?: boolean;
-  dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+  dateStep?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
   defaultValues?: { start: string | null; end: string | null } | null;
 };
 ```
@@ -2382,10 +2416,10 @@ For app bar packages, extend `AppBarPlugin`. For nav bar packages, extend `NavBa
 
 ```typescript
 // index.tsx
-import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
-import { MyPackagePanel } from './my-package-panel';
-import schema from '../schema.json';
-import defaultConfig from '../default-config-my-package.json';
+import { AppBarPlugin } from "geoview-core/api/plugin/appbar-plugin";
+import { MyPackagePanel } from "./my-package-panel";
+import schema from "../schema.json";
+import defaultConfig from "../default-config-my-package.json";
 
 class MyPackagePlugin extends AppBarPlugin {
   override schema(): unknown {
@@ -2398,8 +2432,8 @@ class MyPackagePlugin extends AppBarPlugin {
 
   override defaultTranslations(): Record<string, unknown> {
     return {
-      en: { MyPackage: { title: 'My Package' } },
-      fr: { MyPackage: { title: 'Mon Paquet' } },
+      en: { MyPackage: { title: "My Package" } },
+      fr: { MyPackage: { title: "Mon Paquet" } },
     };
   }
 }

@@ -198,6 +198,7 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
               label={
                 <Box sx={memoSxClasses.mousePositionTextCheckmarkContainer}>
                   <CheckIcon
+                    fontSize="small"
                     sx={{
                       ...memoSxClasses.mousePositionCheckmark,
                       opacity: checkmarkOpacity,
@@ -217,7 +218,7 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
 
   return (
     <Tooltip title={t('mapctrl.mouseposition.coordinates')} placement="top">
-      <Box sx={{ minWidth: 'fit-content' }}>
+      <Box sx={memoSxClasses.container}>
         {expanded ? (
           // Expanded: Semantic radio group with checkmark visual indicators
           <Box sx={memoSxClasses.mousePositionTextContainer}>{memoExpandedContent}</Box>

@@ -99,7 +99,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
             >
               <Grid container spacing={1} sx={memoSxClassesList.geoListItemGrid}>
                 {/* Location name + province (truncates when > 66% of row width) */}
-                <Grid size={{ xs: 12, sm: 8 }} sx={memoSxClassesList.geoListLocationCell}>
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <Typography component="div" noWrap={isAboveSmBreakpoint}>
                     {transformListTitle(
                       geoListItem.name,

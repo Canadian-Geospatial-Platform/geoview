@@ -3,6 +3,14 @@ import type { SxStyles } from '@/ui/style/types';
 import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 import { FOCUS_OUTLINE_WIDTH, getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
 
+/** Theme-independent top-panel styles, passed as objects to ResponsiveGrid panels. */
+export const TOP_PANEL_STYLES = {
+  left: { zIndex: 200 },
+  right: { zIndex: 100, alignContent: 'flex-end' },
+  leftFullscreen: { zIndex: 'unset' },
+  rightFullscreen: { zIndex: 'unset', alignContent: 'flex-end' },
+} satisfies SxStyles;
+
 /**
  * Gets custom sx classes for the common grid layout.
  *
@@ -10,6 +18,30 @@ import { FOCUS_OUTLINE_WIDTH, getFocusIndicatorStyles } from '@/ui/style/themeOp
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  rightTopContent: {
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing(0),
+    [theme.breakpoints.up('sm')]: {
+      justifyContent: 'right',
+    },
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'space-between',
+    },
+    width: '100%',
+  },
+  rightTopContentAppBar: {
+    alignItems: 'end',
+    flexDirection: 'column',
+    gap: '10px',
+    [theme.breakpoints.up('sm')]: {
+      justifyContent: 'space-between',
+    },
+  },
+  enlargeButton: {
+    boxShadow: 'none',
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -89,7 +121,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
     '& .noSelection': {
-      fontSize: theme.palette.geoViewFontSize?.md,
+      fontSize: theme.typography.body2.fontSize,
       fontWeight: '500',
       padding: theme.spacing(2),
     },

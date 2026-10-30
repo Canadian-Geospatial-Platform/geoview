@@ -263,7 +263,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
         <span>{formatValue(memoSliderValue[1])}</span>
       </Box>
 
-      <Typography variant="caption" sx={memoSxClasses.filterDateInfo}>
+      <Typography variant="body2" component="span" sx={memoSxClasses.filterDateInfo}>
         {t('FilterPanel.available')}: {memoBounds.minDate} {t('FilterPanel.to')} {memoBounds.maxDate}
       </Typography>
     </Box>

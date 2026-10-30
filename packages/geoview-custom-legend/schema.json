@@ -75,9 +75,15 @@
         "description": {
           "$ref": "#/definitions/TypeDescription"
         },
+        "fontSizeStep": {
+          "type": "string",
+          "enum": ["xs", "sm", "default", "md", "lg", "xl", "xxl", "display"],
+          "description": "Named typography scale size, converted through the owning map's calibrated theme. Takes precedence over fontSize."
+        },
         "fontSize": {
           "type": "number",
-          "description": "Font size in pixels.",
+          "description": "Deprecated: use fontSizeStep. Exact design-pixel size converted through the owning map's calibrated pxToRem; ignored when fontSizeStep is set.",
+          "deprecated": true,
           "default": 16,
           "minimum": 8,
           "maximum": 32
@@ -88,7 +94,7 @@
           "default": "bold"
         }
       },
-      "required": ["type", "headerText"]
+      "required": ["type", "text"]
     },
     "TypeGroupLayer": {
       "description": "A collapsible group containing other legend items.",

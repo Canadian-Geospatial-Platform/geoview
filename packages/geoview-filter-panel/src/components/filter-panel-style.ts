@@ -36,7 +36,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   filterTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg || '1.125rem',
+    fontSize: theme.typography.h4.fontSize,
     fontWeight: 600,
   },
 
@@ -102,7 +102,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Layer name text
   filterLayerName: {
-    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
+    fontSize: theme.typography.h5.fontSize,
     fontWeight: 600,
     flex: 1,
     minWidth: 0,

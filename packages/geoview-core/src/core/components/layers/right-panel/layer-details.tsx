@@ -790,7 +790,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
           <Typography component="h2" sx={[sxClasses.categoryTitle, layerHidden && hiddenStyle] as SxProps} title={layerName}>
             {layerName}
           </Typography>
-          {subTitle && <Typography sx={[sxClasses.subTitle, layerHidden && hiddenStyle] as SxProps}>{subTitle}</Typography>}
+          {subTitle && (
+            <Typography variant="body2" sx={layerHidden ? hiddenStyle : undefined}>
+              {subTitle}
+            </Typography>
+          )}
         </Box>
         {renderSettingsButton()}
         {renderInfoButton()}
@@ -836,7 +840,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                 layerAttribution.map((attribution) => {
                   if (attribution) {
                     return (
-                      <Typography sx={sxClasses.attributionText} key={attribution}>
+                      <Typography variant="body2" sx={sxClasses.attributionText} key={attribution}>
                         {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                       </Typography>
                     );

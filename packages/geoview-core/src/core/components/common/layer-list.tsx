@@ -360,8 +360,8 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick, com
             <Typography component="span" className="layerTitle" noWrap={!isDisabled}>
               {layerName}
             </Typography>
-            <Box component="span" sx={{ display: 'flex', alignContent: 'center' }}>
-              <Typography component="span" variant="subtitle1" noWrap={!isDisabled} sx={{ display: 'block' }}>
+            <Box component="span" sx={memoSxClasses.listSecondaryTextContainer}>
+              <Typography component="span" variant="body2" noWrap={!isDisabled} sx={memoSxClasses.listSecondaryText}>
                 {getLayerStatus()}
               </Typography>
             </Box>
@@ -499,7 +499,7 @@ export const LayerList = memo((props: LayerListProps): JSX.Element => {
   }, [memoGroupedLayers, t]);
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={memoSxClasses.layerListContainer}>
       {/* WCAG - ARIA live region announcing when a layer moves between the two lists */}
       <Box sx={memoSxClasses.visuallyHidden} role="status">
         {announcement}
