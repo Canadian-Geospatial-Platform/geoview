@@ -281,8 +281,8 @@ const Notifications = memo((): JSX.Element => {
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [hasNewNotification, setHasNewNotification] = useState(false);
-  const [notificationsCount, setNotificationsCount] = useState(0);
+  const [hasNewNotification, setHasNewNotification] = useState<boolean>(false);
+  const [notificationsCount, setNotificationsCount] = useState<number>(0);
 
   // Refs
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -298,7 +298,7 @@ const Notifications = memo((): JSX.Element => {
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const popoverCloseVersion = useStoreUIPopoverCloseVersion();
-  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState(popoverCloseVersion);
+  const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
   const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
   const uiController = useUIController();
 
