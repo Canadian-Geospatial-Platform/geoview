@@ -105,10 +105,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       const topLink = DomHelper.getGVElementById(mapId, 'toplink');
       const bottomLink = DomHelper.getGVElementById(mapId, 'bottomlink');
-      const currentFocus = document.activeElement;
+      const currentFocus = DomHelper.getActiveElement();
 
       // Only intercept if focus is within geoview container
-      if (!currentFocus || !gvRootElement?.contains(currentFocus)) {
+      if (!currentFocus || !gvRootElement.contains(currentFocus)) {
         return;
       }
 
@@ -122,10 +122,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // Use capture phase to intercept before other handlers
     // Scope to geoviewElement to avoid conflicts with other maps
-    gvRootElement?.addEventListener('keydown', handleTabNavigation, { capture: true });
+    gvRootElement.addEventListener('keydown', handleTabNavigation, { capture: true });
 
     return () => {
-      gvRootElement?.removeEventListener('keydown', handleTabNavigation, { capture: true });
+      gvRootElement.removeEventListener('keydown', handleTabNavigation, { capture: true });
     };
   }, [mapId, gvRootElement, activeTrapGeoView]);
 
@@ -144,7 +144,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * when focus is set to map and arrows and enter keys are used to navigate the map.
    */
   const handleScrolling = useCallback((evt: KeyboardEvent): void => {
-    if (mapElementRef.current === document.activeElement) {
+    if (mapElementRef.current === DomHelper.getActiveElement()) {
       if (evt.code === 'Space') {
         evt.preventDefault();
       }
@@ -174,7 +174,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     handlers.current = {
       exit: () => {
         uiController.setActiveTrapGeoView(false);
-        gvRootElement?.classList.remove('map-focus-trap');
+        gvRootElement.classList.remove('map-focus-trap');
 
         if (handlers.current?.handleKeyDown && shellElementRef.current) {
           shellElementRef.current.removeEventListener('keydown', handlers.current.handleKeyDown);
@@ -342,7 +342,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * Logs the currently active focused element for debugging.
    */
   function handleFocusIn(): void {
-    const activeEl = document.activeElement;
+    const activeEl = DomHelper.getActiveElement();
     if (activeEl) {
       logger.logDebug('FOCUS-TRAP Focused element:', activeEl, 'id:', activeEl.id, 'class:', activeEl.className);
     }

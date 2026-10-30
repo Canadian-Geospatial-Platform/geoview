@@ -366,9 +366,9 @@ export class API {
 
       // get array of map elements
       const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));
-      const activeEl = document.activeElement;
+      const activeEl = DomHelper.getActiveElement();
 
-      if (elements.some((element) => element.contains(activeEl))) {
+      if (elements.some((element) => activeEl && element.contains(activeEl))) {
         // Check if the focus element is a map and set store value for crosshair
         const mapId =
           activeEl?.closest('.geoview-shell') !== null

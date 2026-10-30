@@ -198,8 +198,13 @@ export function SingleLayer({
    * Blurs any focused button element that is not within this layer.
    */
   const blurOtherLayerButtons = useCallback((): void => {
-    const activeElement = document.activeElement as HTMLElement;
-    if (activeElement && activeElement.tagName === 'BUTTON' && !layerListItemRef.current?.contains(activeElement)) {
+    const activeElement = DomHelper.getActiveElement();
+    if (
+      activeElement instanceof HTMLElement &&
+      activeElement.tagName === 'BUTTON' &&
+      typeof activeElement.blur === 'function' &&
+      !layerListItemRef.current?.contains(activeElement)
+    ) {
       activeElement.blur();
     }
   }, []);

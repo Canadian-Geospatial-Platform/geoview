@@ -19,6 +19,7 @@ import { getSxClasses, SLIDER_WIDTH_STYLE } from './time-slider-style';
 import { visuallyHidden } from 'geoview-core/ui/style/default';
 import { Switch } from 'geoview-core/ui/switch/switch';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 
 import type { SxStyles } from 'geoview-core/ui/style/types';
 
@@ -770,7 +771,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     logger.logTraceUseEffect('TIME-SLIDER - announcement', storeValues, isPlaying, formatRange);
 
     if (isPlaying) return;
-    if (sliderBoxRef.current?.contains(document.activeElement)) return;
+    const activeElement = DomHelper.getActiveElement();
+    if (!activeElement || sliderBoxRef.current?.contains(activeElement)) return;
 
     setAnnouncement(formatRange(storeValues));
   }, [storeValues, isPlaying, formatRange]);
