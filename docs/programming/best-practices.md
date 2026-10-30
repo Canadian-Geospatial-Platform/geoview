@@ -681,6 +681,12 @@ onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQ
 
 **Checklist when adding a new event:** After writing the `#emit*`, `once*`, `on*`, `off*` group, verify that `once*` has `filter?: (event: EventType) => boolean` in its signature and passes it to `onceEventPromise`.
 
+### Testing transient state
+
+When a test triggers an action that emits an event, create the filtered `once*` promise **before** triggering the action. The event may be emitted synchronously, so subscribing afterward can miss it. Filter by the relevant operation and, when available, a stable entity identifier. Use the event payload to identify what changed, then read the owning store to verify its current state; receiving an event alone does not prove that the state is still present.
+
+Keep the test isolated by clearing pre-existing state and registering cleanup for state created by the test.
+
 ## <a id="accessibility"></a>17- Accessibility (WCAG 2.1 Level AA)
 
 The [accessibility guide](../app/accessibility.md) owns the shared guidance:
