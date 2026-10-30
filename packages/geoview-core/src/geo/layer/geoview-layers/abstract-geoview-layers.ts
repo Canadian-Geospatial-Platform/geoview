@@ -71,9 +71,6 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  *
  */
 export abstract class AbstractGeoViewLayer {
-  /** The default hit tolerance the query should be using */
-  static readonly DEFAULT_HIT_TOLERANCE: number = 4;
-
   /** The default waiting time before showing a warning about the metadata taking a long time to get processed. */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
 
@@ -88,9 +85,6 @@ export abstract class AbstractGeoViewLayer {
 
   /** The default display date mode used when generating default configurations */
   static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode = 'long';
-
-  /** The default hit tolerance */
-  hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the

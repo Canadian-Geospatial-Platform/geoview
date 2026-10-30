@@ -601,7 +601,7 @@ export class MapViewer {
     return this.#northPoleMarkerOverlay!;
   }
 
-  //#region MAP DOM ELEMENTS (only core OpenLayers controls in this region, because they are directly attached to the map behavior, everything else in DOM Adaptors)
+  // #region MAP DOM ELEMENTS (only core OpenLayers controls in this region, because they are directly attached to the map behavior, everything else in DOM Adaptors)
 
   /**
    * Retrieves the scale information from the DOM elements.
@@ -625,7 +625,7 @@ export class MapViewer {
     return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
   }
 
-  //#endregion MAP DOM ELEMENTS
+  // #endregion MAP DOM ELEMENTS
 
   // #region MAP STATES
 

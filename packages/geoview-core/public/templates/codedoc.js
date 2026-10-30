@@ -990,4 +990,4 @@ function initializeConfigEditor(options = {}) {
     getSingleQuoteRegex,
   };
 }
-//#endregion ------------------ CONFIG EDITOR UTILITIES END -----------------------------------------
+// #endregion ------------------ CONFIG EDITOR UTILITIES END -----------------------------------------

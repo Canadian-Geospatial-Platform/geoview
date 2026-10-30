@@ -28,12 +28,6 @@ export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
  * A class to add an EsriDynamic layer.
  */
 export class EsriDynamic extends AbstractGeoViewRaster {
-  // The default hit tolerance the query should be using
-  static override DEFAULT_HIT_TOLERANCE = 7;
-
-  // Override the hit tolerance for a EsriDynamic layer
-  override hitTolerance: number = EsriDynamic.DEFAULT_HIT_TOLERANCE;
-
   /**
    * Constructs an EsriDynamic Layer configuration processor.
    *

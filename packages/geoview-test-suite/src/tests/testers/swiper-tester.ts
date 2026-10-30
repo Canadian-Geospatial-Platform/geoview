@@ -66,27 +66,6 @@ type SwiperPersistenceResult = {
 };
 
 /**
- * Waits for a layer's Swiper render handlers to reach the expected listener counts.
- *
- * @param layer - The layer to inspect
- * @param expectedPreRenderCount - Expected prerender listener count
- * @param expectedPostRenderCount - Expected postrender listener count
- * @returns A promise that resolves when both listener counts match
- */
-async function waitForLayerRenderHandlers(
-  layer: AbstractBaseGVLayer,
-  expectedPreRenderCount: number,
-  expectedPostRenderCount: number
-): Promise<void> {
-  const olLayer = layer.getOLLayer();
-  await whenThisThen(
-    () =>
-      (olLayer.getListeners('prerender')?.length ?? 0) === expectedPreRenderCount &&
-      (olLayer.getListeners('postrender')?.length ?? 0) === expectedPostRenderCount
-  );
-}
-
-/**
  * Main Swiper testing class.
  */
 export class SwiperTester extends GVAbstractTester {
@@ -223,10 +202,10 @@ export class SwiperTester extends GVAbstractTester {
 
         test.addStep('Selecting both layers for the Swiper...');
         controller.setLayerPaths(targetPaths);
-        await waitForLayerRenderHandlers(wmsLayer, wmsBaseline + 1, wmsPostRenderBaseline + 1);
+        await SwiperTester.#waitForLayerRenderHandlers(wmsLayer, wmsBaseline + 1, wmsPostRenderBaseline + 1);
         const wmsHandlers = wmsOLLayer.getListeners('prerender')?.length ?? 0;
 
-        await waitForLayerRenderHandlers(nonTargetLayer, nonTargetBaseline + 1, nonTargetPostRenderBaseline + 1);
+        await SwiperTester.#waitForLayerRenderHandlers(nonTargetLayer, nonTargetBaseline + 1, nonTargetPostRenderBaseline + 1);
         const nonTargetHandlers = nonTargetOLLayer.getListeners('prerender')?.length ?? 0;
         return { wmsHandlers, nonTargetHandlers };
       },
@@ -335,7 +314,7 @@ export class SwiperTester extends GVAbstractTester {
         this.getControllersRegistry().swiperController!.setLayerPaths([SwiperTester.SWIPER_WMS_ROOT_LAYER_PATH]);
 
         test.addStep('Waiting for React to attach render handlers to the target descendant...');
-        await waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline + 1, targetPostRenderBaseline + 1);
+        await SwiperTester.#waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline + 1, targetPostRenderBaseline + 1);
 
         const targetPreRenderActive = targetOLLayer.getListeners('prerender')?.length ?? 0;
         const targetPostRenderActive = targetOLLayer.getListeners('postrender')?.length ?? 0;
@@ -350,7 +329,7 @@ export class SwiperTester extends GVAbstractTester {
 
         test.addStep('Removing swiper paths and waiting for target render handlers to detach...');
         this.getControllersRegistry().swiperController!.removeAllLayerPaths();
-        await waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline, targetPostRenderBaseline);
+        await SwiperTester.#waitForLayerRenderHandlers(targetLayer, targetPreRenderBaseline, targetPostRenderBaseline);
 
         return {
           targetPreRenderBaseline,
@@ -485,6 +464,27 @@ export class SwiperTester extends GVAbstractTester {
         const finalLayerPaths = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(finalLayerPaths, 0);
       }
+    );
+  }
+
+  /**
+   * Waits for a layer's Swiper render handlers to reach the expected listener counts.
+   *
+   * @param layer - The layer to inspect
+   * @param expectedPreRenderCount - Expected prerender listener count
+   * @param expectedPostRenderCount - Expected postrender listener count
+   * @returns A promise that resolves when both listener counts match
+   */
+  static async #waitForLayerRenderHandlers(
+    layer: AbstractBaseGVLayer,
+    expectedPreRenderCount: number,
+    expectedPostRenderCount: number
+  ): Promise<void> {
+    const olLayer = layer.getOLLayer();
+    await whenThisThen(
+      () =>
+        (olLayer.getListeners('prerender')?.length ?? 0) === expectedPreRenderCount &&
+        (olLayer.getListeners('postrender')?.length ?? 0) === expectedPostRenderCount
     );
   }
 }
