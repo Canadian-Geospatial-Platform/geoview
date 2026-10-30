@@ -1865,6 +1865,7 @@ const TEXT_INPUT_TYPES = ['text', 'search', 'url', 'email', 'tel', 'password', '
  * @param element - The element to check, such as the active element
  * @returns True when the element is a text input, textarea, select or content-editable element
  */
+// TODO: ALEX - Delete this function to use DomHelper's instead
 export function isEditableElement(element: Element | null): boolean {
   if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.includes(element.type);
   return (

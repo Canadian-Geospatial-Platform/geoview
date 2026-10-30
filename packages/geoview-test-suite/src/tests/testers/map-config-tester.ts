@@ -32,14 +32,6 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 /** Fixed map height used by map config layout tests. */
 const MAP_CONFIG_TEST_HEIGHT = 500;
 
-/** Height measurements for fixed-height map layout tests. */
-type TypeMapHeightMeasurements = {
-  /** Height of the root GeoView map element. */
-  geoviewMapHeight: number;
-  /** Height of the rendered collapsed footer chrome. */
-  footerChromeHeight: number;
-};
-
 /**
  * Main Map Config testing class.
  */
@@ -2160,3 +2152,15 @@ export class MapConfigTester extends GVAbstractTester {
     };
   }
 }
+
+// #region TYPES AND INTERFACES
+
+/** Height measurements for fixed-height map layout tests. */
+type TypeMapHeightMeasurements = {
+  /** Height of the root GeoView map element. */
+  geoviewMapHeight: number;
+  /** Height of the rendered collapsed footer chrome. */
+  footerChromeHeight: number;
+};
+
+// #endregion TYPES AND INTERFACES

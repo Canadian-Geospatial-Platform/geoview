@@ -48,6 +48,8 @@ export class MyFeatureTester extends GVAbstractTester {
 }
 ```
 
+Declare any result `type` or `interface` a tester needs in a `// #region TYPES AND INTERFACES` block at the bottom of the file, after the class, each with a single-line JSDoc. This keeps the test methods at the top of the file.
+
 ### The `test()` Method
 
 ```typescript

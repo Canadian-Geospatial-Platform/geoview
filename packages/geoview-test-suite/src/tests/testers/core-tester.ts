@@ -16,16 +16,6 @@ import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 
-/** Represents the outcomes of the ESRI picture fill legend regression test. */
-interface TypePictureFillLegendTestResult {
-  /** The GeoView style converted from the ESRI renderer. */
-  styleConfig: TypeLayerStyleConfig | undefined;
-  /** The legend styles generated from the converted style. */
-  legendStyles: Awaited<ReturnType<typeof GeoviewRenderer.getLegendStyles>>;
-  /** The RGBA values sampled from the center of the polygon legend canvas. */
-  centerPixel: number[];
-}
-
 /**
  * Main Core testing class.
  */
@@ -625,3 +615,17 @@ export class CoreTester extends GVAbstractTester {
 
   // #endregion GEO UTILITIES - FETCH WITH PROXY FALLBACK
 }
+
+// #region TYPES AND INTERFACES
+
+/** Represents the outcomes of the ESRI picture fill legend regression test. */
+interface TypePictureFillLegendTestResult {
+  /** The GeoView style converted from the ESRI renderer. */
+  styleConfig: TypeLayerStyleConfig | undefined;
+  /** The legend styles generated from the converted style. */
+  legendStyles: Awaited<ReturnType<typeof GeoviewRenderer.getLegendStyles>>;
+  /** The RGBA values sampled from the center of the polygon legend canvas. */
+  centerPixel: number[];
+}
+
+// #endregion TYPES AND INTERFACES
