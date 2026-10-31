@@ -27,6 +27,10 @@ export interface DataTableProps {
     layerPath: string;
     containerType: TypeContainerBox;
     unfilteredFeaturesCount: number;
+    /** The count of features before extent filtering, after applying symbol visibility. */
+    preExtentFeaturesCount: number;
+    /** Whether filtering to the current map extent is enabled. */
+    filterDataToExtent: boolean;
     /** Called after the table has (re)rendered, so the parent can clear its loading overlay. */
     onRendered?: () => void;
 }

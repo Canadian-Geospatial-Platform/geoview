@@ -184,11 +184,14 @@ export declare class UIController extends AbstractMapViewerController {
     /**
      * Toggles the fullscreen state.
      *
-     * When entering fullscreen, requests fullscreen on the provided element.
-     * When exiting, preserves the current map extent by zooming back after the size change.
+     * When entering fullscreen, saves the current view (center, resolution, rotation) and requests fullscreen on the provided element.
+     * When exiting, only asks the browser to leave fullscreen; the view is handled once the browser reports the exit
+     * (same path for the fullscreen button, the `Esc` key and this API). If the user did not change the view while in fullscreen,
+     * the saved view is restored exactly; otherwise the current center and resolution are kept.
+     * Calls that do not change the state (entering while active, exiting while inactive) are ignored.
      *
      * @param status - Whether to enter or exit fullscreen
-     * @param element - Optional HTML element to make fullscreen
+     * @param element - Optional HTML element to make fullscreen (required to enter fullscreen)
      */
     setFullScreen(status: boolean, element?: TypeHTMLElement): void;
     /**

@@ -1,4 +1,4 @@
-import type { LayerListEntry } from '@/core/components/common';
+import type { LayerListEntry } from '@/core/components/common/layer-list';
 /**
  * Waits until a layer path has 0 elements before changing the selection.
  *

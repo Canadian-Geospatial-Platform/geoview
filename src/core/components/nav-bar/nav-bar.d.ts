@@ -1,4 +1,4 @@
-import type { NavBarApi } from '@/core/components';
+import type { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 /** The properties for the nav-bar component. */
 type NavBarProps = {
     /** The nav-bar API instance. */

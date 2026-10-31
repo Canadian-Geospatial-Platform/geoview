@@ -1,5 +1,5 @@
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
-import type { TypeMenuItemProps } from '@/ui';
+import type { TypeMenuItemProps } from '@/ui/select/select';
 /** Tooltip property type picking name, province, and category from GeoListItem. */
 export type tooltipProp = Pick<GeoListItem, 'name' | 'province' | 'category'>;
 /** Regex patterns used for parsing search terms. */

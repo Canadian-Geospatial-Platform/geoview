@@ -1,5 +1,5 @@
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
-import type { AppBarApi } from '@/core/components';
+import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 /** Props for the AppBar component. */
 type AppBarProps = {
     api: AppBarApi;

@@ -29,8 +29,6 @@ export interface IGeoviewState {
     drawerState: IDrawerState;
     filterPanelState: IFilterPanelState;
 }
-export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
-export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]]>;
 type SubscribeWithSelectorMiddleware = [['zustand/subscribeWithSelector', never]];
 export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, SubscribeWithSelectorMiddleware>>;
 export declare const useStoreGeoViewMapId: () => string;

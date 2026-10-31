@@ -12,12 +12,14 @@ interface UseSelectedRowMessageProps {
     globalFilter: string;
     showUnsymbolizedFeatures: boolean;
     unfilteredFeaturesCount: number;
+    preExtentFeaturesCount: number;
+    filterDataToExtent: boolean;
 }
 /**
  * Custom hook to compute and set the filtered/selected row message for the data table toolbar.
  *
  * @param props - Hook properties containing table data, filters, and instance
  */
-export declare function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance, showUnsymbolizedFeatures, unfilteredFeaturesCount, }: UseSelectedRowMessageProps): string;
+export declare function useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance, showUnsymbolizedFeatures, unfilteredFeaturesCount, preExtentFeaturesCount, filterDataToExtent, }: UseSelectedRowMessageProps): string;
 export {};
 //# sourceMappingURL=useToolbarActionMessage.d.ts.map
