@@ -40,13 +40,15 @@ interface LayerListProps {
     selectedLayerPath: string | undefined;
     /** Callback invoked when a layer item is clicked. */
     onListItemClick: (layer: LayerListEntry) => void;
-    /** Compact mode for the collapsed app-bar icon view: hides the section headings and the "no layers" instructions item. */
+    /** Renders icon-only rows and omits section headings and empty-list instructions in the collapsed app-bar view. */
     compact?: boolean;
     /** Omits the available-layers heading for non-layer lists such as Guide topics. */
     hideAvailableHeading?: boolean;
 }
 /** Properties for the LayerListItem component. */
 interface LayerListItemProps {
+    /** Renders a narrow icon-only row with a feature-count badge. */
+    compact?: boolean;
     /** The unique DOM id for this list item. */
     id: string;
     /** Whether this item is currently selected. */
@@ -66,7 +68,7 @@ interface LayerListItemProps {
  * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
  */
-export declare const LayerListItem: import("react").MemoExoticComponent<({ id, isSelected, layer, onListItemClick }: LayerListItemProps) => JSX.Element>;
+export declare const LayerListItem: import("react").MemoExoticComponent<({ id, isSelected, layer, onListItemClick, compact }: LayerListItemProps) => JSX.Element>;
 /**
  * Renders a list of layers with selection and status indicators.
  *
