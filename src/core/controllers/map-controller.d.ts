@@ -135,8 +135,9 @@ export declare class MapController extends AbstractMapViewerController {
      * WMS features are excluded since they cannot be individually highlighted.
      *
      * @param feature - The feature to highlight
+     * @param isTemporary - Optional flag to remove the highlight after TIMEOUT.featureHighlight, unless another highlight change happens first
      */
-    addHighlightedFeature(feature: TypeFeatureInfoEntry): void;
+    addHighlightedFeature(feature: TypeFeatureInfoEntry, isTemporary?: boolean): void;
     /**
      * Removes a highlighted feature, or all highlighted features, from the map.
      *

@@ -295,9 +295,10 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param extent - The extent to restrictively zoom to
      * @param useAnimation - Optional flag indicating if a zoom animation should be used
      * @param fitOptions - Optional fit options to merge scale constraints into
+     * @param isTemporaryHighlight - Optional flag indicating the feature highlight should expire automatically
      * @returns A promise that resolves when the zoom and highlight are complete
      */
-    zoomToExtentRestrictedAndHighlight(layerPath: string, feature: TypeFeatureInfoEntry, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
+    zoomToExtentRestrictedAndHighlight(layerPath: string, feature: TypeFeatureInfoEntry, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions, isTemporaryHighlight?: boolean): Promise<void>;
     /**
      * Gets the raster function previews for the ESRI image layer.
      *

@@ -1,4 +1,5 @@
 export * from './geoview-store';
+export * from './geoview-store-definition';
 export * from './states/app-state';
 export * from './states/data-table-state';
 export * from './states/drawer-state';

@@ -1,7 +1,7 @@
 import type { i18n } from 'i18next';
 import type { MapViewer } from '@/geo/map/map-viewer';
-/** Create contexts for the map, layer controller, and UI controller */
-export declare const StoreContext: import("react").Context<string | undefined>;
+import { StoreContext } from '@/core/stores/store-context';
+export { StoreContext };
 /** Defines the props for the AppStart component. */
 interface AppStartProps {
     /** The map viewer instance to initialize. */

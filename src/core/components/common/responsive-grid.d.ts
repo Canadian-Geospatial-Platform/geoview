@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { GridProps, SxProps } from '@/ui';
+import type { GridProps, SxProps } from '@/ui/grid';
 /** Properties for the responsive grid root container. */
 interface ResponsiveGridProps extends GridProps {
     children: ReactNode;

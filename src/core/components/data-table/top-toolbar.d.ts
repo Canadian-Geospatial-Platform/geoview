@@ -31,6 +31,10 @@ interface TopToolbarProps<TData extends DataTableRow> {
     table: MRTTableInstance<DataTableRow>;
     /** The count of features before any filters are applied. */
     unfilteredFeaturesCount?: number;
+    /** The count of features before extent filtering and symbol visibility are applied. */
+    preExtentFeaturesCount: number;
+    /** Whether the table is currently filtered to the map extent. */
+    filterDataToExtent: boolean;
 }
 /**
  * Creates the top toolbar for the data table with filters, search, and export controls.

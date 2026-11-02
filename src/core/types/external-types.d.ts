@@ -16,7 +16,6 @@ export * from '@/core/utils/date-mgt';
 export * from '@/core/utils/utilities';
 export * from '@/api';
 export * from '@/api/config/config';
-export * from '@/app';
 export * from '@/geo';
 export * from '@/ui';
 export type { AnySchemaObject } from 'ajv';

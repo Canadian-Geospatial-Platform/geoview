@@ -1,9 +1,8 @@
 import type { GeoviewStoreType } from './geoview-store';
-import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { type TypeFeatureInfoResultSetEntry, type TypeHoverResultSetEntry } from './states/feature-info-state';
+import type { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from './states/feature-info-state';
 import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state';
-import { type TypeGeochartResultSetEntry } from './states/geochart-state';
+import type { TypeGeochartResultSetEntry } from './states/geochart-state';
 export interface StoresManagerState {
     stores: Record<string, GeoviewStoreType>;
 }
@@ -16,8 +15,6 @@ export declare function hasSwiperPlugin(store: GeoviewStoreType): boolean;
 export declare function hasDrawerPlugin(store: GeoviewStoreType): boolean;
 export declare function hasFilterPanelPlugin(store: GeoviewStoreType): boolean;
 export declare function hasStacBrowserPlugin(store: GeoviewStoreType): boolean;
-export declare const addGeoViewStore: (config: TypeMapFeaturesConfig) => void;
-export declare const removeGeoviewStore: (id: string) => void;
 /**
  * Hook to access the GeoView store from the context.
  *

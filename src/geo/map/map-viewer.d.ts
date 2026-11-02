@@ -32,7 +32,7 @@ import { Translate } from '@/geo/interaction/translate';
 import type { TransformOptions } from '@/geo/interaction/transform/transform';
 import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import { ModalApi } from '@/ui';
+import { ModalApi } from '@/ui/modal/modal-api';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { type GVFitOptions } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';

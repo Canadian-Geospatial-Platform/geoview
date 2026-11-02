@@ -4,6 +4,7 @@ import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
+export { isLocalhost, formatDuration } from '@/core/utils/runtime-utilities';
 /** Result of a URL reachability ping check. */
 export type PingResult = {
     /** Whether the URL has valid syntax. */
@@ -379,16 +380,26 @@ export declare function watchHtmlElementRemoval(key: string, element: HTMLElemen
  * `requestFullscreen()` API first, then falling back to vendor-prefixed
  * versions for Safari, IE11, and Firefox.
  * Any errors from the standard promise-based fullscreen request are caught
- * and logged using `logger.logPromiseFailed`.
+ * and logged using `logger.logPromiseFailed`, then propagated to the caller.
  *
  * @param element - The element to display in fullscreen mode
+ * @returns A promise that resolves when the fullscreen request succeeds
  */
-export declare function requestFullscreen(element: TypeHTMLElement): void;
+export declare function requestFullscreen(element: TypeHTMLElement): Promise<void>;
+/**
+ * Gets the element currently displayed in fullscreen mode, if any.
+ *
+ * Uses the standard `document.fullscreenElement` and falls back to vendor-prefixed versions for Safari, IE11, and Firefox.
+ *
+ * @returns The fullscreen element, or undefined when the document is not in fullscreen
+ */
+export declare function getFullscreenElement(): Element | undefined;
 /**
  * Exits fullscreen mode if the document is currently in fullscreen.
  *
  * This function uses the standard `exitFullscreen()` API when available,
  * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
+ * Does nothing when the document is not in fullscreen (avoids a rejected `exitFullscreen()` promise).
  * Any errors from the standard promise-based exit request are caught
  * and logged using `logger.logPromiseFailed`.
  */
@@ -469,13 +480,6 @@ export declare function stringify(str: unknown): unknown | string;
  *   - `timeoutId`: The ID of the underlying setTimeout, useful for advanced control.
  */
 export declare function doTimeout(timeout: number): DelayJob;
-/**
- * Formats a duration in milliseconds into a compact human-readable string.
- *
- * @param durationMs - The duration in milliseconds to format
- * @returns A formatted string such as "150ms", "2.500s", "3m 05s", or "1h 03m 05s"
- */
-export declare function formatDuration(durationMs: number): string;
 /**
  * Awaits for a specified duration before resolving.
  *
@@ -632,12 +636,6 @@ export declare function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLo
  * @param listItem - The list item element to scroll into view
  */
 export declare function scrollListItemIntoView(listItem: HTMLElement): void;
-/**
- * Checks whether the current environment is running on localhost port 8080.
- *
- * @returns True if the current hostname is localhost and the port is 8080; otherwise, false
- */
-export declare function isLocalhost(): boolean;
 /**
  * Formats a numeric value according to the display language.
  *
