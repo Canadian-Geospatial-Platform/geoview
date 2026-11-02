@@ -42,7 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   featureInfoRow: {
     th: {
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
     },
     '& td, & th': {
       verticalAlign: 'top',
@@ -139,7 +139,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(1.25),
   },
   coordinateInfoSectionTitle: {
-    fontWeight: 'bold',
+    fontWeight: theme.typography.fontWeightBold,
   },
   coordinateInfoDeclinationContent: {
     marginLeft: theme.spacing(0.25),

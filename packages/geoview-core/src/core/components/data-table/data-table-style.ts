@@ -161,11 +161,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  dataTableInstructionsTitle: {
-    fontSize: theme.typography.h4.fontSize,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
   dataTableInstructionsBody: {
     fontSize: theme.typography.body2.fontSize,
   },

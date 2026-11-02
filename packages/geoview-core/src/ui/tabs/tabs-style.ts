@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       },
     },
     tab: {
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
       minWidth: 'min(4vw, 24px)',
       padding: theme.spacing(1, 3),
       margin: theme.spacing(0),

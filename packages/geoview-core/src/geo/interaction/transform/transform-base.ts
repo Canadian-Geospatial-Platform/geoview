@@ -2027,6 +2027,7 @@ export class OLTransform extends OLPointer {
     const newBold = !isBold;
 
     drawerText.setBold(newBold);
+    // eslint-disable-next-line no-restricted-syntax -- Map text formatting toggle (user's text style), not UI typography; OpenLayers/map-text exception
     this.#textEditorElement.style.fontWeight = newBold ? 'bold' : 'normal';
   }
 

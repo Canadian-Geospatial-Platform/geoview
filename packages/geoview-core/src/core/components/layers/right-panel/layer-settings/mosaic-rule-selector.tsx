@@ -174,7 +174,7 @@ export function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Elemen
       >
         <CollectionsIcon fontSize="small" />
         <Box component="span" sx={memoSxClasses.settingsSectionHeaderText}>
-          <Typography component="span" sx={memoSxClasses.settingsSectionTitle}>
+          <Typography component="span" variant="h6" sx={memoSxClasses.settingsSectionTitle}>
             {t('layers.settings.updateMosaicRule')}
           </Typography>
           <Typography component="span" variant="body2" color="text.secondary" sx={memoSxClasses.settingsSectionSummary} noWrap>

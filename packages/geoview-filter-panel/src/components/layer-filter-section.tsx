@@ -275,7 +275,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     <Box sx={memoSxClasses.filterLayerSection}>
       <Box sx={memoHeaderSx}>
         <Box sx={memoSxClasses.filterLayerHeaderTop}>
-          <Typography variant="h3" sx={memoSxClasses.filterLayerName}>
+          <Typography variant="h5" component="h3" sx={memoSxClasses.filterLayerName}>
             {layer.filterName || layerName}
           </Typography>
           <IconButton

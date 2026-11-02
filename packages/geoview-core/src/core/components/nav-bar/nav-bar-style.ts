@@ -143,8 +143,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       gap: theme.spacing(1),
     },
     popoverTitleLabel: {
-      fontSize: theme.typography.h6.fontSize,
-      fontWeight: '700',
       color: theme.palette.text.primary,
       flexShrink: 1,
       padding: theme.spacing(0),
@@ -153,16 +151,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       display: 'flex',
       flexShrink: 0,
       color: theme.palette.text.primary,
-    },
-    popoverTitle: {
-      fontSize: theme.typography.h6.fontSize,
-      fontWeight: '700',
-      color: theme.palette.text.primary,
-      minHeight: '48px',
-      borderBottom: `1px solid ${theme.palette.divider}`,
-      display: 'flex',
-      alignItems: 'center',
-      padding: theme.spacing(0.5, 2),
     },
     popoverContent: {
       '&.MuiDialogContent-root': {
@@ -204,7 +192,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       minWidth: 0,
     },
     rotationLabel: {
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
     },
     rotationLabelProjection: {
       display: 'none',

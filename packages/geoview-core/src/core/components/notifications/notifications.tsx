@@ -183,7 +183,7 @@ const NotificationHeader = memo(
 
     return (
       <Box component="header" sx={sxClasses.notificationsHeader}>
-        <Typography component="h2" sx={sxClasses.notificationsTitle} id={titleId}>
+        <Typography component="h2" variant="h6" sx={sxClasses.notificationsTitle} id={titleId}>
           {t('appbar.notifications')}
         </Typography>
         <IconButton

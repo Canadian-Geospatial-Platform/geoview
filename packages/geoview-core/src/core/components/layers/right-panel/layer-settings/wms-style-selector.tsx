@@ -192,7 +192,7 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
       >
         <PaletteIcon fontSize="small" />
         <Box component="span" sx={memoSxClasses.settingsSectionHeaderText}>
-          <Typography component="span" sx={memoSxClasses.settingsSectionTitle} id={titleId}>
+          <Typography component="span" variant="h6" sx={memoSxClasses.settingsSectionTitle} id={titleId}>
             {t('layers.settings.selectWmsStyle')}
           </Typography>
           {currentWmsStyle && (

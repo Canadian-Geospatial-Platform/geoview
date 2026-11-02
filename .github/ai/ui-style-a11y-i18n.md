@@ -11,12 +11,12 @@ Read only the linked section of each doc: search for its heading and read to the
 | Radius tokens and numeric sx multiplier pitfall                        | [Border radius](../../docs/programming/styling-best-practices.md#7--border-radius-named-tokens-on-themeshape)                                     |
 | Display theme registration and demo numbering                          | [Theme registration](../../docs/programming/styling-best-practices.md#4--registering-display-themes)                                              |
 | UI/icon imports                                                        | [Import order](../../docs/programming/best-practices.md#7--how-we-order-the-import-statements)                                                    |
-| Keyboard behavior and focus implementation                            | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode), [Implementation](#keyboard-mode-and-panel-focus)                 |
-| Focus-indicator configuration and exceptions                           | [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators), [Implementation](#focus-indicator-maintenance)                        |
+| Keyboard behavior and focus implementation                             | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode), [Implementation](#keyboard-mode-and-panel-focus)                 |
+| Focus-indicator configuration and exceptions                           | [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators), [Implementation](#focus-indicator-maintenance)                       |
 | Hidden-layer panel grouping, eye toggles, selection, and focus (#3635) | [Panel behavior](../../docs/programming/best-practices.md#hidden-layer-panel-presentation), [Implementation](#hidden-layer-panel-implementation)  |
 | Shared HTML conversion and render-error boundaries                     | [HTML rendering](../../docs/programming/best-practices.md#shared-html-rendering-and-error-boundaries)                                             |
 | Semantic controls, labels, toggles, focus and tooltips                 | [Accessibility checklist](../../docs/app/accessibility.md#code-review-checklist), [ARIA](../../docs/app/accessibility.md#004-aria-best-practices) |
-| Accessibility source searches and enforcement                         | [Review procedure](#accessibility-review-procedure), [Wrapper naming](#wrapper-naming-and-diagnostics)                                            |
+| Accessibility source searches and enforcement                          | [Review procedure](#accessibility-review-procedure), [Wrapper naming](#wrapper-naming-and-diagnostics)                                            |
 | Snackbar persistence and no interactive transient actions              | [Notifications](../../docs/programming/notifications.md#the-governing-wcag-rule)                                                                  |
 | Typed actionable errors, not error.generic                             | [Generic-error failover](../../docs/programming/notifications.md#the-generic-error-message-last-resort-failover)                                  |
 
@@ -56,8 +56,20 @@ The shared [ESLint config](../../packages/eslint.config.js) adds typography sele
 `no-restricted-syntax`, retaining existing restrictions and their warning severity.
 Run `npm run lint` from `packages/`; do not replace the rule array in package configs.
 
+Weight checks flag numeric/numeric-string and `bold`, `bolder`, `lighter`, `normal`, or `semibold`
+literals in style/sx values, responsive and conditional branches, JSX props, DOM
+`style.fontWeight` assignments, and static `font-weight` declarations in tagged templates. Theme
+weight-token references, `'inherit'`, and configuration-driven values remain allowed. When changing
+these selectors, verify both flagged literals and allowed values through shared and plugin-local
+ESLint configs.
+
+[`transform-base.ts`](../../packages/geoview-core/src/geo/interaction/transform/transform-base.ts)
+controls bold formatting in the selected text editor overlay. Its line-level disable explicitly
+identifies it as the user's map-text formatting, not UI typography.
+
 Keep exemptions narrow: theme definitions and declarations own tokens/types; export `layout-styles.ts`
-owns PDF/canvas artwork; the measurement button has a line-level OpenLayers text exemption.
+owns PDF/canvas artwork; the measurement button and map text-format toggle have line-level OpenLayers
+text exemptions.
 Drawer source is owned elsewhere, with only the `createMeasureTooltip` method exempt in DrawerController.
 STAC Browser is the other approved package exemption: its 23 legacy palette reads must migrate before
 the breaking release that removes `palette.geoViewFontSize`. The OpenLayers renderer's destructuring

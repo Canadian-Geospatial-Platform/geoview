@@ -191,7 +191,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
       {/* Service Information */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoServiceInfo')}</Typography>
+        <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          {t('layers.layerInfoServiceInfo')}
+        </Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
           {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
@@ -242,7 +244,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
       {/* Active Filters */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoActiveFilters')}</Typography>
+        <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          {t('layers.layerInfoActiveFilters')}
+        </Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
           {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
           {classFilter && <Box>{`${t('layers.layerClassFilter')}${classFilter}`}</Box>}
@@ -260,7 +264,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         layerDisplayDateTimezone ||
         layerTimeDimension?.field) && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalInformation')}</Typography>
+          <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+            {t('layers.layerInfoTemporalInformation')}
+          </Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
             {layerDisplayDateFormat && <Box>{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>}
             {layerDisplayDateFormatShort && (
@@ -282,7 +288,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
       {/* Temporal Dimension (Time Slider) */}
       {timeSliderDimension && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalDimension')}</Typography>
+          <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+            {t('layers.layerInfoTemporalDimension')}
+          </Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
             {timeSliderDimension.displayDateFormat?.[language] && (
               <Box>{`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`}</Box>

@@ -60,15 +60,21 @@ Read the owning map's theme with `useTheme()`; never import a global default the
 
 - **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
 - **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
+- **Font weights:** use only `theme.typography.fontWeightLight`, `fontWeightRegular`, `fontWeightMedium`, or `fontWeightBold`. All headings h1–h6 are bold. Prefer a Typography variant over overriding its size or weight; when changing a variant, keep the existing HTML element with the `component` prop.
 - **Icons:** use MUI named sizes, for example `<InfoIcon fontSize="small" />`; buttons manage their own icon sizes. `fontSize: 'inherit'` is also allowed.
 - **Display-theme overrides:** select scale keys, for example `scaleOverrides: { h3: 'xxl' }`. The generator converts them with the owning theme's calibrated `pxToRem`; components do not choose literal px/rem/em/% sizes.
 
-The shared ESLint `no-restricted-syntax` checks flag literal sizes, legacy palette reads/generated
-multiplier keys and the deprecated `control` variant in core/plugin source. They do not require an
-explicit Typography variant. Theme definitions, type declarations, export PDF/canvas layout,
-OpenLayers text, console formatting and numeric legend compatibility are exceptions; drawer work
-is owned separately, and STAC Browser is temporarily exempt until its legacy reads are migrated
-before the breaking release. See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
+The shared ESLint `no-restricted-syntax` checks flag literal sizes and weights, legacy palette
+reads/generated multiplier keys, and the deprecated `control` variant in core/plugin source. Literal
+weight checks include style/sx values, JSX props, conditional values, DOM `style.fontWeight`
+assignments, and static `font-weight` declarations in styled templates. Theme weight tokens,
+`'inherit'`, and configuration-driven values are allowed. The rule does not require an explicit
+Typography variant. MUI component defaults (including tooltips, slider labels, and Buttons) remain
+unchanged. Theme definitions, type declarations, export PDF/canvas layout, console formatting, and
+numeric legend compatibility are exceptions; OpenLayers measurement text and the user's map-text
+formatting toggle have narrow line-level exemptions. Drawer work is owned separately, and STAC Browser is
+temporarily exempt until its legacy reads are migrated before the breaking release.
+See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
 
 | Deprecated API                                              | Replacement                                                          |
 | ----------------------------------------------------------- | -------------------------------------------------------------------- |

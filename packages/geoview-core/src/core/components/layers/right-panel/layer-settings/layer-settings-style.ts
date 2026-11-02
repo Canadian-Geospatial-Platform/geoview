@@ -51,8 +51,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionTitle: {
     display: 'block',
-    fontWeight: 600,
-    fontSize: theme.typography.h6.fontSize,
   },
 
   settingsSectionHeaderText: {
@@ -141,7 +139,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsCardTitle: {
     display: 'block',
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightBold,
   },
 
   settingsCardDescription: {

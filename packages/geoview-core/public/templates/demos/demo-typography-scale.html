@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Calibrated Typography Scale - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .typography-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .typography-controls select {
+        min-width: 180px;
+        padding: 8px;
+      }
+
+      .typography-readout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 24px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+      }
+
+      .typography-map {
+        height: 650px;
+        min-height: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page-header">Calibrated Typography Scale Demo</div>
+    <div class="back-to-main">
+      <a href="./index.html?tab=demos">← Back to Main</a>
+    </div>
+
+    <div class="demo-section">
+      <h4>GeoView typography scale</h4>
+      <p>
+        The samples use the map's GeoView theme and show the computed browser size for every typography variant. The design sizes are
+        calibrated to the browser's default font size, rather than the host page's root size.
+      </p>
+      <p>
+        Choose a host root size below to compare 10px, 16px, and 20px roots. Each choice reloads the page so GeoView measures the root before
+        creating its theme. The browser default remains controlled by your browser's font settings.
+      </p>
+      <div class="typography-controls">
+        <label for="rootSize">Host root size for this load:</label>
+        <select id="rootSize">
+          <option value="">Use page default</option>
+          <option value="10">10px</option>
+          <option value="16">16px</option>
+          <option value="20">20px</option>
+        </select>
+      </div>
+      <div id="typographyReadout" class="typography-readout" aria-live="polite"></div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Rendered scale samples</h4>
+      <p>
+        Explore the app-bar panels and the footer-bar layers, legend, and data table. Sample GeoJSON areas, routes, and locations are loaded on
+        the map. Open the Typography Scale panel from the app bar to compare actual GeoView Typography variants and their computed sizes.
+      </p>
+    </div>
+    <div
+      id="map1"
+      class="geoview-map typography-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'viewSettings': { 'projection': 3857 },
+          'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'typography-demo-data',
+              'geoviewLayerName': 'Typography Demo Data',
+              'metadataAccessPath': './datasets/geojson/metadata.meta',
+              'geoviewLayerType': 'GeoJSON',
+              'serviceDateFormat': 'DD/MM/YYYYTHH:mm:ss',
+              'listOfLayerEntryConfig': [
+                { 'layerId': 'polygons.json', 'layerName': 'Sample Areas' },
+                { 'layerId': 'lines.json', 'layerName': 'Sample Routes' },
+                { 'layerId': 'points.json', 'layerName': 'Sample Locations' }
+              ]
+            }
+          ]
+        },
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'export', 'guide', 'details']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'legend', 'data-table']
+          },
+          'selectedTab': 'layers'
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"
+    ></div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      const rootSizeSelect = document.getElementById('rootSize');
+      const rootSizeParam = new URLSearchParams(window.location.search).get('root');
+      const allowedRootSizes = ['10', '16', '20'];
+      const selectedRootSize = allowedRootSizes.includes(rootSizeParam) ? rootSizeParam : '';
+
+      rootSizeSelect.value = selectedRootSize;
+      if (selectedRootSize) document.documentElement.style.fontSize = `${selectedRootSize}px`;
+
+      rootSizeSelect.addEventListener('change', (event) => {
+        const demoUrl = new URL(window.location.href);
+        if (event.target.value) demoUrl.searchParams.set('root', event.target.value);
+        else demoUrl.searchParams.delete('root');
+        window.location.assign(demoUrl);
+      });
+
+      const hostRootSize = Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize);
+      const browserDefaultProbe = document.createElement('span');
+      browserDefaultProbe.style.cssText =
+        'position: absolute; visibility: hidden; width: 0; height: 0; overflow: hidden; left: 0; top: 0; pointer-events: none;';
+      browserDefaultProbe.style.setProperty('font', 'medium sans-serif', 'important');
+      document.documentElement.appendChild(browserDefaultProbe);
+      let browserDefaultSize;
+      try {
+        browserDefaultSize = Number.parseFloat(window.getComputedStyle(browserDefaultProbe).fontSize);
+      } finally {
+        browserDefaultProbe.remove();
+      }
+
+      const readout = document.getElementById('typographyReadout');
+      readout.textContent = `Host root: ${hostRootSize}px | Browser default: ${browserDefaultSize}px | Expected rendered size: design size × browser default ÷ 16`;
+
+      const typographyVariants = [
+        { variant: 'h1', scale: 'display', designSize: 48 },
+        { variant: 'h2', scale: 'xxl', designSize: 32 },
+        { variant: 'h3', scale: 'xl', designSize: 24 },
+        { variant: 'h4', scale: 'lg', designSize: 20 },
+        { variant: 'h5', scale: 'md', designSize: 18 },
+        { variant: 'h6', scale: 'default', designSize: 16 },
+        { variant: 'subtitle1', scale: 'default', designSize: 16 },
+        { variant: 'subtitle2', scale: 'xs', designSize: 12 },
+        { variant: 'body1', scale: 'default', designSize: 16 },
+        { variant: 'body2', scale: 'sm', designSize: 14 },
+        { variant: 'caption', scale: 'xs', designSize: 12 },
+        { variant: 'overline', scale: 'sm', designSize: 14 },
+        { variant: 'button', scale: 'default', designSize: 16 },
+        { variant: 'label', scale: 'sm', designSize: 14 },
+      ];
+
+      const Typography = cgpv.ui.elements.Typography;
+      const createElement = cgpv.reactUtilities.createElement;
+
+      function TypographyScalePanel() {
+        const [measuredSizes, setMeasuredSizes] = cgpv.reactUtilities.react.useState({});
+
+        cgpv.reactUtilities.react.useEffect(() => {
+          window.requestAnimationFrame(() => {
+            const nextMeasuredSizes = {};
+            typographyVariants.forEach(({ variant }) => {
+              const sample = document.getElementById(`typography-sample-${variant}`);
+              if (sample) nextMeasuredSizes[variant] = `${window.getComputedStyle(sample).fontSize}`;
+            });
+            setMeasuredSizes(nextMeasuredSizes);
+          });
+        }, []);
+
+        return createElement(
+          'div',
+          { style: { display: 'grid', gap: '8px', padding: '4px' } },
+          createElement(
+            Typography,
+            { variant: 'body2', component: 'p' },
+            `Design sizes are anchored to a 16px browser default. At this browser's ${browserDefaultSize}px default, the expected rendered size is design size × ${browserDefaultSize} ÷ 16.`
+          ),
+          ...typographyVariants.map(({ variant, scale, designSize }) =>
+            createElement(
+              'div',
+              {
+                key: variant,
+                style: {
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(145px, 1fr) minmax(0, 3fr) minmax(90px, auto)',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '8px 0',
+                  borderBottom: '1px solid #ddd',
+                },
+              },
+              createElement(Typography, { variant: 'caption', component: 'div' }, `${variant} · ${scale} · ${designSize}px`),
+              createElement(
+                Typography,
+                { id: `typography-sample-${variant}`, variant, component: 'div' },
+                'Canadian Geospatial Platform'
+              ),
+              createElement(Typography, { variant: 'caption', component: 'div' }, `Rendered: ${measuredSizes[variant] || 'measuring…'}`)
+            )
+          )
+        );
+      }
+
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId !== 'map1') return;
+
+        const panelId = 'typography-scale-panel';
+        const appIcon = createElement(cgpv.ui.elements.AppsIcon);
+        mapViewer.appBarApi.createAppbarPanel(
+          {
+            id: panelId,
+            tooltip: 'Typography scale',
+            children: appIcon,
+            'aria-label': 'Show calibrated typography samples',
+          },
+          {
+            panelId,
+            title: 'Calibrated Typography Scale',
+            icon: appIcon,
+            content: createElement(TypographyScalePanel),
+            width: '90%',
+            panelStyles: {
+              panelCardContent: { maxHeight: '75vh', overflow: 'auto' },
+            },
+          }
+        );
+        mapViewer.appBarApi.selectTab(panelId);
+      });
+
+      cgpv.init();
+    </script>
+  </body>
+</html>
