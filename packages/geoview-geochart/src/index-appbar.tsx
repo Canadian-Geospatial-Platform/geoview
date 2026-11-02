@@ -93,6 +93,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   /**
    * Callable plugin function to emit a Chart redraw event in order to update the Chart ui on demand.
    */
+  // GV This method isn't completely implemented yet, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   redrawChart(): void {
     // Emit a Chart Redraw event so the chart redraws

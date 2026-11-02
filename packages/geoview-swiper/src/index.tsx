@@ -94,9 +94,9 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    this.mapViewer.controllers.swiperController?.setOrientation(this.getConfig().orientation);
-    this.mapViewer.controllers.swiperController?.setInteractive(this.getConfig().interactive ?? false);
-    this.mapViewer.controllers.swiperController?.setLayers(this.getConfig().layers);
+    this.controllerRegistry.swiperController?.setOrientation(this.getConfig().orientation);
+    this.controllerRegistry.swiperController?.setInteractive(this.getConfig().interactive ?? false);
+    this.controllerRegistry.swiperController?.setLayers(this.getConfig().layers);
   }
 
   /**
@@ -105,7 +105,7 @@ class SwiperPlugin extends MapPlugin {
    * @returns The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
-    return <Swiper controllerRegistry={this.mapViewer.controllers} config={this.getConfig()} />;
+    return <Swiper controllerRegistry={this.controllerRegistry} config={this.getConfig()} />;
   }
 
   /**
@@ -117,7 +117,7 @@ class SwiperPlugin extends MapPlugin {
   activateForLayer(layerPath: string, side?: SwipeSide): void {
     try {
       // Add the layer path
-      this.mapViewer.controllers.swiperController?.addLayerPath(layerPath, side);
+      this.controllerRegistry.swiperController?.addLayerPath(layerPath, side);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -132,7 +132,7 @@ class SwiperPlugin extends MapPlugin {
   deActivateForLayer(layerPath: string): void {
     try {
       // Remove the layer
-      this.mapViewer.controllers.swiperController?.removeLayerPath(layerPath);
+      this.controllerRegistry.swiperController?.removeLayerPath(layerPath);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -146,7 +146,7 @@ class SwiperPlugin extends MapPlugin {
    * @param side - The visible side for the layer
    */
   setLayerSide(layerPath: string, side: SwipeSide): void {
-    this.mapViewer.controllers.swiperController?.setLayerSide(layerPath, side);
+    this.controllerRegistry.swiperController?.setLayerSide(layerPath, side);
   }
 
   /**
@@ -154,7 +154,7 @@ class SwiperPlugin extends MapPlugin {
    */
   deActivateAll(): void {
     // Remove all layers
-    this.mapViewer.controllers.swiperController?.removeAllLayerPaths();
+    this.controllerRegistry.swiperController?.removeAllLayerPaths();
   }
 
   /**
@@ -164,7 +164,7 @@ class SwiperPlugin extends MapPlugin {
    */
   setOrientation(orientation: SwipeOrientation): void {
     // Set the orientation in the store
-    this.mapViewer.controllers.swiperController?.setOrientation(orientation);
+    this.controllerRegistry.swiperController?.setOrientation(orientation);
   }
 }
 

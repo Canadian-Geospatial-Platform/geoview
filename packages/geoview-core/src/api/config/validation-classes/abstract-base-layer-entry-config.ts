@@ -144,6 +144,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *
    * @param displayDateMode - The display date mode that should be used
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
     // Override this function to refresh the metadata

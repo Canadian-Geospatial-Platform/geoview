@@ -1466,7 +1466,8 @@ export class LayerTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.GEOMET_ICON_LIST);
+        // GV Current Conditions isn't returning a legend for us anymore, sending checkIconsList = undefined now
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, undefined);
       },
       (test) => {
         // Redirect to helper to clean up and assert

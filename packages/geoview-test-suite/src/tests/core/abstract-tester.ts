@@ -218,6 +218,7 @@ export abstract class AbstractTester {
    *
    * @param test - The test about to be assertion verified
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onPerformingTestAssertions(test: Test): void {
     // Update the status and step
@@ -305,6 +306,7 @@ export abstract class AbstractTester {
    * @param test - The test which is finalizing
    * @param callback - Optional finalization callback
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onPerformingTestFinalization<T>(test: Test<T>, callback?: BaseFinalizeDelegate<T>): void {
     // If we do have a callback for finalization

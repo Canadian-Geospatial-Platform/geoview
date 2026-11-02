@@ -1,5 +1,6 @@
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { DetailsTester } from '../testers/details-tester';
@@ -17,12 +18,13 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry for the map viewer
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
+  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(api, mapViewer, controllerRegistry);
 
     // Create the Geochart tester
-    this.#detailsTester = new DetailsTester(api, mapViewer);
+    this.#detailsTester = new DetailsTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#detailsTester);
   }
 

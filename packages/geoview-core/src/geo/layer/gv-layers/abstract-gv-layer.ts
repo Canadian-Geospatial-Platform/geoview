@@ -587,6 +587,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param legend - The fetched legend information
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // By default, nothing to do here, check for overrides in children classes
@@ -597,6 +598,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param filter - Optional elaborate layer filters to be used
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onSetLayerFilters(filter?: LayerFilters): void {
     // Override this to set the filters on the layer
@@ -654,6 +656,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @returns The hit tolerance
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   getHitTolerance(): number {
     return AbstractGVLayer.DEFAULT_HIT_TOLERANCE;

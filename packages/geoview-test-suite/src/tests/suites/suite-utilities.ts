@@ -1,5 +1,6 @@
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { UtilitiesCoreTester } from '../testers/utilities-core-tester';
 import { UtilitiesDateTester } from '../testers/utilities-date-tester';
@@ -27,13 +28,14 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry for the map viewer
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
-    this.#coreTester = new UtilitiesCoreTester(api, mapViewer);
-    this.#dateTester = new UtilitiesDateTester(api, mapViewer);
-    this.#geoTester = new UtilitiesGeoTester(api, mapViewer);
-    this.#projectionTester = new UtilitiesProjectionTester(api, mapViewer);
+  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(api, mapViewer, controllerRegistry);
+    this.#coreTester = new UtilitiesCoreTester(api, mapViewer, controllerRegistry);
+    this.#dateTester = new UtilitiesDateTester(api, mapViewer, controllerRegistry);
+    this.#geoTester = new UtilitiesGeoTester(api, mapViewer, controllerRegistry);
+    this.#projectionTester = new UtilitiesProjectionTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#coreTester);
     this.addTester(this.#dateTester);
     this.addTester(this.#geoTester);
