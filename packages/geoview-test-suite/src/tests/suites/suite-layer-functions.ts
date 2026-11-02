@@ -118,6 +118,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     // Projection mutations must not overlap the outstanding parallel layer test.
     await pLayerWMSDuplicateGroupNames;
     await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
-    return this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
+    await this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
+    return Promise.resolve();
   }
 }

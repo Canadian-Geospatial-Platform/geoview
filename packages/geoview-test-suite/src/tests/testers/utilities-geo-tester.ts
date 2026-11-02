@@ -31,8 +31,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
         test.addStep('Verifying projection, feature properties and transformed coordinates...');
         Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
         UtilitiesGeoTester.#assertProjectedPoint(result);
-      },
-      () => {}
+      }
     );
   }
 
@@ -56,8 +55,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
         test.addStep('Verifying the embedded CRS determined the transform...');
         Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
         UtilitiesGeoTester.#assertProjectedPoint(result);
-      },
-      () => {}
+      }
     );
   }
 
@@ -82,8 +80,7 @@ export class UtilitiesGeoTester extends GVAbstractTester {
         Test.assertIsEqual(result.dataProjection, Projection.getProjectionLonLat());
         Test.assertIsEqual(result.hadInvalidGeometries, false);
         UtilitiesGeoTester.#assertProjectedPoint(result);
-      },
-      () => {}
+      }
     );
   }
 

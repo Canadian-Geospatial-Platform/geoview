@@ -208,6 +208,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
     ]);
 
     // Definition-request observation must not overlap the other utility tests.
-    return this.#projectionTester.testAddProjectionIfMissingInputs();
+    await this.#projectionTester.testAddProjectionIfMissingInputs();
+    return Promise.resolve();
   }
 }
