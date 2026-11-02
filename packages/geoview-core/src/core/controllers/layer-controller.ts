@@ -2375,6 +2375,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The layer domain that fired the event
    * @param event - The event containing the unregistered layer
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleDomainLayerUnregistered(sender: LayerDomain, event: DomainLayerRegisteredEvent): void {
     //

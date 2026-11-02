@@ -168,6 +168,7 @@ export abstract class AbstractGeoViewLayer {
    * @param layerConfig - The layer entry configuration to preprocess
    * @returns A promise that resolves with the preprocessing result (e.g., ping/proxy info)
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onPreprocessLayerConfig(layerConfig: AbstractBaseLayerEntryConfig): Promise<PreprocessLayerConfigResult> {
     // Nothing to preprocess by default..
@@ -241,6 +242,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param layerConfig - The layer entry config to validate
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Override to perform a validation on the layer entry config
@@ -268,6 +270,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param layer - The GV layer to initialize
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onInitGVLayer(layer: AbstractGVLayer): void {
     // Override this function to do something...

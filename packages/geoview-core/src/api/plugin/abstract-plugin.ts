@@ -4,6 +4,7 @@ import type * as i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
 import type { MapViewer } from '@/geo/map/map-viewer';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -15,6 +16,9 @@ export abstract class AbstractPlugin {
 
   /** The map viewer for the plugin */
   mapViewer: MapViewer;
+
+  /** The plugin controller registry */
+  controllerRegistry: ControllerRegistry;
 
   /** The plugin properties */
   pluginProps?: unknown;
@@ -45,6 +49,7 @@ export abstract class AbstractPlugin {
   constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
     this.pluginId = pluginId;
     this.mapViewer = mapViewer;
+    this.controllerRegistry = mapViewer.controllers;
     this.pluginProps = props;
     this.react = window.cgpv.reactUtilities.react;
     this.createRoot = window.cgpv.reactUtilities.createRoot;
@@ -94,6 +99,7 @@ export abstract class AbstractPlugin {
    *
    * @returns The translations object
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   defaultTranslations(): Record<string, unknown> {
     return {}; // Default empty
@@ -164,7 +170,7 @@ export abstract class AbstractPlugin {
   /**
    * Overridable function called when the tab with the plugin is being selected.
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onSelect(): void {
     // Log

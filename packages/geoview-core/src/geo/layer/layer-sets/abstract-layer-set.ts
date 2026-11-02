@@ -134,7 +134,7 @@ export abstract class AbstractLayerSet {
    * @param layer - The layer
    * @returns True if the layer should be registered, false otherwise
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes

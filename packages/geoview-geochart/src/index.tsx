@@ -87,11 +87,11 @@ class GeoChartFooterPlugin extends FooterPlugin {
       const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
 
       // Init the charts to the store
-      this.mapViewer.controllers.geoChartController?.initCharts(configs);
+      this.controllerRegistry.geoChartController?.initCharts(configs);
 
       // If there is charts, tab should be shown
       if (configs.length) {
-        this.mapViewer.controllers.uiController.showTabButton('geochart');
+        this.controllerRegistry.uiController.showTabButton('geochart');
       }
 
       // Log

@@ -105,17 +105,6 @@ export class FilterPanelController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - FILTER APPLICATION
 
   /**
-   * Checks if a layer is ready to have filters applied.
-   *
-   * @param layerPath - The layer path
-   * @returns True if the layer is in a 'processed' or 'loaded' state
-   */
-  isLayerReady(layerPath: string): boolean {
-    const status = getStoreLayerStatus(this.getMapId(), layerPath);
-    return status === 'processed' || status === 'loaded';
-  }
-
-  /**
    * Builds a SQL-like filter expression for a layer based on its current filter state.
    *
    * Includes both domain base filters (for attributes with filterMissingDomainValues)
@@ -129,7 +118,7 @@ export class FilterPanelController extends AbstractMapViewerController {
     const expressions: string[] = [];
 
     // Add domain base filters (always active if configured)
-    const domainBaseFilters = this.#buildDomainBaseFilters(layerPath);
+    const domainBaseFilters = FilterPanelController.#buildDomainBaseFilters(this.getMapId(), layerPath);
     if (domainBaseFilters) {
       expressions.push(`(${domainBaseFilters})`);
     }
@@ -201,7 +190,7 @@ export class FilterPanelController extends AbstractMapViewerController {
    */
   applyLayerFilter(layerPath: string): void {
     // Check if layer is ready
-    if (!this.isLayerReady(layerPath)) {
+    if (!FilterPanelController.isLayerReady(this.getMapId(), layerPath)) {
       logger.logDebug(`Layer ${layerPath} is not ready yet - skipping filter application`);
       return;
     }
@@ -429,84 +418,13 @@ export class FilterPanelController extends AbstractMapViewerController {
       let uniqueValues = Array.from(uniqueSet).sort();
 
       // Apply domain processing if applicable
-      uniqueValues = this.processDomainForUniqueValues(uniqueValues, attribute);
+      uniqueValues = FilterPanelController.processDomainForUniqueValues(uniqueValues, attribute);
 
       return uniqueValues;
     } catch (err) {
       logger.logError(`Error extracting unique values for layer ${layerPath}, field ${attribute.fieldName}:`, err);
       return [];
     }
-  }
-
-  /**
-   * Processes unique values through domain mapping if applicable.
-   *
-   * Domain processing only applies to 'select' and 'multiselect' filter types.
-   * When a domain is defined:
-   * - Optionally filters out values not in the domain (if filterMissingDomainValues is true)
-   * - Orders values according to the domain order (not alphabetical)
-   *
-   * @param uniqueValues - Array of unique values from the layer (alphabetically sorted)
-   * @param attribute - The attribute configuration
-   * @returns Filtered and ordered array of values
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  processDomainForUniqueValues(uniqueValues: (string | number)[], attribute: TypeFilterAttribute): (string | number)[] {
-    // Domain only applies to select and multiselect filter types
-    if (
-      !attribute.domain ||
-      attribute.domain.length === 0 ||
-      (attribute.filterType !== 'select' && attribute.filterType !== 'multiselect')
-    ) {
-      return uniqueValues;
-    }
-
-    // Step 1: Filter values if filterMissingDomainValues is true
-    let processedValues = uniqueValues;
-    if (attribute.filterMissingDomainValues) {
-      const domainValueSet = new Set(attribute.domain.map((d) => d.value));
-      processedValues = uniqueValues.filter((val) => domainValueSet.has(val));
-    }
-
-    // Step 2: Order values according to domain order (not alphabetical)
-    const domainOrderMap = new Map<string | number, number>();
-    attribute.domain.forEach((domainEntry, index) => {
-      domainOrderMap.set(domainEntry.value, index);
-    });
-
-    return processedValues.sort((a, b) => {
-      const aIndex = domainOrderMap.get(a);
-      const bIndex = domainOrderMap.get(b);
-
-      // Both have domain order - use domain order
-      if (aIndex !== undefined && bIndex !== undefined) {
-        return aIndex - bIndex;
-      }
-
-      // Only a has domain order - a comes first
-      if (aIndex !== undefined) return -1;
-
-      // Only b has domain order - b comes first
-      if (bIndex !== undefined) return 1;
-
-      // Neither has domain order - alphabetical fallback
-      return String(a).localeCompare(String(b));
-    });
-  }
-
-  /**
-   * Gets the display label for a value using the attribute's domain mapping.
-   *
-   * @param attribute - The attribute configuration
-   * @param value - The raw value from the layer
-   * @returns The display label from the domain, or the stringified value if no domain match
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getDisplayLabel(attribute: TypeFilterAttribute, value: string | number): string {
-    if (!attribute.domain) return String(value);
-
-    const domainEntry = attribute.domain.find((d) => d.value === value);
-    return domainEntry ? domainEntry.label : String(value);
   }
 
   /**
@@ -577,6 +495,131 @@ export class FilterPanelController extends AbstractMapViewerController {
     logger.logDebug('Filter panel feature queries completed');
   }
 
+  // #endregion PUBLIC METHODS - UTILITIES
+
+  // #region STATIC METHODS
+
+  /**
+   * Checks if a filter value is a range value.
+   *
+   * @param value - Filter value to check
+   * @returns Whether the value is a TypeRangeValue
+   */
+  static isRangeValue(value: TypeFilterValue): value is TypeRangeValue {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      ('min' in value || 'max' in value) &&
+      !('start' in value) &&
+      !('end' in value)
+    );
+  }
+
+  /**
+   * Checks if a filter value is a date range value.
+   *
+   * @param value - Filter value to check
+   * @returns Whether the value is a TypeDateRangeValue
+   */
+  static isDateRangeValue(value: TypeFilterValue): value is TypeDateRangeValue {
+    return typeof value === 'object' && value !== null && !Array.isArray(value) && ('start' in value || 'end' in value);
+  }
+
+  /**
+   * Escapes single quotes in strings for SQL expressions.
+   *
+   * @param str - String to escape
+   * @returns Escaped string
+   */
+  static escapeString(str: string): string {
+    return str.replace(/'/g, "''");
+  }
+
+  /**
+   * Formats a numeric value for display, grouped by thousands and locale-aware.
+   *
+   * @param value - The numeric value to format
+   * @param attribute - The filter attribute containing number format and currency information
+   * @returns The formatted number value as a string
+   */
+  static formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string {
+    if (attribute.numberFormat === 'currency') {
+      return formatCurrencyValue(value, displayLanguage, attribute.currency);
+    }
+    return formatMeasurementValue(value, displayLanguage);
+  }
+
+  /**
+   * Formats a timestamp value for display in the UI.
+   *
+   * Uses DateMgt to format timestamps consistently across the application.
+   *
+   * @param timestamp - Milliseconds since epoch
+   * @returns Formatted date string (e.g., "Jan 15, 2020")
+   */
+  // TODO: CHECK - Move this function into the DateMgt utility (better responsibility separation, reusability) if not already there? Or at least in a controller utility file?
+  static formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string {
+    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT[displayLanguage], displayLanguage, DateMgt.TIME_UTC);
+  }
+
+  /**
+   * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
+   *
+   * Uses DateMgt to ensure consistent date formatting in SQL filter strings.
+   *
+   * @param timestamp - Milliseconds since epoch
+   * @returns Date string in YYYY-MM-DD format
+   */
+  // TODO: CHECK - Move this function into the StoreApp state (better responsibility separation, reusability) instead of the controller?
+  static formatDateForFilter(mapId: string, timestamp: number): string {
+    const displayLanguage = getStoreAppDisplayLanguage(mapId);
+    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, displayLanguage, DateMgt.TIME_UTC);
+  }
+
+  /**
+   * Checks if a layer is ready to have filters applied.
+   *
+   * @param layerPath - The layer path
+   * @returns True if the layer is in a 'processed' or 'loaded' state
+   */
+  static isLayerReady(mapId: string, layerPath: string): boolean {
+    const status = getStoreLayerStatus(mapId, layerPath);
+    return status === 'processed' || status === 'loaded';
+  }
+
+  /**
+   * Applies a calendar-aware date step to a timestamp.
+   *
+   * Uses Day.js (via DateMgt) to handle calendar arithmetic correctly,
+   * including variable-length months and leap years.
+   *
+   * @param timestamp - The starting timestamp in milliseconds
+   * @param dateStep - The step type from attribute config (day, week, month, year, etc.)
+   * @param direction - 1 for forward (right arrow), -1 for backward (left arrow)
+   * @returns The adjusted timestamp in milliseconds
+   */
+  static applyDateStep(timestamp: number, dateStep: string, direction: 1 | -1): number {
+    const stepUnit = FilterPanelController.#getDateStepUnit(dateStep);
+    const date = DateMgt.createDayjs(timestamp);
+    const adjustedDate = date.add(direction, stepUnit);
+    return adjustedDate.valueOf();
+  }
+
+  /**
+   * Gets the display label for a value using the attribute's domain mapping.
+   *
+   * @param attribute - The attribute configuration
+   * @param value - The raw value from the layer
+   * @returns The display label from the domain, or the stringified value if no domain match
+   */
+  static getDisplayLabel(attribute: TypeFilterAttribute, value: string | number): string {
+    if (!attribute.domain) return String(value);
+
+    const domainEntry = attribute.domain.find((d) => d.value === value);
+    return domainEntry ? domainEntry.label : String(value);
+  }
+
   /**
    * Computes timestamp bounds from unique date values.
    *
@@ -586,8 +629,8 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param uniqueValues - Array of date values from layer features
    * @returns Object with min/max timestamps and formatted display dates, or null if no valid dates
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getDateBounds(uniqueValues: (string | number)[]): { min: number; max: number; minDate: string; maxDate: string } | null {
+  // TODO: CHECK - Move this function into the DateMgt utility (better responsibility separation, reusability) instead of the controller? Or at least in a controller utility file?
+  static getDateBounds(uniqueValues: (string | number)[]): { min: number; max: number; minDate: string; maxDate: string } | null {
     if (!uniqueValues.length) {
       return null;
     }
@@ -628,67 +671,78 @@ export class FilterPanelController extends AbstractMapViewerController {
   }
 
   /**
-   * Formats a numeric value for display, grouped by thousands and locale-aware.
+   * Processes unique values through domain mapping if applicable.
    *
-   * @param value - The numeric value to format
-   * @param attribute - The filter attribute containing number format and currency information
-   * @returns The formatted number value as a string
+   * Domain processing only applies to 'select' and 'multiselect' filter types.
+   * When a domain is defined:
+   * - Optionally filters out values not in the domain (if filterMissingDomainValues is true)
+   * - Orders values according to the domain order (not alphabetical)
+   *
+   * @param uniqueValues - Array of unique values from the layer (alphabetically sorted)
+   * @param attribute - The attribute configuration
+   * @returns Filtered and ordered array of values
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string {
-    if (attribute.numberFormat === 'currency') {
-      return formatCurrencyValue(value, displayLanguage, attribute.currency);
+  static processDomainForUniqueValues(uniqueValues: (string | number)[], attribute: TypeFilterAttribute): (string | number)[] {
+    // Domain only applies to select and multiselect filter types
+    if (
+      !attribute.domain ||
+      attribute.domain.length === 0 ||
+      (attribute.filterType !== 'select' && attribute.filterType !== 'multiselect')
+    ) {
+      return uniqueValues;
     }
-    return formatMeasurementValue(value, displayLanguage);
+
+    // Step 1: Filter values if filterMissingDomainValues is true
+    let processedValues = uniqueValues;
+    if (attribute.filterMissingDomainValues) {
+      const domainValueSet = new Set(attribute.domain.map((d) => d.value));
+      processedValues = uniqueValues.filter((val) => domainValueSet.has(val));
+    }
+
+    // Step 2: Order values according to domain order (not alphabetical)
+    const domainOrderMap = new Map<string | number, number>();
+    attribute.domain.forEach((domainEntry, index) => {
+      domainOrderMap.set(domainEntry.value, index);
+    });
+
+    return processedValues.sort((a, b) => {
+      const aIndex = domainOrderMap.get(a);
+      const bIndex = domainOrderMap.get(b);
+
+      // Both have domain order - use domain order
+      if (aIndex !== undefined && bIndex !== undefined) {
+        return aIndex - bIndex;
+      }
+
+      // Only a has domain order - a comes first
+      if (aIndex !== undefined) return -1;
+
+      // Only b has domain order - b comes first
+      if (bIndex !== undefined) return 1;
+
+      // Neither has domain order - alphabetical fallback
+      return String(a).localeCompare(String(b));
+    });
   }
 
   /**
-   * Formats a timestamp value for display in the UI.
+   * Maps dateStep config values to Day.js duration units.
    *
-   * Uses DateMgt to format timestamps consistently across the application.
-   *
-   * @param timestamp - Milliseconds since epoch
-   * @returns Formatted date string (e.g., "Jan 15, 2020")
+   * @param dateStep - The step type from attribute config
+   * @returns The corresponding Day.js ManipulateType
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string {
-    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT[displayLanguage], displayLanguage, DateMgt.TIME_UTC);
+  static #getDateStepUnit(dateStep: string): ManipulateType {
+    const units: Record<string, ManipulateType> = {
+      second: 'second',
+      minute: 'minute',
+      hour: 'hour',
+      day: 'day',
+      week: 'week',
+      month: 'month',
+      year: 'year',
+    };
+    return units[dateStep] ?? 'day';
   }
-
-  /**
-   * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
-   *
-   * Uses DateMgt to ensure consistent date formatting in SQL filter strings.
-   *
-   * @param timestamp - Milliseconds since epoch
-   * @returns Date string in YYYY-MM-DD format
-   */
-  formatDateForFilter(timestamp: number): string {
-    const displayLanguage = getStoreAppDisplayLanguage(this.getMapId());
-    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, displayLanguage, DateMgt.TIME_UTC);
-  }
-
-  /**
-   * Applies a calendar-aware date step to a timestamp.
-   *
-   * Uses Day.js (via DateMgt) to handle calendar arithmetic correctly,
-   * including variable-length months and leap years.
-   *
-   * @param timestamp - The starting timestamp in milliseconds
-   * @param dateStep - The step type from attribute config (day, week, month, year, etc.)
-   * @param direction - 1 for forward (right arrow), -1 for backward (left arrow)
-   * @returns The adjusted timestamp in milliseconds
-   */
-  applyDateStep(timestamp: number, dateStep: string, direction: 1 | -1): number {
-    const stepUnit = this.#getDateStepUnit(dateStep);
-    const date = DateMgt.createDayjs(timestamp);
-    const adjustedDate = date.add(direction, stepUnit);
-    return adjustedDate.valueOf();
-  }
-
-  // #endregion PUBLIC METHODS - UTILITIES
-
-  // #region PRIVATE HELPER METHODS
 
   /**
    * Builds domain base filters for attributes with filterMissingDomainValues enabled.
@@ -700,8 +754,8 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @returns SQL-like filter expression for domain restrictions, or undefined if no domain filters
    */
 
-  #buildDomainBaseFilters(layerPath: string): string | undefined {
-    const layerConfig = getStoreFilterPanelLayerConfig(this.getMapId(), layerPath);
+  static #buildDomainBaseFilters(mapId: string, layerPath: string): string | undefined {
+    const layerConfig = getStoreFilterPanelLayerConfig(mapId, layerPath);
     if (!layerConfig?.attributes) return undefined;
 
     const domainExpressions: string[] = [];
@@ -732,62 +786,5 @@ export class FilterPanelController extends AbstractMapViewerController {
     return domainExpressions.length > 0 ? domainExpressions.join(' AND ') : undefined;
   }
 
-  /**
-   * Checks if a filter value is a range value.
-   *
-   * @param value - Filter value to check
-   * @returns Whether the value is a TypeRangeValue
-   */
-  static isRangeValue(value: TypeFilterValue): value is TypeRangeValue {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value) &&
-      ('min' in value || 'max' in value) &&
-      !('start' in value) &&
-      !('end' in value)
-    );
-  }
-
-  /**
-   * Checks if a filter value is a date range value.
-   *
-   * @param value - Filter value to check
-   * @returns Whether the value is a TypeDateRangeValue
-   */
-  static isDateRangeValue(value: TypeFilterValue): value is TypeDateRangeValue {
-    return typeof value === 'object' && value !== null && !Array.isArray(value) && ('start' in value || 'end' in value);
-  }
-
-  /**
-   * Escapes single quotes in strings for SQL expressions.
-   *
-   * @param str - String to escape
-   * @returns Escaped string
-   */
-  static escapeString(str: string): string {
-    return str.replace(/'/g, "''");
-  }
-
-  /**
-   * Maps dateStep config values to Day.js duration units.
-   *
-   * @param dateStep - The step type from attribute config
-   * @returns The corresponding Day.js ManipulateType
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  #getDateStepUnit(dateStep: string): ManipulateType {
-    const units: Record<string, ManipulateType> = {
-      second: 'second',
-      minute: 'minute',
-      hour: 'hour',
-      day: 'day',
-      week: 'week',
-      month: 'month',
-      year: 'year',
-    };
-    return units[dateStep] ?? 'day';
-  }
-
-  // #endregion PRIVATE HELPER METHODS
+  // #endregion STATIC METHODS
 }

@@ -286,7 +286,7 @@ export class GVEsriImage extends AbstractGVRaster {
 
     // Format and return the result
     featureInfoResult.results = this.formatFeatureInfoResult(
-      [this.#createFeatureFromIdentifyResponse(identifyJsonResponse, queryGeometry)],
+      [GVEsriImage.#createFeatureFromIdentifyResponse(identifyJsonResponse, queryGeometry)],
       layerConfig,
       language,
       true,
@@ -679,6 +679,10 @@ export class GVEsriImage extends AbstractGVRaster {
     }
   }
 
+  // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
+
   /**
    * Creates the feature holding the pixel, class and catalog information returned by an identify response.
    *
@@ -686,8 +690,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param queryGeometry - Whether the returned location should be attached as the feature geometry
    * @returns The feature holding the identify information
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  #createFeatureFromIdentifyResponse(identifyJsonResponse: EsriImageIdentifyJsonResponse, queryGeometry: boolean): Feature {
+  static #createFeatureFromIdentifyResponse(identifyJsonResponse: EsriImageIdentifyJsonResponse, queryGeometry: boolean): Feature {
     // Build feature properties starting with pixel-specific fields
     const properties: Record<string, unknown> = {
       // Put pixel value first so it appears at top of details
@@ -721,7 +724,7 @@ export class GVEsriImage extends AbstractGVRaster {
     return feature;
   }
 
-  // #endregion PRIVATE METHODS
+  // #endregion STATIC METHODS
 
   // #region EVENTS
 

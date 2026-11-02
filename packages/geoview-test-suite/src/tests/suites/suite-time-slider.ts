@@ -1,5 +1,6 @@
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { TimeSliderTester } from '../testers/time-slider-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
@@ -14,10 +15,11 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry for the map viewer
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
-    this.#timeSliderTester = new TimeSliderTester(api, mapViewer);
+  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(api, mapViewer, controllerRegistry);
+    this.#timeSliderTester = new TimeSliderTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#timeSliderTester);
   }
 

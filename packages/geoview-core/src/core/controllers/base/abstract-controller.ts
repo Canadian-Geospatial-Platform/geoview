@@ -35,6 +35,7 @@ export class AbstractController {
    *
    * Override this to subscribe to domain events, map events, or store changes.
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onHook(): void {
     // To be implemented by subclasses
@@ -46,6 +47,7 @@ export class AbstractController {
    * Override this to unsubscribe from domain events, map events, or store
    * changes. Subscriptions should be removed in reverse order of attachment.
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onUnhook(): void {
     // To be implemented by subclasses
