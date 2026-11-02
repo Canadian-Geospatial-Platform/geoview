@@ -35,11 +35,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingLeft: theme.spacing(0.5),
   },
 
-  filterTitle: {
-    fontSize: theme.typography.h4.fontSize,
-    fontWeight: 600,
-  },
-
   // Layer section container
   filterLayerSection: {
     padding: theme.spacing(0.5, 0.75, 0),
@@ -102,8 +97,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Layer name text
   filterLayerName: {
-    fontSize: theme.typography.h5.fontSize,
-    fontWeight: 600,
     flex: 1,
     minWidth: 0,
   },

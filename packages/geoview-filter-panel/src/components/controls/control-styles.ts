@@ -20,7 +20,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'block',
     marginBottom: theme.spacing(0.75),
     marginTop: theme.spacing(0.5),
-    fontWeight: 500,
+    fontWeight: theme.typography.fontWeightMedium,
     fontSize: theme.typography.label.fontSize,
   },
 

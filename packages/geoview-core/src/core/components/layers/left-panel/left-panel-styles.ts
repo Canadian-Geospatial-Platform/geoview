@@ -69,12 +69,12 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
 
     // layer title
     '& .MuiListItemText-primary': {
-      fontWeight: '600',
+      fontWeight: theme.typography.fontWeightBold,
       fontSize: theme.typography.body1.fontSize,
     },
     '& .MuiListItemText-secondary': {
       color: theme.palette.text.primary,
-      fontWeight: '400',
+      fontWeight: theme.typography.fontWeightRegular,
     },
   },
   listSubitem: {

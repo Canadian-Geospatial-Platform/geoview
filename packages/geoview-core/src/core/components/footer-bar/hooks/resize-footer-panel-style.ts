@@ -30,8 +30,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   title: {
-    fontSize: theme.typography.h6.fontSize,
-    fontWeight: '700',
     color: theme.palette.text.primary,
   },
   sliderWrapper: {

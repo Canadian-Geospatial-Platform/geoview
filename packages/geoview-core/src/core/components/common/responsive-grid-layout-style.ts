@@ -122,7 +122,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .noSelection': {
       fontSize: theme.typography.body2.fontSize,
-      fontWeight: '500',
+      fontWeight: theme.typography.fontWeightMedium,
       padding: theme.spacing(2),
     },
     '& .panel-content-container': {

@@ -32,10 +32,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     boxShadow: '0px 12px 9px -13px #E0E0E0',
     flexWrap: 'wrap',
   },
-  panelTitle: {
-    fontSize: theme.typography.h4.fontSize,
-    fontWeight: '600',
-  },
   centeredContainer: {
     textAlign: 'center',
     paddingTop: theme.spacing(2.5),

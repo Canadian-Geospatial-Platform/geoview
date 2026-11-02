@@ -11,8 +11,6 @@ import { ellipsisOverflow } from '@/ui/style/default';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   categoryTitle: {
     textAlign: 'left',
-    fontWeight: '600',
-    fontSize: theme.typography.h5.fontSize,
   },
   layerDetails: {
     padding: theme.spacing(2),
@@ -64,8 +62,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(0.25),
   },
   infoSectionTitle: {
-    fontWeight: 600,
-    fontSize: theme.typography.h6.fontSize,
     color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.25),
   },
@@ -136,7 +132,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   boldLabel: {
-    fontWeight: 'bold',
+    fontWeight: theme.typography.fontWeightBold,
   },
 
   sublayerListItem: {

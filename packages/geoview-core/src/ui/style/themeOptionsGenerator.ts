@@ -343,6 +343,10 @@ export const generateThemeOptions = ({
 
     // start of other options
     typography: {
+      fontWeightLight: 300,
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      fontWeightBold: 700,
       fontSize: 14,
       fontFamily: themeFont,
       h1: { ...themeHeadingStyles, fontSize: variantSize('h1') },
@@ -350,10 +354,7 @@ export const generateThemeOptions = ({
       h3: { ...themeHeadingStyles, fontSize: variantSize('h3') },
       h4: { ...themeHeadingStyles, fontSize: variantSize('h4') },
       h5: { ...themeHeadingStyles, fontSize: variantSize('h5') },
-      h6: {
-        fontWeight: 400,
-        fontSize: variantSize('h6'),
-      },
+      h6: { ...themeHeadingStyles, fontSize: variantSize('h6') },
       subtitle1: {
         fontSize: variantSize('subtitle1'),
         lineHeight: 1.25,
@@ -516,7 +517,7 @@ export const generateThemeOptions = ({
               '&.error, &.query-error': {
                 background: geoViewColors.error.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: theme.palette.error.main,
                 },
               },
@@ -524,7 +525,7 @@ export const generateThemeOptions = ({
               '&.loading, &.processing, &.query-processing': {
                 background: geoViewColors.info.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: theme.palette.info.main,
                 },
               },
@@ -532,7 +533,7 @@ export const generateThemeOptions = ({
               '&.registered': {
                 background: geoViewColors.grey.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: geoViewColors.info.main,
                 },
               },

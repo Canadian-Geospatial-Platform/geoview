@@ -787,7 +787,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     <Paper sx={sxClasses.layerDetails}>
       <Box sx={sxClasses.headerRow}>
         <Box sx={sxClasses.headerTitleContainer}>
-          <Typography component="h2" sx={[sxClasses.categoryTitle, layerHidden && hiddenStyle] as SxProps} title={layerName}>
+          <Typography component="h2" variant="h5" sx={[sxClasses.categoryTitle, layerHidden && hiddenStyle] as SxProps} title={layerName}>
             {layerName}
           </Typography>
           {subTitle && (

@@ -164,7 +164,12 @@ export default function Version(): JSX.Element {
           >
             <Paper component="section" sx={memoSxClasses.versionInfoPanel}>
               <Box component="header" sx={memoSxClasses.versionHeading}>
-                <Typography sx={memoSxClasses.versionsInfoTitle} component="h2" id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}>
+                <Typography
+                  variant="h6"
+                  sx={memoSxClasses.versionsInfoTitle}
+                  component="h2"
+                  id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}
+                >
                   {t('appbar.version')}
                 </Typography>
                 <IconButton

@@ -198,6 +198,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             slotProps={{
               title: {
                 component: 'h2',
+                variant: 'h6',
               },
             }}
             action={

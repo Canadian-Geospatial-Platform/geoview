@@ -15,7 +15,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     '& .MuiListItemText-primary': {
       fontSize: theme.typography.body1.fontSize,
-      fontWeight: '600',
+      fontWeight: theme.typography.fontWeightBold,
     },
     '& .MuiListItem-root': {
       '& .MuiListItemButton-root': {
@@ -82,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     margin: theme.spacing(0.75, 0),
     '& .layerTitle': {
       fontSize: theme.typography.body1.fontSize,
-      fontWeight: '600',
+      fontWeight: theme.typography.fontWeightBold,
       lineHeight: 1.5,
       paddingRight: theme.spacing(1.25),
       display: 'block',
@@ -93,7 +93,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       marginTop: theme.spacing(0.5),
       '>p': {
         color: theme.palette.text.secondary,
-        fontWeight: 400,
+        fontWeight: theme.typography.fontWeightRegular,
       },
       ' svg': {
         width: '0.75em',
@@ -165,7 +165,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'block',
     padding: theme.spacing(1.5, 0, 0.5, 2),
     fontSize: theme.typography.body2.fontSize,
-    fontWeight: 700,
+    fontWeight: theme.typography.fontWeightBold,
     textTransform: 'uppercase',
     color: theme.palette.text.primary,
   },

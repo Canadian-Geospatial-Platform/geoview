@@ -51,7 +51,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Header text styling
   headerText: {
     fontSize: theme.typography.h5.fontSize,
-    fontWeight: '600',
+    fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.text.primary,
     maxWidth: '400px',
   },
@@ -66,7 +66,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   // Group title styling
   groupTitle: {
     textWrapMode: 'wrap',
-    fontWeight: '700',
     color: theme.palette.text.primary,
   },
 
@@ -167,7 +166,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: 'auto',
     fontSize: theme.typography.caption.fontSize,
     fontStyle: 'italic',
-    fontWeight: 300,
+    fontWeight: theme.typography.fontWeightLight,
     textTransform: 'none',
     color: theme.palette.text.secondary,
     // Override MUI text-button hover background to keep this disclosure control flat.
@@ -185,7 +184,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   descriptionText: {
     fontSize: theme.typography.body2.fontSize,
     fontStyle: 'italic',
-    fontWeight: 300,
+    fontWeight: theme.typography.fontWeightLight,
     color: theme.palette.text.primary,
     marginTop: theme.spacing(0.5),
     marginLeft: theme.spacing(2),

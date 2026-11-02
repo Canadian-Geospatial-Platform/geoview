@@ -30,7 +30,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   controlLabel: {
-    fontWeight: 'bold',
+    fontWeight: theme.typography.fontWeightBold,
     whiteSpace: 'nowrap',
   },
   controlLabelHidden: {

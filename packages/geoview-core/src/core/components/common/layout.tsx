@@ -93,7 +93,11 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-    const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+    /** Memoizes the layout styles for the current theme. */
+    const memoSxClasses = useMemo((): SxStyles => {
+      logger.logTraceUseMemo('LAYOUT - memoSxClasses', theme);
+      return getSxClasses(theme);
+    }, [theme]);
     const { t } = useTranslation();
     let layerName = useStoreLayerName(selectedLayerPath!);
     if (!layerName && selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
@@ -162,13 +166,12 @@ const Layout = forwardRef(
 
       // clamping code copied from https://tailwindcss.com/docs/line-clamp
       const sxClasses = composeSxProps(
-        memoSxClasses.layerTitle,
         containerType === CONTAINER_TYPE.APP_BAR ? memoSxClasses.layerTitleAppBar : memoSxClasses.layerTitleFooterBar,
         !toggleMode && memoSxClasses.layerTitleWithoutToggle
       );
 
       return (
-        <Typography sx={sxClasses} component="h3">
+        <Typography sx={sxClasses} component="h3" variant="h3">
           {layerName}
         </Typography>
       );
