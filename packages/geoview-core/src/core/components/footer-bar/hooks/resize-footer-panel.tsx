@@ -266,7 +266,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
         >
           <Paper component="section" sx={memoSxClasses.panel}>
             <Box component="header" sx={memoSxClasses.header}>
-              <Typography component="h2" sx={memoSxClasses.title}>
+              <Typography component="h2" variant="h6" sx={memoSxClasses.title}>
                 {t('footerBar.resizeTooltip')}
               </Typography>
               <IconButton

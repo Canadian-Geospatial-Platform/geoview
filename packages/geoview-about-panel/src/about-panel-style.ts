@@ -61,7 +61,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   title: {
     marginTop: theme.spacing(2),
-    fontWeight: theme.typography.fontWeightBold,
   },
   logoContainer: {
     display: 'flex',

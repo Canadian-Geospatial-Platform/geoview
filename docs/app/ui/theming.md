@@ -72,6 +72,10 @@ Use the owning map's typography variants for text sizes: `<Typography variant="b
 or `theme.typography.body2.fontSize` for size-only styling. Icons use named MUI sizes such as
 `fontSize="small"`, not literal sizes.
 
+Use the theme's `fontWeightLight`, `fontWeightRegular`, `fontWeightMedium`, and `fontWeightBold`
+tokens for component weights. All headings from h1 through h6 are bold. Integrators should note
+that h6 changed from regular to bold.
+
 Display themes can override a variant with a scale key, for example
 `scaleOverrides: { h3: 'xxl' }`. Available keys are `xs`, `sm`, `default`, `md`, `lg`, `xl`, `xxl`
 and `display`; the theme generator converts them with calibrated `pxToRem`.

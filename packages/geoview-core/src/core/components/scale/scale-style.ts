@@ -83,7 +83,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
     '&.interaction-static': {
       fontSize: theme.typography.h5.fontSize,
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
       borderBottom: '2px solid',
       color: theme.palette.geoViewColor?.grey.dark[500],
 

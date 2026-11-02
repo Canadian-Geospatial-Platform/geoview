@@ -35,12 +35,6 @@ export const getSxClassesMain = (theme: Theme): SxClasses => ({
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxClasses => ({
-  title: {
-    textAlign: 'left',
-    fontWeight: '600',
-    color: theme.palette.text.primary,
-    fontSize: theme.typography.h5.fontSize,
-  },
   layerStackContainer: {
     flexWrap: 'wrap',
     alignItems: 'center',
@@ -90,8 +84,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   legendPrimary: {
-    fontSize: theme.typography.h5.fontSize,
-    fontWeight: '600',
+    fontWeight: theme.typography.fontWeightBold,
     '.outOfRange &': {
       color: theme.palette.text.secondary,
     },
@@ -110,7 +103,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   layerListItem: {
     paddingLeft: theme.spacing(0.75),
     marginBottom: theme.spacing(0.75),
-    fontWeight: '400',
+    fontWeight: theme.typography.fontWeightRegular,
   },
   legendItemIconContainer: {
     display: 'flex',
@@ -147,11 +140,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     width: '100%',
     padding: theme.spacing(1.25, 0),
     margin: theme.spacing(0, 1.25),
-  },
-  legendInstructionsTitle: {
-    fontSize: theme.typography.h4.fontSize,
-    fontWeight: '600',
-    lineHeight: '1.5em',
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.divider}`,

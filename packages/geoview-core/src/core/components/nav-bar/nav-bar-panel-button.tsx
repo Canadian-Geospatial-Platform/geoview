@@ -160,7 +160,7 @@ export default function NavbarPanelButton({
         >
           <Paper sx={memoSxClasses.popoverPaper}>
             <Box sx={memoSxClasses.popoverTitleContainer}>
-              <DialogTitle id={dialogTitleId} sx={memoSxClasses.popoverTitleLabel}>
+              <DialogTitle id={dialogTitleId} variant="h6" sx={memoSxClasses.popoverTitleLabel}>
                 {t(buttonPanel.panel?.title as string) ?? ''}
               </DialogTitle>
               <Box sx={memoSxClasses.popoverTitleActions}>
