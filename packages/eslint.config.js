@@ -33,16 +33,25 @@ const RESTRICTED_PLUGIN_BARREL_PATHS = [
 
 const FONT_SIZE_MESSAGE =
   'Use a Typography variant or theme.typography.<variant>.fontSize, not a literal size. Icons use small/medium/large/inherit. See docs/programming/styling-best-practices.md#typography.';
+const FONT_WEIGHT_MESSAGE =
+  'Use theme.typography.fontWeightLight/Regular/Medium/Bold, not a literal font weight. See docs/programming/styling-best-practices.md#typography.';
 const FONT_SIZE_PROPERTY = 'Property:matches([key.name="fontSize"], [key.value="fontSize"])';
+const FONT_WEIGHT_PROPERTY = 'Property:matches([key.name="fontWeight"], [key.value="fontWeight"])';
 const PACKAGES_ROOT = fileURLToPath(new URL('.', import.meta.url));
 const LITERAL_SIZE = ':matches(Literal[value=/[0-9](px|rem|em|%)/i], Literal[raw=/^[0-9.]/])';
+const LITERAL_WEIGHT =
+  ':matches(Literal[value=/^(?:[+-]?(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)|bold|bolder|lighter|normal|semibold)$/i], Literal[raw=/^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)/])';
 const FONT_SIZE_ROOT = `:matches(${FONT_SIZE_PROPERTY}, JSXAttribute[name.name="fontSize"])`;
+const FONT_WEIGHT_ASSIGNMENT = 'AssignmentExpression[operator="="][left.property.name="fontWeight"]';
+const FONT_WEIGHT_ROOT = `:matches(${FONT_WEIGHT_PROPERTY}, JSXAttribute[name.name="fontWeight"], ${FONT_WEIGHT_ASSIGNMENT})`;
 const SIZE_VALUE_CONTAINERS =
   'ObjectExpression, Property, ArrayExpression, ConditionalExpression, LogicalExpression, UnaryExpression, JSXExpressionContainer, TSAsExpression, TSSatisfiesExpression, TSNonNullExpression';
 
 // Follow only value-producing containers, never helper arguments, lookup keys or condition tests.
 const sizeValueSelector = (value) =>
   `${FONT_SIZE_ROOT} ${value}:not(${FONT_SIZE_ROOT} :not(${SIZE_VALUE_CONTAINERS}) *):not(Property > *.key):not(ConditionalExpression > *.test):not(${FONT_SIZE_ROOT} ConditionalExpression > *.test *)`;
+const fontWeightValueSelector = (value) =>
+  `${FONT_WEIGHT_ROOT} ${value}:not(${FONT_WEIGHT_ROOT} :not(${SIZE_VALUE_CONTAINERS}) *):not(Property > *.key):not(ConditionalExpression > *.test):not(${FONT_WEIGHT_ROOT} ConditionalExpression > *.test *)`;
 
 const TYPOGRAPHY_RESTRICTIONS = [
   {
@@ -52,6 +61,15 @@ const TYPOGRAPHY_RESTRICTIONS = [
   {
     selector: `${sizeValueSelector('TemplateLiteral[expressions.length=0]')} > TemplateElement[value.raw=/[0-9](px|rem|em|%)/i], TaggedTemplateExpression > TemplateLiteral > TemplateElement[value.raw=/font-size\\s*:\\s*[+-]?([0-9]*[.])?[0-9]+(px|rem|em|%)/i]`,
     message: FONT_SIZE_MESSAGE,
+  },
+  {
+    selector: fontWeightValueSelector(LITERAL_WEIGHT),
+    message: FONT_WEIGHT_MESSAGE,
+  },
+  {
+    selector:
+      'TaggedTemplateExpression > TemplateLiteral > TemplateElement[value.raw=/font-weight\\s*:\\s*(?:[+-]?[0-9]+(?:\\.[0-9]+)?|bold|bolder|lighter|normal|semibold)/i]',
+    message: FONT_WEIGHT_MESSAGE,
   },
   {
     selector:

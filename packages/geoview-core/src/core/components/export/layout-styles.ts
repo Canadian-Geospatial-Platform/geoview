@@ -59,7 +59,7 @@ export const SHARED_STYLES = {
   page: { padding: 36, fontFamily: 'Helvetica' },
   title: {
     fontSize: 16,
-    fontWeight: 'semibold',
+    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
   },

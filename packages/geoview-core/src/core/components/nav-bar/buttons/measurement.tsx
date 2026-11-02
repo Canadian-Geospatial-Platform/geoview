@@ -49,6 +49,7 @@ const TOOLTIP_BASE_STYLE = {
   textColor: '#fff',
   // eslint-disable-next-line no-restricted-syntax -- OpenLayers/canvas measurement text, not viewer UI.
   fontSize: '13px',
+  // eslint-disable-next-line no-restricted-syntax -- OpenLayers/canvas measurement text, not viewer UI.
   fontWeight: 'bold',
   padding: { top: 4, right: 8, bottom: 4, left: 8 },
 } as const;

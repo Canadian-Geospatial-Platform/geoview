@@ -1,3 +1,3 @@
-import { eslintConfigBase } from '../eslint.config.js';
+import parentConfig from '../eslint.config.js';
 
-export default eslintConfigBase;
+export default parentConfig;

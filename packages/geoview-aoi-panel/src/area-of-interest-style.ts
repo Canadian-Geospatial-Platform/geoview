@@ -54,7 +54,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: theme.palette.geoViewColor?.grey.dark[900],
       color: theme.palette.geoViewColor?.grey.light[900],
       fontSize: theme.typography.body2.fontSize,
-      fontWeight: 400,
+      fontWeight: theme.typography.fontWeightRegular,
       padding: theme.spacing(0, 1.5),
       height: 60,
       width: '100%',
