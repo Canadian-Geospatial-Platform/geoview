@@ -3592,24 +3592,6 @@ export class LayerTester extends GVAbstractTester {
 
 // #region TYPES AND INTERFACES
 
-/** Result captured by the parent-crawl visibility test at each stage. */
-type ParentCrawlVisibilityResult = {
-  /** State snapshot taken after the parent group has been hidden. */
-  afterHide: {
-    groupVisible: boolean;
-    childOwnVisible: boolean;
-    childEffectiveVisible: boolean;
-    childHidden: boolean;
-    childInRange: boolean;
-  };
-  /** State snapshot taken after setLayerVisibleIncludingParents walked the parents. */
-  afterShow: {
-    groupVisible: boolean;
-    childEffectiveVisible: boolean;
-    childHidden: boolean;
-  };
-};
-
 /** Immutable source and query snapshots after an injection. */
 type GeojsonInjectionSnapshot = {
   features: { id: string | number | undefined; value: unknown; lonlat: number[] }[];
