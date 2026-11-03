@@ -61,14 +61,6 @@ export class API {
   #onMapViewerSetHandlers: MapViewerSetDelegate[] = [];
 
   /**
-   * Initiates the event and projection objects.
-   */
-  constructor() {
-    // Activate/deactivate the map crosshair as keyboard focus enters/leaves the map element
-    API.#manageMapCrosshairOnFocus(this);
-  }
-
-  /**
    * Gets the list of all map IDs currently in the collection.
    *
    * @returns Array of map IDs
@@ -350,49 +342,6 @@ export class API {
   }
 
   // #endregion EVENTS
-
-  // #region STATIC METHODS
-
-  /**
-   * Activates the map crosshair when keyboard Tab focus lands on the map element and deactivates it otherwise.
-   *
-   * Crosshair activation only triggers for the specific map element ({mapId}-mapTargetElement); tabbing to any
-   * other element within a .geoview-map container deactivates it.
-   */
-  static #manageMapCrosshairOnFocus(apiInstance: API): void {
-    // Add event listener for when tab pressed
-    document.addEventListener('keyup', (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return;
-
-      // get array of map elements
-      const elements: Element[] = Array.from(document.getElementsByClassName('geoview-map'));
-      const activeEl = DomHelper.getActiveElement();
-
-      if (elements.some((element) => activeEl && element.contains(activeEl))) {
-        // Check if the focus element is a map and set store value for crosshair
-        const mapId =
-          activeEl?.closest('.geoview-shell') !== null
-            ? activeEl
-                ?.closest('.geoview-shell')!
-                .getAttribute('id')
-                ?.replace(/-shell$/, '')
-            : undefined;
-
-        if (mapId !== undefined) {
-          const mapFocus = activeEl?.getAttribute('id') === DomHelper.buildMapTargetElementId(mapId);
-
-          // Only log if map is in focus, if not... too much logging
-          if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
-
-          // Get the associated MapViewer
-          const mapViewer = apiInstance.getMapViewer(mapId);
-          mapViewer.controllers.uiController.setCrosshairActive(mapFocus);
-        }
-      }
-    });
-  }
-
-  // #endregion STATIC METHODS
 }
 
 // #region EVENT TYPES

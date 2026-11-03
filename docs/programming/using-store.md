@@ -76,7 +76,7 @@ export const setStoreMapClickMarker = (
 
 ## DOM Elements and Store State
 
-Do not store live DOM elements in Zustand. The map host is supplied at mount and exposed to React through context; the shell element is created by `Shell` and exposed to its descendants through its own context. Store lifecycle code may read the host to initialize reactive values such as map height, but should not retain the element in a state slice. Use `DomHelper` for imperative map-scoped DOM lookups. See [Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access) for the root-versus-descendant guidance.
+Do not store live DOM elements in Zustand. The map root is resolved by `mapId` through `DomHelper.getGVRootElement(mapId)` when UI code needs it; the shell element is created by `Shell` and exposed to its descendants through `useShellContainer()`. Store lifecycle code may read the host to initialize reactive values such as map height, but should not retain the element in a state slice. Prefer an existing ref or context, and use `DomHelper` for required map-scoped lookups at the UI/browser-integration boundary. See [Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access) for the root-versus-descendant guidance.
 
 ## Store Access Patterns
 

@@ -100,6 +100,9 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   Editing follows the same rule through `DrawerController.handleEditingEscape()`: a grab or selection is cleared first.
 - [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
   on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
+- [Map](../../packages/geoview-core/src/core/components/map/map.tsx) updates crosshair state on Tab release
+  for focus within its own root. It activates only when the map target itself is focused and does not
+  manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and enable its viewer-level trap.
   [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,

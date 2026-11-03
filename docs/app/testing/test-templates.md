@@ -534,7 +534,8 @@ If either check fails, it returns `{ results: [] }` silently (no error thrown). 
 ### `whenThisThen()` for Async Conditions
 
 Prefer the existing event-driven `allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath)`
-before querying. Use `whenThisThen` only for conditions with no suitable event; the polling example
+before querying. A layer config must reach `processed` before its GV layer can be registered; the
+wait rejects if the config enters an error state first. Use `whenThisThen` only for conditions with no suitable event; the polling example
 below remains a fallback, not the default registration pattern.
 
 ```typescript
