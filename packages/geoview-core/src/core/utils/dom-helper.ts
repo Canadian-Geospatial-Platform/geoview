@@ -143,6 +143,32 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets the visibility toggle button for a layer in a map's layer panel.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @returns The visibility button, or undefined when the layer row or button is not rendered
+   */
+  static getVisibleButton(mapId: string, layerPath: string): HTMLButtonElement | undefined {
+    const layerListItem = DomHelper.queryGVSelectorAll<HTMLElement>(mapId, '[id]').find((element) => element.id.endsWith(layerPath));
+    return layerListItem?.parentElement?.querySelector<HTMLButtonElement>('.rightIcons-container button[aria-pressed]') ?? undefined;
+  }
+
+  /**
+   * Checks whether a layer's visibility button displays the visible eye icon.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @returns True when the visible eye icon is rendered; otherwise false
+   */
+  static getVisibleButtonVisibility(mapId: string, layerPath: string): boolean {
+    const visibilityButton = DomHelper.getVisibleButton(mapId, layerPath);
+    const visibleIcon = visibilityButton?.querySelector('[data-testid="VisibilityOutlinedIcon"]');
+    const hiddenIcon = visibilityButton?.querySelector('[data-testid="VisibilityOffOutlinedIcon"]');
+    return Boolean(visibleIcon) && !hiddenIcon;
+  }
+
+  /**
    * Returns visible tabbable elements in keyboard order within a map's focus trap.
    *
    * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.

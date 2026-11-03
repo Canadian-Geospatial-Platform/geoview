@@ -588,6 +588,16 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 
 ---
 
+#### 2.2.5 Layer Visibility (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| Method                            | Type | Description                                                                                             |
+| --------------------------------- | ---- | ------------------------------------------------------------------------------------------------------- |
+| `testSetOrToggleLayerVisibility` | test | Test explicit visibility values and no-argument toggles through `LayerApi.setOrToggleLayerVisibility` |
+
+---
+
 ## 3. Map
 
 [↑ Back to top](#table-of-contents)

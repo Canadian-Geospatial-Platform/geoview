@@ -361,6 +361,7 @@ _(Doc updates, demo cleanup, code organization)_
 
 _(Tests added, moved, removed, or reorganized)_
 
+- Added `suite-layer-functions` coverage for public `LayerApi.setOrToggleLayerVisibility`, checking explicit values, no-argument toggles, return values, and resulting layer state.
 - Merged the two UI tests into the sequential `suite-map` flow and removed the separate Map 7 runner page.
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path.
 - New automated test case for group layer with `defaultVisibility: false` (#3544)
