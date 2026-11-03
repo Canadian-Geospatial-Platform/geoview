@@ -82,14 +82,13 @@ Classify every test before writing it. Each group has its own tester, suite, and
 | 2 — Layers           | Layer lifecycle                          | `LayerTester`                                                                    | `suite-layer`                       | Parallel then sequential      |
 | 2 — Layers           | Layer query                              | `LayerTester`                                                                    | `suite-layer`                       | Sequential (changes zoom)     |
 | 2 — Layers           | Legend                                   | `LegendTester` (new)                                                             | `suite-legend` (new)                | Guarded (`legend` tab)        |
-| 3 — Map              | Map interaction                          | `MapTester`                                                                      | `suite-map`                         | Sequential `await`            |
+| 3 — Map              | Map interaction / map-scoped UI          | `MapTester`                                                                      | `suite-map`                         | Complex mixed; UI checks last |
 | 3 — Map              | Map config                               | `MapConfigTester`                                                                | `suite-map-config`                  | Sequential (creates new maps) |
 | 4 — Component panels | Details panel                            | `DetailsTester`                                                                  | `suite-details`                     | Guarded (`details` tab)       |
 | 4 — Component panels | Data table                               | `DataTableTester` (new)                                                          | `suite-data-table` (new)            | Guarded (`data-table` tab)    |
-| 4 — Component panels | UI / DOM                                 | `UITester`                                                                       | `suite-ui`                          | `Promise.all()`               |
 | 5 — Plugins          | Geochart / Swiper / Time slider / Drawer | `GeochartTester`, `SwiperTester`, `TimeSliderTester` (new), `DrawerTester` (new) | matching `suite-*`                  | Guarded (plugin loaded)       |
 
-> **Choosing the group:** pure function → 1; adds/removes/queries a layer → 2; changes zoom/projection/basemap → 3; interacts with a footer/app bar panel → 4; tests a plugin package → 5. Verify current testers/suites in `packages/geoview-test-suite/src/tests/` — "(new)" entries may already exist.
+> **Choosing the group:** pure function → 1; adds/removes/queries a layer → 2; changes zoom/projection/basemap or performs map-scoped UI checks → 3; tests dedicated Details/Data Table panels → 4; tests a plugin package → 5. Verify current testers/suites in `packages/geoview-test-suite/src/tests/` — "(new)" entries may already exist.
 
 ---
 
@@ -151,17 +150,18 @@ Follow the template exactly, including helpers, the three-callback separation (e
 
 Apply every rule in `.github/ai/release-testing.md`:
 
-- **Sync rules** — `docs/app/testing/test-catalog.md`, the release-testing `Auto` flags (`M`/`C` → `A`), and the three-way sync (test files ↔ issue template ↔ README)
+- **Automated tests** — update the unnumbered `test-catalog.md` inventory when methods change; update `00-automated-suite.md` only for new suites or execution variants. Neither file has test totals.
+- **Manual plan changes** — keep the release-testing `Auto` flags (`M`/`C` → `A`) and the three-way sync (test files ↔ issue template ↔ README)
 - **Release candidate tracker** — use the `update-release-candidate` skill after completed test, HTML page, config, or infrastructure changes; reconcile existing entries rather than duplicating them
-- **Docs to keep in sync** — `docs/app/testing/*`, `00-automated-suite.md` counts, README `(A/C/M)` counts
-- If any automated test changed, re-audit **all** suites' counts (use the `sync-test-counts` skill)
+- **Docs to keep in sync** — `docs/app/testing/*`; update automated checklist rows only for new suites or execution variants; update README `(A/C/M)` counts only when the manual plan changes
+- If any automated test changed, verify **all** suites' source call counts against `getTestsTotalFinal()` (use the `sync-test-counts` skill); no documentation totals are maintained
 
 ### Phase 6 — Verify
 
 1. Check the generated files for TypeScript errors and unresolved imports
 2. Confirm the test is wired into `onLaunchTestSuite()` and `getTestsTotalFinal()` matches
 3. Confirm constants exist for every URL and ID used
-4. Run the release-testing count command from `.github/ai/release-testing.md` and fix any README discrepancy
+4. Run the release-testing count command from `.github/ai/release-testing.md` only when manual-plan rows or `Auto` flags change; for automated tests, verify source calls against `getTestsTotalFinal()`
 
 ---
 
@@ -187,6 +187,6 @@ Apply every rule in `.github/ai/release-testing.md`:
 
 - **Mode 2:** "Missing Test Coverage Report" in `.github/ai/test-suite.md` → "Coverage Review"
 - **Mode 3:** "Manual Release-Testing Audit Report" in `.github/ai/release-testing.md`
-- **Mode 1:** list the files created/changed, the suite and template used, and the updated counts (`getTestsTotalFinal()`, test catalog, `00-automated-suite.md`, README)
+- **Mode 1:** list the files created/changed, the suite and template used, and the validation performed; identify catalog/checklist changes where applicable
 
 **Knowledge upkeep:** follow `AGENTS.md` → Knowledge upkeep and the **public-docs-first** rule: record shared guidance in its public section and link from AI references, never duplicate it. List changed files in your report.

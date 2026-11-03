@@ -101,6 +101,12 @@
         margin-bottom: 0;
       }
 
+      .test-suite-description {
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        background-color: #e8eaf6;
+      }
+
       .group-header {
         margin: 15px 0 5px 0;
         padding: 5px 10px;
@@ -206,12 +212,6 @@
         <span id="vpnStatus" class="toggle-status off">OFF</span>
       </label>
       <label class="toggle-switch">
-        <input type="checkbox" id="runSequentially" onchange="toggleRunSequentially(this.checked)" />
-        <span class="toggle-slider"></span>
-        <span class="toggle-label">Run sequentially</span>
-        <span id="runSequentiallyStatus" class="toggle-status off">OFF</span>
-      </label>
-      <label class="toggle-switch">
         <input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)" />
         <span class="toggle-slider"></span>
         <span class="toggle-label">Heavy tests</span>
@@ -231,9 +231,7 @@
 
     <!-- Group 1: Core / Utility -->
     <div id="group1-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core</button>
-      <button class="tab-button" onclick="openTab(event, 'map1-test')">Config Validation</button>
-      <button class="tab-button" onclick="openTab(event, 'map9-test')">Utilities</button>
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core / Utilities / Config Validation</button>
     </div>
 
     <!-- Group 2: Layers -->
@@ -251,7 +249,6 @@
 
     <!-- Group 4: Components -->
     <div id="group4-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map7-test')">UI Tests</button>
       <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
       <button class="tab-button" onclick="openTab(event, 'map11-test')">Data Table</button>
     </div>
@@ -289,29 +286,11 @@
 
       <!-- Map 0 Results -->
       <button id="collapsible-map0" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 0 - Core Tests</span>
+        <span style="font-weight: bold">Map 0 - Tests Core / Utilities / Config</span>
         <span id="stats-map0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map0-results"></div>
-      </div>
-
-      <!-- Map 1 Results -->
-      <button id="collapsible-map1" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 1 - Config Tests</span>
-        <span id="stats-map1" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map1-results"></div>
-      </div>
-
-      <!-- Map 9 Results -->
-      <button id="collapsible-map9" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 9 - Utilities Tests</span>
-        <span id="stats-map9" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map9-results"></div>
       </div>
 
       <!-- Group 2: Layers -->
@@ -367,15 +346,6 @@
 
       <!-- Group 4: Components -->
       <div class="group-header">Group 4 - Components</div>
-
-      <!-- Map 7 Results -->
-      <button id="collapsible-map7" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 7 - UI Tests</span>
-        <span id="stats-map7" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map7-results"></div>
-      </div>
 
       <!-- Map 8 Results -->
       <button id="collapsible-map8" class="collapsible" onclick="toggleCollapsible(this)">
@@ -462,55 +432,12 @@
           'theme': 'geo.ca',
           'corePackagesConfig': [
             {
-              'test-suite': { 'suites': ['suite-core'] }
+              'test-suite': { 'suites': ['suite-core', 'suite-utilities', 'suite-config'] }
             }
           ],
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"
-      ></div>
-    </div>
-
-    <!-- Map 1 Tab -->
-    <div id="map1-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT1">1. Tests on map 1</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map1"></div>
-      <br />
-      <div
-        id="map1"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'viewSettings': {
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            }
-          },
-          'components': [],
-          'footerBar': {
-            'tabs': {
-              'core': [
-                'layers'
-              ]
-            }
-          },
-          'corePackages': ['test-suite'],
-          'theme': 'geo.ca',
-          'corePackagesConfig': [
-            {
-              'test-suite': { 'suites': ['suite-config'] }
-            }
-          ]
         }"
       ></div>
     </div>
@@ -898,50 +825,6 @@
     </div>
 
     <!-- Map 7 Tab -->
-    <div id="map7-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT7">7. Tests on map 7</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map7"></div>
-      <br />
-      <div
-        id="map7"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': []
-        },
-        'components': [],
-        'footerBar': {
-          'tabs': {
-            'core': [
-              'layers'
-            ]
-          }
-        },
-        'corePackages': ['test-suite'],
-        'theme': 'geo.ca',
-        'corePackagesConfig': [
-          {
-            'test-suite': { 'suites': ['suite-ui'] }
-          }
-        ]
-      }"
-      ></div>
-    </div>
-
     <!-- Map 8 Tab -->
     <div id="map8-test" class="tab-content">
       <div class="map-title-holder">
@@ -998,49 +881,6 @@
           'corePackagesConfig': [
             {
               'test-suite': { 'suites': ['suite-details'] }
-            }
-          ]
-        }"
-      ></div>
-    </div>
-
-    <!-- Map 9 Tab -->
-    <div id="map9-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT9">9. Tests on map 9 (Utilities)</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map9"></div>
-      <br />
-      <div
-        id="map9"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'viewSettings': {
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            }
-          },
-          'components': [],
-          'footerBar': {
-            'tabs': {
-              'core': [
-                'layers'
-              ]
-            }
-          },
-          'corePackages': ['test-suite'],
-          'theme': 'geo.ca',
-          'corePackagesConfig': [
-            {
-              'test-suite': { 'suites': ['suite-utilities'] }
             }
           ]
         }"
@@ -1413,13 +1253,6 @@
           toggleVPN(true);
         }
 
-        // Update the run sequentially toggle button based on the plugin's configuration defined in the code
-        const btnRunningSequentially = document.getElementById('runSequentially');
-        if (btnRunningSequentially && plugin.getIsRunningSequentially()) {
-          btnRunningSequentially.checked = true;
-          toggleRunSequentially(true);
-        }
-
         // Update the heavy tests toggle button based on the plugin's configuration defined in the code
         const btnRunningHeavyTests = document.getElementById('heavyTestsToggle');
         if (btnRunningHeavyTests && plugin.getIsRunningHeavyTests()) {
@@ -1576,12 +1409,6 @@
       function toggleVPN(checked) {
         toggleOption(checked, 'vpnStatus', (plugin, value) => {
           plugin.setIsRunningOnVPN(value);
-        });
-      }
-
-      function toggleRunSequentially(checked) {
-        toggleOption(checked, 'runSequentiallyStatus', (plugin, value) => {
-          plugin.setIsRunningSequentially(value);
         });
       }
 

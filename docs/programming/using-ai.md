@@ -201,7 +201,7 @@ Skills are reusable recipes in `.github/skills/<name>/SKILL.md`. Copilot picks o
 | `/add-translation`          | Adds or changes UI text in both `en` and `fr`                                               |
 | `/new-layer`                | Adds a new layer type or layer test end to end                                              |
 | `/add-geoview-test`         | Adds a test to `geoview-test-suite` (three-callback pattern, count syncing)                 |
-| `/sync-test-counts`         | Audits all suites so `getTestsTotalFinal`, the test catalog and the checklist agree         |
+| `/sync-test-counts`         | Audits each suite's full test calls against its `getTestsTotalFinal()` value                |
 | `/update-defaults`          | Updates config defaults in all three default-value sources                                  |
 | `/add-display-theme`        | Adds or renames a display theme across every surface                                        |
 | `/capture-lesson`           | Records a verified lesson in the right AI doc or memory                                     |

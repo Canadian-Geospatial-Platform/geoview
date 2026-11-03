@@ -27,27 +27,25 @@ rush serve
 - [API Reference](../../app/testing/api-reference.md) — Assertion API and test lifecycle
 - [Test Suite Package](../../../packages/geoview-test-suite/) — Source code for `geoview-test-suite`
 
-The checklist counts release executions rather than unique test methods. `suite-layer` runs once on LCC (EPSG:3978) and once on Web Mercator (EPSG:3857), so its 49 tests contribute 98 executions to the total.
+The checklist has one row for each suite execution. `suite-layer` appears twice because it runs on both LCC (EPSG:3978) and Web Mercator (EPSG:3857).
 
 ## Suite Checklist
 
-| #   | Suite                                    | Tests   | Status   |
-| --- | ---------------------------------------- | ------- | -------- |
-| 1   | `suite-core`                             | 16      | [ ] Pass |
-| 2   | `suite-config`                           | 39      | [ ] Pass |
-| 3   | `suite-utilities`                        | 57      | [ ] Pass |
-| 4   | `suite-layer` (LCC — EPSG:3978)          | 49      | [ ] Pass |
-| 5   | `suite-layer` (WM — EPSG:3857)           | 49      | [ ] Pass |
-| 6   | `suite-layer-functions` (WM — EPSG:3857) | 11       | [ ] Pass |
-| 7   | `suite-map`                              | 18      | [ ] Pass |
-| 8   | `suite-map-config`                       | 57      | [ ] Pass |
-| 9   | `suite-ui`                               | 2       | [ ] Pass |
-| 10  | `suite-details`                          | 6       | [ ] Pass |
-| 11  | `suite-data-table`                       | 15      | [ ] Pass |
-| 12  | `suite-geochart`                         | 2       | [ ] Pass |
-| 13  | `suite-swiper`                           | 7       | [ ] Pass |
-| 14  | `suite-time-slider`                      | 3       | [ ] Pass |
-|     | **Total**                                | **329** |          |
+| Suite                                    | Status   |
+| ---------------------------------------- | -------- |
+| `suite-core`                             | [ ] Pass |
+| `suite-config`                           | [ ] Pass |
+| `suite-utilities`                        | [ ] Pass |
+| `suite-layer` (LCC — EPSG:3978)          | [ ] Pass |
+| `suite-layer` (WM — EPSG:3857)           | [ ] Pass |
+| `suite-layer-functions` (WM — EPSG:3857) | [ ] Pass |
+| `suite-map`                              | [ ] Pass |
+| `suite-map-config`                       | [ ] Pass |
+| `suite-details`                          | [ ] Pass |
+| `suite-data-table`                       | [ ] Pass |
+| `suite-geochart`                         | [ ] Pass |
+| `suite-swiper`                           | [ ] Pass |
+| `suite-time-slider`                      | [ ] Pass |
 
 ## What to Do if a Suite Fails
 
