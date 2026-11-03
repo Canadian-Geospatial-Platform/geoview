@@ -259,7 +259,7 @@ _(Optimizations, refactors, structural changes)_
 - Created map move handlers in map-controller and layer-controller (#3544)
 - Centralized map control logic in `mapController.#updateMapControls` (#3544)
 - Added theme, displayDateMode, displayTimezone to UI Domain for controller-based store updates (#3544)
-- Restored explicit `ControllerRegistry` dependency injection across controllers, plugins, layer sets, layers, and test-suite helpers, replacing implicit controller access (`9d085fa1a5`)
+- Restored explicit `ControllerRegistry` dependency injection across controllers, plugins, layer sets, and test-suite helpers, replacing implicit controller access (`9d085fa1a5`)
 - Reviewed and replaced 30+ `onEvent/offEvent` patterns with new `onceEvent` pattern (#3544)
 - Changed map click pattern for WCAG mode vs regular mode (#3544)
 - Fixed time-slider-state action setters to be immutable and focused on individual layerPath values (#3544)
