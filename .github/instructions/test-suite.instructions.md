@@ -13,3 +13,4 @@ Task routing: [test-suite.md](../ai/test-suite.md) → **Enforcement reminders**
 - Shared map changes run sequentially; prefer event registration waits and await controller zoom.
 - Tester files keep every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class.
 - Any test change requires all-suite count reconciliation and both catalog/release totals.
+- Keep `getTestsTotalFinal()` aligned with calls in the changed suite. Update the unnumbered catalog inventory when test methods change; the automated checklist has no test totals and only needs edits when suite execution rows change.

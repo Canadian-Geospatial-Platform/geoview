@@ -216,13 +216,12 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 }
 ```
 
-`getTestsTotalFinal()` is required for every concrete suite. Count each `testXXXX()` / `testErrorXXXX()`
-call in the full `onLaunchTestSuite()`, including heavy tests gated by `getIsRunningHeavyTests()`.
-Exclude debug-only and commented-out calls. On every automated test addition/removal/rename, audit
-**all registered suites**, not just the changed suite: reconcile actual calls, TS totals,
-`test-catalog.md` summary rows, and `00-automated-suite.md` rows. The release checklist runs suite-layer
-twice (LCC and WM); the catalog counts it once. Recompute each document's total from its own rows.
-Update individual catalog entries as well as summary counts; do not blindly increment already-drifted totals.
+`getTestsTotalFinal()` is required for every concrete suite. Keep it equal to the full
+`onLaunchTestSuite()` call count, including heavy tests gated by `getIsRunningHeavyTests()` and
+excluding debug-only or commented-out calls. The test catalog is an unnumbered inventory, and the
+automated release checklist tracks pass status without test totals. Update catalog entries when test
+methods are added, removed, or renamed; update checklist rows only when the suite list or execution
+variants change. There are no documentation totals to reconcile.
 
 ### Conditional Execution
 
