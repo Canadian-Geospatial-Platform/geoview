@@ -1946,6 +1946,54 @@ export class MapViewer {
   }
 
   /**
+   * Gets map position information at a rendered viewport pixel, accounting for view padding and rotation.
+   *
+   * @param pixel - The pixel relative to the map viewport
+   * @returns The position information, or undefined before a coordinate transform is available
+   */
+  getMapPositionFromPixel(pixel: Pixel): TypeMapMouseInfo | undefined {
+    const projected = this.map?.getCoordinateFromPixel(pixel) ?? undefined;
+    if (!projected) return undefined;
+
+    return {
+      projected,
+      pixel: [...pixel],
+      lonlat: Projection.transformToLonLat(projected, this.getProjection()),
+      dragging: false,
+    };
+  }
+
+  /**
+   * Gets the map position under a pointer given in browser client coordinates.
+   *
+   * @param clientX - The pointer X position in the browser viewport
+   * @param clientY - The pointer Y position in the browser viewport
+   * @returns The position, or undefined when the pointer is outside the map or the viewport has no size
+   */
+  getMapPositionFromClientPoint(clientX: number, clientY: number): TypeMapMouseInfo | undefined {
+    const rect = this.map.getTargetElement()?.getBoundingClientRect();
+    const size = this.map.getSize();
+    if (!rect || !size || rect.width <= 0 || rect.height <= 0) return undefined;
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return undefined;
+
+    return this.getMapPositionFromPixel([(x * size[0]) / rect.width, (y * size[1]) / rect.height]);
+  }
+
+  /**
+   * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
+   *
+   * @returns The position, or undefined before the viewport has a size
+   */
+  getViewportCenterPosition(): TypeMapMouseInfo | undefined {
+    const size = this.map.getSize();
+    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
+    return this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+  }
+
+  /**
    * Transforms extent from LonLat to the current projection of the map.
    *
    * @param extent - The LonLat extent

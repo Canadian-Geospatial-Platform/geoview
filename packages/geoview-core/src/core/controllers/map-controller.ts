@@ -867,16 +867,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The position information, or undefined before a coordinate transform is available
    */
   getMapPositionFromPixel(pixel: Pixel): TypeMapMouseInfo | undefined {
-    const mapViewer = this.getMapViewer();
-    const projected = mapViewer.map?.getCoordinateFromPixel(pixel) ?? undefined;
-    if (!projected) return undefined;
-
-    return {
-      projected,
-      pixel: [...pixel],
-      lonlat: Projection.transformToLonLat(projected, mapViewer.getProjection()),
-      dragging: false,
-    };
+    return this.getMapViewer().getMapPositionFromPixel(pixel);
   }
 
   /**
@@ -887,16 +878,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The position, or undefined when the pointer is outside the map or the viewport has no size
    */
   getMapPositionFromClientPoint(clientX: number, clientY: number): TypeMapMouseInfo | undefined {
-    const { map } = this.getMapViewer();
-    const rect = map.getTargetElement()?.getBoundingClientRect();
-    const size = map.getSize();
-    if (!rect || !size || rect.width <= 0 || rect.height <= 0) return undefined;
-
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return undefined;
-
-    return this.getMapPositionFromPixel([(x * size[0]) / rect.width, (y * size[1]) / rect.height]);
+    return this.getMapViewer().getMapPositionFromClientPoint(clientX, clientY);
   }
 
   /**
@@ -905,9 +887,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The position, or undefined before the viewport has a size
    */
   getViewportCenterPosition(): TypeMapMouseInfo | undefined {
-    const size = this.getMapSize();
-    if (!size || size[0] <= 0 || size[1] <= 0) return undefined;
-    return this.getMapPositionFromPixel([size[0] / 2, size[1] / 2]);
+    return this.getMapViewer().getViewportCenterPosition();
   }
 
   /**
