@@ -880,6 +880,26 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Gets the map position under a pointer given in browser client coordinates.
+   *
+   * @param clientX - The pointer X position in the browser viewport
+   * @param clientY - The pointer Y position in the browser viewport
+   * @returns The position, or undefined when the pointer is outside the map or the viewport has no size
+   */
+  getMapPositionFromClientPoint(clientX: number, clientY: number): TypeMapMouseInfo | undefined {
+    const { map } = this.getMapViewer();
+    const rect = map.getTargetElement()?.getBoundingClientRect();
+    const size = map.getSize();
+    if (!rect || !size || rect.width <= 0 || rect.height <= 0) return undefined;
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return undefined;
+
+    return this.getMapPositionFromPixel([(x * size[0]) / rect.width, (y * size[1]) / rect.height]);
+  }
+
+  /**
    * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
    *
    * @returns The position, or undefined before the viewport has a size

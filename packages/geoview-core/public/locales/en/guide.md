@@ -99,8 +99,9 @@ Information will be shown for supported features when the crosshair is positione
 1. Open **Measure**, enable the tool, and choose **Distance** or **Area**.
 2. Click the map to start, then click to add points.
 3. Double-click to finish a line or polygon. To close a polygon, you can also click its first point.
-4. Press **Esc** to cancel the sketch in progress. The tool stays enabled so you can start again.
-5. While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point. Use **Clear** in the Measure panel to remove completed measurements.
+4. After the first click, you can also press **Enter** or **Spacebar** to add a point at the mouse pointer, and **Shift+Enter** or **Shift+Spacebar** to finish.
+5. Press **Esc** to cancel the sketch in progress. The tool stays enabled so you can start again.
+6. While a sketch is in progress, press **Ctrl+Z** or **Backspace** to undo the last point. Use **Clear** in the Measure panel to remove completed measurements.
 
 #### With the crosshair
 
@@ -157,9 +158,9 @@ When the drawer package is enabled, drawing and geometry editing tools become av
 
 Activate drawing mode by clicking the **Draw** button in the navigation bar or pressing **Alt+D**. Select a geometry type, then:
 
-An on-map hint explains the mouse or crosshair steps for every geometry, including the second coordinate for circles, rectangles, and stars.
+An on-map hint explains the steps for every geometry, including the second coordinate for circles, rectangles, and stars. With keyboard navigation enabled, the hint shows the keyboard steps, starting with **Ctrl+M** to focus the map.
 
-- **Mouse**: Click on the map to place vertices. Double-click to finish multi-vertex geometries (lines, polygons).
+- **Mouse**: Click on the map to place vertices. Double-click to finish multi-vertex geometries (lines, polygons). After the first click, you can also press **Enter** or **Spacebar** to place a vertex at the mouse pointer, and **Shift+Enter** or **Shift+Spacebar** to finish.
 - **Crosshair** (keyboard navigation): Press **Enter** or **Spacebar** to place a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
 
 ## Editing Mode
@@ -223,7 +224,7 @@ Press **Esc** to cancel a sketch or a pending first coordinate. Press **Esc** ag
 4. Press **Enter** or **Spacebar** to grab the handle
 5. Use **arrow keys** to move the grabbed handle
 6. Press **Enter** or **Spacebar** again to release the handle
-7. Press **Escape** to cancel the grab or deselect the geometry
+7. Press **Escape** to cancel the grab or deselect the geometry, then **Escape** again to return focus to the **Toggle editing** button
 
 **Text editing:** With a text feature selected, press **Shift+Enter** or **Shift+Spacebar** when the crosshair is inside the text bounds to open the text editor (keyboard double-click equivalent).
 

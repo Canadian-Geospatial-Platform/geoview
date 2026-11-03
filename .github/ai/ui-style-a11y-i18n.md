@@ -32,6 +32,12 @@ Read only the linked section of each doc: search for its heading and read to the
   follow the [live-region content-change contract](../../docs/app/accessibility.md#aria-live).
 - Measurement point counts exclude OpenLayers' cursor coordinate and polygon closing coordinate.
   Update the tracked count on decreases too, so adding a point after undo produces feedback.
+- On-map drawing hints (`DrawingHint`): mouse wording ("Click") by default; keyboard wording when keyboard navigation
+  (`activeTrapGeoView`) or the crosshair is active, prefixed with `drawingHint.focusMap` (Ctrl+M) until the crosshair
+  is active. Never mix the two wordings in one message. Mouse use ends keyboard navigation mode, so test with keyboard input.
+  The hint is a `role="status"` live region (not `aria-hidden`): a screen reader hears the same text, no extra strings.
+- Pointer Enter/Space: `Crosshair` also handles Enter/Space at the mouse pointer while measuring or drawing (not
+  editing). Pointer handlers are suspended then, so it tracks the pointer itself and focuses the map on pointer down.
 
 ## Source navigation and translation workflow
 
@@ -91,6 +97,7 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   `GV_DOM_SUFFIX`) only while the map has focus and outside fullscreen. Decide "nothing left" from state read
   before the Draw interaction aborts its sketch: measurement uses a capture-phase listener, and the drawer's
   handler is registered in `onHook`, ahead of any Draw instance. Reordering either makes one Escape do both.
+  Editing follows the same rule through `DrawerController.handleEditingEscape()`: a grab or selection is cleared first.
 - [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
   on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch

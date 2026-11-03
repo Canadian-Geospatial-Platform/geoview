@@ -15,6 +15,8 @@ export const GV_DOM_SUFFIX = {
   measureButton: 'button-measurement',
   /** The drawer navbar button that toggles drawing; focus returns to it when keyboard drawing ends. */
   drawerDrawButton: 'drawer-draw',
+  /** The drawer navbar button that toggles editing; focus returns to it when keyboard editing ends. */
+  drawerEditButton: 'drawer-edit',
 } as const;
 
 /** CSS class marking the guide's scrollable content container. */

@@ -99,8 +99,9 @@ Pour les éléments pris en charge, l’information s’affiche lorsque le point
 1. Ouvrez **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
 2. Cliquez sur la carte pour commencer, puis cliquez pour ajouter des points.
 3. Double-cliquez pour terminer une ligne ou un polygone. Pour fermer un polygone, vous pouvez aussi cliquer sur son premier point.
-4. Appuyez sur **Échap** pour annuler le tracé en cours. L'outil reste activé et vous pouvez recommencer.
-5. Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point. Utilisez **Effacer** dans le panneau Mesurer pour supprimer les mesures terminées.
+4. Après le premier clic, vous pouvez aussi appuyer sur **Entrée** ou **Barre d'espace** pour ajouter un point à la position du pointeur de la souris, et sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer.
+5. Appuyez sur **Échap** pour annuler le tracé en cours. L'outil reste activé et vous pouvez recommencer.
+6. Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point. Utilisez **Effacer** dans le panneau Mesurer pour supprimer les mesures terminées.
 
 #### Avec le pointeur en croix
 
@@ -157,9 +158,9 @@ Lorsque le module drawer est activé, les outils de dessin et d'édition de géo
 
 Activez le mode dessin en cliquant sur le bouton **Dessiner** dans la barre de navigation ou en appuyant sur **Alt+D**. Sélectionnez un type de géométrie, puis :
 
-Une indication sur la carte explique les étapes à la souris ou au pointeur en croix pour chaque géométrie, y compris la deuxième coordonnée des cercles, rectangles et étoiles.
+Une indication sur la carte explique les étapes pour chaque géométrie, y compris la deuxième coordonnée des cercles, rectangles et étoiles. Lorsque la navigation au clavier est activée, l'indication présente les étapes au clavier, en commençant par **Ctrl+M** pour focaliser la carte.
 
-- **Souris** : Cliquez sur la carte pour placer des sommets. Double-cliquez pour terminer les géométries multi-sommets (lignes, polygones).
+- **Souris** : Cliquez sur la carte pour placer des sommets. Double-cliquez pour terminer les géométries multi-sommets (lignes, polygones). Après le premier clic, vous pouvez aussi appuyer sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur de la souris, et sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer.
 - **Pointeur en croix** (navigation au clavier) : Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur en croix. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer la géométrie.
 
 ## Mode édition
@@ -223,7 +224,7 @@ Appuyez sur **Échap** pour annuler un tracé ou une première coordonnée en at
 4. Appuyez sur **Entrée** ou **Barre d'espace** pour saisir la poignée
 5. Utilisez les **touches fléchées** pour déplacer la poignée saisie
 6. Appuyez à nouveau sur **Entrée** ou **Barre d'espace** pour relâcher la poignée
-7. Appuyez sur **Échap** pour annuler la saisie ou désélectionner la géométrie
+7. Appuyez sur **Échap** pour annuler la saisie ou désélectionner la géométrie, puis de nouveau sur **Échap** pour ramener le focus sur le bouton **Basculer l'édition**
 
 **Édition de texte :** Avec un élément textuel sélectionné, appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** lorsque le pointeur en croix est à l'intérieur des limites du texte pour ouvrir l'éditeur de texte (équivalent du double-clic au clavier).
 

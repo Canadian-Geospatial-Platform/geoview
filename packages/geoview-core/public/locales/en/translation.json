@@ -104,6 +104,7 @@
   "drawingHint": {
     "startMouse": "Click to start drawing.",
     "startKeyboard": "Press Enter or Space to start drawing.",
+    "focusMap": "Press Ctrl+M to focus the map.",
     "mouse": {
       "point": "Click to place a point.",
       "text": "Click to place text.",
@@ -112,8 +113,8 @@
       "firstCorner": "Click to set the first corner.",
       "oppositeCorner": "Click to set the opposite corner and finish. Press Esc to cancel.",
       "editing": "Click a geometry to select it, then drag it or its handles to edit. Press Esc to deselect.",
-      "line": "Click to add points, double-click to finish, Esc to cancel, Ctrl+Z or Backspace to undo.",
-      "polygon": "Click to add points, double-click to finish, or click the first point to close. Press Esc to cancel; Ctrl+Z or Backspace to undo."
+      "line": "Click to add points. Double-click to finish. Press Esc to cancel. Press Ctrl+Z or Backspace to undo.",
+      "polygon": "Click to add points. Double-click, or click the first point, to finish. Press Esc to cancel. Press Ctrl+Z or Backspace to undo."
     },
     "keyboard": {
       "point": "Press Enter or Space to place a point at the crosshair.",
@@ -122,9 +123,9 @@
       "radius": "Move the crosshair, then press Enter or Space to set the size and finish. Press Esc to cancel.",
       "firstCorner": "Press Enter or Space to set the first corner at the crosshair.",
       "oppositeCorner": "Move the crosshair, then press Enter or Space to set the opposite corner and finish. Press Esc to cancel.",
-      "editing": "Press Enter or Space over a geometry to select it, then over a handle to grab it. Use arrows to move; Enter or Space to release; Esc to cancel the grab or deselect.",
-      "line": "Press Enter or Space to add a point, Shift+Enter or Shift+Space to finish, Esc to cancel, and Ctrl+Z or Backspace to undo.",
-      "polygon": "Press Enter or Space to add a point, Shift+Enter or Shift+Space to finish, Esc to cancel, and Ctrl+Z or Backspace to undo."
+      "editing": "Press Enter or Space over a geometry to select it, then over a handle to grab it. Use the arrow keys to move it, then press Enter or Space to release. Press Esc to cancel the grab or deselect.",
+      "line": "Press Enter or Space to add a point. Press Shift+Enter or Shift+Space to finish. Press Esc to cancel. Press Ctrl+Z or Backspace to undo.",
+      "polygon": "Press Enter or Space to add a point. Press Shift+Enter or Shift+Space to finish. Press Esc to cancel. Press Ctrl+Z or Backspace to undo."
     }
   },
   "basemaps": {

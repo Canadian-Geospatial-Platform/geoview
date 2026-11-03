@@ -7,12 +7,19 @@ import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
+/** Properties for the Edit button. */
+interface EditProps {
+  /** The map-scoped id of the button, so keyboard editing can return focus to it. */
+  id: string;
+}
+
 /**
  * Creates an edit button to toggle editing capabilities.
  *
+ * @param props - Properties defined in EditProps interface
  * @returns The edit button element
  */
-export default function Edit(): JSX.Element {
+export default function Edit({ id }: EditProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-drawer/src/buttons/edit');
 
@@ -36,6 +43,7 @@ export default function Edit(): JSX.Element {
 
   return (
     <IconButton
+      id={id}
       aria-label={t('drawer.edit')}
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
