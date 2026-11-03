@@ -62,6 +62,11 @@ Default navbar (when `navBar` is omitted from config): `["zoom", "rotation", "fu
 
 ## Measurement Tool
 
+Compare total labels with [Drawer measurements](17e-package-drawer.md#editing--tools):
+both use bold 14px sans-serif, white text, a 70%-black backing and 4px/8px padding.
+Segment labels retain their distinct 13px/halo styling. Verify existing total labels remain present
+in map exports; Drawer overlays are not added to exports by this styling alignment.
+
 | Test                   | Description                | Steps                                                                         | Expected Result                                          | Auto |
 | ---------------------- | -------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ---- |
 | Measurement button     | Button appears in navbar   | 1. On Map 1, verify measurement button appears                                | Measurement button appears in the navbar                 | C    |

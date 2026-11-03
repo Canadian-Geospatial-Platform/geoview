@@ -186,6 +186,7 @@ export const TIMEOUT: Record<string, number> = {
   guideSearchSectionExpand: 300,
   guideAnchorFocus: 300,
 
+  /** @deprecated Use theme.transitions.duration.standard; removed in a future breaking release */
   fadingPanelDuration: 300, // Duration for fade-out and fade-in halves (ms) when crossfading between e.g. details and settings views
 
   modalFocusClose: 500,

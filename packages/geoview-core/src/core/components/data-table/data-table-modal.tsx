@@ -22,7 +22,8 @@ import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/states/data
 import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
-import { getSxClasses } from './data-table-style';
+import type { SxStyles } from '@/ui/style/types';
+import { dataTableModalContentStyle, getDataTableModalContentTextStyle, getSxClasses } from './data-table-style';
 import { useFeatureFieldInfos } from './hooks/useFeatureFieldInfos';
 
 /** Linkify configuration options for URL detection and formatting. */
@@ -50,7 +51,8 @@ export default function DataTableModal(): JSX.Element {
   const { t } = useTranslation();
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const memoDataTableModalContentTextStyle = useMemo(() => getDataTableModalContentTextStyle(theme), [theme]);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,7 +89,7 @@ export default function DataTableModal(): JSX.Element {
   const getCellValue = useCallback(
     (cellValue: string | number | JSX.Element): JSX.Element => {
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
-        <Box component="div" sx={sxClasses.tableCell}>
+        <Box component="div" sx={memoSxClasses.tableCell}>
           <UseHtmlToReact
             htmlContent={sanitizeHtmlContent(
               enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
@@ -96,12 +98,12 @@ export default function DataTableModal(): JSX.Element {
           />
         </Box>
       ) : (
-        <Box component="div" sx={sxClasses.tableCell}>
+        <Box component="div" sx={memoSxClasses.tableCell}>
           {cellValue}
         </Box>
       );
     },
-    [sxClasses.tableCell, t]
+    [memoSxClasses.tableCell, t]
   );
 
   /**
@@ -196,7 +198,7 @@ export default function DataTableModal(): JSX.Element {
       contentModal={
         <>
           {isLoading && (
-            <Box sx={sxClasses.loadingSpinnerContainer}>
+            <Box sx={memoSxClasses.loadingSpinnerContainer}>
               <CircularProgress
                 isLoaded={!isLoading}
                 style={{
@@ -216,7 +218,7 @@ export default function DataTableModal(): JSX.Element {
               muiPaginationProps={{
                 rowsPerPageOptions: [50, 100],
               }}
-              muiTableContainerProps={{ sx: { maxHeight: 'calc(90vh - 200px)' } }}
+              muiTableContainerProps={{ sx: memoSxClasses.dataTableModalTableContainer }}
               enableStickyHeader
               enableSorting
               positionToolbarAlertBanner="none"
@@ -232,8 +234,8 @@ export default function DataTableModal(): JSX.Element {
           )}
         </>
       }
-      contentStyle={{ overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }}
-      contentTextStyle={{ padding: theme.spacing(0), flex: 1, display: 'flex', flexDirection: 'column' }}
+      contentStyle={dataTableModalContentStyle}
+      contentTextStyle={memoDataTableModalContentTextStyle}
     />
   );
 }
