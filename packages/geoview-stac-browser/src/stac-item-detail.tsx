@@ -157,6 +157,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       {/* Title */}
       <Typography
         component="h3"
+        variant="h4"
         tabIndex={-1}
         data-stac-view-focus
         sx={[memoSxClasses.detailTitle, memoSxClasses.detailSection] as SxProps}
@@ -166,7 +167,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
 
       {/* Metadata */}
       <Box sx={memoSxClasses.metadataSection}>
-        <Typography component="h4" sx={memoSxClasses.filterLabel}>
+        <Typography component="h4" variant="label" sx={memoSxClasses.filterLabel}>
           {t('stacBrowser.metadata')}
         </Typography>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={memoSxClasses.previewImage} />}
@@ -176,7 +177,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       {/* Assets - clickable GeoTIFF assets to display on map */}
       {memoVisibleAssets.length > 0 && (
         <Box sx={memoSxClasses.detailSection}>
-          <Typography component="h4" sx={memoSxClasses.filterLabel}>
+          <Typography component="h4" variant="label" sx={memoSxClasses.filterLabel}>
             {t('stacBrowser.assets')}
           </Typography>
           <Box sx={memoSxClasses.assetList}>
@@ -188,7 +189,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
               return (
                 <Box key={key} sx={[memoSxClasses.assetItem, isSelected && memoSxClasses.assetItemSelected] as SxProps}>
                   <Box sx={memoSxClasses.itemRowText}>
-                    <Typography sx={[memoSxClasses.resultMeta, isSelected && memoSxClasses.assetTitleSelected] as SxProps}>
+                    <Typography variant="label" sx={[memoSxClasses.resultMeta, isSelected && memoSxClasses.assetTitleSelected] as SxProps}>
                       {assetTitle}
                     </Typography>
                     <Box sx={memoSxClasses.assetBadgeRow}>

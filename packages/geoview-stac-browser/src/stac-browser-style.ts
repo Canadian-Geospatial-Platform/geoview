@@ -113,8 +113,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderRadius: theme.shape.borderRadiusNone,
     borderBottom: '2px solid transparent',
     padding: theme.spacing(1),
-    fontWeight: 500,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontWeight: theme.typography.fontWeightMedium,
+    fontSize: theme.typography.label.fontSize,
     color: theme.palette.text.secondary,
     cursor: 'pointer',
     textAlign: 'center',
@@ -130,7 +130,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   modeButtonActive: {
     borderBottom: `2px solid ${theme.palette.primary.main}`,
     color: theme.palette.primary.main,
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightBold,
   },
   filterPanel: {
     display: 'flex',
@@ -157,8 +157,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(0.5),
   },
   filterLabel: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.text.primary,
   },
   propertyFilterRow: {
@@ -193,12 +192,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   resultTitle: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.text.primary,
   },
   resultMeta: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.text.secondary,
     display: 'flex',
     alignItems: 'center',
@@ -211,12 +207,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderRadius: theme.shape.borderRadiusMd,
   },
   detailTitle: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.lg,
     color: theme.palette.text.primary,
   },
   detailDescription: {
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.text.primary,
   },
   assetList: {
@@ -238,7 +231,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     backgroundColor: theme.palette.action.selected,
   },
   assetTitleSelected: {
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightBold,
   },
   loading: {
     display: 'flex',
@@ -262,7 +255,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   pageRange: {
     marginLeft: 'auto',
     alignSelf: 'center',
-    fontSize: theme.palette.geoViewFontSize?.sm,
   },
   dateInputRow: {
     display: 'flex',
@@ -272,13 +264,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   containedInExtentCheckbox: {
     marginLeft: theme.spacing(0.25),
-  },
-  dateInput: {
-    flex: 1,
-    '& input': {
-      fontSize: theme.palette.geoViewFontSize?.sm,
-      padding: theme.spacing(0.75),
-    },
   },
   collectionsListBox: {
     maxHeight: 150,
@@ -323,15 +308,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   collectionTitle: {
     display: 'block',
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.text.primary,
   },
   collectionDescription: {
     display: 'block',
-    fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.text.secondary,
-    lineHeight: 1.4,
   },
   collectionSearchField: {
     flex: 1,
@@ -361,7 +342,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   keywordChip: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 1),
-    fontSize: theme.palette.geoViewFontSize?.xs,
+    fontSize: theme.typography.caption.fontSize,
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.text.primary,
     whiteSpace: 'nowrap',
@@ -380,18 +361,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(0.25),
   },
   metadataLabel: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.text.primary,
   },
-  zoomButton: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
-  },
-
   // Items section (collection detail)
   itemsSectionTitle: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.5),
   },
@@ -416,11 +390,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexWrap: 'wrap',
     columnGap: theme.spacing(1.5),
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     color: theme.palette.text.secondary,
   },
   itemSummaryLabel: {
-    fontWeight: 600,
+    fontSize: theme.typography.label.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
   },
   itemCardActions: {
     display: 'flex',
@@ -428,7 +403,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     gap: theme.spacing(0.25, 0.5),
     '& .MuiButton-root': {
-      fontSize: theme.palette.geoViewFontSize?.sm,
       minWidth: 0,
       padding: theme.spacing(0.25, 0.75),
     },
@@ -441,7 +415,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0.5, 1.5),
     borderBottom: `1px solid ${theme.palette.divider}`,
     backgroundColor: theme.palette.action.hover,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     flexShrink: 0,
   },
 
@@ -453,20 +427,18 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     rowGap: theme.spacing(0.25),
     margin: theme.spacing(0),
     padding: theme.spacing(0.5, 0.5, 0.5, 1),
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
   },
   metadataPair: {
     display: 'contents',
   },
   metadataKey: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.text.primary,
     overflowWrap: 'anywhere',
   },
   metadataValue: {
     margin: theme.spacing(0),
-    fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.text.secondary,
     overflowWrap: 'anywhere',
   },
@@ -486,8 +458,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetTypeBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: theme.palette.geoViewFontSize?.xs,
-    fontWeight: 600,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
     borderRadius: theme.shape.borderRadiusSm,
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
@@ -496,8 +468,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   assetRoleBadge: {
     display: 'inline-block',
     padding: theme.spacing(0.25, 0.75),
-    fontSize: theme.palette.geoViewFontSize?.xs,
-    fontWeight: 500,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: theme.typography.fontWeightMedium,
     borderRadius: theme.shape.borderRadiusSm,
     border: `1px solid ${theme.palette.divider}`,
     color: theme.palette.text.secondary,
@@ -525,8 +497,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(1.5),
   },
   collectionGroupTitle: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.primary.main,
     padding: theme.spacing(0.5, 0),
     borderBottom: `1px solid ${theme.palette.divider}`,

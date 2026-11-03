@@ -56,10 +56,10 @@ export function StacMetadataView(props: StacMetadataViewProps): JSX.Element {
     <Box sx={sxClasses.metadataGrid} component="dl">
       {rows.map((row) => (
         <Box key={row.field} sx={sxClasses.metadataPair}>
-          <Typography component="dt" sx={sxClasses.metadataKey}>
+          <Typography component="dt" variant="label" sx={sxClasses.metadataKey}>
             {row.isConfiguredLabel ? t(row.label) : row.label}
           </Typography>
-          <Typography component="dd" sx={sxClasses.metadataValue}>
+          <Typography component="dd" variant="body2" sx={sxClasses.metadataValue}>
             {renderMetadataLinks(row.value)}
           </Typography>
         </Box>

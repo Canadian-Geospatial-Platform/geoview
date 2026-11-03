@@ -189,7 +189,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
         {Array.from(memoGroupedItems.entries()).map(([collectionId, groupItems]) => (
           <Box key={collectionId} sx={memoSxClasses.collectionGroup}>
             {/* Collection header */}
-            <Typography component="h4" sx={memoSxClasses.collectionGroupTitle}>
+            <Typography component="h4" variant="h6" sx={memoSxClasses.collectionGroupTitle}>
               {getCollectionTitle(collectionId)} ({groupItems.length})
             </Typography>
 
@@ -220,7 +220,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
               {t('stacBrowser.next')}
             </Button>
             {results.features.length > 0 && (
-              <Typography role="status" sx={memoSxClasses.pageRange}>
+              <Typography variant="body2" role="status" sx={memoSxClasses.pageRange}>
                 {t('stacBrowser.itemRange', { start: startItem, end: endItem })}
               </Typography>
             )}

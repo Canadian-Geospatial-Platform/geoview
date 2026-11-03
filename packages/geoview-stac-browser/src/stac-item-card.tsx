@@ -74,9 +74,11 @@ export const StacItemCard = memo(function StacItemCardComponent(props: StacItemC
         </Tooltip>
         {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt="" sx={sxClasses.itemThumbnail} />}
         <Box sx={sxClasses.itemRowText}>
-          <Typography sx={sxClasses.resultTitle}>{title}</Typography>
+          <Typography component="p" variant="h6" sx={sxClasses.resultTitle}>
+            {title}
+          </Typography>
           {(badge || !itemView?.summaryFields?.length) && (
-            <Typography sx={sxClasses.resultMeta}>
+            <Typography variant="body2" sx={sxClasses.resultMeta}>
               {badge && (
                 <Box component="span" sx={sxClasses.assetTypeBadge}>
                   {badge}
