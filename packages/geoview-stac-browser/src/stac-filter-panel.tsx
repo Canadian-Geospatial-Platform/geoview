@@ -390,7 +390,9 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       {/* Text search */}
       {showKeyword && (
         <Box sx={memoSxClasses.filterRow}>
-          <Typography sx={memoSxClasses.filterLabel}>{t('stacBrowser.textSearch')}</Typography>
+          <Typography variant="label" sx={memoSxClasses.filterLabel}>
+            {t('stacBrowser.textSearch')}
+          </Typography>
           <TextField
             size="small"
             aria-label={t('stacBrowser.textSearch')}
@@ -405,7 +407,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       {/* Collection filter */}
       {showCollections && (
         <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-collections`}>
-          <Typography id={`${baseId}-collections`} sx={memoSxClasses.filterLabel}>
+          <Typography variant="label" id={`${baseId}-collections`} sx={memoSxClasses.filterLabel}>
             {t('stacBrowser.collections')}
           </Typography>
           <Box sx={memoSxClasses.collectionsListBox}>
@@ -430,7 +432,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       {/* Temporal filter */}
       {config.filters?.temporal !== false && (
         <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-temporal`}>
-          <Typography id={`${baseId}-temporal`} sx={memoSxClasses.filterLabel}>
+          <Typography variant="label" id={`${baseId}-temporal`} sx={memoSxClasses.filterLabel}>
             {t('stacBrowser.temporal')}
           </Typography>
           <Box sx={memoSxClasses.dateInputRow}>
@@ -443,10 +445,16 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
       {showPropertyFilters && (
         <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-properties`}>
-          <Typography id={`${baseId}-properties`} sx={memoSxClasses.filterLabel}>
+          <Typography variant="label" id={`${baseId}-properties`} sx={memoSxClasses.filterLabel}>
             {t('stacBrowser.propertyFilters')}
           </Typography>
-          <Box role="status">{queryablesLoading && <Typography sx={memoSxClasses.resultMeta}>{t('stacBrowser.loading')}</Typography>}</Box>
+          <Box role="status">
+            {queryablesLoading && (
+              <Typography variant="body2" sx={memoSxClasses.resultMeta}>
+                {t('stacBrowser.loading')}
+              </Typography>
+            )}
+          </Box>
           {!queryablesLoading &&
             memoPropertyFields.map(([field, queryable]) => {
               const isNumeric = queryable.type === 'integer' || queryable.type === 'number';
@@ -467,7 +475,9 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
               return (
                 <Box key={field} sx={memoSxClasses.propertyFilterRow}>
-                  <Typography sx={memoSxClasses.resultMeta}>{label}</Typography>
+                  <Typography variant="body2" sx={memoSxClasses.resultMeta}>
+                    {label}
+                  </Typography>
                   <Select
                     aria-label={t('stacBrowser.propertyOperator', { field: label })}
                     inputProps={{ name: field }}
@@ -502,14 +512,16 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
               );
             })}
           {!queryablesLoading && memoPropertyFields.length === 0 && (
-            <Typography sx={memoSxClasses.resultMeta}>{t('stacBrowser.noQueryableProperties')}</Typography>
+            <Typography variant="body2" sx={memoSxClasses.resultMeta}>
+              {t('stacBrowser.noQueryableProperties')}
+            </Typography>
           )}
         </Box>
       )}
 
       {showSortControls && (
         <Box sx={memoSxClasses.filterRow} role="group" aria-labelledby={`${baseId}-sort`}>
-          <Typography id={`${baseId}-sort`} sx={memoSxClasses.filterLabel}>
+          <Typography variant="label" id={`${baseId}-sort`} sx={memoSxClasses.filterLabel}>
             {t('stacBrowser.sort')}
           </Typography>
           <Box sx={memoSxClasses.dateInputRow}>

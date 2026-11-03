@@ -520,8 +520,6 @@ export default [
       'geoview-core/src/ui/style/**',
       // Owned elsewhere; see TYPOGRAPHY_PLAN.md drawer hand-off
       'geoview-drawer/**',
-      // Out of scope for typography normalization; must migrate before palette.geoViewFontSize is removed (see TYPOGRAPHY_PLAN.md)
-      'geoview-stac-browser/**',
       '**/*.d.ts',
       // PDF/canvas layout sizes describe exported artwork, not viewer UI.
       'geoview-core/src/core/components/export/layout-styles.ts',

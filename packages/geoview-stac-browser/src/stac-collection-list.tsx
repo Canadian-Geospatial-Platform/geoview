@@ -151,16 +151,16 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
                 aria-labelledby={`${cardId}-title`}
                 aria-describedby={describedBy || undefined}
               >
-                <Typography component="span" id={`${cardId}-title`} sx={memoSxClasses.collectionTitle}>
+                <Typography component="span" variant="h6" id={`${cardId}-title`} sx={memoSxClasses.collectionTitle}>
                   {StacFieldUtils.getCollectionTitle(collection)}
                 </Typography>
                 {collection.description && (
-                  <Typography component="span" id={`${cardId}-description`} sx={memoSxClasses.collectionDescription}>
+                  <Typography component="span" variant="body2" id={`${cardId}-description`} sx={memoSxClasses.collectionDescription}>
                     {collection.description.length > 150 ? `${collection.description.substring(0, 150)}...` : collection.description}
                   </Typography>
                 )}
                 {temporal && (
-                  <Typography component="span" id={`${cardId}-temporal`} sx={memoSxClasses.resultMeta}>
+                  <Typography component="span" variant="body2" id={`${cardId}-temporal`} sx={memoSxClasses.resultMeta}>
                     {temporal}
                   </Typography>
                 )}

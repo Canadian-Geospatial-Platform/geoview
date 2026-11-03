@@ -61,7 +61,8 @@ Read the owning map's theme with `useTheme()`; never import a global default the
 - **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
 - **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
 - **Font weights:** use only `theme.typography.fontWeightLight`, `fontWeightRegular`, `fontWeightMedium`, or `fontWeightBold`. All headings h1–h6 are bold. Prefer a Typography variant over overriding its size or weight; when changing a variant, keep the existing HTML element with the `component` prop.
-- **Icons:** use MUI named sizes, for example `<InfoIcon fontSize="small" />`; buttons manage their own icon sizes. `fontSize: 'inherit'` is also allowed.
+- **Buttons:** standard buttons use the button typography size (16px). Use `size="small"` for compact buttons and let MUI set its own small size; never set a Button's font size locally. MUI owns sizes inside its components, including small Button text and icons in Buttons.
+- **Icons:** use MUI named sizes, for example `<InfoIcon fontSize="small" />`. `fontSize: 'inherit'` is also allowed.
 - **Display-theme overrides:** select scale keys, for example `scaleOverrides: { h3: 'xxl' }`. The generator converts them with the owning theme's calibrated `pxToRem`; components do not choose literal px/rem/em/% sizes.
 
 The shared ESLint `no-restricted-syntax` checks flag literal sizes and weights, legacy palette
@@ -73,8 +74,7 @@ Typography variant; components can rely on the owning theme's typography default
 overrides tooltip font sizes with `caption` for non-touch input and `body2` for touch input.
 Theme definitions, type declarations, export PDF/canvas layout, console formatting, and
 numeric legend compatibility are exceptions; OpenLayers measurement text and the user's map-text
-formatting toggle have narrow line-level exemptions. Drawer work is owned separately, and STAC Browser is
-temporarily exempt until its legacy reads are migrated before the breaking release.
+formatting toggle have narrow line-level exemptions. Drawer work is owned separately.
 See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
 
 | Deprecated API                                              | Replacement                                                          |

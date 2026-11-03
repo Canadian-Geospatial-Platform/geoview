@@ -81,9 +81,7 @@ Keep exemptions narrow: theme definitions and declarations own tokens/types; exp
 owns PDF/canvas artwork; the measurement button and map text-format toggle have line-level OpenLayers
 text exemptions.
 Drawer source is owned elsewhere, with only the `createMeasureTooltip` method exempt in DrawerController.
-STAC Browser is the other approved package exemption: its 23 legacy palette reads must migrate before
-the breaking release that removes `palette.geoViewFontSize`. The OpenLayers renderer's destructuring
-font default is not a style value and needs no disable.
+The OpenLayers renderer's destructuring font default is not a style value and needs no disable.
 Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
 Do not exempt export modal UI, whole geo folders, or whole custom-legend files.
 

@@ -841,7 +841,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
 
       {/* Selection summary, kept across views so the user can clear the map at any time; the status stays mounted to be announced */}
       <Box sx={hasSelection ? memoSxClasses.selectionBar : undefined}>
-        <Typography role="status" sx={memoSxClasses.resultMeta}>
+        <Typography variant="body2" role="status" sx={memoSxClasses.resultMeta}>
           {hasSelection ? t('stacBrowser.selectionSummary', { selected: selectedCount, previewed: previewedCount }) : ''}
         </Typography>
         {hasSelection && (
