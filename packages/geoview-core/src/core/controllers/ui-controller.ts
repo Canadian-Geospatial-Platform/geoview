@@ -11,6 +11,7 @@ import {
   addStoreUIAppBarPanelId,
   addStoreUIFooterTab,
   bumpStoreUINavBarButtonPanelVersion,
+  closeStoreUIMapPopovers,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
   hideStoreUITabButton,
@@ -30,6 +31,8 @@ import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
   getStoreAppHeight,
+  getStoreAppIsCrosshairsActive,
+  getStoreAppIsFullscreenActive,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -38,11 +41,14 @@ import {
   setStoreAppDisplayDateTimezone,
   setStoreAppDisplayLanguage,
   setStoreAppDisplayTheme,
+  setStoreAppDrawingHint,
   setStoreAppFullScreenActive,
   setStoreAppGuide,
   setStoreAppHeight,
+  type TypeDrawingHint,
 } from '@/core/stores/states/app-state';
-import { getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { getGVElementById, getGVMapTargetElement, getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
 import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -101,6 +107,9 @@ export class UIController extends AbstractMapViewerController {
 
   /** Whether the view was changed (user or programmatic) while in fullscreen, sticky until exit. */
   #fullscreenViewChanged = false;
+
+  /** Pending map-focus restoration after the browser finishes leaving fullscreen. */
+  #fullscreenFocusFrame?: number;
 
   /** The bounded reference to the browser fullscreen change handler. */
   #boundedHandleFullscreenChanged: () => void;
@@ -165,6 +174,7 @@ export class UIController extends AbstractMapViewerController {
    * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
+    this.#cancelFullscreenFocusRestore();
     // Unhooks the fullscreen listeners, if fullscreen is active
     if (this.#fullscreenElement) this.#removeFullscreenListeners();
 
@@ -436,6 +446,36 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
+   * Closes map-control popovers and releases their focus trap without restoring caller focus.
+   */
+  closeMapPopovers(): void {
+    this.disableFocusTrap('no-focus');
+    closeStoreUIMapPopovers(this.getMapId());
+  }
+
+  /**
+   * Returns focus to the navbar button that started a keyboard drawing tool.
+   *
+   * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+   *
+   * @param suffix - The map-relative id suffix of the tool button
+   */
+  focusToolButton(suffix: string): void {
+    const mapId = this.getMapId();
+    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== getGVMapTargetElement(mapId)) return;
+    getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+  }
+
+  /**
+   * Sets the current on-map drawing instructions.
+   *
+   * @param drawingHint - The drawing type and whether its sketch has started
+   */
+  setDrawingHint(drawingHint: TypeDrawingHint): void {
+    setStoreAppDrawingHint(this.getMapId(), drawingHint);
+  }
+
+  /**
    * Activates or deactivates WCAG keyboard map interactions (pan and zoom).
    *
    * @param active - Whether to activate or deactivate keyboard interactions
@@ -484,6 +524,8 @@ export class UIController extends AbstractMapViewerController {
     if (status) {
       // If already active or no element to make fullscreen, nothing to do
       if (this.#fullscreenElement || !element) return;
+
+      this.#cancelFullscreenFocusRestore();
 
       const view = this.getMapViewer().getView();
       const viewState = UIController.#getViewState(view);
@@ -781,6 +823,39 @@ export class UIController extends AbstractMapViewerController {
 
     // Save in store
     setStoreAppFullScreenActive(this.getMapId(), false);
+
+    const mapId = this.getMapId();
+    if (this.#hasActiveKeyboardTool()) {
+      // The browser can restore focus to the fullscreen caller after fullscreenchange.
+      this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
+        this.#fullscreenFocusFrame = undefined;
+        if (!getFullscreenElement() && this.#hasActiveKeyboardTool()) {
+          getGVMapTargetElement(mapId)?.focus({ preventScroll: true });
+        }
+      });
+    }
+  }
+
+  /**
+   * Checks whether keyboard drawing or measurement is active with the crosshair, so the map should keep focus.
+   *
+   * @returns True when the crosshair is active and a drawing or measurement interaction is running
+   */
+  #hasActiveKeyboardTool(): boolean {
+    const mapId = this.getMapId();
+    const { mapController, drawerController } = this.getControllersRegistry();
+    return (
+      getStoreAppIsCrosshairsActive(mapId) &&
+      (mapController.getActiveMeasurementDraw() !== undefined || (!!drawerController && getStoreDrawerIsDrawing(mapId)))
+    );
+  }
+
+  /**
+   * Cancels a pending map-focus restoration scheduled after leaving fullscreen.
+   */
+  #cancelFullscreenFocusRestore(): void {
+    if (this.#fullscreenFocusFrame !== undefined) cancelAnimationFrame(this.#fullscreenFocusFrame);
+    this.#fullscreenFocusFrame = undefined;
   }
 
   /**

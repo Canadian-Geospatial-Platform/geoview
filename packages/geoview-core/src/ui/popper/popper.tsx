@@ -11,6 +11,9 @@ import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
 import { delay } from '@/core/utils/utilities';
 
+/** Stable animated wrapper so popper rerenders do not remount its focus trap. */
+const AnimatedPopper = animated(MaterialPopper);
+
 /**
  * Properties for the Popper component extending Material-UI's PopperProps.
  */
@@ -91,7 +94,6 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
   // Hooks
   const fadeInAnimation = useFadeIn();
-  const AnimatedPopper = animated(MaterialPopper);
   const theme = useTheme();
 
   // Ref
@@ -137,9 +139,13 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
     // Focus management when popper opens
     if (open && focusSelector) {
+      let isOpen = true;
+
       // Wait the transition period then focus the close button when popover opens
       delay(theme.transitions.duration.shortest)
         .then(() => {
+          if (!isOpen) return;
+
           const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
           if (focusElement) {
             focusElement.focus();
@@ -148,7 +154,13 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
         .catch(() => {
           logger.logPromiseFailed('in delay in UI.POPPER - open');
         });
+
+      return (): void => {
+        isOpen = false;
+      };
     }
+
+    return undefined;
   }, [open, focusSelector, theme.transitions.duration.shortest]);
 
   // TODO: style - manage z-index in theme

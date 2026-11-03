@@ -63,6 +63,9 @@ export interface IUIState {
   /** Version counter that increments when nav-bar button panels are added or removed (triggers re-render). */
   navBarButtonPanelVersion: number;
 
+  /** Version counter that closes map-control popovers when incremented. */
+  popoverCloseVersion: number;
+
   /** The current resize value (percentage) for the footer panel. */
   footerPanelResizeValue: number;
 
@@ -113,6 +116,9 @@ export interface IUIState {
     /** Increments the nav-bar button panel version to trigger a re-render. */
     bumpNavBarButtonPanelVersion: () => void;
 
+    /** Requests that map-control popovers close. */
+    closeMapPopovers: () => void;
+
     /** Sets the map info bar expanded state. */
     setMapInfoExpanded: (expanded: boolean) => void;
   };
@@ -137,6 +143,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeFooterBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
     navBarComponents: [],
     navBarButtonPanelVersion: 0,
+    popoverCloseVersion: 0,
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
@@ -391,6 +398,18 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       },
 
       /**
+       * Requests that map-control popovers close.
+       */
+      closeMapPopovers: (): void => {
+        set({
+          uiState: {
+            ...get().uiState,
+            popoverCloseVersion: get().uiState.popoverCloseVersion + 1,
+          },
+        });
+      },
+
+      /**
        * Sets the map info bar expanded state.
        *
        * @param expanded - Whether the map info bar is expanded
@@ -551,6 +570,9 @@ export const useStoreUIAppBarPanelIds = (): string[] => useStore(useGeoViewStore
 /** Hooks the nav-bar button panel version counter (triggers re-render on change). */
 export const useStoreUINavBarButtonPanelVersion = (): number =>
   useStore(useGeoViewStore(), (state) => state.uiState.navBarButtonPanelVersion);
+
+/** Hooks the map-control popover close request counter. */
+export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewStore(), (state) => state.uiState.popoverCloseVersion);
 
 /** Hooks the current focus-trap item from the UI state. */
 export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
@@ -745,6 +767,15 @@ export const removeStoreUIAppBarPanelId = (mapId: string, id: string): void => {
  */
 export const bumpStoreUINavBarButtonPanelVersion = (mapId: string): void => {
   getStoreUIState(mapId).actions.bumpNavBarButtonPanelVersion();
+};
+
+/**
+ * Requests that map-control popovers close.
+ *
+ * @param mapId - The map identifier
+ */
+export const closeStoreUIMapPopovers = (mapId: string): void => {
+  getStoreUIState(mapId).actions.closeMapPopovers();
 };
 
 // #endregion STATE ADAPTORS

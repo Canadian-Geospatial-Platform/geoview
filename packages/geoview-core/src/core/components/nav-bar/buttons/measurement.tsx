@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
-import { createElement, useState, useCallback, useEffect, useMemo } from 'react';
+import { createElement, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
 import { LineString, Polygon, Point } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import type { EventsKey } from 'ol/events';
+import { unByKey } from 'ol/Observable';
 import { Style, Stroke, Fill, Text } from 'ol/style';
 import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
@@ -24,12 +26,13 @@ import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { formatLength, formatArea } from '@/core/utils/utilities';
-import type { Draw } from '@/geo/interaction/draw';
+import { formatLength, formatArea, isEditableElement } from '@/core/utils/utilities';
+import { buildGVElementId, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { useMapController } from '@/core/controllers/use-controllers';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** The geometry group key for measurement features. */
 const MEASURE_GROUP_KEY = 'geoview-measurement';
@@ -85,13 +88,19 @@ export default function Measurement(): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
   const mapController = useMapController();
+  const uiController = useUIController();
 
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
-  const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
   const [statusMessage, setStatusMessage] = useState<string>('');
+
+  /** Number of committed points in the current measurement sketch. */
+  const sketchVertexCount = useRef(0);
+
+  /** Listener for point-count changes in the active sketch. */
+  const sketchGeometryChangeKey = useRef<EventsKey | undefined>(undefined);
 
   /**
    * Builds custom sx classes for the measurement component.
@@ -103,6 +112,15 @@ export default function Measurement(): JSX.Element {
   }, [theme]);
 
   // #region Handlers
+
+  /**
+   * Releases the active sketch listener and resets its point count.
+   */
+  const clearSketchListener = useCallback((): void => {
+    if (sketchGeometryChangeKey.current) unByKey(sketchGeometryChangeKey.current);
+    sketchGeometryChangeKey.current = undefined;
+    sketchVertexCount.current = 0;
+  }, []);
 
   /**
    * Creates a style function that shows segment lengths.
@@ -247,10 +265,7 @@ export default function Measurement(): JSX.Element {
       // Early return if no type
       if (!type) return;
 
-      // Stop existing measurement if any
-      if (drawInstance) {
-        drawInstance.stopInteraction();
-      }
+      mapController.stopActiveMeasurement();
 
       // Create or get the geometry group for measurements
       mapController.createGeometryGroup(MEASURE_GROUP_KEY);
@@ -263,8 +278,41 @@ export default function Measurement(): JSX.Element {
         fillColor: FILL_COLORS,
       });
 
+      mapController.setActiveMeasurementDraw(draw);
+
+      /** Updates the on-map hint for this measurement type. */
+      const setHint = (started: boolean): void => uiController.setDrawingHint({ tool: 'measurement', geometry: geomType, started });
+      setHint(false);
+
+      // Announce added vertices without repeating announcements for pointer movement.
+      draw.onDrawStart((_sender: unknown, event: OLDrawEvent): void => {
+        clearSketchListener();
+        const geometry = event.feature.getGeometry();
+        if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
+
+        setHint(true);
+
+        sketchVertexCount.current = 1;
+        setStatusMessage(t('measurement.status.vertexAdded', { count: sketchVertexCount.current }));
+
+        sketchGeometryChangeKey.current = geometry.on('change', (): void => {
+          // Exclude the cursor coordinate and, for polygons, the closing coordinate.
+          const vertexCount = Math.max(
+            1,
+            geometry instanceof LineString ? geometry.getCoordinates().length - 1 : (geometry.getCoordinates()[0]?.length ?? 0) - 2
+          );
+          const previousVertexCount = sketchVertexCount.current;
+          sketchVertexCount.current = vertexCount;
+          if (vertexCount > previousVertexCount) {
+            setStatusMessage(t('measurement.status.vertexAdded', { count: vertexCount }));
+          }
+        });
+      });
+
       // Handle draw end
-      draw.onDrawEnd((_sender: unknown, event: OLDrawEvent) => {
+      draw.onDrawEnd((_sender: unknown, event: OLDrawEvent): void => {
+        clearSketchListener();
+        setHint(false);
         const { feature } = event;
         const geometry = feature.getGeometry();
 
@@ -299,36 +347,78 @@ export default function Measurement(): JSX.Element {
         }
       });
 
-      setDrawInstance(draw);
-      setActiveMeasurement(type);
+      draw.onDrawAbort((): void => {
+        clearSketchListener();
+        setHint(false);
+        setStatusMessage(t('measurement.status.cancelled'));
+      });
 
-      // Register the draw instance for keyboard accessibility via crosshair
-      // This also suppresses hover and click-marker handlers (like drawer does)
-      mapController.setActiveMeasurementDraw(draw);
+      setActiveMeasurement(type);
 
       // Announce measurement mode started
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
     },
-    [drawInstance, createSegmentStyle, mapController, displayLanguage, t]
+    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, t]
   );
 
   /**
-   * Stops the current measurement.
+   * Synchronizes the measurement controls when measurement stops, including when drawer drawing or editing takes over.
    */
-  const stopMeasurement = useCallback((): void => {
-    if (drawInstance) {
-      drawInstance.stopInteraction();
-      setDrawInstance(null);
-    }
-    setActiveMeasurement(null);
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - measurement stopped subscription');
+    const handler = mapController.onMeasurementStopped((_sender, _event): void => {
+      clearSketchListener();
+      setActiveMeasurement(null);
+      setStatusMessage(t('measurement.status.stopped'));
+    });
+    return (): void => mapController.offMeasurementStopped(handler);
+  }, [clearSketchListener, mapController, t]);
 
-    // Unregister the draw instance for keyboard accessibility
-    mapController.setActiveMeasurementDraw(undefined);
+  /**
+   * Registers measurement keyboard shortcuts: undo/redo, and Escape returning focus to the Measure button.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - keyboard shortcuts', activeMeasurement);
 
-    // Announce measurement stopped
-    setStatusMessage(t('measurement.status.stopped'));
-  }, [drawInstance, mapController, t]);
+    if (!activeMeasurement) return undefined;
+
+    const handleShortcut = (event: KeyboardEvent): void => {
+      const { activeElement } = document;
+      const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
+      if (!activeElement || !geoViewElement?.contains(activeElement) || isEditableElement(activeElement)) return;
+
+      // Capture phase: this sees the sketch before the Draw interaction cancels it, so one Escape never does both.
+      if (event.key === 'Escape') {
+        if (sketchVertexCount.current === 0) uiController.focusToolButton(GV_DOM_SUFFIX.measureButton);
+        return;
+      }
+
+      const isUndoShortcut =
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) ||
+        (event.key === 'Backspace' && !event.ctrlKey && !event.metaKey && !event.altKey);
+      const isRedoShortcut =
+        (event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === 'y' || (event.key.toLowerCase() === 'z' && event.shiftKey));
+      if (!isUndoShortcut && !isRedoShortcut) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      if (isRedoShortcut) {
+        setStatusMessage(t('measurement.status.redoUnavailable'));
+      } else {
+        setStatusMessage(
+          mapController.undoActiveMeasurement()
+            ? t('measurement.status.vertexUndone', { count: sketchVertexCount.current })
+            : t('measurement.status.nothingToUndo')
+        );
+      }
+    };
+
+    document.addEventListener('keydown', handleShortcut, true);
+    return (): void => {
+      document.removeEventListener('keydown', handleShortcut, true);
+    };
+  }, [activeMeasurement, mapController, uiController, mapId, t]);
 
   /**
    * Clears all measurements.
@@ -343,13 +433,13 @@ export default function Measurement(): JSX.Element {
     mapController.deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
 
     // Stop current drawing
-    stopMeasurement();
+    mapController.stopActiveMeasurement();
 
     // Announce cleared with count
     if (featureCount > 0) {
       setStatusMessage(t('measurement.status.cleared', { count: featureCount }));
     }
-  }, [stopMeasurement, mapController, measurementFeatures.length, t]);
+  }, [mapController, measurementFeatures.length, t]);
 
   /**
    * Handles the measurement enable/disable toggle switch.
@@ -360,10 +450,10 @@ export default function Measurement(): JSX.Element {
         // Default to line when enabling
         startMeasurement('line');
       } else {
-        stopMeasurement();
+        mapController.stopActiveMeasurement();
       }
     },
-    [startMeasurement, stopMeasurement]
+    [startMeasurement, mapController]
   );
 
   /**
@@ -412,6 +502,7 @@ export default function Measurement(): JSX.Element {
     logger.logTraceUseEffect('MEASUREMENT, Clean up on mount');
 
     return () => {
+      clearSketchListener();
       // GV IMPORTANT: This method may be called during React cleanup effects after a map has been deleted.
       // GV Wrap in try-catch to silently handle this expected race condition without throwing errors.
       try {
@@ -435,11 +526,6 @@ export default function Measurement(): JSX.Element {
 
     return (
       <Box sx={memoSxClasses.measurementPanel}>
-        {/* WCAG - Screen reader status announcements */}
-        <Typography role="status" sx={visuallyHidden}>
-          {statusMessage}
-        </Typography>
-
         {/* Enable/Disable Toggle */}
         <Switch
           label={!isMeasurementActive ? t('general.enable') : t('general.disable')}
@@ -497,6 +583,7 @@ export default function Measurement(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
+    id: buildGVElementId(mapId, GV_DOM_SUFFIX.measureButton),
     'aria-label': 'mapnav.measurement',
     children: createElement(StraightenIcon),
     tooltipPlacement: 'left',
@@ -508,5 +595,17 @@ export default function Measurement(): JSX.Element {
     content: renderButtons(),
   };
 
-  return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'measurement', button, panel }} isActive={activeMeasurement !== null} />;
+  return (
+    <NavbarPanelButton
+      buttonPanel={{ buttonPanelId: 'measurement', button, panel }}
+      isActive={activeMeasurement !== null}
+      keepPanelMounted
+      liveRegionContent={
+        /* WCAG - Screen reader status announcements */
+        <Typography role="status" sx={visuallyHidden}>
+          {statusMessage}
+        </Typography>
+      }
+    />
+  );
 }

@@ -48,7 +48,8 @@
     "drawer",
     "basemap-select",
     "projection",
-    "fullscreen"
+    "fullscreen",
+    "measurement"
   ],
   "appBar": {
     "tabs": {

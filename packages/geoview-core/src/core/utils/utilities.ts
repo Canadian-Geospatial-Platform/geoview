@@ -1856,6 +1856,25 @@ export function handleEscapeKey(key: string, cb?: () => void, callbackId?: strin
   }
 }
 
+/** Input types that accept typed text. */
+const TEXT_INPUT_TYPES = ['text', 'search', 'url', 'email', 'tel', 'password', 'number'];
+
+/**
+ * Checks whether an element accepts typed text or selection, so keyboard shortcuts must not override its native keys.
+ *
+ * @param element - The element to check, such as the active element
+ * @returns True when the element is a text input, textarea, select or content-editable element
+ */
+// TODO: ALEX - Delete this function to use DomHelper's instead
+export function isEditableElement(element: Element | null): boolean {
+  if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.includes(element.type);
+  return (
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement ||
+    (element instanceof HTMLElement && element.isContentEditable)
+  );
+}
+
 /**
  * Check if element is in viewport.
  *

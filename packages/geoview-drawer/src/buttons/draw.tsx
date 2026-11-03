@@ -7,12 +7,19 @@ import { IconButton, DrawIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
+/** Properties for the Draw button. */
+interface DrawProps {
+  /** The map-scoped id of the button, so keyboard drawing can return focus to it. */
+  id: string;
+}
+
 /**
  * Creates a draw button to toggle drawing capabilities.
  *
+ * @param props - Properties defined in DrawProps interface
  * @returns The draw button element
  */
-export default function Draw(): JSX.Element {
+export default function Draw({ id }: DrawProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-drawer/src/buttons/draw');
 
@@ -36,6 +43,7 @@ export default function Draw(): JSX.Element {
 
   return (
     <IconButton
+      id={id}
       aria-label={t('drawer.toggleDrawing')}
       tooltipPlacement="left"
       className={isDrawing ? 'highlighted active' : ''}

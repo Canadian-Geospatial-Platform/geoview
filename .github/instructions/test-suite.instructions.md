@@ -11,4 +11,5 @@ Task routing: [test-suite.md](../ai/test-suite.md) → **Enforcement reminders**
 - Custom in-browser framework, not Jest; do not change tests/core for ordinary feature tests.
 - Execute/return the subject, assert only that result, finalize cleanup; use shared helpers/constants.
 - Shared map changes run sequentially; prefer event registration waits and await controller zoom.
+- Tester files keep every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class.
 - Any test change requires all-suite count reconciliation and both catalog/release totals.
