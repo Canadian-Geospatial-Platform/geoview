@@ -73,8 +73,9 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   is the OpenLayers canvas container. [Map](../../packages/geoview-core/src/core/components/map/map.tsx)
   assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
   focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
-- [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
-  on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
+- [Map](../../packages/geoview-core/src/core/components/map/map.tsx) updates crosshair state on Tab release
+  for focus within its own root. It activates only when the map target itself is focused and does not
+  manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and enable its viewer-level trap.
   [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,

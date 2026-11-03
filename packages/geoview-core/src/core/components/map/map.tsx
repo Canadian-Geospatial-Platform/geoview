@@ -122,6 +122,31 @@ export function Map(props: MapProps): JSX.Element {
     };
   }, [viewer, mapInteraction, mapId, uiController]);
 
+  /**
+   * Updates crosshair activation when Tab changes focus within this map.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MAP - Crosshair focus listener');
+
+    const handleTabFocus = (event: KeyboardEvent): void => {
+      if (event.key !== 'Tab') return;
+
+      const activeElement = DomHelper.getActiveElementWithinMap(mapId);
+      if (!activeElement) return;
+
+      const mapFocus = activeElement === mapElement.current;
+      if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
+      uiController.setCrosshairActive(mapFocus);
+    };
+
+    document.addEventListener('keyup', handleTabFocus);
+
+    return (): void => {
+      document.removeEventListener('keyup', handleTabFocus);
+    };
+  }, [mapId, uiController]);
+
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
     <Box
