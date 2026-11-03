@@ -44,6 +44,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests layer controller functions and feature-query behavior:<br/>
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
+      <b>Layer visibility</b> — Explicit visibility updates and implicit toggles through the public LayerApi<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
       <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
@@ -107,6 +108,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test resolving the first layer under a root id (e.g. a GeoCore UUID) — issue #3633
     await this.#layerTester.testGetGeoviewLayerByRootId();
+
+    // Test the public LayerApi explicit visibility and toggle behavior
+    await this.#layerTester.testSetOrToggleLayerVisibility();
 
     // Test that reloading a layer preserves its position in the layer order — issue #3666
     await this.#layerTester.testReloadLayerPreservesPosition();

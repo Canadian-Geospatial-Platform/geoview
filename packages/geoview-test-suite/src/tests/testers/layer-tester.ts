@@ -23,9 +23,11 @@ import {
   getStoreLayerInVisibleRangeLayerPaths,
   getStoreLayerOrderedLayerPaths,
 } from 'geoview-core/core/stores/states/layer-state';
+import { getStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
 import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/feature-info-state';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { generateId } from 'geoview-core/core/utils/utilities';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -3002,6 +3004,76 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests explicit visibility updates and implicit toggles through the public LayerApi.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSetOrToggleLayerVisibility(): Promise<Test<boolean[]>> {
+    const geoviewLayerId = generateId();
+    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const layerPath = `${geoviewLayerId}/point-feature-group/points_1.json`;
+    const mapId = this.getMapId();
+    const previousActiveAppBarTab = getStoreUIActiveAppBarTab(mapId);
+
+    return this.test(
+      'Test LayerApi.setOrToggleLayerVisibility sets and toggles layer visibility...',
+      async (test) => {
+        test.addStep('Adding a GeoJSON layer to test visibility changes...');
+        await this.helperStepAddLayerOnMap(test, layerConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+
+        test.addStep('Opening the Layers panel to inspect the layer visibility control...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('layers', true, false);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'layers');
+        await DomHelper.waitForDomElement(`[id$="${layerPath}"]`, DomHelper.getGVRootElement(mapId));
+
+        const layerApi = this.getMapViewer().layer;
+
+        test.addStep('Explicitly hiding the layer and capturing the store and eye-control state...');
+        const hideState = await LayerTester.#captureVisibilityState(
+          mapId,
+          layerPath,
+          layerApi.setOrToggleLayerVisibility(layerPath, false)
+        );
+
+        test.addStep('Explicitly showing the layer and capturing the store and eye-control state...');
+        const showState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath, true));
+
+        test.addStep('Toggling the visible layer off and capturing the store and eye-control state...');
+        const toggleOffState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath));
+
+        test.addStep('Toggling the hidden layer on and capturing the store and eye-control state...');
+        const toggleOnState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath));
+
+        return [...hideState, ...showState, ...toggleOffState, ...toggleOnState];
+      },
+      (test, result) => {
+        test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is hidden...');
+        const hiddenState = [false, true, false, true, false, false];
+        Test.assertIsArrayEqual(result.slice(0, 6), hiddenState);
+
+        test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is visible...');
+        const visibleState = [true, true, true, true, true, true];
+        Test.assertIsArrayEqual(result.slice(6, 12), visibleState);
+        Test.assertIsArrayEqual(result.slice(12, 18), hiddenState);
+        Test.assertIsArrayEqual(result.slice(18, 24), visibleState);
+      },
+      async (test) => {
+        try {
+          this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        } finally {
+          this.getControllersRegistry().uiController.setActiveAppBarTab(
+            previousActiveAppBarTab.tabId,
+            previousActiveAppBarTab.isOpen,
+            previousActiveAppBarTab.isFocusTrapped ?? false
+          );
+          await DomHelper.waitForReactIdle();
+        }
+      }
+    );
+  }
+
+  /**
    * Tests that reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order (issue #3666).
    *
    * Reload re-fetches metadata, re-validates the config, and recreates the GV layer. The previous implementation
@@ -3305,6 +3377,18 @@ export class LayerTester extends GVAbstractTester {
   // #endregion LAYER FUNCTIONS
 
   // #region HELPERS
+  /**
+   * Captures the LayerApi result, store visibility and rendered eye-control state.
+   *
+   * @param apiResult - The visibility returned by the LayerApi call
+   * @returns The API, store and UI visibility observations
+   */
+  static async #captureVisibilityState(mapId: string, layerPath: string, apiResult: boolean): Promise<boolean[]> {
+    await DomHelper.waitForReactIdle();
+    const storeLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+
+    return [apiResult, storeLayer !== undefined, storeLayer?.visible ?? false, DomHelper.getVisibleButtonVisibility(mapId, layerPath)];
+  }
 
   /**
    * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
