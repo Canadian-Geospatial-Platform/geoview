@@ -1,7 +1,31 @@
+import type { CSSProperties } from 'react';
 import type { Theme } from '@mui/material/styles';
 import type { SxProps, SxStyles } from '@/ui/style/types';
 import { ellipsisOverflow } from '@/ui/style/default';
 import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
+
+/**
+ * Styles the data table modal content area.
+ */
+export const dataTableModalContentStyle: CSSProperties = {
+  overflow: 'hidden',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+/**
+ * Gets styles for the data table modal text container.
+ *
+ * @param theme - The theme object
+ * @returns The data table modal text container styles
+ */
+export const getDataTableModalContentTextStyle = (theme: Theme): CSSProperties => ({
+  padding: theme.spacing(0),
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+});
 
 /**
  * Sx for truncated, single-line cell content (tooltip wrapper).
@@ -37,6 +61,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: '300px',
     minWidth: '450px',
     position: 'relative',
+  },
+  dataTableModalTableContainer: {
+    maxHeight: 'calc(90vh - 200px)',
   },
   dataTableWrapper: {
     height: '100%',

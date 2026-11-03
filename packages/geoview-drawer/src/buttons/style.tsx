@@ -1,5 +1,6 @@
 import type { TypeWindow } from 'geoview-core';
 import { MuiColorInput } from 'mui-color-input';
+import type { MuiColorInputProps } from 'mui-color-input';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 import {
@@ -7,7 +8,6 @@ import {
   useStoreDrawerActiveGeom,
   useStoreDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/states/drawer-state';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -106,7 +106,6 @@ export function StylePanel(): JSX.Element {
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
   const selectedDrawingType = useStoreDrawerSelectedDrawingType();
-  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   /** The current geometry type, using the selected drawing type or active geometry as fallback. */
@@ -265,41 +264,72 @@ export function StylePanel(): JSX.Element {
 
   // #endregion
 
-  // Add close button to MUIColorInputs
-  useEffect(() => {
-    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup', displayLanguage);
+  /**
+   * Sets up only this input's portaled picker, updating its header without replacing the focused close button.
+   *
+   * @param paper - The picker paper, or null when its ref detaches
+   */
+  const setupColorPicker = useCallback(
+    (paper: HTMLDivElement | null): void => {
+      if (!paper) return;
 
-    const addCloseButtons = (): void => {
-      // Find all color picker popovers
-      // MuiColorInput renders its popover in a portal on document.body, outside any map's subtree,
-      // so a map-scoped wrapper cannot reach it — a global query is required here.
-      // eslint-disable-next-line no-restricted-syntax
-      const popovers = document.querySelectorAll('.MuiColorInput-PopoverBody');
+      /**
+       * Applies this map's typography to a new or already-open picker header.
+       *
+       * @param header - The picker-owned header
+       */
+      const applyColorPickerTypography = (header: HTMLElement): void => {
+        const { body1, body2, fontWeightMedium, fontWeightRegular } = theme.typography;
+        const closeBtn = header.querySelector<HTMLButtonElement>('.color-picker-close-btn');
+        if (
+          body1.fontSize === undefined ||
+          body2.fontSize === undefined ||
+          fontWeightMedium === undefined ||
+          fontWeightRegular === undefined ||
+          !closeBtn
+        ) {
+          logger.logError('STYLE PANEL - Color picker typography or close button is missing');
+          return;
+        }
+        header.style.setProperty('font-family', theme.typography.fontFamily ?? 'inherit');
+        header.style.setProperty('font-size', typeof body2.fontSize === 'number' ? `${body2.fontSize}px` : body2.fontSize);
+        header.style.setProperty('font-weight', `${fontWeightMedium}`);
+        closeBtn.style.fontSize = typeof body1.fontSize === 'number' ? `${body1.fontSize}px` : body1.fontSize;
+        closeBtn.style.fontWeight = `${fontWeightRegular}`;
+      };
 
-      popovers.forEach((popover) => {
-        // Check if we already added a close button
-        if (popover.parentElement?.querySelector('.color-picker-close-btn')) return;
+      const existingTitle = paper.querySelector<HTMLSpanElement>('.color-picker-title');
+      if (existingTitle?.parentElement) {
+        existingTitle.textContent = t('drawer.colourPicker');
+        applyColorPickerTypography(existingTitle.parentElement);
+        return;
+      }
 
-        // Create header div
-        const header = document.createElement('div');
-        header.style.cssText = `
+      // The portal is outside the map subtree; the paper ref retains its input's ownership.
+      const popover = paper.querySelector('.MuiColorInput-PopoverBody');
+      if (!popover?.parentElement) {
+        logger.logError('STYLE PANEL - Color picker body missing from its paper');
+        return;
+      }
+
+      const header = paper.ownerDocument.createElement('div');
+      header.style.cssText = `
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0px 0px 8px 8px;
-        font-size: 14px;
-        font-weight: 500;
       `;
-        header.textContent = t('drawer.colourPicker');
+      const title = paper.ownerDocument.createElement('span');
+      title.className = 'color-picker-title';
+      title.textContent = t('drawer.colourPicker');
+      header.appendChild(title);
 
-        // Create close button
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'color-picker-close-btn';
-        closeBtn.innerHTML = '✕';
-        closeBtn.style.cssText = `
+      const closeBtn = paper.ownerDocument.createElement('button');
+      closeBtn.className = 'color-picker-close-btn';
+      closeBtn.textContent = '✕';
+      closeBtn.style.cssText = `
         background: none;
         border: none;
-        font-size: 16px;
         cursor: pointer;
         padding: 4px;
         border-radius: ${GEOVIEW_SHAPE.borderRadiusFull};
@@ -310,35 +340,32 @@ export function StylePanel(): JSX.Element {
         justify-content: center;
       `;
 
-        closeBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
+      closeBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-          // Find the specific popover and close it by clicking outside
-          const popoverRoot = popover.closest('.MuiPopover-root');
-          if (popoverRoot) {
-            const backdrop = popoverRoot.querySelector('.MuiBackdrop-root');
-            if (backdrop) {
-              (backdrop as HTMLElement).click();
-            }
+        // Find the specific popover and close it by clicking outside
+        const popoverRoot = popover.closest('.MuiPopover-root');
+        if (popoverRoot) {
+          const backdrop = popoverRoot.querySelector('.MuiBackdrop-root');
+          if (backdrop) {
+            (backdrop as HTMLElement).click();
           }
-        };
-
-        header.appendChild(closeBtn);
-
-        // Insert header before the popover body
-        if (popover.parentElement) {
-          popover.parentElement.insertBefore(header, popover);
         }
-      });
-    };
+      };
 
-    // Use MutationObserver to detect when popovers are added
-    const observer = new MutationObserver(addCloseButtons);
-    observer.observe(document.body, { childList: true, subtree: true });
+      header.appendChild(closeBtn);
+      applyColorPickerTypography(header);
+      popover.parentElement.insertBefore(header, popover);
+    },
+    [t, theme]
+  );
 
-    return () => observer.disconnect();
-  }, [displayLanguage, t]);
+  /** Keeps the picker-owned paper ref stable across unrelated style-panel renders. */
+  const memoPopoverProps = useMemo((): NonNullable<MuiColorInputProps['PopoverProps']> => {
+    logger.logTraceUseMemo('STYLE PANEL - Color picker paper props');
+    return { slotProps: { paper: { ref: setupColorPicker } } };
+  }, [setupColorPicker]);
 
   // Preload all Google Fonts
   useEffect(() => {
@@ -399,6 +426,7 @@ export function StylePanel(): JSX.Element {
                   {t('drawer.textColour')}
                 </Typography>
                 <MuiColorInput
+                  PopoverProps={memoPopoverProps}
                   value={localTextColor}
                   onChange={handleTextColorChange}
                   onBlur={handleTextColorClose}
@@ -432,6 +460,7 @@ export function StylePanel(): JSX.Element {
                   {t('drawer.textHaloColour')}
                 </Typography>
                 <MuiColorInput
+                  PopoverProps={memoPopoverProps}
                   value={localTextHaloColor}
                   onChange={handleTextHaloColorChange}
                   onBlur={handleTextHaloColorClose}
@@ -490,7 +519,13 @@ export function StylePanel(): JSX.Element {
           <Typography variant="subtitle2" sx={memoSxClasses.label}>
             {t('drawer.fillColour')}
           </Typography>
-          <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={memoSxClasses.input} />
+          <MuiColorInput
+            PopoverProps={memoPopoverProps}
+            value={localFillColor}
+            onChange={handleFillColorChange}
+            onBlur={handleFillColorClose}
+            sx={memoSxClasses.input}
+          />
         </ListItem>
       )}
 
@@ -522,6 +557,7 @@ export function StylePanel(): JSX.Element {
               {t('drawer.strokeColour')}
             </Typography>
             <MuiColorInput
+              PopoverProps={memoPopoverProps}
               value={localStrokeColor}
               onChange={handleStrokeColorChange}
               onBlur={handleStrokeColorClose}

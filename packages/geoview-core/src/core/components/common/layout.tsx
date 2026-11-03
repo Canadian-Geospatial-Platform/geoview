@@ -93,11 +93,6 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-    /** Memoizes the layout styles for the current theme. */
-    const memoSxClasses = useMemo((): SxStyles => {
-      logger.logTraceUseMemo('LAYOUT - memoSxClasses', theme);
-      return getSxClasses(theme);
-    }, [theme]);
     const { t } = useTranslation();
     let layerName = useStoreLayerName(selectedLayerPath!);
     if (!layerName && selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
@@ -106,6 +101,12 @@ const Layout = forwardRef(
     const uiController = useUIController();
     const mapId = useStoreGeoViewMapId();
     const isCrosshairsActive = useStoreAppIsCrosshairsActive();
+
+    /** Memoizes the layout styles for the current theme. */
+    const memoSxClasses = useMemo((): SxStyles => {
+      logger.logTraceUseMemo('LAYOUT - memoSxClasses', theme);
+      return getSxClasses(theme);
+    }, [theme]);
 
     // #region Handlers
 

@@ -143,7 +143,11 @@ export class MapViewer {
   /** Plugins attached to the map */
   plugins: PluginsContainer = {};
 
-  /** The overview map React root */
+  /**
+   * The separate overview-map React root, retained for cleanup.
+   *
+   * @deprecated Use the overview toggle's portal in the owning React tree; removed in a future breaking release
+   */
   overviewRoot: Root | undefined;
 
   /** Used to access button bar API to create buttons and button panels on the app-bar */
@@ -1237,6 +1241,7 @@ export class MapViewer {
     this.controllers.mapController.removeHighlightedFeature('all');
 
     // Remove the dom element (remove rendered map and overview map)
+    // Compatibility cleanup for the deprecated separate root; the owning React tree now cleans up the overview toggle's portal.
     if (this.overviewRoot) this.overviewRoot.unmount();
 
     // Unload all plugins

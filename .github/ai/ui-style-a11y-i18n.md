@@ -80,7 +80,12 @@ identifies it as the user's map-text formatting, not UI typography.
 Keep exemptions narrow: theme definitions and declarations own tokens/types; export `layout-styles.ts`
 owns PDF/canvas artwork; the measurement button and map text-format toggle have line-level OpenLayers
 text exemptions.
-Drawer source is owned elsewhere, with only the `createMeasureTooltip` method exempt in DrawerController.
+Drawer TS/TSX UI is checked too; picker headers use their owning StylePanel's paper ref.
+Measurement overlays use fixed bold `14px sans-serif` text and a 70%-black backing/pointer in
+`measurement-styles.css`, matching Measure totals while retaining Drawer geometry and inherited line-height;
+their theme migration is deferred. Do not supply overlay typography from the Draw button, which is not
+mounted on static maps, or add measurement-specific synchronization to the core `Map` component.
+See the [map-theme contract](../../docs/programming/styling-best-practices.md#typography).
 The OpenLayers renderer's destructuring font default is not a style value and needs no disable.
 Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
 Do not exempt export modal UI, whole geo folders, or whole custom-legend files.

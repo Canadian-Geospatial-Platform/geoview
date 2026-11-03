@@ -523,8 +523,6 @@ export default [
     ignores: [
       // Theme definitions own the scale and deprecated compatibility values.
       'geoview-core/src/ui/style/**',
-      // Owned elsewhere; see TYPOGRAPHY_PLAN.md drawer hand-off
-      'geoview-drawer/**',
       '**/*.d.ts',
       // PDF/canvas layout sizes describe exported artwork, not viewer UI.
       'geoview-core/src/core/components/export/layout-styles.ts',
@@ -534,22 +532,6 @@ export default [
         1, // Match the existing restricted-syntax warning level.
         ...BASE_SYNTAX_RESTRICTIONS,
         ...TYPOGRAPHY_RESTRICTIONS,
-      ],
-    },
-  },
-  {
-    basePath: PACKAGES_ROOT,
-    files: ['geoview-core/src/core/controllers/drawer-controller.ts'],
-    rules: {
-      'no-restricted-syntax': [
-        1,
-        ...BASE_SYNTAX_RESTRICTIONS,
-        ...TYPOGRAPHY_RESTRICTIONS.map((restriction) => ({
-          ...restriction,
-          // Owned elsewhere; see TYPOGRAPHY_PLAN.md drawer hand-off
-          // Restrict only the measurement-label helper, not the rest of DrawerController.
-          selector: `:matches(${restriction.selector}):not(MethodDefinition[key.name="createMeasureTooltip"] *)`,
-        })),
       ],
     },
   },

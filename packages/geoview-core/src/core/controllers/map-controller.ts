@@ -1032,6 +1032,7 @@ export class MapController extends AbstractMapViewerController {
    * Sets the React root for the overview map so it can be destroyed with the map element.
    *
    * @param overviewRoot - The React root element for the overview map
+   * @deprecated Use the overview toggle's portal in the owning React tree; removed in a future breaking release
    */
   setMapOverviewMapRoot(overviewRoot: Root): void {
     this.getMapViewer().overviewRoot = overviewRoot;
