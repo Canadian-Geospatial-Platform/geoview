@@ -25,7 +25,7 @@ export default function Draw({ id }: DrawProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
-  const { useMemo } = cgpv.reactUtilities.react;
+  const { useEffect, useMemo } = cgpv.reactUtilities.react;
 
   // Get store values
   const theme = useTheme();
@@ -33,6 +33,14 @@ export default function Draw({ id }: DrawProps): JSX.Element {
   const { t } = useTranslation<string>();
   const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
+  const measurementFontSize = theme.typography.caption.fontSize;
+  const measurementFontWeight = theme.typography.fontWeightBold;
+
+  /** Synchronizes measurement typography with this map's theme even when its style panel is closed. */
+  useEffect(() => {
+    logger.logTraceUseEffect('DRAW - Measurement typography', measurementFontSize, measurementFontWeight);
+    drawerController.setMeasurementTypography(measurementFontSize, measurementFontWeight);
+  }, [drawerController, measurementFontSize, measurementFontWeight]);
 
   /**
    * Handles a click on the draw button
