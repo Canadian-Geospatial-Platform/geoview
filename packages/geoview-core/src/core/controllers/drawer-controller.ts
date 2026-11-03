@@ -19,6 +19,7 @@ import { DrawerIcon } from '@/geo/style/drawer-icon';
 import { DrawerText } from '@/geo/style/drawer-text';
 import { DrawerStyle } from '@/geo/style/drawer-style';
 import { GEOVIEW_SHAPE } from '@/ui/style/default';
+import type { Theme } from '@/ui/style/types';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { DrawerStyleProperties } from '@/core/types/drawer-types';
@@ -122,6 +123,9 @@ export class DrawerController extends AbstractMapViewerController {
 
   /** The current snap interaction instance */
   #snapInstance?: Snap;
+
+  /** The owning map's measurement typography, supplied by the drawer UI. */
+  #measurementTypography?: { fontSize: string; fontWeight: string };
 
   /** Keep track of the temporary transform instances for new text drawings */
   #tempTextTransformInstance?: Transform;
@@ -227,6 +231,33 @@ export class DrawerController extends AbstractMapViewerController {
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS - DRAWING
+
+  /**
+   * Applies the owning map's themed size and weight to existing and future measurement labels.
+   *
+   * @param fontSize - The caption size, preserving calibrated units
+   * @param fontWeight - The bold weight token
+   */
+  setMeasurementTypography(fontSize: Theme['typography']['caption']['fontSize'], fontWeight: Theme['typography']['fontWeightBold']): void {
+    if (fontSize === undefined || fontWeight === undefined) {
+      logger.logError('DrawerController - Measurement typography is missing from the owning map theme');
+      return;
+    }
+
+    this.#measurementTypography = {
+      fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize,
+      fontWeight: `${fontWeight}`,
+    };
+
+    this.getMapViewer()
+      .map.getOverlays()
+      .forEach((overlay) => {
+        const element = overlay.getElement();
+        if (element?.classList.contains('drawer-tooltip-measure')) {
+          this.#applyMeasurementTypography(element);
+        }
+      });
+  }
 
   /**
    * Starts a drawing operation with the specified geometry type.
@@ -1138,7 +1169,7 @@ export class DrawerController extends AbstractMapViewerController {
     // Add measurement tooltip for non-point features
     if (!(geom instanceof Point)) {
       const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-      const overlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
+      const overlay = this.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
       if (overlay) {
         viewer.map.addOverlay(overlay);
       }
@@ -1900,7 +1931,7 @@ export class DrawerController extends AbstractMapViewerController {
           if (!(olGeometry instanceof Point)) {
             // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
             const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-            const newOverlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
+            const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
             if (newOverlay) {
               viewer.map.addOverlay(newOverlay);
             }
@@ -2199,7 +2230,7 @@ export class DrawerController extends AbstractMapViewerController {
       // Recreate measurement overlay
       const geom = clonedFeature.getGeometry();
       if (geom && !(geom instanceof Point)) {
-        const overlay = DrawerController.#createMeasureTooltip(clonedFeature, false, this.#uiDomain.getLanguage());
+        const overlay = this.#createMeasureTooltip(clonedFeature, false, this.#uiDomain.getLanguage());
         if (overlay) viewer.map.addOverlay(overlay);
       }
     });
@@ -2263,7 +2294,7 @@ export class DrawerController extends AbstractMapViewerController {
           // Recreate measurement overlay only if geometry changed
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
+            const overlay = this.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
@@ -2298,7 +2329,7 @@ export class DrawerController extends AbstractMapViewerController {
           // Recreate overlay
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
+            const overlay = this.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
@@ -2360,6 +2391,72 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   // #endregion PRIVATE METHDOS - HISTORY
+
+  // #region PRIVATE METHODS - MEASUREMENT LABELS
+
+  /**
+   * Creates or updates a measurement tooltip for a feature.
+   *
+   * Uses this controller's typography and map document to keep measurement labels scoped to their owning map.
+   *
+   * @param feature - The feature to create a tooltip for
+   * @param hideMeasurements - Whether to hide the measurement tooltip
+   * @param displayLanguage - The display language
+   * @returns The created or updated overlay, or undefined if creation failed
+   */
+  #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean, displayLanguage: TypeDisplayLanguage): Overlay | undefined {
+    // Get the measureTooltip for the feature if one already exists
+    let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
+    if (measureTooltip) {
+      measureTooltip.getElement()?.remove();
+    }
+    const geom = feature.getGeometry();
+    if (geom === undefined) return undefined;
+
+    const { output, tooltipCoord } = DrawerController.#getFeatureMeasurements(geom, displayLanguage);
+
+    if (!output || !tooltipCoord) return undefined;
+
+    const measureTooltipElement = this.getMapViewer().map.getTargetElement().ownerDocument.createElement('div');
+    measureTooltipElement.className = 'drawer-tooltip drawer-tooltip-measure';
+    measureTooltipElement.style.textAlign = 'center';
+    this.#applyMeasurementTypography(measureTooltipElement);
+
+    measureTooltipElement.innerHTML = output;
+    measureTooltipElement.hidden = hideMeasurements;
+
+    // If no measure tooltip, create a new one
+    if (!measureTooltip) {
+      measureTooltip = new Overlay({
+        offset: [0, -15],
+        positioning: 'bottom-center',
+        stopEvent: false,
+        insertFirst: false,
+      });
+    }
+    measureTooltip.setElement(measureTooltipElement);
+    measureTooltip.setPosition(tooltipCoord);
+
+    // Set the tooltip on the feature so it can be replaced later if modified
+    feature.set('measureTooltip', measureTooltip);
+    return measureTooltip;
+  }
+
+  /**
+   * Styles a measurement label without changing its layout or other visual properties.
+   *
+   * @param element - The measurement overlay element
+   */
+  #applyMeasurementTypography(element: HTMLElement): void {
+    if (!this.#measurementTypography) {
+      logger.logError('DrawerController - Measurement typography has not been supplied by the drawer UI');
+      return;
+    }
+    element.style.setProperty('font-size', this.#measurementTypography.fontSize);
+    element.style.setProperty('font-weight', this.#measurementTypography.fontWeight);
+  }
+
+  // #endregion PRIVATE METHODS - MEASUREMENT LABELS
 
   // #region DOMAIN HANDLERS
   // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
@@ -2546,7 +2643,7 @@ export class DrawerController extends AbstractMapViewerController {
       if (geom instanceof Point) return;
 
       // Update the overlay with new values
-      DrawerController.#createMeasureTooltip(feature, true, this.#uiDomain.getLanguage());
+      this.#createMeasureTooltip(feature, true, this.#uiDomain.getLanguage());
 
       // Update the undo redo state
       this.#updateUndoRedoState();
@@ -2648,7 +2745,7 @@ export class DrawerController extends AbstractMapViewerController {
       if (previousFeature && !hideMeasurements) {
         const geom = previousFeature.getGeometry();
         if (geom && !(geom instanceof Point)) {
-          const overlay = DrawerController.#createMeasureTooltip(previousFeature, false, this.#uiDomain.getLanguage());
+          const overlay = this.#createMeasureTooltip(previousFeature, false, this.#uiDomain.getLanguage());
           if (overlay) {
             this.getMapViewer().map.addOverlay(overlay);
           }
@@ -2981,55 +3078,6 @@ export class DrawerController extends AbstractMapViewerController {
       tooltipCoord = geom.getCenter();
     }
     return { output, tooltipCoord };
-  }
-
-  /**
-   * Creates or updates a measurement tooltip for a feature.
-   *
-   * @param feature - The feature to create a tooltip for
-   * @param hideMeasurements - Whether to hide the measurement tooltip
-   * @param displayLanguage - The display language
-   * @returns The created or updated overlay, or undefined if creation failed
-   */
-  static #createMeasureTooltip(
-    feature: Feature<Geometry>,
-    hideMeasurements: boolean,
-    displayLanguage: TypeDisplayLanguage
-  ): Overlay | undefined {
-    // Get the measureTooltip for the feature if one already exists
-    let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
-    if (measureTooltip) {
-      measureTooltip.getElement()?.remove();
-    }
-    const geom = feature.getGeometry();
-    if (geom === undefined) return undefined;
-
-    const { output, tooltipCoord } = this.#getFeatureMeasurements(geom, displayLanguage);
-
-    if (!output || !tooltipCoord) return undefined;
-
-    const measureTooltipElement = document.createElement('div');
-    measureTooltipElement.className = 'drawer-tooltip drawer-tooltip-measure';
-    measureTooltipElement.style.textAlign = 'center';
-
-    measureTooltipElement.innerHTML = output;
-    measureTooltipElement.hidden = hideMeasurements;
-
-    // If no measure tooltip, create a new one
-    if (!measureTooltip) {
-      measureTooltip = new Overlay({
-        offset: [0, -15],
-        positioning: 'bottom-center',
-        stopEvent: false,
-        insertFirst: false,
-      });
-    }
-    measureTooltip.setElement(measureTooltipElement);
-    measureTooltip.setPosition(tooltipCoord);
-
-    // Set the tooltip on the feature so it can be replaced later if modified
-    feature.set('measureTooltip', measureTooltip);
-    return measureTooltip;
   }
 
   // #endregion STATIC METHODS

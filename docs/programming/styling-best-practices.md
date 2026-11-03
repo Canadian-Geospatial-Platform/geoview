@@ -57,6 +57,9 @@ the shell do not inherit its scrollbar colours and require a separate map-owners
 ### Typography
 
 Read the owning map's theme with `useTheme()`; never import a global default theme for component sizes.
+For non-React DOM text, including drawer measurement overlays and portaled colour-picker headers,
+pass that map's theme values to the owning DOM setup and refresh existing text when its theme changes.
+Keep calibrated font-size strings unchanged; append `px` only to numeric font sizes.
 
 - **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
 - **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
@@ -74,7 +77,7 @@ Typography variant; components can rely on the owning theme's typography default
 overrides tooltip font sizes with `caption` for non-touch input and `body2` for touch input.
 Theme definitions, type declarations, export PDF/canvas layout, console formatting, and
 numeric legend compatibility are exceptions; OpenLayers measurement text and the user's map-text
-formatting toggle have narrow line-level exemptions. Drawer work is owned separately.
+formatting toggle have narrow line-level exemptions.
 See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
 
 | Deprecated API                                              | Replacement                                                          |

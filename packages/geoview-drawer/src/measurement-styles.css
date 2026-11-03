@@ -7,14 +7,12 @@
   padding: 4px 8px;
   opacity: 0.7;
   white-space: nowrap;
-  font-size: 12px;
   cursor: default;
   user-select: none;
 }
 
 .drawer-tooltip-measure {
   opacity: 1;
-  font-weight: bold;
 }
 
 .drawer-tooltip-measure:before {
