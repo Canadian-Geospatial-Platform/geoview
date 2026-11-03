@@ -49,8 +49,8 @@ export default function DataTableModal(): JSX.Element {
 
   const { t } = useTranslation();
 
-  const sxtheme = useTheme();
-  const sxClasses = getSxClasses(sxtheme);
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -233,7 +233,7 @@ export default function DataTableModal(): JSX.Element {
         </>
       }
       contentStyle={{ overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }}
-      contentTextStyle={{ padding: 0, flex: 1, display: 'flex', flexDirection: 'column' }}
+      contentTextStyle={{ padding: theme.spacing(0), flex: 1, display: 'flex', flexDirection: 'column' }}
     />
   );
 }

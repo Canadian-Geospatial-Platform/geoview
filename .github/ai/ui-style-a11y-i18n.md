@@ -86,6 +86,20 @@ the breaking release that removes `palette.geoViewFontSize`. The OpenLayers rend
 font default is not a style value and needs no disable.
 Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
 Do not exempt export modal UI, whole geo folders, or whole custom-legend files.
+
+## Spacing lint maintenance
+
+Public contract: [Spacing](../../docs/programming/styling-best-practices.md#5--spacing-themespacing-in-style-modules-no-sx-shorthand).
+`SPACING_RESTRICTIONS` in the shared [ESLint config](../../packages/eslint.config.js) are
+`no-restricted-syntax` selectors merged into `BASE_SYNTAX_RESTRICTIONS`, beside the border-radius checks,
+so they apply wherever the base restrictions do. They flag spacing strings with or without units, bare
+numbers outside inline JSX `sx` props, unit-suffixed template literals, and `margin`/`padding`/`gap`
+declarations in tagged CSS templates. Popper `modifiers` options are excluded because their `padding` is
+not CSS. Export `layout-styles.ts` and `utilities.ts` (PDF/canvas artwork) get base restrictions without
+the spacing selectors.
+Selectors match property names, not types, so a non-CSS option named `padding` or `p` in another object
+may need a line-level `// eslint-disable-next-line no-restricted-syntax -- <reason>`. When changing the
+selectors, run `npm run lint` from `packages/` and check both flagged literals and allowed `sx` numbers.
 Size selectors follow value containers (responsive objects/arrays, conditional branches and JSX
 expressions), not helper-call arguments, lookup keys or condition tests. Preserve both positive and
 negative cases when changing these selectors.

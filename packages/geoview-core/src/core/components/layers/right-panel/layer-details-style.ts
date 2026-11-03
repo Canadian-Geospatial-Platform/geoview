@@ -83,7 +83,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '30px',
     backgroundColor: theme.palette.divider,
     // Absorb flex gap so the 1px divider plus its margins equal layerButtonsGroup's gap (theme.spacing(2))
-    margin: `0 calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
+    // eslint-disable-next-line no-restricted-syntax -- the 1px adjustment matches the divider's fixed border width
+    margin: `${theme.spacing(0)} calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
   },
   layerDetailsListGroup: {
     listStyleType: 'disc',
