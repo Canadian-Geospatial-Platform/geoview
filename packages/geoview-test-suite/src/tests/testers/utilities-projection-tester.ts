@@ -1,4 +1,5 @@
 import { Projection } from 'geoview-core/geo/utils/projection';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -7,6 +8,40 @@ import { GVAbstractTester } from './abstract-gv-tester';
  * Projection utilities testing class for cgpv.api.utilities.projection (Projection) functions.
  */
 export class UtilitiesProjectionTester extends GVAbstractTester {
+  /**
+   * Tests projection input dispatch for available projections and metadata.
+   *
+   * @returns Resolved projections
+   */
+  testAddProjectionIfMissingInputs(): Promise<Test<OLProjection[]>> {
+    return this.test(
+      'Test addProjectionIfMissing accepts projection objects, identifiers and metadata...',
+      (test) => {
+        test.addStep('Resolving available projections from their supported input forms...');
+        return Promise.all([
+          Projection.addProjectionIfMissing(Projection.getProjectionLonLat()),
+          Projection.addProjectionIfMissing(Projection.getProjectionFromStringOrNumber(3857)),
+          Projection.addProjectionIfMissing('EPSG:4326'),
+          Projection.addProjectionIfMissing(4326),
+          Projection.addProjectionIfMissing('4326'),
+          Projection.addProjectionIfMissing('http://www.opengis.net/def/crs/EPSG/0/4326'),
+          Projection.addProjectionIfMissing('urn:ogc:def:crs:EPSG::4326'),
+          Projection.addProjectionIfMissing({ wkid: 4326 }),
+          Projection.addProjectionIfMissing({ wkid: 3857, latestWkid: 4326 }),
+          Projection.addProjectionIfMissing({ wkt: GVAbstractTester.WGS84_WKT }),
+        ]);
+      },
+      (test, projections) => {
+        test.addStep('Verifying identity, dispatch and WKT resolution...');
+        Test.assertIsEqual(projections[0], Projection.getProjectionLonLat());
+        Test.assertIsEqual(projections[1], Projection.getProjectionFromStringOrNumber(3857));
+        projections.slice(2, 9).forEach((projection) => Test.assertIsEqual(projection.getCode(), 'EPSG:4326'));
+        Test.assertIsEqual(projections[9].getCode().startsWith('CUSTOM:WGS 84:'), true);
+        Test.assertIsEqual(projections[9].getUnits(), 'degree');
+      }
+    );
+  }
+
   /**
    * Returns the name of the Tester.
    *

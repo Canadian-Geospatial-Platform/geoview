@@ -123,18 +123,28 @@ mapViewer.layer.setLayerHoverable("myLayer", true);
 
 ### GeoJSON Source Update
 
+Use `setGeojsonSource` with a GeoJSON object or JSON string to **replace**, rather than append to, an existing GeoJSON layer's features.
+Coordinates are transformed from the source projection into the current map projection; an embedded GeoJSON CRS takes precedence over the
+stored source projection, with longitude/latitude as the GeoJSON reader's default when neither is available. Injected features are retained
+for reprojection when the map projection changes.
+
+Await the update and handle rejected promises in asynchronous event handlers. Feature-info/table refresh starts after source replacement
+and can finish asynchronously.
+
 ```typescript
-await mapViewer.layer.setGeojsonSource("myGeoJsonLayer", {
-  type: "FeatureCollection",
+await mapViewer.layer.setGeojsonSource('myGeoJsonLayer', {
+  type: 'FeatureCollection',
   features: [
     {
-      type: "Feature",
-      geometry: { type: "Point", coordinates: [-75.6972, 45.4215] },
-      properties: { name: "Ottawa" },
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-75.6972, 45.4215] },
+      properties: { name: 'Ottawa' },
     },
   ],
 });
 ```
+
+Projection-input maintenance notes: [GeoJSON injection and projection objects](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/map-architecture.md#geojson-injection-and-projection-objects).
 
 ### Zoom to Layer
 
