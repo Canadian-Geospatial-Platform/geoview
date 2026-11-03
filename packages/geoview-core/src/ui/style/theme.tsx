@@ -57,6 +57,7 @@ const defaultBaseTheme = createTheme({ typography: { htmlFontSize: defaultHtmlFo
 
 /** Default compatibility theme. Calibrated map themes are created lazily through getTheme instead. */
 const cgpvThemeOptions = getThemeOptions('geo.ca', { pxToRem: defaultBaseTheme.typography.pxToRem });
+/** @deprecated Use the owning map's theme via useTheme(), or getTheme(mode) to build one; removed in a future breaking release */
 export const cgpvTheme = createTheme({
   ...cgpvThemeOptions,
   typography: { ...cgpvThemeOptions.typography, htmlFontSize: defaultHtmlFontSize },
