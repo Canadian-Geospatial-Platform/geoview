@@ -1,8 +1,12 @@
-/* Measurement tooltip styles */
+/*
+ * Measurement tooltip styles.
+ * Static CSS cannot directly read the owning map's React theme. These legacy colours,
+ * spacing, radius and typography remain fixed; theme migration is deferred.
+ */
 .drawer-tooltip {
   position: relative;
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px; /* = theme.shape.borderRadiusSm (CSS cannot read the theme) */
+  border-radius: 4px;
   color: white;
   padding: 4px 8px;
   opacity: 0.7;
