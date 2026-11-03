@@ -88,7 +88,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
-      children: createElement(Edit),
+      children: createElement(Edit, { id: buildGVElementId(mapId, GV_DOM_SUFFIX.drawerEditButton) }),
       visible: true,
     },
     groupName: 'drawer',

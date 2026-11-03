@@ -20,7 +20,9 @@ deactivates the crosshair. Tabbing to another control within the viewer also dea
 Ctrl+M closes open navigation, About/Version, and Notifications popovers before transferring focus, so Enter acts on the map
 rather than reopening the previous panel.
 Escape is not a general crosshair-exit shortcut; drawer editing can use it to cancel a grabbed transform.
-While measuring or drawing with the crosshair, Escape cancels an in-progress sketch or pending coordinate; pressing it again with nothing left to cancel returns focus to the tool's navbar button (Measure or Toggle Drawing).
+Drawing hints show mouse wording by default. With keyboard navigation on or the crosshair active they show keyboard wording, preceded by "Press Ctrl+M to focus the map." until the map is focused.
+While measuring or drawing, Enter/Space and Shift+Enter/Space also act at the mouse pointer. This is documented in the guide, not in the hints.
+While measuring, drawing or editing with the crosshair, Escape cancels an in-progress sketch, pending coordinate, grab or selection; pressing it again with nothing left to cancel returns focus to the tool's navbar button (Measure, Toggle Drawing or Toggle editing).
 This applies only when the map itself has focus, and not in fullscreen, where Escape exits fullscreen.
 Arrow keys pan by 128px by default. Shift+ArrowUp increases the step by 10px;
 Shift+ArrowDown decreases it by 10px (minimum 10px).

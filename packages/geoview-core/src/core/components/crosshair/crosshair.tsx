@@ -8,7 +8,7 @@ import type { SxStyles } from '@/ui/style/types';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
-import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { useStoreAppDrawingHint, useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
@@ -44,6 +44,9 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
   const mapId = useStoreGeoViewMapId();
   const mapZoom = useStoreMapZoom();
   const isCrosshairsActive = useStoreAppIsCrosshairsActive();
+  const drawingHint = useStoreAppDrawingHint();
+  // Measuring or drawing lets a pointer user place points with Enter/Space at the mouse pointer, like the crosshair does.
+  const isPointerToolActive = drawingHint !== undefined && drawingHint.tool !== 'editing';
   const uiController = useUIController();
   const mapController = useMapController();
   const drawerController = useDrawerControllerIfExists();
@@ -51,6 +54,9 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
 
   // Pan delta for keyboard pan interactions
   const panDelta = useRef(128);
+
+  // Last pointer position over the map, in browser client coordinates; cleared when the pointer leaves
+  const pointerClientPosition = useRef<{ x: number; y: number } | undefined>(undefined);
 
   // AbortController ref - aborts any in-flight coordinate info fetch on re-click
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -229,7 +235,7 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         }
       } else if (event.key === 'Escape') {
         event.preventDefault();
-        drawerController?.cancelGrabbedTransform();
+        drawerController?.handleEditingEscape();
       }
     },
     [drawerController]
@@ -255,13 +261,17 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
   );
 
   /**
-   * Handles the main crosshair interaction (Enter/Space).
+   * Handles the main interaction (Enter/Space) at the crosshair, or at the mouse pointer while measuring or drawing.
    */
   const handleCrosshairInteraction = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
-      if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) {
+      if (!(event instanceof KeyboardEvent) || (!isCrosshairsActive && !isPointerToolActive)) {
         return;
       }
+
+      // Without the crosshair, only Enter/Space act, once per press, and only while the pointer is over the map
+      const isActionKey = event.key === 'Enter' || event.key === ' ';
+      if (!isCrosshairsActive && (!isActionKey || event.repeat)) return;
 
       // Prevent interactions when typing in input fields
       const { activeElement } = document;
@@ -274,7 +284,10 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
       }
 
       // Resolve from the rendered pixel on every interaction; mouse and move-end positions may be stale.
-      const currentPointerPosition = mapController.getViewportCenterPosition();
+      const pointer = pointerClientPosition.current;
+      const currentPointerPosition = isCrosshairsActive
+        ? mapController.getViewportCenterPosition()
+        : pointer && mapController.getMapPositionFromClientPoint(pointer.x, pointer.y);
       if (!currentPointerPosition) return;
 
       // Handle Shift+Click logic first
@@ -289,8 +302,37 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
+    [
+      isCrosshairsActive,
+      isPointerToolActive,
+      mapController,
+      handleShiftClick,
+      handleDefaultInteraction,
+      handleDrawerInteraction,
+      drawerController,
+    ]
   );
+
+  /**
+   * Remembers where the mouse is over the map while a tool is active, since map pointer handlers are suspended then.
+   */
+  const handlePointerMove = useCallback((event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
+    if (event instanceof PointerEvent) pointerClientPosition.current = { x: event.clientX, y: event.clientY };
+  }, []);
+
+  /**
+   * Forgets the mouse position once it leaves the map, so Enter/Space cannot act on a stale location.
+   */
+  const handlePointerLeave = useCallback((): void => {
+    pointerClientPosition.current = undefined;
+  }, []);
+
+  /**
+   * Gives the map keyboard focus when it is clicked with a tool active, so Enter/Space reach it.
+   */
+  const handlePointerDown = useCallback((): void => {
+    if (document.activeElement !== mapTargetElement) mapTargetElement.focus({ preventScroll: true });
+  }, [mapTargetElement]);
 
   // #endregion
 
@@ -323,7 +365,10 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
   }, [isCrosshairsActive, mapController, layerSetController]);
 
   // Event listeners
-  useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);
+  useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive || isPointerToolActive);
+  useEventListener<HTMLElement>('pointermove', handlePointerMove, mapTargetElement, isPointerToolActive);
+  useEventListener<HTMLElement>('pointerleave', handlePointerLeave, mapTargetElement, isPointerToolActive);
+  useEventListener<HTMLElement>('pointerdown', handlePointerDown, mapTargetElement, isPointerToolActive);
   useEventListener<HTMLElement>('keydown', handlePanDelta, mapTargetElement, isCrosshairsActive);
   useEventListener<HTMLElement>('keydown', handleZoomControls, mapTargetElement, isCrosshairsActive);
 

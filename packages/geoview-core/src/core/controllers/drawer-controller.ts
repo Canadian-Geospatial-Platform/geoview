@@ -1442,6 +1442,22 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Handles Escape while editing with the crosshair.
+   *
+   * Cancels a grabbed handle. With nothing left to cancel, returns focus to the edit button.
+   * A selection is cleared by the global Escape handler, which runs after this one.
+   */
+  handleEditingEscape(): void {
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
+    if (this.#grabbedHandle || transformInstance?.getSelectedFeature()) {
+      this.cancelGrabbedTransform();
+      return;
+    }
+
+    this.getControllersRegistry().uiController.focusToolButton(GV_DOM_SUFFIX.drawerEditButton);
+  }
+
+  /**
    * Checks if a handle is currently grabbed for transformation.
    *
    * @returns Whether a handle is grabbed

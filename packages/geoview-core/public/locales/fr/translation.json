@@ -104,6 +104,7 @@
   "drawingHint": {
     "startMouse": "Cliquez pour commencer le dessin.",
     "startKeyboard": "Appuyez sur Entrée ou Espace pour commencer le dessin.",
+    "focusMap": "Appuyez sur Ctrl+M pour focaliser la carte.",
     "mouse": {
       "point": "Cliquez pour placer un point.",
       "text": "Cliquez pour placer du texte.",
@@ -112,8 +113,8 @@
       "firstCorner": "Cliquez pour définir le premier coin.",
       "oppositeCorner": "Cliquez pour définir le coin opposé et terminer. Appuyez sur Échap pour annuler.",
       "editing": "Cliquez sur une géométrie pour la sélectionner, puis faites glisser la géométrie ou ses poignées pour la modifier. Appuyez sur Échap pour désélectionner.",
-      "line": "Cliquez pour ajouter des points, double-cliquez pour terminer, Échap pour annuler, Ctrl+Z ou Retour arrière pour défaire.",
-      "polygon": "Cliquez pour ajouter des points, double-cliquez pour terminer ou cliquez sur le premier point pour fermer. Appuyez sur Échap pour annuler; Ctrl+Z ou Retour arrière pour défaire."
+      "line": "Cliquez pour ajouter des points. Double-cliquez pour terminer. Appuyez sur Échap pour annuler. Appuyez sur Ctrl+Z ou Retour arrière pour défaire.",
+      "polygon": "Cliquez pour ajouter des points. Double-cliquez, ou cliquez sur le premier point, pour terminer. Appuyez sur Échap pour annuler. Appuyez sur Ctrl+Z ou Retour arrière pour défaire."
     },
     "keyboard": {
       "point": "Appuyez sur Entrée ou Espace pour placer un point au pointeur en croix.",
@@ -122,9 +123,9 @@
       "radius": "Déplacez le pointeur en croix, puis appuyez sur Entrée ou Espace pour définir la taille et terminer. Appuyez sur Échap pour annuler.",
       "firstCorner": "Appuyez sur Entrée ou Espace pour définir le premier coin au pointeur en croix.",
       "oppositeCorner": "Déplacez le pointeur en croix, puis appuyez sur Entrée ou Espace pour définir le coin opposé et terminer. Appuyez sur Échap pour annuler.",
-      "editing": "Appuyez sur Entrée ou Espace sur une géométrie pour la sélectionner, puis sur une poignée pour la saisir. Utilisez les flèches pour déplacer; Entrée ou Espace pour relâcher; Échap pour annuler la saisie ou désélectionner.",
-      "line": "Appuyez sur Entrée ou Espace pour ajouter un point, Maj.+Entrée ou Maj.+Espace pour terminer, Échap pour annuler, et Ctrl+Z ou Retour arrière pour défaire.",
-      "polygon": "Appuyez sur Entrée ou Espace pour ajouter un point, Maj.+Entrée ou Maj.+Espace pour terminer, Échap pour annuler, et Ctrl+Z ou Retour arrière pour défaire."
+      "editing": "Appuyez sur Entrée ou Espace sur une géométrie pour la sélectionner, puis sur une poignée pour la saisir. Utilisez les touches fléchées pour la déplacer, puis appuyez sur Entrée ou Espace pour la relâcher. Appuyez sur Échap pour annuler la saisie ou désélectionner.",
+      "line": "Appuyez sur Entrée ou Espace pour ajouter un point. Appuyez sur Maj.+Entrée ou Maj.+Espace pour terminer. Appuyez sur Échap pour annuler. Appuyez sur Ctrl+Z ou Retour arrière pour défaire.",
+      "polygon": "Appuyez sur Entrée ou Espace pour ajouter un point. Appuyez sur Maj.+Entrée ou Maj.+Espace pour terminer. Appuyez sur Échap pour annuler. Appuyez sur Ctrl+Z ou Retour arrière pour défaire."
     }
   },
   "basemaps": {
