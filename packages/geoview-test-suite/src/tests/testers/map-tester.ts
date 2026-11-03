@@ -30,6 +30,7 @@ import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
+  getStoreAppHeight,
   getStoreAppDisplayLanguage,
   getStoreAppIsCrosshairsActive,
   getStoreAppIsFullscreenActive,
@@ -1158,6 +1159,66 @@ export class MapTester extends GVAbstractTester {
         // Restore original language
         test.addStep(`Restoring language to '${originalLanguage}'...`);
         await this.getMapViewer().setLanguage(originalLanguage);
+      }
+    );
+  }
+
+  /**
+   * Test selecting details panel and finding the "Top" anchor in the guide container.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testGuideDetailsPanelTopAnchor(): Promise<Test<HTMLAnchorElement | null>> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test Details Panel - Select and Find Top Anchor',
+      async (test) => {
+        test.addStep('Selecting details panel and wait for the UI to refresh...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'details');
+
+        test.addStep('Finding guide-container div...');
+        const guideContainer = DomHelper.getGuideContainer(mapId);
+        if (!guideContainer) throw new Error('guide-container div not found');
+
+        test.addStep('Searching for "Top" anchor tag within guide-container...');
+        const anchorElements = guideContainer.querySelectorAll('a');
+        let foundTopAnchor: HTMLAnchorElement | null = null;
+
+        for (let index = 0; index < anchorElements.length; index++) {
+          const anchor = anchorElements[index];
+          if (anchor.textContent?.trim() === 'Top') {
+            foundTopAnchor = anchor;
+            break;
+          }
+        }
+
+        return foundTopAnchor;
+      },
+      (test, result) => {
+        test.addStep('Verifying "Top" anchor tag was not found...');
+        Test.assertIsEqual(result, null);
+      }
+    );
+  }
+
+  /**
+   * Test that a non-React consumer can read the footer height through the UI controller.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testControllerGetFooterHeight(): Promise<Test<string>> {
+    return this.test(
+      'Test UIController.getFooterHeight (non-React consumer)',
+      (test) => {
+        test.addStep('Calling getFooterHeight via the controller registry (non-React path)...');
+        return DomHelper.getDataFooterHeight(this.getMapId(), getStoreAppHeight(this.getMapId()));
+      },
+      (test, result) => {
+        test.addStep('Verifying a CSS length string was returned...');
+        Test.assertIsDefined('footerHeight', result);
+        Test.assertIsEqual(/(px|%)$/.test(result), true);
       }
     );
   }
