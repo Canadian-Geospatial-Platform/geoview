@@ -494,7 +494,7 @@ export const generateThemeOptions = ({
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
                 background: `${theme.palette.background.paper} 0% 0% no-repeat padding-box`,
                 borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
-                marginBottom: '10px',
+                marginBottom: theme.spacing(1.25),
               },
 
               '&[data-layer-depth] &:not([data-layer-depth="0"])': {
@@ -553,7 +553,7 @@ export const generateThemeOptions = ({
       },
       MuiFab: {
         styleOverrides: {
-          root: { padding: '0 24px' },
+          root: ({ theme }) => ({ padding: theme.spacing(0, 3) }),
         },
       },
       MuiDrawer: {

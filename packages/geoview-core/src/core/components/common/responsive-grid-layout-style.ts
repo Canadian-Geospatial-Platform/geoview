@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   rightTopContentAppBar: {
     alignItems: 'end',
     flexDirection: 'column',
-    gap: '10px',
+    gap: theme.spacing(1.25),
     [theme.breakpoints.up('sm')]: {
       justifyContent: 'space-between',
     },

@@ -102,7 +102,35 @@ const TYPOGRAPHY_RESTRICTIONS = [
   },
 ];
 
-const BASE_SYNTAX_RESTRICTIONS = [
+const SPACING_MESSAGE =
+  'Use theme.spacing(), not a literal spacing value. Plain numbers are allowed only in inline JSX sx props. See docs/programming/styling-best-practices.md §5.';
+const SPACING_KEY =
+  '/^(?:(?:margin|padding)(?:Top|Right|Bottom|Left|X|Y|Block|BlockStart|BlockEnd|Inline|InlineStart|InlineEnd)?|gap|rowGap|columnGap|[mp][trblxyse]?)$/';
+const SPACING_PROPERTY = `Property:matches([key.name=${SPACING_KEY}], [key.value=${SPACING_KEY}])`;
+
+const SPACING_RESTRICTIONS = [
+  {
+    // Strings bypass the theme everywhere: '16px', '1rem', '10%', '0', '0 auto'
+    selector: `${SPACING_PROPERTY} > Literal[value=/(^|\\s)[+-]?[0-9.]+(px|rem|em|vh|vw|%)?(\\s|$)/i]`,
+    message: SPACING_MESSAGE,
+  },
+  {
+    // Numbers mean pixels outside sx; inline sx scales them through the theme. Popper modifier options are not CSS.
+    selector: `${SPACING_PROPERTY} > :matches(Literal[raw=/^[0-9.]/], UnaryExpression[argument.raw=/^[0-9.]/]):not(JSXAttribute[name.name="sx"] *):not(JSXAttribute[name.name="modifiers"] *)`,
+    message: SPACING_MESSAGE,
+  },
+  {
+    selector: `${SPACING_PROPERTY} > TemplateLiteral > TemplateElement[value.raw=/(^|\\s)[+-]?[0-9.]*(px|rem|em|vh|vw|%)/i]`,
+    message: SPACING_MESSAGE,
+  },
+  {
+    selector:
+      'TaggedTemplateExpression > TemplateLiteral > TemplateElement[value.raw=/(margin|padding|gap)(-[a-z]+)*\\s*:\\s*[^;]*[0-9](px|rem|em|%)/i]',
+    message: SPACING_MESSAGE,
+  },
+];
+
+const NON_SPACING_SYNTAX_RESTRICTIONS = [
   {
     selector: ":matches(PropertyDefinition, MethodDefinition)[accessibility='private']",
     message: 'Use # prefix for private instead',
@@ -138,6 +166,8 @@ const BASE_SYNTAX_RESTRICTIONS = [
       'Use a border-radius token: theme.shape.borderRadius{None,Sm,Md,Lg,Full} in style modules, or GEOVIEW_SHAPE.* from @/ui/style/default in @/ui, theme overrides and cssText. See docs/programming/styling-best-practices.md §3. theme.shape.borderRadius is a number, so inside sx it renders 6 × 6 = 36px.',
   },
 ];
+
+const BASE_SYNTAX_RESTRICTIONS = [...SPACING_RESTRICTIONS, ...NON_SPACING_SYNTAX_RESTRICTIONS];
 
 const config = [
   js.configs.recommended,
@@ -530,5 +560,20 @@ export default [
     basePath: PACKAGES_ROOT,
     files: ['geoview-core/src/core/utils/dom-helper.ts'],
     rules: { 'no-restricted-syntax': [1, ...TYPOGRAPHY_RESTRICTIONS] },
+  },
+  {
+    // PDF/canvas export artwork has fixed dimensions independent of the viewer theme.
+    basePath: PACKAGES_ROOT,
+    files: ['geoview-core/src/core/components/export/layout-styles.ts'],
+    rules: {
+      'no-restricted-syntax': [1, ...NON_SPACING_SYNTAX_RESTRICTIONS],
+    },
+  },
+  {
+    basePath: PACKAGES_ROOT,
+    files: ['geoview-core/src/core/components/export/utilities.ts'],
+    rules: {
+      'no-restricted-syntax': [1, ...NON_SPACING_SYNTAX_RESTRICTIONS, ...TYPOGRAPHY_RESTRICTIONS],
+    },
   },
 ];

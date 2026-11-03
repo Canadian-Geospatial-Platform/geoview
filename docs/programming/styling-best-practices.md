@@ -122,6 +122,16 @@ GeoView uses MUI's default 8px spacing scale: `theme.spacing(n) = n × 8px`. The
 
 **In-scope properties:** `padding`/`margin` and all directional variants (`paddingTop`, `mx`, etc.), `gap`, `rowGap`, `columnGap`.
 
+The shared ESLint config warns on spacing literals that bypass the theme, using `no-restricted-syntax` like the border-radius and typography checks. Plain numbers are allowed only in inline JSX `sx` props, where MUI scales them through the theme; everywhere else they mean pixels. Strings (`'16px'`, `'1rem'`, `'0'`) bypass the theme in any context. For an intentional exception, use an ESLint directive with a reason:
+
+```ts
+// eslint-disable-next-line no-restricted-syntax -- preserve the accessible visually-hidden offset
+margin: '-1px',
+```
+
+The warning also checks MUI spacing shorthands (`p`, `mt`, `px`, etc.). It does not prescribe whole or half-step factors; quarter steps such as `theme.spacing(1.25)` remain valid.
+The check matches property names, so a non-CSS option named `padding` (for example a map or Popper option) may need the same reasoned exception.
+
 **Rule:**
 
 - **Inside `*-style.ts` files** (`getSxClasses(theme)`, MUI `styleOverrides`, `styled()`): always use explicit `theme.spacing()` with the full CSS property name. Never use `sx` shorthand aliases (`p`, `m`, `gap`, `pt`, `mx`, etc.) in these files.

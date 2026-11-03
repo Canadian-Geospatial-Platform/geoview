@@ -83,6 +83,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       },
     },
     mobileDropdown: {
+      // eslint-disable-next-line no-restricted-syntax -- preserve the exact 47px offset
       marginLeft: '47px',
       maxWidth: '200px',
       padding: theme.spacing(1, 0),
