@@ -57,6 +57,13 @@ the shell do not inherit its scrollbar colours and require a separate map-owners
 ### Typography
 
 Read the owning map's theme with `useTheme()`; never import a global default theme for component sizes.
+For theme-aware non-React DOM text, including portaled colour-picker headers,
+pass that map's theme values to the owning DOM setup and refresh existing text when its theme changes.
+Keep calibrated font-size strings unchanged; append `px` only to numeric font sizes.
+Drawer measurement labels use fixed bold 14px sans-serif text, white on a 70%-black backing with 4px/8px
+padding, matching Measure total labels in both static and dynamic maps. Drawer retains its pointer,
+rounded corners and inherited line-height; Measure segment labels remain distinct. Theme migration
+and browser-default-font-size scaling remain deferred; ordinary page zoom still scales the labels.
 
 - **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
 - **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
@@ -74,17 +81,20 @@ Typography variant; components can rely on the owning theme's typography default
 overrides tooltip font sizes with `caption` for non-touch input and `body2` for touch input.
 Theme definitions, type declarations, export PDF/canvas layout, console formatting, and
 numeric legend compatibility are exceptions; OpenLayers measurement text and the user's map-text
-formatting toggle have narrow line-level exemptions. Drawer work is owned separately.
+formatting toggle have narrow line-level exemptions.
 See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
 
-| Deprecated API                                              | Replacement                                                          |
-| ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| `palette.geoViewFontSize`                                   | `theme.typography.<variant>.fontSize`                                |
-| Generated multiplier keys such as `geoViewFontSize['1.2x']` | A typography variant; display themes customize it through scale keys |
-| `control` typography variant                                | An appropriate standard MUI variant or GeoView `label`               |
-| Custom-legend numeric `fontSize`                            | Named `fontSizeStep`, for example `"lg"` instead of `20`             |
+| Deprecated API                                              | Replacement                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `palette.geoViewFontSize`                                   | `theme.typography.<variant>.fontSize`                                     |
+| Generated multiplier keys such as `geoViewFontSize['1.2x']` | A typography variant; display themes customize it through scale keys      |
+| `control` typography variant                                | An appropriate standard MUI variant or GeoView `label`                    |
+| Custom-legend numeric `fontSize`                            | Named `fontSizeStep`, for example `"lg"` instead of `20`                  |
+| Static `geoViewFontSizes` export                            | The owning map's `theme.typography.<variant>.fontSize`                    |
+| Static `cgpvTheme` export                                   | The owning map's theme via `useTheme()`, or `getTheme(mode)` to build one |
 
-All four deprecated APIs are retained for compatibility and **removed in the next breaking release**.
+The first four deprecated APIs are retained for compatibility and **removed in the next breaking release**.
+The static `geoViewFontSizes` and `cgpvTheme` exports are retained for compatibility and removed in a future breaking release.
 Numeric legend sizes remain exact during this transition. See [theme typography](../app/ui/theming.md#typography)
 and [host-page font-size timing](../app/config/create-map.md#host-page-font-size).
 

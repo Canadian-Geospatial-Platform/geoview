@@ -132,6 +132,9 @@ Use `delay(ms)`, cancellable `doTimeout(ms)` and event-driven `waitFor*` methods
 or polling. React timer refs cleaned up with `clearTimeout` are the callback-style exception.
 Use `whenThisThen` only when no suitable event exists.
 
+`TIMEOUT.fadingPanelDuration` is deprecated and will be removed in a future breaking release.
+Use the owning theme's `theme.transitions.duration.standard` for panel transitions instead.
+
 Catch only the intended recoverable error: check `instanceof`, handle that type, and rethrow all others.
 Broad suppression is reserved for documented best-effort boundaries such as optional legend enrichment.
 `GeoViewError.throwIfAborted(error)` rethrows aborts during format fallback. Update `@throws` for errors

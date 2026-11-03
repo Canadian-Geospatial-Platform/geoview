@@ -1,13 +1,18 @@
-/* Measurement tooltip styles */
+/*
+ * Measurement tooltip styles.
+ * Fixed typography, backing and padding match Measure's canvas total labels.
+ * Static CSS cannot directly read the owning map's React theme; theme migration is deferred.
+ */
 .drawer-tooltip {
   position: relative;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px; /* = theme.shape.borderRadiusSm (CSS cannot read the theme) */
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
   color: white;
   padding: 4px 8px;
   opacity: 0.7;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 14px;
+  font-family: sans-serif;
   cursor: default;
   user-select: none;
 }
@@ -18,7 +23,7 @@
 }
 
 .drawer-tooltip-measure:before {
-  border-top: 6px solid rgba(0, 0, 0, 0.5);
+  border-top: 6px solid rgba(0, 0, 0, 0.7);
   border-right: 6px solid transparent;
   border-left: 6px solid transparent;
   content: '';
