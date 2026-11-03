@@ -47,10 +47,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Search row above the list — no border of its own, just the standard-variant underline
   filterMultiselectSearch: {
-    px: 1,
-    pt: 0.5,
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    paddingTop: theme.spacing(0.5),
     '& .MuiInput-input': {
-      pl: '0.5em',
+      paddingLeft: theme.spacing(1),
     },
   },
 
@@ -58,7 +59,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterMultiselectContainer: {
     maxHeight: '200px',
     overflowY: 'auto',
-    p: 0.5,
+    padding: theme.spacing(0.5),
   },
 
   // Date range info text

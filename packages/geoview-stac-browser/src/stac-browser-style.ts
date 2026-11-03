@@ -285,7 +285,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflow: 'auto',
     // Room for the checkbox focus indicator, which the scroll container would otherwise clip
     padding: theme.spacing(1.5),
-    '& .MuiFormControlLabel-root': { marginLeft: 0 },
+    '& .MuiFormControlLabel-root': { marginLeft: theme.spacing(0) },
   },
   detailSection: {
     padding: theme.spacing(0, 1.5),

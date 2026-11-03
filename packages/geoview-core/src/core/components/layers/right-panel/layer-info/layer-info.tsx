@@ -191,7 +191,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
       {/* Service Information */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+        <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoServiceInfo')}
         </Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
@@ -244,7 +244,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
       {/* Active Filters */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+        <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoActiveFilters')}
         </Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
@@ -264,7 +264,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         layerDisplayDateTimezone ||
         layerTimeDimension?.field) && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalInformation')}
           </Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
@@ -288,7 +288,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
       {/* Temporal Dimension (Time Slider) */}
       {timeSliderDimension && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalDimension')}
           </Typography>
           <Box sx={memoSxClasses.infoSectionContent}>

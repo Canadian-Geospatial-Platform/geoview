@@ -52,7 +52,9 @@ export const visuallyHidden = {
   position: 'absolute',
   width: '1px',
   height: '1px',
+  // eslint-disable-next-line no-restricted-syntax -- shared constant has no theme; zero is unit-independent
   padding: 0,
+  // eslint-disable-next-line no-restricted-syntax -- preserve the WCAG visually-hidden clipping offset
   margin: '-1px',
   overflow: 'hidden',
   clip: 'rect(0, 0, 0, 0)',

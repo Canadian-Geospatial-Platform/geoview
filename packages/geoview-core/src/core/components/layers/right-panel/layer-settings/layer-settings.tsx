@@ -102,7 +102,7 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
 
   return (
     <Box sx={sxClasses.infoSection}>
-      <Typography variant="h6" sx={sxClasses.infoSectionTitle}>
+      <Typography component="p" variant="h6" sx={sxClasses.infoSectionTitle}>
         {t('swiper.settingsTitle')}
       </Typography>
       <Box sx={sxClasses.swiperSectionContent}>
@@ -214,7 +214,7 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
 
     return (
       <Box sx={sxClasses.infoSection}>
-        <Typography variant="h6" sx={sxClasses.infoSectionTitle}>
+        <Typography component="p" variant="h6" sx={sxClasses.infoSectionTitle}>
           {t('layers.layerInfoInteraction')}
         </Typography>
         <Box sx={sxClasses.infoSectionContent}>
