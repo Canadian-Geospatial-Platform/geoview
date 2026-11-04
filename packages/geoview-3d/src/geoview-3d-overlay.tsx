@@ -24,6 +24,8 @@ interface GeoView3DOverlayProps {
   tilesetUrl: string;
   /** The basemap drawn under the tileset. */
   basemapId: TypeBasemapId;
+  /** Whether the tileset is drawn. */
+  tilesetVisible: boolean;
   /** Called whenever the tileset loading status changes. */
   onStatusChange: (status: TypeTilesetStatus, message?: string) => void;
   /** Called with the terrain elevation request counts as they change, and with undefined for a fresh 3D view. */
@@ -43,7 +45,7 @@ interface GeoView3DOverlayProps {
 export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   logger.logTraceRender('geoview-3d/geoview-3d-overlay > GeoView3DOverlay');
 
-  const { tilesetUrl, basemapId, onStatusChange, onTerrainProgressChange, shouldFrameTileset } = props;
+  const { tilesetUrl, basemapId, tilesetVisible, onStatusChange, onTerrainProgressChange, shouldFrameTileset } = props;
   const { t } = useTranslation<string>();
   const theme = (window as TypeWindow).cgpv.ui.useTheme();
 
@@ -105,6 +107,16 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
 
     rendererRef.current?.setBasemap(basemapId);
   }, [basemapId]);
+
+  /**
+   * Shows or hides the tileset whenever the toggle changes (also on mount, once the renderer exists).
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-3D-OVERLAY - tileset visible', tilesetVisible);
+
+    rendererRef.current?.setTilesetVisible(tilesetVisible);
+  }, [tilesetVisible]);
 
   /**
    * Loads the tileset into the renderer whenever its URL changes.

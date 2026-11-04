@@ -91,6 +91,9 @@ export class TilesetRenderer {
   /** The layer rendering the current tileset, once its root tileset.json is validated. */
   #tilesetLayer?: SafeTile3DLayer;
 
+  /** Whether the tileset is drawn; hidden tilesets keep their loaded tiles. */
+  #tilesetVisible = true;
+
   /**
    * Creates the renderer and its deck.gl instance on the given canvas.
    *
@@ -164,6 +167,20 @@ export class TilesetRenderer {
     if (this.#destroyed || basemapId === this.#basemapId) return;
     this.#basemapId = basemapId;
     this.#basemapLayer = createBasemapLayer(basemapId);
+    this.#updateLayers();
+  }
+
+  /**
+   * Shows or hides the tileset, e.g. to look at the ground under it.
+   *
+   * The layer is hidden rather than removed, so its loaded tiles are kept and showing it again is immediate.
+   *
+   * @param visible - Whether the tileset is drawn
+   */
+  setTilesetVisible(visible: boolean): void {
+    if (this.#destroyed || visible === this.#tilesetVisible) return;
+    this.#tilesetVisible = visible;
+    this.#tilesetLayer = this.#tilesetLayer?.clone({ visible });
     this.#updateLayers();
   }
 
@@ -253,6 +270,7 @@ export class TilesetRenderer {
     return new SafeTile3DLayer({
       id: `${TILE3D_LAYER_ID}-${generation}`,
       data: tilesetUrl,
+      visible: this.#tilesetVisible,
       loader: Tiles3DLoader,
       loadOptions,
       // Draw glTF tiles with a scenegraph layer that honours COLOR_0 vertex colours.

@@ -48,6 +48,7 @@ class GeoView3DPlugin extends AppBarPlugin {
             '3D view of the configured 3D Tiles tileset. Use the arrow keys to pan, = and - to zoom, Shift with arrow keys to rotate and tilt.',
           canvasRole: '3D map',
           overlayHint: 'The 3D view covers the map while this panel is open. Close the panel to return to the 2D map.',
+          showTileset: 'Show 3D tileset',
           status: {
             invalidUrl: 'No valid tileset URL is configured (set tilesetUrl to an http(s) tileset.json).',
             webglUnavailable:
@@ -82,6 +83,7 @@ class GeoView3DPlugin extends AppBarPlugin {
             'Vue 3D du jeu de tuiles 3D configuré. Utilisez les flèches pour vous déplacer, = et - pour zoomer, Maj avec les flèches pour pivoter et incliner.',
           canvasRole: 'Carte 3D',
           overlayHint: 'La vue 3D recouvre la carte tant que ce panneau est ouvert. Fermez le panneau pour revenir à la carte 2D.',
+          showTileset: 'Afficher le jeu de tuiles 3D',
           status: {
             invalidUrl: "Aucune URL de jeu de tuiles valide n'est configurée (définir tilesetUrl vers un tileset.json http(s)).",
             webglUnavailable:

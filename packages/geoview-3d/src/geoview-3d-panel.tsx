@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, CheckCircleIcon, ErrorIcon, LoopIcon, Select, Typography } from 'geoview-core/ui';
+import { Box, CheckCircleIcon, ErrorIcon, LoopIcon, Select, Switch, Typography } from 'geoview-core/ui';
 import { visuallyHidden } from 'geoview-core/ui/style/default';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -57,6 +57,7 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string>('');
   // Kept here rather than in the overlay so the choice survives closing and reopening the panel.
   const [basemapId, setBasemapId] = useState<TypeBasemapId>(DEFAULT_BASEMAP_ID);
+  const [tilesetVisible, setTilesetVisible] = useState<boolean>(true);
   const [terrainProgress, setTerrainProgress] = useState<TypeTerrainProgress | undefined>(undefined);
   // Survives overlay remounts: the panel stays mounted while closed.
   const framedTilesetUrlsRef = useRef<Set<string>>(new Set());
@@ -101,6 +102,13 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   }, []);
 
   /**
+   * Handles the tileset visibility toggle.
+   */
+  const handleTilesetVisibleChange = useCallback((_event: unknown, checked: boolean): void => {
+    setTilesetVisible(checked);
+  }, []);
+
+  /**
    * Handles new terrain elevation request counts (undefined for a fresh 3D view).
    */
   const handleTerrainProgressChange = useCallback((progress: TypeTerrainProgress | undefined): void => {
@@ -142,6 +150,7 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
       <Box sx={visuallyHidden} role="alert">
         {terrainState === 'failed' ? t('GeoView3D.terrain.failedAnnouncement') : ''}
       </Box>
+      <Switch size="small" checked={tilesetVisible} onChange={handleTilesetVisibleChange} label={t('GeoView3D.showTileset')} />
       <Select
         value={basemapId}
         onChange={handleBasemapChange}
@@ -159,6 +168,7 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
           <GeoView3DOverlay
             tilesetUrl={config.tilesetUrl}
             basemapId={basemapId}
+            tilesetVisible={tilesetVisible}
             onStatusChange={handleStatusChange}
             onTerrainProgressChange={handleTerrainProgressChange}
             shouldFrameTileset={shouldFrameTileset}
