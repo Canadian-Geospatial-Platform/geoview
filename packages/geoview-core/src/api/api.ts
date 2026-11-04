@@ -153,8 +153,13 @@ export class API {
       return;
     }
 
-    // Get the div container
-    const gvRootElement = DomHelper.getGVRootElement(mapId);
+    let gvRootElement;
+    try {
+      // Try to get the div container if still there
+      gvRootElement = DomHelper.getGVRootElement(mapId);
+    } catch (error: unknown) {
+      logger.logWarning(`GV root element for mapId ${mapId} couldn't be found.`, error);
+    }
 
     // Delete the map
     await this.getMapViewer(mapId).delete();
