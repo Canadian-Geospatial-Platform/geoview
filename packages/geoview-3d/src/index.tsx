@@ -56,6 +56,16 @@ class GeoView3DPlugin extends AppBarPlugin {
             loaded: '3D tileset loaded.',
             error: 'The 3D tileset could not be displayed: {{message}}',
           },
+          basemap: {
+            label: 'Basemap',
+            cbmt: 'Canada Base Map (blurry past street scale)',
+            imagery: 'Esri World Imagery (sharp)',
+            none: 'None',
+            attribution: {
+              cbmt: '© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources',
+              imagery: 'Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community',
+            },
+          },
         },
       },
       fr: {
@@ -72,6 +82,16 @@ class GeoView3DPlugin extends AppBarPlugin {
             loading: 'Chargement du jeu de tuiles 3D…',
             loaded: 'Jeu de tuiles 3D chargé.',
             error: "Le jeu de tuiles 3D n'a pas pu être affiché : {{message}}",
+          },
+          basemap: {
+            label: 'Carte de base',
+            cbmt: 'Carte de base du Canada (floue à l’échelle de la rue)',
+            imagery: 'Imagerie mondiale Esri (nette)',
+            none: 'Aucune',
+            attribution: {
+              cbmt: '© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelles',
+              imagery: 'Source : Esri, Vantor, Earthstar Geographics et la communauté des utilisateurs SIG',
+            },
           },
         },
       },

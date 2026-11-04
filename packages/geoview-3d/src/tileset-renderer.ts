@@ -1,12 +1,14 @@
 import { Deck } from '@deck.gl/core';
 import type { MapViewState } from '@deck.gl/core';
-import type { Tile3DLayerProps } from '@deck.gl/geo-layers';
+import type { TileLayer, Tile3DLayerProps } from '@deck.gl/geo-layers';
 import { Tiles3DLoader } from '@loaders.gl/3d-tiles';
 import { load } from '@loaders.gl/core';
 
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { SafeTile3DLayer } from './safe-tile-3d-layer';
+import { createBasemapLayer, DEFAULT_BASEMAP_ID } from './basemap-layer';
+import type { TypeBasemapId } from './basemap-layer';
 import { refineThroughEmptyTiles } from './tileset-traversal';
 import { VertexColorScenegraphLayer } from './vertex-color-scenegraph-layer';
 import type { TypeSyncedViewport } from './viewport-sync';
@@ -64,19 +66,31 @@ export class TilesetRenderer {
   /** The camera currently shown, kept in step with user interaction so syncs preserve pitch and bearing. */
   #viewState: MapViewState = DEFAULT_VIEW_STATE;
 
+  /** The basemap currently drawn under the tileset. */
+  #basemapId: TypeBasemapId;
+
+  /** The ground basemap layer, kept across tileset changes; undefined when no basemap is drawn. */
+  #basemapLayer?: TileLayer;
+
+  /** The layer rendering the current tileset, once its root tileset.json is validated. */
+  #tilesetLayer?: SafeTile3DLayer;
+
   /**
    * Creates the renderer and its deck.gl instance on the given canvas.
    *
    * @param canvas - The canvas the deck.gl instance draws into
    * @param callbacks - Optional callbacks reporting the tileset loading lifecycle
+   * @param basemapId - The basemap drawn under the tileset
    */
-  constructor(canvas: HTMLCanvasElement, callbacks: TilesetRendererCallbacks = {}) {
+  constructor(canvas: HTMLCanvasElement, callbacks: TilesetRendererCallbacks = {}, basemapId: TypeBasemapId = DEFAULT_BASEMAP_ID) {
     this.#callbacks = callbacks;
+    this.#basemapId = basemapId;
+    this.#basemapLayer = createBasemapLayer(basemapId);
     this.#deck = new Deck({
       canvas,
       initialViewState: DEFAULT_VIEW_STATE,
       controller: true,
-      layers: [],
+      layers: this.#getLayers(),
       onViewStateChange: ({ viewState }): void => {
         this.#viewState = viewState;
       },
@@ -112,7 +126,8 @@ export class TilesetRenderer {
     this.#abortController?.abort();
     this.#abortController = undefined;
     this.#generation += 1;
-    this.#deck.setProps({ layers: [] });
+    this.#tilesetLayer = undefined;
+    this.#updateLayers();
 
     if (!url) return;
     const generation = this.#generation;
@@ -120,6 +135,18 @@ export class TilesetRenderer {
       // A superseded or destroyed request (incl. its abort) is no longer wanted; only the current one is reported.
       if (this.#isCurrent(generation)) this.#reportError(error instanceof Error ? error.message : String(error));
     });
+  }
+
+  /**
+   * Sets the basemap drawn under the tileset, replacing the current one.
+   *
+   * @param basemapId - The basemap to draw ('none' for no basemap)
+   */
+  setBasemap(basemapId: TypeBasemapId): void {
+    if (this.#destroyed || basemapId === this.#basemapId) return;
+    this.#basemapId = basemapId;
+    this.#basemapLayer = createBasemapLayer(basemapId);
+    this.#updateLayers();
   }
 
   /**
@@ -169,7 +196,24 @@ export class TilesetRenderer {
     await load(tilesetUrl, Tiles3DLoader, loadOptions);
 
     if (!this.#isCurrent(generation)) return;
-    this.#deck.setProps({ layers: [this.#createLayer(tilesetUrl, generation, loadOptions)] });
+    this.#tilesetLayer = this.#createLayer(tilesetUrl, generation, loadOptions);
+    this.#updateLayers();
+  }
+
+  /**
+   * Lists the layers to draw, basemap first so the tileset renders over it.
+   *
+   * @returns The deck.gl layers
+   */
+  #getLayers(): (TileLayer | SafeTile3DLayer)[] {
+    return [this.#basemapLayer, this.#tilesetLayer].filter((layer) => layer !== undefined);
+  }
+
+  /**
+   * Hands the current basemap and tileset layers to deck.gl.
+   */
+  #updateLayers(): void {
+    this.#deck.setProps({ layers: this.#getLayers() });
   }
 
   /**

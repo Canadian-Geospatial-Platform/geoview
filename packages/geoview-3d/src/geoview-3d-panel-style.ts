@@ -20,6 +20,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderRadius: theme.spacing(0.5),
     backgroundColor: theme.palette.background.default,
   },
+  attribution: {
+    color: theme.palette.text.secondary,
+  },
   overlay: {
     position: 'absolute',
     inset: 0,

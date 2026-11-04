@@ -10,6 +10,7 @@ import { useStoreMapCenterCoordinates, useStoreMapCurrentProjectionEPSG, useStor
 import { Projection } from 'geoview-core/geo/utils/projection';
 
 import { getSxClasses } from './geoview-3d-panel-style';
+import type { TypeBasemapId } from './basemap-layer';
 import { TilesetRenderer } from './tileset-renderer';
 import { toDeckViewport } from './viewport-sync';
 
@@ -20,6 +21,8 @@ export type TypeTilesetStatus = 'invalidUrl' | 'webglUnavailable' | 'loading' | 
 interface GeoView3DOverlayProps {
   /** The URL of the tileset.json to render. */
   tilesetUrl: string;
+  /** The basemap drawn under the tileset. */
+  basemapId: TypeBasemapId;
   /** Called whenever the tileset loading status changes. */
   onStatusChange: (status: TypeTilesetStatus, message?: string) => void;
   /** Decides whether to frame the camera on the loaded tileset rather than keep the synced 2D view. */
@@ -37,7 +40,7 @@ interface GeoView3DOverlayProps {
 export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   logger.logTraceRender('geoview-3d/geoview-3d-overlay > GeoView3DOverlay');
 
-  const { tilesetUrl, onStatusChange, shouldFrameTileset } = props;
+  const { tilesetUrl, basemapId, onStatusChange, shouldFrameTileset } = props;
   const { t } = useTranslation<string>();
   const theme = (window as TypeWindow).cgpv.ui.useTheme();
 
@@ -51,6 +54,9 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   onStatusChangeRef.current = onStatusChange;
   const shouldFrameTilesetRef = useRef(shouldFrameTileset);
   shouldFrameTilesetRef.current = shouldFrameTileset;
+  // Read once at creation; later changes go through setBasemap.
+  const basemapIdRef = useRef(basemapId);
+  basemapIdRef.current = basemapId;
 
   const mapController = useMapController();
   const mapCenter = useStoreMapCenterCoordinates();
@@ -65,11 +71,15 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
     logger.logTraceUseEffect('GEOVIEW-3D-OVERLAY - create renderer');
 
     if (!canvasRef.current) return undefined;
-    const renderer = new TilesetRenderer(canvasRef.current, {
-      onTilesetLoad: (): void => onStatusChangeRef.current('loaded'),
-      onError: (message: string): void => onStatusChangeRef.current('error', message),
-      shouldFrameTileset: (url: string): boolean => shouldFrameTilesetRef.current(url),
-    });
+    const renderer = new TilesetRenderer(
+      canvasRef.current,
+      {
+        onTilesetLoad: (): void => onStatusChangeRef.current('loaded'),
+        onError: (message: string): void => onStatusChangeRef.current('error', message),
+        shouldFrameTileset: (url: string): boolean => shouldFrameTilesetRef.current(url),
+      },
+      basemapIdRef.current
+    );
     rendererRef.current = renderer;
 
     return (): void => {
@@ -77,6 +87,16 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
       renderer.destroy();
     };
   }, []);
+
+  /**
+   * Switches the basemap drawn under the tileset whenever the selection changes.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-3D-OVERLAY - basemap', basemapId);
+
+    rendererRef.current?.setBasemap(basemapId);
+  }, [basemapId]);
 
   /**
    * Loads the tileset into the renderer whenever its URL changes.

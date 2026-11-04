@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Typography } from 'geoview-core/ui';
+import { Box, Select, Typography } from 'geoview-core/ui';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -11,6 +11,8 @@ import { useGVElementById } from 'geoview-core/core/stores/states/app-state';
 import { useStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
 
 import { getSxClasses } from './geoview-3d-panel-style';
+import { BASEMAP_IDS, DEFAULT_BASEMAP_ID, isBasemapId } from './basemap-layer';
+import type { TypeBasemapId } from './basemap-layer';
 import { GeoView3DOverlay } from './geoview-3d-overlay';
 import type { TypeTilesetStatus } from './geoview-3d-overlay';
 import type { TypeGeoView3DConfig } from './geoview-3d-types';
@@ -48,6 +50,8 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   const getElementById = useGVElementById();
   const [status, setStatus] = useState<TypeTilesetStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  // Kept here rather than in the overlay so the choice survives closing and reopening the panel.
+  const [basemapId, setBasemapId] = useState<TypeBasemapId>(DEFAULT_BASEMAP_ID);
   // Survives overlay remounts: the panel stays mounted while closed.
   const framedTilesetUrlsRef = useRef<Set<string>>(new Set());
   // Probed once, on first opening, so a page that never opens the panel never creates a WebGL context.
@@ -83,7 +87,16 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
     return true;
   }, []);
 
+  /**
+   * Handles a basemap selection.
+   */
+  const handleBasemapChange = useCallback((event: { target: { value: unknown } }): void => {
+    if (isBasemapId(event.target.value)) setBasemapId(event.target.value);
+  }, []);
+
   // #endregion
+
+  const basemapMenuItems = BASEMAP_IDS.map((id) => ({ item: { value: id, children: t(`GeoView3D.basemap.${id}`) } }));
 
   let displayedStatus: TypeTilesetStatus = status;
   if (!isUrlValid) displayedStatus = 'invalidUrl';
@@ -95,9 +108,26 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
       <Box sx={memoSxClasses.status} role="status" aria-live="polite">
         <Typography variant="body2">{t(`GeoView3D.status.${displayedStatus}`, { message: errorMessage })}</Typography>
       </Box>
+      <Select
+        value={basemapId}
+        onChange={handleBasemapChange}
+        menuItems={basemapMenuItems}
+        label={t('GeoView3D.basemap.label')}
+        fullWidth
+      />
+      {basemapId !== 'none' && (
+        <Typography variant="caption" sx={memoSxClasses.attribution}>
+          {t(`GeoView3D.basemap.attribution.${basemapId}`)}
+        </Typography>
+      )}
       {mapTarget &&
         createPortal(
-          <GeoView3DOverlay tilesetUrl={config.tilesetUrl} onStatusChange={handleStatusChange} shouldFrameTileset={shouldFrameTileset} />,
+          <GeoView3DOverlay
+            tilesetUrl={config.tilesetUrl}
+            basemapId={basemapId}
+            onStatusChange={handleStatusChange}
+            shouldFrameTileset={shouldFrameTileset}
+          />,
           mapTarget
         )}
     </Box>
