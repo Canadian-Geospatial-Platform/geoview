@@ -7,6 +7,7 @@ import { load } from '@loaders.gl/core';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { SafeTile3DLayer } from './safe-tile-3d-layer';
+import { refineThroughEmptyTiles } from './tileset-traversal';
 import type { TypeSyncedViewport } from './viewport-sync';
 
 /** The tileset object handed to Tile3DLayer's onTilesetLoad callback. */
@@ -206,6 +207,8 @@ export class TilesetRenderer {
       tileset.destroy();
       return;
     }
+
+    refineThroughEmptyTiles(tileset);
 
     const center = tileset.cartographicCenter;
     if (center && (this.#callbacks.shouldFrameTileset?.(tilesetUrl) ?? true)) {
