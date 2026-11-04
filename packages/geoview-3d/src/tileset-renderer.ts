@@ -251,6 +251,22 @@ export class TilesetRenderer {
   // #region STATIC METHODS
 
   /**
+   * Checks whether the browser can create a WebGL2 context, which deck.gl 9 requires.
+   *
+   * deck.gl starts its render loop without awaiting it, so a failed context creation rejects unhandled; probing first
+   * lets the caller show a message instead of creating a Deck that cannot render.
+   *
+   * @returns Whether a WebGL2 context (hardware or software) can be created
+   */
+  static isWebGL2Available(): boolean {
+    // A detached canvas: the probe never touches the page.
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
+  }
+
+  /**
    * Checks whether a configured tileset URL can be requested.
    *
    * Accepts absolute or page-relative http(s) URLs; rejects empty values, the REPLACE_ME placeholder and other schemes.

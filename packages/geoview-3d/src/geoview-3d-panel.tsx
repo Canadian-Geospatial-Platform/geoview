@@ -50,10 +50,16 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string>('');
   // Survives overlay remounts: the panel stays mounted while closed.
   const framedTilesetUrlsRef = useRef<Set<string>>(new Set());
+  // Probed once, on first opening, so a page that never opens the panel never creates a WebGL context.
+  const webgl2AvailableRef = useRef<boolean | undefined>(undefined);
 
   const isPanelOpen = activeAppBarTab.isOpen && activeAppBarTab.tabId === tabId;
   const isUrlValid = TilesetRenderer.isValidTilesetUrl(config.tilesetUrl);
-  const mapTarget = isPanelOpen && isUrlValid ? getElementById(GV_DOM_SUFFIX.mapTarget) : undefined;
+  if (isPanelOpen && isUrlValid && webgl2AvailableRef.current === undefined) {
+    webgl2AvailableRef.current = TilesetRenderer.isWebGL2Available();
+  }
+  const isWebGL2Missing = webgl2AvailableRef.current === false;
+  const mapTarget = isPanelOpen && isUrlValid && !isWebGL2Missing ? getElementById(GV_DOM_SUFFIX.mapTarget) : undefined;
 
   // #region Handlers
 
@@ -79,7 +85,9 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
 
   // #endregion
 
-  const displayedStatus: TypeTilesetStatus = isUrlValid ? status : 'invalidUrl';
+  let displayedStatus: TypeTilesetStatus = status;
+  if (!isUrlValid) displayedStatus = 'invalidUrl';
+  else if (isWebGL2Missing) displayedStatus = 'webglUnavailable';
 
   return (
     <Box sx={memoSxClasses.container}>

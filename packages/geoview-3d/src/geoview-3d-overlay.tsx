@@ -14,7 +14,7 @@ import { TilesetRenderer } from './tileset-renderer';
 import { toDeckViewport } from './viewport-sync';
 
 /** Loading state of the configured tileset. */
-export type TypeTilesetStatus = 'invalidUrl' | 'loading' | 'loaded' | 'error';
+export type TypeTilesetStatus = 'invalidUrl' | 'webglUnavailable' | 'loading' | 'loaded' | 'error';
 
 /** Props for the GeoView3DOverlay component. */
 interface GeoView3DOverlayProps {

@@ -50,6 +50,8 @@ class GeoView3DPlugin extends AppBarPlugin {
           overlayHint: 'The 3D view covers the map while this panel is open. Close the panel to return to the 2D map.',
           status: {
             invalidUrl: 'No valid tileset URL is configured (set tilesetUrl to an http(s) tileset.json).',
+            webglUnavailable:
+              'The 3D view needs WebGL2, which this browser cannot provide. Enable hardware acceleration in the browser settings, or try another browser.',
             loading: 'Loading 3D tileset…',
             loaded: '3D tileset loaded.',
             error: 'The 3D tileset could not be displayed: {{message}}',
@@ -65,6 +67,8 @@ class GeoView3DPlugin extends AppBarPlugin {
           overlayHint: 'La vue 3D recouvre la carte tant que ce panneau est ouvert. Fermez le panneau pour revenir à la carte 2D.',
           status: {
             invalidUrl: "Aucune URL de jeu de tuiles valide n'est configurée (définir tilesetUrl vers un tileset.json http(s)).",
+            webglUnavailable:
+              "La vue 3D nécessite WebGL2, que ce navigateur ne peut pas fournir. Activez l'accélération matérielle dans les paramètres du navigateur ou essayez un autre navigateur.",
             loading: 'Chargement du jeu de tuiles 3D…',
             loaded: 'Jeu de tuiles 3D chargé.',
             error: "Le jeu de tuiles 3D n'a pas pu être affiché : {{message}}",
