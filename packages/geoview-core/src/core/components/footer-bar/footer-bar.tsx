@@ -30,7 +30,7 @@ import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
-import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import { camelCase, delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 import { Guide } from '@/core/components/guide/guide';
@@ -114,7 +114,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     delay(TIMEOUT.tabsContainerResize).then(
       () => {
         if (tabsContainerRef.current) {
-          scrollIfNotVisible(tabsContainerRef.current, 'end');
+          DomHelper.scrollIfNotVisible(tabsContainerRef.current, 'end');
         }
       },
       (error: unknown) => logger.logPromiseFailed('Delay failed in handleHeaderClick', error)

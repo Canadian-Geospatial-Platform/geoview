@@ -15,6 +15,7 @@ import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';

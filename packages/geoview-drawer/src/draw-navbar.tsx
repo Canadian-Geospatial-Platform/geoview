@@ -3,7 +3,7 @@ import type { TypeDrawerConfig } from 'geoview-core/core/stores/states/drawer-st
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
 import { logger } from 'geoview-core/core/utils/logger';
-import { buildGVElementId, GV_DOM_SUFFIX } from 'geoview-core/core/utils/dom-helper';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 
 import Draw from './buttons/draw';
 import { GeometryPickerButton, GeometryPickerPanel } from './buttons/geometry-picker';
@@ -39,7 +39,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.toggleDrawing',
       tooltipPlacement: 'left',
-      children: createElement(Draw, { id: buildGVElementId(mapId, GV_DOM_SUFFIX.drawerDrawButton) }),
+      children: createElement(Draw, { id: DomHelper.buildGVElementId(mapId, 'drawer-draw') }), // TODO: Move this to specific function
       visible: true,
     },
     groupName: 'drawer',
@@ -88,7 +88,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
-      children: createElement(Edit, { id: buildGVElementId(mapId, GV_DOM_SUFFIX.drawerEditButton) }),
+      children: createElement(Edit, { id: DomHelper.buildGVElementId(mapId, 'drawer-edit') }), // TODO: Move this to specific function
       visible: true,
     },
     groupName: 'drawer',

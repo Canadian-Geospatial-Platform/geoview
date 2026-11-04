@@ -468,8 +468,8 @@ export class MapTester extends GVAbstractTester {
     return this.test(
       'Test crosshair pixel coordinates for Enter/Space with view padding and rotation',
       async (test): Promise<TypeCrosshairCoordinateResult[]> => {
-        const target = getGVMapTargetElement(mapId);
-        const svg = queryGVSelector<SVGSVGElement>(mapId, 'svg[viewBox="0 0 275 275"]');
+        const target = DomHelper.getMapTargetElement(mapId);
+        const svg = DomHelper.queryGVSelector<SVGSVGElement>(mapId, 'svg[viewBox="0 0 275 275"]');
         if (!target || !svg) throw new TestError('Crosshair and map target must be mounted');
         const results: TypeCrosshairCoordinateResult[] = [];
         mapController.setActiveMeasurementDraw(draw);

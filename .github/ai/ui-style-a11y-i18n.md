@@ -98,8 +98,6 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   before the Draw interaction aborts its sketch: measurement uses a capture-phase listener, and the drawer's
   handler is registered in `onHook`, ahead of any Draw instance. Reordering either makes one Escape do both.
   Editing follows the same rule through `DrawerController.handleEditingEscape()`: a grab or selection is cleared first.
-- [API.#manageMapCrosshairOnFocus](../../packages/geoview-core/src/api/api.ts) updates crosshair state
-  on Tab release. It does not manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [Map](../../packages/geoview-core/src/core/components/map/map.tsx) updates crosshair state on Tab release
   for focus within its own root. It activates only when the map target itself is focused and does not
   manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.

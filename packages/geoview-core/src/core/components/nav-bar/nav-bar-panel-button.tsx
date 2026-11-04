@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, cloneElement, isValidElement, useId } from 'react';
+import { useEffect, useMemo, useRef, useId } from 'react';
+import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +18,7 @@ import type { SxStyles } from '@/ui/style/types';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 
@@ -45,9 +47,8 @@ export default function NavbarPanelButton({
   isActive = false,
   keepPanelMounted = false,
   liveRegionContent,
-  onOpenChange
+  onOpenChange,
 }: NavbarPanelButtonType): JSX.Element {
-export default function NavbarPanelButton({ buttonPanel, isActive = false, onOpenChange }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
@@ -77,32 +78,36 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false, onOpe
   // States
   const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [localOpen, setLocalOpen] = useState(buttonPanel.panel?.status ?? false);
-  const open = onOpenChange ? (buttonPanel.panel?.status ?? false) : localOpen;
-  const anchorEl = buttonRef.current;
+  const previousRequestedOpen = useRef(false);
+  const previousOpen = useRef(open);
+
+  useEffect((): void => {
+    logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - external open state', buttonPanel.panel?.status);
+    const requestedOpen = buttonPanel.panel?.status ?? false;
+    if (requestedOpen === previousRequestedOpen.current) return;
+    previousRequestedOpen.current = requestedOpen;
+
+    if (requestedOpen && buttonRef.current) openAt(buttonRef.current);
+    else closePanel();
+  }, [buttonPanel.panel?.status, closePanel, openAt]);
+
+  useEffect((): void => {
+    logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - open state callback', open);
+    if (previousOpen.current === open) return;
+    previousOpen.current = open;
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   // #region Handlers
 
   /**
-   * Closes the panel and clears the anchor element.
-   */
-  const closePanel = (): void => {
-    if (onOpenChange) {
-      onOpenChange(false);
-    } else {
-      setLocalOpen(false);
-    }
-  };
-
-  /**
    * Handles when the user clicks the navbar button to toggle the panel.
    */
-  const handleClick = (): void => {
-    if (onOpenChange) {
-      onOpenChange(!open);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (open) {
+      closePanel();
     } else {
       openAt(event.currentTarget);
-      setLocalOpen(!open);
     }
   };
 
@@ -122,16 +127,12 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false, onOpe
    *
    * @returns The rendered panel content
    */
-  const renderPanelContent = (): JSX.Element => {
+  const renderPanelContent = (): ReactNode => {
     if (buttonPanel.panel?.convertHtmlContent) {
       return <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />;
     }
 
-    if (isValidElement(buttonPanel.panel?.content)) {
-      return cloneElement(buttonPanel.panel.content as React.ReactElement<{ closePanel?: () => void }>, { closePanel });
-    }
-
-    return buttonPanel.panel?.content as JSX.Element;
+    return buttonPanel.panel?.content;
   };
 
   return (
