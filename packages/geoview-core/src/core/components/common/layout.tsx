@@ -13,8 +13,11 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
+import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Properties for the Layout component. */
 interface LayoutProps {
@@ -98,6 +101,8 @@ const Layout = forwardRef(
       layerName = t('details.coordinateInfoTitle');
     }
     const uiController = useUIController();
+    const mapId = useStoreGeoViewMapId();
+    const isCrosshairsActive = useStoreAppIsCrosshairsActive();
 
     // #region Handlers
 
@@ -182,15 +187,18 @@ const Layout = forwardRef(
     }));
 
     /**
-     * Handles right panel close - restores focus to the LayerListItem that opened it.
+     * Restores focus to the map in keyboard navigation mode, or to the selected layer otherwise.
      */
     const handleRightPanelClosed = useCallback((): void => {
       onRightPanelClosed?.();
 
       const selectedLayer = selectedLayerPath ? layerList.find((layer) => layer.layerPath === selectedLayerPath) : undefined;
+      const focusRestoreElementId = isCrosshairsActive
+        ? DomHelper.buildMapTargetElementId(mapId)
+        : (selectedLayer?.layerUniqueId ?? 'no-focus');
 
-      uiController.disableFocusTrap(selectedLayer?.layerUniqueId ?? 'no-focus');
-    }, [onRightPanelClosed, selectedLayerPath, layerList, uiController]);
+      uiController.disableFocusTrap(focusRestoreElementId);
+    }, [onRightPanelClosed, selectedLayerPath, layerList, isCrosshairsActive, mapId, uiController]);
 
     return (
       <ResponsiveGridLayout

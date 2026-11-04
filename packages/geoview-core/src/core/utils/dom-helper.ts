@@ -682,6 +682,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets a map's main skip-link target element.
+   *
+   * @param mapId - The map identifier
+   * @returns The main map element, or undefined when the map is not yet mounted
+   */
+  static getMainMap(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'main-map');
+  }
+
+  /**
    * Returns the currently focused element when it belongs to the specified map.
    *
    * @param mapId - The map identifier
@@ -880,6 +890,17 @@ export abstract class DomHelper {
    */
   static getAppBarPanel(mapId: string, tabId: string): HTMLElement | undefined {
     return DomHelper.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
+  }
+
+  /**
+   * Gets an app bar panel close button element.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The app bar panel close button element, if found
+   */
+  static getAppBarPanelCloseButton(mapId: string, tabId: string): HTMLButtonElement | undefined {
+    return DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-close-btn`);
   }
 
   /**
