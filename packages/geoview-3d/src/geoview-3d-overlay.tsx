@@ -18,6 +18,12 @@ import { toDeckViewport } from './viewport-sync';
 /** Loading state of the configured tileset. */
 export type TypeTilesetStatus = 'invalidUrl' | 'webglUnavailable' | 'loading' | 'loaded' | 'error';
 
+/**
+ * Keys the 3D view navigates with (deck.gl's keyboard controller reads `event.code`), plus the numeric keypad's + and -,
+ * which OpenLayers zooms with.
+ */
+const NAVIGATION_KEY_CODES = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Minus', 'Equal', 'NumpadAdd', 'NumpadSubtract']);
+
 /** Props for the GeoView3DOverlay component. */
 interface GeoView3DOverlayProps {
   /** The URL of the tileset.json to render. */
@@ -95,6 +101,32 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
     return (): void => {
       rendererRef.current = undefined;
       renderer.destroy();
+    };
+  }, []);
+
+  /**
+   * Keeps the 3D view's navigation keys from also driving the 2D map behind it.
+   *
+   * OpenLayers listens for keys on the map container, which contains this canvas, so arrow and zoom keys pressed in the
+   * 3D view would also pan or zoom the 2D map, and the 2D-to-3D sync would then move the 3D camera. A native listener is
+   * needed: the map container receives the event before React's root listener. deck.gl's own listener sits on the
+   * canvas itself, so it still gets the keys. Escape and Tab still bubble (GeoView's focus trap needs them).
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOVIEW-3D-OVERLAY - keyboard isolation');
+
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+    const stopNavigationKey = (event: KeyboardEvent): void => {
+      if (NAVIGATION_KEY_CODES.has(event.code)) event.stopPropagation();
+    };
+    // OpenLayers' KeyboardZoom also reacts to keypress (the "-" character), not only keydown.
+    const keyEvents = ['keydown', 'keypress', 'keyup'] as const;
+    keyEvents.forEach((type) => canvas.addEventListener(type, stopNavigationKey));
+
+    return (): void => {
+      keyEvents.forEach((type) => canvas.removeEventListener(type, stopNavigationKey));
     };
   }, []);
 
