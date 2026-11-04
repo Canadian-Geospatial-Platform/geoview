@@ -34,6 +34,7 @@ import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/except
 import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import { NoBoundsError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
 import { GVWMS } from 'geoview-core/geo/layer/gv-layers/raster/gv-wms';
@@ -86,16 +87,43 @@ export class LayerTester extends GVAbstractTester {
    * @returns Immutable feature and query results for assertion
    */
   #testGeojsonSource(reproject: boolean): Promise<Test<GeojsonInjectionResult>> {
+    // Give this run its own layer id so repeated executions cannot collide with existing test layers.
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
     const mapViewer = this.getMapViewer();
     const initialProjection = getStoreMapStateJson(this.getMapId()).currentProjection;
+
+    // The test switches only between projections supported by its coordinate fixtures.
     if (initialProjection !== 3978 && initialProjection !== 3857) throw new TestError('Unsupported test map projection');
+
+    // Snapshot the shared map view because the projection variant must leave the map as it found it.
     const initialCenter = mapViewer.getView().getCenter()?.slice();
     const initialZoom = mapViewer.getView().getZoom();
     const initialRotation = mapViewer.getView().getRotation();
-    let layer: GVGeoJSON | undefined;
+
+    // The first injection has two distinguishable features so replacement can be checked exactly.
+    const originalCoordinates1 = [-75, 45];
+    const originalCoordinates2 = [-80, 50];
+    const original: GeoJSONObject = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', id: 'original-1', properties: { Red: 11 }, geometry: { type: 'Point', coordinates: originalCoordinates1 } },
+        { type: 'Feature', id: 'original-2', properties: { Red: 12 }, geometry: { type: 'Point', coordinates: originalCoordinates2 } },
+      ],
+    };
+
+    // A single replacement makes stale features obvious in both the source and query results.
+    const replacementCoordinates = [-100, 55];
+    const replacement: GeoJSONObject = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', id: 'replacement', properties: { Red: 33 }, geometry: { type: 'Point', coordinates: replacementCoordinates } },
+      ],
+    };
+
+    let layer: AbstractBaseGVLayer | undefined;
     let loadedEvents = 0;
+    // Count public injection completion events separately from the layer's initial load.
     const loadedHandler = (): void => {
       loadedEvents++;
     };
@@ -104,81 +132,104 @@ export class LayerTester extends GVAbstractTester {
         ? 'Test public GeoJSON replacement features reproject after a map projection change...'
         : 'Test public GeoJSON object injection and JSON-string replacement...',
       async (test) => {
+        // Use a blank but queryable layer so all feature data comes from the public injection calls below.
         test.addStep('Adding an isolated queryable blank GeoJSON layer...');
         const config = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, GVAbstractTester.GEOJSON_METADATA_META_BLANK, false, [
           { id: GVAbstractTester.GEOJSON_BLANK },
         ]);
+
         await this.helperStepAddLayerOnMap(test, config);
-        const registeredLayer = await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
-        if (!(registeredLayer instanceof GVGeoJSON)) throw new TestError('Expected a GeoJSON layer for injection');
-        layer = registeredLayer;
+        layer = await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+        if (!(layer instanceof GVGeoJSON)) throw new TestError('Expected a GeoJSON layer for injection');
+
+        // Subscribe after initial layer setup so this count reflects the two injections and optional reinjection.
         layer.onLayerLoaded(loadedHandler);
         const allFeatureInfo = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet;
-        await allFeatureInfo.waitForLayerToGetRegistered(layerPath);
-        const original: GeoJSONObject = {
-          type: 'FeatureCollection',
-          features: [
-            { type: 'Feature', id: 'original-1', properties: { Red: 11 }, geometry: { type: 'Point', coordinates: [-75, 45] } },
-            { type: 'Feature', id: 'original-2', properties: { Red: 12 }, geometry: { type: 'Point', coordinates: [-80, 50] } },
-          ],
-        };
-        const replacement: GeoJSONObject = {
-          type: 'FeatureCollection',
-          features: [{ type: 'Feature', id: 'replacement', properties: { Red: 33 }, geometry: { type: 'Point', coordinates: [-100, 55] } }],
-        };
 
+        // Wait until the query layer exists before triggering source updates that should refresh its results.
+        await allFeatureInfo.waitForLayerToGetRegistered(layerPath);
+
+        // The public API accepts a GeoJSON object; wait for its asynchronous query refresh before taking a snapshot.
         test.addStep('Awaiting public object injection and its asynchronous feature-info refresh...');
         await mapViewer.layer.setGeojsonSource(layerPath, original);
         await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
+
+        // Get the initial Geojson injection
         const initial = this.#snapshotGeojsonInjection(layer, loadedEvents);
 
+        // Replace through the string overload to verify parsing and replacement, not feature accumulation.
         test.addStep('Replacing features using JSON-string input and the stored source projection...');
         await mapViewer.layer.setGeojsonSource(layerPath, JSON.stringify(replacement));
         await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
+
+        // Prepare the result object with the initial and replacement snapshots.
         const result: GeojsonInjectionResult = {
           initial,
           replacement: this.#snapshotGeojsonInjection(layer, loadedEvents),
         };
+
+        // If reprojecting
         if (reproject) {
+          // The helper listens for the next loaded event before changing projection, avoiding a missed fast completion.
           test.addStep('Changing map projection and waiting for the injected layer to finish reinjection...');
           await LayerTester.#withGeojsonLoaded(layer, () =>
             this.getControllersRegistry().mapController.setProjection(initialProjection === 3978 ? 3857 : 3978)
           );
-          // Projection switches reset table results; query the reprojected source explicitly.
+          // Projection switches reset table results, so query the reprojected source explicitly before snapshotting.
           await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
           result.reprojected = this.#snapshotGeojsonInjection(layer, loadedEvents);
         }
+
+        // Return the final result of the GeoJSON injection, including any reprojected snapshot if applicable.
         return result;
       },
       (test, result) => {
+        // Compare identities, values, coordinates, query contents, status, projection metadata, and completion counts.
         test.addStep('Verifying exact feature identities, properties, positions, loaded events and query replacement...');
         LayerTester.#assertGeojsonInjection(
           result.initial,
-          ['original-1', 'original-2'],
-          [11, 12],
-          [
-            [-75, 45],
-            [-80, 50],
-          ],
+          [String(original.features[0].id ?? ''), String(original.features[1].id ?? '')],
+          [original.features[0].properties?.Red, original.features[1].properties?.Red],
+          [originalCoordinates1, originalCoordinates2],
           1
         );
-        LayerTester.#assertGeojsonInjection(result.replacement, ['replacement'], [33], [[-100, 55]], 2);
+        LayerTester.#assertGeojsonInjection(
+          result.replacement,
+          ['replacement'],
+          [replacement.features[0].properties?.Red],
+          [[-100, 55]],
+          2
+        );
+
         if (reproject) {
           Test.assertIsDefined('reprojected', result.reprojected);
-          LayerTester.#assertGeojsonInjection(result.reprojected, ['replacement'], [33], [[-100, 55]], 3);
+          LayerTester.#assertGeojsonInjection(
+            result.reprojected,
+            ['replacement'],
+            [replacement.features[0].properties?.Red],
+            [replacementCoordinates],
+            3
+          );
         }
       },
       async (test) => {
-        layer?.offLayerLoaded(loadedHandler);
+        // Remove the observer before teardown so layer removal cannot affect the injection event count.
+        if (layer instanceof AbstractGVLayer) {
+          layer?.offLayerLoaded(loadedHandler);
+        }
+
         try {
+          // Remove the isolated test layer even when an earlier assertion failed.
           this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         } finally {
           if (reproject) {
+            // Restore the shared map state even when injection, assertions, or layer cleanup failed.
             await this.getControllersRegistry().mapController.setProjection(initialProjection);
             const view = mapViewer.getView();
             view.setCenter(initialCenter);
             if (initialZoom !== undefined) view.setZoom(initialZoom);
             this.getControllersRegistry().mapController.rotate(initialRotation, false);
+            // Wait for rendering to settle before another test uses this map.
             await mapViewer.waitForRender();
           }
         }

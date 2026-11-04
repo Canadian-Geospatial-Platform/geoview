@@ -68,12 +68,13 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testAddWMSDuplicateGroupNames();
+    await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
+    await this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
 
     // Resolve when all
-    return Promise.all([pDevTest0]);
+    return Promise.resolve();
   }
 
   /**
