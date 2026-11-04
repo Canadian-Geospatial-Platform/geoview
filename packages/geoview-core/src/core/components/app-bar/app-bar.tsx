@@ -43,6 +43,7 @@ import {
   useStoreUIAppBarPanelIds,
 } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
+import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
@@ -108,6 +109,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
   const interaction = useStoreMapInteraction();
+  const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const appBarComponents = useStoreUIAppbarComponents();
   const { tabId, isOpen, isFocusTrapped } = useStoreUIActiveAppBarTab();
   const hiddenTabs = useStoreUIHiddenTabs();
@@ -260,23 +262,25 @@ export function AppBar(props: AppBarProps): JSX.Element {
   );
 
   /**
-   * Handles the general close action of a panel.
+   * Handles the general close action of a panel and restores focus to its appropriate target.
    *
    * @param buttonId - The id of the panel button to close
    */
   const handleGeneralCloseClicked = useCallback(
     (buttonId: string): void => {
-      // Return focus to the AppBar button that opened this panel
+      const returnFocusToMap = isCrosshairsActive && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
+
       if (isFocusTrapped) {
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          DomHelper.getAppBarButton(mapId, buttonId)?.focus({ focusVisible: true });
+          const focusTarget = returnFocusToMap ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
+          focusTarget?.focus({ focusVisible: true });
         }, TIMEOUT.dataPanelLoading);
       }
 
       uiController.setActiveAppBarTab(buttonId, false, false);
     },
-    [uiController, isFocusTrapped, mapId]
+    [uiController, isFocusTrapped, mapId, isCrosshairsActive]
   );
 
   /**

@@ -18,6 +18,7 @@ import {
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/states/feature-info-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
+import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import {
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
@@ -39,6 +40,7 @@ import { checkSelectedLayerPathList } from '@/core/components/common/comp-common
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
 import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
@@ -93,6 +95,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const checkedFeatures = useStoreDetailsCheckedFeatures();
   const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
   const hideCoordinateInfoSwitch = useStoreDetailsHideCoordinateInfoSwitch();
+  const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const orderedLayers = useStoreLayerOrderedLayerPaths();
   const mapClickCoordinates = useStoreMapClickCoordinates();
@@ -607,6 +610,22 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     [detailsController]
   );
   // #endregion
+
+  /**
+   * Focuses the Details panel header close button after a new crosshair query.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect(
+      'DETAILS-PANEL - focus header close button after crosshair query',
+      mapClickCoordinates,
+      appBarTabId,
+      appBarIsOpen
+    );
+
+    if (mapClickCoordinates && isCrosshairsActive && containerType === CONTAINER_TYPE.APP_BAR && appBarIsOpen && appBarTabId) {
+      DomHelper.getAppBarPanelCloseButton(mapId, appBarTabId)?.focus({ focusVisible: true });
+    }
+  }, [mapClickCoordinates, isCrosshairsActive, containerType, appBarIsOpen, appBarTabId, mapId]);
 
   /**
    * Selects a layer after a map click.

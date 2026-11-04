@@ -883,6 +883,17 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets an app bar panel close button element.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The app bar panel close button element, if found
+   */
+  static getAppBarPanelCloseButton(mapId: string, tabId: string): HTMLButtonElement | undefined {
+    return DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-close-btn`);
+  }
+
+  /**
    * Waits for an app bar tab button to receive the active class.
    *
    * @param mapId - The map container identifier

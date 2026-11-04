@@ -82,7 +82,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - shellElementRef');
-    shellElementRef.current = shellContainer?.querySelector('.geoview-shell') ?? null;
+    shellElementRef.current = shellContainer ?? null;
   }, [shellContainer]);
 
   /**
@@ -232,13 +232,17 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       mapHTMLElement.addEventListener('keydown', handleExit);
 
       // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
-      // Focus on the skip to main content link to skip app bar
       setTimeout(() => {
-        // Explicitly request focus indicator for keyboard users (WCAG navigation)
-        DomHelper.getGVElementById(mapId, 'main-map')?.focus({ preventScroll: true, focusVisible: true });
+        if (mapTargetElement?.tabIndex === 0) {
+          uiController.setCrosshairActive(true);
+          mapTargetElement.focus({ preventScroll: true });
+        } else {
+          // Static maps do not support map keyboard interaction.
+          DomHelper.getGVElementById(mapId, 'main-map')?.focus({ preventScroll: true, focusVisible: true });
+        }
       }, FOCUS_DELAY);
     }
-  }, [handleExit, mapId, uiController]);
+  }, [handleExit, mapId, mapTargetElement, uiController]);
 
   /**
    * Handles when the user clicks the enable focus trap button.

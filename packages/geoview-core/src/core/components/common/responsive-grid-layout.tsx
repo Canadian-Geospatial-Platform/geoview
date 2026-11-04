@@ -27,7 +27,7 @@ import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
-import { useStoreAppGuide, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
+import { useStoreAppGuide, useStoreAppIsCrosshairsActive, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -130,6 +130,7 @@ const ResponsiveGridLayout = forwardRef(
     // Store
     const mapId = useStoreGeoViewMapId();
     const guide = useStoreAppGuide();
+    const isCrosshairsActive = useStoreAppIsCrosshairsActive();
     const isFocusTrap = useStoreUIActiveTrapGeoView();
     const isMapFullScreen = useStoreAppIsFullscreenActive();
     const focusItem = useStoreUIActiveFocusItem();
@@ -373,12 +374,12 @@ const ResponsiveGridLayout = forwardRef(
      */
     useEffect(() => {
       logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - focus close button when right panel visible', isRightPanelVisible, hasContent);
-      if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
+      if (isRightPanelVisible && hasContent && !isGuideOpen && !isCrosshairsActive && closeBtnRef.current) {
         requestAnimationFrame(() => {
           closeBtnRef.current?.focus();
         });
       }
-    }, [isRightPanelVisible, hasContent, isGuideOpen]);
+    }, [isRightPanelVisible, hasContent, isGuideOpen, isCrosshairsActive]);
 
     /**
      * Handles the enlarge toggle button click.
