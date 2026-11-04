@@ -124,13 +124,15 @@ export class LayerTester extends GVAbstractTester {
           type: 'FeatureCollection',
           features: [{ type: 'Feature', id: 'replacement', properties: { Red: 33 }, geometry: { type: 'Point', coordinates: [-100, 55] } }],
         };
+
         test.addStep('Awaiting public object injection and its asynchronous feature-info refresh...');
         await mapViewer.layer.setGeojsonSource(layerPath, original);
-        await allFeatureInfo.waitForLayerQueryToFinish(layerPath, GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS);
+        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
         const initial = this.#snapshotGeojsonInjection(layer, loadedEvents);
+
         test.addStep('Replacing features using JSON-string input and the stored source projection...');
         await mapViewer.layer.setGeojsonSource(layerPath, JSON.stringify(replacement));
-        await allFeatureInfo.waitForLayerQueryToFinish(layerPath, GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS);
+        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
         const result: GeojsonInjectionResult = {
           initial,
           replacement: this.#snapshotGeojsonInjection(layer, loadedEvents),
@@ -257,7 +259,7 @@ export class LayerTester extends GVAbstractTester {
     const completion = Promise.withResolvers<void>();
     const loaded = (): void => completion.resolve();
     const failed = (): void => completion.reject(new TestError('GeoJSON reinjection emitted a layer error'));
-    const signal = AbortSignal.timeout(GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS);
+    const signal = AbortSignal.timeout(10000); // TODO: Fix this timeout
     const timedOut = (): void => completion.reject(new TestError('Timed out waiting for GeoJSON reinjection'));
     layer.onLayerLoaded(loaded);
     layer.onLayerError(failed);

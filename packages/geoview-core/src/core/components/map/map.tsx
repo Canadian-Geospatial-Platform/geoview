@@ -130,7 +130,7 @@ export function Map(props: MapProps): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleGlobalShortcut);
     };
-  }, [viewer, mapInteraction, mapId, uiController]);
+  }, [viewer, mapInteraction, mapId, uiController, t]);
 
   /**
    * Updates crosshair activation when Tab changes focus within this map.

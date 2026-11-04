@@ -48,7 +48,9 @@ import {
   type TypeDrawingHint,
 } from '@/core/stores/states/app-state';
 import { getStoreMapConfigNavBar } from '@/core/stores/states/map-state';
+import { getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { createGuideObject, exitFullscreen, getFullscreenElement, requestFullscreen } from '@/core/utils/utilities';
@@ -471,8 +473,8 @@ export class UIController extends AbstractMapViewerController {
    */
   focusToolButton(suffix: string): void {
     const mapId = this.getMapId();
-    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== getGVMapTargetElement(mapId)) return;
-    getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId)) return;
+    DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
   }
 
   /**
@@ -816,7 +818,7 @@ export class UIController extends AbstractMapViewerController {
       this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
         this.#fullscreenFocusFrame = undefined;
         if (!getFullscreenElement() && this.#hasActiveKeyboardTool()) {
-          getGVMapTargetElement(mapId)?.focus({ preventScroll: true });
+          DomHelper.getMapTargetElement(mapId)?.focus({ preventScroll: true });
         }
       });
     }

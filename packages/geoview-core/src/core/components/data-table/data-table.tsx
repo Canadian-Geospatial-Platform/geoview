@@ -50,7 +50,7 @@ import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useDataTableController, useLayerController, useUIController } from '@/core/controllers/use-controllers';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { isImage, linkifyAndSanitizeHtml, containsHtmlTags, scrollIfNotVisible } from '@/core/utils/utilities';
+import { isImage, linkifyAndSanitizeHtml, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -802,7 +802,7 @@ function DataTable({
       if (extent) {
         // Bring the map into view, like the map info bar and app bar do
         const shellElement = DomHelper.getShellElement(mapId);
-        if (shellElement) scrollIfNotVisible(shellElement, 'start');
+        if (shellElement) DomHelper.scrollIfNotVisible(shellElement, 'start');
 
         // Zoom to extent and wait for it to finish
         layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, undefined, true).catch((error: unknown) => {

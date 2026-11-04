@@ -1830,133 +1830,6 @@ export function handleEscapeKey(key: string, cb?: () => void, callbackId?: strin
   }
 }
 
-/** Input types that accept typed text. */
-const TEXT_INPUT_TYPES = ['text', 'search', 'url', 'email', 'tel', 'password', 'number'];
-
-/**
- * Checks whether an element accepts typed text or selection, so keyboard shortcuts must not override its native keys.
- *
- * @param element - The element to check, such as the active element
- * @returns True when the element is a text input, textarea, select or content-editable element
- */
-// TODO: ALEX - Delete this function to use DomHelper's instead
-export function isEditableElement(element: Element | null): boolean {
-  if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.includes(element.type);
-  return (
-    element instanceof HTMLTextAreaElement ||
-    element instanceof HTMLSelectElement ||
-    (element instanceof HTMLElement && element.isContentEditable)
-  );
-}
-
-/**
- * Check if element is in viewport.
- *
- * @param el - The element to check for
- * @returns true if visible, false otherwise
- */
-export function isElementInViewport(el: Element): boolean {
-  const rect = el.getBoundingClientRect();
-
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
-}
-
-/**
- * Scrolls an element into view only if it's not already visible in the viewport.
- *
- * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
- * For 'start': adds offset pixels above the element.
- * For 'end': adds offset pixels below the element.
- * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
- *
- * @param el - The HTML element to scroll into view if not visible
- * @param blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
- * @param offset - Optional offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
- */
-export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset = 100): void {
-  // Accessibility-first: default to instant scroll when matchMedia unavailable (SSR/test environments)
-  const prefersReducedMotion =
-    typeof window === 'undefined' ||
-    typeof window.matchMedia !== 'function' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
-  const rect = el.getBoundingClientRect();
-  if (rect.top < offset || rect.bottom > window.innerHeight) {
-    if (blockValue === 'center' || blockValue === 'nearest') {
-      el.scrollIntoView({ behavior: behaviorScroll, block: blockValue });
-    } else {
-      let scrollTop;
-      if (blockValue === 'end') {
-        scrollTop = window.scrollY + rect.bottom - window.innerHeight + offset;
-      } else {
-        scrollTop = window.scrollY + rect.top - offset;
-      }
-      window.scrollTo({
-        top: scrollTop,
-        behavior: behaviorScroll,
-      });
-    }
-  }
-}
-
-/**
- * Scrolls a list item into view within its scrollable container only, without scrolling the page.
- *
- * Adds a 20px gap for better visibility when scrolling.
- *
- * @param listItem - The list item element to scroll into view
- */
-export function scrollListItemIntoView(listItem: HTMLElement): void {
-  // Accessibility-first: default to instant scroll when matchMedia unavailable (SSR/test environments)
-  const prefersReducedMotion =
-    typeof window === 'undefined' ||
-    typeof window.matchMedia !== 'function' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
-  const gap = 20;
-
-  // Find the nearest scrollable parent
-  let container: HTMLElement | null = listItem.parentElement;
-  while (container && container !== document.body) {
-    const { overflowY } = window.getComputedStyle(container);
-    if ((overflowY === 'auto' || overflowY === 'scroll') && container.scrollHeight > container.clientHeight) {
-      break;
-    }
-    container = container.parentElement;
-  }
-
-  if (!container || container === document.body) return;
-
-  // Check if item is outside the visible area
-  const itemRect = listItem.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-  const isAbove = itemRect.top < containerRect.top;
-  const isBelow = itemRect.bottom > containerRect.bottom;
-
-  if (!isAbove && !isBelow) return;
-
-  // Calculate scroll position
-  const itemTop = listItem.offsetTop - container.offsetTop;
-  const itemBottom = itemTop + listItem.offsetHeight;
-
-  let newScrollTop;
-  if (isAbove) {
-    newScrollTop = Math.max(0, itemTop - gap);
-  } else {
-    newScrollTop = itemBottom - container.clientHeight + gap;
-  }
-
-  container.scrollTo({
-    top: newScrollTop,
-    behavior: behaviorScroll,
-  });
-}
-
 /**
  * Formats a numeric value according to the display language.
  *
@@ -2020,7 +1893,7 @@ export function formatArea(area: number, displayLanguage: TypeDisplayLanguage): 
  * @returns The normalized access path
  */
 export function normalizeDatacubeAccessPath(path: string): string {
-  //TODO: extract to list of exceptions / normalizations?
+  //TODO: ALEX - extract to list of exceptions / normalizations (use services-manager class)
   return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
 }
 

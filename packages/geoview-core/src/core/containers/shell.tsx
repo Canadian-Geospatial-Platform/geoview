@@ -40,7 +40,7 @@ import { ShellContainerContext } from '@/core/containers/shell-container-context
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { useEffectHostResizeSync } from './use-effect-host-resize-sync';
-import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import { delay } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
@@ -270,7 +270,7 @@ export function Shell(props: ShellProps): JSX.Element {
     if (!shellRef.current) return;
 
     // Check if the map is already in view, then scroll if needed
-    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
+    DomHelper.scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
 
   /**

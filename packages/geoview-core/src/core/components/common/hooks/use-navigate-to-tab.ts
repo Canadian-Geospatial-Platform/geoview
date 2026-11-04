@@ -4,7 +4,6 @@ import {
   useStoreUIFooterBarComponents,
   useStoreUIAppbarComponents,
 } from '@/core/stores/states/ui-state';
-import { scrollIfNotVisible } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
@@ -63,7 +62,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
           // Scroll the footer into view
           const footer = DomHelper.getTabsContainer(mapId);
           if (footer) {
-            scrollIfNotVisible(footer, 'start');
+            DomHelper.scrollIfNotVisible(footer, 'start');
           }
         }, delay);
       } else if (hasAppBarTab) {

@@ -241,23 +241,24 @@ export abstract class DomHelper {
   }
 
   /**
-   * Checks whether an element is an input, textarea, or contenteditable element.
+   * Checks whether an element is an input, textarea, select, or contenteditable element.
    *
    * @param element - The element to check, or undefined when there is no active element
-   * @returns Whether the element is an input, textarea, or contenteditable element
+   * @returns Whether the element is an input, textarea, select, or contenteditable element
    */
   static isInputOrContentEditableElement(element: Element | null | undefined): boolean {
     return (
       element instanceof window.HTMLInputElement ||
       element instanceof window.HTMLTextAreaElement ||
+      element instanceof window.HTMLSelectElement ||
       DomHelper.isContentEditableElement(element)
     );
   }
 
   /**
-   * Checks whether the currently focused element is an input, textarea, or contenteditable element.
+   * Checks whether the currently focused element is an input, textarea, select, or contenteditable element.
    *
-   * @returns Whether the active element is an input, textarea, or contenteditable element
+   * @returns Whether the active element is an input, textarea, select, or contenteditable element
    */
   static isActiveElementInputOrContentEditableElement(): boolean {
     return DomHelper.isInputOrContentEditableElement(DomHelper.getActiveElement());
@@ -271,6 +272,107 @@ export abstract class DomHelper {
    */
   static isContentEditableElement(element: Element | null | undefined): boolean {
     return element instanceof window.HTMLElement && element.isContentEditable;
+  }
+
+  /**
+   * Checks whether an element is fully visible in the viewport.
+   *
+   * @param element - The element to check
+   * @returns Whether the element is visible within the viewport
+   */
+  static isElementInViewport(element: Element): boolean {
+    const rect = element.getBoundingClientRect();
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  /**
+   * Scrolls an element into view only if it is outside the viewport.
+   *
+   * Respects reduced-motion preferences. For 'start', adds offset pixels above the element.
+   * For 'end', adds offset pixels below the element. For 'center' and 'nearest', uses standard scrollIntoView behavior.
+   *
+   * @param element - The HTML element to scroll into view if not visible
+   * @param blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
+   * @param offset - Optional offset in pixels for 'start' and 'end' positions (default: 100)
+   */
+  static scrollIfNotVisible(element: HTMLElement, blockValue: ScrollLogicalPosition, offset = 100): void {
+    const prefersReducedMotion =
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
+    const rect = element.getBoundingClientRect();
+    if (rect.top < offset || rect.bottom > window.innerHeight) {
+      if (blockValue === 'center' || blockValue === 'nearest') {
+        element.scrollIntoView({ behavior: behaviorScroll, block: blockValue });
+      } else {
+        let scrollTop;
+        if (blockValue === 'end') {
+          scrollTop = window.scrollY + rect.bottom - window.innerHeight + offset;
+        } else {
+          scrollTop = window.scrollY + rect.top - offset;
+        }
+        window.scrollTo({
+          top: scrollTop,
+          behavior: behaviorScroll,
+        });
+      }
+    }
+  }
+
+  /**
+   * Scrolls a list item into view within its scrollable container only, without scrolling the page.
+   *
+   * Adds a 20px gap for better visibility when scrolling.
+   *
+   * @param listItem - The list item element to scroll into view
+   */
+  static scrollListItemIntoView(listItem: HTMLElement): void {
+    const prefersReducedMotion =
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
+    const gap = 20;
+
+    let container: HTMLElement | null = listItem.parentElement;
+    while (container && container !== document.body) {
+      const { overflowY } = window.getComputedStyle(container);
+      if ((overflowY === 'auto' || overflowY === 'scroll') && container.scrollHeight > container.clientHeight) {
+        break;
+      }
+      container = container.parentElement;
+    }
+
+    if (!container || container === document.body) return;
+
+    const itemRect = listItem.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const isAbove = itemRect.top < containerRect.top;
+    const isBelow = itemRect.bottom > containerRect.bottom;
+
+    if (!isAbove && !isBelow) return;
+
+    const itemTop = listItem.offsetTop - container.offsetTop;
+    const itemBottom = itemTop + listItem.offsetHeight;
+
+    let newScrollTop;
+    if (isAbove) {
+      newScrollTop = Math.max(0, itemTop - gap);
+    } else {
+      newScrollTop = itemBottom - container.clientHeight + gap;
+    }
+
+    container.scrollTo({
+      top: newScrollTop,
+      behavior: behaviorScroll,
+    });
   }
 
   /**

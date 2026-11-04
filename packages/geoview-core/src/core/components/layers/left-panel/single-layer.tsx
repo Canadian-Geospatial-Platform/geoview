@@ -44,7 +44,6 @@ import { logger } from '@/core/utils/logger';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
-import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
@@ -181,7 +180,7 @@ export function SingleLayer({
     if (layerIsSelected && layerId) {
       const listItem = DomHelper.getGVElementByFullId(mapId, layerListItemButtonId);
       if (listItem) {
-        scrollListItemIntoView(listItem);
+        DomHelper.scrollListItemIntoView(listItem);
       }
     }
   }, [layerIsSelected, layerId, layerListItemButtonId, mapId]);
@@ -290,7 +289,7 @@ export function SingleLayer({
       // Reorder
       layerController.reorderLayer(layerPath, direction);
 
-      // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
+      // Scroll into view after DOM updates (DomHelper.scrollListItemIntoView does not work well for this)
       requestAnimationFrame(() => {
         layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       });
@@ -310,7 +309,7 @@ export function SingleLayer({
         // Prevent double-firing via native button click event
         event.preventDefault();
 
-        // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
+        // Scroll into view after DOM updates (DomHelper.scrollListItemIntoView does not work well for this)
         requestAnimationFrame(() => {
           layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
         });
