@@ -394,7 +394,7 @@ export default function Measurement(): JSX.Element {
 
       // Capture phase: this sees the sketch before the Draw interaction cancels it, so one Escape never does both.
       if (event.key === 'Escape') {
-        if (sketchVertexCount.current === 0) uiController.focusToolButton('button-measurement'); // TODO: Move this to specific function
+        if (sketchVertexCount.current === 0) uiController.focusMeasurementButton();
         return;
       }
 
@@ -587,7 +587,7 @@ export default function Measurement(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    id: DomHelper.buildGVElementId(mapId, 'button-measurement'), // TODO: Move this to specific function
+    id: DomHelper.buildButtonMeasurementId(mapId),
     'aria-label': 'mapnav.measurement',
     children: createElement(StraightenIcon),
     tooltipPlacement: 'left',

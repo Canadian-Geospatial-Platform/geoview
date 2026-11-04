@@ -39,7 +39,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.toggleDrawing',
       tooltipPlacement: 'left',
-      children: createElement(Draw, { id: DomHelper.buildGVElementId(mapId, 'drawer-draw') }), // TODO: Move this to specific function
+      children: createElement(Draw, { id: DomHelper.buildDrawerDrawButtonId(mapId) }),
       visible: true,
     },
     groupName: 'drawer',
@@ -88,7 +88,7 @@ export function createDrawerButtons(mapId: string, config: TypeDrawerConfig): Re
     buttonProps: {
       'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
-      children: createElement(Edit, { id: DomHelper.buildGVElementId(mapId, 'drawer-edit') }), // TODO: Move this to specific function
+      children: createElement(Edit, { id: DomHelper.buildDrawerEditButtonId(mapId) }),
       visible: true,
     },
     groupName: 'drawer',

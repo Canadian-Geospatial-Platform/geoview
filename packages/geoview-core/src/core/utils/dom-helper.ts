@@ -86,6 +86,36 @@ export abstract class DomHelper {
     return DomHelper.buildGVElementId(mapId, 'bottomlink');
   }
 
+  /**
+   * Builds the DOM id for a map's measurement button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped measurement button id
+   */
+  static buildButtonMeasurementId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'button-measurement');
+  }
+
+  /**
+   * Builds the DOM id for a map's drawer draw button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped drawer draw button id
+   */
+  static buildDrawerDrawButtonId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'drawer-draw');
+  }
+
+  /**
+   * Builds the DOM id for a map's drawer edit button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped drawer edit button id
+   */
+  static buildDrawerEditButtonId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'drawer-edit');
+  }
+
   // #endregion IDs
 
   // #region GENERIC - PUBLIC

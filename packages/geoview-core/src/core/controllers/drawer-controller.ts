@@ -1025,6 +1025,24 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Returns focus to the drawer edit button.
+   *
+   * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+   */
+  focusDrawerEditButton(): void {
+    this.focusToolButton('drawer-edit');
+  }
+
+  /**
+   * Returns focus to the drawer draw button.
+   *
+   * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+   */
+  focusDrawerDrawButton(): void {
+    this.focusToolButton('drawer-draw');
+  }
+
+  /**
    * Creates an auto-complete feature (Circle, Rectangle, Star) manually from two coordinates.
    *
    * @param geomType - The geometry type to create
@@ -1451,7 +1469,7 @@ export class DrawerController extends AbstractMapViewerController {
       return;
     }
 
-    this.getControllersRegistry().uiController.focusToolButton('drawer-edit'); // TODO: Move this to specific function
+    this.focusDrawerEditButton();
   }
 
   /**
@@ -2792,7 +2810,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     // This handler runs before the Draw interaction cancels its sketch, so an active sketch is cancelled by this Escape
     if (getStoreDrawerIsDrawing(mapId) && !this.#drawInstance?.hasActiveSketch()) {
-      this.getControllersRegistry().uiController.focusToolButton('drawer-draw'); // TODO: Move this to specific function
+      this.focusDrawerDrawButton();
     }
   }
 

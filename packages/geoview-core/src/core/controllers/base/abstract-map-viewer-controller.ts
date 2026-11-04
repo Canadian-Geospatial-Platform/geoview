@@ -4,6 +4,8 @@ import type { TypeMapMouseInfo } from '@/api/types/map-schema-types';
 import { AbstractController } from './abstract-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import { getStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
@@ -93,6 +95,17 @@ export class AbstractMapViewerController extends AbstractController {
 
     // Perform a query at the clicked lonlat using layerSetController
     return this.getControllersRegistry().layerSetController.queryAtLonLat(coordinates.lonlat);
+  }
+
+  /**
+   * Returns focus to a map-relative tool button when the map target is focused.
+   *
+   * @param suffix - The map-relative id suffix of the tool button
+   */
+  protected focusToolButton(suffix: string): void {
+    const mapId = this.getMapId();
+    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId)) return;
+    DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
   }
 
   // #region STATIC METHODS

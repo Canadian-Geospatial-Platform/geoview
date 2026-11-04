@@ -32,7 +32,6 @@ import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
   getStoreAppIsCrosshairsActive,
-  getStoreAppIsFullscreenActive,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -465,16 +464,12 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Returns focus to the navbar button that started a keyboard drawing tool.
+   * Returns focus to the measurement button.
    *
    * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
-   *
-   * @param suffix - The map-relative id suffix of the tool button
    */
-  focusToolButton(suffix: string): void {
-    const mapId = this.getMapId();
-    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId)) return;
-    DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+  focusMeasurementButton(): void {
+    this.focusToolButton('button-measurement');
   }
 
   /**
