@@ -2,7 +2,8 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Select, Typography } from 'geoview-core/ui';
+import { Box, CheckCircleIcon, ErrorIcon, LoopIcon, Select, Typography } from 'geoview-core/ui';
+import { visuallyHidden } from 'geoview-core/ui/style/default';
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -13,10 +14,14 @@ import { useStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-st
 import { getSxClasses } from './geoview-3d-panel-style';
 import { BASEMAP_IDS, DEFAULT_BASEMAP_ID, isBasemapId } from './basemap-layer';
 import type { TypeBasemapId } from './basemap-layer';
+import type { TypeTerrainProgress } from './terrain-layer';
 import { GeoView3DOverlay } from './geoview-3d-overlay';
 import type { TypeTilesetStatus } from './geoview-3d-overlay';
 import type { TypeGeoView3DConfig } from './geoview-3d-types';
 import { TilesetRenderer } from './tileset-renderer';
+
+/** Style key of the terrain progress line for each terrain state. */
+const TERRAIN_STYLE_KEYS = { loading: 'terrainLoading', loaded: 'terrainLoaded', failed: 'terrainFailed' } as const;
 
 /** Props for the GeoView3DPanel component. */
 interface GeoView3DPanelProps {
@@ -52,6 +57,7 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string>('');
   // Kept here rather than in the overlay so the choice survives closing and reopening the panel.
   const [basemapId, setBasemapId] = useState<TypeBasemapId>(DEFAULT_BASEMAP_ID);
+  const [terrainProgress, setTerrainProgress] = useState<TypeTerrainProgress | undefined>(undefined);
   // Survives overlay remounts: the panel stays mounted while closed.
   const framedTilesetUrlsRef = useRef<Set<string>>(new Set());
   // Probed once, on first opening, so a page that never opens the panel never creates a WebGL context.
@@ -94,9 +100,25 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
     if (isBasemapId(event.target.value)) setBasemapId(event.target.value);
   }, []);
 
+  /**
+   * Handles new terrain elevation request counts (undefined for a fresh 3D view).
+   */
+  const handleTerrainProgressChange = useCallback((progress: TypeTerrainProgress | undefined): void => {
+    setTerrainProgress(progress);
+  }, []);
+
   // #endregion
 
   const basemapMenuItems = BASEMAP_IDS.map((id) => ({ item: { value: id, children: t(`GeoView3D.basemap.${id}`) } }));
+
+  // Terrain only matters while the 3D view shows a basemap draped on it, and once elevation has been requested.
+  let terrainState: 'loading' | 'loaded' | 'failed' | undefined;
+  if (mapTarget && basemapId !== 'none' && terrainProgress) {
+    const { pending, loaded, failed } = terrainProgress;
+    if (failed > 0) terrainState = 'failed';
+    else if (pending > 0) terrainState = 'loading';
+    else if (loaded > 0) terrainState = 'loaded';
+  }
 
   let displayedStatus: TypeTilesetStatus = status;
   if (!isUrlValid) displayedStatus = 'invalidUrl';
@@ -107,6 +129,18 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
       <Typography variant="body2">{t('GeoView3D.overlayHint')}</Typography>
       <Box sx={memoSxClasses.status} role="status" aria-live="polite">
         <Typography variant="body2">{t(`GeoView3D.status.${displayedStatus}`, { message: errorMessage })}</Typography>
+      </Box>
+      {terrainState && terrainProgress && (
+        <Box sx={memoSxClasses[TERRAIN_STYLE_KEYS[terrainState]]}>
+          {terrainState === 'loading' && <LoopIcon fontSize="small" aria-hidden />}
+          {terrainState === 'loaded' && <CheckCircleIcon fontSize="small" aria-hidden />}
+          {terrainState === 'failed' && <ErrorIcon fontSize="small" aria-hidden />}
+          <Typography variant="body2">{t(`GeoView3D.terrain.${terrainState}`, terrainProgress)}</Typography>
+        </Box>
+      )}
+      {/* Announces a terrain failure once, with fixed text: the counts above change too often to be read out. */}
+      <Box sx={visuallyHidden} role="alert">
+        {terrainState === 'failed' ? t('GeoView3D.terrain.failedAnnouncement') : ''}
       </Box>
       <Select
         value={basemapId}
@@ -126,6 +160,7 @@ export function GeoView3DPanel(props: GeoView3DPanelProps): JSX.Element {
             tilesetUrl={config.tilesetUrl}
             basemapId={basemapId}
             onStatusChange={handleStatusChange}
+            onTerrainProgressChange={handleTerrainProgressChange}
             shouldFrameTileset={shouldFrameTileset}
           />,
           mapTarget

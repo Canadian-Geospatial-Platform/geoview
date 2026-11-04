@@ -1,3 +1,5 @@
+// Experimental in deck.gl 9.4 (underscore export); drapes 2D layers over a terrain layer.
+import { _TerrainExtension as TerrainExtension } from '@deck.gl/extensions';
 import { TileLayer } from '@deck.gl/geo-layers';
 import type { TileLayerProps } from '@deck.gl/geo-layers';
 import { BitmapLayer } from '@deck.gl/layers';
@@ -63,7 +65,7 @@ export function isBasemapId(value: unknown): value is TypeBasemapId {
 }
 
 /**
- * Creates the basemap layer drawn under the tileset.
+ * Creates the basemap layer drawn under the tileset, draped on the terrain.
  *
  * @param basemapId - The basemap to draw
  * @returns The basemap tile layer, or undefined when no basemap is wanted
@@ -78,6 +80,8 @@ export function createBasemapLayer(basemapId: TypeBasemapId): TileLayer | undefi
     minZoom: 0,
     maxZoom,
     tileSize: 256,
+    // Drapes the tiles over the terrain layer's ground elevation; the imagery keeps its own, deeper zoom levels.
+    extensions: [new TerrainExtension()],
     // Decode images in the browser: the default worker setup downloads worker scripts from a public CDN (unpkg).
     loadOptions: { core: { worker: false } },
     // A failed tile only leaves a gap (the Canada Base Map has no street-scale tiles outside Canada, for instance);
@@ -93,6 +97,9 @@ export function createBasemapLayer(basemapId: TypeBasemapId): TileLayer | undefi
         id: props.id,
         image: props.data as string | null,
         bounds: [west, south, east, north],
+        // The tile images are the layers that draw: they need the TerrainExtension to be draped, not drawn flat at 0 m
+        // under the terrain mesh.
+        extensions: props.extensions,
       });
     },
   });

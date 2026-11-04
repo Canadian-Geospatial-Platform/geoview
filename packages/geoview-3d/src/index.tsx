@@ -56,6 +56,13 @@ class GeoView3DPlugin extends AppBarPlugin {
             loaded: '3D tileset loaded.',
             error: 'The 3D tileset could not be displayed: {{message}}',
           },
+          terrain: {
+            loading: 'Terrain: loading {{pending}} tiles… ({{loaded}} loaded)',
+            loaded: 'Terrain: {{loaded}} tiles loaded',
+            failed:
+              'Terrain: {{failed}} tiles failed, so the ground is flat (0 m) there and objects may float ({{loaded}} loaded). Reopen the panel later to retry.',
+            failedAnnouncement: 'The elevation service is not responding: part of the ground is flat and objects may float.',
+          },
           basemap: {
             label: 'Basemap',
             cbmt: 'Canada Base Map (blurry past street scale)',
@@ -82,6 +89,13 @@ class GeoView3DPlugin extends AppBarPlugin {
             loading: 'Chargement du jeu de tuiles 3D…',
             loaded: 'Jeu de tuiles 3D chargé.',
             error: "Le jeu de tuiles 3D n'a pas pu être affiché : {{message}}",
+          },
+          terrain: {
+            loading: 'Relief : chargement de {{pending}} tuiles… ({{loaded}} chargées)',
+            loaded: 'Relief : {{loaded}} tuiles chargées',
+            failed:
+              'Relief : {{failed}} tuiles en échec, le sol y est donc plat (0 m) et les objets peuvent flotter ({{loaded}} chargées). Rouvrez le panneau plus tard pour réessayer.',
+            failedAnnouncement: "Le service d'élévation ne répond pas : une partie du sol est plate et les objets peuvent flotter.",
           },
           basemap: {
             label: 'Carte de base',

@@ -23,6 +23,25 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   attribution: {
     color: theme.palette.text.secondary,
   },
+  // Terrain progress: the icon and the wording carry the state; colour only reinforces it (WCAG 1.4.1).
+  terrainLoading: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+  },
+  terrainLoaded: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    color: theme.palette.success.main,
+  },
+  terrainFailed: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    color: theme.palette.error.main,
+  },
   overlay: {
     position: 'absolute',
     inset: 0,

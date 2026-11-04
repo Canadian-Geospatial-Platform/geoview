@@ -11,6 +11,7 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 
 import { getSxClasses } from './geoview-3d-panel-style';
 import type { TypeBasemapId } from './basemap-layer';
+import type { TypeTerrainProgress } from './terrain-layer';
 import { TilesetRenderer } from './tileset-renderer';
 import { toDeckViewport } from './viewport-sync';
 
@@ -25,6 +26,8 @@ interface GeoView3DOverlayProps {
   basemapId: TypeBasemapId;
   /** Called whenever the tileset loading status changes. */
   onStatusChange: (status: TypeTilesetStatus, message?: string) => void;
+  /** Called with the terrain elevation request counts as they change, and with undefined for a fresh 3D view. */
+  onTerrainProgressChange: (progress: TypeTerrainProgress | undefined) => void;
   /** Decides whether to frame the camera on the loaded tileset rather than keep the synced 2D view. */
   shouldFrameTileset: (tilesetUrl: string) => boolean;
 }
@@ -40,7 +43,7 @@ interface GeoView3DOverlayProps {
 export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   logger.logTraceRender('geoview-3d/geoview-3d-overlay > GeoView3DOverlay');
 
-  const { tilesetUrl, basemapId, onStatusChange, shouldFrameTileset } = props;
+  const { tilesetUrl, basemapId, onStatusChange, onTerrainProgressChange, shouldFrameTileset } = props;
   const { t } = useTranslation<string>();
   const theme = (window as TypeWindow).cgpv.ui.useTheme();
 
@@ -52,6 +55,8 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
   const rendererRef = useRef<TilesetRenderer | undefined>(undefined);
   const onStatusChangeRef = useRef(onStatusChange);
   onStatusChangeRef.current = onStatusChange;
+  const onTerrainProgressChangeRef = useRef(onTerrainProgressChange);
+  onTerrainProgressChangeRef.current = onTerrainProgressChange;
   const shouldFrameTilesetRef = useRef(shouldFrameTileset);
   shouldFrameTilesetRef.current = shouldFrameTileset;
   // Read once at creation; later changes go through setBasemap.
@@ -77,10 +82,13 @@ export function GeoView3DOverlay(props: GeoView3DOverlayProps): JSX.Element {
         onTilesetLoad: (): void => onStatusChangeRef.current('loaded'),
         onError: (message: string): void => onStatusChangeRef.current('error', message),
         shouldFrameTileset: (url: string): boolean => shouldFrameTilesetRef.current(url),
+        onTerrainProgress: (progress: TypeTerrainProgress): void => onTerrainProgressChangeRef.current(progress),
       },
       basemapIdRef.current
     );
     rendererRef.current = renderer;
+    // A new 3D view requests its terrain afresh.
+    onTerrainProgressChangeRef.current(undefined);
 
     return (): void => {
       rendererRef.current = undefined;

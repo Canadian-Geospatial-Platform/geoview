@@ -1,6 +1,6 @@
 import { Deck } from '@deck.gl/core';
 import type { MapViewState } from '@deck.gl/core';
-import type { TileLayer, Tile3DLayerProps } from '@deck.gl/geo-layers';
+import type { TerrainLayer, TileLayer, Tile3DLayerProps } from '@deck.gl/geo-layers';
 import { Tiles3DLoader } from '@loaders.gl/3d-tiles';
 import { load } from '@loaders.gl/core';
 
@@ -9,6 +9,8 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { SafeTile3DLayer } from './safe-tile-3d-layer';
 import { createBasemapLayer, DEFAULT_BASEMAP_ID } from './basemap-layer';
 import type { TypeBasemapId } from './basemap-layer';
+import { createTerrainLayer } from './terrain-layer';
+import type { TypeTerrainProgress } from './terrain-layer';
 import { refineThroughEmptyTiles } from './tileset-traversal';
 import { VertexColorScenegraphLayer } from './vertex-color-scenegraph-layer';
 import type { TypeSyncedViewport } from './viewport-sync';
@@ -24,7 +26,12 @@ export interface TilesetRendererCallbacks {
   onError?: (message: string) => void;
   /** Decides whether to frame the camera on a freshly loaded tileset; frames when omitted. */
   shouldFrameTileset?: (tilesetUrl: string) => boolean;
+  /** Called with the terrain elevation request counts as they change, at most every TERRAIN_PROGRESS_INTERVAL_MS. */
+  onTerrainProgress?: (progress: TypeTerrainProgress) => void;
 }
+
+/** Shortest interval between two terrain progress reports, so bursts of tiles do not re-render the panel per tile. */
+const TERRAIN_PROGRESS_INTERVAL_MS = 250;
 
 /** Initial camera before any tileset is loaded (Canada-wide, tilted). */
 const DEFAULT_VIEW_STATE: MapViewState = { longitude: -95, latitude: 60, zoom: 3, pitch: 45, bearing: 0 };
@@ -72,6 +79,15 @@ export class TilesetRenderer {
   /** The ground basemap layer, kept across tileset changes; undefined when no basemap is drawn. */
   #basemapLayer?: TileLayer;
 
+  /** Ground elevation the basemap is draped on; created once so its tiles stay cached across basemap changes. */
+  #terrainLayer: TerrainLayer = createTerrainLayer((progress: TypeTerrainProgress): void => this.#queueTerrainProgress(progress));
+
+  /** The latest terrain progress not yet reported. */
+  #queuedTerrainProgress?: TypeTerrainProgress;
+
+  /** Timer spacing terrain progress reports; set while reports are being held back. */
+  #terrainProgressTimer?: ReturnType<typeof setTimeout>;
+
   /** The layer rendering the current tileset, once its root tileset.json is validated. */
   #tilesetLayer?: SafeTile3DLayer;
 
@@ -90,6 +106,8 @@ export class TilesetRenderer {
       canvas,
       initialViewState: DEFAULT_VIEW_STATE,
       controller: true,
+      // Nothing in the 3D view is picked yet; with draped terrain, hover picking logs "picking buffer corrupt" errors.
+      _pickable: false,
       layers: this.#getLayers(),
       onViewStateChange: ({ viewState }): void => {
         this.#viewState = viewState;
@@ -157,6 +175,8 @@ export class TilesetRenderer {
     this.#generation += 1;
     this.#abortController?.abort();
     this.#abortController = undefined;
+    clearTimeout(this.#terrainProgressTimer);
+    this.#terrainProgressTimer = undefined;
     this.#deck.finalize();
   }
 
@@ -201,12 +221,17 @@ export class TilesetRenderer {
   }
 
   /**
-   * Lists the layers to draw, basemap first so the tileset renders over it.
+   * Lists the layers to draw: the terrain the basemap is draped on, the basemap, then the tileset, which keeps its own
+   * absolute heights.
+   *
+   * The terrain layer always stays in the list and is only hidden without a basemap: deck.gl finalizes a layer that
+   * leaves the list, and a finalized layer instance cannot be added again.
    *
    * @returns The deck.gl layers
    */
-  #getLayers(): (TileLayer | SafeTile3DLayer)[] {
-    return [this.#basemapLayer, this.#tilesetLayer].filter((layer) => layer !== undefined);
+  #getLayers(): (TerrainLayer | TileLayer | SafeTile3DLayer)[] {
+    const terrainLayer = this.#terrainLayer.clone({ visible: this.#basemapLayer !== undefined });
+    return [terrainLayer, this.#basemapLayer, this.#tilesetLayer].filter((layer) => layer !== undefined);
   }
 
   /**
@@ -294,6 +319,31 @@ export class TilesetRenderer {
   #reportError(message: string): void {
     logger.logError(`geoview-3d - Tileset rendering failed for ${this.#tilesetUrl}`, message);
     this.#callbacks.onError?.(message);
+  }
+
+  /**
+   * Queues a terrain progress report: the first one goes out at once, later ones at most every
+   * TERRAIN_PROGRESS_INTERVAL_MS, and the last one of a burst is always reported.
+   *
+   * @param progress - The latest elevation request counts
+   */
+  #queueTerrainProgress(progress: TypeTerrainProgress): void {
+    this.#queuedTerrainProgress = progress;
+    if (this.#terrainProgressTimer === undefined) this.#flushTerrainProgress();
+  }
+
+  /**
+   * Reports the queued terrain progress, if any, and holds later reports back for TERRAIN_PROGRESS_INTERVAL_MS.
+   */
+  #flushTerrainProgress(): void {
+    const progress = this.#queuedTerrainProgress;
+    this.#queuedTerrainProgress = undefined;
+    if (!progress || this.#destroyed) return;
+    this.#callbacks.onTerrainProgress?.(progress);
+    this.#terrainProgressTimer = setTimeout(() => {
+      this.#terrainProgressTimer = undefined;
+      this.#flushTerrainProgress();
+    }, TERRAIN_PROGRESS_INTERVAL_MS);
   }
 
   // #endregion PRIVATE METHODS

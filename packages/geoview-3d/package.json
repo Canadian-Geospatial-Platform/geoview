@@ -26,7 +26,8 @@
     "@luma.gl/engine": "~9.4.0",
     "@luma.gl/gltf": "~9.4.0",
     "@luma.gl/shadertools": "~9.4.0",
-    "@luma.gl/webgpu": "~9.4.0"
+    "@luma.gl/webgpu": "~9.4.0",
+    "geotiff": "^3.0.5"
   },
   "peerDependencies": {
     "geoview-core": "workspace:^2.0.0",
