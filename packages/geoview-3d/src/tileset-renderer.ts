@@ -8,6 +8,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { SafeTile3DLayer } from './safe-tile-3d-layer';
 import { refineThroughEmptyTiles } from './tileset-traversal';
+import { VertexColorScenegraphLayer } from './vertex-color-scenegraph-layer';
 import type { TypeSyncedViewport } from './viewport-sync';
 
 /** The tileset object handed to Tile3DLayer's onTilesetLoad callback. */
@@ -185,6 +186,8 @@ export class TilesetRenderer {
       data: tilesetUrl,
       loader: Tiles3DLoader,
       loadOptions,
+      // Draw glTF tiles with a scenegraph layer that honours COLOR_0 vertex colours.
+      _subLayerProps: { scenegraph: { type: VertexColorScenegraphLayer } },
       onTilesetLoad: (tileset: TypeTileset3D): void => this.#handleTilesetLoad(tilesetUrl, generation, tileset),
       // loaders.gl calls onTileError(tile, message, url), the reverse of deck.gl's declared (tile, url, message).
       onTileError: (_tile, message: string, url: string): void => {
