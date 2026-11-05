@@ -17,3 +17,4 @@
 - Plugins type-check against core's generated `geoview-core/lib/**/*.d.ts` (TS project references), not core `src`. After deleting/moving core files, stale `lib` yields misleading plugin errors (e.g. `List` missing on `ui/index`); run `tsc -b geoview-core/tsconfig.json` or `rush build` (#3711).
 - Dependabot security updates scan any committed `package-lock.json` even though Rush uses `common/config/rush/pnpm-lock.yaml`; stray lock files (from a forbidden `npm install`) produce bogus PRs, so `**/package-lock.json` is git-ignored (#3711).
 - `getUrlWithProxyWhenNeeded()` wraps a raw target URL as `proxy?${url}`; append paging parameters to that raw URL string instead of normalizing it with `URLSearchParams`.
+- Effects that defer DOM lookups (`requestAnimationFrame`, `delay`) through `DomHelper.getGV*` must cancel them in cleanup: `getGVRootElement` throws once the viewer is deleted (the UI test suite creates and deletes temporary viewers) (#3708).

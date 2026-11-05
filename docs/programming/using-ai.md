@@ -45,7 +45,7 @@ This guide explains how the GeoView repository is set up for AI coding assistant
 | ---- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | **`IssueCreator`** agent        | Draft the issue: root cause, proposed fix, affected files.                                                                                                                                                                |
 | 2    | **Default agent**               | Implement the fix. Paste the issue; name a specialist (for example `LayerExpert`) when the area is clear.                                                                                                                 |
-| 3    | **`BranchReview`** agent        | Check the branch against GeoView best practices and conventions. Also records the change in the release tracker.                                                                                                          |
+| 3    | **`BranchReview`** agent        | Check the branch against GeoView best practices and conventions, including duplicated or misplaced content in changed docs. Also records the change in the release tracker.                                               |
 | 4    | **`IssueReview`** agent         | Compare the final diff with the issue's proposed fix, capture lessons learned when they differ, and refine the release tracker entry using the issue.                                                                     |
 | 5    | **Release tracker** (automatic) | Steps 3 and 4 record the change in [RELEASE-CANDIDATE.md](./release-testing/RELEASE-CANDIDATE.md) for PR and release notes through `/update-release-candidate`. Run the skill yourself only if you skipped those reviews. |
 
@@ -157,20 +157,20 @@ Custom agents live in `.github/agents/` and appear in the Copilot Chat **agent p
 - **[Workflow]** — Runs a whole task end-to-end and produces a result. Usually picked by a developer.
 - **[Specialist]** — Domain expert for one area of the code. Usually called by the main agent as a subagent for a focused task, but you can also chat with it directly.
 
-| Agent                   | Role       | Use it to...                                                                                     |
-| ----------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| `BranchReview`          | Workflow   | Audit changed code and domain/controller/store ownership; say "full" for entire changed files    |
-| `TestCreator`           | Workflow   | Create test-suite tests, find missing coverage, maintain release-testing docs                    |
-| `DocUpdate`             | Workflow   | Audit named or branch-affected docs; say "guide" for EN/FR viewer guides or "full" for every doc |
-| `DepUpdate`             | Workflow   | Audit dependencies and Node.js/Rush/pnpm compatibility, plan upgrades, review vulnerabilities    |
-| `IssueCreator`          | Workflow   | Draft a ready-to-paste GitHub issue                                                              |
-| `IssueReview`           | Workflow   | Compare a PR branch with its linked issue and capture lessons                                    |
-| `LayerExpert`           | Specialist | Layer classes, config validation, GeoCore, WMS/ESRI/OGC metadata                                 |
-| `MapGeoExpert`          | Specialist | MapViewer, projections, zoom/rotation, OpenLayers interactions, swiper                           |
-| `ControllerStoreExpert` | Specialist | Controllers, domains, store slices, events, batch store sync                                     |
-| `GeoViewArchitect`      | Specialist | Cross-package architecture, abstractions, refactoring strategy, API design                       |
-| `UIA11yReviewer`        | Specialist | React components, styling, accessibility, translations; "browser" for interactive viewer checks  |
-| `CodeExplorer`          | Specialist | Read-only questions: where code lives, how a flow works                                          |
+| Agent                   | Role       | Use it to...                                                                                                            |
+| ----------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `BranchReview`          | Workflow   | Audit changed code, domain/controller/store ownership, and changed-doc duplication; say "full" for entire changed files |
+| `TestCreator`           | Workflow   | Create test-suite tests, find missing coverage, maintain release-testing docs                                           |
+| `DocUpdate`             | Workflow   | Audit named or branch-affected docs; say "guide" for EN/FR viewer guides or "full" for every doc                        |
+| `DepUpdate`             | Workflow   | Audit dependencies and Node.js/Rush/pnpm compatibility, plan upgrades, review vulnerabilities                           |
+| `IssueCreator`          | Workflow   | Draft a ready-to-paste GitHub issue                                                                                     |
+| `IssueReview`           | Workflow   | Compare a PR branch with its linked issue and capture lessons                                                           |
+| `LayerExpert`           | Specialist | Layer classes, config validation, GeoCore, WMS/ESRI/OGC metadata                                                        |
+| `MapGeoExpert`          | Specialist | MapViewer, projections, zoom/rotation, OpenLayers interactions, swiper                                                  |
+| `ControllerStoreExpert` | Specialist | Controllers, domains, store slices, events, batch store sync                                                            |
+| `GeoViewArchitect`      | Specialist | Cross-package architecture, abstractions, refactoring strategy, API design                                              |
+| `UIA11yReviewer`        | Specialist | React components, styling, accessibility, translations; "browser" for interactive viewer checks                         |
+| `CodeExplorer`          | Specialist | Read-only questions: where code lives, how a flow works                                                                 |
 
 **Delegation policy (summary):** the main agent handles small, known-file work itself and delegates only work that needs separate context, one agent per objective, with a bounded goal. See `AGENTS.md` → Delegation policy.
 
@@ -277,7 +277,7 @@ The Copilot CLI (`copilot` command) reads the same files: `AGENTS.md`, `.github/
 ```yaml
 ---
 name: MyExpert
-description: '[Specialist] Use when: ...'
+description: "[Specialist] Use when: ..."
 tools: [read, search, edit]
 user-invocable: false # hide from the picker; only the main agent can delegate to it
 disable-model-invocation: true # the main agent never delegates to it; developers pick it manually

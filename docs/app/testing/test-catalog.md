@@ -78,16 +78,16 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | 39         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 57         | Parallel                    |
 | 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | 49         | Mixed parallel + sequential |
-| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 9          | Mixed parallel + sequential |
+| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 11         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 18         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
-| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 2          | Parallel                    |
+| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 6          | Mixed parallel + sequential |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 15         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **280**    |                             |
+| **Total**         |                         |                                                                                                 | **285**    |                             |
 
 ---
 
@@ -100,7 +100,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-core` · **File:** `tests/suites/suite-core.ts` · **Tester:** `CoreTester` (`tests/testers/core-tester.ts`)
-**Execution:** Fully parallel (`Promise.all`) · **Guard:** None
+**Execution:** Independent tests in parallel, then isolated page-scrolling tests sequentially · **Guard:** None
 
 | #   | Method                                  | Type      | Description                                                                           |
 | --- | --------------------------------------- | --------- | ------------------------------------------------------------------------------------- |
@@ -817,6 +817,10 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | --- | -------------------------------- | ---- | ------------------------------------------------------ |
 | 1   | `testGuideDetailsPanelTopAnchor` | test | Test Details Panel - Select and Find Top Anchor        |
 | 2   | `testControllerGetFooterHeight`  | test | Test UIController.getFooterHeight (non-React consumer) |
+| 3   | `testMapSectionScroll('partial')` | test | Clipped map-info and top clipping; complete section visibility and repeat stability |
+| 4   | `testMapSectionScroll('transitions')` | test | Real footer-tab, app-bar and map-info click paths and final viewport bounds |
+| 5   | `testMapSectionScroll('visible')` | test | Already visible map remains stationary on repeated activation |
+| 6   | `testMapSectionScroll('oversized')` | test | Taller-than-viewport map aligns with a 50px top gap and stays stable |
 
 ---
 

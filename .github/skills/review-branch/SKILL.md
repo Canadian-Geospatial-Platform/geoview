@@ -3,6 +3,6 @@ name: review-branch
 description: "Use when asked to review the current branch against GeoView conventions. Invoke with /review-branch."
 ---
 
-Review the changed files in the current branch against the scoped rules in `.github/instructions/`. Report only concrete violations with file and line, grouped by severity.
+Review the changed files in the current branch against the scoped rules in `.github/instructions/`, and changed docs against the ownership rules in `.github/ai/documentation.md` (no duplicated contracts). Report only concrete violations with file and line, grouped by severity.
 
 For larger work, delegate to the `BranchReview` custom agent.

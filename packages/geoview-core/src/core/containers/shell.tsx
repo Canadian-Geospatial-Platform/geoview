@@ -264,14 +264,19 @@ export function Shell(props: ShellProps): JSX.Element {
   );
 
   /**
-   * Scrolls the map into view when clicking on the map info area.
+   * Reveals the complete map section on app-bar or map-info activation.
+   * Leaves up to 50px above fitting sections; oversized sections keep a stable 50px gap.
    */
   const handleScrollShellIntoView = useCallback((): void => {
-    if (!shellRef.current) return;
+    const mapSection = mapShellContainerRef.current;
+    if (!mapSection) return;
 
-    // Check if the map is already in view, then scroll if needed
-    DomHelper.scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
-  }, []);
+    const { top, height } = mapSection.getBoundingClientRect();
+    const offset = height > window.innerHeight ? 50 : Math.min(50, window.innerHeight - height);
+    if (height > window.innerHeight && Math.abs(top - offset) <= 1) return;
+
+    DomHelper.scrollIfNotVisible(mapSection, 'start', offset);
+  }, [mapShellContainerRef]);
 
   /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.

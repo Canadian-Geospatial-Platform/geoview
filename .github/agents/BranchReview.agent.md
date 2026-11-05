@@ -1,6 +1,6 @@
 ---
 name: BranchReview
-description: "[Workflow] Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity. Runs the GeoView Branch Review Checklist against changed files in the current branch."
+description: "[Workflow] Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting, function length and cyclomatic complexity, documentation duplication. Runs the GeoView Branch Review Checklist against changed files in the current branch."
 tools: [read, search, execute, edit, todo, vscode/askQuestions]
 argument-hint: 'target branch (default: upstream/develop); add "full" to audit entire changed files'
 ---
@@ -23,7 +23,7 @@ Use `vscode/askQuestions` for clarifications and approval requests, asking one f
 ### Phase 1 — Discover Changed Files
 
 1. Follow `AGENTS.md` → Branch and PR comparisons: default to `upstream/develop`, refresh it when possible, and run `git diff --name-only <target>...HEAD`. If the user specifies another base, use it throughout this workflow, including commit and breaking-change checks below. Report the base and refresh limitations; keep working-tree changes separate.
-2. Filter to only `.ts` and `.tsx` files under `packages/` (ignore config files, JSON, markdown, etc.)
+2. Filter code files to `.ts` and `.tsx` under `packages/` for checklist items 1–15. Separately list changed Markdown under `docs/`, `.github/ai/`, `.github/instructions/`, `.github/agents/`, `.github/skills/`, and package READMEs for checklist item 16. Ignore other config, JSON and scripts.
 3. Locate the changed hunks with `git diff <target>...HEAD -- <file>`. In changed-scope mode, read the enclosing declarations plus the context needed to judge them (imports, related hooks, types); read the whole file only when it is small or the scope requires it. In full-file mode, read each changed file fully.
 
 ### Phase 2 — Audit Against Branch Review Checklist
@@ -147,6 +147,16 @@ When changed components, controllers, domains, stores, or their callers affect a
 - [ ] Check event-driven and suppressed-event batch synchronization for affected derived state. Runtime tests can verify behavior but do not establish correct architectural placement.
 - [ ] For each violation, report the changed symbol/location, the responsibility it violates, the proposed owning layer, and why. Report insufficient evidence as an unresolved question; do not require unrelated architectural refactors.
 
+#### 16. Documentation Ownership and Duplication
+
+For changed Markdown listed in Phase 1, apply [documentation.md](../ai/documentation.md). Read only the changed sections and the sections they link to (heading-targeted, bounded reads):
+
+- [ ] Each behavior rule, default, or contract has one owner. Flag a changed AI reference, instruction, agent, or skill that restates a public section's rules instead of linking to it and adding only maintenance knowledge.
+- [ ] Flag the same explanation added to two public docs, and AI-only procedures placed in public docs.
+- [ ] `AI-SUMMARY` blocks are genuine condensations with one canonical source link and match it, including exceptions.
+- [ ] When the branch changes behavior documented publicly, the contract and its linked implementation notes agree; report contradictions with both locations.
+- [ ] For each finding, report both locations, the owning location, and the proposed replacement link or removal. Respect the selected review scope.
+
 ### Phase 3 — Report
 
 Present findings organized by file with violation counts:
@@ -215,7 +225,8 @@ Use the `update-release-candidate` skill after branch/PR review to reconcile ver
 - DO NOT run `npm run lint` or `npm run build` — this is a pattern-level review, not a build check
 - DO NOT auto-fix code violations without presenting the report first and getting user approval. This approval requirement does not block Phase 6 tracker maintenance, which follows its own explicit read-only rules.
 - DO NOT remove or alter existing `TODO`, `NOTE`, `FIXME`, `// GV`, or `eslint-disable` comments
-- ONLY review files under `packages/` — ignore docs, config, scripts
+- Approved documentation-ownership fixes (item 16) may remove duplicated text or replace it with a link; never delete unique knowledge without moving it to its owner
+- ONLY review files under `packages/` for code checks, plus changed documentation for item 16 — ignore config and scripts
 
 ## Git Commands Reference
 

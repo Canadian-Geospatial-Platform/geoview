@@ -19,6 +19,18 @@ import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
 
+  /** Timeout value for waiting for layer registration. */
+  static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
+
+  /** Maximum time for browser scrolling and UI layout to settle. */
+  static readonly UI_SCROLL_TIMEOUT_MS = 5000;
+
+  /** Stable interval covering delayed footer scrolling and layout transitions. */
+  static readonly UI_SCROLL_SETTLE_MS = 500;
+
+  /** Pixel tolerance for viewport geometry and scroll stability. */
+  static readonly UI_SCROLL_TOLERANCE_PX = 2;
+
   /** WGS84 definition used to exercise local WKT resolution. */
   static readonly WGS84_WKT =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]';
