@@ -4,14 +4,18 @@ import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
+import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
-import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import { generateId } from 'geoview-core/core/utils/utilities';
+import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -1129,6 +1133,108 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
+   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   *
+   * Each step of the process is logged into the provided test instance for traceability and debugging.
+   *
+   * @param test - The test instance used to log each step in the layer setup process
+   * @param gvConfig - The configuration object defining the GeoView layer to be added
+   * @returns A promise that resolves to the fully loaded GeoView layer instance
+   */
+  async addLayerOnMap<T>(test: Test<T>, gvConfig: TypeGeoviewLayerConfig): Promise<GeoViewLayerAddedResult> {
+    // Add the geoview layer by geocore uuid
+    test.addStep('Adding the layer on the map...');
+    const result = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
+
+    // Wait for the layer to be fully added on the map
+    test.addStep('Waiting for the layer to be added...');
+    await result.promiseLayer;
+
+    // Return the layer
+    return result;
+  }
+
+  /**
+   * Waits until the layer at the given layer path has loaded once, and waits until its legend has been queried.
+   *
+   * Each step of the process is logged into the provided test instance for traceability and debugging.
+   * The legend wait ignores empty-icon and `no data` legend payloads by default; pass `acceptNoIconsOrNoData` as true
+   * to accept those payloads as a valid resolution (useful for layers whose service legitimately reports no icons).
+   *
+   * @param test - The test instance used to log each step in the layer check process
+   * @param layerPath - The unique path or ID used to retrieve the added layer from the map viewer
+   * @param acceptNoIconsOrNoData - Optional. When true, a legend with no icons or with a `no data` first icon is accepted as a valid resolution. Defaults to false
+   * @returns A promise that resolves to the fully loaded GeoView layer instance
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+   */
+  async waitLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractBaseGVLayer> {
+    // Wait for the layer to get registered
+    test.addStep(`Wait for the layer ${layerPath} to be registered...`);
+    const layer = await this.getControllersRegistry().layerController.waitForLayerRegistered(layerPath);
+
+    // Wait until the layer has at least loaded once
+    test.addStep(`Waiting for the layer to be loaded at least once...`);
+    await layer.waitForLoadedOnce();
+
+    // Wait until the legend has been queried
+    test.addStep(`Wait for the legend to be queried...`);
+    await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLegendQueried(layerPath, acceptNoIconsOrNoData);
+
+    // Return the layer
+    return layer;
+  }
+
+  /**
+   * Adds the historical flood events Esri Dynamic layer with a generated ID and waits for it to load and its legend to be queried.
+   *
+   * @param test - The test instance used to log layer registration, loading, and legend query steps
+   * @returns A promise that resolves with the loaded historical flood events layer after its legend has been queried
+   */
+  async addLayerEsriDynamicHistoFloodEvents<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const gvLayerName = 'Esri Dynamic Histo Flood Events';
+
+    // Create the geoview layer config
+    const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+      { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
+    ]);
+
+    // Redirect to helper to add the layer to the map and wait
+    await this.addLayerOnMap(test, gvConfig);
+
+    // Find the layer and wait until its ready
+    return this.waitLayerAtLayerPath(test, layerPath);
+  }
+
+  /**
+   * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
+   *
+   * Each step is logged to the provided test instance for traceability.
+   *
+   * @param test - The test instance used to record each step of the removal process
+   * @param mapViewer - The map viewer instance from which the layer is removed
+   * @param layerPath - The unique path or ID of the layer to be removed
+   */
+  finalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
+    // Check that the layer is indeed there
+    test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
+    Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
+
+    // Remove the added layer
+    test.addStep(`Removing the layer ${layerPath} from the map...`);
+    this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layerPath);
+
+    // Check the removal worked
+    test.addStep(`Check that the layer is indeed removed...`);
+    const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
+    Test.assertIsUndefined('legendLayer', legendLayer);
+  }
+
+  /**
    * Destroys the current map and creates a new one from the given config.
    *
    * Deletes the existing map viewer, creates a fresh instance via `createMapFromConfigFast`,
@@ -1162,30 +1268,6 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Return the map viewer
     return mapViewer;
-  }
-
-  /**
-   * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
-   *
-   * Each step is logged to the provided test instance for traceability.
-   *
-   * @param test - The test instance used to record each step of the removal process
-   * @param mapViewer - The map viewer instance from which the layer is removed
-   * @param layerPath - The unique path or ID of the layer to be removed
-   */
-  finalizeStepRemoveLayerAndAssert(test: Test, layerPath: string): void {
-    // Check that the layer is indeed there
-    test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
-    Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
-
-    // Remove the added layer
-    test.addStep(`Removing the layer ${layerPath} from the map...`);
-    this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layerPath);
-
-    // Check the removal worked
-    test.addStep(`Check that the layer is indeed removed...`);
-    const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
-    Test.assertIsUndefined('legendLayer', legendLayer);
   }
 
   /**

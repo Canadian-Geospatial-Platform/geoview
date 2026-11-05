@@ -105,7 +105,6 @@ export class TimeSliderTester extends GVAbstractTester {
    */
   testConstrainValues(): Promise<Test<TimeSliderConstraintResult>> {
     const baseValues: TypeTimeSliderValues = {
-      delay: 1000,
       defaultValues: [0, 1000],
       discreteValues: false,
       field: 'date',
