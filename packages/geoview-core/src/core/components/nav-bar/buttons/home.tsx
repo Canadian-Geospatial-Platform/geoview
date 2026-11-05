@@ -6,6 +6,7 @@ import { HomeIcon } from '@/ui/icons';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
@@ -42,7 +43,7 @@ export default function Home(): JSX.Element {
 
   return (
     <IconButton
-      id={`${mapId}-button-home`}
+      id={DomHelper.buildButtonHomeId(mapId)}
       aria-label={t('mapnav.home')}
       tooltipPlacement="left"
       onClick={handleZoom}

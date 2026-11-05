@@ -652,7 +652,7 @@ const ResponsiveGridLayout = forwardRef(
 
             {isFocusTrap && !isFullScreen && hasContent && (
               <IconButton
-                id={`${mapId}-${containerType}-guide-close-btn`}
+                id={DomHelper.buildGuideCloseButtonId(mapId, containerType)}
                 onClick={handleCloseGuide}
                 sx={composeSxProps(
                   memoSxClasses.guideCloseBtn,
