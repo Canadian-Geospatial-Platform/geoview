@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { LineString, Polygon, Point } from 'ol/geom';
+import { LineString, Polygon } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import type { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
@@ -26,6 +26,7 @@ import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
+import { createMeasurementLabelStyles } from '@/core/components/nav-bar/buttons/measurement-label-style';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -46,21 +47,19 @@ const FILL_COLORS = 'rgba(255, 0, 0, 0.2)';
 /** Stroke width for measurement lines. */
 const STROKE_WIDTH = 2;
 
-/** Base style values for measurement tooltips and labels. */
-const TOOLTIP_BASE_STYLE = {
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+/** Base style values for measurement segment labels. */
+const SEGMENT_LABEL_BASE_STYLE = {
   textColor: '#fff',
   // eslint-disable-next-line no-restricted-syntax -- OpenLayers/canvas measurement text, not viewer UI.
   fontSize: '13px',
   // eslint-disable-next-line no-restricted-syntax -- OpenLayers/canvas measurement text, not viewer UI.
   fontWeight: 'bold',
-  padding: { top: 4, right: 8, bottom: 4, left: 8 },
 } as const;
 
 /** OpenLayers canvas text style configuration for segment labels. */
 const LABEL_STYLE_CONFIG = {
-  font: `${TOOLTIP_BASE_STYLE.fontWeight} ${TOOLTIP_BASE_STYLE.fontSize} sans-serif`,
-  textColor: TOOLTIP_BASE_STYLE.textColor,
+  font: `${SEGMENT_LABEL_BASE_STYLE.fontWeight} ${SEGMENT_LABEL_BASE_STYLE.fontSize} sans-serif`,
+  textColor: SEGMENT_LABEL_BASE_STYLE.textColor,
   haloColor: 'rgba(0, 0, 0, 0.7)',
   haloWidth: 9,
 } as const;
@@ -126,14 +125,14 @@ export default function Measurement(): JSX.Element {
   }, []);
 
   /**
-   * Creates a style function that shows segment lengths.
+   * Creates a style function for measurement geometry, totals and optional segment lengths.
    *
    * @param includeSegmentLabels - Optional whether to include segment length labels on the geometry
    * @returns OpenLayers style function that applies measurement styles
    */
   const createSegmentStyle = useCallback(
     (includeSegmentLabels = true): StyleFunction => {
-      return (feature: FeatureLike) => {
+      return (feature: FeatureLike): Style[] => {
         const styles: Style[] = [];
         const geometry = feature.getGeometry();
 
@@ -206,8 +205,7 @@ export default function Measurement(): JSX.Element {
           }
         }
 
-        // Add total measurement label for map exports (canvas-based) so we can add to export
-        // Overlays are not exportable
+        // Keep totals canvas-based so the text, rounded backing and pointer appear in map exports.
         let labelCoord: number[];
         let totalLabel = '';
         let labelOffsetY = -15; // Default offset for line (above end point)
@@ -217,7 +215,7 @@ export default function Measurement(): JSX.Element {
           const length = GeoUtilities.getLength(geometry);
           totalLabel = formatLength(length, displayLanguage);
         } else if (geometry instanceof Polygon) {
-          // Position at polygon centroid
+          // Position at an interior point so the total stays inside the polygon.
           labelCoord = geometry.getInteriorPoint().getCoordinates();
           labelCoord.pop(); // Remove the third coordinate
           labelOffsetY = 0; // No offset for polygon - keep label inside
@@ -230,27 +228,7 @@ export default function Measurement(): JSX.Element {
           return styles;
         }
 
-        styles.push(
-          new Style({
-            geometry: new Point(labelCoord),
-            text: new Text({
-              text: totalLabel,
-              font: `bold 14px sans-serif`, // Slightly larger for prominence
-              fill: new Fill({ color: TOOLTIP_BASE_STYLE.textColor }),
-              backgroundFill: new Fill({ color: TOOLTIP_BASE_STYLE.backgroundColor }),
-              padding: [
-                TOOLTIP_BASE_STYLE.padding.top,
-                TOOLTIP_BASE_STYLE.padding.right,
-                TOOLTIP_BASE_STYLE.padding.bottom,
-                TOOLTIP_BASE_STYLE.padding.left,
-              ],
-              offsetY: labelOffsetY,
-              textAlign: 'center',
-              textBaseline: 'middle',
-              overflow: true,
-            }),
-          })
-        );
+        styles.push(...createMeasurementLabelStyles(feature, labelCoord, totalLabel, labelOffsetY));
 
         return styles;
       };
