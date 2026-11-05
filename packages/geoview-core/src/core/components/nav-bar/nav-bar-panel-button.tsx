@@ -1,4 +1,4 @@
-import { useMemo, cloneElement, isValidElement, useId } from 'react';
+import { useEffect, useMemo, useRef, useId } from 'react';
 import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -12,14 +12,15 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { DialogTitle, DialogContent, Box } from '@/ui/layout';
 import { Paper } from '@/ui/paper/paper';
 import { CloseIcon } from '@/ui/icons';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
+
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
+import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
-import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
-import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -31,6 +32,8 @@ interface NavbarPanelButtonType {
   keepPanelMounted?: boolean;
   /** Accessible live-region content that must remain available when the panel is closed. */
   liveRegionContent?: ReactNode;
+  /** Requests a change to the panel's open state. */
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 /**
@@ -44,6 +47,7 @@ export default function NavbarPanelButton({
   isActive = false,
   keepPanelMounted = false,
   liveRegionContent,
+  onOpenChange,
 }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
@@ -56,7 +60,7 @@ export default function NavbarPanelButton({
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const shellContainer = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // Extract panel width if provided
   const panelWidth = buttonPanel.panel?.width;
@@ -73,6 +77,26 @@ export default function NavbarPanelButton({
 
   // States
   const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const previousRequestedOpen = useRef(false);
+  const previousOpen = useRef(open);
+
+  useEffect((): void => {
+    logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - external open state', buttonPanel.panel?.status);
+    const requestedOpen = buttonPanel.panel?.status ?? false;
+    if (requestedOpen === previousRequestedOpen.current) return;
+    previousRequestedOpen.current = requestedOpen;
+
+    if (requestedOpen && buttonRef.current) openAt(buttonRef.current);
+    else closePanel();
+  }, [buttonPanel.panel?.status, closePanel, openAt]);
+
+  useEffect((): void => {
+    logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - open state callback', open);
+    if (previousOpen.current === open) return;
+    previousOpen.current = open;
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   // #region Handlers
 
@@ -103,16 +127,12 @@ export default function NavbarPanelButton({
    *
    * @returns The rendered panel content
    */
-  const renderPanelContent = (): JSX.Element => {
+  const renderPanelContent = (): ReactNode => {
     if (buttonPanel.panel?.convertHtmlContent) {
       return <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />;
     }
 
-    if (isValidElement(buttonPanel.panel?.content)) {
-      return cloneElement(buttonPanel.panel.content as React.ReactElement<{ closePanel?: () => void }>, { closePanel });
-    }
-
-    return buttonPanel.panel?.content as JSX.Element;
+    return buttonPanel.panel?.content;
   };
 
   return (
@@ -121,6 +141,7 @@ export default function NavbarPanelButton({
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
+          iconRef={buttonRef}
           aria-label={t(buttonPanel.button['aria-label'])}
           aria-expanded={open}
           aria-haspopup="dialog"

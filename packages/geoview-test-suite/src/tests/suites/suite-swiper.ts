@@ -17,7 +17,7 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
+   * @param controllerRegistry - The controller registry for the map viewer
    */
   constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super(api, mapViewer, controllerRegistry);

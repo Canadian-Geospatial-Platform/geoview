@@ -27,6 +27,7 @@ import type {
   TypeExternalPackagesProps,
   TypeServiceUrls,
   TypeConfigMeta,
+  TypeScaleInfo,
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
@@ -37,6 +38,8 @@ import type { TypeClickMarker } from '@/core/components/click-marker/click-marke
 import type { TypeHoverFeatureInfo } from './feature-info-state';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import { OVERVIEW_MAP_MIN_CONTAINER_WIDTH, OVERVIEW_MAP_MIN_CONTAINER_HEIGHT } from '@/core/utils/constant';
+
+// GV States shouldn't import DomHelper
 
 // #region INTERFACE DEFINITION
 
@@ -1096,24 +1099,6 @@ export const setStoreMapFixNorth = (mapId: string, fixNorth: boolean): void => {
 };
 
 // #endregion STATE ADAPTORS
-
-/** Represents the map scale display information for metric and imperial units. */
-export interface TypeScaleInfo {
-  /** The line width for the metric scale bar. */
-  lineWidthMetric: string;
-
-  /** The label text for the metric scale bar. */
-  labelGraphicMetric: string;
-
-  /** The line width for the imperial scale bar. */
-  lineWidthImperial: string;
-
-  /** The label text for the imperial scale bar. */
-  labelGraphicImperial: string;
-
-  /** The numeric scale label. */
-  labelNumeric: string;
-}
 
 /** Represents the north arrow display state. */
 export interface TypeNorthArrow {

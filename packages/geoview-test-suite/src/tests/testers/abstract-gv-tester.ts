@@ -3,7 +3,6 @@ import type { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
-import { TestError } from '../core/exceptions';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
@@ -12,16 +11,13 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
-import { getGVRootElement } from 'geoview-core/core/utils/dom-helper';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 
 /**
  * Main GeoView Abstract Tester class.
  */
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
-
-  /** Timeout value for waiting for layer registration. */
-  static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
 
   /** WGS84 definition used to exercise local WKT resolution. */
   static readonly WGS84_WKT =
@@ -1048,7 +1044,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** The Map Viewer for the tests */
   #mapViewer: MapViewer;
 
-  /** The Controller Registry for the tests */
+  /** The controller registry for the tests */
   #controllerRegistry: ControllerRegistry;
 
   /**
@@ -1056,7 +1052,6 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param api - The api
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    */
   constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super();
@@ -1095,18 +1090,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Gets the suite's existing map container instead of adding maps to the test runner page.
-   *
-   * @returns The current suite's map root
-   * @throws {TestError} When the suite's map container is missing
-   */
-  protected getViewportHost(): HTMLElement {
-    const host = getGVRootElement(this.getMapId());
-    if (!host) throw new TestError('Viewport test suite has no map container');
-    return host;
-  }
-
-  /**
    * Gets the geometry API from the map viewer.
    * @returns The geometry API instance
    */
@@ -1124,14 +1107,13 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Sets the MapViewer and the Controller registry for the current test.
+   * Sets the MapViewer for the current test.
    *
    * @param mapViewer - The MapViewer to set
-   * @param controllerRegistry - The ControllerRegistry to set
    */
-  reassignMapViewerAndControllers(mapViewer: MapViewer, controllerRegistry: ControllerRegistry): void {
+  reassignMapViewer(mapViewer: MapViewer): void {
     this.#mapViewer = mapViewer;
-    this.#controllerRegistry = controllerRegistry;
+    this.#controllerRegistry = mapViewer.controllers;
   }
 
   /**
@@ -1155,7 +1137,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), 500);
 
     // Replace the map viewer and the controller registry in the tester with the new one created from config
-    this.reassignMapViewerAndControllers(mapViewer, mapViewer.controllers);
+    this.reassignMapViewer(mapViewer);
 
     // Waiting for layers to get loaded even when map is in a background tab
     test.addStep('Waiting for layers to get loaded even when map is in a background tab...');
@@ -1211,6 +1193,8 @@ export abstract class GVAbstractTester extends AbstractTester {
     await promiseMapclick.promiseQueryBatched;
   }
 
+  // #region UI INTERACTION METHODS
+
   /**
    * Opens or closes an app bar tab and waits for its active class to reflect the requested state.
    *
@@ -1227,14 +1211,14 @@ export abstract class GVAbstractTester extends AbstractTester {
 
       // Wait for the React UI to actually pick up on the store update
       test.addStep(`Waiting on the ${tabId} panel to open...`);
-      await this.waitForAppbarTabSelected(tabId);
+      await DomHelper.waitForAppbarTabSelected(this.getMapId(), tabId);
     } else {
       test.addStep(`Closing ${tabId} app bar panel...`);
       this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, false, false);
 
       // Wait for the React UI to actually pick up on the store update
       test.addStep(`Waiting on the ${tabId} panel to close...`);
-      await this.waitForAppbarTabNotSelected(tabId);
+      await DomHelper.waitForAppbarTabNotSelected(this.getMapId(), tabId);
     }
   }
 
@@ -1254,58 +1238,20 @@ export abstract class GVAbstractTester extends AbstractTester {
 
       // Wait for the React UI to actually pick up on the store update
       test.addStep(`Waiting on the ${tabId} panel to open...`);
-      await this.waitForFooterTabSelected(tabId);
+      await DomHelper.waitForFooterTabSelected(this.getMapId(), tabId);
     } else {
       test.addStep(`Closing ${tabId} footer bar panel...`);
       this.getControllersRegistry().uiController.setActiveFooterBarTab(undefined);
 
       // Wait for the React UI to actually pick up on the store update
       test.addStep(`Waiting on the ${tabId} panel to close...`);
-      await this.waitForFooterTabNotSelected(tabId);
+      await DomHelper.waitForFooterTabNotSelected(this.getMapId(), tabId);
     }
   }
 
-  /**
-   * Waits for an app bar tab button to receive the active class.
-   *
-   * @param tabId - The app bar tab identifier
-   * @returns A promise that resolves with the active app bar tab button element
-   */
-  waitForAppbarTabSelected(tabId: string): Promise<Element> {
-    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn.active`);
-  }
+  // #endregion UI INTERACTION METHODS
 
-  /**
-   * Waits for an app bar tab button to no longer have the active class.
-   *
-   * @param tabId - The app bar tab identifier
-   * @returns A promise that resolves with the inactive app bar tab button element
-   */
-  waitForAppbarTabNotSelected(tabId: string): Promise<Element> {
-    return AbstractTester.waitForClass(`#${this.getMapId()}-appBar-${tabId}-panel-btn:not(.active)`);
-  }
-
-  /**
-   * Waits for a footer tab to receive the selected class.
-   *
-   * @param tabId - The footer tab identifier
-   * @returns A promise that resolves with the selected footer tab element
-   */
-  waitForFooterTabSelected(tabId: string): Promise<Element> {
-    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}.Mui-selected`);
-  }
-
-  /**
-   * Waits for a footer tab to no longer have the selected class.
-   *
-   * @param tabId - The footer tab identifier
-   * @returns A promise that resolves with the inactive footer tab element
-   */
-  waitForFooterTabNotSelected(tabId: string): Promise<Element> {
-    return AbstractTester.waitForClass(`#${this.getMapId()}-tab-${tabId}:not(.Mui-selected)`);
-  }
-
-  // #region STATIC METHODS
+  // #region STATIC METHODS PUBLIC
 
   /**
    * Creates the GeoJSON group configuration used by settings and visibility tests.
@@ -1356,5 +1302,5 @@ export abstract class GVAbstractTester extends AbstractTester {
     return layerConfig as TypeGeoviewLayerConfig;
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC METHODS PUBLIC
 }

@@ -442,7 +442,7 @@ testMyPanelBehavior(): Promise<Test<ResultType>> {
 - Use `this.getControllersRegistry().uiController.setActiveFooterBarTab()` to activate tabs
 - Use `delay()` after tab switches to allow UI to update (minimum 500ms, some panels need 2000ms)
 - Access store state via `getStore*` getters for assertions (e.g., `getStoreUIActiveFooterBarTab`, `getStoreDetailsFeatures`)
-- Access DOM in a **map-scoped** way: for the map root use `getStoreAppGeoviewHTMLElement(mapId)`; for a specific descendant prefer the wrappers `getGVElementById(mapId, suffix)` / `queryGVSelector(mapId, selector)` from `geoview-core/core/utils/dom-helper`. Never use `document.getElementById` / `document.querySelector` directly (see [Best Practices §18 — Map-scoped DOM access](../../programming/best-practices.md#dom-access))
+- Access DOM in a **map-scoped** way: for the map root use `DomHelper.getGVRootElement(mapId)`; for a specific descendant prefer `DomHelper.getGVElementById(mapId, suffix)` / `DomHelper.queryGVSelector(mapId, selector)` from `geoview-core/core/utils/dom-helper`. Never use `document.getElementById` / `document.querySelector` directly (see [Best Practices §18 — Map-scoped DOM access](../../programming/best-practices.md#dom-access))
 
 ### Suite Guard Pattern
 
@@ -534,7 +534,8 @@ If either check fails, it returns `{ results: [] }` silently (no error thrown). 
 ### `whenThisThen()` for Async Conditions
 
 Prefer the existing event-driven `allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath)`
-before querying. Use `whenThisThen` only for conditions with no suitable event; the polling example
+before querying. A layer config must reach `processed` before its GV layer can be registered; the
+wait rejects if the config enters an error state first. Use `whenThisThen` only for conditions with no suitable event; the polling example
 below remains a fallback, not the default registration pattern.
 
 ```typescript

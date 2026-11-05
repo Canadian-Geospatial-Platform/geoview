@@ -10,6 +10,7 @@ Helper/error routing: [typescript-react.md](../ai/typescript-react.md) → **Sou
 
 - No unexplained any; explicit returns include callbacks/memos. Respect DOM versus mutable refs.
 - Memo values use memo prefix; dependencies reflect actual use; memoization needs concrete benefit.
-- Use existing Fetch/timing/DOM helpers and narrow catches; do not duplicate shared logic.
+- Use existing Fetch/timing helpers and narrow catches; do not duplicate shared logic. Keep DOM access at the UI/browser-integration boundary: prefer existing refs/context (such as `useShellContainer()` for the shell), use `DomHelper` for required map-scoped root/descendant lookups, and have controllers request semantic UI actions or values instead. Follow [map-scoped DOM access](../../docs/programming/best-practices.md#dom-access).
+- For fire-and-forget promise chains, attach a terminal rejection-handling `.catch()`; `void` is not a substitute. If the catch handler can reject, handle that rejection too. Follow [best-practices.md](../../docs/programming/best-practices.md#shared-helpers-and-error-boundaries).
 - Alias imports whose name matches or closely resembles a local member (e.g. `loadImage as loadImageFromUtils`).
 - Method size/complexity thresholds are review signals, not hard caps or mandatory file splitting.

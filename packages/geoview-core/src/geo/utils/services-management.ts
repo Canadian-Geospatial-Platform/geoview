@@ -1,3 +1,5 @@
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+
 /** Handles known service-specific quirks that require special treatment. */
 export class ServicesManagement {
   /**
@@ -55,5 +57,36 @@ export class ServicesManagement {
    */
   static toggleMsLayerIdPrefix(layerId: string): string {
     return layerId.startsWith('ms:') ? layerId.slice(3) : `ms:${layerId}`;
+  }
+
+  /**
+   * If no primary-key outfield is configured, marks the first `pk_lyr_id` outfield as type `oid`, falling back to `id`.
+   * Field-name matching is case-insensitive; `pk_lyr_id` is preferred for CDTK layers.
+   *
+   * @param layerConfig - The layer configuration whose outfields are checked and may be modified
+   */
+  static guessAssignationOfPrimaryKeyField(layerConfig: AbstractBaseLayerEntryConfig): void {
+    // If the outfields have no primary key, try to determine one manually
+    if (!layerConfig.hasOutfieldsPK()) {
+      const outfields = layerConfig.getOutfields();
+
+      // Look for a field named 'pk_lyr_id' first, then 'id' as a fallback (CDTK special-case!)
+      const lyrIdField = outfields?.find((field) => field.name.toLowerCase() === 'pk_lyr_id');
+      if (lyrIdField) {
+        lyrIdField.type = 'oid';
+      } else {
+        // Look for a field named 'fid' as a fallback if 'pk_lyr_id' is not found
+        const fidField = outfields?.find((field) => field.name.toLowerCase() === 'fid');
+        if (fidField) {
+          fidField.type = 'oid';
+        } else {
+          // Look for a field named 'id' as a fallback if 'fid' is not found
+          const idField = outfields?.find((field) => field.name.toLowerCase() === 'id');
+          if (idField) {
+            idField.type = 'oid';
+          }
+        }
+      }
+    }
   }
 }

@@ -13,7 +13,7 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
   /** The MapViewer */
   #mapViewer: MapViewer;
 
-  /** The ControllerRegistry */
+  /** The controller registry for the map viewer */
   #controllerRegistry: ControllerRegistry;
 
   /**
@@ -21,7 +21,6 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
    *
    * @param api - The api, mainly used to retrieve the MapViewer
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry, used to pass to testers that need it
    */
   protected constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super();
@@ -73,21 +72,21 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
   }
 
   /**
-   * Gets the controllers registry.
-   *
-   * @returns The controllers registry
-   */
-  getControllersRegistry(): ControllerRegistry {
-    return this.#controllerRegistry;
-  }
-
-  /**
    * Gets the Map Id.
    *
    * @returns The map id
    */
   getMapId(): string {
-    return this.#mapViewer.mapId;
+    return this.getMapViewer().mapId;
+  }
+
+  /**
+   * Gets the controller registry for the map viewer.
+   *
+   * @returns The controller registry
+   */
+  getControllersRegistry(): ControllerRegistry {
+    return this.#controllerRegistry;
   }
 
   // #endregion METHODS

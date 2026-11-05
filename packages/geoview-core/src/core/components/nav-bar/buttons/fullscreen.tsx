@@ -4,12 +4,11 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { FullscreenIcon, FullscreenExitIcon } from '@/ui/icons';
-import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { getGVShellElement } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useUIController } from '@/core/controllers/use-controllers';
 
 /**
@@ -37,10 +36,8 @@ export default function Fullscreen(): JSX.Element {
    * Exiting (button, `Esc` key or API) is finalized by the UI controller when the browser leaves fullscreen.
    */
   function handleSetFullscreen(): void {
-    const element = getGVShellElement(mapId);
-    if (element) {
-      uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
-    }
+    // Call controller to toggle fullscreen mode
+    uiController.setFullScreen(!isFullScreen, DomHelper.getShellElement(mapId));
   }
 
   // #endregion Handlers

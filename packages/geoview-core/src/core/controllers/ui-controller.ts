@@ -3,7 +3,7 @@ import KeyboardZoom from 'ol/interaction/KeyboardZoom';
 import type { Coordinate } from 'ol/coordinate';
 import type View from 'ol/View';
 
-import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
@@ -12,6 +12,7 @@ import {
   addStoreUIFooterTab,
   bumpStoreUINavBarButtonPanelVersion,
   closeStoreUIMapPopovers,
+  clearStoreUIFocusRestoreRequest,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
   hideStoreUITabButton,
@@ -30,9 +31,7 @@ import {
 import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
-  getStoreAppHeight,
   getStoreAppIsCrosshairsActive,
-  getStoreAppIsFullscreenActive,
   removeStoreAppAllNotifications,
   removeStoreAppNotification,
   setStoreAppCircularProgress,
@@ -47,10 +46,10 @@ import {
   setStoreAppHeight,
   type TypeDrawingHint,
 } from '@/core/stores/states/app-state';
-import { getGVElementById, getGVMapTargetElement, getGVRootDataAttribute } from '@/core/utils/dom-helper';
+import { getStoreMapConfigNavBar } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
-import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { createGuideObject, exitFullscreen, getFullscreenElement, requestFullscreen } from '@/core/utils/utilities';
@@ -68,6 +67,8 @@ import type {
   UIDomain,
 } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
+
+// GV Controllers shouldn't import DomHelper
 
 /**
  * Controller responsible for managing the UI state interactions.
@@ -330,6 +331,15 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
+   * Completes a focus restoration request handled by the UI shell.
+   *
+   * @param requestId - The identifier of the completed request
+   */
+  completeFocusRestore(requestId: number): void {
+    clearStoreUIFocusRestoreRequest(this.getMapId(), requestId);
+  }
+
+  /**
    * Sets the active state of the GeoView focus trap.
    *
    * @param active - Whether the GeoView trap is active
@@ -454,16 +464,13 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Returns focus to the navbar button that started a keyboard drawing tool.
+   * Returns focus to the measurement button.
    *
    * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
-   *
-   * @param suffix - The map-relative id suffix of the tool button
    */
-  focusToolButton(suffix: string): void {
-    const mapId = this.getMapId();
-    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== getGVMapTargetElement(mapId)) return;
-    getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
+  focusMeasurementButton(): void {
+    if (!AbstractMapViewerController.isToolButtonFocusable(this.getMapId())) return;
+    DomHelper.getButtonMeasurement(this.getMapId())?.focus({ focusVisible: true });
   }
 
   /**
@@ -670,29 +677,6 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Gets the current geolocator search area from the store.
-   *
-   * @returns The current geolocator search area, or undefined if not set
-   */
-  getMapGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
-    // Return the store value
-    return getStoreMapGeolocatorSearchArea(this.getMapId());
-  }
-
-  /**
-   * Gets the effective footer height for the map.
-   *
-   * Prefers a consumer-provided `data-footer-height` attribute on the root element, falling back to the store's
-   * app height. Combines a DOM read with a store value, so it lives on the controller rather than in `dom-helper`
-   * (which must stay store-free). Callable from non-React code via `mapViewer.controllers.uiController`.
-   *
-   * @returns The footer height as a CSS length string (e.g. '600px')
-   */
-  getFooterHeight(): string {
-    return getGVRootDataAttribute(this.getMapId(), 'data-footer-height') ?? `${getStoreAppHeight(this.getMapId())}px`;
-  }
-
-  /**
    * Resizes the map viewer height without destroying and recreating the MapViewer.
    *
    * Updates the stored viewer height so the footer bar split and the OpenLayers canvas recalculate to match,
@@ -830,7 +814,7 @@ export class UIController extends AbstractMapViewerController {
       this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
         this.#fullscreenFocusFrame = undefined;
         if (!getFullscreenElement() && this.#hasActiveKeyboardTool()) {
-          getGVMapTargetElement(mapId)?.focus({ preventScroll: true });
+          DomHelper.getMapTargetElement(mapId)?.focus({ preventScroll: true });
         }
       });
     }

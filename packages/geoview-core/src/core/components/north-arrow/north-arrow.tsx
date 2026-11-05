@@ -10,6 +10,7 @@ import { useStoreMapNorthArrowElement, useStoreMapCurrentProjectionEPSG } from '
 
 import { useManageArrow } from './hooks/useManageArrow';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -97,7 +98,7 @@ export const NorthPoleFlag = memo((): JSX.Element => {
   }, [mapController]);
 
   return (
-    <Box ref={northPoleRef} id={`${mapId}-northpole`} sx={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+    <Box ref={northPoleRef} id={DomHelper.buildNorthPoleId(mapId)} sx={{ visibility: isVisible ? 'visible' : 'hidden' }}>
       <NorthPoleIcon />
     </Box>
   );

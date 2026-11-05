@@ -130,11 +130,11 @@ The pipeline: `gv-layer.getLegend()` → `TypeLegend { type, styleConfig, legend
 
 The UI ([`legend-layer-container.tsx`](../../packages/geoview-core/src/core/components/legend/legend-layer-container.tsx), [`legend-layer.tsx`](../../packages/geoview-core/src/core/components/legend/legend-layer.tsx), [`layer-details.tsx`](../../packages/geoview-core/src/core/components/layers/right-panel/layer-details.tsx)) uses **two predicates** (`layerHasClassItems`, `layerHasLegendImage` — both in [`types.ts`](../../packages/geoview-core/src/core/components/layers/types.ts)) to pick exactly one of these modes per layer:
 
-| Mode                       | Predicate                                                | Triggered when                                                                                                                                  | UI rendered                                          |
-| -------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Class-based items**      | `layerHasClassItems(items, styleConfig, minItems?)`      | `items.length >= minItems` (default `1`) **and** `styleConfig` is set                                                                           | Per-class clickable list (`ItemsList` / `renderItems`) |
-| **Service legend image**   | `layerHasLegendImage(schemaTag, items, icons, styleConfig)` | WMS/WMTS only; **no** class items; `icons[0].iconImage` exists **and is not the string `'no data'`**                                            | Single image (`WMSLegendImage` / `renderWMSImage`)   |
-| **Nothing**                | Neither predicate matches                                | (no `icons`, no `items`, no `styleConfig`)                                                                                                      | Nothing rendered                                     |
+| Mode                       | Predicate                                                     | Triggered when                                                                                                                                  | UI rendered                                          |
+| -------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Class-based items**      | `layerHasClassItems(items, styleConfig, minItems?)`           | `items.length >= minItems` (default `1`) **and** `styleConfig` is set                                                                           | Per-class clickable list (`ItemsList` / `renderItems`) |
+| **Service legend image**   | `layerHasLegendImage(schemaTag, items, icons, styleConfig)`   | WMS/WMTS only; **no** class items; `icons[0].iconImage` exists **and is not the string `'no data'`**                                            | Single image (`WMSLegendImage` / `renderWMSImage`)   |
+| **Nothing**                | Neither predicate matches                                    | (no `icons`, no `items`, no `styleConfig`)                                                                                                      | Nothing rendered                                     |
 
 > `layerHasClassItems` takes an optional `minItems` argument. `CollapsibleContent` uses `minItems = 2` so that a layer with a **single** class item collapses (no point in expanding a list of one), while the rest of the UI uses the default `1` to detect any presence of class data.
 
@@ -267,13 +267,14 @@ async queryLayers(location?: undefined, extent?: Extent): Promise<void> {
 
 - Queries all features regardless of viewport
 - Optionally supports extent-based filtering
-- Large result handling (pagination, streaming)
+- Delegates service paging to the underlying layer source; fetched features are still accumulated in the result set
 - Used by Data Table, export features, analysis tools
 
 **Performance Considerations:**
 
 - Can return large datasets
-- May need pagination or streaming for WFS/large GeoJSON
+- WFS 2.0 responses that report more matched than returned features are paged sequentially with `count` and `startIndex`; a detected primary key is used for stable ordering when available
+- Paging is not streaming: all retrieved features are still held in memory, and large GeoJSON sources have no common paging strategy
 - Query button disabling to prevent concurrent queries
 
 ---

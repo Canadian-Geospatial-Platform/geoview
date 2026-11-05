@@ -18,9 +18,6 @@ import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX, DISPLAY_LANGUAGE_LOCALE } from '@
 // GV Re-exported to keep the existing public import path
 export { isLocalhost, formatDuration } from '@/core/utils/runtime-utilities';
 
-/** The observers to monitor element removals from the DOM tree */
-const observers: Record<string, MutationObserver> = {};
-
 /** Regex patterns for image URL validation - compiled once to avoid recreation on every isImage() call. */
 const IMAGE_VALIDATION_PATTERNS = {
   /** URLs ending with image extensions (with optional query params/fragments). */
@@ -485,7 +482,7 @@ export function getScriptAndAssetURL(): string {
  * @param getName - Callback that returns the item name used for sorting
  * @returns A sorted copy of the items
  */
-export function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[] {
+export function sortArrayByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[] {
   return [...items].sort((itemA, itemB): number => {
     const nameA = getName(itemA).trim();
     const nameB = getName(itemB).trim();
@@ -503,6 +500,28 @@ export function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => stri
     if (isNameANumber || isNameBNumber) return isNameANumber ? -1 : 1;
 
     return nameA.localeCompare(nameB, undefined, { sensitivity: 'base', numeric: true });
+  });
+}
+
+/**
+ * Sorts a source array so that items in the enforce array appear first in the specified order.
+ *
+ * Items not in the enforce array retain their original relative order.
+ *
+ * @param sourceArray - The array to sort
+ * @param enforce - The ordered list of items to prioritize
+ * @returns The sorted array with enforced items first
+ */
+export function sortArrayWithEnforcedValues(sourceArray: string[], enforce: string[]): string[] {
+  const filteredEnforce = enforce.filter((item) => sourceArray.includes(item));
+  return [...sourceArray].sort((first, second) => {
+    const firstPriority = filteredEnforce.indexOf(first);
+    const secondPriority = filteredEnforce.indexOf(second);
+
+    if (firstPriority !== -1 && secondPriority !== -1) return firstPriority - secondPriority;
+    if (firstPriority !== -1) return -1;
+    if (secondPriority !== -1) return 1;
+    return 0;
   });
 }
 
@@ -1088,51 +1107,6 @@ export function linkifyAndSanitizeHtml(content: string, announcementText: string
     ...options,
   });
   return sanitizeHtmlContent(enhanceLinksAccessibility(linkified, announcementText));
-}
-
-/**
- * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
- * is removed from the document.
- *
- * When the element is removed, it triggers a cleanup callback and disconnects the observer to prevent memory leaks.
- *
- * @param key - A unique identifier for the element, used to manage observer references
- * @param element - The DOM element to monitor for removal from the DOM tree
- * @param onHTMLElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree
- */
-export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void {
-  if (!element || !element.parentNode) return;
-
-  // Get the parent to set the MutationObserver on
-  const parent = element.parentNode;
-
-  // Disconnect prior observer if it exists
-  if (observers[key]) {
-    // Disconnect the observer, we're replacing it
-    observers[key].disconnect();
-    delete observers[key];
-  }
-
-  // Create the MutationObserver
-  const observer = new MutationObserver((mutations: MutationRecord[]) => {
-    for (const mutation of mutations) {
-      for (const node of Array.from(mutation.removedNodes)) {
-        if (node === element || (node instanceof HTMLElement && node.contains(element))) {
-          // Callback
-          onHTMLElementRemoved(key);
-
-          // Disconnect the observer, we're done
-          observer.disconnect();
-          delete observers[key];
-          return;
-        }
-      }
-    }
-  });
-
-  // Store and activate the observer
-  observers[key] = observer;
-  observer.observe(parent, { childList: true });
 }
 
 /**
@@ -1856,133 +1830,6 @@ export function handleEscapeKey(key: string, cb?: () => void, callbackId?: strin
   }
 }
 
-/** Input types that accept typed text. */
-const TEXT_INPUT_TYPES = ['text', 'search', 'url', 'email', 'tel', 'password', 'number'];
-
-/**
- * Checks whether an element accepts typed text or selection, so keyboard shortcuts must not override its native keys.
- *
- * @param element - The element to check, such as the active element
- * @returns True when the element is a text input, textarea, select or content-editable element
- */
-// TODO: ALEX - Delete this function to use DomHelper's instead
-export function isEditableElement(element: Element | null): boolean {
-  if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.includes(element.type);
-  return (
-    element instanceof HTMLTextAreaElement ||
-    element instanceof HTMLSelectElement ||
-    (element instanceof HTMLElement && element.isContentEditable)
-  );
-}
-
-/**
- * Check if element is in viewport.
- *
- * @param el - The element to check for
- * @returns true if visible, false otherwise
- */
-export function isElementInViewport(el: Element): boolean {
-  const rect = el.getBoundingClientRect();
-
-  return (
-    rect.top >= 0 &&
-    rect.left >= 0 &&
-    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
-}
-
-/**
- * Scrolls an element into view only if it's not already visible in the viewport.
- *
- * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
- * For 'start': adds offset pixels above the element.
- * For 'end': adds offset pixels below the element.
- * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
- *
- * @param el - The HTML element to scroll into view if not visible
- * @param blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
- * @param offset - Optional offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
- */
-export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset = 100): void {
-  // Accessibility-first: default to instant scroll when matchMedia unavailable (SSR/test environments)
-  const prefersReducedMotion =
-    typeof window === 'undefined' ||
-    typeof window.matchMedia !== 'function' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
-  const rect = el.getBoundingClientRect();
-  if (rect.top < offset || rect.bottom > window.innerHeight) {
-    if (blockValue === 'center' || blockValue === 'nearest') {
-      el.scrollIntoView({ behavior: behaviorScroll, block: blockValue });
-    } else {
-      let scrollTop;
-      if (blockValue === 'end') {
-        scrollTop = window.scrollY + rect.bottom - window.innerHeight + offset;
-      } else {
-        scrollTop = window.scrollY + rect.top - offset;
-      }
-      window.scrollTo({
-        top: scrollTop,
-        behavior: behaviorScroll,
-      });
-    }
-  }
-}
-
-/**
- * Scrolls a list item into view within its scrollable container only, without scrolling the page.
- *
- * Adds a 20px gap for better visibility when scrolling.
- *
- * @param listItem - The list item element to scroll into view
- */
-export function scrollListItemIntoView(listItem: HTMLElement): void {
-  // Accessibility-first: default to instant scroll when matchMedia unavailable (SSR/test environments)
-  const prefersReducedMotion =
-    typeof window === 'undefined' ||
-    typeof window.matchMedia !== 'function' ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const behaviorScroll = (prefersReducedMotion ? 'instant' : 'smooth') as ScrollBehavior;
-  const gap = 20;
-
-  // Find the nearest scrollable parent
-  let container: HTMLElement | null = listItem.parentElement;
-  while (container && container !== document.body) {
-    const { overflowY } = window.getComputedStyle(container);
-    if ((overflowY === 'auto' || overflowY === 'scroll') && container.scrollHeight > container.clientHeight) {
-      break;
-    }
-    container = container.parentElement;
-  }
-
-  if (!container || container === document.body) return;
-
-  // Check if item is outside the visible area
-  const itemRect = listItem.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-  const isAbove = itemRect.top < containerRect.top;
-  const isBelow = itemRect.bottom > containerRect.bottom;
-
-  if (!isAbove && !isBelow) return;
-
-  // Calculate scroll position
-  const itemTop = listItem.offsetTop - container.offsetTop;
-  const itemBottom = itemTop + listItem.offsetHeight;
-
-  let newScrollTop;
-  if (isAbove) {
-    newScrollTop = Math.max(0, itemTop - gap);
-  } else {
-    newScrollTop = itemBottom - container.clientHeight + gap;
-  }
-
-  container.scrollTo({
-    top: newScrollTop,
-    behavior: behaviorScroll,
-  });
-}
-
 /**
  * Formats a numeric value according to the display language.
  *
@@ -2046,7 +1893,7 @@ export function formatArea(area: number, displayLanguage: TypeDisplayLanguage): 
  * @returns The normalized access path
  */
 export function normalizeDatacubeAccessPath(path: string): string {
-  //TODO: extract to list of exceptions / normalizations?
+  //TODO: ALEX - extract to list of exceptions / normalizations (use services-manager class)
   return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
 }
 

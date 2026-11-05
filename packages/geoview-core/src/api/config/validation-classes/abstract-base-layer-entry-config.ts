@@ -20,7 +20,6 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { LayerDataAccessPathMandatoryError, LayerMetadataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
-import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { deepMerge } from '@/core/utils/utilities';
 import { Projection, type TypeProjection } from '@/geo/utils/projection';
@@ -145,6 +144,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *
    * @param displayDateMode - The display date mode that should be used
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
     // Override this function to refresh the metadata
@@ -699,20 +699,13 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Gets the out field which represents the primary key.
+   * Gets the out field which represents the primary key if any.
    *
-   * @returns The outfield
-   * @throws {NoPrimaryKeyFieldError} When no outfields has the type 'oid'
+   * @returns The primary key outfield, or undefined if none exists
    */
-  getOutfieldsPK(): TypeOutfields {
+  getOutfieldsPK(): TypeOutfields | undefined {
     // Get the oid field
-    const outfieldOID = this.getOutfields()?.find((outfield) => outfield.type === 'oid');
-
-    // If not found
-    if (!outfieldOID) throw new NoPrimaryKeyFieldError(this.layerPath);
-
-    // Return it
-    return outfieldOID;
+    return this.getOutfields()?.find((outfield) => outfield.type === 'oid');
   }
 
   /**

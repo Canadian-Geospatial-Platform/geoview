@@ -74,6 +74,10 @@ export const setStoreMapClickMarker = (
 };
 ```
 
+## DOM Elements and Store State
+
+Do not store live DOM elements in Zustand. The map root is resolved by `mapId` through `DomHelper.getGVRootElement(mapId)` when UI code needs it; the shell element is created by `Shell` and exposed to its descendants through `useShellContainer()`. Store lifecycle code may read the host to initialize reactive values such as map height, but should not retain the element in a state slice. Prefer an existing ref or context, and use `DomHelper` for required map-scoped lookups at the UI/browser-integration boundary. See [Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access) for the root-versus-descendant guidance.
+
 ## Store Access Patterns
 
 ### React Components — read via hooks, mutate via controllers
@@ -191,5 +195,5 @@ The store files are split so that imports only flow one way and the store never 
 
 - **[Best Practices](best-practices.md)** - Coding standards
 - **[Logging](logging.md)** - Logger levels and where logging belongs
-- **[Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access)** - When to use the DOM wrappers vs. the `useStoreAppGeoviewHTMLElement` / `getStoreAppGeoviewHTMLElement` root accessors, and the ban on direct `document.*`
+- **[Best Practices §18 — Map-scoped DOM access](best-practices.md#dom-access)** - When to use the React root-element context vs. `DomHelper` for map-scoped DOM access, and the ban on direct `document.*`
 - **[Event Helper](event-helper.md)** - Delegate event system

@@ -56,7 +56,9 @@ export abstract class AbstractTestSuite {
    */
   abstract getDescriptionAsHtml(): string;
 
-  /** Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded. */
+  /**
+   * Mustoverride function to provide the exact number of tester test calls in the full onLaunchTestSuite implementation; debug-only calls are excluded.
+   */
   abstract getTestsTotalFinal(): number;
 
   /**
@@ -64,6 +66,7 @@ export abstract class AbstractTestSuite {
    *
    * @returns A promise that resolves to true if the test suite can execute on the given map
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onCanExecuteTestSuite(): Promise<boolean> {
     return Promise.resolve(true);
@@ -77,6 +80,7 @@ export abstract class AbstractTestSuite {
    *
    * @returns A promise that resolves when preparation is complete
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onPrepareLaunchTestSuite(): Promise<void> {
     return Promise.resolve();
@@ -93,6 +97,7 @@ export abstract class AbstractTestSuite {
    *
    * @returns A promise that resolves immediately by default (no debug tests to run)
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Nothing here

@@ -164,6 +164,8 @@ import EventHelper from '@/api/events/event-helper';
 import { getStoreDrawerIsDrawing, getStoreDrawerIsEditing } from '@/core/stores/states/drawer-state';
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * Controller responsible for Map interactions.
  */
@@ -1661,6 +1663,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map resolution changed event containing the new zoom level
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapResolutionChanged(sender: MapViewer, event: MapResolutionChangedEvent): void {
     // Save to the store
@@ -1699,6 +1702,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map rotation event containing the new rotation value
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapRotation(sender: MapViewer, event: MapRotationEvent): void {
     // Save to the store
@@ -1711,6 +1715,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map pointer move event containing the new pointer position
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapPointerMove(sender: MapViewer, event: MapPointerMoveEvent): void {
     // Save to the store
@@ -1723,6 +1728,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map single click event containing the clicked coordinates
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapClicked(sender: MapViewer, event: MapSingleClickEvent): void {
     // Nothing?
@@ -1734,6 +1740,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map mouse enter event
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapMouseEnter(sender: MapViewer, event: MapBaseEvent): void {
     // Save to the store
@@ -1746,6 +1753,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map mouse leave event
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapMouseLeave(sender: MapViewer, event: MapBaseEvent): void {
     // Save to the store
@@ -1758,6 +1766,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The interaction changed event containing the new interaction mode
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapInteractionChanged(sender: MapViewer, event: MapInteractionChangedEvent): void {
     // Save to the store
@@ -1865,6 +1874,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The map size changed event containing the new size and scale
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMapSizeChanged(sender: MapViewer, event: MapSizeChangedEvent): void {
     // Save to the store
@@ -1878,6 +1888,7 @@ export class MapController extends AbstractMapViewerController {
    * @param sender - The map viewer that emitted the event
    * @param event - The marker icon showed event containing the projected coordinates
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleMarkerIconShowed(sender: MapViewer, event: MarkerIconShowedEvent): void {
     // Save to the store

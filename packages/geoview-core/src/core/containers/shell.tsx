@@ -20,15 +20,11 @@ import { Typography } from '@/ui/typography/typography';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
-import {
-  useStoreAppIsCircularProgressActive,
-  useStoreAppIsFullscreenActive,
-  useStoreAppGeoviewHTMLElement,
-  useStoreAppHeight,
-} from '@/core/stores/states/app-state';
+import { useStoreAppIsCircularProgressActive, useStoreAppIsFullscreenActive, useStoreAppHeight } from '@/core/stores/states/app-state';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
+  useStoreUIFocusRestoreRequest,
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
 } from '@/core/stores/states/ui-state';
@@ -40,11 +36,12 @@ import { logger } from '@/core/utils/logger';
 import type { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
 
 import { FocusTrapDialog } from './focus-trap';
+import { ShellContainerContext } from '@/core/containers/shell-container-context';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { useEffectHostResizeSync } from './use-effect-host-resize-sync';
-import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
-import { buildGVElementId, getGVElementById, getGVMapTargetElement, getGVRootElement, getGVVisibleTabbable } from '@/core/utils/dom-helper';
+import { delay } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -78,6 +75,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const shellRef = useRef<HTMLDivElement>(null);
+  const [shellElement, setShellElement] = useState<HTMLElement | undefined>();
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -100,17 +98,35 @@ export function Shell(props: ShellProps): JSX.Element {
   const interaction = useStoreMapInteraction();
   const geoviewConfig = useStoreGeoViewConfig();
   const focusItem = useStoreUIActiveFocusItem();
+  const focusRestoreRequest = useStoreUIFocusRestoreRequest();
   const isMapFullScreen = useStoreAppIsFullscreenActive();
   const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const { isOpen } = useStoreUIActiveFooterBarTab();
-  const geoviewElement = useStoreAppGeoviewHTMLElement();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
 
+  // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
+  // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
+  // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
+  // See issue #3222 for more detail.
+  useEffect(() => {
+    if (!focusRestoreRequest) return undefined;
+
+    const requestId = requestAnimationFrame(() => {
+      DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId)?.focus({ focusVisible: true });
+      uiController.completeFocusRestore(focusRestoreRequest.requestId);
+    });
+    return (): void => {
+      cancelAnimationFrame(requestId);
+    };
+  }, [focusRestoreRequest, mapId, uiController]);
+
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
   const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
+
+  const gvRootElement = DomHelper.getGVRootElement(mapId);
 
   /**
    * Computes the style classes for the shell container.
@@ -127,7 +143,7 @@ export function Shell(props: ShellProps): JSX.Element {
     footerPanelResizeValue,
     isFooterBar,
     collapsedFooterHeight,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     appHeight,
   });
 
@@ -137,7 +153,15 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param root - The viewer focus trap root
    * @returns The elements in keyboard order
    */
-  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => getGVVisibleTabbable(mapId, root), [mapId]);
+  const getShellTabbable = useCallback((root: HTMLElement): HTMLElement[] => DomHelper.getGVVisibleTabbable(mapId, root), [mapId]);
+
+  /**
+   * Keeps the shell element available to its React descendants without resolving it through the store.
+   */
+  const setShellElementRef = useCallback((element: HTMLDivElement | null): void => {
+    shellRef.current = element;
+    setShellElement(element ?? undefined);
+  }, []);
 
   // #region HANDLERS
 
@@ -246,19 +270,8 @@ export function Shell(props: ShellProps): JSX.Element {
     if (!shellRef.current) return;
 
     // Check if the map is already in view, then scroll if needed
-    scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
+    DomHelper.scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
   }, []);
-
-  /**
-   * Handles skip link navigation by focusing the target element.
-   */
-  const handleSkipLinkClick = useCallback(
-    (suffix: string): void => {
-      // Explicitly request focus indicator for keyboard users (WCAG 2.4.1 skip links)
-      getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
-    },
-    [mapId]
-  );
 
   /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.
@@ -269,15 +282,15 @@ export function Shell(props: ShellProps): JSX.Element {
     // Intentionally use plain focus() without focusVisible: true because the crosshair itself
     // serves as the visual indicator for keyboard navigation mode. The focus ring is redundant
     // when the crosshair is active and would create visual noise.
-    getGVMapTargetElement(mapId)?.focus();
+    DomHelper.getMapTargetElement(mapId)?.focus();
   }, [mapId, uiController]);
 
   /**
    * Handles navigation from the top skip link to the bottom skip link.
    */
   const handleSkipToBottomLink = useCallback((): void => {
-    handleSkipLinkClick('bottomlink');
-  }, [handleSkipLinkClick]);
+    DomHelper.getWCAGBottomLink(mapId)?.focus({ focusVisible: true });
+  }, [mapId]);
 
   /**
    * Handles navigation from the main-content skip link to the map.
@@ -294,8 +307,8 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles navigation from the bottom skip link to the top skip link.
    */
   const handleSkipToTopLink = useCallback((): void => {
-    handleSkipLinkClick('toplink');
-  }, [handleSkipLinkClick]);
+    DomHelper.getWCAGTopLink(mapId)?.focus({ focusVisible: true });
+  }, [mapId]);
 
   /**
    * Handles when the host element is resized by an external layout.
@@ -312,7 +325,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Keep the viewer height in sync when an external layout resizes the host (e.g. 100% height in a resizable parent)
   useEffectHostResizeSync({
     mapId,
-    geoviewElement,
+    geoviewElement: gvRootElement,
     isMapFullScreen,
     hostOriginalHeightRef,
     onHostHeightChange: handleHostHeightChange,
@@ -415,8 +428,8 @@ export function Shell(props: ShellProps): JSX.Element {
     }
 
     // Wait for both footer elements because the measured element depends on whether the panel is open.
-    const footerContainer = getGVElementById(mapId, 'tabsContainer');
-    const footerHeader = getGVElementById(mapId, 'footerbar-header');
+    const footerContainer = DomHelper.getTabsContainer(mapId);
+    const footerHeader = DomHelper.getFooterBarHeader(mapId);
     if (!footerHeader || !footerContainer) {
       setCollapsedFooterHeight(0);
       return undefined;
@@ -463,8 +476,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={buildGVElementId(mapViewer.mapId, 'toplink')}
-        href={`#${buildGVElementId(mapViewer.mapId, 'bottomlink')}`}
+        id={DomHelper.buildWCAGTopLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildWCAGBottomLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -473,78 +486,80 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
         <Box
-          ref={shellRef}
-          id={`${mapViewer.mapId}-shell`}
+          ref={setShellElementRef}
+          id={DomHelper.buildShellId(mapViewer.mapId)}
           sx={memoSxClasses.shell}
           // geoview-keyboard-active scopes keyboard-only focus outlines (form controls) to GeoView's keyboard-navigation mode
           className={`geoview-shell${activeTrapGeoView ? ' geoview-keyboard-active' : ' geoview-keyboard-inactive'}`}
           tabIndex={-1}
         >
-          {/* Map loading */}
-          <Box role="status" aria-busy={!mapLoaded}>
-            <CircularProgress isLoaded={mapLoaded} />
-            {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
-            {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
-          </Box>
-
-          {/* Processing */}
-          <Box role="status" aria-busy={circularProgressActive}>
-            <CircularProgress isLoaded={!circularProgressActive} />
-            {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
-            {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}
-          </Box>
-          {interaction === 'dynamic' && (
-            <Link
-              id={buildGVElementId(mapViewer.mapId, 'main-map')}
-              href={`#${buildGVElementId(mapViewer.mapId, 'main-map')}`}
-              tabIndex={0}
-              sx={{ ...memoSxClasses.skip, top: '0px' }}
-              onClick={handleSkipToMap}
-            >
-              {t('keyboardnav.map')}
-            </Link>
-          )}
-
-          <Box
-            id={buildGVElementId(mapViewer.mapId, 'map')}
-            sx={memoSxClasses.mapShellContainer}
-            className="mapContainer"
-            ref={mapShellContainerRef}
-          >
-            <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
-            <Box sx={memoSxClasses.mapContainer}>
-              <Map viewer={mapViewer} />
+          <ShellContainerContext.Provider value={shellElement}>
+            {/* Map loading */}
+            <Box role="status" aria-busy={!mapLoaded}>
+              <CircularProgress isLoaded={mapLoaded} />
+              {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
+              {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
             </Box>
-            {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
-            <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
-            <Snackbar
-              snackBarId={`${mapViewer.mapId}-snackbar`}
-              message={snackbarMessage}
-              open={snackbarOpen}
-              type={snackbarType}
-              closeButtonText={t('general.close')}
-              onClose={handleSnackBarClose}
-            />
-          </Box>
-          {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
-          {Object.keys(mapViewer.modal.modals).map((modalId) => (
-            <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={getGVRootElement(mapViewer.mapId)} />
-          ))}
-          {/* modal section start */}
-          <FocusTrapDialog mapId={mapViewer.mapId} focusTrapId={mapViewer.mapId} />
-          {mapLoaded && <ExportModal />}
-          {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
-          {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
-          {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
-          {/* modal section end */}
-          {Object.keys(components).map((key: string) => {
-            return <Fragment key={key}>{components[key]}</Fragment>;
-          })}
+
+            {/* Processing */}
+            <Box role="status" aria-busy={circularProgressActive}>
+              <CircularProgress isLoaded={!circularProgressActive} />
+              {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
+              {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}
+            </Box>
+            {interaction === 'dynamic' && (
+              <Link
+                id={DomHelper.buildWCAGLinkToMapId(mapId)}
+                href={`#${DomHelper.buildWCAGLinkToMapId(mapId)}`}
+                tabIndex={0}
+                sx={{ ...memoSxClasses.skip, top: '0px' }}
+                onClick={handleSkipToMap}
+              >
+                {t('keyboardnav.map')}
+              </Link>
+            )}
+
+            <Box
+              id={DomHelper.buildMapContainerId(mapId)}
+              sx={memoSxClasses.mapShellContainer}
+              className="mapContainer"
+              ref={mapShellContainerRef}
+            >
+              <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+              <Box sx={memoSxClasses.mapContainer}>
+                <Map viewer={mapViewer} />
+              </Box>
+              {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
+              <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
+              <Snackbar
+                snackBarId={`${mapViewer.mapId}-snackbar`}
+                message={snackbarMessage}
+                open={snackbarOpen}
+                type={snackbarType}
+                closeButtonText={t('general.close')}
+                onClose={handleSnackBarClose}
+              />
+            </Box>
+            {isFooterBar && <FooterBar api={mapViewer.footerBarApi} />}
+            {Object.keys(mapViewer.modal.modals).map((modalId) => (
+              <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
+            ))}
+            {/* modal section start */}
+            <FocusTrapDialog mapId={mapViewer.mapId} />
+            {mapLoaded && <ExportModal />}
+            {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
+            {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
+            {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
+            {/* modal section end */}
+            {Object.keys(components).map((key: string) => {
+              return <Fragment key={key}>{components[key]}</Fragment>;
+            })}
+          </ShellContainerContext.Provider>
         </Box>
       </FocusTrap>
       <Link
-        id={buildGVElementId(mapViewer.mapId, 'bottomlink')}
-        href={`#${buildGVElementId(mapViewer.mapId, 'toplink')}`}
+        id={DomHelper.buildWCAGBottomLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildWCAGTopLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}

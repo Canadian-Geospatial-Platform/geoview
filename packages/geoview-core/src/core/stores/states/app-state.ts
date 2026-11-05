@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useStore } from 'zustand';
 
 import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
@@ -10,9 +9,10 @@ import type { NotificationDetailsType } from '@/core/components/notifications/no
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { DrawGeometryType } from '@/core/stores/states/drawer-state';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { buildGVElementId, getGVRootElement, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
+
+// GV States shouldn't import DomHelper
 
 /** Describes the visible map hint for drawing, measurement, or editing. */
 export type TypeDrawingHint =
@@ -62,9 +62,6 @@ export interface IAppState {
 
   /** The URL of the metadata service used for layer metadata lookups. */
   metadataServiceURL: string | undefined;
-
-  /** The root HTML element that hosts the GeoView map instance. */
-  geoviewHTMLElement: HTMLElement;
 
   /** The current height (in pixels) of the map container. */
   height: number;
@@ -141,7 +138,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     guide: {},
     geolocatorServiceURL: '',
     metadataServiceURL: '',
-    geoviewHTMLElement: document.createElement('div'), // create an empty div before real one is assigned
     height: 0,
     geoviewAssetsURL: getScriptAndAssetURL(),
     isCircularProgressActive: false,
@@ -155,7 +151,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage!) ? geoviewConfig.displayLanguage! : 'en';
-      const geoviewHTMLElement = getGVRootElement(get().mapId)!;
       set({
         appState: {
           ...get().appState,
@@ -165,8 +160,6 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           displayTheme: geoviewConfig.theme!, // Was defaulted so can use '!'
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
-          geoviewHTMLElement,
-          height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures!, // Was defaulted so can use '!'
           showLayerHighlightLayerBbox: geoviewConfig.globalSettings?.showLayerHighlightLayerBbox ?? true,
         },
@@ -498,36 +491,6 @@ export const useStoreAppMetadataServiceURL = (): string | undefined =>
   useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
 
 /**
- * Gets the root GeoView HTML element for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The HTML element hosting the map.
- */
-export const getStoreAppGeoviewHTMLElement = (mapId: string): HTMLElement => getStoreAppState(mapId).geoviewHTMLElement;
-
-/** Hook that returns the root GeoView HTML element for the current map. */
-export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
-
-/**
- * Hook that returns a map-scoped element lookup for the current map.
- *
- * The returned function resolves an element by its map-relative suffix (without the `${mapId}-`
- * prefix) inside the current map's root element, so lookups never collide across maps on the page.
- *
- * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
- */
-export const useGVElementById = (): ((suffix: string) => HTMLElement | undefined) => {
-  const root = useStoreAppGeoviewHTMLElement();
-  return useCallback(
-    (suffix: string): HTMLElement | undefined => {
-      const fullId = buildGVElementId(root.id, suffix);
-      return root.querySelector<HTMLElement>(`#${CSS.escape(fullId)}`) ?? undefined;
-    },
-    [root]
-  );
-};
-
-/**
  * Gets the map container height for the given map.
  *
  * @param mapId - The map identifier.
@@ -587,31 +550,6 @@ export const useStoreAppShowUnsymbolizedFeatures = (): boolean =>
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
-
-/**
- * Hook that returns the shell container HTML element for the current map.
- *
- * Delegates to `useGVElementById` so the shell is resolved through the single reactive-lookup path
- * (map-scoped query anchored on the reactively-stored root element), rather than a hand-written query.
- *
- * @returns The shell container element.
- */
-export const useStoreAppShellContainer = (): HTMLElement => {
-  return useGVElementById()(GV_DOM_SUFFIX.shell) as HTMLElement;
-};
-
-/**
- * Hook that returns the OpenLayers map target element for the current map.
- *
- * Reactive counterpart to `getGVMapTargetElement`: resolved through the reactive-lookup path so a component
- * re-renders once the element is mounted. Use this for render-time needs; use `getGVMapTargetElement(mapId)`
- * for imperative access in effects, handlers, controllers, or non-React code.
- *
- * @returns The map target element, or undefined when the map is not yet mounted.
- */
-export const useStoreAppMapTargetElement = (): HTMLElement | undefined => {
-  return useGVElementById()(GV_DOM_SUFFIX.mapTarget);
-};
 
 /**
  * Gets whether to show highlight bounding boxes around layer features for the given map.

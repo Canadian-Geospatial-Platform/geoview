@@ -3,8 +3,8 @@ import type { createRoot } from 'react-dom/client';
 import type * as i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 
-import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -17,7 +17,7 @@ export abstract class AbstractPlugin {
   /** The map viewer for the plugin */
   mapViewer: MapViewer;
 
-  /** The controller registry for the plugin */
+  /** The plugin controller registry */
   controllerRegistry: ControllerRegistry;
 
   /** The plugin properties */
@@ -43,14 +43,13 @@ export abstract class AbstractPlugin {
    *
    * @param pluginId - Unique identifier for the plugin instance
    * @param mapViewer - The map viewer
-   * @param controllerRegistry - The controller registry
    * @param props - Optional plugin options and properties
    */
   // GV Do not edit the constructor params without editing the plugin-controller.addPlugin dynamic constructor call looking like 'new (constructor as any)'
-  constructor(pluginId: string, mapViewer: MapViewer, controllerRegistry: ControllerRegistry, props: unknown | undefined) {
+  constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
     this.pluginId = pluginId;
     this.mapViewer = mapViewer;
-    this.controllerRegistry = controllerRegistry;
+    this.controllerRegistry = mapViewer.controllers;
     this.pluginProps = props;
     this.react = window.cgpv.reactUtilities.react;
     this.createRoot = window.cgpv.reactUtilities.createRoot;
@@ -100,6 +99,7 @@ export abstract class AbstractPlugin {
    *
    * @returns The translations object
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   defaultTranslations(): Record<string, unknown> {
     return {}; // Default empty
@@ -170,7 +170,7 @@ export abstract class AbstractPlugin {
   /**
    * Overridable function called when the tab with the plugin is being selected.
    */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onSelect(): void {
     // Log

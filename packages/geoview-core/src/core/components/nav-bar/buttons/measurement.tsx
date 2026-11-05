@@ -26,11 +26,11 @@ import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { formatLength, formatArea, isEditableElement } from '@/core/utils/utilities';
-import { buildGVElementId, GV_DOM_SUFFIX } from '@/core/utils/dom-helper';
+import { formatLength, formatArea } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
@@ -87,6 +87,7 @@ export default function Measurement(): JSX.Element {
   // Stores
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
+  const shellContainer = useShellContainer();
   const mapController = useMapController();
   const uiController = useUIController();
 
@@ -384,13 +385,16 @@ export default function Measurement(): JSX.Element {
     if (!activeMeasurement) return undefined;
 
     const handleShortcut = (event: KeyboardEvent): void => {
-      const { activeElement } = document;
-      const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
-      if (!activeElement || !geoViewElement?.contains(activeElement) || isEditableElement(activeElement)) return;
+      if (
+        !DomHelper.getActiveElement() ||
+        !DomHelper.getActiveElementWithinMap(mapId) ||
+        DomHelper.isActiveElementInputOrContentEditableElement()
+      )
+        return;
 
       // Capture phase: this sees the sketch before the Draw interaction cancels it, so one Escape never does both.
       if (event.key === 'Escape') {
-        if (sketchVertexCount.current === 0) uiController.focusToolButton(GV_DOM_SUFFIX.measureButton);
+        if (sketchVertexCount.current === 0) uiController.focusMeasurementButton();
         return;
       }
 
@@ -418,7 +422,7 @@ export default function Measurement(): JSX.Element {
     return (): void => {
       document.removeEventListener('keydown', handleShortcut, true);
     };
-  }, [activeMeasurement, mapController, uiController, mapId, t]);
+  }, [activeMeasurement, mapController, uiController, mapId, shellContainer, t]);
 
   /**
    * Clears all measurements.
@@ -567,7 +571,7 @@ export default function Measurement(): JSX.Element {
 
         {/* Clear Button */}
         <IconButton
-          id={`${mapId}-button-clear-measurements`}
+          id={DomHelper.buildButtonClearMeasurements(mapId)}
           aria-label={t('measurement.clear')}
           onClick={clearMeasurements}
           className="buttonOutline"
@@ -583,7 +587,7 @@ export default function Measurement(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    id: buildGVElementId(mapId, GV_DOM_SUFFIX.measureButton),
+    id: DomHelper.buildButtonMeasurementId(mapId),
     'aria-label': 'mapnav.measurement',
     children: createElement(StraightenIcon),
     tooltipPlacement: 'left',

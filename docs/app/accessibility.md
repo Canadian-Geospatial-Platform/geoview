@@ -32,7 +32,7 @@ the full map viewport center, not the logical view center shifted by map-info-ba
 This remains true after panning, rotating, or expanding/collapsing the map info bar.
 Activating the keyboard crosshair replaces any stale mouse pointer position.
 
-On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. This mode enables a focus trap within the viewer; focusing the map activates crosshair-based interaction.
+On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the top "Skip to main content - Map" link. Activating that link focuses the map and activates crosshair-based interaction.
 
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair
@@ -55,6 +55,8 @@ In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) 
 - This speeds up navigation by preventing focus from cycling through the entire map
 - Close the active panel or selection by pressing **Esc** — focus returns to the associated button
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
+
+With the crosshair active, pressing Enter on a feature opens Details and focuses the panel-header Close button. Focus remains there as the feature attributes load. Pressing Enter on Close or pressing Esc closes Details and returns focus to the map for another crosshair query.
 
 Sub-panels provide similar functionality.
 Scrollable right-panel content is also a keyboard stop; focus it and use the arrow keys to scroll

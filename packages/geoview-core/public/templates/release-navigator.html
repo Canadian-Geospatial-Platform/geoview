@@ -154,7 +154,7 @@
           cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
         }
       });
-      //#endregion ------------------ SWITCHER SECTION END -----------------------------------------
+      // #endregion ------------------ SWITCHER SECTION END -----------------------------------------
 
       //#region ------------------ BUILD SELECTOR SECTION START -----------------------------------------
       /**
@@ -194,9 +194,9 @@
 
       // Populate options on page load
       populateReleaseOptions();
-      //#endregion ------------------ BUILD SELECTOR SECTION END -----------------------------------------
+      // #endregion ------------------ BUILD SELECTOR SECTION END -----------------------------------------
 
-      //#region ------------------ LOAD CGPV SCRIPT SECTION START -----------------------------------------
+      // #region ------------------ LOAD CGPV SCRIPT SECTION START -----------------------------------------
       /**
        * Resolves the script URL for a given version.
        * Hosted versions (2.1.0+) load from the CDN; legacy versions from local builds.
@@ -250,7 +250,7 @@
         url.searchParams.set('config', selectedVersion);
         window.location.href = url.toString();
       });
-      //#endregion ------------------ LOAD CGPV SCRIPT SECTION END -----------------------------------------
+      // #endregion ------------------ LOAD CGPV SCRIPT SECTION END -----------------------------------------
 
       // Function to initialize/reinitialize the map with current config
       async function initializeMap() {
@@ -337,7 +337,7 @@
             alert(`Failed to load release ${config}. Please try another version.`);
           });
       }
-      //#endregion ------------------ CONFIGURATION SECTION END -----------------------------------------
+      // #endregion ------------------ CONFIGURATION SECTION END -----------------------------------------
 
       // create snippets
       window.addEventListener('load', () => {

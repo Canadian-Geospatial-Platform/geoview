@@ -29,10 +29,10 @@ import {
   LayerServiceMetadataUnableToFetchError,
 } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { formatError, NetworkError, RequestTimeoutError, ResponseEmptyError, ResponseError } from '@/core/exceptions/core-exceptions';
 import { parseXMLToJson, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
-import { formatError, NetworkError, RequestTimeoutError, ResponseEmptyError, ResponseError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -323,7 +323,7 @@ export class WFS extends AbstractGeoViewVector {
       bboxExtent,
       undefined,
       undefined
-    );
+    ).then(({ features, dataProjection }) => ({ features, dataProjection }));
   }
 
   /**
@@ -466,6 +466,9 @@ export class WFS extends AbstractGeoViewVector {
 
       // Set it
       layerConfig.setOutfields(outfields);
+
+      // If the outfields have no primary key, try to determine one manually
+      ServicesManagement.guessAssignationOfPrimaryKeyField(layerConfig);
     }
   }
 
@@ -565,9 +568,6 @@ export class WFS extends AbstractGeoViewVector {
     const fieldDefinition = fieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
 
-    // GV Special case for CDTK features the pk_lyr_id is the equivalent of the OBJECTID, treat it as such
-    if (fieldDefinition.name === 'pk_lyr_id') return 'oid';
-
     const fieldEntryType = fieldDefinition.type?.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
     if (fieldEntryType === 'dateTime') return 'date';
@@ -584,7 +584,7 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Generic format fallback strategy: tries the preferred format first, then falls back to no specific format.
-   * Accepts custom parse functions so callers can plug in their own fetch+parse pipeline.
+   * Accepts custom parse functions while retaining a common parsed WFS feature-page shape for paging.
    *
    * @param layerConfig - The WFS layer entry configuration
    * @param queryFnJSON - A function that receives a URL and optional request settings and queries the response as JSON
@@ -593,19 +593,19 @@ export class WFS extends AbstractGeoViewVector {
    * @param outfields - Optional list of fields to return (propertyName parameter)
    * @param filter - Optional OGC XML filter string
    * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
-   * @returns A promise that resolves with the result of the parse function
+   * @returns A promise that resolves with all parsed features and their source projection
    * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
    * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
    */
-  static async fetchWithFormatFallback<T>(
+  static async fetchWithFormatFallback(
     layerConfig: OgcWfsLayerEntryConfig,
-    queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<T>,
-    queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<T>,
+    queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>,
+    queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>,
     outfields: TypeOutfields[] | undefined,
     bboxExtent: string | undefined,
     filter: string | undefined,
     srsName: string | undefined
-  ): Promise<T> {
+  ): Promise<TypeWFSFeaturePage> {
     // Get the officially supported formats by the service
     const supportedFormats = WFS.#resolveSupportedFormats(layerConfig);
 
@@ -615,6 +615,17 @@ export class WFS extends AbstractGeoViewVector {
     // Resolve the full URL with proxy if needed
     const postEndpoint = postEndpointHref ? layerConfig.getUrlWithProxyWhenNeeded(postEndpointHref) : undefined;
 
+    // Resolve the primary key from the requested fields first, then the configured source outfields.
+    let primaryKeyOutfield = layerConfig.getOutfieldsPK();
+
+    // If there's no primary key outfield, take the first available field name to at least have something to sort by
+    if (!primaryKeyOutfield && outfields && outfields.length) {
+      primaryKeyOutfield = outfields[0];
+    }
+
+    // Get the sort by field for the request, only applicable for WFS 2.0.0
+    const sortBy = layerConfig.getVersionOrDefault() === '2.0.0' ? primaryKeyOutfield?.name : undefined;
+
     // Context object for handling post fallback scenarios
     const postFallbackContext = {
       layerConfig,
@@ -623,6 +634,7 @@ export class WFS extends AbstractGeoViewVector {
       outfields,
       filter,
       srsName,
+      sortBy,
       state: {
         usePostFallback: false,
         lastUriTooLongError: undefined as ResponseError | undefined,
@@ -631,7 +643,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // Ordered list of formats to try, from most preferred to least preferred.
     // Each entry maps a MIME type to the parse function to use for that format.
-    const formatCandidates: { format: string; queryFn: (url: string, requestInit?: RequestInit) => Promise<T> }[] = [
+    const formatCandidates: { format: string; queryFn: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage> }[] = [
       { format: MIME_TYPE_FORMAT_JSON, queryFn: queryFnJSON },
       { format: MIME_TYPE_FORMAT_GML_XML_32, queryFn: queryFnFallback },
       { format: MIME_TYPE_FORMAT_TEXT_XML_GML_321, queryFn: queryFnFallback },
@@ -642,18 +654,31 @@ export class WFS extends AbstractGeoViewVector {
     ];
 
     // Try each format candidate in order
-    let result: T | undefined;
+    let result: TypeWFSFeaturePage | undefined;
     for (const candidate of formatCandidates) {
       // The empty format is a final request without an outputFormat parameter.
       const matchingFormats = candidate.format ? WFS.#supportedFormatsInclude(supportedFormats, candidate.format) : [''];
       if (matchingFormats.length) {
         try {
           // Build the GetFeatureUrl with the candidate format and other parameters
-          const url = WFS.#buildGetFeatureUrl(layerConfig, matchingFormats[0], bboxExtent, outfields, filter, srsName);
+          const url = WFS.#buildGetFeatureUrl(layerConfig, matchingFormats[0], bboxExtent, outfields, filter, srsName, sortBy);
 
           // GV Here, we do want to await in the loop, because we want to know if the fetch/parse succeeded before looping to the next format request.
           // eslint-disable-next-line no-await-in-loop
           result = await WFS.#queryWithGetOrPostFallback(candidate.queryFn, url, matchingFormats[0], postFallbackContext);
+
+          const pageMetadata = result;
+          if (
+            layerConfig.getVersionOrDefault() === '2.0.0' &&
+            pageMetadata?.numberMatched !== undefined &&
+            pageMetadata.numberReturned !== undefined
+          ) {
+            if (pageMetadata.numberMatched > pageMetadata.numberReturned) {
+              // GV Only page when the WFS 2 response explicitly reports more matches than it returned.
+              // eslint-disable-next-line no-await-in-loop
+              result = await WFS.#fetchWFSFeaturePages(result, candidate.queryFn, url, matchingFormats[0], postFallbackContext);
+            }
+          }
 
           // If the fetch/parse succeeded, return right away
           if (result) return result;
@@ -672,9 +697,77 @@ export class WFS extends AbstractGeoViewVector {
     throw new LayerInvalidFeatureInfoFormatWFSError(layerConfig.layerPath, supportedFormats, layerConfig.getLayerNameCascade());
   }
 
+  /**
+   * Reads WFS result paging counts from a JSON or XML feature collection.
+   *
+   * @param responseData - The raw WFS response
+   * @returns The numeric matched and returned counts, when provided by the service
+   */
+  static readWFSPageMetadata(responseData: unknown): TypeWFSPageMetadata {
+    let numberMatched: unknown;
+    let numberReturned: unknown;
+
+    if (typeof responseData === 'string') {
+      const responseDocument = new DOMParser().parseFromString(responseData, 'text/xml');
+      numberMatched = responseDocument.documentElement.getAttribute('numberMatched');
+      numberReturned = responseDocument.documentElement.getAttribute('numberReturned');
+    } else {
+      const responseRecord = WFS.#asRecord(responseData);
+      numberMatched = responseRecord?.numberMatched;
+      numberReturned = responseRecord?.numberReturned;
+    }
+
+    return {
+      numberMatched: WFS.#parseWFSResponseCount(numberMatched),
+      numberReturned: WFS.#parseWFSResponseCount(numberReturned),
+    };
+  }
+
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Fetches the remaining WFS 2 pages after a response reports more matches than returned features.
+   *
+   * @param firstPage - The first parsed feature page
+   * @param queryFn - The response parser and query function
+   * @param url - The candidate GetFeature URL
+   * @param outputFormat - The requested response format
+   * @param context - The request settings and retry state shared by all format candidates
+   * @returns The first page with all subsequent page features appended
+   */
+  static async #fetchWFSFeaturePages(
+    firstPage: TypeWFSFeaturePage,
+    queryFn: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>,
+    url: string,
+    outputFormat: string,
+    context: TypeWFSGetOrPostFallbackContext
+  ): Promise<TypeWFSFeaturePage> {
+    const { numberReturned: pageSize, numberMatched } = firstPage;
+    if (pageSize === undefined || numberMatched === undefined || pageSize <= 0)
+      throw new Error('WFS reported additional matching features but returned an empty first page.');
+
+    const pages = [firstPage];
+    let startIndex = pageSize;
+
+    while (startIndex < numberMatched) {
+      const pageRequest = { count: pageSize, startIndex };
+      // GV Keep each page sequential because the next startIndex depends on the number of features just received.
+      // eslint-disable-next-line no-await-in-loop
+      const pageResult = await WFS.#queryWithGetOrPostFallback(queryFn, url, outputFormat, context, pageRequest);
+      const pageItemCount = pageResult.features.length;
+      if (pageItemCount <= 0) throw new Error('WFS pagination returned an unsupported or empty feature response.');
+
+      const pageNumberReturned = pageResult.numberReturned ?? pageItemCount;
+      if (pageNumberReturned <= 0) throw new Error(`WFS pagination returned an invalid numberReturned at startIndex ${startIndex}.`);
+      pages.push(pageResult);
+      startIndex += pageNumberReturned;
+    }
+
+    const features = pages.flatMap((page) => page.features);
+    return { ...firstPage, features, numberReturned: features.length };
+  }
 
   /**
    * Queries a GetFeature candidate and retries with an advertised XML POST endpoint after HTTP 414.
@@ -683,25 +776,37 @@ export class WFS extends AbstractGeoViewVector {
    * @param url - The candidate GetFeature URL
    * @param outputFormat - The requested response format
    * @param context - The request settings and retry state shared by all format candidates
+   * @param pageRequest - Optional WFS 2 page parameters
    * @returns The parsed response
    */
-  static async #queryWithGetOrPostFallback<T>(
-    queryFn: (url: string, requestInit?: RequestInit) => Promise<T>,
+  static async #queryWithGetOrPostFallback(
+    queryFn: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>,
     url: string,
     outputFormat: string,
-    context: TypeWFSGetOrPostFallbackContext
-  ): Promise<T> {
-    const { layerConfig, postEndpoint, bboxExtent, outfields, filter, srsName, state } = context;
+    context: TypeWFSGetOrPostFallbackContext,
+    pageRequest?: TypeWFSPageRequest
+  ): Promise<TypeWFSFeaturePage> {
+    const { layerConfig, postEndpoint, bboxExtent, outfields, filter, srsName, sortBy, state } = context;
 
     // Once GET has exceeded the URI limit, send later format candidates through POST too.
     if (state.usePostFallback && postEndpoint) {
-      const postRequest = WFS.#buildGetFeaturePostRequest(layerConfig, postEndpoint, outputFormat, bboxExtent, outfields, filter, srsName);
+      const postRequest = WFS.#buildGetFeaturePostRequest(
+        layerConfig,
+        postEndpoint,
+        outputFormat,
+        bboxExtent,
+        outfields,
+        filter,
+        srsName,
+        sortBy,
+        pageRequest
+      );
       if (postRequest) return queryFn(postRequest.url, postRequest.requestInit);
     }
 
     try {
       // Keep GET as the default; only switch methods when the server rejects its URL length.
-      return await queryFn(url);
+      return await queryFn(pageRequest ? WFS.#addWFSPageParameters(url, pageRequest) : url);
     } catch (error: unknown) {
       // POST only addresses an overlong request URL; propagate unrelated failures unchanged.
       if (!(error instanceof ResponseError) || error.status !== 414) throw error;
@@ -709,12 +814,37 @@ export class WFS extends AbstractGeoViewVector {
       if (!postEndpoint) throw error;
 
       // Preserve the original 414 if the advertised endpoint or request cannot be used safely.
-      const postRequest = WFS.#buildGetFeaturePostRequest(layerConfig, postEndpoint, outputFormat, bboxExtent, outfields, filter, srsName);
+      const postRequest = WFS.#buildGetFeaturePostRequest(
+        layerConfig,
+        postEndpoint,
+        outputFormat,
+        bboxExtent,
+        outfields,
+        filter,
+        srsName,
+        sortBy,
+        pageRequest
+      );
       if (!postRequest) throw error;
 
       state.usePostFallback = true;
       return queryFn(postRequest.url, postRequest.requestInit);
     }
+  }
+
+  /**
+   * Adds WFS 2 page parameters to a GetFeature URL.
+   *
+   * @param url - The candidate GetFeature URL
+   * @param pageRequest - The page count and start index
+   * @returns The URL with count and startIndex query parameters
+   */
+  static #addWFSPageParameters(url: string, pageRequest: TypeWFSPageRequest): string {
+    const fragmentIndex = url.indexOf('#');
+    const requestUrl = fragmentIndex === -1 ? url : url.slice(0, fragmentIndex);
+    const fragment = fragmentIndex === -1 ? '' : url.slice(fragmentIndex);
+    const separator = requestUrl.includes('?') ? '&' : '?';
+    return `${requestUrl}${separator}count=${pageRequest.count}&startIndex=${pageRequest.startIndex}${fragment}`;
   }
 
   /**
@@ -727,6 +857,8 @@ export class WFS extends AbstractGeoViewVector {
    * @param outfields - Optional requested properties
    * @param filter - Optional OGC/FES filter XML
    * @param srsName - Optional response projection
+   * @param sortBy - Optional WFS 2 primary-key field to sort results by
+   * @param pageRequest - Optional WFS 2 page parameters
    * @returns The POST endpoint and request settings, or undefined when the request cannot be represented safely
    */
   static #buildGetFeaturePostRequest(
@@ -736,7 +868,9 @@ export class WFS extends AbstractGeoViewVector {
     bboxExtent?: string,
     outfields?: TypeOutfields[],
     filter?: string,
-    srsName?: string
+    srsName?: string,
+    sortBy?: string,
+    pageRequest?: TypeWFSPageRequest
   ): TypeWFSGetFeaturePostRequest | undefined {
     // Get the WFS version
     const version = layerConfig.getVersionOrDefault();
@@ -792,7 +926,13 @@ export class WFS extends AbstractGeoViewVector {
       ...(outfields && { propertyNames: outfields.map((outfield) => outfield.name) }),
       ...(bbox && { bbox, geometryName }),
     });
+
     const requestElement = requestNode as Element;
+    if (pageRequest) {
+      requestElement.setAttribute('count', String(pageRequest.count));
+      requestElement.setAttribute('startIndex', String(pageRequest.startIndex));
+    }
+
     const requestDocument = requestElement.ownerDocument;
     if (!requestDocument) return undefined;
 
@@ -844,6 +984,21 @@ export class WFS extends AbstractGeoViewVector {
       }
     }
 
+    if (sortBy) {
+      const sortNamespace = 'http://www.opengis.net/fes/2.0';
+      const sortByElement = requestDocument.createElementNS(sortNamespace, 'fes:SortBy');
+      sortByElement.setAttribute('xmlns:fes', sortNamespace);
+      const sortPropertyElement = requestDocument.createElementNS(sortNamespace, 'fes:SortProperty');
+      const valueReferenceElement = requestDocument.createElementNS(sortNamespace, 'fes:ValueReference');
+      const sortOrderElement = requestDocument.createElementNS(sortNamespace, 'fes:SortOrder');
+      valueReferenceElement.textContent = sortBy;
+      sortOrderElement.textContent = 'ASC';
+      sortPropertyElement.appendChild(valueReferenceElement);
+      sortPropertyElement.appendChild(sortOrderElement);
+      sortByElement.appendChild(sortPropertyElement);
+      queryElement.appendChild(sortByElement);
+    }
+
     return {
       url: postEndpoint,
       requestInit: {
@@ -881,7 +1036,7 @@ export class WFS extends AbstractGeoViewVector {
     dataProjection?: string | OLProjection,
     featureProjection?: string | OLProjection,
     requestInit?: RequestInit
-  ): Promise<SourceFeaturesInfo> {
+  ): Promise<TypeWFSFeaturePage> {
     // Fetch as JSON
     const responseData = await Fetch.fetchJson(url, requestInit);
 
@@ -904,7 +1059,7 @@ export class WFS extends AbstractGeoViewVector {
     dataProjection?: string | OLProjection,
     featureProjection?: string | OLProjection,
     requestInit?: RequestInit
-  ): Promise<SourceFeaturesInfo> {
+  ): Promise<TypeWFSFeaturePage> {
     // Fetch as text
     const responseData = await Fetch.fetchText(url, requestInit);
 
@@ -926,14 +1081,36 @@ export class WFS extends AbstractGeoViewVector {
     version: string,
     dataProjection?: string | OLProjection,
     featureProjection?: string | OLProjection
-  ): Promise<SourceFeaturesInfo> {
+  ): Promise<TypeWFSFeaturePage> {
+    const pageMetadata = WFS.readWFSPageMetadata(responseData);
+
     // Check if the data is GeoJSON
     if (GeoUtilities.isGeoJSONObject(responseData)) {
-      return GeoUtilities.readFeaturesFromGeoJSON(responseData, dataProjection, featureProjection);
+      return GeoUtilities.readFeaturesFromGeoJSON(responseData, dataProjection, featureProjection).then((sourceFeaturesInfo) => ({
+        ...sourceFeaturesInfo,
+        ...pageMetadata,
+      }));
     }
 
     // Here, the output isn't GeoJSON, assume XML/GML
-    return GeoUtilities.readFeaturesFromWFS(responseData, version, dataProjection, featureProjection);
+    return GeoUtilities.readFeaturesFromWFS(responseData, version, dataProjection, featureProjection).then((sourceFeaturesInfo) => ({
+      ...sourceFeaturesInfo,
+      ...pageMetadata,
+    }));
+  }
+
+  /**
+   * Parses a numeric WFS response count.
+   *
+   * @param value - The raw count value
+   * @returns A non-negative integer count, or undefined when the service did not provide one
+   */
+  static #parseWFSResponseCount(value: unknown): number | undefined {
+    if (typeof value !== 'string' && typeof value !== 'number') return undefined;
+    if (typeof value === 'string' && value.trim() === '') return undefined;
+
+    const count = Number(value);
+    return Number.isSafeInteger(count) && count >= 0 ? count : undefined;
   }
 
   /**
@@ -1016,6 +1193,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param outfields - Optional list of fields to return (propertyName parameter)
    * @param filter - Optional OGC XML filter string
    * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
+   * @param sortBy - Optional WFS 2 primary-key field to sort results by
    * @returns The constructed GetFeature URL
    */
   static #buildGetFeatureUrl(
@@ -1024,7 +1202,8 @@ export class WFS extends AbstractGeoViewVector {
     bboxExtent?: string,
     outfields?: TypeOutfields[],
     filter?: string,
-    srsName?: string
+    srsName?: string,
+    sortBy?: string
   ): string {
     // Work the url for a GetFeature request
     let url = GeoUtilities.ensureServiceRequestUrlGetFeature(
@@ -1040,6 +1219,11 @@ export class WFS extends AbstractGeoViewVector {
     // If an extent is provided, append bbox
     if (bboxExtent) {
       url = `${url}&bbox=${bboxExtent}`;
+    }
+
+    // If sorting by a field name
+    if (sortBy) {
+      url = `${url}&sortBy=${sortBy}`;
     }
 
     // Tweak url with the proxy if necessary
@@ -1066,6 +1250,8 @@ type TypeWFSGetOrPostFallbackContext = {
   filter: string | undefined;
   /** Optional output projection code. */
   srsName: string | undefined;
+  /** Optional WFS 2 primary-key field used to keep paged results ordered. */
+  sortBy: string | undefined;
   /** Mutable state shared while trying formats and switching from GET to POST. */
   state: {
     /** Whether an earlier HTTP 414 switched subsequent candidates to POST. */
@@ -1081,4 +1267,23 @@ type TypeWFSGetFeaturePostRequest = {
   url: string;
   /** HTTP method, headers, and serialized XML body. */
   requestInit: RequestInit;
+};
+
+/** Numeric result counts advertised by a WFS feature collection. */
+export type TypeWFSPageMetadata = {
+  /** Total matching features, when the service reports a numeric total. */
+  numberMatched?: number;
+  /** Features returned in this response page, when reported. */
+  numberReturned?: number;
+};
+
+/** Parsed WFS features and the response counts needed to detect a capped result. */
+export type TypeWFSFeaturePage = SourceFeaturesInfo & TypeWFSPageMetadata;
+
+/** WFS 2 request parameters for one response page. */
+type TypeWFSPageRequest = {
+  /** Maximum number of features requested for this page. */
+  count: number;
+  /** Zero-based index of the first matching feature in this page. */
+  startIndex: number;
 };

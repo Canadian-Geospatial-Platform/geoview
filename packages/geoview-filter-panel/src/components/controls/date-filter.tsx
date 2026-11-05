@@ -1,8 +1,9 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { FilterPanelController } from 'geoview-core/core/controllers/filter-panel-controller';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
+import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { TypeFilterAttribute, TypeFilterValue, TypeDateRangeValue } from '../../types';
@@ -48,7 +49,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
 
-  const controller = useFilterPanelController();
+  const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
 
   // Track which thumb (0 = start, 1 = end) was last interacted with
@@ -69,8 +70,8 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('DATE-FILTER - memoBounds', uniqueValues.length);
 
-    return controller.getDateBounds(uniqueValues);
-  }, [controller, uniqueValues]);
+    return FilterPanelController.getDateBounds(uniqueValues);
+  }, [uniqueValues]);
 
   /**
    * Compute the current slider value (array with two timestamp elements).
@@ -131,11 +132,11 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
 
       // Convert timestamps to YYYY-MM-DD strings using the controller
       onChange({
-        start: controller.formatDateForFilter(start),
-        end: controller.formatDateForFilter(end),
+        start: FilterPanelController.formatDateForFilter(mapId, start),
+        end: FilterPanelController.formatDateForFilter(mapId, end),
       });
     },
-    [controller, onChange, isRasterLayer]
+    [mapId, onChange, isRasterLayer]
   );
 
   /**
@@ -147,11 +148,11 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
       const [start, end] = newValue as number[];
       setDraggingValue(undefined);
       onChange({
-        start: controller.formatDateForFilter(start),
-        end: controller.formatDateForFilter(end),
+        start: FilterPanelController.formatDateForFilter(mapId, start),
+        end: FilterPanelController.formatDateForFilter(mapId, end),
       });
     },
-    [isRasterLayer, controller, onChange]
+    [mapId, isRasterLayer, onChange]
   );
 
   /**
@@ -176,25 +177,25 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
       // Apply date step to the active thumb (0 = start, 1 = end)
       if (activeThumb === 0) {
         // Modify start date
-        const newStartTimestamp = controller.applyDateStep(currentStart, dateStep, direction);
+        const newStartTimestamp = FilterPanelController.applyDateStep(currentStart, dateStep, direction);
         const clampedStart = Math.min(Math.max(newStartTimestamp, memoBounds.min), memoBounds.max);
 
         onChange({
-          start: controller.formatDateForFilter(clampedStart),
-          end: controller.formatDateForFilter(currentEnd),
+          start: FilterPanelController.formatDateForFilter(mapId, clampedStart),
+          end: FilterPanelController.formatDateForFilter(mapId, currentEnd),
         });
       } else {
         // Modify end date
-        const newEndTimestamp = controller.applyDateStep(currentEnd, dateStep, direction);
+        const newEndTimestamp = FilterPanelController.applyDateStep(currentEnd, dateStep, direction);
         const clampedEnd = Math.min(Math.max(newEndTimestamp, memoBounds.min), memoBounds.max);
 
         onChange({
-          start: controller.formatDateForFilter(currentStart),
-          end: controller.formatDateForFilter(clampedEnd),
+          start: FilterPanelController.formatDateForFilter(mapId, currentStart),
+          end: FilterPanelController.formatDateForFilter(mapId, clampedEnd),
         });
       }
     },
-    [memoBounds, memoSliderValue, attribute.dateStep, controller, onChange]
+    [mapId, memoBounds, memoSliderValue, attribute.dateStep, onChange]
   );
 
   /**
@@ -202,9 +203,9 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
    */
   const formatValue = useCallback(
     (timestamp: number): string => {
-      return controller.formatDateForDisplay(timestamp, displayLanguage);
+      return FilterPanelController.formatDateForDisplay(timestamp, displayLanguage);
     },
-    [controller, displayLanguage]
+    [displayLanguage]
   );
 
   if (loading) {

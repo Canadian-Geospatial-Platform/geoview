@@ -122,6 +122,8 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 
+// GV Controllers shouldn't import DomHelper
+
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
  */
@@ -2373,6 +2375,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The layer domain that fired the event
    * @param event - The event containing the unregistered layer
    */
+  // GV This method is a private handler, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleDomainLayerUnregistered(sender: LayerDomain, event: DomainLayerRegisteredEvent): void {
     //

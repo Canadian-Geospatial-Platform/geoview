@@ -4,7 +4,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { FilterPanelController } from 'geoview-core/core/controllers/filter-panel-controller';
 
 import type { SxStyles } from 'geoview-core/ui/style/types';
 
@@ -118,7 +118,6 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
-  const controller = useFilterPanelController();
   const headerLabelId = useId();
 
   /**
@@ -132,10 +131,10 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
 
     const filterString = searchString.trim().toLowerCase();
     return uniqueValues.filter((val) => {
-      const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
+      const displayLabel = val !== null ? FilterPanelController.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
       return displayLabel.toLowerCase().includes(filterString);
     });
-  }, [uniqueValues, searchString, attribute, controller, t]);
+  }, [uniqueValues, searchString, attribute, t]);
 
   /**
    * Handles when the search input value changes.
@@ -224,7 +223,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
           )}
           {memoFilteredValues.map((val) => {
             const isSelected = Array.isArray(value) && value.includes(val);
-            const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
+            const displayLabel = val !== null ? FilterPanelController.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
 
             return (
               <FilterCheckboxItem

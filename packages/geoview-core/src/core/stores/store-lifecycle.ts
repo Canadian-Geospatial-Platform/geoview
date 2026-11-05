@@ -48,7 +48,7 @@ const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, con
  *
  * @param config - The map features configuration used to initialize the store
  */
-export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
+export const addGeoViewStore = (config: TypeMapFeaturesConfig, mapElement: HTMLElement): void => {
   if (!config.mapId) {
     return;
   }
@@ -56,6 +56,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   // Create the store
   const geoviewStore = create<IGeoviewState>()(geoviewStoreDefinitionWithSubscribeSelector);
   geoviewStore.getState().setMapConfig(config);
+  geoviewStore.getState().appState.actions.setHeight(mapElement.clientHeight || 600);
 
   // Initialize the store subscriptions
   initDetailsStateSubscriptions(geoviewStore);
@@ -68,7 +69,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
     },
   }));
 
-  mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, geoviewStore.getState().appState.geoviewHTMLElement);
+  mountZustandDevTools(`getViewStore-${config.mapId}`, geoviewStore, mapElement);
 };
 
 /**

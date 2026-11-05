@@ -1,6 +1,7 @@
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { getStoreAppGeoviewHTMLElement } from 'geoview-core/core/stores/states/app-state';
 
 /**
  * Main UI testing class.
@@ -29,15 +30,11 @@ export class UITester extends GVAbstractTester {
         // Step 1: Select the details tab in footer bar
         test.addStep('Selecting details panel and wait for the UI to refresh...');
         this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
-        await this.waitForAppbarTabSelected('details');
-
-        // Get the GeoView HTML element
-        test.addStep('Getting GeoView HTML element...');
-        const geoviewElement = getStoreAppGeoviewHTMLElement(mapId);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'details');
 
         // Find the guide-container div
         test.addStep('Finding guide-container div...');
-        const guideContainer = geoviewElement.querySelector('.guide-container');
+        const guideContainer = DomHelper.getGuideContainer(mapId);
 
         if (!guideContainer) {
           throw new Error('guide-container div not found');
@@ -80,7 +77,7 @@ export class UITester extends GVAbstractTester {
       (test) => {
         // Call the controller getter through the registry — the non-React access path
         test.addStep('Calling getFooterHeight via the controller registry (non-React path)...');
-        return this.getControllersRegistry().uiController.getFooterHeight();
+        return DomHelper.getDataFooterHeight(this.getMapId(), getStoreAppHeight(this.getMapId()));
       },
       (test, result) => {
         test.addStep('Verifying a CSS length string was returned...');

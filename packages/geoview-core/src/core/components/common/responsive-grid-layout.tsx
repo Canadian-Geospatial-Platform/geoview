@@ -22,11 +22,12 @@ import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
 import { FullScreenDialog } from './full-screen-dialog';
+import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { transformMarkdownIds } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGVElementById } from '@/core/utils/dom-helper';
-import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { DomHelper } from '@/core/utils/dom-helper';
+import { useStoreAppGuide, useStoreAppIsCrosshairsActive, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -129,10 +130,11 @@ const ResponsiveGridLayout = forwardRef(
     // Store
     const mapId = useStoreGeoViewMapId();
     const guide = useStoreAppGuide();
+    const isCrosshairsActive = useStoreAppIsCrosshairsActive();
     const isFocusTrap = useStoreUIActiveTrapGeoView();
     const isMapFullScreen = useStoreAppIsFullscreenActive();
     const focusItem = useStoreUIActiveFocusItem();
-    const shellContainer = useStoreAppShellContainer();
+    const shellContainer = useShellContainer();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
@@ -343,7 +345,8 @@ const ResponsiveGridLayout = forwardRef(
       if (isGuideOpen) {
         // Use RAF for next frame
         requestAnimationFrame(() => {
-          getGVElementById(mapId, `${containerType}-guide-close-btn`)?.focus();
+          // Focus on the close button for the container type
+          DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
         });
       }
     }, [isGuideOpen, mapId, containerType]);
@@ -371,12 +374,12 @@ const ResponsiveGridLayout = forwardRef(
      */
     useEffect(() => {
       logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - focus close button when right panel visible', isRightPanelVisible, hasContent);
-      if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
+      if (isRightPanelVisible && hasContent && !isGuideOpen && !isCrosshairsActive && closeBtnRef.current) {
         requestAnimationFrame(() => {
           closeBtnRef.current?.focus();
         });
       }
-    }, [isRightPanelVisible, hasContent, isGuideOpen]);
+    }, [isRightPanelVisible, hasContent, isGuideOpen, isCrosshairsActive]);
 
     /**
      * Handles the enlarge toggle button click.
@@ -649,7 +652,7 @@ const ResponsiveGridLayout = forwardRef(
 
             {isFocusTrap && !isFullScreen && hasContent && (
               <IconButton
-                id={`${mapId}-${containerType}-guide-close-btn`}
+                id={DomHelper.buildGuideCloseButtonId(mapId, containerType)}
                 onClick={handleCloseGuide}
                 sx={composeSxProps(
                   memoSxClasses.guideCloseBtn,

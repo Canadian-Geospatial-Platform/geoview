@@ -4,9 +4,13 @@ import type { TypeMapMouseInfo } from '@/api/types/map-schema-types';
 import { AbstractController } from './abstract-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import { getStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
+
+// GV Controllers shouldn't import DomHelper
 
 /**
  * Base class for controllers that operate on a specific map instance.
@@ -146,6 +150,16 @@ export class AbstractMapViewerController extends AbstractController {
     }
 
     return layerPaths;
+  }
+
+  /**
+   * Checks whether focus can return from the map to a tool button.
+   *
+   * @param mapId - The map identifier
+   * @returns True when the map target has focus and fullscreen mode is inactive
+   */
+  protected static isToolButtonFocusable(mapId: string): boolean {
+    return !(getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId));
   }
 
   // #endregion STATIC METHODS

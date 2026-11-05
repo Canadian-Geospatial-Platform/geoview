@@ -71,9 +71,6 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
  *
  */
 export abstract class AbstractGeoViewLayer {
-  /** The default hit tolerance the query should be using */
-  static readonly DEFAULT_HIT_TOLERANCE: number = 4;
-
   /** The default waiting time before showing a warning about the metadata taking a long time to get processed. */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
 
@@ -88,9 +85,6 @@ export abstract class AbstractGeoViewLayer {
 
   /** The default display date mode used when generating default configurations */
   static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode = 'long';
-
-  /** The default hit tolerance */
-  hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -174,6 +168,7 @@ export abstract class AbstractGeoViewLayer {
    * @param layerConfig - The layer entry configuration to preprocess
    * @returns A promise that resolves with the preprocessing result (e.g., ping/proxy info)
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onPreprocessLayerConfig(layerConfig: AbstractBaseLayerEntryConfig): Promise<PreprocessLayerConfigResult> {
     // Nothing to preprocess by default..
@@ -247,6 +242,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param layerConfig - The layer entry config to validate
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Override to perform a validation on the layer entry config
@@ -274,6 +270,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @param layer - The GV layer to initialize
    */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onInitGVLayer(layer: AbstractGVLayer): void {
     // Override this function to do something...

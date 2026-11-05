@@ -11,6 +11,7 @@ import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state
 import type { TypeGeochartResultSetEntry } from './states/geochart-state';
 import { logger } from '@/core/utils/logger';
 
+// GV Store shouldn't import DomHelper
 // GV This file is the equivalent of the controller-manager.ts file, but for the store.
 // GV Store creation/removal lives in store-lifecycle.ts so the state slices can import this file without a cycle.
 
@@ -197,6 +198,50 @@ export const helperPropagateArrayStoreBatch = async <
     batchPropagationObject[mapId] = [];
   }
 };
+
+/**
+ * Waits for a subscribed value to become defined.
+ *
+ * @param getValue - Returns the current value, or undefined while it is unavailable
+ * @param subscribe - Registers a change listener and returns its unsubscribe function
+ * @returns A promise that resolves with the first defined value
+ * @throws When reading the value or subscribing throws
+ */
+export function helperWaitForValueWithSubscription<T>(
+  getValue: () => T | undefined,
+  subscribe: (listener: () => void) => () => void
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let isSettled = false;
+    const subscription: { unsubscribe?: () => void } = {};
+    const checkValue = (): void => {
+      if (isSettled) return;
+
+      try {
+        const value = getValue();
+        if (value === undefined) return;
+
+        isSettled = true;
+        subscription.unsubscribe?.();
+        resolve(value);
+      } catch (error: unknown) {
+        isSettled = true;
+        subscription.unsubscribe?.();
+        reject(error);
+      }
+    };
+
+    try {
+      subscription.unsubscribe = subscribe(checkValue);
+      if (isSettled) subscription.unsubscribe();
+      else checkValue();
+    } catch (error: unknown) {
+      isSettled = true;
+      subscription.unsubscribe?.();
+      reject(error);
+    }
+  });
+}
 
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store

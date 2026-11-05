@@ -3,8 +3,6 @@ import type { Extent } from 'ol/extent';
 
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { getStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
-import { getGVElementById, getGVMapTargetElement } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -12,8 +10,13 @@ import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
+// GV Controllers shouldn't import DomHelper
+
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
+
+/** Map fit padding ordered as top, right, bottom, left. */
+export type TypeStacZoomPadding = [number, number, number, number];
 
 /** A visible map extent saved with its source projection. */
 export interface TypeStacMapExtentSnapshot {
@@ -54,7 +57,7 @@ export interface TypeStacPreviewAsset {
  */
 export class StacBrowserController extends AbstractMapViewerController {
   /** Padding (in pixels) used when zooming to a STAC extent. */
-  static readonly ZOOM_PADDING = [100, 100, 100, 100];
+  static readonly ZOOM_PADDING: TypeStacZoomPadding = [100, 100, 100, 100];
 
   /** Preview overlays currently on the map, keyed by a caller-provided id. */
   #overlays = new Map<string, BaseLayer>();
@@ -145,13 +148,14 @@ export class StacBrowserController extends AbstractMapViewerController {
    * Densifies edges for curvilinear projections and offsets the fit for the open STAC panel.
    *
    * @param bbox - The bounding box in EPSG:4326 [west, south, east, north]
+   * @param padding - Map fit padding in pixels, ordered as top, right, bottom, left
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid (propagated from `zoomToExtent()`)
    */
-  zoomToLonLatBbox(bbox: TypeLonLatBbox): Promise<void> {
+  zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeStacZoomPadding = StacBrowserController.ZOOM_PADDING): Promise<void> {
     const extent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), this.getMapViewer().getProjection(), 25);
     return this.getControllersRegistry().mapController.zoomToExtent(extent, true, {
-      padding: this.#getZoomPadding(),
+      padding,
     });
   }
 
@@ -358,44 +362,6 @@ export class StacBrowserController extends AbstractMapViewerController {
       }
       return false;
     }
-  }
-
-  /**
-   * Gets fit padding that reserves the visible STAC panel overlap on the left of the map.
-   *
-   * Falls back to normal padding when the panel is closed, unavailable, or leaves no usable fit area.
-   *
-   * @returns Padding in map pixels ordered as top, right, bottom, left
-   */
-  #getZoomPadding(): [number, number, number, number] {
-    const [top, right, bottom, left] = StacBrowserController.ZOOM_PADDING;
-    const padding: [number, number, number, number] = [top, right, bottom, left];
-    const mapId = this.getMapId();
-    const activeTab = getStoreUIActiveAppBarTab(mapId);
-    if (!activeTab.isOpen || activeTab.tabId !== 'stac-browser') return padding;
-
-    const panel = getGVElementById(mapId, 'appBar-stac-browser-panel');
-    const mapTarget = getGVMapTargetElement(mapId);
-    const mapSize = this.getMapViewer().map.getSize();
-    if (!panel || !mapTarget || !mapSize || panel.getAttribute('aria-hidden') === 'true') return padding;
-
-    const panelRect = panel.getBoundingClientRect();
-    const mapRect = mapTarget.getBoundingClientRect();
-    if (
-      mapRect.width <= 0 ||
-      panelRect.width <= 0 ||
-      panelRect.bottom <= mapRect.top ||
-      panelRect.top >= mapRect.bottom ||
-      panelRect.left >= mapRect.right ||
-      panelRect.right <= mapRect.left
-    )
-      return padding;
-
-    // Convert CSS overlap into map pixels, including when the host applies CSS scaling.
-    const overlap = Math.min(mapRect.width, panelRect.right - mapRect.left) * (mapSize[0] / mapRect.width);
-    if (mapSize[0] <= left + overlap + right || mapSize[1] <= top + bottom) return padding;
-
-    return [top, right, bottom, left + overlap];
   }
 
   // #endregion PRIVATE METHODS

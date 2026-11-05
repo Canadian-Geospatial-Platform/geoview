@@ -5,6 +5,7 @@ import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
+import { FilterPanelController } from 'geoview-core/core/controllers/filter-panel-controller';
 import type { TypeMenuItemProps } from 'geoview-core/ui/select/select';
 import { getSxClasses } from './control-styles';
 
@@ -69,7 +70,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         type: 'item' as const,
         item: {
           value: val as string,
-          children: <span>{val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue')}</span>,
+          children: <span>{val !== null ? FilterPanelController.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue')}</span>,
         },
       });
     });

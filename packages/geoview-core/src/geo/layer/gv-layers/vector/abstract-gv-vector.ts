@@ -731,9 +731,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     this.setVisible(true);
 
     // Wait for the first style change, then restore the original visibility state
-    void this.onceLayerStyleChanged().then(() => {
-      this.setVisible(initialVisible);
-    });
+    this.onceLayerStyleChanged()
+      .then(() => {
+        this.setVisible(initialVisible);
+      })
+      .catch((error: unknown) => {
+        // Log the error
+        logger.logPromiseFailed('Error occurred while ensuring style with temporary visibility', error);
+      });
   }
 
   // #endregion PRIVATE METHODS

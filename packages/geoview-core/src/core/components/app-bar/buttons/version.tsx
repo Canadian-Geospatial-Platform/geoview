@@ -13,14 +13,15 @@ import { Box, Link } from '@/ui/layout';
 import { List } from '@/ui/list/list';
 import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
+import { useShellContainer } from '@/core/containers/shell-container-context';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { SxStyles } from '@/ui/style/types';
 import { getSxClasses } from './version-style';
 
@@ -70,7 +71,7 @@ export default function Version(): JSX.Element {
   const uiController = useUIController();
 
   // Get container
-  const mapElem = useStoreAppShellContainer();
+  const shellContainer = useShellContainer();
 
   // State
   const { open, anchorEl, openAt, close } = useMapPopover();
@@ -91,8 +92,8 @@ export default function Version(): JSX.Element {
 
       // Register focus trap with button as the return target
       uiController.enableFocusTrap({
-        activeElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`,
-        callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`,
+        activeElementId: DomHelper.buildAppBarVersionFocusTrapId(mapId),
+        callbackElementId: DomHelper.buildAppBarVersionButtonId(mapId),
       });
     },
     [mapId, uiController, open, openAt, close]
@@ -115,7 +116,7 @@ export default function Version(): JSX.Element {
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={interaction === 'dynamic' ? memoSxClasses.versionButtonBoxDynamic : memoSxClasses.versionButtonBoxStatic}>
         <IconButton
-          id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`}
+          id={DomHelper.buildAppBarVersionButtonId(mapId)}
           aria-haspopup="dialog"
           aria-label={t('appbar.version')}
           tooltipPlacement="right"
@@ -137,7 +138,7 @@ export default function Version(): JSX.Element {
           placement="right-end"
           strategy="fixed"
           onClose={handleClickAway}
-          container={mapElem}
+          container={shellContainer}
           focusSelector="button"
           modifiers={[
             {
@@ -157,7 +158,7 @@ export default function Version(): JSX.Element {
           handleKeyDown={handleEscapeKey}
         >
           <FocusTrapContainer
-            focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`}
+            focusTrapContainerId={DomHelper.buildAppBarVersionFocusTrapId(mapId)}
             open={open && activeTrapGeoView}
             containerType={CONTAINER_TYPE.APP_BAR}
           >
