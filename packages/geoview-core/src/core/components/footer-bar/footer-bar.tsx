@@ -284,7 +284,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [pluginController, activeFooterBarTab]);
 
   return memoFooterBarTabs.length > 0 ? (
-    <Box ref={tabsContainerRef} sx={memoSxClasses.tabsContainer} className="tabsContainer" id={`${mapId}-tabsContainer`}>
+    <Box ref={tabsContainerRef} sx={memoSxClasses.tabsContainer} className="tabsContainer" id={DomHelper.buildTabsContainerId(mapId)}>
       <Tabs
         mapId={mapId}
         shellContainer={shellContainer}

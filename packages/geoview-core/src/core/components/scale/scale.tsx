@@ -16,6 +16,7 @@ import { composeSxProps } from '@/ui/style/types';
 import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** The properties for the scale component. */
 interface ScaleProps {
@@ -272,8 +273,8 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
   return (
     <Tooltip title={t('mapnav.scale')} placement="top">
       <Box sx={SCALE_BOX_STYLES}>
-        <Box id={`${mapId}-scaleControlBarMetric`} sx={memoSxClasses.scaleControl} />
-        <Box id={`${mapId}-scaleControlBarImperial`} sx={memoSxClasses.scaleControl} />
+        <Box id={DomHelper.buildScaleControlBarMetricId(mapId)} sx={memoSxClasses.scaleControl} />
+        <Box id={DomHelper.buildScaleControlBarImperialId(mapId)} sx={memoSxClasses.scaleControl} />
 
         {expanded ? (
           // Expanded: Semantic radio group with checkmark visual indicators

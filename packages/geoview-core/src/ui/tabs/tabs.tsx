@@ -8,13 +8,14 @@ import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
+import type { SxStyles } from '@/ui/style/types';
 import type { TypeMenuItemProps } from '@/ui/select/select';
 import { Select } from '@/ui/select/select';
 import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import type { SxStyles } from '@/ui/style/types';
 
 /** Properties defining a tab and its panel content. */
 export type TypeTabs = {
@@ -370,7 +371,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     <Box sx={memoSxClasses.wrapper}>
       {/* Delegated listener (not a control): any click inside (mainly bubbled from the tabs/buttons, incl. keyboard activation) scrolls the footer into view */}
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-      <Grid container id={`${mapId}-footerbar-header`} onClick={onHeaderClick} sx={memoSxClasses.header}>
+      <Grid container id={DomHelper.buildFooterBarHeaderId(mapId)} onClick={onHeaderClick} sx={memoSxClasses.header}>
         <Grid size={{ xs: 7, sm: 10 }}>
           {!isMobile ? (
             <MaterialTabs

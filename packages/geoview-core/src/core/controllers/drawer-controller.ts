@@ -65,6 +65,7 @@ import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 
 import type {
@@ -1030,7 +1031,8 @@ export class DrawerController extends AbstractMapViewerController {
    * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
    */
   focusDrawerEditButton(): void {
-    this.focusToolButton('drawer-edit');
+    if (!AbstractMapViewerController.isToolButtonFocusable(this.getMapId())) return;
+    DomHelper.getDrawerEditButton(this.getMapId())?.focus({ focusVisible: true });
   }
 
   /**
@@ -1039,7 +1041,8 @@ export class DrawerController extends AbstractMapViewerController {
    * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
    */
   focusDrawerDrawButton(): void {
-    this.focusToolButton('drawer-draw');
+    if (!AbstractMapViewerController.isToolButtonFocusable(this.getMapId())) return;
+    DomHelper.getDrawerDrawButton(this.getMapId())?.focus({ focusVisible: true });
   }
 
   /**

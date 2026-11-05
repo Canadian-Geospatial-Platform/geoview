@@ -554,7 +554,7 @@ export class MapViewer {
     map.addControl(scaleBarImperial);
 
     // Create an overlay for the north pole icon
-    const northPoleId = `${mapId}-northpole`;
+    const northPoleId = DomHelper.buildNorthPoleId(mapId);
     const northPolePosition = Projection.transformFromLonLat(
       [NORTH_POLE_POSITION_LONLAT[1], NORTH_POLE_POSITION_LONLAT[0]],
       this.getProjection()
@@ -569,7 +569,7 @@ export class MapViewer {
     map.addOverlay(this.#northPoleMarkerOverlay);
 
     // Create an overlay for click marker icon
-    const clickMarkerId = `${mapId}-clickmarker`;
+    const clickMarkerId = DomHelper.buildClickMarkerId(mapId);
     this.#clickMarkerOverlay = new Overlay({
       id: clickMarkerId,
       position: [-1, -1],
