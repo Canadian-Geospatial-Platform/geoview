@@ -40,18 +40,7 @@ export class API {
     projection: Projection,
     date: DateMgt,
     renderer: GeoviewRenderer,
-    // TODO: CHECK IMPORTANT - Consider changing this to `dom: DomHelper` directly
-    dom: {
-      buildGVElementId: DomHelper.buildGVElementId,
-      getGVRootElement: DomHelper.getGVRootElement,
-      getGVElementById: DomHelper.getGVElementById,
-      getGVElementByFullId: DomHelper.getGVElementByFullId,
-      getGVMapTargetElement: DomHelper.getMapTargetElement,
-      getGVShellElement: DomHelper.getShellElement,
-      getGVGuidebox: DomHelper.getGuidebox,
-      queryGVSelector: DomHelper.queryGVSelector,
-      queryGVSelectorAll: DomHelper.queryGVSelectorAll,
-    },
+    dom: DomHelper,
   };
 
   /** List of available maps */

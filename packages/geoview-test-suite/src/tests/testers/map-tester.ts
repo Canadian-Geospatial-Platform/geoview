@@ -481,6 +481,7 @@ export class MapTester extends GVAbstractTester {
           for (const bottom of [0, 35, 100, 35]) {
             test.addStep(`Testing bottom padding ${bottom}px at rotation ${rotation}...`);
             uiController.setCrosshairActive(false);
+
             // eslint-disable-next-line no-await-in-loop -- Each case must commit crosshair deactivation before reactivation.
             await delay(50);
             view.padding = [0, 0, bottom, 0];
@@ -492,6 +493,7 @@ export class MapTester extends GVAbstractTester {
             if (!stale) throw new TestError('Rendered map coordinate transform must be available');
             setStoreMapPointerPosition(mapId, stale);
             uiController.setCrosshairActive(true);
+
             // eslint-disable-next-line no-await-in-loop -- Observe the activation effect before dispatching this case's keys.
             await delay(50);
 
@@ -539,6 +541,7 @@ export class MapTester extends GVAbstractTester {
       (test, results): void => {
         test.addStep('Verifying rendered alignment, activation reset, and both keyboard drawing coordinates...');
         Test.assertIsEqual(results.length, 8);
+
         for (const result of results) {
           Test.assertIsDefined('activation pointer', result.pointer);
           Test.assertIsDefined('converted position', result.position);
