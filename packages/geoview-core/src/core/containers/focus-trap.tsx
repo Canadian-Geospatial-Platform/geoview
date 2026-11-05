@@ -103,8 +103,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         return;
       }
 
-      const topLink = DomHelper.getGVElementById(mapId, 'toplink');
-      const bottomLink = DomHelper.getGVElementById(mapId, 'bottomlink');
+      const topLink = DomHelper.getWCAGTopLink(mapId);
+      const bottomLink = DomHelper.getWCAGBottomLink(mapId);
       const currentFocus = DomHelper.getActiveElement();
 
       // Only intercept if focus is within geoview container
@@ -190,7 +190,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
         setTimeout(() => {
           // Explicitly request focus indicator for keyboard users
-          DomHelper.getGVElementById(mapId, 'toplink')?.focus({ focusVisible: true });
+          DomHelper.getWCAGTopLink(mapId)?.focus({ focusVisible: true });
         }, FOCUS_DELAY);
         uiController.setCrosshairActive(false);
       },
@@ -233,16 +233,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
       setTimeout(() => {
-        if (mapTargetElement?.tabIndex === 0) {
-          uiController.setCrosshairActive(true);
-          mapTargetElement.focus({ preventScroll: true });
-        } else {
-          // Static maps do not support map keyboard interaction.
-          DomHelper.getMainMap(mapId)?.focus({ preventScroll: true, focusVisible: true });
-        }
+        DomHelper.getWCAGLinkToMap(mapId)?.focus({ preventScroll: true, focusVisible: true });
       }, FOCUS_DELAY);
     }
-  }, [handleExit, mapId, mapTargetElement, uiController]);
+  }, [handleExit, mapId, uiController]);
 
   /**
    * Handles when the user clicks the enable focus trap button.
@@ -275,8 +269,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // If Tab from topLink or shift+Tab from bottomLink, focus the map element
       const targetId = (event.target as HTMLElement).id;
       let linkId = '';
-      if (targetId.endsWith('-toplink')) linkId = 'toplink';
-      else if (targetId.endsWith('-bottomlink')) linkId = 'bottomlink';
+      if (targetId.endsWith('-wcag-toplink')) linkId = 'toplink';
+      else if (targetId.endsWith('-wcag-bottomlink')) linkId = 'bottomlink';
       if (
         (event.code === 'Tab' && !event.shiftKey && linkId === 'toplink') ||
         (event.code === 'Tab' && event.shiftKey && linkId === 'bottomlink')
@@ -319,8 +313,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     },
     [exitFocus, handleScrolling]
   );
-  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getGVElementById(mapId, 'bottomlink'));
-  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getGVElementById(mapId, 'toplink'));
+  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getWCAGBottomLink(mapId));
+  useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getWCAGTopLink(mapId));
 
   /**
    * Focuses the enable button when the modal opens.

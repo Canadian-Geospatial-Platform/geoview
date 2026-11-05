@@ -469,7 +469,8 @@ export class UIController extends AbstractMapViewerController {
    * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
    */
   focusMeasurementButton(): void {
-    this.focusToolButton('button-measurement');
+    if (!AbstractMapViewerController.isToolButtonFocusable(this.getMapId())) return;
+    DomHelper.getButtonMeasurement(this.getMapId())?.focus({ focusVisible: true });
   }
 
   /**

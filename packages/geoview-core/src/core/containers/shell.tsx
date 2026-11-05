@@ -274,17 +274,6 @@ export function Shell(props: ShellProps): JSX.Element {
   }, []);
 
   /**
-   * Handles skip link navigation by focusing the target element.
-   */
-  const handleSkipLinkClick = useCallback(
-    (suffix: string): void => {
-      // Explicitly request focus indicator for keyboard users (WCAG 2.4.1 skip links)
-      DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
-    },
-    [mapId]
-  );
-
-  /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.
    */
   const handleSkipToMainContent = useCallback((): void => {
@@ -300,8 +289,8 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles navigation from the top skip link to the bottom skip link.
    */
   const handleSkipToBottomLink = useCallback((): void => {
-    handleSkipLinkClick('bottomlink');
-  }, [handleSkipLinkClick]);
+    DomHelper.getWCAGBottomLink(mapId)?.focus({ focusVisible: true });
+  }, [mapId]);
 
   /**
    * Handles navigation from the main-content skip link to the map.
@@ -318,8 +307,8 @@ export function Shell(props: ShellProps): JSX.Element {
    * Handles navigation from the bottom skip link to the top skip link.
    */
   const handleSkipToTopLink = useCallback((): void => {
-    handleSkipLinkClick('toplink');
-  }, [handleSkipLinkClick]);
+    DomHelper.getWCAGTopLink(mapId)?.focus({ focusVisible: true });
+  }, [mapId]);
 
   /**
    * Handles when the host element is resized by an external layout.
@@ -487,8 +476,8 @@ export function Shell(props: ShellProps): JSX.Element {
   return (
     <Box sx={memoSxClasses.all}>
       <Link
-        id={DomHelper.buildTopLinkId(mapViewer.mapId)}
-        href={`#${DomHelper.buildBottomLinkId(mapViewer.mapId)}`}
+        id={DomHelper.buildWCAGTopLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildWCAGBottomLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={handleSkipToBottomLink}
@@ -498,7 +487,7 @@ export function Shell(props: ShellProps): JSX.Element {
       <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
         <Box
           ref={setShellElementRef}
-          id={`${mapViewer.mapId}-shell`}
+          id={DomHelper.buildShellId(mapViewer.mapId)}
           sx={memoSxClasses.shell}
           // geoview-keyboard-active scopes keyboard-only focus outlines (form controls) to GeoView's keyboard-navigation mode
           className={`geoview-shell${activeTrapGeoView ? ' geoview-keyboard-active' : ' geoview-keyboard-inactive'}`}
@@ -520,8 +509,8 @@ export function Shell(props: ShellProps): JSX.Element {
             </Box>
             {interaction === 'dynamic' && (
               <Link
-                id={DomHelper.buildMainMapId(mapId)}
-                href={`#${DomHelper.buildMainMapId(mapId)}`}
+                id={DomHelper.buildWCAGLinkToMapId(mapId)}
+                href={`#${DomHelper.buildWCAGLinkToMapId(mapId)}`}
                 tabIndex={0}
                 sx={{ ...memoSxClasses.skip, top: '0px' }}
                 onClick={handleSkipToMap}
@@ -530,7 +519,12 @@ export function Shell(props: ShellProps): JSX.Element {
               </Link>
             )}
 
-            <Box id={DomHelper.buildMapId(mapId)} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+            <Box
+              id={DomHelper.buildMapContainerId(mapId)}
+              sx={memoSxClasses.mapShellContainer}
+              className="mapContainer"
+              ref={mapShellContainerRef}
+            >
               <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
               <Box sx={memoSxClasses.mapContainer}>
                 <Map viewer={mapViewer} />
@@ -564,8 +558,8 @@ export function Shell(props: ShellProps): JSX.Element {
         </Box>
       </FocusTrap>
       <Link
-        id={DomHelper.buildBottomLinkId(mapViewer.mapId)}
-        href={`#${DomHelper.buildTopLinkId(mapViewer.mapId)}`}
+        id={DomHelper.buildWCAGBottomLinkId(mapViewer.mapId)}
+        href={`#${DomHelper.buildWCAGTopLinkId(mapViewer.mapId)}`}
         tabIndex={0}
         sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={handleSkipToTopLink}

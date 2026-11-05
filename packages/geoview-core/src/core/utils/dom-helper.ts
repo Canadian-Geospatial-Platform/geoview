@@ -20,7 +20,7 @@ const observers: Record<string, MutationObserver> = {};
  * Provides stateless, map-scoped DOM utilities.
  */
 export abstract class DomHelper {
-  // #region IDs
+  // #region GENERIC - PUBLIC
 
   /**
    * Builds a DOM id in the canonical `${mapId}-suffix` format (generic to specific).
@@ -35,90 +35,6 @@ export abstract class DomHelper {
   static buildGVElementId(mapId: string, suffix: string): string {
     return `${mapId}-${suffix}`;
   }
-
-  /**
-   * Builds the DOM id for a map's container.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped map container id
-   */
-  static buildMapId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'map');
-  }
-
-  /**
-   * Builds the DOM id for a map's OpenLayers target element.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped target element id
-   */
-  static buildMapTargetElementId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'mapTargetElement');
-  }
-
-  /**
-   * Builds the DOM id for a map's main map skip-link target.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped main map id
-   */
-  static buildMainMapId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'main-map');
-  }
-
-  /**
-   * Builds the DOM id for a map's top skip link.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped top skip link id
-   */
-  static buildTopLinkId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'toplink');
-  }
-
-  /**
-   * Builds the DOM id for a map's bottom skip link.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped bottom skip link id
-   */
-  static buildBottomLinkId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'bottomlink');
-  }
-
-  /**
-   * Builds the DOM id for a map's measurement button.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped measurement button id
-   */
-  static buildButtonMeasurementId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'button-measurement');
-  }
-
-  /**
-   * Builds the DOM id for a map's drawer draw button.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped drawer draw button id
-   */
-  static buildDrawerDrawButtonId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'drawer-draw');
-  }
-
-  /**
-   * Builds the DOM id for a map's drawer edit button.
-   *
-   * @param mapId - The map identifier
-   * @returns The map-scoped drawer edit button id
-   */
-  static buildDrawerEditButtonId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'drawer-edit');
-  }
-
-  // #endregion IDs
-
-  // #region GENERIC - PUBLIC
 
   /**
    * Resolves a map's root GeoView HTML element from the live DOM.
@@ -654,6 +570,10 @@ export abstract class DomHelper {
 
   // #region MAP SPECIFIC
 
+  static buildShellId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'shell');
+  }
+
   /**
    * Resolves a map's shell container element (the wrapper around the whole viewer chrome).
    *
@@ -666,6 +586,16 @@ export abstract class DomHelper {
   // TODO: CHECK - Should this return TypeHTMLElement without the | undefined and throw when not found?
   static getShellElement(mapId: string): TypeHTMLElement | undefined {
     return DomHelper.getGVElementById<TypeHTMLElement>(mapId, 'shell');
+  }
+
+  /**
+   * Builds the DOM id for a map's container.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped map container id
+   */
+  static buildMapContainerId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'map');
   }
 
   /**
@@ -682,16 +612,6 @@ export abstract class DomHelper {
   }
 
   /**
-   * Gets a map's main skip-link target element.
-   *
-   * @param mapId - The map identifier
-   * @returns The main map element, or undefined when the map is not yet mounted
-   */
-  static getMainMap(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'main-map');
-  }
-
-  /**
    * Returns the currently focused element when it belongs to the specified map.
    *
    * @param mapId - The map identifier
@@ -701,6 +621,16 @@ export abstract class DomHelper {
     const activeElement = DomHelper.getActiveElement();
     if (!activeElement || !DomHelper.getGVRootElement(mapId).contains(activeElement)) return undefined;
     return activeElement;
+  }
+
+  /**
+   * Builds the DOM id for the map's footer tabs container.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped footer tabs container id
+   */
+  static buildTabsContainerId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'tabsContainer');
   }
 
   /**
@@ -714,6 +644,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's footer bar header.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped footer bar header id
+   */
+  static buildFooterBarHeaderId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'footerbar-header');
+  }
+
+  /**
    * Gets the footer bar header element.
    *
    * @param mapId - The map identifier
@@ -721,6 +661,16 @@ export abstract class DomHelper {
    */
   static getFooterBarHeader(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'footerbar-header');
+  }
+
+  /**
+   * Builds the DOM id for a map's OpenLayers target element.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped target element id
+   */
+  static buildMapTargetElementId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'mapTargetElement');
   }
 
   /**
@@ -778,6 +728,17 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's north pole marker.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped north pole marker id
+   */
+  // TODO: CHECK - Is there 2 northpole elements in the dom-tree? This is called twice..
+  static buildNorthPoleId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'northpole');
+  }
+
+  /**
    * Gets the north pole marker element.
    *
    * @param mapId - The map identifier
@@ -798,6 +759,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's click marker.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped click marker id
+   */
+  static buildClickMarkerId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'clickmarker');
+  }
+
+  /**
    * Gets the click marker element.
    *
    * @param mapId - The map identifier
@@ -808,6 +779,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's info bar.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped info bar id
+   */
+  static buildMapInfoId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'mapInfo');
+  }
+
+  /**
    * Gets the map info bar element.
    *
    * @param mapId - The map identifier
@@ -815,6 +796,66 @@ export abstract class DomHelper {
    */
   static getMapInfo(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'mapInfo');
+  }
+
+  /**
+   * Builds the DOM id for the map's home button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped home button id
+   */
+  static buildButtonHomeId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'button-home');
+  }
+
+  /**
+   * Gets the map's home button.
+   *
+   * @param mapId - The map identifier
+   * @returns The home button element, or undefined when it is not present
+   */
+  static getButtonHome(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'button-home');
+  }
+
+  /**
+   * Builds the DOM id for a map's measurement button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped measurement button id
+   */
+  static buildButtonMeasurementId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'button-measurement');
+  }
+
+  /**
+   * Builds the DOM id for a map's measurement button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped measurement button id
+   */
+  static getButtonMeasurement(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'button-measurement');
+  }
+
+  /**
+   * Builds the DOM id for the map's clear measurements button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped clear measurements button id
+   */
+  static buildButtonClearMeasurements(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'button-clear-measurements');
+  }
+
+  /**
+   * Gets the map's clear measurements button.
+   *
+   * @param mapId - The map identifier
+   * @returns The clear measurements button element, or undefined when it is not present
+   */
+  static getButtonClearMeasurements(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'button-clear-measurements');
   }
 
   /**
@@ -830,6 +871,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's metric scale control bar.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped metric scale control bar id
+   */
+  static buildScaleControlBarMetricId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'scaleControlBarMetric');
+  }
+
+  /**
    * Gets the metric scale control bar element.
    *
    * @param mapId - The map identifier
@@ -837,6 +888,16 @@ export abstract class DomHelper {
    */
   static getScaleControlBarMetric(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'scaleControlBarMetric');
+  }
+
+  /**
+   * Builds the DOM id for the map's imperial scale control bar.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped imperial scale control bar id
+   */
+  static buildScaleControlBarImperialId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'scaleControlBarImperial');
   }
 
   /**
@@ -860,6 +921,17 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the guide close button in an app bar or footer bar container.
+   *
+   * @param mapId - The map identifier
+   * @param containerType - The container where the guide is displayed
+   * @returns The map-scoped guide close button id
+   */
+  static buildGuideCloseButtonId(mapId: string, containerType: TypeContainerBox): string {
+    return DomHelper.buildGVElementId(mapId, `${containerType}-guide-close-btn`);
+  }
+
+  /**
    * Gets the guide close button for an app bar or footer bar container.
    *
    * @param mapId - The map identifier
@@ -868,6 +940,46 @@ export abstract class DomHelper {
    */
   static getGuideCloseButton(mapId: string, containerType: TypeContainerBox): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, `${containerType}-guide-close-btn`);
+  }
+
+  /**
+   * Builds the DOM id for the map's app bar version button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped app bar version button id
+   */
+  static buildAppBarVersionButtonId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+  }
+
+  /**
+   * Gets the map's app bar version button.
+   *
+   * @param mapId - The map identifier
+   * @returns The app bar version button element, or undefined when it is not present
+   */
+  static getAppBarVersionButton(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+  }
+
+  /**
+   * Builds the DOM id for the map's app bar version focus trap container.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped app bar version focus trap container id
+   */
+  static buildAppBarVersionFocusTrapId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
+  }
+
+  /**
+   * Gets the map's app bar version focus trap container.
+   *
+   * @param mapId - The map identifier
+   * @returns The app bar version focus trap container element, or undefined when it is not present
+   */
+  static getAppBarVersionFocusTrap(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
   }
 
   /**
@@ -901,6 +1013,66 @@ export abstract class DomHelper {
    */
   static getAppBarPanelCloseButton(mapId: string, tabId: string): HTMLButtonElement | undefined {
     return DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-close-btn`);
+  }
+
+  /**
+   * Builds the DOM id for the map's WCAG "Skip to main content - Map" link.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped WCAG skip link id
+   */
+  static buildWCAGLinkToMapId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'wcag-link-to-map');
+  }
+
+  /**
+   * Gets the map's WCAG "Skip to main content - Map" link.
+   *
+   * @param mapId - The map identifier
+   * @returns The skip link element, or undefined when it is not present
+   */
+  static getWCAGLinkToMap(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'wcag-link-to-map');
+  }
+
+  /**
+   * Builds the DOM id for a map's top skip link.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped top skip link id
+   */
+  static buildWCAGTopLinkId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'wcag-toplink');
+  }
+
+  /**
+   * Gets the map's top skip link element.
+   *
+   * @param mapId - The map identifier
+   * @returns The top skip link element, or undefined when it is not present
+   */
+  static getWCAGTopLink(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'wcag-toplink');
+  }
+
+  /**
+   * Builds the DOM id for a map's bottom skip link.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped bottom skip link id
+   */
+  static buildWCAGBottomLinkId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'wcag-bottomlink');
+  }
+
+  /**
+   * Gets the map's WCAG bottom skip link element.
+   *
+   * @param mapId - The map identifier
+   * @returns The bottom skip link element, or undefined when it is not present
+   */
+  static getWCAGBottomLink(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'wcag-bottomlink');
   }
 
   /**
@@ -1211,6 +1383,50 @@ export abstract class DomHelper {
   };
 
   // #endregion DATA-TABLE SPECIFIC
+
+  // #region DRAWER SPECIFIC
+
+  /**
+   * Builds the DOM id for a map's drawer draw button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped drawer draw button id
+   */
+  static buildDrawerDrawButtonId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'drawer-draw');
+  }
+
+  /**
+   * Gets the map's drawer draw button.
+   *
+   * @param mapId - The map identifier
+   * @returns The drawer draw button element, or undefined when it is not present
+   */
+  static getDrawerDrawButton(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'drawer-draw');
+  }
+
+  /**
+   * Builds the DOM id for a map's drawer edit button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped drawer edit button id
+   */
+  static buildDrawerEditButtonId(mapId: string): string {
+    return DomHelper.buildGVElementId(mapId, 'drawer-edit');
+  }
+
+  /**
+   * Gets the map's drawer edit button.
+   *
+   * @param mapId - The map identifier
+   * @returns The drawer edit button element, or undefined when it is not present
+   */
+  static getDrawerEditButton(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'drawer-edit');
+  }
+
+  // #endregion DRAWER SPECIFIC
 
   // #region SWIPER SPECIFIC
 

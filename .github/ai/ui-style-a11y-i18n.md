@@ -104,12 +104,17 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and enable its viewer-level trap.
   [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,
-  Ctrl+Q exit, and the shell mousemove listener. Check `movementX`/`movementY`: zero movement must not
+  Ctrl+Q exit, and the shell mousemove listener. After Enable closes the dialog, focus
+  `DomHelper.getMainMap(mapId)`: the main-content skip link for dynamic maps, or the static map container.
+  Do not focus the OpenLayers target or activate the crosshair on entry; the skip link owns that action.
+  Check `movementX`/`movementY`: zero movement must not
   exit keyboard mode during resize/fullscreen transitions. Keep listener cleanup paired with exit.
   Fullscreen exit restores map focus for active crosshair drawing/measurement on the next animation
   frame, after browser focus restoration. Cancel pending restoration on controller unhook or fullscreen re-entry.
 - [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
   coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
+  App-bar panel Escape dismissal must use the same close handler as the header Close button:
+  Details returns focus to the map while the crosshair is active, not to the Details toolbar button.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
   also checks toggle/mobile mode, content, and right-panel visibility.
 - Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. It takes the

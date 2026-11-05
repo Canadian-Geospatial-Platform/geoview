@@ -6,6 +6,7 @@ import { ExpandMoreIcon, ExpandLessIcon } from '@/ui/icons';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Box } from '@/ui/layout';
 import { getSxClasses } from './map-info-expand-button-style';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -72,7 +73,7 @@ export const MapInfoExpandButton = memo(({ onExpand, expanded }: MapInfoExpandBu
       <IconButton
         aria-label={t(TOOLTIP_KEY)}
         aria-expanded={expanded}
-        aria-controls={`${mapId}-mapInfo`}
+        aria-controls={DomHelper.buildMapInfoId(mapId)}
         tooltipPlacement="top"
         onClick={handleClick}
         sx={memoSxClasses.button}

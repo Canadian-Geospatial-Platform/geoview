@@ -6,11 +6,12 @@ import type { i18n } from 'i18next';
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 
 import { GlobalStyles, ScopedCssBaseline } from '@mui/material';
-import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
-import { logger } from '@/core/utils/logger';
-import { useStoreAppDisplayThemeById } from '@/core/stores/states/app-state';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { DomHelper } from '@/core/utils/dom-helper';
+import { logger } from '@/core/utils/logger';
+import { Shell } from '@/core/containers/shell';
+import { useStoreAppDisplayThemeById } from '@/core/stores/states/app-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { ControllerContext } from '@/core/controllers/base/controller-manager';
 import { StoreContext } from '@/core/stores/store-context';
@@ -114,7 +115,7 @@ function AppStart(props: AppStartProps): JSX.Element {
               {/* Scope inherited scrollbar colours to this map without styling other viewers or the host page. */}
               <GlobalStyles
                 styles={(currentTheme) => ({
-                  [`#${CSS.escape(`${mapViewer.mapId}-shell`)}`]: {
+                  [`#${CSS.escape(DomHelper.buildShellId(mapViewer.mapId))}`]: {
                     scrollbarColor: `${currentTheme.palette.primary.main} ${
                       currentTheme.palette.surface?.low ?? currentTheme.palette.background.default
                     }`,
