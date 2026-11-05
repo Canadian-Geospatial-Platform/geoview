@@ -126,7 +126,9 @@ Implementation notes:
 - `Shell.handleScrollShellIntoView` measures `mapShellContainerRef`, not a positional shell child:
   status wrappers precede the map section (#3708). Oversized sections skip scrolling within 1px of
   the gap. Leave the shared `scrollIfNotVisible` footer offset unchanged.
-- `UITester.testMapSectionScroll` mutates page scroll, so the UI suite runs its scenarios sequentially.
+- `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
+  (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
+  and runs its scenarios sequentially.
   Footer assertions must start from bounds that trigger `scrollIfNotVisible`. Close app-bar panels only
   while the toggle is visible: focus restoration otherwise re-centres the off-screen toggle. Map-info
   scroll tests click the `{mapId}-mapInfo` bar, not its buttons.

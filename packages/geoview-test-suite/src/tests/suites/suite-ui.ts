@@ -69,7 +69,8 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
 
     await Promise.all([pDetailsPanel, pFooterHeight]);
 
-    // Page-scrolling fixtures must not run alongside other UI/map mutations.
+    // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
+    await this.waitForPageExclusivity();
     await this.#uiTester.testMapSectionScroll('partial');
     await this.#uiTester.testMapSectionScroll('transitions');
     await this.#uiTester.testMapSectionScroll('visible');

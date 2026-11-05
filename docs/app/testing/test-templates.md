@@ -539,7 +539,7 @@ wait rejects if the config enters an error state first. Use `whenThisThen` only 
 below remains a fallback, not the default registration pattern.
 
 ```typescript
-import { whenThisThen } from 'geoview-core/core/utils/utilities';
+import { whenThisThen } from "geoview-core/core/utils/utilities";
 
 // Wait for a layer to be registered before querying
 // prettier-ignore
@@ -554,6 +554,7 @@ await whenThisThen(
 - Tests that modify shared map state (zoom, projection, center) → run **sequentially** via `await`
 - Pure function tests and config validation → run in **parallel** via `Promise.all()`
 - Query tests → run **after** all parallel tests (they change zoom)
+- Tests that mutate page-level state shared by every map (e.g. window scroll) → `await this.waitForPageExclusivity()` in the suite first. "Run all" launches every map's suites in parallel, so such tests pass alone but fail beside other maps. Only one suite per page may use it.
 
 ### Race Conditions with Layer Removal
 

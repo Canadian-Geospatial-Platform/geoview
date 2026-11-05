@@ -811,7 +811,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-ui` · **File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
-**Execution:** Independent tests in parallel, then isolated page-scrolling tests sequentially · **Guard:** None
+**Execution:** Independent tests in parallel, then isolated page-scrolling tests sequentially once no other suite on the page is running · **Guard:** None
 
 | #   | Method                                | Type | Description                                                                         |
 | --- | ------------------------------------- | ---- | ----------------------------------------------------------------------------------- |

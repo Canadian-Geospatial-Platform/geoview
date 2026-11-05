@@ -1,6 +1,7 @@
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
-import { formatDuration } from 'geoview-core/core/utils/utilities';
+import { formatDuration, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { logger } from 'geoview-core/core/utils/logger';
 import type { AbstractTester, FailureEvent, SkippedEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
 import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions';
 
@@ -43,6 +44,12 @@ export abstract class AbstractTestSuite {
 
   /** Datetime when the latest test suite launch ended. */
   #launchEndedAt?: Date;
+
+  /** Number of test suite launches currently in progress across every map on the page. */
+  static #activeLaunchesOnPage = 0;
+
+  /** Default maximum wait for other test suites on the page to finish before running page-level tests. */
+  static readonly PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS = 10 * 60 * 1000;
 
   // #region OVERRIDES
 
@@ -328,6 +335,7 @@ export abstract class AbstractTestSuite {
     // Track launch timing for this execution.
     this.#launchStartedAt = new Date();
     this.#launchEndedAt = undefined;
+    AbstractTestSuite.#activeLaunchesOnPage++;
 
     try {
       // Prepare to launch the test suite
@@ -344,6 +352,27 @@ export abstract class AbstractTestSuite {
     } finally {
       // Record the end time whether launch succeeded or failed.
       this.#launchEndedAt = new Date();
+      AbstractTestSuite.#activeLaunchesOnPage--;
+    }
+  }
+
+  /**
+   * Waits until this is the only test suite launch in progress on the page (e.g. when "Run all" launches every map).
+   *
+   * Use before tests that mutate page-level state shared by all maps, such as window scroll. Only one suite on the
+   * page may wait this way at a time, otherwise each waits for the other until the timeout.
+   *
+   * @param timeoutMs - Optional maximum wait in milliseconds (defaults to PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS)
+   * @returns A promise resolving to true when the page became exclusive, or false when the timeout elapsed first
+   */
+  protected async waitForPageExclusivity(timeoutMs = AbstractTestSuite.PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS): Promise<boolean> {
+    try {
+      await whenThisThen((): boolean => AbstractTestSuite.#activeLaunchesOnPage <= 1, timeoutMs, 500);
+      return true;
+    } catch (error: unknown) {
+      // Proceed anyway; page-level tests may then be disturbed by the remaining concurrent suites
+      logger.logWarning(`Test suite '${this.getName()}' did not get exclusive page access before the timeout`, error);
+      return false;
     }
   }
 
