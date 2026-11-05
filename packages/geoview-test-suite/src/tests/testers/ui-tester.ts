@@ -1,8 +1,8 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 
 /**
  * Main UI testing class.
@@ -142,6 +142,7 @@ export class UITester extends GVAbstractTester {
          * Positions the section without smooth scrolling, then waits for browser layout.
          *
          * @param top - Desired viewport top of the section
+         * @returns A promise that resolves once the section layout has settled
          */
         const positionSection = async (top: number): Promise<void> => {
           window.scrollTo({ top: window.scrollY + section.getBoundingClientRect().top - top, behavior: 'instant' });
@@ -150,6 +151,8 @@ export class UITester extends GVAbstractTester {
 
         /**
          * Activates the delegated app-bar callback and records the settled map geometry.
+         *
+         * @returns A promise that resolves once the geometry has been recorded
          */
         const activateAppBar = async (): Promise<void> => {
           button.click();
@@ -172,23 +175,26 @@ export class UITester extends GVAbstractTester {
           await positionSection(-40);
           await activateAppBar();
         } else if (scenario === 'transitions') {
-          // Keep the footer control visible but inside the helper's 100px top clearance.
-          await positionSection(50 - section.getBoundingClientRect().height);
+          // Keep the footer control visible but inside the helper's top clearance.
+          const helperOffset = GVAbstractTester.UI_SCROLL_HELPER_OFFSET_PX;
+          await positionSection(helperOffset / 2 - section.getBoundingClientRect().height);
           test.addStep('Activating a footer tab through its delegated click path...');
           const initialFooterRect = footer.getBoundingClientRect();
-          preconditions.push(initialFooterRect.top >= 0 && initialFooterRect.top < 100);
+          preconditions.push(initialFooterRect.top >= 0 && initialFooterRect.top < helperOffset);
           UITester.#requireElement(mapId, 'tab-layers').click();
           await UITester.#waitForScrollLayout(footer);
           const footerRect = footer.getBoundingClientRect();
           test.addStep(
             `Footer bounds after activation: top=${footerRect.top}, bottom=${footerRect.bottom}, viewport=${window.innerHeight}`
           );
-          preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - 100)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+          preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
 
           /**
            * Opens the app-bar panel from a clipped section, then closes it while the section is visible.
            * Closing restores focus to the toggle; doing it off-screen would let the browser's focus scroll
            * re-center the button and override the delegated scroll under test.
+           *
+           * @returns A promise that resolves once the panel is closed and the section has settled
            */
           const activateAppBarFromClosed = async (): Promise<void> => {
             await activateAppBar();
@@ -231,14 +237,15 @@ export class UITester extends GVAbstractTester {
           if (!condition) Test.assertFail(`Scroll scenario "${scenario}" setup/transition check ${index + 1} failed.`);
         });
         const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
+        const gap = GVAbstractTester.UI_MAP_SECTION_SCROLL_GAP_PX;
         result.measurements.forEach((measurement, index): void => {
           test.addStep(`Activation ${index + 1}: ${JSON.stringify(measurement)}, viewport=${result.viewportHeight}`);
           if (scenario === 'oversized') {
-            Test.assertIsEqual(Math.abs(measurement.top - 50) <= tolerance, true);
+            Test.assertIsEqualWithinTolerance(measurement.top, gap, tolerance);
           } else {
             if (scenario !== 'visible') {
-              const expectedOffset = Math.min(50, result.viewportHeight - (measurement.bottom - measurement.top));
-              Test.assertIsEqual(Math.abs(measurement.top - expectedOffset) <= tolerance, true);
+              const expectedOffset = Math.min(gap, result.viewportHeight - (measurement.bottom - measurement.top));
+              Test.assertIsEqualWithinTolerance(measurement.top, expectedOffset, tolerance);
             }
             Test.assertIsEqual(measurement.top >= -tolerance, true);
             Test.assertIsEqual(measurement.bottom <= result.viewportHeight + tolerance, true);
@@ -247,7 +254,7 @@ export class UITester extends GVAbstractTester {
           }
         });
         if (scenario !== 'transitions') {
-          Test.assertIsEqual(Math.abs(result.measurements[1].scrollY - result.measurements[0].scrollY) <= tolerance, true);
+          Test.assertIsEqualWithinTolerance(result.measurements[1].scrollY, result.measurements[0].scrollY, tolerance);
         }
       },
       async (): Promise<void> => {

@@ -19,9 +19,6 @@ import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
 
-  /** Timeout value for waiting for layer registration. */
-  static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
-
   /** Maximum time for browser scrolling and UI layout to settle. */
   static readonly UI_SCROLL_TIMEOUT_MS = 5000;
 
@@ -30,6 +27,12 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /** Pixel tolerance for viewport geometry and scroll stability. */
   static readonly UI_SCROLL_TOLERANCE_PX = 2;
+
+  /** Top gap left by the shell when it scrolls the map section into view. */
+  static readonly UI_MAP_SECTION_SCROLL_GAP_PX = 50;
+
+  /** Default top clearance used by `DomHelper.scrollIfNotVisible` (footer alignment). */
+  static readonly UI_SCROLL_HELPER_OFFSET_PX = 100;
 
   /** WGS84 definition used to exercise local WKT resolution. */
   static readonly WGS84_WKT =

@@ -57,6 +57,9 @@ const DEFAULT_SNACKBAR_DISPLAY_TIME = 5 * 1000; // 5 seconds
 /** The length of time to display the snackbar message if there are more messages in the queue. */
 const QUEUED_SNACKBAR_DISPLAY_TIME = 3 * 1000; // 3 seconds
 
+/** The top gap, in pixels, left above the map section when app-bar or map-info activation scrolls it into view. */
+const MAP_SECTION_SCROLL_GAP_PX = 50;
+
 /**
  * Creates a shell component to wrap the map and other components not inside the map.
  *
@@ -265,15 +268,16 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Reveals the complete map section on app-bar or map-info activation.
-   * Leaves up to 50px above fitting sections; oversized sections keep a stable 50px gap.
+   * Leaves up to MAP_SECTION_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
    */
   const handleScrollShellIntoView = useCallback((): void => {
     const mapSection = mapShellContainerRef.current;
     if (!mapSection) return;
 
     const { top, height } = mapSection.getBoundingClientRect();
-    const offset = height > window.innerHeight ? 50 : Math.min(50, window.innerHeight - height);
-    if (height > window.innerHeight && Math.abs(top - offset) <= 1) return;
+    const isOversized = height > window.innerHeight;
+    const offset = isOversized ? MAP_SECTION_SCROLL_GAP_PX : Math.min(MAP_SECTION_SCROLL_GAP_PX, window.innerHeight - height);
+    if (isOversized && Math.abs(top - offset) <= 1) return;
 
     DomHelper.scrollIfNotVisible(mapSection, 'start', offset);
   }, [mapShellContainerRef]);
