@@ -64,8 +64,10 @@ Default navbar (when `navBar` is omitted from config): `["zoom", "rotation", "fu
 
 Compare total labels with [Drawer measurements](17e-package-drawer.md#editing--tools):
 both use bold 14px sans-serif, white text, a 70%-black backing and 4px/8px padding.
+Compare their 4px rounded corners and 6px downward pointers, including two-line polygon totals.
+Check zoom, map rotation and high-DPI rendering; Measure keeps its existing label anchor positions.
 Segment labels retain their distinct 13px/halo styling. Verify existing total labels remain present
-in map exports; Drawer overlays are not added to exports by this styling alignment.
+with their rounded backing and pointer in map exports; Drawer overlays are not added to exports by this styling alignment.
 
 | Test                   | Description                | Steps                                                                         | Expected Result                                          | Auto |
 | ---------------------- | -------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ---- |

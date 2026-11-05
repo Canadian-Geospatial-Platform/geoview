@@ -61,9 +61,11 @@ For theme-aware non-React DOM text, including portaled colour-picker headers,
 pass that map's theme values to the owning DOM setup and refresh existing text when its theme changes.
 Keep calibrated font-size strings unchanged; append `px` only to numeric font sizes.
 Drawer measurement labels use fixed bold 14px sans-serif text, white on a 70%-black backing with 4px/8px
-padding, matching Measure total labels in both static and dynamic maps. Drawer retains its pointer,
-rounded corners and inherited line-height; Measure segment labels remain distinct. Theme migration
-and browser-default-font-size scaling remain deferred; ordinary page zoom still scales the labels.
+padding, matching Measure total labels in both static and dynamic maps. Both use a 4px corner radius,
+a 6px downward pointer and 1.5 line-height; label anchor positions remain tool-specific.
+Measure totals retain canvas rendering for map exports; Drawer labels remain HTML overlays.
+Measure segment labels and each tool's existing area-unit formatting remain distinct.
+Theme migration and browser-default-font-size scaling remain deferred; ordinary page zoom still scales the labels.
 
 - **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
 - **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.

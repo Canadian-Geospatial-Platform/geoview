@@ -291,6 +291,7 @@ export function StylePanel(): JSX.Element {
           logger.logError('STYLE PANEL - Color picker typography or close button is missing');
           return;
         }
+        closeBtn.setAttribute('aria-label', t('drawer.closeColourPicker'));
         header.style.setProperty('font-family', theme.typography.fontFamily ?? 'inherit');
         header.style.setProperty('font-size', typeof body2.fontSize === 'number' ? `${body2.fontSize}px` : body2.fontSize);
         header.style.setProperty('font-weight', `${fontWeightMedium}`);

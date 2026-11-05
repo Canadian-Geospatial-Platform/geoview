@@ -81,11 +81,22 @@ Keep exemptions narrow: theme definitions and declarations own tokens/types; exp
 owns PDF/canvas artwork; the measurement button and map text-format toggle have line-level OpenLayers
 text exemptions.
 Drawer TS/TSX UI is checked too; picker headers use their owning StylePanel's paper ref.
-Measurement overlays use fixed bold `14px sans-serif` text and a 70%-black backing/pointer in
-`measurement-styles.css`, matching Measure totals while retaining Drawer geometry and inherited line-height;
-their theme migration is deferred. Do not supply overlay typography from the Draw button, which is not
-mounted on static maps, or add measurement-specific synchronization to the core `Map` component.
-See the [map-theme contract](../../docs/programming/styling-best-practices.md#typography).
+Measurement labels: keep Drawer `measurement-styles.css` and Measure `measurement-label-style.ts`
+aligned with the [public styling contract](../../docs/programming/styling-best-practices.md#typography).
+Maintenance safeguards:
+
+- Measure: one backing/pointer fill avoids opacity seams; `lineTo`/`arcTo` avoids requiring `roundRect`.
+  Give backing/text ascending z-indices (custom renderers otherwise paint after native text).
+- Translate the render-pixel anchor, scale local CSS dimensions by `pixelRatio`, then counter-rotate
+  by the render state's rotation to align the backing with upright text.
+- Cache only the latest text/offset per feature in a WeakMap; update its shared Point when the anchor moves.
+  Measure width once with the supplied context, not internal `ol/render/canvas` helpers.
+  OL 10.9 browser text spacing comes from the full font string: `14px/1.5` matches the 21px backing line-height.
+- Preserve tool-specific anchors, segment styles and area superscripts (Drawer HTML, Measure Unicode).
+  Measure totals export; Drawer overlays do not. Theme migration remains deferred.
+- Keep Drawer CSS independent of navbar mounting: no typography setup in the Draw button
+  (absent on static maps) or measurement-specific synchronization in the core `Map`.
+
 The OpenLayers renderer's destructuring font default is not a style value and needs no disable.
 Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
 Do not exempt export modal UI, whole geo folders, or whole custom-legend files.

@@ -52,7 +52,11 @@ export default function DataTableModal(): JSX.Element {
 
   const theme = useTheme();
   const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
-  const memoDataTableModalContentTextStyle = useMemo(() => getDataTableModalContentTextStyle(theme), [theme]);
+  /** Memoizes the data table modal text container styles for the current theme. */
+  const memoDataTableModalContentTextStyle = useMemo((): ReturnType<typeof getDataTableModalContentTextStyle> => {
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - memoDataTableModalContentTextStyle', theme);
+    return getDataTableModalContentTextStyle(theme);
+  }, [theme]);
 
   const [isLoading, setIsLoading] = useState(true);
 
