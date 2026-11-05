@@ -1,7 +1,7 @@
 /**
  * This component improves Mui's TreeView component to be able to process Layers data.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,8 @@ import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/l
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Tooltip } from '@/ui/tooltip/tooltip';
-import { ellipsisOverflow } from '@/ui/style/default';
+import type { SxStyles } from '@/ui/style/types';
+import { getSxClasses } from './add-new-layer-style';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;
@@ -34,6 +35,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   const { layerTree, onSelectedItemsChange } = props;
   const { t } = useTranslation();
   const theme = useTheme();
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
   /**
@@ -180,14 +182,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
   return (
     <SimpleTreeView
-      sx={{
-        fontSize: '0.8rem',
-        '& .MuiTreeItem-label': {
-          fontSize: '0.8rem !important',
-          padding: theme.spacing(0.5, 0),
-          ...ellipsisOverflow,
-        },
-      }}
+      sx={memoSxClasses.layerTree}
       multiSelect
       checkboxSelection
       selectedItems={selectedItems}

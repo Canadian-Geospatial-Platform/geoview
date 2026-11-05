@@ -41,8 +41,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(2),
   },
   notificationsTitle: {
-    fontSize: theme.palette.geoViewFontSize?.default,
-    fontWeight: '700',
     color: theme.palette.text.primary,
   },
   notificationsFooter: {
@@ -98,7 +96,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing(1),
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     color: theme.palette.text.primary,
     margin: theme.spacing(0),
     overflowWrap: 'break-word',
@@ -113,7 +111,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(0, 2),
     backgroundColor: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
     color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     borderRadius: theme.shape.borderRadiusFull,
     height: '20px',
     lineHeight: '20px',

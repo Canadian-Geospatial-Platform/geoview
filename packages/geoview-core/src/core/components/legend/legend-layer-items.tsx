@@ -96,7 +96,7 @@ const LegendListItem = memo(
             aria-pressed={isVisible && layerVisible}
           >
             <ListItemIcon>
-              <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+              <Box sx={sxClasses.legendItemIconContainer}>
                 {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
               </Box>
             </ListItemIcon>
@@ -104,6 +104,8 @@ const LegendListItem = memo(
               primary={name}
               slotProps={{
                 primary: {
+                  variant: 'body1',
+                  component: 'span',
                   noWrap: !isDisabled,
                 },
               }}

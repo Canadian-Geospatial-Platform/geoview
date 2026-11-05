@@ -66,6 +66,34 @@ contrast-reversed surfaces, and `layerVisibility` for legend visibility markers.
 roles are optional in reusable components that may receive an external MUI theme; provide a
 fallback or use optional chaining when accessing them.
 
+## Typography
+
+Use the owning map's typography variants for text sizes: `<Typography variant="body2">` for text,
+or `theme.typography.body2.fontSize` for size-only styling. Icons use named MUI sizes such as
+`fontSize="small"`, not literal sizes.
+
+Use the theme's `fontWeightLight`, `fontWeightRegular`, `fontWeightMedium`, and `fontWeightBold`
+tokens for component weights. All headings from h1 through h6 are bold. Integrators should note
+that h6 changed from regular to bold.
+
+Display themes can override a variant with a scale key, for example
+`scaleOverrides: { h3: 'xxl' }`. Available keys are `xs`, `sm`, `default`, `md`, `lg`, `xl`, `xxl`
+and `display`; the theme generator converts them with calibrated `pxToRem`.
+
+| Deprecated API                                              | Replacement                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `palette.geoViewFontSize`                                   | `theme.typography.<variant>.fontSize`                                     |
+| Generated multiplier keys such as `geoViewFontSize['1.2x']` | A typography variant; display themes customize it through scale keys      |
+| `control` typography variant                                | An appropriate standard MUI variant or GeoView `label`                    |
+| Custom-legend numeric `fontSize`                            | Named `fontSizeStep`, for example `"lg"` instead of `20`                  |
+| Static `geoViewFontSizes` export                            | The owning map's `theme.typography.<variant>.fontSize`                    |
+| Static `cgpvTheme` export                                   | The owning map's theme via `useTheme()`, or `getTheme(mode)` to build one |
+
+The first four APIs are deprecated and removed in the next breaking release.
+The static `geoViewFontSizes` and `cgpvTheme` exports are deprecated and removed in a future breaking release.
+See the [styling rules](../../programming/styling-best-practices.md#typography)
+and [host-page font-size timing](../config/create-map.md#host-page-font-size).
+
 ## Customizing An Existing Theme
 
 The system currently has 4 themes: `dark`, `light`, `geo.ca`, and `canada.ca`. The selected theme

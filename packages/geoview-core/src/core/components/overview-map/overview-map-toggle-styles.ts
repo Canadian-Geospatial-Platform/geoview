@@ -24,7 +24,10 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     color: theme.palette.common.black,
     zIndex: 150,
     transform: 'rotate(45deg)',
-    transition: 'transform 0.3s ease',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.standard,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     cursor: 'pointer',
     '&.minimapOpen': {
       transform: 'rotate(-45deg)',

@@ -40,7 +40,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(1),
     color: theme.palette.text.primary,
     textAlign: 'left',
-    transition: 'color 0.2s',
+    transition: theme.transitions.create('color', {
+      duration: theme.transitions.duration.shorter,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     '&:hover': {
       color: theme.palette.primary.main,
     },
@@ -48,8 +51,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionTitle: {
     display: 'block',
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
   },
 
   settingsSectionHeaderText: {
@@ -62,7 +63,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionSummary: {
     display: 'block',
-    fontSize: theme.palette.geoViewFontSize?.sm,
   },
 
   settingsSectionContentCollapsed: {
@@ -110,7 +110,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     border: '1px solid',
     borderColor: theme.palette.divider,
     borderRadius: theme.shape.borderRadiusMd,
-    transition: 'border-color 0.2s, background-color 0.2s',
+    transition: theme.transitions.create(['border-color', 'background-color'], {
+      duration: theme.transitions.duration.shorter,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     '&:hover': {
       borderColor: theme.palette.primary.main,
       backgroundColor: theme.palette.action.hover,
@@ -136,7 +139,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsCardTitle: {
     display: 'block',
-    fontWeight: 600,
+    fontWeight: theme.typography.fontWeightBold,
   },
 
   settingsCardDescription: {

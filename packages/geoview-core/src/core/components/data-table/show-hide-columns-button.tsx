@@ -1,5 +1,6 @@
 import { useState, useCallback, memo, useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 
 import type { MRT_TableInstance as MRTTableInstance, MRT_Column as MRTColumn } from 'material-react-table';
 
@@ -82,6 +83,7 @@ export function ShowHideColumnsButton({ table }: ShowHideColumnsButtonProps): JS
   // Log
   logger.logTraceRender('components/data-table/show-hide-columns-button');
 
+  const theme = useTheme();
   const { t } = useTranslation();
   const menuId = useId();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -166,10 +168,10 @@ export function ShowHideColumnsButton({ table }: ShowHideColumnsButtonProps): JS
           },
         }}
       >
-        <MenuItem onClick={handleShowAll} role="menuitem" sx={{ fontWeight: 600 }}>
+        <MenuItem onClick={handleShowAll} role="menuitem" sx={{ fontWeight: theme.typography.fontWeightBold }}>
           {t('dataTable.showAll')}
         </MenuItem>
-        <MenuItem onClick={handleHideAll} role="menuitem" sx={{ fontWeight: 600 }}>
+        <MenuItem onClick={handleHideAll} role="menuitem" sx={{ fontWeight: theme.typography.fontWeightBold }}>
           {t('dataTable.hideAll')}
         </MenuItem>
         <Divider />

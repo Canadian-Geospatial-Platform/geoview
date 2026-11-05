@@ -36,8 +36,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(2),
   },
   versionsInfoTitle: {
-    fontSize: theme.palette.geoViewFontSize?.default,
-    fontWeight: '700',
     color: theme.palette.text.primary,
   },
   versionCloseButton: {

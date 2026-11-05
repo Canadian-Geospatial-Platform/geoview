@@ -6,6 +6,7 @@ This document collects GeoView-specific conventions for styling, CSS, and themin
 
 - [1- Organizing component styles](#1--organizing-component-styles)
 - [2- Theme tokens and external-theme safety](#2--theme-tokens-and-external-theme-safety)
+  - [Typography](#typography)
 - [3- UI wrappers and translated labels](#3--ui-wrappers-and-translated-labels)
 - [4- Registering display themes](#4--registering-display-themes)
 - [5- Spacing in style modules](#5--spacing-themespacing-in-style-modules-no-sx-shorthand)
@@ -39,8 +40,8 @@ For application UI, prefer semantic MUI palette roles over hard-coded colors: us
 `layerVisibility` for checked and unchecked legend markers.
 
 Use `geoViewColor` where a GeoView-specific color or color ramp is needed, especially for map
-rendering and OpenLayers, and `geoViewFontSize` for GeoView font-size tokens. Spacing and border
-radius have their own conventions in the sections below.
+rendering and OpenLayers. Text sizes come from typography variants, not `palette.geoViewFontSize`.
+Spacing and border radius have their own conventions in the sections below.
 
 Reusable `@/ui` and `core/components/ui` components may receive a standard external MUI theme,
 which does not contain GeoView's custom extensions. Access those extensions with optional chaining,
@@ -52,6 +53,53 @@ for the thumb and `surface.low` for the track. Keep these declarations map-scope
 classes and unqualified MUI portal selectors can leak one viewer's palette into another viewer or
 the host application. GeoView must not set scrollbar colours on `html` or `body`. Portals outside
 the shell do not inherit its scrollbar colours and require a separate map-ownership strategy.
+
+### Typography
+
+Read the owning map's theme with `useTheme()`; never import a global default theme for component sizes.
+For theme-aware non-React DOM text, including portaled colour-picker headers,
+pass that map's theme values to the owning DOM setup and refresh existing text when its theme changes.
+Keep calibrated font-size strings unchanged; append `px` only to numeric font sizes.
+Drawer measurement labels use fixed bold 14px sans-serif text, white on a 70%-black backing with 4px/8px
+padding, matching Measure total labels in both static and dynamic maps. Both use a 4px corner radius,
+a 6px downward pointer and 1.5 line-height; label anchor positions remain tool-specific.
+Map rotation does not rotate either label: text and backing stay upright, and line-label offsets stay
+above their screen-space anchors. Measure totals retain canvas rendering for map exports; Drawer labels remain HTML overlays.
+Measure segment labels and each tool's existing area-unit formatting remain distinct.
+Theme migration and browser-default-font-size scaling remain deferred; ordinary page zoom still scales the labels.
+
+- **Typography and its slots:** select the appropriate variant, for example `<Typography variant="body2">Details</Typography>`. Implicit MUI defaults are allowed.
+- **Other elements or size-only overrides:** use `fontSize: theme.typography.body2.fontSize`. Do not spread a variant onto non-Typography elements: that also changes weight and line-height.
+- **Font weights:** use only `theme.typography.fontWeightLight`, `fontWeightRegular`, `fontWeightMedium`, or `fontWeightBold`. All headings h1–h6 are bold. Prefer a Typography variant over overriding its size or weight; when changing a variant, keep the existing HTML element with the `component` prop.
+- **Buttons:** standard buttons use the button typography size (16px). Use `size="small"` for compact buttons and let MUI set its own small size; never set a Button's font size locally. MUI owns sizes inside its components, including small Button text and icons in Buttons.
+- **Icons:** use MUI named sizes, for example `<InfoIcon fontSize="small" />`. `fontSize: 'inherit'` is also allowed.
+- **Display-theme overrides:** select scale keys, for example `scaleOverrides: { h3: 'xxl' }`. The generator converts them with the owning theme's calibrated `pxToRem`; components do not choose literal px/rem/em/% sizes.
+
+The shared ESLint `no-restricted-syntax` checks flag literal sizes and weights, legacy palette
+reads/generated multiplier keys, and the deprecated `control` variant in core/plugin source. Literal
+weight checks include style/sx values, JSX props, conditional values, DOM `style.fontWeight`
+assignments, and static `font-weight` declarations in styled templates. Theme weight tokens,
+`'inherit'`, and configuration-driven values are allowed. The rule does not require an explicit
+Typography variant; components can rely on the owning theme's typography defaults. GeoView's theme
+overrides tooltip font sizes with `caption` for non-touch input and `body2` for touch input.
+Theme definitions, type declarations, export PDF/canvas layout, console formatting, and
+numeric legend compatibility are exceptions; OpenLayers measurement text and the user's map-text
+formatting toggle have narrow line-level exemptions.
+See the [lint maintenance notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/ui-style-a11y-i18n.md#typography-lint-maintenance).
+
+| Deprecated API                                              | Replacement                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `palette.geoViewFontSize`                                   | `theme.typography.<variant>.fontSize`                                     |
+| Generated multiplier keys such as `geoViewFontSize['1.2x']` | A typography variant; display themes customize it through scale keys      |
+| `control` typography variant                                | An appropriate standard MUI variant or GeoView `label`                    |
+| Custom-legend numeric `fontSize`                            | Named `fontSizeStep`, for example `"lg"` instead of `20`                  |
+| Static `geoViewFontSizes` export                            | The owning map's `theme.typography.<variant>.fontSize`                    |
+| Static `cgpvTheme` export                                   | The owning map's theme via `useTheme()`, or `getTheme(mode)` to build one |
+
+The first four deprecated APIs are retained for compatibility and **removed in the next breaking release**.
+The static `geoViewFontSizes` and `cgpvTheme` exports are retained for compatibility and removed in a future breaking release.
+Numeric legend sizes remain exact during this transition. See [theme typography](../app/ui/theming.md#typography)
+and [host-page font-size timing](../app/config/create-map.md#host-page-font-size).
 
 ## 3- UI wrappers and translated labels
 
@@ -86,6 +134,16 @@ must all recognize the same theme name. When adding or renaming a theme:
 GeoView uses MUI's default 8px spacing scale: `theme.spacing(n) = n × 8px`. There is no custom spacing scale override today; if this ever changes, update the conversion guidance in [Section 6](#6--handling-legacy-values-that-dont-land-on-the-8px-grid) accordingly, since its tie-break rules are derived from the 8px assumption.
 
 **In-scope properties:** `padding`/`margin` and all directional variants (`paddingTop`, `mx`, etc.), `gap`, `rowGap`, `columnGap`.
+
+The shared ESLint config warns on spacing literals that bypass the theme, using `no-restricted-syntax` like the border-radius and typography checks. Plain numbers are allowed only in inline JSX `sx` props, where MUI scales them through the theme; everywhere else they mean pixels. Strings (`'16px'`, `'1rem'`, `'0'`) bypass the theme in any context. For an intentional exception, use an ESLint directive with a reason:
+
+```ts
+// eslint-disable-next-line no-restricted-syntax -- preserve the accessible visually-hidden offset
+margin: '-1px',
+```
+
+The warning also checks MUI spacing shorthands (`p`, `mt`, `px`, etc.). It does not prescribe whole or half-step factors; quarter steps such as `theme.spacing(1.25)` remain valid.
+The check matches property names, so a non-CSS option named `padding` (for example a map or Popper option) may need the same reasoned exception.
 
 **Rule:**
 

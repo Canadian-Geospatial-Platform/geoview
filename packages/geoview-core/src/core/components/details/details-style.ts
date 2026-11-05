@@ -27,6 +27,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     gap: theme.spacing(0.5),
     flexWrap: 'wrap',
   },
+  clearHighlightIconContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
   featureInfoListContainer: {
     padding: theme.spacing(0, 2, 2, 2),
     overflowY: 'auto',
@@ -38,7 +42,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   featureInfoRow: {
     th: {
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
     },
     '& td, & th': {
       verticalAlign: 'top',
@@ -83,7 +87,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     lineHeight: '19px',
     '& .MuiTable-root': {
       tableLayout: 'fixed',
@@ -135,7 +139,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(1.25),
   },
   coordinateInfoSectionTitle: {
-    fontWeight: 'bold',
+    fontWeight: theme.typography.fontWeightBold,
   },
   coordinateInfoDeclinationContent: {
     marginLeft: theme.spacing(0.25),

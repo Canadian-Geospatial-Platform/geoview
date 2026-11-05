@@ -11,12 +11,12 @@ Read only the linked section of each doc: search for its heading and read to the
 | Radius tokens and numeric sx multiplier pitfall                        | [Border radius](../../docs/programming/styling-best-practices.md#7--border-radius-named-tokens-on-themeshape)                                     |
 | Display theme registration and demo numbering                          | [Theme registration](../../docs/programming/styling-best-practices.md#4--registering-display-themes)                                              |
 | UI/icon imports                                                        | [Import order](../../docs/programming/best-practices.md#7--how-we-order-the-import-statements)                                                    |
-| Keyboard behavior and focus implementation                            | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode), [Implementation](#keyboard-mode-and-panel-focus)                 |
-| Focus-indicator configuration and exceptions                           | [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators), [Implementation](#focus-indicator-maintenance)                        |
+| Keyboard behavior and focus implementation                             | [Keyboard navigation](../../docs/app/accessibility.md#keyboard-navigation-mode), [Implementation](#keyboard-mode-and-panel-focus)                 |
+| Focus-indicator configuration and exceptions                           | [Focus behavior](../../docs/app/accessibility.md#keyboard-focus-indicators), [Implementation](#focus-indicator-maintenance)                       |
 | Hidden-layer panel grouping, eye toggles, selection, and focus (#3635) | [Panel behavior](../../docs/programming/best-practices.md#hidden-layer-panel-presentation), [Implementation](#hidden-layer-panel-implementation)  |
 | Shared HTML conversion and render-error boundaries                     | [HTML rendering](../../docs/programming/best-practices.md#shared-html-rendering-and-error-boundaries)                                             |
 | Semantic controls, labels, toggles, focus and tooltips                 | [Accessibility checklist](../../docs/app/accessibility.md#code-review-checklist), [ARIA](../../docs/app/accessibility.md#004-aria-best-practices) |
-| Accessibility source searches and enforcement                         | [Review procedure](#accessibility-review-procedure), [Wrapper naming](#wrapper-naming-and-diagnostics)                                            |
+| Accessibility source searches and enforcement                          | [Review procedure](#accessibility-review-procedure), [Wrapper naming](#wrapper-naming-and-diagnostics)                                            |
 | Snackbar persistence and no interactive transient actions              | [Notifications](../../docs/programming/notifications.md#the-governing-wcag-rule)                                                                  |
 | Typed actionable errors, not error.generic                             | [Generic-error failover](../../docs/programming/notifications.md#the-generic-error-message-last-resort-failover)                                  |
 
@@ -58,6 +58,65 @@ Search `public/locales/{en,fr}/translation.json` before creating keys: namespace
 (`appbar`, `mapctrl`, `dataTable` differ). Use `t('domain.key')` and i18next `{{name}}` interpolation;
 keep key parity and meaningful French text. Do not copy hypothetical translation keys from examples.
 The public translation convention is in [UI wrappers and translated labels](../../docs/programming/styling-best-practices.md#3--ui-wrappers-and-translated-labels).
+
+## Typography lint maintenance
+
+Public contract: [Typography](../../docs/programming/styling-best-practices.md#typography).
+The shared [ESLint config](../../packages/eslint.config.js) adds typography selectors to
+`no-restricted-syntax`, retaining existing restrictions and their warning severity.
+Run `npm run lint` from `packages/`; do not replace the rule array in package configs.
+
+Weight checks flag numeric/numeric-string and `bold`, `bolder`, `lighter`, `normal`, or `semibold`
+literals in style/sx values, responsive and conditional branches, JSX props, DOM
+`style.fontWeight` assignments, and static `font-weight` declarations in tagged templates. Theme
+weight-token references, `'inherit'`, and configuration-driven values remain allowed. When changing
+these selectors, verify both flagged literals and allowed values through shared and plugin-local
+ESLint configs.
+
+[`transform-base.ts`](../../packages/geoview-core/src/geo/interaction/transform/transform-base.ts)
+controls bold formatting in the selected text editor overlay. Its line-level disable explicitly
+identifies it as the user's map-text formatting, not UI typography.
+
+Keep exemptions narrow: theme definitions and declarations own tokens/types; export `layout-styles.ts`
+owns PDF/canvas artwork; the measurement button and map text-format toggle have line-level OpenLayers
+text exemptions.
+Drawer TS/TSX UI is checked too; picker headers use their owning StylePanel's paper ref.
+Measurement labels: keep Drawer `measurement-styles.css` and Measure `measurement-label-style.ts`
+aligned with the [public styling contract](../../docs/programming/styling-best-practices.md#typography).
+Maintenance safeguards:
+
+- Measure: draw the backing/pointer in one fill (`lineTo`/`arcTo`, not `roundRect`) to avoid opacity seams;
+  give backing/text ascending z-indices because custom renderers otherwise paint after native text.
+  Translate the render-pixel anchor, scale CSS dimensions by `pixelRatio`, counter-rotate by the render
+  state's rotation, then apply `offsetY` so the backing and offset stay screen-aligned with native text.
+- Cache only the latest text/offset per feature in a WeakMap; update its shared Point when the anchor moves.
+  Measure width once with the supplied context, not internal `ol/render/canvas` helpers.
+  OL 10.9 browser text spacing comes from the full font string: `14px/1.5` matches the 21px backing line-height.
+- Preserve tool-specific anchors, segment styles and area superscripts (Drawer HTML, Measure Unicode).
+  Measure totals export; Drawer overlays do not. Theme migration remains deferred.
+- Keep Drawer CSS independent of navbar mounting: no typography setup in the Draw button
+  (absent on static maps) or measurement-specific synchronization in the core `Map`.
+
+The OpenLayers renderer's destructuring font default is not a style value and needs no disable.
+Console-format strings and numeric legend conversion are not style-object literals, so need no disable.
+Do not exempt export modal UI, whole geo folders, or whole custom-legend files.
+
+## Spacing lint maintenance
+
+Public contract: [Spacing](../../docs/programming/styling-best-practices.md#5--spacing-themespacing-in-style-modules-no-sx-shorthand).
+`SPACING_RESTRICTIONS` in the shared [ESLint config](../../packages/eslint.config.js) are
+`no-restricted-syntax` selectors merged into `BASE_SYNTAX_RESTRICTIONS`, beside the border-radius checks,
+so they apply wherever the base restrictions do. They flag spacing strings with or without units, bare
+numbers outside inline JSX `sx` props, unit-suffixed template literals, and `margin`/`padding`/`gap`
+declarations in tagged CSS templates. Popper `modifiers` options are excluded because their `padding` is
+not CSS. Export `layout-styles.ts` and `utilities.ts` (PDF/canvas artwork) get base restrictions without
+the spacing selectors.
+Selectors match property names, not types, so a non-CSS option named `padding` or `p` in another object
+may need a line-level `// eslint-disable-next-line no-restricted-syntax -- <reason>`. When changing the
+selectors, run `npm run lint` from `packages/` and check both flagged literals and allowed `sx` numbers.
+Size selectors follow value containers (responsive objects/arrays, conditional branches and JSX
+expressions), not helper-call arguments, lookup keys or condition tests. Preserve both positive and
+negative cases when changing these selectors.
 
 ## Theme and scrollbar maintenance
 

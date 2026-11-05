@@ -433,13 +433,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
           content: memoPanels[tab].content,
           width: getPanelWidth(tab),
           panelStyles: {
-            panelCardContent: { padding: '0' },
+            panelCardContent: { padding: theme.spacing(0) },
           },
         };
         return [button, panel, tab];
       })
       .forEach((appBarTab) => appBarApi.createAppbarPanel(appBarTab[0], appBarTab[1]));
-  }, [footerBarConfig?.tabs.core, appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement, getPanelWidth]);
+  }, [footerBarConfig?.tabs.core, appBarConfig?.tabs.core, appBarApi, t, memoPanels, geoviewElement, getPanelWidth, theme]);
 
   /**
    * Monitors scroll container overflow and scroll position.

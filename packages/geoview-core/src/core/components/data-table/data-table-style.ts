@@ -1,7 +1,31 @@
+import type { CSSProperties } from 'react';
 import type { Theme } from '@mui/material/styles';
 import type { SxProps, SxStyles } from '@/ui/style/types';
 import { ellipsisOverflow } from '@/ui/style/default';
 import { FOCUS_OUTLINE_WIDTH } from '@/ui/style/themeOptionsGenerator';
+
+/**
+ * Styles the data table modal content area.
+ */
+export const dataTableModalContentStyle: CSSProperties = {
+  overflow: 'hidden',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+/**
+ * Gets styles for the data table modal text container.
+ *
+ * @param theme - The theme object
+ * @returns The data table modal text container styles
+ */
+export const getDataTableModalContentTextStyle = (theme: Theme): CSSProperties => ({
+  padding: theme.spacing(0),
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+});
 
 /**
  * Sx for truncated, single-line cell content (tooltip wrapper).
@@ -24,7 +48,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dataPanel: { background: theme.palette.surface?.high ?? theme.palette.background.paper, paddingBottom: theme.spacing(2) },
   gridContainer: { paddingLeft: theme.spacing(2), paddingRight: theme.spacing(2) },
   selectedRows: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     margin: theme.spacing(0),
     padding: theme.spacing(0.75),
   },
@@ -37,6 +61,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: '300px',
     minWidth: '450px',
     position: 'relative',
+  },
+  dataTableModalTableContainer: {
+    maxHeight: 'calc(90vh - 200px)',
   },
   dataTableWrapper: {
     height: '100%',
@@ -93,7 +120,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         gridTemplateColumns: '1fr',
       },
     },
-    '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize?.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiInput-root': { fontSize: theme.typography.body2.fontSize, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
     '& .MuiBadge-root': {
       marginLeft: theme.spacing(1),
       svg: {
@@ -161,13 +188,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  dataTableInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
   dataTableInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
   },
   rightPanelContainer: {
     overflowY: 'auto',

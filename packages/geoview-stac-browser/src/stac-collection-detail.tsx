@@ -245,7 +245,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
       {/* Collection Header */}
       <Box sx={memoSxClasses.detailSection}>
-        <Typography component="h3" tabIndex={-1} data-stac-view-focus sx={memoSxClasses.detailTitle}>
+        <Typography component="h3" variant="h4" tabIndex={-1} data-stac-view-focus sx={memoSxClasses.detailTitle}>
           {StacFieldUtils.getCollectionTitle(collection)}
         </Typography>
 
@@ -269,7 +269,9 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
         {/* Keywords */}
         {collection.keywords && collection.keywords.length > 0 && (
           <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.keywords')}</Typography>
+            <Typography variant="label" sx={memoSxClasses.metadataLabel}>
+              {t('stacBrowser.keywords')}
+            </Typography>
             <Box sx={memoSxClasses.keywordChipsRow}>
               {collection.keywords.map((keyword) => (
                 <Box key={keyword} component="span" sx={memoSxClasses.keywordChip}>
@@ -283,22 +285,30 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
         {/* License */}
         {collection.license && (
           <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.license')}</Typography>
-            <Typography sx={memoSxClasses.resultMeta}>{collection.license}</Typography>
+            <Typography variant="label" sx={memoSxClasses.metadataLabel}>
+              {t('stacBrowser.license')}
+            </Typography>
+            <Typography variant="body2" sx={memoSxClasses.resultMeta}>
+              {collection.license}
+            </Typography>
           </Box>
         )}
 
         {/* Temporal extent */}
         {memoTemporalDisplay && (
           <Box sx={memoSxClasses.metadataRow}>
-            <Typography sx={memoSxClasses.metadataLabel}>{t('stacBrowser.temporal')}</Typography>
-            <Typography sx={memoSxClasses.resultMeta}>{memoTemporalDisplay}</Typography>
+            <Typography variant="label" sx={memoSxClasses.metadataLabel}>
+              {t('stacBrowser.temporal')}
+            </Typography>
+            <Typography variant="body2" sx={memoSxClasses.resultMeta}>
+              {memoTemporalDisplay}
+            </Typography>
           </Box>
         )}
 
         {/* Zoom to collection extent */}
         {memoUnionExtent && (
-          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent} sx={memoSxClasses.zoomButton}>
+          <Button type="text" variant="outlined" size="small" onClick={handleZoomToExtent}>
             {t('stacBrowser.zoomToExtent')}
           </Button>
         )}
@@ -306,7 +316,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
 
       {/* Items Section */}
       <Box sx={memoSxClasses.detailSection}>
-        <Typography component="h4" sx={memoSxClasses.itemsSectionTitle}>
+        <Typography component="h4" variant="h6" sx={memoSxClasses.itemsSectionTitle}>
           {t('stacBrowser.items')}
           {numberMatched !== undefined ? ` (${numberMatched.toLocaleString(display.dateDisplay.language)})` : ''}
         </Typography>

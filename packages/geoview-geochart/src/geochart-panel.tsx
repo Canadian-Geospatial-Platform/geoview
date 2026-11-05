@@ -45,6 +45,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   logger.logTraceRender('geoview-geochart/geochart-panel');
 
   const { cgpv } = window as TypeWindow;
+  const { useTheme } = cgpv.ui;
+  const theme = useTheme();
   const { mapId, provideCallbackRedraw } = props;
   const { reactUtilities } = cgpv;
   const { useState, useCallback, useMemo, useEffect, useRef } = reactUtilities.react;
@@ -307,7 +309,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           titleFullscreen={t('geochart.title')}
         >
           {selectedLayerPath && (
-            <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
+            <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: theme.typography.button.fontSize } }}>
               {Object.entries(memoConfigObj).map(([layerPath, layerChartConfig]) => {
                 if (layerPath === selectedLayerPath) {
                   return renderChart(layerChartConfig, {}, layerPath);

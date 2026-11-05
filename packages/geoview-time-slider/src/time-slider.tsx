@@ -869,7 +869,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     <Box onKeyDown={handleKeyDown} sx={memoSxClasses.containerPadding}>
       {/* Header with title and filter switch */}
       <Box sx={memoSxClasses.headerContainer}>
-        <Typography component="h2" sx={memoSxClasses.panelTitle}>
+        <Typography variant="h4" component="h2">
           {renderDisplayTitle()}
         </Typography>
         <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
@@ -1027,7 +1027,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       {/* Description */}
       {(description || additionalLayerpaths?.length) && (
-        <Typography component="div" sx={memoSxClasses.descriptionText}>
+        <Typography variant="body2" component="div" sx={memoSxClasses.descriptionText}>
           {description || renderLayerNames()}
         </Typography>
       )}

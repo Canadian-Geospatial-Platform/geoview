@@ -13,7 +13,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     alignItems: 'center',
     gap: theme.spacing(2),
-    margin: '0 auto',
+    margin: theme.spacing(0, 'auto'),
+    // eslint-disable-next-line no-restricted-syntax -- horizontal padding scales with the dialog width
     padding: `${theme.spacing(2)} 10%`,
     width: '100%',
     overflowX: 'hidden',
@@ -54,7 +55,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       width: 'auto',
     },
     '& .MuiInputLabel-formControl': {
-      fontSize: theme.palette.geoViewFontSize?.default,
+      fontSize: theme.typography.body1.fontSize,
       marginTop: theme.spacing(0),
     },
     '& .MuiInputLabel-formControl.Mui-focused': {
@@ -80,7 +81,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   mapSkeletonMargin: {
-    margin: '0 auto',
+    margin: theme.spacing(0, 'auto'),
   },
 
   mapLoading: {
@@ -88,7 +89,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 'auto',
     height: 'auto',
     border: `1px solid ${theme.palette.divider}`,
-    margin: '0 auto',
+    margin: theme.spacing(0, 'auto'),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

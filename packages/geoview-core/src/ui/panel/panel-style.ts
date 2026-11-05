@@ -23,7 +23,10 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     [theme.breakpoints.down('sm')]: {
       width: open ? `calc(100% - ${appBarWidth}px)` : 0,
     },
-    transition: `${theme.transitions.duration.standard}ms ease`,
+    transition: theme.transitions.create('all', {
+      duration: theme.transitions.duration.standard,
+      easing: theme.transitions.easing.easeInOut,
+    }),
     position: 'absolute',
     left: `${appBarWidth}px`,
   },
@@ -45,7 +48,6 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       gap: theme.spacing(0.5),
     },
     '& .MuiCardHeader-title': {
-      fontSize: theme.palette.geoViewFontSize?.default,
       lineHeight: 1.25,
       paddingTop: theme.spacing(0),
       textTransform: 'uppercase',
@@ -67,7 +69,10 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
         border: `1px solid ${theme.palette.primary.main}`,
         height: 36,
         width: 36,
-        transition: 'all 0.3s ease-in-out',
+        transition: theme.transitions.create('all', {
+          duration: theme.transitions.duration.standard,
+          easing: theme.transitions.easing.easeInOut,
+        }),
         '& .MuiSvgIcon-root': {
           width: 24,
           height: 24,

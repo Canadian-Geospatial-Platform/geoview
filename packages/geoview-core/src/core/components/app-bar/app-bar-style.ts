@@ -67,7 +67,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderRadius: theme.shape.borderRadiusNone,
       backgroundColor: 'transparent',
       color: theme.palette.primary.main,
-      transition: 'background-color 0.3s ease-in-out',
+      transition: theme.transitions.create('background-color', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
       '& span': {
         margin: theme.spacing(0),
       },

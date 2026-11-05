@@ -20,15 +20,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'block',
     marginBottom: theme.spacing(0.75),
     marginTop: theme.spacing(0.5),
-    fontWeight: 500,
-    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
+    fontWeight: theme.typography.fontWeightMedium,
+    fontSize: theme.typography.label.fontSize,
   },
 
   // Loading/empty states
   filterLoading: {
     color: theme.palette.text.secondary,
     fontStyle: 'italic',
-    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
 
   // Multiselect checkbox item
@@ -48,10 +47,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   // Search row above the list — no border of its own, just the standard-variant underline
   filterMultiselectSearch: {
-    px: 1,
-    pt: 0.5,
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+    paddingTop: theme.spacing(0.5),
     '& .MuiInput-input': {
-      pl: '0.5em',
+      paddingLeft: theme.spacing(1),
     },
   },
 
@@ -59,7 +59,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterMultiselectContainer: {
     maxHeight: '200px',
     overflowY: 'auto',
-    p: 0.5,
+    padding: theme.spacing(0.5),
   },
 
   // Date range info text
@@ -69,7 +69,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),
     display: 'block',
-    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
   },
 
   // Range slider container
@@ -83,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterRangeValues: {
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
+    fontSize: theme.typography.body2.fontSize,
     color: theme.palette.text.secondary,
     paddingLeft: theme.spacing(0.75),
     paddingRight: theme.spacing(0.75),

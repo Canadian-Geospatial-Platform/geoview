@@ -952,6 +952,8 @@ interface TypeHeaderLayer {
   type: 'header';
   text: string;
   description?: TypeDescription;
+  fontSizeStep?: 'xs' | 'sm' | 'default' | 'md' | 'lg' | 'xl' | 'xxl' | 'display';
+  /** @deprecated Use fontSizeStep instead. */
   fontSize?: number;
   fontWeight?: 'normal' | 'bold';
 }
@@ -991,7 +993,8 @@ interface TypeDescription {
    - **description**: Optional description object with:
      - **text** (required): Descriptive text to display below header
      - **collapsed** (optional): Whether description starts collapsed (default: false)
-   - **fontSize** (number, range: 8-32, default: 16): Font size in pixels
+   - **fontSizeStep**: Named typography size: `xs` (12), `sm` (14), `default` (16), `md` (18), `lg` (20), `xl` (24), `xxl` (32), or `display` (48 design pixels). Uses the owning map's calibrated theme and takes precedence over `fontSize`.
+   - **fontSize** (deprecated; removed in the next breaking release; number, range: 8-32, schema default: 16): Exact design-pixel size converted through the owning map's calibrated `pxToRem`, without rounding. Prefer `fontSizeStep`. With neither property, existing default sizing is unchanged.
    - **fontWeight** (string, default: "bold"): Font weight ("normal" or "bold")
 
 3. **TypeGroupLayer** - Display a collapsible group of legend items:
@@ -1057,7 +1060,7 @@ interface TypeDescription {
               "text": "Current weather conditions and forecasts",
               "collapsed": false
             },
-            "fontSize": 18,
+            "fontSizeStep": "md",
             "fontWeight": "bold"
           },
           {
@@ -1082,7 +1085,7 @@ interface TypeDescription {
           {
             "type": "header",
             "text": "Administrative Boundaries",
-            "fontSize": 16
+            "fontSizeStep": "default"
           },
           {
             "type": "layer",

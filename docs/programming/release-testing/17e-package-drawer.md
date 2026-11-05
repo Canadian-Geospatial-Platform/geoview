@@ -34,7 +34,7 @@ Config: `configs/navigator/demos/15-package-drawer.json`
 | Editing guidance | Editing instructions follow the input mode | 1. Activate Edit<br>2. Check the hint with the mouse and with keyboard navigation on, before and after Ctrl+M in EN/FR<br>3. Stop editing or switch tools | A hint explains selection and handle editing; with keyboard navigation on it starts with "Press Ctrl+M to focus the map." until the map is focused; it clears when editing stops | M |
 | Snap         | Drawn geometries snap to nearby features       | 1. Toggle Snap<br>2. Draw near an existing feature   | Drawn geometries snap to nearby features/vertices   | M    |
 | Undo / Redo  | Undo reverts, Redo restores                    | 1. Draw a geometry<br>2. Click Undo<br>3. Click Redo | Undo reverts the action; Redo restores it           | M    |
-| Measurements | Length/area measurements display on geometries | 1. Toggle Measurements                               | Length/area measurements display on geometries      | M    |
+| Measurements | Length/area labels match Measure totals | 1. Draw a line and polygon and toggle Measurements<br>2. Compare with Measure totals on light/dark map content<br>3. Hide/show, edit and undo/redo<br>4. Import a line/polygon into a static map | Labels use bold 14px sans-serif, white text, 70%-black backing, 4px/8px padding, 4px rounded corners and a 6px downward pointer; tool-specific placement remains; styling persists without navbar controls | M |
 | Clear all    | All drawings are removed                       | 1. Draw multiple geometries<br>2. Click Clear        | All drawings are removed                            | M    |
 
 ## Style

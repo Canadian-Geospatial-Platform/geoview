@@ -102,7 +102,9 @@ function SwiperLayerSettingsSection({ layerPath, controller }: SwiperLayerSettin
 
   return (
     <Box sx={sxClasses.infoSection}>
-      <Typography sx={sxClasses.infoSectionTitle}>{t('swiper.settingsTitle')}</Typography>
+      <Typography component="p" variant="h6" sx={sxClasses.infoSectionTitle}>
+        {t('swiper.settingsTitle')}
+      </Typography>
       <Box sx={sxClasses.swiperSectionContent}>
         <Switch
           size="small"
@@ -218,7 +220,9 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
 
     return (
       <Box sx={sxClasses.infoSection}>
-        <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoInteraction')}</Typography>
+        <Typography component="p" variant="h6" sx={sxClasses.infoSectionTitle}>
+          {t('layers.layerInfoInteraction')}
+        </Typography>
         <Box sx={sxClasses.infoSectionContent}>
           {isLayerHoverable && (
             <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')} checked={hoverable} />

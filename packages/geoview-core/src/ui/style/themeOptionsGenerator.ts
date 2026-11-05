@@ -1,8 +1,16 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 import type { CSSObject } from '@mui/system';
-import type { IGeoViewColors } from '@/ui/style/types';
-import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes, GEOVIEW_SHAPE } from '@/ui/style/default';
+import type { IGeoViewColors, ThemeTypographyInput, TypographyVariant, TypographyScaleKey } from '@/ui/style/types';
+import {
+  font,
+  headingStyles,
+  opacity,
+  geoViewColors as defaultGeoViewColors,
+  getGeoViewFontSizes,
+  GEOVIEW_SHAPE,
+  TYPOGRAPHY_SCALE,
+} from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -63,9 +71,14 @@ export const getFormControlFocusIndicatorStyles = (geoViewColors: IGeoViewColors
  *
  * @param geoViewColors - GeoView color palette to derive button styles from
  * @param palette - Generated MUI palette for semantic button colours
+ * @param transitions - Current theme transitions for button interactions
  * @returns Style override object for MUI Button and IconButton components
  */
-const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['palette']): CSSObject => ({
+const getButtonStyleOverrides = (
+  geoViewColors: IGeoViewColors,
+  palette: Theme['palette'],
+  transitions: Theme['transitions']
+): CSSObject => ({
   '&.highlighted': {
     '&:hover, &:active, &.active': {
       backgroundColor: palette.primary.main,
@@ -103,7 +116,10 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['
     color: palette.primary.main,
     height: 36,
     width: 36,
-    transition: 'background-color 0.3s ease-in-out',
+    transition: transitions.create('background-color', {
+      duration: transitions.duration.standard,
+      easing: transitions.easing.easeInOut,
+    }),
     '&:hover': {
       backgroundColor: palette.action.hover,
     },
@@ -188,17 +204,46 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors, palette: Theme['
  * Configures all MUI component overrides, typography, palette, and spacing
  * to match GeoView's design system.
  *
- * @param geoViewColors - Optional color palette to generate theme from
- * @param themeFont - Optional font family stack to apply to the generated theme
- * @param mode - Optional palette mode ('light' or 'dark') for MUI component defaults
+ * @param options - Colors, font, mode and calibrated typography for the selected display theme
  * @returns Complete MUI ThemeOptions configuration
  */
-export const generateThemeOptions = (
-  geoViewColors: IGeoViewColors = defaultGeoViewColors,
+export const generateThemeOptions = ({
+  geoViewColors = defaultGeoViewColors,
   themeFont = font,
-  mode: PaletteMode = 'light' // Default to light mode if not specified
-): ThemeOptions => {
+  mode = 'light',
+  typography,
+}: {
+  geoViewColors?: IGeoViewColors;
+  themeFont?: string;
+  mode?: PaletteMode;
+  typography: ThemeTypographyInput;
+}): ThemeOptions => {
   logger.logTraceCore('ui/style/themeOptionsGenerator - generateThemeOptions', geoViewColors);
+
+  const variantScale: Record<TypographyVariant, TypographyScaleKey> = {
+    h1: 'display',
+    h2: 'xxl',
+    h3: 'xl',
+    h4: 'lg',
+    h5: 'md',
+    h6: 'default',
+    subtitle1: 'default',
+    subtitle2: 'xs',
+    body1: 'default',
+    body2: 'sm',
+    caption: 'xs',
+    overline: 'sm',
+    button: 'default',
+    label: 'sm',
+    ...typography.scaleOverrides,
+  };
+  /**
+   * Resolves the selected scale key through the calibrated base theme.
+   *
+   * @param variant - Typography variant whose size is being generated
+   * @returns Calibrated rem size
+   */
+  const variantSize = (variant: TypographyVariant): string => typography.pxToRem(TYPOGRAPHY_SCALE[variantScale[variant]]);
 
   const themeHeadingStyles = {
     ...headingStyles,
@@ -216,7 +261,7 @@ export const generateThemeOptions = (
     palette: {
       mode,
       geoViewColor: geoViewColors,
-      geoViewFontSize: geoViewFontSizes,
+      geoViewFontSize: getGeoViewFontSizes(typography.pxToRem),
       geoViewSpacingAndSizing: {},
       inverseContent: {
         surface: geoViewColors.bgColor.dark[800],
@@ -298,35 +343,37 @@ export const generateThemeOptions = (
 
     // start of other options
     typography: {
-      // fontSize: `${defaultFontSize}rem`,
-      htmlFontSize: 16,
+      fontWeightLight: 300,
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      fontWeightBold: 700,
+      fontSize: 14,
       fontFamily: themeFont,
-      h1: themeHeadingStyles,
-      h2: themeHeadingStyles,
-      h3: themeHeadingStyles,
-      h4: themeHeadingStyles,
-      h5: themeHeadingStyles,
-      h6: {
-        fontWeight: 400,
-      },
+      h1: { ...themeHeadingStyles, fontSize: variantSize('h1') },
+      h2: { ...themeHeadingStyles, fontSize: variantSize('h2') },
+      h3: { ...themeHeadingStyles, fontSize: variantSize('h3') },
+      h4: { ...themeHeadingStyles, fontSize: variantSize('h4') },
+      h5: { ...themeHeadingStyles, fontSize: variantSize('h5') },
+      h6: { ...themeHeadingStyles, fontSize: variantSize('h6') },
       subtitle1: {
-        fontSize: geoViewFontSizes.default,
+        fontSize: variantSize('subtitle1'),
         lineHeight: 1.25,
       },
       subtitle2: {
-        fontSize: geoViewFontSizes.xs,
+        fontSize: variantSize('subtitle2'),
         lineHeight: 1.25,
       },
-      body1: {},
-      body2: {},
-      caption: {},
+      body1: { fontSize: variantSize('body1') },
+      body2: { fontSize: variantSize('body2') },
+      caption: { fontSize: variantSize('caption') },
+      label: { fontSize: variantSize('label') },
       overline: {
-        fontSize: geoViewFontSizes.sm,
+        fontSize: variantSize('overline'),
         fontWeight: 500,
         letterSpacing: 2,
       },
       button: {
-        fontSize: geoViewFontSizes.default,
+        fontSize: variantSize('button'),
         fontWeight: 500,
       },
       control: {
@@ -397,7 +444,8 @@ export const generateThemeOptions = (
           },
         },
         styleOverrides: {
-          tooltip: ({ theme }) => ({
+          tooltip: ({ theme, ownerState }) => ({
+            fontSize: ownerState.touch ? theme.typography.body2.fontSize : theme.typography.caption.fontSize,
             backgroundColor: theme.palette.inverseContent?.surface ?? theme.palette.grey[900],
             color: theme.palette.inverseContent?.text ?? theme.palette.common.white,
           }),
@@ -446,7 +494,7 @@ export const generateThemeOptions = (
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
                 background: `${theme.palette.background.paper} 0% 0% no-repeat padding-box`,
                 borderRadius: GEOVIEW_SHAPE.borderRadiusMd,
-                marginBottom: '10px',
+                marginBottom: theme.spacing(1.25),
               },
 
               '&[data-layer-depth] &:not([data-layer-depth="0"])': {
@@ -469,7 +517,7 @@ export const generateThemeOptions = (
               '&.error, &.query-error': {
                 background: geoViewColors.error.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: theme.palette.error.main,
                 },
               },
@@ -477,7 +525,7 @@ export const generateThemeOptions = (
               '&.loading, &.processing, &.query-processing': {
                 background: geoViewColors.info.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: theme.palette.info.main,
                 },
               },
@@ -485,7 +533,7 @@ export const generateThemeOptions = (
               '&.registered': {
                 background: geoViewColors.grey.lighten(0.7, 0.6),
                 '& .MuiListItemText-secondary': {
-                  fontWeight: 'bold',
+                  fontWeight: theme.typography.fontWeightBold,
                   color: geoViewColors.info.main,
                 },
               },
@@ -495,17 +543,17 @@ export const generateThemeOptions = (
       },
       MuiButton: {
         styleOverrides: {
-          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette, theme.transitions),
         },
       },
       MuiIconButton: {
         styleOverrides: {
-          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette),
+          root: ({ theme }) => getButtonStyleOverrides(geoViewColors, theme.palette, theme.transitions),
         },
       },
       MuiFab: {
         styleOverrides: {
-          root: { padding: '0 24px' },
+          root: ({ theme }) => ({ padding: theme.spacing(0, 3) }),
         },
       },
       MuiDrawer: {
@@ -613,7 +661,7 @@ export const generateThemeOptions = (
         size: { width: 275, height: 275 },
       },
     },
-  } as ThemeOptions;
+  };
 
   return themeOptions;
 };

@@ -54,7 +54,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: theme.spacing(1),
     borderBottom: `1px solid ${theme.palette.divider}`,
     '& .MuiInputLabel-formControl': {
-      fontSize: theme.palette.geoViewFontSize?.default,
+      fontSize: theme.typography.body1.fontSize,
       marginTop: theme.spacing(0),
     },
     '& .MuiInputLabel-formControl.Mui-focused': {
@@ -71,7 +71,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterBox: {
     flexGrow: 2,
     '& .MuiInputLabel-root': {
-      fontSize: theme.palette.geoViewFontSize?.sm,
+      fontSize: theme.typography.body2.fontSize,
     },
   },
   searchResult: {
@@ -98,10 +98,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   resultMessage: {
     padding: theme.spacing(2),
-    fontSize: theme.palette.geoViewFontSize?.md,
-  },
-  clearFiltersIcon: {
-    fontSize: theme.palette.geoViewFontSize?.md,
   },
   visuallyHidden,
 });
@@ -114,7 +110,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
  */
 export const getSxClassesList = (theme: Theme): SxStyles => ({
   geoList: {
-    paddingTop: theme.spacing(0.75), // Add spacing between the search bar and the list for the first items focus indicator to be visible
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1), // Add spacing between the search bar and the list for the first items focus indicator to be visible
   },
   geoListItemButton: {
     marginInline: theme.spacing(0.75), // Create space for the focus indicator to be visible on the left and right sides of the button
@@ -123,14 +120,7 @@ export const getSxClassesList = (theme: Theme): SxStyles => ({
   geoListItemGrid: {
     width: '100%',
   },
-
-  // Location name + province cell (left side, 66% width on sm+)
-  geoListLocationCell: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
-  },
-
   geoListCategoryCell: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'right',
     [theme.breakpoints.down('sm')]: {
       textAlign: 'left',
@@ -141,7 +131,7 @@ export const getSxClassesList = (theme: Theme): SxStyles => ({
 export const StyledInputField = styled(Input)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
-  fontSize: theme.palette.geoViewFontSize?.default,
+  fontSize: theme.typography.body1.fontSize,
   '& .MuiInputBase-input': {
     transition: theme.transitions.create('width'),
     width: '100%',

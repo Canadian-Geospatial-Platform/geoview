@@ -17,8 +17,8 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(2),
     paddingBottom: theme.spacing(0.5),
-    fontSize: theme.palette.geoViewFontSize?.xl,
-    fontWeight: 700,
+    fontSize: theme.typography.h3.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
     borderBottom: `2px solid ${theme.palette.primary.main}`,
   },
   '& h2': {
@@ -28,8 +28,8 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(3),
     paddingBottom: theme.spacing(0.5),
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: 600,
+    fontSize: theme.typography.h4.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
     overflowWrap: 'anywhere',
     wordBreak: 'normal',
     hyphens: 'auto',
@@ -50,8 +50,8 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(2.5),
     paddingBottom: theme.spacing(0.5),
-    fontSize: theme.palette.geoViewFontSize?.md,
-    fontWeight: 600,
+    fontSize: theme.typography.h5.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
     overflowWrap: 'anywhere',
     wordBreak: 'normal',
     hyphens: 'auto',
@@ -68,8 +68,8 @@ const getGuideBoxStyles = (theme: Theme): SxProps<Theme> => ({
   '& h4': {
     marginBottom: theme.spacing(0.5),
     marginTop: theme.spacing(2),
-    fontSize: theme.palette.geoViewFontSize?.default,
-    fontWeight: 600,
+    fontSize: theme.typography.h6.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
     borderBottom: 'none',
     '& img': {
       verticalAlign: 'bottom',
@@ -130,30 +130,10 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       '& .current-match': {
         backgroundColor: theme.palette.warning.main,
         color: theme.palette.warning.contrastText,
-        fontWeight: 'bold',
+        fontWeight: theme.typography.fontWeightBold,
       },
     },
     guideBox: getGuideBoxStyles(theme),
-    footerGuideListItemText: {
-      '&:hover': {
-        cursor: 'pointer',
-      },
-      '& .MuiListItemText-primary': {
-        padding: theme.spacing(2),
-        fontSize: `${theme.palette.geoViewFontSize?.lg} !important`,
-        lineHeight: 1.5,
-        fontWeight: '700',
-        textTransform: 'capitalize',
-      },
-    },
-    footerGuideListItemCollapse: {
-      '& .MuiListItemText-primary': {
-        padding: theme.spacing(2, 2, 2, 3.75),
-        fontSize: `${theme.palette.geoViewFontSize?.md} !important`,
-        lineHeight: 1.5,
-        whiteSpace: 'unset',
-      },
-    },
     errorMessage: {
       marginLeft: theme.spacing(7.5),
       marginTop: theme.spacing(3.75),
@@ -171,12 +151,12 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       gap: theme.spacing(0.25),
     },
     searchMatchCount: {
-      fontSize: theme.palette.geoViewFontSize?.xs,
+      fontSize: theme.typography.caption.fontSize,
       color: theme.palette.text.secondary,
       whiteSpace: 'nowrap',
     },
     searchNoResults: {
-      fontSize: theme.palette.geoViewFontSize?.xs,
+      fontSize: theme.typography.caption.fontSize,
       color: theme.palette.text.secondary,
       whiteSpace: 'nowrap',
     },
@@ -186,17 +166,11 @@ export const getSxClasses = (theme: Theme): SxStyles =>
         boxShadow: 'none',
       },
     },
-    searchNavigationIcon: {
-      fontSize: theme.palette.geoViewFontSize?.sm,
-    },
     searchClearButton: {
       '&.Mui-focusVisible': {
         outlineOffset: `-${FOCUS_OUTLINE_WIDTH}`,
         boxShadow: 'none',
       },
-    },
-    searchClearIcon: {
-      fontSize: theme.palette.geoViewFontSize?.sm,
     },
     visuallyHidden,
   }) as const;

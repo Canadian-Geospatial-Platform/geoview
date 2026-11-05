@@ -35,12 +35,6 @@ export const getSxClassesMain = (theme: Theme): SxClasses => ({
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxClasses => ({
-  title: {
-    textAlign: 'left',
-    fontWeight: '600',
-    color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize?.md,
-  },
   layerStackContainer: {
     flexWrap: 'wrap',
     alignItems: 'center',
@@ -53,9 +47,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         height: '1.25rem',
       },
     },
-  },
-  layerStackSubtitle: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
   },
   layerStackIcons: {
     display: 'flex',
@@ -92,22 +83,14 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     alignItems: 'center',
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
-  legendTitle: {
-    fontSize: theme.palette.geoViewFontSize?.md,
-    fontWeight: '600',
-    '& div': {
-      fontSize: 'inherit',
-      fontWeight: 'inherit',
-    },
-    '>p': {
-      margin: theme.spacing(0),
-      color: theme.palette.text.secondary,
-      fontSize: theme.palette.geoViewFontSize?.sm,
-      lineHeight: 1.43,
-    },
-    '& .MuiListItemText-secondary': {
+  legendPrimary: {
+    fontWeight: theme.typography.fontWeightBold,
+    '.outOfRange &': {
       color: theme.palette.text.secondary,
     },
+  },
+  legendSecondary: {
+    color: theme.palette.text.secondary,
   },
   layerList: {
     marginTop: theme.spacing(0),
@@ -120,7 +103,12 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   layerListItem: {
     paddingLeft: theme.spacing(0.75),
     marginBottom: theme.spacing(0.75),
-    fontWeight: '400',
+    fontWeight: theme.typography.fontWeightRegular,
+  },
+  legendItemIconContainer: {
+    display: 'flex',
+    padding: theme.spacing(0, 2.25),
+    margin: theme.spacing(0, -2.25),
   },
   layerListItemButton: {
     padding: theme.spacing(0, 0, 0, 0.75),
@@ -152,14 +140,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     width: '100%',
     padding: theme.spacing(1.25, 0),
     margin: theme.spacing(0, 1.25),
-  },
-  legendInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: '600',
-    lineHeight: '1.5em',
-  },
-  legendInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize?.default,
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.divider}`,

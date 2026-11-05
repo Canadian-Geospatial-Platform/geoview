@@ -21,8 +21,4 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'space-between',
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
-  dialogTitle: {
-    fontSize: theme.palette.geoViewFontSize?.lg,
-    fontWeight: '600',
-  },
 });

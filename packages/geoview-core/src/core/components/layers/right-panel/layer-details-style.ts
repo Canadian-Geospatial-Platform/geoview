@@ -11,8 +11,6 @@ import { ellipsisOverflow } from '@/ui/style/default';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   categoryTitle: {
     textAlign: 'left',
-    fontWeight: '600',
-    fontSize: theme.palette.geoViewFontSize?.lg,
   },
   layerDetails: {
     padding: theme.spacing(2),
@@ -38,7 +36,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tableIconLabel: {
     color: theme.palette.text.primary,
-    fontSize: theme.palette.geoViewFontSize?.default,
+    fontSize: theme.typography.body1.fontSize,
     alignSelf: 'center',
   },
   wmsImage: {
@@ -47,7 +45,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layerInfo: {
     color: theme.palette.text.secondary,
-    fontSize: theme.palette.geoViewFontSize?.sm,
+    fontSize: theme.typography.body2.fontSize,
     '& .info-container': {
       display: 'flex',
       alignItems: 'center',
@@ -64,8 +62,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: theme.spacing(0.25),
   },
   infoSectionTitle: {
-    fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize?.default,
     color: theme.palette.text.primary,
     marginBottom: theme.spacing(0.25),
   },
@@ -87,7 +83,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '30px',
     backgroundColor: theme.palette.divider,
     // Absorb flex gap so the 1px divider plus its margins equal layerButtonsGroup's gap (theme.spacing(2))
-    margin: `0 calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
+    // eslint-disable-next-line no-restricted-syntax -- the 1px adjustment matches the divider's fixed border width
+    margin: `${theme.spacing(0)} calc(-1 * (${theme.spacing(2)} - 1px) / 2)`,
   },
   layerDetailsListGroup: {
     listStyleType: 'disc',
@@ -136,7 +133,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   boldLabel: {
-    fontWeight: 'bold',
+    fontWeight: theme.typography.fontWeightBold,
   },
 
   sublayerListItem: {
@@ -164,10 +161,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minWidth: 0,
   },
 
-  subTitle: {
-    fontSize: theme.palette.geoViewFontSize?.sm,
-  },
-
   layerButtonsGroup: {
     display: 'flex',
     flexDirection: 'row',
@@ -193,7 +186,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   attributionText: {
     marginTop: theme.spacing(1.25),
     color: theme.palette.text.secondary,
-    fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'center',
   },
 

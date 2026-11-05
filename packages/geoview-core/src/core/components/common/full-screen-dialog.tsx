@@ -101,7 +101,7 @@ export const FullScreenDialog = memo(({ open, onClose, onExited, title, children
       {...dialogProps}
     >
       <Box sx={memoSxClasses.dialogHeader}>
-        <DialogTitle sx={memoSxClasses.dialogTitle}>{title}</DialogTitle>
+        <DialogTitle variant="h4">{title}</DialogTitle>
         <IconButton
           iconRef={closeButtonRef}
           onClick={(event) => onClose(event, 'backdropClick')}

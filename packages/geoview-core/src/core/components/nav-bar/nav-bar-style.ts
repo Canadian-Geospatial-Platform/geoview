@@ -99,7 +99,10 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       maxWidth: '44px',
       minWidth: '44px',
       padding: 'initial',
-      transition: 'background-color 0.3s ease-in-out',
+      transition: theme.transitions.create('background-color', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
       '&.highlighted.active': {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
@@ -140,8 +143,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       gap: theme.spacing(1),
     },
     popoverTitleLabel: {
-      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
-      fontWeight: '700',
       color: theme.palette.text.primary,
       flexShrink: 1,
       padding: theme.spacing(0),
@@ -150,16 +151,6 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       display: 'flex',
       flexShrink: 0,
       color: theme.palette.text.primary,
-    },
-    popoverTitle: {
-      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
-      fontWeight: '700',
-      color: theme.palette.text.primary,
-      minHeight: '48px',
-      borderBottom: `1px solid ${theme.palette.divider}`,
-      display: 'flex',
-      alignItems: 'center',
-      padding: theme.spacing(0.5, 2),
     },
     popoverContent: {
       '&.MuiDialogContent-root': {
@@ -201,7 +192,7 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       minWidth: 0,
     },
     rotationLabel: {
-      fontWeight: 'bold',
+      fontWeight: theme.typography.fontWeightBold,
     },
     rotationLabelProjection: {
       display: 'none',
@@ -224,7 +215,10 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      transition: 'transform 0.3s ease-in-out',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.standard,
+        easing: theme.transitions.easing.easeInOut,
+      }),
     },
     measurementPanel: {
       display: 'flex',
