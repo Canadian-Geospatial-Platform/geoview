@@ -28,6 +28,7 @@ import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/f
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { CONTAINER_TYPE } from 'geoview-core/core/utils/constant';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -54,6 +55,7 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
+import type { TypeContainerBox } from 'geoview-core/core/types/global-types';
 
 /**
  * Main Layer testing class.
@@ -3060,45 +3062,75 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSetOrToggleLayerVisibility(): Promise<Test<boolean[]>> {
+    // Isolate visibility changes from existing layers by creating a uniquely identified test layer.
     const geoviewLayerId = generateId();
     const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    // Target a leaf layer inside the fixture's group rather than changing the group's visibility.
     const layerPath = `${geoviewLayerId}/point-feature-group/points_1.json`;
     const mapId = this.getMapId();
+    // Preserve the app-bar selection and focus-trap state for restoration after the test.
     const previousActiveAppBarTab = getStoreUIActiveAppBarTab(mapId);
 
     return this.test(
       'Test LayerApi.setOrToggleLayerVisibility sets and toggles layer visibility...',
       async (test) => {
+        // Wait for layer registration and loading before exercising the public visibility API.
         test.addStep('Adding a GeoJSON layer to test visibility changes...');
         await this.helperStepAddLayerOnMap(test, layerConfig);
         await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
+        // Render the Layers panel so each API change can also be observed through its eye control.
         test.addStep('Opening the Layers panel to inspect the layer visibility control...');
-        this.getControllersRegistry().uiController.setActiveAppBarTab('layers', true, false);
-        await DomHelper.waitForAppbarTabSelected(mapId, 'layers');
-        await DomHelper.waitForDomElement(`[id$="${layerPath}"]`, DomHelper.getGVRootElement(mapId));
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('layers');
 
+        // Wait for both tab activation and the layer's DOM entry before reading UI state.
+        await DomHelper.waitForFooterTabSelected(mapId, 'layers');
+
+        // Get the layer api
         const layerApi = this.getMapViewer().layer;
 
+        // Explicit false establishes a hidden starting state independently of the fixture's default.
+        // Each capture waits for React before reading the store and rendered visibility control.
         test.addStep('Explicitly hiding the layer and capturing the store and eye-control state...');
         const hideState = await LayerTester.#captureVisibilityState(
           mapId,
           layerPath,
+          CONTAINER_TYPE.FOOTER_BAR,
           layerApi.setOrToggleLayerVisibility(layerPath, false)
         );
 
+        // Explicit true must restore visibility after the preceding hide operation.
         test.addStep('Explicitly showing the layer and capturing the store and eye-control state...');
-        const showState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath, true));
+        const showState = await LayerTester.#captureVisibilityState(
+          mapId,
+          layerPath,
+          CONTAINER_TYPE.FOOTER_BAR,
+          layerApi.setOrToggleLayerVisibility(layerPath, true)
+        );
 
+        // Omitting the visibility argument exercises the toggle branch from visible to hidden.
         test.addStep('Toggling the visible layer off and capturing the store and eye-control state...');
-        const toggleOffState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath));
+        const toggleOffState = await LayerTester.#captureVisibilityState(
+          mapId,
+          layerPath,
+          CONTAINER_TYPE.FOOTER_BAR,
+          layerApi.setOrToggleLayerVisibility(layerPath)
+        );
 
+        // Repeat the implicit toggle from the opposite state to cover both transition directions.
         test.addStep('Toggling the hidden layer on and capturing the store and eye-control state...');
-        const toggleOnState = await LayerTester.#captureVisibilityState(mapId, layerPath, layerApi.setOrToggleLayerVisibility(layerPath));
+        const toggleOnState = await LayerTester.#captureVisibilityState(
+          mapId,
+          layerPath,
+          CONTAINER_TYPE.FOOTER_BAR,
+          layerApi.setOrToggleLayerVisibility(layerPath)
+        );
 
+        // Keep snapshots in operation order so assertions consume observations without repeating API calls.
         return [...hideState, ...showState, ...toggleOffState, ...toggleOnState];
       },
       (test, result) => {
+        // The assertions expect six booleans per snapshot; slices follow the operation order above.
         test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is hidden...');
         const hiddenState = [false, true, false, true, false, false];
         Test.assertIsArrayEqual(result.slice(0, 6), hiddenState);
@@ -3106,18 +3138,24 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is visible...');
         const visibleState = [true, true, true, true, true, true];
         Test.assertIsArrayEqual(result.slice(6, 12), visibleState);
+
+        // Implicit toggles must produce the same observations as the corresponding explicit updates.
         Test.assertIsArrayEqual(result.slice(12, 18), hiddenState);
         Test.assertIsArrayEqual(result.slice(18, 24), visibleState);
       },
       async (test) => {
         try {
+          // Remove the fixture and verify cleanup through the shared layer-removal helper.
           this.finalizeStepRemoveLayerAndAssert(test, layerPath);
         } finally {
+          // Restore app-bar state even if fixture removal fails, avoiding contamination of later tests.
           this.getControllersRegistry().uiController.setActiveAppBarTab(
             previousActiveAppBarTab.tabId,
             previousActiveAppBarTab.isOpen,
             previousActiveAppBarTab.isFocusTrapped ?? false
           );
+
+          // Let restoration render before the next test begins interacting with the shared viewer.
           await DomHelper.waitForReactIdle();
         }
       }
@@ -3431,14 +3469,30 @@ export class LayerTester extends GVAbstractTester {
   /**
    * Captures the LayerApi result, store visibility and rendered eye-control state.
    *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path in the footer Layers panel
+   * @param containerType - The type of container where the visibility button is located
    * @param apiResult - The visibility returned by the LayerApi call
-   * @returns The API, store and UI visibility observations
+   * @returns The API result, store existence and visibility, button existence, pressed state, and eye icon visibility
    */
-  static async #captureVisibilityState(mapId: string, layerPath: string, apiResult: boolean): Promise<boolean[]> {
+  static async #captureVisibilityState(
+    mapId: string,
+    layerPath: string,
+    containerType: TypeContainerBox,
+    apiResult: boolean
+  ): Promise<boolean[]> {
     await DomHelper.waitForReactIdle();
     const storeLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+    const visibilityButton = DomHelper.getVisibleButton(mapId, layerPath, containerType);
 
-    return [apiResult, storeLayer !== undefined, storeLayer?.visible ?? false, DomHelper.getVisibleButtonVisibility(mapId, layerPath)];
+    return [
+      apiResult,
+      storeLayer !== undefined,
+      storeLayer?.visible ?? false,
+      visibilityButton !== undefined,
+      visibilityButton?.getAttribute('aria-pressed') === 'true',
+      DomHelper.getVisibleButtonVisibility(mapId, layerPath, containerType),
+    ];
   }
 
   /**

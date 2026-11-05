@@ -65,8 +65,8 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static getGVElementById<T extends HTMLElement = HTMLElement>(mapId: string, suffix: string): T | undefined {
-    const fullId = DomHelper.buildGVElementId(mapId, suffix);
-    const root = DomHelper.getGVRootElement(mapId);
+    const fullId = this.buildGVElementId(mapId, suffix);
+    const root = this.getGVRootElement(mapId);
 
     // Scoped lookup within the map root (preferred).
     if (root) return root.querySelector<T>(`#${CSS.escape(fullId)}`) ?? undefined;
@@ -88,7 +88,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static getGVElementByFullId<T extends HTMLElement = HTMLElement>(mapId: string, fullId: string): T | undefined {
-    const root = DomHelper.getGVRootElement(mapId);
+    const root = this.getGVRootElement(mapId);
 
     // Scoped lookup within the map root (preferred).
     if (root) return root.querySelector<T>(`#${CSS.escape(fullId)}`) ?? undefined;
@@ -110,7 +110,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static queryGVSelector<T extends Element = HTMLElement>(mapId: string, selector: string): T | undefined {
-    const root = DomHelper.getGVRootElement(mapId);
+    const root = this.getGVRootElement(mapId);
 
     // Scoped query within the map root (preferred).
     if (root) return root.querySelector<T>(selector) ?? undefined;
@@ -132,7 +132,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static queryGVSelectorAll<T extends Element = HTMLElement>(mapId: string, selector: string): T[] {
-    const root = DomHelper.getGVRootElement(mapId);
+    const root = this.getGVRootElement(mapId);
 
     // Scoped query within the map root (preferred).
     if (root) return Array.from(root.querySelectorAll<T>(selector));
@@ -143,14 +143,27 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets the layer list item button in the specified Layers panel.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @param containerType - The app bar or footer bar containing the Layers panel
+   * @returns The layer list item button element, or undefined when it is not rendered
+   */
+  static getLayerBoxInLayersPanel(mapId: string, layerPath: string, containerType: TypeContainerBox): HTMLElement | undefined {
+    return this.getGVElementById(mapId, `${containerType}-layers-${layerPath}`);
+  }
+
+  /**
    * Gets the visibility toggle button for a layer in a map's layer panel.
    *
    * @param mapId - The map identifier
    * @param layerPath - The full layer path
+   * @param containerType - The app bar or footer bar containing the Layers panel
    * @returns The visibility button, or undefined when the layer row or button is not rendered
    */
-  static getVisibleButton(mapId: string, layerPath: string): HTMLButtonElement | undefined {
-    const layerListItem = DomHelper.queryGVSelectorAll<HTMLElement>(mapId, '[id]').find((element) => element.id.endsWith(layerPath));
+  static getVisibleButton(mapId: string, layerPath: string, containerType: TypeContainerBox): HTMLButtonElement | undefined {
+    const layerListItem = this.getGVElementById(mapId, `${containerType}-layers-${layerPath}`);
     return layerListItem?.parentElement?.querySelector<HTMLButtonElement>('.rightIcons-container button[aria-pressed]') ?? undefined;
   }
 
@@ -159,12 +172,17 @@ export abstract class DomHelper {
    *
    * @param mapId - The map identifier
    * @param layerPath - The full layer path
-   * @returns True when the visible eye icon is rendered; otherwise false
+   * @param containerType - The app bar or footer bar containing the Layers panel
+   * @returns True for the visible eye icon, or false for the hidden eye icon
+   * @throws {Error} When the visibility button is missing or its eye icon state is ambiguous
    */
-  static getVisibleButtonVisibility(mapId: string, layerPath: string): boolean {
-    const visibilityButton = DomHelper.getVisibleButton(mapId, layerPath);
-    const visibleIcon = visibilityButton?.querySelector('[data-testid="VisibilityOutlinedIcon"]');
-    const hiddenIcon = visibilityButton?.querySelector('[data-testid="VisibilityOffOutlinedIcon"]');
+  static getVisibleButtonVisibility(mapId: string, layerPath: string, containerType: TypeContainerBox): boolean {
+    const visibilityButton = this.getVisibleButton(mapId, layerPath, containerType);
+    if (!visibilityButton) {
+      throw new Error(`Layer visibility button not found for map '${mapId}', container '${containerType}', layer '${layerPath}'`);
+    }
+    const visibleIcon = visibilityButton.querySelector('[data-testid="VisibilityOutlinedIcon"]');
+    const hiddenIcon = visibilityButton.querySelector('[data-testid="VisibilityOffOutlinedIcon"]');
     return Boolean(visibleIcon) && !hiddenIcon;
   }
 
@@ -178,7 +196,7 @@ export abstract class DomHelper {
    * @returns The currently visible and enabled elements in tab order
    */
   static getGVVisibleTabbable(mapId: string, root: HTMLElement): HTMLElement[] {
-    const elements = DomHelper.queryGVSelectorAll<HTMLElement>(mapId, `#${CSS.escape(root.id)} :is(${TABBABLE_SELECTOR})`);
+    const elements = this.queryGVSelectorAll<HTMLElement>(mapId, `#${CSS.escape(root.id)} :is(${TABBABLE_SELECTOR})`);
     const radios = elements.filter(
       (element): element is HTMLInputElement => element instanceof window.HTMLInputElement && element.type === 'radio'
     );
@@ -223,7 +241,7 @@ export abstract class DomHelper {
       element instanceof window.HTMLInputElement ||
       element instanceof window.HTMLTextAreaElement ||
       element instanceof window.HTMLSelectElement ||
-      DomHelper.isContentEditableElement(element)
+      this.isContentEditableElement(element)
     );
   }
 
@@ -233,7 +251,7 @@ export abstract class DomHelper {
    * @returns Whether the active element is an input, textarea, select, or contenteditable element
    */
   static isActiveElementInputOrContentEditableElement(): boolean {
-    return DomHelper.isInputOrContentEditableElement(DomHelper.getActiveElement());
+    return this.isInputOrContentEditableElement(this.getActiveElement());
   }
 
   /**
@@ -544,7 +562,7 @@ export abstract class DomHelper {
    */
   static waitForDomContent(element: Element, timeout?: number): Promise<void> {
     if (element.textContent?.trim()) return Promise.resolve();
-    return DomHelper.waitForDomChange(element, () => !!element.textContent?.trim(), timeout);
+    return this.waitForDomChange(element, () => !!element.textContent?.trim(), timeout);
   }
 
   /**
@@ -596,8 +614,14 @@ export abstract class DomHelper {
 
   // #region MAP SPECIFIC
 
+  /**
+   * Builds the DOM id for a map's shell container.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped shell container id
+   */
   static buildShellId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'shell');
+    return this.buildGVElementId(mapId, 'shell');
   }
 
   /**
@@ -611,7 +635,7 @@ export abstract class DomHelper {
    */
   // TODO: CHECK - Should this return TypeHTMLElement without the | undefined and throw when not found?
   static getShellElement(mapId: string): TypeHTMLElement | undefined {
-    return DomHelper.getGVElementById<TypeHTMLElement>(mapId, 'shell');
+    return this.getGVElementById<TypeHTMLElement>(mapId, 'shell');
   }
 
   /**
@@ -621,7 +645,7 @@ export abstract class DomHelper {
    * @returns The map-scoped map container id
    */
   static buildMapContainerId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'map');
+    return this.buildGVElementId(mapId, 'map');
   }
 
   /**
@@ -632,7 +656,7 @@ export abstract class DomHelper {
    * @throws {Error} When the map container element is not found
    */
   static getMapContainer(mapId: string): HTMLElement {
-    const mapContainer = DomHelper.getGVElementById(mapId, 'map');
+    const mapContainer = this.getGVElementById(mapId, 'map');
     if (mapContainer) return mapContainer;
     throw new Error(`Map container element not found for mapId: ${mapId}`);
   }
@@ -644,8 +668,8 @@ export abstract class DomHelper {
    * @returns The active element inside the map, or undefined when focus is outside the map
    */
   static getActiveElementWithinMap(mapId: string): Element | undefined {
-    const activeElement = DomHelper.getActiveElement();
-    if (!activeElement || !DomHelper.getGVRootElement(mapId).contains(activeElement)) return undefined;
+    const activeElement = this.getActiveElement();
+    if (!activeElement || !this.getGVRootElement(mapId).contains(activeElement)) return undefined;
     return activeElement;
   }
 
@@ -656,7 +680,7 @@ export abstract class DomHelper {
    * @returns The map-scoped footer tabs container id
    */
   static buildTabsContainerId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'tabsContainer');
+    return this.buildGVElementId(mapId, 'tabsContainer');
   }
 
   /**
@@ -666,7 +690,7 @@ export abstract class DomHelper {
    * @returns The footer tabs container element, if found
    */
   static getTabsContainer(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'tabsContainer');
+    return this.getGVElementById(mapId, 'tabsContainer');
   }
 
   /**
@@ -676,7 +700,7 @@ export abstract class DomHelper {
    * @returns The map-scoped footer bar header id
    */
   static buildFooterBarHeaderId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'footerbar-header');
+    return this.buildGVElementId(mapId, 'footerbar-header');
   }
 
   /**
@@ -686,7 +710,7 @@ export abstract class DomHelper {
    * @returns The footer bar header element, if found
    */
   static getFooterBarHeader(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'footerbar-header');
+    return this.getGVElementById(mapId, 'footerbar-header');
   }
 
   /**
@@ -696,7 +720,7 @@ export abstract class DomHelper {
    * @returns The map-scoped target element id
    */
   static buildMapTargetElementId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'mapTargetElement');
+    return this.buildGVElementId(mapId, 'mapTargetElement');
   }
 
   /**
@@ -709,7 +733,7 @@ export abstract class DomHelper {
    * @returns The map target element, or undefined when the map is not yet mounted
    */
   static getMapTargetElement<T extends HTMLElement = HTMLElement>(mapId: string): T | undefined {
-    return DomHelper.getGVElementById<T>(mapId, 'mapTargetElement');
+    return this.getGVElementById<T>(mapId, 'mapTargetElement');
   }
 
   /**
@@ -721,7 +745,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static getDataFooterHeight(mapId: string, defaultHeight: number): string {
-    return DomHelper.getGVRootElement(mapId).getAttribute('data-footer-height') ?? `${defaultHeight}px`;
+    return this.getGVRootElement(mapId).getAttribute('data-footer-height') ?? `${defaultHeight}px`;
   }
 
   /**
@@ -732,7 +756,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static getDataConfigUrl(mapId: string): string | undefined {
-    return DomHelper.getGVRootElement(mapId).getAttribute('data-config-url') ?? undefined;
+    return this.getGVRootElement(mapId).getAttribute('data-config-url') ?? undefined;
   }
 
   /**
@@ -761,7 +785,7 @@ export abstract class DomHelper {
    */
   // TODO: CHECK - Is there 2 northpole elements in the dom-tree? This is called twice..
   static buildNorthPoleId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'northpole');
+    return this.buildGVElementId(mapId, 'northpole');
   }
 
   /**
@@ -771,7 +795,7 @@ export abstract class DomHelper {
    * @returns The north pole marker HTML element, if found
    */
   static getNorthPole(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'northpole');
+    return this.getGVElementById(mapId, 'northpole');
   }
 
   /**
@@ -781,7 +805,7 @@ export abstract class DomHelper {
    * @returns The north arrow SVG element, if found
    */
   static getNorthArrowSVG(mapId: string): SVGSVGElement | undefined {
-    return DomHelper.getMapTargetElement(mapId)?.querySelector<SVGSVGElement>('[data-testid="north-arrow"] svg') ?? undefined;
+    return this.getMapTargetElement(mapId)?.querySelector<SVGSVGElement>('[data-testid="north-arrow"] svg') ?? undefined;
   }
 
   /**
@@ -791,7 +815,7 @@ export abstract class DomHelper {
    * @returns The map-scoped click marker id
    */
   static buildClickMarkerId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'clickmarker');
+    return this.buildGVElementId(mapId, 'clickmarker');
   }
 
   /**
@@ -801,7 +825,7 @@ export abstract class DomHelper {
    * @returns The click marker HTML element, if found
    */
   static getClickMarker(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'clickmarker');
+    return this.getGVElementById(mapId, 'clickmarker');
   }
 
   /**
@@ -811,7 +835,7 @@ export abstract class DomHelper {
    * @returns The map-scoped info bar id
    */
   static buildMapInfoId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'mapInfo');
+    return this.buildGVElementId(mapId, 'mapInfo');
   }
 
   /**
@@ -821,7 +845,7 @@ export abstract class DomHelper {
    * @returns The map info bar HTML element, if found
    */
   static getMapInfo(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'mapInfo');
+    return this.getGVElementById(mapId, 'mapInfo');
   }
 
   /**
@@ -831,7 +855,7 @@ export abstract class DomHelper {
    * @returns The map-scoped home button id
    */
   static buildButtonHomeId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'button-home');
+    return this.buildGVElementId(mapId, 'button-home');
   }
 
   /**
@@ -841,7 +865,49 @@ export abstract class DomHelper {
    * @returns The home button element, or undefined when it is not present
    */
   static getButtonHome(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'button-home');
+    return this.getGVElementById(mapId, 'button-home');
+  }
+
+  /**
+   * Builds the DOM id for the map's zoom-in button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped zoom-in button id
+   */
+  static buildButtonZoomInId(mapId: string): string {
+    return this.buildGVElementId(mapId, 'button-zoom-in');
+  }
+
+  /**
+   * Gets the map's zoom-in button.
+   *
+   * @param mapId - The map identifier
+   * @returns The zoom-in button element, or undefined when it is not present
+   * @throws {Error} When the root element is not found
+   */
+  static getButtonZoomIn(mapId: string): HTMLElement | undefined {
+    return this.getGVElementById(mapId, 'button-zoom-in');
+  }
+
+  /**
+   * Builds the DOM id for the map's zoom-out button.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped zoom-out button id
+   */
+  static buildButtonZoomOutId(mapId: string): string {
+    return this.buildGVElementId(mapId, 'button-zoom-out');
+  }
+
+  /**
+   * Gets the map's zoom-out button.
+   *
+   * @param mapId - The map identifier
+   * @returns The zoom-out button element, or undefined when it is not present
+   * @throws {Error} When the root element is not found
+   */
+  static getButtonZoomOut(mapId: string): HTMLElement | undefined {
+    return this.getGVElementById(mapId, 'button-zoom-out');
   }
 
   /**
@@ -851,7 +917,7 @@ export abstract class DomHelper {
    * @returns The map-scoped measurement button id
    */
   static buildButtonMeasurementId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'button-measurement');
+    return this.buildGVElementId(mapId, 'button-measurement');
   }
 
   /**
@@ -861,7 +927,7 @@ export abstract class DomHelper {
    * @returns The map-scoped measurement button id
    */
   static getButtonMeasurement(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'button-measurement');
+    return this.getGVElementById(mapId, 'button-measurement');
   }
 
   /**
@@ -871,7 +937,7 @@ export abstract class DomHelper {
    * @returns The map-scoped clear measurements button id
    */
   static buildButtonClearMeasurements(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'button-clear-measurements');
+    return this.buildGVElementId(mapId, 'button-clear-measurements');
   }
 
   /**
@@ -881,7 +947,7 @@ export abstract class DomHelper {
    * @returns The clear measurements button element, or undefined when it is not present
    */
   static getButtonClearMeasurements(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'button-clear-measurements');
+    return this.getGVElementById(mapId, 'button-clear-measurements');
   }
 
   /**
@@ -893,7 +959,7 @@ export abstract class DomHelper {
    * @returns The map info bar height in pixels, or zero when it is not present
    */
   static getMapInfoOffsetHeight(mapId: string): number {
-    return DomHelper.getMapInfo(mapId)?.offsetHeight ?? 0;
+    return this.getMapInfo(mapId)?.offsetHeight ?? 0;
   }
 
   /**
@@ -903,7 +969,7 @@ export abstract class DomHelper {
    * @returns The map-scoped metric scale control bar id
    */
   static buildScaleControlBarMetricId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'scaleControlBarMetric');
+    return this.buildGVElementId(mapId, 'scaleControlBarMetric');
   }
 
   /**
@@ -913,7 +979,7 @@ export abstract class DomHelper {
    * @returns The metric scale control bar element, if found
    */
   static getScaleControlBarMetric(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'scaleControlBarMetric');
+    return this.getGVElementById(mapId, 'scaleControlBarMetric');
   }
 
   /**
@@ -923,7 +989,7 @@ export abstract class DomHelper {
    * @returns The map-scoped imperial scale control bar id
    */
   static buildScaleControlBarImperialId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'scaleControlBarImperial');
+    return this.buildGVElementId(mapId, 'scaleControlBarImperial');
   }
 
   /**
@@ -933,7 +999,7 @@ export abstract class DomHelper {
    * @returns The imperial scale control bar element, if found
    */
   static getScaleControlBarImperial(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'scaleControlBarImperial');
+    return this.getGVElementById(mapId, 'scaleControlBarImperial');
   }
 
   /**
@@ -943,7 +1009,7 @@ export abstract class DomHelper {
    * @returns The guide content container, if found
    */
   static getGuideContainer(mapId: string): HTMLElement | undefined {
-    return DomHelper.queryGVSelector<HTMLElement>(mapId, '.guide-container');
+    return this.queryGVSelector<HTMLElement>(mapId, '.guide-container');
   }
 
   /**
@@ -954,7 +1020,7 @@ export abstract class DomHelper {
    * @returns The map-scoped guide close button id
    */
   static buildGuideCloseButtonId(mapId: string, containerType: TypeContainerBox): string {
-    return DomHelper.buildGVElementId(mapId, `${containerType}-guide-close-btn`);
+    return this.buildGVElementId(mapId, `${containerType}-guide-close-btn`);
   }
 
   /**
@@ -965,7 +1031,7 @@ export abstract class DomHelper {
    * @returns The guide close button element, if found
    */
   static getGuideCloseButton(mapId: string, containerType: TypeContainerBox): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, `${containerType}-guide-close-btn`);
+    return this.getGVElementById(mapId, `${containerType}-guide-close-btn`);
   }
 
   /**
@@ -975,7 +1041,7 @@ export abstract class DomHelper {
    * @returns The map-scoped app bar version button id
    */
   static buildAppBarVersionButtonId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+    return this.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
   }
 
   /**
@@ -985,7 +1051,7 @@ export abstract class DomHelper {
    * @returns The app bar version button element, or undefined when it is not present
    */
   static getAppBarVersionButton(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+    return this.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
   }
 
   /**
@@ -995,7 +1061,7 @@ export abstract class DomHelper {
    * @returns The map-scoped app bar version focus trap container id
    */
   static buildAppBarVersionFocusTrapId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
+    return this.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
   }
 
   /**
@@ -1005,7 +1071,7 @@ export abstract class DomHelper {
    * @returns The app bar version focus trap container element, or undefined when it is not present
    */
   static getAppBarVersionFocusTrap(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
+    return this.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-ft`);
   }
 
   /**
@@ -1016,7 +1082,7 @@ export abstract class DomHelper {
    * @returns The app bar button element, if found
    */
   static getAppBarButton(mapId: string, tabId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`);
+    return this.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`);
   }
 
   /**
@@ -1027,7 +1093,7 @@ export abstract class DomHelper {
    * @returns The app bar panel element, if found
    */
   static getAppBarPanel(mapId: string, tabId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
+    return this.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
   }
 
   /**
@@ -1038,7 +1104,7 @@ export abstract class DomHelper {
    * @returns The app bar panel close button element, if found
    */
   static getAppBarPanelCloseButton(mapId: string, tabId: string): HTMLButtonElement | undefined {
-    return DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-close-btn`);
+    return this.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-close-btn`);
   }
 
   /**
@@ -1048,7 +1114,7 @@ export abstract class DomHelper {
    * @returns The map-scoped WCAG skip link id
    */
   static buildWCAGLinkToMapId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'wcag-link-to-map');
+    return this.buildGVElementId(mapId, 'wcag-link-to-map');
   }
 
   /**
@@ -1058,7 +1124,7 @@ export abstract class DomHelper {
    * @returns The skip link element, or undefined when it is not present
    */
   static getWCAGLinkToMap(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'wcag-link-to-map');
+    return this.getGVElementById(mapId, 'wcag-link-to-map');
   }
 
   /**
@@ -1068,7 +1134,7 @@ export abstract class DomHelper {
    * @returns The map-scoped top skip link id
    */
   static buildWCAGTopLinkId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'wcag-toplink');
+    return this.buildGVElementId(mapId, 'wcag-toplink');
   }
 
   /**
@@ -1078,7 +1144,7 @@ export abstract class DomHelper {
    * @returns The top skip link element, or undefined when it is not present
    */
   static getWCAGTopLink(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'wcag-toplink');
+    return this.getGVElementById(mapId, 'wcag-toplink');
   }
 
   /**
@@ -1088,7 +1154,7 @@ export abstract class DomHelper {
    * @returns The map-scoped bottom skip link id
    */
   static buildWCAGBottomLinkId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'wcag-bottomlink');
+    return this.buildGVElementId(mapId, 'wcag-bottomlink');
   }
 
   /**
@@ -1098,7 +1164,7 @@ export abstract class DomHelper {
    * @returns The bottom skip link element, or undefined when it is not present
    */
   static getWCAGBottomLink(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'wcag-bottomlink');
+    return this.getGVElementById(mapId, 'wcag-bottomlink');
   }
 
   /**
@@ -1132,7 +1198,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static waitForAppbarTabSelected(mapId: string, tabId: string): Promise<Element> {
-    return DomHelper.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn.active`, this.getGVRootElement(mapId));
+    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn.active`, this.getGVRootElement(mapId));
   }
 
   /**
@@ -1144,7 +1210,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static waitForAppbarTabNotSelected(mapId: string, tabId: string): Promise<Element> {
-    return DomHelper.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn:not(.active)`, this.getGVRootElement(mapId));
+    return this.waitForClass(`#${mapId}-appBar-${tabId}-panel-btn:not(.active)`, this.getGVRootElement(mapId));
   }
 
   /**
@@ -1156,7 +1222,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static waitForFooterTabSelected(mapId: string, tabId: string): Promise<Element> {
-    return DomHelper.waitForClass(`#${mapId}-tab-${tabId}.Mui-selected`, this.getGVRootElement(mapId));
+    return this.waitForClass(`#${mapId}-tab-${tabId}.Mui-selected`, this.getGVRootElement(mapId));
   }
 
   /**
@@ -1168,7 +1234,7 @@ export abstract class DomHelper {
    * @throws {Error} When the root element is not found
    */
   static waitForFooterTabNotSelected(mapId: string, tabId: string): Promise<Element> {
-    return DomHelper.waitForClass(`#${mapId}-tab-${tabId}:not(.Mui-selected)`, this.getGVRootElement(mapId));
+    return this.waitForClass(`#${mapId}-tab-${tabId}:not(.Mui-selected)`, this.getGVRootElement(mapId));
   }
 
   // #endregion MAP SPECIFIC
@@ -1441,7 +1507,7 @@ export abstract class DomHelper {
    * @returns The map-scoped drawer draw button id
    */
   static buildDrawerDrawButtonId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'drawer-draw');
+    return this.buildGVElementId(mapId, 'drawer-draw');
   }
 
   /**
@@ -1451,7 +1517,7 @@ export abstract class DomHelper {
    * @returns The drawer draw button element, or undefined when it is not present
    */
   static getDrawerDrawButton(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'drawer-draw');
+    return this.getGVElementById(mapId, 'drawer-draw');
   }
 
   /**
@@ -1461,7 +1527,7 @@ export abstract class DomHelper {
    * @returns The map-scoped drawer edit button id
    */
   static buildDrawerEditButtonId(mapId: string): string {
-    return DomHelper.buildGVElementId(mapId, 'drawer-edit');
+    return this.buildGVElementId(mapId, 'drawer-edit');
   }
 
   /**
@@ -1471,7 +1537,7 @@ export abstract class DomHelper {
    * @returns The drawer edit button element, or undefined when it is not present
    */
   static getDrawerEditButton(mapId: string): HTMLElement | undefined {
-    return DomHelper.getGVElementById(mapId, 'drawer-edit');
+    return this.getGVElementById(mapId, 'drawer-edit');
   }
 
   // #endregion DRAWER SPECIFIC

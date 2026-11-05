@@ -42,6 +42,8 @@ Source boundaries most likely to produce misleading tests:
 
 - `setMapZoomLevel` returns void; await controller zoom when completion matters.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
+- Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
+  `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
 - Prefer `waitForLayerToGetRegistered`; polling is fallback only when no event exists.
 - Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
