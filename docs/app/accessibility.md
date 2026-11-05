@@ -32,7 +32,7 @@ the full map viewport center, not the logical view center shifted by map-info-ba
 This remains true after panning, rotating, or expanding/collapsing the map info bar.
 Activating the keyboard crosshair replaces any stale mouse pointer position.
 
-On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the map and activates crosshair-based interaction immediately.
+On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the top "Skip to main content - Map" link. Activating that link focuses the map and activates crosshair-based interaction.
 
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair

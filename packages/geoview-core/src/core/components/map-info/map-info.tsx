@@ -20,6 +20,7 @@ import { MAP_INFO_HEIGHT_COLLAPSED, MAP_INFO_HEIGHT_EXPANDED } from '@/core/util
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Props for the MapInfo component. */
 interface MapInfoProps {
@@ -100,7 +101,13 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   return (
     // Delegated listener (not a control): any click inside (mainly bubbled from child buttons, incl. keyboard activation) scrolls the shell into view
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
-    <Box component="section" aria-label={t('map.info')} id={`${mapId}-mapInfo`} sx={memoContainerSx} onClick={onScrollShellIntoView}>
+    <Box
+      component="section"
+      aria-label={t('map.info')}
+      id={DomHelper.buildMapInfoId(mapId)}
+      sx={memoContainerSx}
+      onClick={onScrollShellIntoView}
+    >
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' ? (

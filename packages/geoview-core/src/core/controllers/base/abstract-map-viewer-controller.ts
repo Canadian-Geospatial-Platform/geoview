@@ -97,17 +97,6 @@ export class AbstractMapViewerController extends AbstractController {
     return this.getControllersRegistry().layerSetController.queryAtLonLat(coordinates.lonlat);
   }
 
-  /**
-   * Returns focus to a map-relative tool button when the map target is focused.
-   *
-   * @param suffix - The map-relative id suffix of the tool button
-   */
-  protected focusToolButton(suffix: string): void {
-    const mapId = this.getMapId();
-    if (getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId)) return;
-    DomHelper.getGVElementById(mapId, suffix)?.focus({ focusVisible: true });
-  }
-
   // #region STATIC METHODS
 
   /**
@@ -161,6 +150,16 @@ export class AbstractMapViewerController extends AbstractController {
     }
 
     return layerPaths;
+  }
+
+  /**
+   * Checks whether focus can return from the map to a tool button.
+   *
+   * @param mapId - The map identifier
+   * @returns True when the map target has focus and fullscreen mode is inactive
+   */
+  protected static isToolButtonFocusable(mapId: string): boolean {
+    return !(getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId));
   }
 
   // #endregion STATIC METHODS

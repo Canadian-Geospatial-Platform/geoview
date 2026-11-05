@@ -27,7 +27,7 @@ When tabbing into GeoView for the first time, a dialog appears asking to enable 
 | Test                     | Description                      | Steps                                                  | Expected Result                                                 | Auto |
 | ------------------------ | -------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------- | ---- |
 | Dialog appears           | WCAG dialog shown on first entry | 1. Tab into the GeoView viewer from outside            | "Keyboard navigation" dialog appears                            | M    |
-| Enable button            | Enables WCAG focus trap          | 1. Click "Enable"                                      | Focus is trapped within the viewer (WCAG mode active)           | M    |
+| Enable button            | Enables WCAG focus trap          | 1. Click "Enable"<br>2. Press Enter on the focused link | WCAG mode activates; focus starts on the top "Skip to main content - Map" link without activating the crosshair; Enter focuses the map and activates the crosshair | M    |
 | Skip button              | Bypasses viewer                  | 1. Click "Skip"                                        | Dialog closes; focus continues past the viewer without trapping | M    |
 | Dialog does not reappear | One-time per session             | 1. After clicking "Enable" or "Skip", continue tabbing | Dialog does not reappear on subsequent entries                  | M    |
 

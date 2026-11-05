@@ -571,7 +571,7 @@ export default function Measurement(): JSX.Element {
 
         {/* Clear Button */}
         <IconButton
-          id={`${mapId}-button-clear-measurements`}
+          id={DomHelper.buildButtonClearMeasurements(mapId)}
           aria-label={t('measurement.clear')}
           onClick={clearMeasurements}
           className="buttonOutline"
