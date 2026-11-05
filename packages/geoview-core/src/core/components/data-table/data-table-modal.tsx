@@ -52,13 +52,6 @@ export default function DataTableModal(): JSX.Element {
   const { t } = useTranslation();
 
   const theme = useTheme();
-  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
-  /** Memoizes the data table modal text container styles for the current theme. */
-  const memoDataTableModalContentTextStyle = useMemo((): ReturnType<typeof getDataTableModalContentTextStyle> => {
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - memoDataTableModalContentTextStyle', theme);
-    return getDataTableModalContentTextStyle(theme);
-  }, [theme]);
-
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
@@ -74,6 +67,15 @@ export default function DataTableModal(): JSX.Element {
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
+
+  const memoSxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  /**
+   * Memoizes the data table modal text container styles for the current theme.
+   */
+  const memoDataTableModalContentTextStyle = useMemo((): ReturnType<typeof getDataTableModalContentTextStyle> => {
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - memoDataTableModalContentTextStyle', theme);
+    return getDataTableModalContentTextStyle(theme);
+  }, [theme]);
 
   /**
    * Finds the layer data matching the selected layer path.
