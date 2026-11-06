@@ -341,7 +341,7 @@ export class DataTableTester extends GVAbstractTester {
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
-        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.removeLayerConfigAndAssert(test, layerPath);
       }
     );
   }

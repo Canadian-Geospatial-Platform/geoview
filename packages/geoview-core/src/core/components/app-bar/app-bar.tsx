@@ -188,21 +188,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [interaction]);
 
   /**
-   * Constructs the AppBar element ID for buttons and panels.
-   *
-   * @param buttonId - The button identifier
-   * @param suffix - Optional suffix to append (e.g., '-panel-btn', '-panel')
-   * @returns The full element ID
-   */
-  // TODO: ALex, refactor this to use domHelper getAppBarButton, investigate footerBar as well #3638
-  const getButtonElementId = useCallback(
-    (buttonId: string, suffix?: string): string => {
-      return `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}${suffix ?? ''}`;
-    },
-    [mapId]
-  );
-
-  /**
    * Updates scroll indicator visibility based on overflow and scroll position.
    */
   const updateScrollIndicators = useCallback((): void => {
@@ -535,7 +520,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         // WCAG - Compute ARIA attributes before rendering
         const isPanelOpen: boolean = tabId === buttonPanel.button.id && isOpen;
         const expandedState: 'true' | 'false' = isPanelOpen ? 'true' : 'false';
-        const ariaControls: string | undefined = activeTrapGeoView ? undefined : getButtonElementId(buttonPanel.button.id, '-panel');
+        const ariaControls: string | undefined = activeTrapGeoView ? undefined : DomHelper.buildAppBarPanelId(mapId, buttonPanel.button.id);
         const ariaExpanded: 'true' | 'false' | undefined = activeTrapGeoView ? undefined : expandedState;
 
         // Apply bottom section style to first visible button only
@@ -544,7 +529,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         return (
           <ListItem key={buttonPanel.button.id} sx={itemSx}>
             <IconButton
-              id={getButtonElementId(buttonPanel.button.id, '-panel-btn')}
+              id={DomHelper.buildAppBarPanelButtonId(mapId, buttonPanel.button.id)}
               aria-label={t(buttonPanel.button['aria-label'])}
               // In WCAG mode, panels are treated as dialogs because they are focus-trapped, so we set aria-haspopup to dialog to indicate that.
               aria-haspopup={activeTrapGeoView ? 'dialog' : undefined}
@@ -563,7 +548,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         );
       });
     },
-    [hiddenTabs, memoButtonPanels, tabId, isOpen, activeTrapGeoView, sxClasses, getButtonElementId, t, handleButtonClicked]
+    [hiddenTabs, memoButtonPanels, mapId, tabId, isOpen, activeTrapGeoView, sxClasses, t, handleButtonClicked]
   );
 
   /**
