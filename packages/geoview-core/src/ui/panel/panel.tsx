@@ -32,14 +32,14 @@ export type TypePanelAppProps = {
   panel: TypePanelProps;
   button: IconButtonPropsExtend;
 
-  // Callback when the user clicked the general close button
-  onGeneralClose?: () => void;
-  // Callback when the panel has completed opened (and transitioned in)
+  /** Callback when the user clicks the general close button. */
+  onGeneralClose?: (buttonId: string) => void;
+  /** Callback when the panel has completed opening and transitioning in. */
   onOpen?: () => void;
-  // Callback when the panel has been closed
+  /** Callback when the panel has been closed. */
   onClose?: () => void;
-  // Callback when the panel has been closed by escape key
-  onKeyDown?: (event: KeyboardEvent) => void;
+  /** Callback when the panel receives a keydown event. */
+  onKeyDown?: (event: KeyboardEvent, buttonId: string) => void;
 };
 
 /**
@@ -73,6 +73,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const panelButtonId = typeof button.id === 'string' ? button.id : '';
   const panelContainerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
@@ -87,6 +88,27 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+
+  // #region Handlers
+
+  /**
+   * Forwards keydown events with the owning panel button ID.
+   */
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent): void => {
+      onKeyDown?.(event, panelButtonId);
+    },
+    [panelButtonId, onKeyDown]
+  );
+
+  /**
+   * Closes this panel through its owning callback.
+   */
+  const handleGeneralClose = useCallback((): void => {
+    onGeneralClose?.(panelButtonId);
+  }, [panelButtonId, onGeneralClose]);
+
+  // #endregion Handlers
 
   /**
    * Creates a cancellable delay for panel transitions.
@@ -164,7 +186,6 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       role={open && activeTrapGeoView ? 'dialog' : undefined}
       aria-label={t('general.panelLabel', { title: t(panel.title) })}
       aria-hidden={!open}
-      aria-modal={open && activeTrapGeoView ? true : undefined}
       sx={{
         ...memoSxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
@@ -185,7 +206,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef}
-          onKeyDown={(event: KeyboardEvent) => onKeyDown?.(event)}
+          onKeyDown={handleKeyDown}
           {...{ 'data-id': button.id }}
           className="panel-card"
           {...rest}
@@ -208,7 +229,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
                   aria-label={t('general.close')}
                   tooltipPlacement="right"
                   size="small"
-                  onClick={() => onGeneralClose?.()}
+                  onClick={handleGeneralClose}
                   iconRef={closeBtnRef}
                   className="cgpv-panel-close"
                 >

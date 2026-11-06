@@ -196,12 +196,13 @@ export class LayerSetController extends AbstractMapViewerController {
    * This call will also open the details panel if not already open.
    *
    * @param longlat - The longitude/latitude coordinates to query
+   * @param returnFocusToMap - Whether closing the details panel should return focus to the map
    */
-  queryAtLonLat(longlat: Coordinate): Promise<TypeFeatureInfoResultSet> {
+  queryAtLonLat(longlat: Coordinate, returnFocusToMap = false): Promise<TypeFeatureInfoResultSet> {
     // Query all layers which can be queried
     return this.featureInfoLayerSet?.queryLayers(longlat, () => {
       // Query has started, open the details panel
-      this.openDetailsPanelOnMapClick();
+      this.openDetailsPanelOnMapClick(returnFocusToMap);
     });
   }
 
@@ -276,8 +277,10 @@ export class LayerSetController extends AbstractMapViewerController {
    * switches to 'details'. When the footer does not host details, the app-bar details tab
    * is opened instead. Only one details panel is activated so two focus traps never compete
    * (which caused a focus-trap loop in crosshair/WCAG mode when details was in both bars).
+   *
+   * @param returnFocusToMap - When true, closing the AppBar Details panel returns focus to the map. This has no effect when Details is hosted in the footer bar.
    */
-  openDetailsPanelOnMapClick(): void {
+  openDetailsPanelOnMapClick(returnFocusToMap = false): void {
     const hasFooterDetails = getStoreUIFooterBarComponents(this.getMapId()).includes('details');
 
     // Prefer the footer details tab when both bars host details (matches useNavigateToTab behavior).
@@ -290,7 +293,7 @@ export class LayerSetController extends AbstractMapViewerController {
       }
     } else if (getStoreUIAppBarComponents(this.getMapId()).includes('details')) {
       // Open details appbar tab only when the footer does not also host details.
-      this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, true);
+      this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, true, returnFocusToMap);
     }
   }
 

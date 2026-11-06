@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
 
 import { useTranslation } from 'react-i18next';
@@ -69,6 +70,17 @@ export function Map(props: MapProps): JSX.Element {
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
+
+  /**
+   * Deactivates crosshair interactions when keyboard focus leaves the map region.
+   *
+   * @param event - The map region blur event
+   */
+  const handleMapBlur = (event: FocusEvent<HTMLElement>): void => {
+    if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+      uiController.setCrosshairActive(false);
+    }
+  };
 
   /**
    * Initializes the map viewer on mount.
@@ -167,6 +179,7 @@ export function Map(props: MapProps): JSX.Element {
       tabIndex={mapInteraction === 'static' ? -1 : 0}
       role="region"
       aria-label={t('map.container', { mapId })}
+      onBlur={handleMapBlur}
     >
       <Typography role="status" aria-live="polite" sx={visuallyHidden}>
         {shortcutMessage}

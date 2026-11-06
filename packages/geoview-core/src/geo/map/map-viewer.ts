@@ -5,6 +5,7 @@ import type { i18n } from 'i18next';
 import { Overlay, type MapBrowserEvent, type MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
+import { defaults as defaultInteractions } from 'ol/interaction';
 import type { ViewOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
@@ -100,6 +101,7 @@ import {
   getStoreMapStateJson,
   getStoreMapGeolocatorSearchArea,
 } from '@/core/stores/states/map-state';
+import { getStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -442,6 +444,7 @@ export class MapViewer {
         padding: [0, 0, mapInfoInitialHeight, 0],
       }),
       controls: [],
+      interactions: defaultInteractions({ onFocusOnly: false }),
       keyboardEventTarget: keyboardTarget,
     });
 
@@ -2094,20 +2097,21 @@ export class MapViewer {
     // If map isn't static
     this.registerMapPointerHandlers(map);
 
-    // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
+    // Register mouse interaction events. Hover-driven focus is disabled while keyboard navigation is active.
     const mapHTMLElement = map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
-      // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
-      // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
-      // This enables scroll wheel zoom without showing the focus ring.
-      mapHTMLElement.focus({ preventScroll: true });
+      if (!getStoreUIActiveTrapGeoView(this.mapId)) {
+        // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
+        // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
+        mapHTMLElement.focus({ preventScroll: true });
+      }
 
       // Emit to the outside
       this.#emitMapMouseEnter({});
     });
 
     mapHTMLElement.addEventListener('mouseleave', () => {
-      mapHTMLElement.blur();
+      if (!getStoreUIActiveTrapGeoView(this.mapId)) mapHTMLElement.blur();
 
       // Emit to the outside
       this.#emitMapMouseLeave({});

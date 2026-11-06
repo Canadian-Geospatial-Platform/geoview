@@ -293,6 +293,7 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Added a persistent Settings button on dynamic maps with an EN/FR Keyboard navigation switch that controls the existing keyboard-navigation mode (#3694).
 - Added shared EN/FR on-map guidance for measurement, drawer geometries, and editing (mouse wording, or keyboard wording starting with Ctrl+M when keyboard navigation is on); measurement vertex undo via Ctrl+Z/Backspace; Enter/Space at the mouse pointer while measuring or drawing; corrected crosshair artwork/coordinate alignment; and improved Ctrl+M popover closure, Escape returning focus to the Measure/Toggle Drawing/Toggle editing button, and fullscreen-exit map focus. Measurement and drawer drawing/editing now exclude each other, and drawer mode transitions keep Details queries suppressed ([Canadian-Geospatial-Platform/geoview#3712](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3712), commit `9de43e4d9f`). This records implemented behavior, not completion of the issue's full WCAG/embedded/fullscreen validation.
 - Standardized border-radius values with named MUI theme shape tokens across core and plugins, replacing inconsistent radii and documenting/enforcing the shared token system (#3681)
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
