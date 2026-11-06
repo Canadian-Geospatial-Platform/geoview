@@ -125,10 +125,11 @@ Config: `configs/navigator/layers/all-layers.json`
 
 Config: `configs/navigator/demos/10-basic-appbar-data-table-tab.json` (data table as appBar tab, footerBar disabled)
 
-| Test                  | Description                  | Steps                                                             | Expected Result                                                            | Auto |
-| --------------------- | ---------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------- | ---- |
-| AppBar data table tab | Table opens in app bar panel | 1. Load the config<br>2. Click the data table icon in the app bar | Data table opens as an app bar panel (not footer bar)                      | A    |
-| Pre-selected layer    | Layer auto-selected on open  | 1. Check which layer is selected when the table opens             | The layer specified by `appBar.selectedDataTableLayerPath` is pre-selected | A    |
+| Test                  | Description                  | Steps                                                                     | Expected Result                                                                                                                                             | Auto |
+| --------------------- | ---------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| AppBar data table tab | Table opens in app bar panel | 1. Load the config<br>2. Click the data table icon in the app bar         | Data table opens as an app bar panel (not footer bar)                                                                                                       | A    |
+| Pre-selected layer    | Layer auto-selected on open  | 1. Check which layer is selected when the table opens                     | The layer specified by `appBar.selectedDataTableLayerPath` is pre-selected                                                                                  | A    |
+| Zoom with open panel  | Feature stays visible        | 1. With the panel open, click the zoom icon (`ZoomInSearchIcon`) on a row | The feature is fitted in the part of the map not covered by the panel; with the panel closed, or when the table is in the footer bar, the zoom is unchanged | M    |
 
 ## Column Management
 

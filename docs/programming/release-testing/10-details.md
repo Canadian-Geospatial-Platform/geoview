@@ -67,11 +67,12 @@ Details panel queries, feature highlighting, lightbox, coordinate info, and hove
 
 ## Feature Navigation
 
-| Test                      | Description                  | Steps                                                                      | Expected Result                                                              | Auto |
-| ------------------------- | ---------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---- |
-| Prev/Next arrows          | Navigation arrows appear     | 1. On Map 1, query an area with multiple features on the same layer        | Prev/Next arrows appear to navigate between features                         | M    |
-| Navigate between features | Highlight and details change | 1. On Map 1, click next/prev arrows                                        | Highlighted feature changes on the map and details update to the new feature | M    |
-| Zoom to feature           | Map zooms to feature extent  | 1. On Map 1, click the zoom-to-feature button on a specific feature result | Map zooms to that feature's extent                                           | A    |
+| Test                      | Description                  | Steps                                                                               | Expected Result                                                                                                                         | Auto |
+| ------------------------- | ---------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Prev/Next arrows          | Navigation arrows appear     | 1. On Map 1, query an area with multiple features on the same layer                 | Prev/Next arrows appear to navigate between features                                                                                    | M    |
+| Navigate between features | Highlight and details change | 1. On Map 1, click next/prev arrows                                                 | Highlighted feature changes on the map and details update to the new feature                                                            | M    |
+| Zoom to feature           | Map zooms to feature extent  | 1. On Map 1, click the zoom-to-feature button on a specific feature result          | Map zooms to that feature's extent                                                                                                      | A    |
+| Zoom with app-bar panel   | Feature stays visible        | 1. With Details in the app bar and its panel open, click the zoom-to-feature button | The feature is fitted in the part of the map not covered by the panel; with the panel closed or in the footer bar the zoom is unchanged | M    |
 
 ## Summary & Out Fields
 

@@ -146,6 +146,8 @@ _(User-facing features added or enabled)_
 - Improved WFS GML field-type parsing so feature attributes retain the types declared by the service.
 - Time-slider filters now use a shared SQL-like predicate for instants and ranges across raster, vector, and data-table filtering, with conversion to WMS `TIME` and service-specific ESRI syntax at request time.
 
+- Details and Data Table "Zoom to feature" now keep the feature visible when their app-bar panel is open over the map: the panel overlap (measured from the actual panel and map positions, so CSS scaling is handled) is added to the left fit padding. No panel offset when no panel is open, or when the panel does not overlap the map (footer bar, very narrow map). Feature zoom (Details, Data Table) and STAC browser zoom now share one fixed 50px fit padding (`OL_ZOOM_PIXEL_PADDING`) instead of the 5% map-size padding and STAC's 100px. The overlap computation was extracted from the STAC browser into the shared core helper `MapFitPadding` (`core/utils/map-fit-padding.ts`), used by the STAC browser zoom and the new `useAppBarPanelFitOptions` hook (Details and Data Table); `StacBrowserLayoutUtils` and `StacBrowserController.ZOOM_PADDING` are removed (`zoomToLonLatBbox` now requires its `padding` argument) and `TypeStacZoomPadding` is replaced by `TypeMapFitPadding` in `core/utils/constant.ts` (#3747)
+
 ## Bug Fixes
 
 _(Fixes discovered or applied during this cycle)_
@@ -367,6 +369,7 @@ _(Tests added, moved, removed, or reorganized)_
 - New automated test case for group layer with `defaultVisibility: false` (#3544)
 - New `suite-data-table` test suite (15 tests currently): allFeaturesDataArray populated, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
 - New `suite-details` tests (6 total): details panel query, clear all highlights, zoom to feature, nameField as label, summary false hides field, field alias renames field
+- Added automated `suite-details` test `testZoomToFeatureWithPanelOffset` (DetailsTester) for #3747: with the details app-bar panel open, zooms to a feature using `MapFitPadding` padding and asserts the left padding includes the panel overlap and the feature center is outside the covered area (`suite-details` 6 → 7; `test-catalog` total 280 → 281; `00-automated-suite` total 329 → 330). Added manual "Zoom with app-bar panel" rows in `10-details.md` and `11-data-table.md` (manual 704 → 706)
 - Added `getStoreDataTableLayerSettings` getter to `data-table-state.ts` (moved paired hook from OTHERS region to main region)
 - Added `getStoreMapClickMarker` and `getStoreMapNorthArrow` getters to `map-state.ts` (moved from OTHERS to main region)
 - Map 11 test page added for `suite-data-table` (GeoJSON + Commemorative Map + Esri Dynamic + Permafrost layers)
