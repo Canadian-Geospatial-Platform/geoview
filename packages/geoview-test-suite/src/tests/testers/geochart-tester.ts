@@ -152,20 +152,15 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {Error} When the current query does not reach the batched GeoChart data before the timeout
    */
   async waitForLayerQueryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
-    const { layerController, layerSetController, uiController, geoChartController } = this.getControllersRegistry();
+    const { layerController, uiController, geoChartController } = this.getControllersRegistry();
     if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
 
     // Get the layer
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
     const layer = layerController.getGeoviewLayerRegular(layerPath);
 
-    // Wait until the layer has at least loaded once
-    test.addStep(`Waiting for its layer 'loaded' status...`);
-    await layer.waitForLoadedOnce();
-
-    // Perform a map click using the feature info layer set
-    test.addStep(`Perform query operation at given coordinates...`);
-    await layerSetController.queryAtLonLat(lonlat);
+    // Query the layer at the given coordinates
+    await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
     // Wait for the batched query to propagate to the store
     await GVAbstractTester.waitForBatchedQueryPropagation(test);
