@@ -1,0 +1,38 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": ["zoom"],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
+  "theme": "geo.ca"
+}

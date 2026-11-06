@@ -1,0 +1,405 @@
+{
+  "configMeta": {
+    "description": "Combined initialSettings demo with all categories: filters, states, controls, cascading settings, and layer-specific config. See 23a through 23d for individual focused demos."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "controls": {
+                "query": true,
+                "hover": true
+              },
+              "states": {
+                "queryable": false,
+                "hoverable": false,
+                "opacity": 0.5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": "Dry Spell",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/dry_spell/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dry_spell",
+            "source": {
+              "rasterFunction": "ds_30"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "US States",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "layerFilter": "STATE_ABBR = 'NY'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000",
+            "wmsLayerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": "Weather Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "wmsLYR1-Group",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "CURRENT_CONDITIONS"
+              },
+              {
+                "layerId": "RADAR_1KM_RSNO",
+                "layerName": "Radar Snow"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": "Permanent Snow",
+            "source": {
+              "wmsStyle": "msi-binary",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "FeatureServerLyr2",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tour Locations",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Tour",
+                "outfields": [
+                  {
+                    "name": "Venue",
+                    "alias": "Venue Set",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Event",
+                    "alias": "Event Set",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Tour",
+                    "alias": "Tour Set",
+                    "type": "string"
+                  },
+                  {
+                    "name": "City",
+                    "alias": "City Set",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Date",
+                    "alias": "Date Set",
+                    "type": "date"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "Root Settings Layer",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "initialSettings": {
+          "controls": {
+            "highlight": false,
+            "zoom": false
+          },
+          "states": {
+            "visible": false,
+            "opacity": 0.5
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines"
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": {
+                  "controls": {
+                    "remove": false
+                  }
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "Group Layer Setting Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "initialSettings": {
+              "controls": {
+                "highlight": false,
+                "zoom": false
+              }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines"
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "initialSettings": {
+              "controls": {
+                "remove": false
+              }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3",
+        "geoviewLayerName": "SubLayer Setting Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "initialSettings": {
+          "controls": {
+            "remove": false
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines",
+                "initialSettings": {
+                  "controls": {
+                    "highlight": false,
+                    "zoom": false
+                  }
+                }
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

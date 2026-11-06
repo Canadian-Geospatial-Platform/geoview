@@ -1,0 +1,24 @@
+{
+  "configMeta": {
+    "description": "Web Mercator projection (3857) with transport basemap and measurement navBar."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    }
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "navBar": [
+    "measurement"
+  ],
+  "corePackages": [],
+  "theme": "geo.ca"
+}

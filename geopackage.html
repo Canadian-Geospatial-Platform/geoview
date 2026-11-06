@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Geopackage Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Geopackage Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show Geopackage layer types</p></td></tr><tr><td><a href="#HLYR1">1. Geopackage Layers</a><br/><a href="#HLYR2">2. Multiple GeoPackage Layers - one with multiple layers</a><br/><a href="#HLYR3">3. Geopackage Layers - with footer bar</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. GeoPackage Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR1-state" class="panel map-title-holder"></pre><hr/><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': 'Natural Earth',
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'Natural_Earth_QGIS_layers_and_styles.gpkg',
+                  'layerName': 'Natural Earth',
+                  'source': {
+                    'dataAccessPath': './datasets/geopackages'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info (GeoPackageLYR1/Natural_Earth_QGIS_layers_and_styles.gpkg/Countries)</button><pre id="ResultSetId1-all-features" class="panel"></pre><hr/><div class="map-title-holder"><h4 id="HLYR2">2. Multiple GeoPackage Layers - one with multiple layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR2-state" class="panel map-title-holder"></pre><hr/><div id="LYR2" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'initialView': { 'zoomAndCenter': [10, [-2.4, 51.25]]},
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'osm',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': 'Rivers and Canals',
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'QGIS Packaged Layers (D+S Canal).gpkg',
+                  'layerName': 'D+S Canal',
+                  'source': {
+                    'dataAccessPath': './datasets/geopackages'
+                  }
+                },
+                {
+                  'layerId': 'rivers.gpkg',
+                  'layerName': 'Rivers',
+                  'source': {
+                    'dataAccessPath': './datasets/geopackages'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><div class="map-title-holder"><h4 id="HLYR3">3. Geopackage Layers - with footer bar</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR3-state" class="panel map-title-holder"></pre><hr/><div id="LYR3" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'GeoPackageLYR1',
+              'geoviewLayerName': 'Natural Earth',
+              'geoviewLayerType': 'GeoPackage',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'Natural_Earth_QGIS_layers_and_styles.gpkg',
+                  'layerName': 'Natural Earth',
+                  'source': {
+                    'dataAccessPath': './datasets/geopackages'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'LYR1') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
+        });
+
+        const getAllFeatureInfo1 = document.getElementById('AllFeatureInfo1');
+        getAllFeatureInfo1.addEventListener('click', async () => {
+          const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer('GeoPackageLYR1/Natural_Earth_QGIS_layers_and_styles.gpkg/Countries');
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+        });
+
+        createTableOfFilter('LYR1');
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+      } else if (mapId === 'LYR2') {
+        listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+      } else if (mapId === 'LYR3') {
+        listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+      }
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

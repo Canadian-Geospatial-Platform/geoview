@@ -1,0 +1,220 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "stations_particules",
+        "geoviewLayerName": "Stations de particules",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "stations_gaz_rares",
+        "geoviewLayerName": "Stations de gaz rares",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "perimetre",
+        "geoviewLayerName": "Périmètre de localisation des stations",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "3"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "stations_particules/1",
+                "propertyValue": "nom_station",
+                "propertyDisplay": "nom_station"
+              }
+            ],
+            "chart": "line",
+            "chartjsOptions": {
+              "radius": 2
+            },
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "nom_station",
+                    "prefix": "'",
+                    "valueFrom": "nom_station",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "heure_debut"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "d MMM yyyy, HH:mm",
+                "property": "heure_debut",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "logarithmic",
+                "property": "mesure",
+                "label": "Concentration de radionucléides dans l'air (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nucleide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": false
+              },
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
+              "stepsSwitcher": false,
+              "resetStates": true,
+              "description": "Concentrations de radionucléides dans l'air",
+              "download": true
+            }
+          },
+          {
+            "layers": [
+              {
+                "layerId": "stations_gaz_rares/2",
+                "propertyValue": "nom_station",
+                "propertyDisplay": "nom_station"
+              }
+            ],
+            "chart": "line",
+            "chartjsOptions": {
+              "radius": 2
+            },
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer/4",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "nom_station",
+                    "prefix": "'",
+                    "valueFrom": "nom_station",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "heure_debut"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "d MMM yyyy, HH:mm",
+                "property": "heure_debut",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "logarithmic",
+                "property": "mesure",
+                "label": "Concentration de radionucléides dans l'air (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "nucleide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": false
+              },
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
+              "stepsSwitcher": false,
+              "resetStates": true,
+              "description": "Concentrations de radionucléides dans l'air",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
