@@ -34,6 +34,13 @@ Read only the linked section of each doc: search for its heading and read to the
 - Do not modify framework `tests/core/` merely to implement a feature test.
 - Tester files declare every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class
   (see [Step 1](../../docs/app/testing/creating-tests.md#step-1-create-a-tester)); never above the class.
+- Successful fixture setup lives in specific `GVAbstractTester.addLayer...` helpers
+  ([helper contract](../../docs/app/testing/creating-tests.md#helper-methods)). Preserve source options,
+  legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
+  subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
+- Fixture helpers own generated IDs. Caller assertions and cleanup derive paths from the returned
+  layer, or `result.gvLayer` when observations are returned alongside it. Keep a layer-instance
+  fallback for teardown when execution fails after setup; do not retain caller-generated IDs for cleanup.
 
 ### Gotchas & Pitfalls
 

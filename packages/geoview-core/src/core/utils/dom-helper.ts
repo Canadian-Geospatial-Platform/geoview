@@ -1075,6 +1075,17 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for an app bar tab's panel button.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The map-scoped app bar panel button id
+   */
+  static buildAppBarPanelButtonId(mapId: string, tabId: string): string {
+    return this.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`);
+  }
+
+  /**
    * Gets an app bar tab button element.
    *
    * @param mapId - The map identifier
@@ -1083,6 +1094,17 @@ export abstract class DomHelper {
    */
   static getAppBarButton(mapId: string, tabId: string): HTMLElement | undefined {
     return this.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`);
+  }
+
+  /**
+   * Builds the DOM id for an app bar tab's panel.
+   *
+   * @param mapId - The map identifier
+   * @param tabId - The app bar tab identifier
+   * @returns The map-scoped app bar panel id
+   */
+  static buildAppBarPanelId(mapId: string, tabId: string): string {
+    return this.buildGVElementId(mapId, `${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
   }
 
   /**

@@ -254,7 +254,7 @@ export class TimeSliderTester extends GVAbstractTester {
       (test) => {
         // If the test was running
         if (isRunningOnVPN) {
-          this.finalizeStepRemoveLayerAndAssert(test, groupPath);
+          this.removeLayerConfigAndAssert(test, groupPath);
         }
       }
     );
