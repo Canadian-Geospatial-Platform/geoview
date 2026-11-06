@@ -1131,12 +1131,13 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param test - The test instance used to log layer setup steps
    * @param uuid - The GeoCore UUID used to add the layer
+   * @param layerEntryConfig - Optional layer entry configuration for the layer addition
    * @returns A promise that resolves with the layer addition result, or undefined when no result is returned
    */
-  async addLayerOnMapFromUUID<T>(test: Test<T>, uuid: string): Promise<GeoViewLayerAddedResult | void> {
+  async addLayerOnMapFromUUID<T>(test: Test<T>, uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | void> {
     // Add the geoview layer by geocore uuid
     test.addStep('Adding the layer on the map...');
-    const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid);
+    const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid, layerEntryConfig);
 
     // Wait for the layer to be fully added on the map
     test.addStep('Waiting for the layer to be added...');

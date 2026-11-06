@@ -515,7 +515,7 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>/<span id="testsTotalFinal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Progress: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>/<span id="testsTotalFinal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
       Duration: <span id="testsDuration-${mapId}">0</span>
