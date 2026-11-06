@@ -820,7 +820,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 3   | `testMapSectionScroll('partial')`     | test | Clipped map-info and top clipping; complete section visibility and repeat stability |
 | 4   | `testMapSectionScroll('transitions')` | test | Real footer-tab, app-bar and map-info click paths and final viewport bounds         |
 | 5   | `testMapSectionScroll('visible')`     | test | Already visible map remains stationary on repeated activation                       |
-| 6   | `testMapSectionScroll('oversized')`   | test | Taller-than-viewport map aligns with a 50px top gap and stays stable                |
+| 6   | `testMapSectionScroll('oversized')`   | test | Taller-than-viewport map aligns with the top gap and stays stable                   |
 
 ---
 

@@ -124,7 +124,8 @@ The behavioural contract (offset, oversized alignment, map-info buttons) lives i
 Implementation notes:
 
 - `Shell.handleScrollShellIntoView` measures `mapShellContainerRef`, not a positional shell child:
-  status wrappers precede the map section (#3708). Oversized sections skip scrolling within 1px of
+  status wrappers precede the map section (#3708). The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
+  (`core/utils/constant.ts`), also read by the UI tests. Oversized sections skip scrolling within 1px of
   the gap. Leave the shared `scrollIfNotVisible` footer offset unchanged.
 - `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
   (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
