@@ -9,7 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
-import { TIMEOUT } from '@/core/utils/constant';
+import { MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
 
 import { Box, Link } from '@/ui/layout';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
@@ -56,9 +56,6 @@ const DEFAULT_SNACKBAR_DISPLAY_TIME = 5 * 1000; // 5 seconds
 
 /** The length of time to display the snackbar message if there are more messages in the queue. */
 const QUEUED_SNACKBAR_DISPLAY_TIME = 3 * 1000; // 3 seconds
-
-/** The top gap, in pixels, left above the map section when app-bar or map-info activation scrolls it into view. */
-const MAP_SECTION_SCROLL_GAP_PX = 50;
 
 /**
  * Creates a shell component to wrap the map and other components not inside the map.

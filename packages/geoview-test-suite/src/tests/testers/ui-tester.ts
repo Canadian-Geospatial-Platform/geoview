@@ -1,4 +1,5 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { MAP_SECTION_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
 import { Test } from '../core/test';
@@ -237,7 +238,7 @@ export class UITester extends GVAbstractTester {
           if (!condition) Test.assertFail(`Scroll scenario "${scenario}" setup/transition check ${index + 1} failed.`);
         });
         const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
-        const gap = GVAbstractTester.UI_MAP_SECTION_SCROLL_GAP_PX;
+        const gap = MAP_SECTION_SCROLL_GAP_PX;
         result.measurements.forEach((measurement, index): void => {
           test.addStep(`Activation ${index + 1}: ${JSON.stringify(measurement)}, viewport=${result.viewportHeight}`);
           if (scenario === 'oversized') {

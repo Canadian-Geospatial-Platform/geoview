@@ -28,9 +28,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Pixel tolerance for viewport geometry and scroll stability. */
   static readonly UI_SCROLL_TOLERANCE_PX = 2;
 
-  /** Top gap left by the shell when it scrolls the map section into view. */
-  static readonly UI_MAP_SECTION_SCROLL_GAP_PX = 50;
-
   /** Default top clearance used by `DomHelper.scrollIfNotVisible` (footer alignment). */
   static readonly UI_SCROLL_HELPER_OFFSET_PX = 100;
 
