@@ -10,7 +10,6 @@ import {
   useStoreAppDisplayLanguage,
 } from 'geoview-core/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
-import { useStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { useMapController, useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
 import type { TypeStacMapExtentSnapshot, TypeStacPreviewAsset } from 'geoview-core/core/controllers/stac-browser-controller';
 
@@ -39,7 +38,7 @@ import { StacCollectionList } from './stac-collection-list';
 import { StacCollectionDetail } from './stac-collection-detail';
 import { StacSearchResults } from './stac-search-results';
 import { StacItemDetail } from './stac-item-detail';
-import { StacBrowserLayoutUtils } from './stac-browser-layout-utils';
+import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 import { getSxClasses, SELECTED_FILL_OPACITY, SELECTION_COLORS } from './stac-browser-style';
 
 /** Geometry group used for the selected item footprints. */
@@ -75,8 +74,6 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const stacController = useStacBrowserController();
   const mapController = useMapController();
   const mapId = useStoreGeoViewMapId();
-  const activeAppBarTab = useStoreUIActiveAppBarTab();
-  const isStacPanelOpen = activeAppBarTab.isOpen && activeAppBarTab.tabId === 'stac-browser';
   const displayLanguage = useStoreAppDisplayLanguage();
   const displayDateTimezone = useStoreAppDisplayDateTimezone();
   const displayDateMode = useStoreAppDisplayDateMode();
@@ -661,12 +658,13 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     (item: StacItem): void => {
       const bbox = StacFieldUtils.getBbox(item);
       if (!bbox) return;
-      const padding = StacBrowserLayoutUtils.getZoomPadding(mapId, isStacPanelOpen, mapController.getMapSize());
+      // The STAC browser only lives in the app bar and this zoom is triggered from inside its panel, so the panel is known to be open
+      const padding = MapFitPadding.getAppBarPanelPadding(mapId, 'stac-browser', mapController.getMapSize());
       stacController.zoomToLonLatBbox(bbox, padding).catch((error: unknown) => {
         logger.logError(`STAC-BROWSER - Failed to zoom to item ${item.id}`, error);
       });
     },
-    [stacController, mapController, mapId, isStacPanelOpen]
+    [stacController, mapController, mapId]
   );
 
   /**

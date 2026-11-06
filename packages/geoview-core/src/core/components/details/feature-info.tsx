@@ -9,6 +9,7 @@ import { Typography } from '@/ui/typography/typography';
 import { useStoreDetailsCheckedFeatures } from '@/core/stores/states/feature-info-state';
 import { useStoreGeochartChartsConfig, useStoreGeochartLayerDataArrayBatch } from '@/core/stores/states/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
+import { useAppBarPanelFitOptions } from '@/core/components/common/hooks/use-app-bar-panel-fit-options';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -208,6 +209,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const displayDateFormat = useStoreLayerDisplayDateFormat(feature.layerPath);
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(feature.layerPath);
   const layerController = useLayerController();
+  const getPanelFitOptions = useAppBarPanelFitOptions();
   const detailsController = useDetailsController();
   const geoChartController = useGeoChartControllerIfExists();
 
@@ -305,13 +307,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       // Skip when there is no extent to zoom to
       if (!feature?.extent) return;
 
-      // Zoom to the feature extent and highlight the feature (highlight is skipped for geometries too complex to render)
-      layerController.zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
-      });
+      // Zoom to the feature extent, keeping it out of an open app-bar panel, and highlight it (skipped for geometries too complex to render)
+      layerController
+        .zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true, getPanelFitOptions())
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
+        });
     },
-    [feature, layerController]
+    [feature, layerController, getPanelFitOptions]
   );
 
   /**

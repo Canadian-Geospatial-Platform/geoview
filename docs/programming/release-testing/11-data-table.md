@@ -115,11 +115,12 @@ Config: `configs/navigator/layers/all-layers.json`
 
 Config: `configs/navigator/layers/all-layers.json`
 
-| Test                  | Description                 | Steps                                                   | Expected Result                                                         | Auto |
-| --------------------- | --------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- | ---- |
-| Icon column           | Feature symbology shown     | 1. Check the first column of each row                   | Feature style icon is displayed representing the layer's symbology      | M    |
-| Zoom to feature       | Map zooms to feature        | 1. Click the zoom icon (`ZoomInSearchIcon`) on a row    | Map zooms to that feature's extent and highlights it                    | M    |
-| Open details from row | Details panel shows feature | 1. Click the details icon (`InfoOutlinedIcon`) on a row | Details panel/modal opens showing full feature information for that row | M    |
+| Test                    | Description                 | Steps                                                                                  | Expected Result                                                                                                                         | Auto |
+| ----------------------- | --------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Icon column             | Feature symbology shown     | 1. Check the first column of each row                                                  | Feature style icon is displayed representing the layer's symbology                                                                      | M    |
+| Zoom to feature         | Map zooms to feature        | 1. Click the zoom icon (`ZoomInSearchIcon`) on a row                                   | Map zooms to that feature's extent and highlights it                                                                                    | M    |
+| Zoom with app-bar panel | Feature stays visible       | 1. With the Data Table in the app bar and its panel open, click the zoom icon on a row | The feature is fitted in the part of the map not covered by the panel; with the panel closed or in the footer bar the zoom is unchanged | M    |
+| Open details from row   | Details panel shows feature | 1. Click the details icon (`InfoOutlinedIcon`) on a row                                | Details panel/modal opens showing full feature information for that row                                                                 | M    |
 
 ## Data Table in App Bar
 

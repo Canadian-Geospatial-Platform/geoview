@@ -28,6 +28,9 @@ export const OL_ZOOM_DURATION = 500;
 /** OpenLayers zoom padding values as percentage of the map size dimensions [width, height] (both sides!). */
 export const OL_ZOOM_PERCENT_PADDING: [number, number] = [0.05, 0.05];
 
+/** Fixed padding in pixels, on each side, used when zooming to a feature or a STAC extent. */
+export const OL_ZOOM_PIXEL_PADDING = 50;
+
 /** The extended FitOptions for Geoview. */
 export type GVFitOptions = FitOptions & { percentPadding?: [number, number] };
 

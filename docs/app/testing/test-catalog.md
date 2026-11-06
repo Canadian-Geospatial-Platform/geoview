@@ -831,14 +831,15 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 **Suite:** `suite-details` · **File:** `tests/suites/suite-details.ts` · **Tester:** `DetailsTester` (`tests/testers/details-tester.ts`)
 **Execution:** Sequential + parallel · **Guard:** `details` must be in `footerBar.tabs.core`
 
-| #   | Method                       | Type | Description                                          |
-| --- | ---------------------------- | ---- | ---------------------------------------------------- |
-| 1   | `testDetailsOnLayer`         | test | Test Details on layer _{layerPath}_ ...              |
-| 2   | `testClearAllHighlights`     | test | Test Clear all highlights on layer _{layerPath}_ ... |
-| 3   | `testZoomToFeature`          | test | Test Zoom to feature on layer _{layerPath}_ ...      |
-| 4   | `testNameFieldAsLabel`       | test | Test nameField as label in query results...          |
-| 5   | `testSummaryFalseHidesField` | test | Test summary false hides field from query results... |
-| 6   | `testFieldAliasRenamesField` | test | Test field alias renames field in query results...   |
+| #   | Method                             | Type | Description                                                                |
+| --- | ---------------------------------- | ---- | -------------------------------------------------------------------------- |
+| 1   | `testDetailsOnLayer`               | test | Test Details on layer _{layerPath}_ ...                                    |
+| 2   | `testClearAllHighlights`           | test | Test Clear all highlights on layer _{layerPath}_ ...                       |
+| 3   | `testZoomToFeature`                | test | Test Zoom to feature on layer _{layerPath}_ ...                            |
+| 4   | `testZoomToFeatureWithPanelOffset` | test | Test Zoom to feature keeps the feature out of the open details panel on... |
+| 5   | `testNameFieldAsLabel`             | test | Test nameField as label in query results...                                |
+| 6   | `testSummaryFalseHidesField`       | test | Test summary false hides field from query results...                       |
+| 7   | `testFieldAliasRenamesField`       | test | Test field alias renames field in query results...                         |
 
 ---
 

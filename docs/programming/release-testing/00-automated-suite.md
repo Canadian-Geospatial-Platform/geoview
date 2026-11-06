@@ -38,7 +38,7 @@ The checklist counts release executions rather than unique test methods. `suite-
 | 3   | `suite-utilities`                        | 57      | [ ] Pass |
 | 4   | `suite-layer` (LCC — EPSG:3978)          | 49      | [ ] Pass |
 | 5   | `suite-layer` (WM — EPSG:3857)           | 49      | [ ] Pass |
-| 6   | `suite-layer-functions` (WM — EPSG:3857) | 11       | [ ] Pass |
+| 6   | `suite-layer-functions` (WM — EPSG:3857) | 11      | [ ] Pass |
 | 7   | `suite-map`                              | 18      | [ ] Pass |
 | 8   | `suite-map-config`                       | 57      | [ ] Pass |
 | 9   | `suite-ui`                               | 6       | [ ] Pass |
