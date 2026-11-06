@@ -42,7 +42,8 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests UI component rendering and DOM structure:<br/>
-      <b>Guide/Details</b> — Panel top anchor positioning and scroll behavior`;
+      <b>Guide/Details</b> — Panel top anchor positioning<br/>
+      <b>Viewport scrolling</b> — Complete map visibility, footer transitions and stable oversized alignment`;
   }
 
   /**
@@ -51,7 +52,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 2;
+    return 6;
   }
 
   /**
@@ -59,14 +60,20 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
+  protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test details panel guide and Top anchor
     const pDetailsPanel = this.#uiTester.testGuideDetailsPanelTopAnchor();
 
     // Test the UIController.getFooterHeight getter from a non-React consumer (controller registry)
     const pFooterHeight = this.#uiTester.testControllerGetFooterHeight();
 
-    // Resolve when all tests are done
-    return Promise.all([pDetailsPanel, pFooterHeight]);
+    await Promise.all([pDetailsPanel, pFooterHeight]);
+
+    // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
+    await this.waitForPageExclusivity();
+    await this.#uiTester.testMapSectionScroll('partial');
+    await this.#uiTester.testMapSectionScroll('transitions');
+    await this.#uiTester.testMapSectionScroll('visible');
+    return this.#uiTester.testMapSectionScroll('oversized');
   }
 }

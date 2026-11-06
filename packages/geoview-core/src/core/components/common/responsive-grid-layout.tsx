@@ -330,13 +330,16 @@ const ResponsiveGridLayout = forwardRef(
       // Log
       logger.logTraceUseEffect('LAYOUT - focus on close button when guide is open in WCAG');
 
-      if (isGuideOpen) {
-        // Use RAF for next frame
-        requestAnimationFrame(() => {
-          // Focus on the close button for the container type
-          DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
-        });
-      }
+      if (!isGuideOpen) return undefined;
+
+      // Use RAF for next frame; cancel on cleanup so an unmounted map root is never queried
+      const frame = requestAnimationFrame(() => {
+        // Focus on the close button for the container type
+        DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
+      });
+      return (): void => {
+        cancelAnimationFrame(frame);
+      };
     }, [isGuideOpen, mapId, containerType]);
 
     /**

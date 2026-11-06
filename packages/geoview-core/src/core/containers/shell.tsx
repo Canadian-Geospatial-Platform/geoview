@@ -9,7 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
-import { TIMEOUT } from '@/core/utils/constant';
+import { MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
 
 import { Box, Link } from '@/ui/layout';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
@@ -264,14 +264,20 @@ export function Shell(props: ShellProps): JSX.Element {
   );
 
   /**
-   * Scrolls the map into view when clicking on the map info area.
+   * Reveals the complete map section on app-bar or map-info activation.
+   * Leaves up to MAP_SECTION_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
    */
   const handleScrollShellIntoView = useCallback((): void => {
-    if (!shellRef.current) return;
+    const mapSection = mapShellContainerRef.current;
+    if (!mapSection) return;
 
-    // Check if the map is already in view, then scroll if needed
-    DomHelper.scrollIfNotVisible(shellRef.current.children[0] as HTMLElement, 'start');
-  }, []);
+    const { top, height } = mapSection.getBoundingClientRect();
+    const isOversized = height > window.innerHeight;
+    const offset = isOversized ? MAP_SECTION_SCROLL_GAP_PX : Math.min(MAP_SECTION_SCROLL_GAP_PX, window.innerHeight - height);
+    if (isOversized && Math.abs(top - offset) <= 1) return;
+
+    DomHelper.scrollIfNotVisible(mapSection, 'start', offset);
+  }, [mapShellContainerRef]);
 
   /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.

@@ -117,6 +117,24 @@ selectors, run `npm run lint` from `packages/` and check both flagged literals a
 Size selectors follow value containers (responsive objects/arrays, conditional branches and JSX
 expressions), not helper-call arguments, lookup keys or condition tests. Preserve both positive and
 negative cases when changing these selectors.
+## Shell scrolling
+
+The behavioural contract (offset, oversized alignment, map-info buttons) lives in the
+[delegated-listener section](../../docs/app/accessibility.md#2-use-semantic-elements-for-interactions--high-priority).
+Implementation notes:
+
+- `Shell.handleScrollShellIntoView` measures `mapShellContainerRef`, not a positional shell child:
+  status wrappers precede the map section (#3708). The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
+  (`core/utils/constant.ts`), also read by the UI tests. Oversized sections skip scrolling within 1px of
+  the gap. Leave the shared `scrollIfNotVisible` footer offset unchanged.
+- `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
+  (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
+  and runs its scenarios sequentially.
+  Footer assertions must start from bounds that trigger `scrollIfNotVisible`. Close app-bar panels only
+  while the toggle is visible: focus restoration otherwise re-centres the off-screen toggle. Map-info
+  scroll tests click the `{mapId}-mapInfo` bar, not its buttons.
+- Real Enter/Space, focus, reduced-motion and fullscreen checks stay in the
+  [global release plan](../../docs/programming/release-testing/01-global.md#map-section-scrolling).
 
 ## Theme and scrollbar maintenance
 

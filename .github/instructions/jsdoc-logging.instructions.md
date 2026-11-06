@@ -1,6 +1,6 @@
 ---
 description: JSDoc, comment and logger trace conventions
-applyTo: 'packages/**/*.{ts,tsx}'
+applyTo: "packages/**/*.{ts,tsx}"
 ---
 
 Canonical sections (search the named heading and read only that section):
@@ -9,5 +9,6 @@ Canonical sections (search the named heading and read only that section):
 Audit workflow: [jsdoc-logging.md](../ai/jsdoc-logging.md) → **JSDoc Audit Checklist**.
 
 - Check every function/hook/property, not just exports; explicit return annotations and semantic JSDoc.
+- Blank line before a `//` comment unless it opens a block/list or continues a comment ([Line comments](../../docs/programming/best-practices.md#line-comments)).
 - Render trace at component entry, effect/memo trace first; `memoSxClasses` is the documented exception.
 - Use logger, not console. Preserve TODO/NOTE/FIXME/WCAG/TO.DOCONT, `// GV` and eslint-disable notes.
