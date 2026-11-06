@@ -399,6 +399,23 @@ When a function calls another function that throws and does **not** catch the er
 - If the caller wraps the error into a new error type, document the new type only
 - If the callee has no `@throws` documentation, check its implementation and document what it actually throws
 
+### Line comments
+
+Separate a `//` comment from the code above it with a blank line, so it visibly introduces the statements that follow it.
+
+```ts
+test.addStep("Activating the map-info bar...");
+
+// Clip the top of the section; the bar itself stays on screen below it
+await positionSection(context, -40);
+```
+
+Skip the blank line when the comment:
+
+- is the first line of a block (directly after `{` or `case x:`), or the first item of an argument list, array or object literal
+- continues a comment on the previous line
+- trails code on the same line
+
 ## 10- How we order functions in component
 
 In components, functions should be ordered in the following way:
@@ -636,17 +653,17 @@ waitForMapReady(): Promise<MapBaseEvent> {
 
 **Existing examples:**
 
-| Method                           | Class                 | Resolves when...                            |
-| -------------------------------- | --------------------- | ------------------------------------------- |
-| `waitForMapReady()`              | `MapViewer`           | The map is fully initialized                |
-| `waitForMoveEnd()`               | `MapViewer`           | The current animation/interaction completes |
-| `waitForRender()`                | `MapViewer`           | The next `rendercomplete` event fires       |
-| `waitForBounds()`                | `AbstractBaseGVLayer` | The layer's bounds become available         |
-| `waitForLoadedOnce()`            | `AbstractGVLayer`     | The layer reaches its first `loaded` state  |
+| Method                           | Class                 | Resolves when...                                                        |
+| -------------------------------- | --------------------- | ----------------------------------------------------------------------- |
+| `waitForMapReady()`              | `MapViewer`           | The map is fully initialized                                            |
+| `waitForMoveEnd()`               | `MapViewer`           | The current animation/interaction completes                             |
+| `waitForRender()`                | `MapViewer`           | The next `rendercomplete` event fires                                   |
+| `waitForBounds()`                | `AbstractBaseGVLayer` | The layer's bounds become available                                     |
+| `waitForLoadedOnce()`            | `AbstractGVLayer`     | The layer reaches its first `loaded` state                              |
 | `waitForLayerToGetRegistered()`  | `AbstractLayerSet`    | Config must reach `processed`; rejects if it errors before registration |
-| `waitForAllLayersStatus()`       | `LayerController`     | All layers reach a given status             |
-| `waitForLayersLoaded()`          | `LayerController`     | Map is ready + all layers are loaded        |
-| `waitForOverviewMapVisibility()` | `MapController`       | Overview map reaches expected visibility    |
+| `waitForAllLayersStatus()`       | `LayerController`     | All layers reach a given status                                         |
+| `waitForLayersLoaded()`          | `LayerController`     | Map is ready + all layers are loaded                                    |
+| `waitForOverviewMapVisibility()` | `MapController`       | Overview map reaches expected visibility                                |
 
 **Why prefer `waitFor*` over `whenThisThen` polling:**
 
@@ -722,7 +739,7 @@ DOM lookup helpers scope queries to the map's root element. Use them from UI or 
 
 `buildGVElementId` only constructs a string and can be used wherever a canonical DOM id is needed. The lookup helpers return live DOM elements and belong at the UI boundary; their map-scoped behavior is not a reason for controllers or domains to query or manipulate rendered UI.
 
-| Helper | Use for | Returns |
+| Helper                                       | Use for                                                    | Returns                                        |
 | -------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
 | `DomHelper.buildGVElementId(mapId, suffix)`  | Creating a canonical `${mapId}-suffix` id                  | `string`                                       |
 | `DomHelper.getGVElementById(mapId, suffix)`  | Finding a descendant by its map-relative **suffix**        | `HTMLElement \| undefined`                     |
@@ -742,7 +759,10 @@ import { DomHelper } from "@/core/utils/dom-helper";
 
 const el = DomHelper.getGVElementById(mapId, "appBar"); // suffix → builds "map1-appBar", scoped
 const btn = DomHelper.getGVElementByFullId(mapId, closeButtonId); // caller already has the full id
-const tab = DomHelper.queryGVSelector(mapId, '[role="tab"][aria-selected="true"]');
+const tab = DomHelper.queryGVSelector(
+  mapId,
+  '[role="tab"][aria-selected="true"]',
+);
 ```
 
 ### React: refs and map-scoped lookup

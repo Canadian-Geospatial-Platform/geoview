@@ -99,8 +99,10 @@ export class UITester extends GVAbstractTester {
   testMapSectionScroll(scenario: TypeScrollScenario): Promise<Test<TypeScrollResult>> {
     // Unique ID so the fixture never collides with the suite map or another scroll test
     const mapId = `scroll-${generateId(8)}`;
+
     // Captured up front so cleanup can leave the page where the next test expects it
     const originalScroll = { x: window.scrollX, y: window.scrollY };
+
     // Built now but only mounted when the test runs, and always removed in cleanup
     const fixture = UITester.#createScrollFixture(mapId);
 
@@ -269,6 +271,7 @@ export class UITester extends GVAbstractTester {
     );
 
     test.addStep('Activating a visible app-bar button with map-info clipped below the viewport...');
+
     // First click opens the panel and second closes it; the page must not move between the two activations
     await UITester.#activateAppBar(context);
     await UITester.#activateAppBar(context);
@@ -294,8 +297,10 @@ export class UITester extends GVAbstractTester {
     await UITester.#activateAppBarFromClosed(context);
 
     test.addStep('Returning from the footer-view position through the app bar...');
+
     // Scroll until the section's bottom edge reaches the viewport top, i.e. the footer-view position
     await UITester.#positionSection(context, -section.getBoundingClientRect().height);
+
     // The footer must still be on screen, otherwise this is not the footer-view position
     preconditions.push(footer.getBoundingClientRect().top >= -GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
     await UITester.#activateAppBarFromClosed(context);
@@ -318,6 +323,7 @@ export class UITester extends GVAbstractTester {
 
     // Baseline taken before any activation so the later measurements can be compared with an untouched page
     measurements.push(UITester.#measureScroll(section, info));
+
     // Both edges of the section must be on screen, otherwise nothing proves the "no unnecessary scroll" behavior
     preconditions.push(measurements[0].top >= 0, measurements[0].bottom <= window.innerHeight);
 
@@ -337,6 +343,7 @@ export class UITester extends GVAbstractTester {
 
     // Start slightly below the top so the delegated scroll has something to correct
     await UITester.#positionSection(context, 40);
+
     // The section must really be taller than the viewport, otherwise it could not exercise the oversized path
     preconditions.push(section.getBoundingClientRect().height > window.innerHeight);
 
@@ -359,6 +366,7 @@ export class UITester extends GVAbstractTester {
     await UITester.#positionSection(context, helperOffset / 2 - section.getBoundingClientRect().height);
     test.addStep('Activating a footer tab through its delegated click path...');
     const initialFooterRect = footer.getBoundingClientRect();
+
     // The footer must start inside the clearance zone, otherwise the activation would have nothing to scroll
     preconditions.push(initialFooterRect.top >= 0 && initialFooterRect.top < helperOffset);
 
@@ -369,6 +377,7 @@ export class UITester extends GVAbstractTester {
     // Log the final footer bounds so a failed alignment check can be diagnosed from the report
     const footerRect = footer.getBoundingClientRect();
     test.addStep(`Footer bounds after activation: top=${footerRect.top}, bottom=${footerRect.bottom}, viewport=${window.innerHeight}`);
+
     // The helper must leave the footer's bottom edge at the viewport bottom minus its clearance
     preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
   }
@@ -383,6 +392,7 @@ export class UITester extends GVAbstractTester {
     const { test, section, info, preconditions, measurements } = context;
 
     test.addStep('Activating the map-info bar while the map is clipped at the top...');
+
     // Clip the top of the section; the bar itself stays on screen below it
     await UITester.#positionSection(context, -40);
 
@@ -422,6 +432,7 @@ export class UITester extends GVAbstractTester {
 
     // A real click exercises the delegated handler exactly as a user would
     button.click();
+
     // Measure only after scrolling and layout have settled, or the reading would be transient
     await UITester.#waitForScrollLayout(section);
     measurements.push(UITester.#measureScroll(section, info));
@@ -503,6 +514,7 @@ export class UITester extends GVAbstractTester {
     // The whole section must end up inside the viewport...
     Test.assertIsEqual(measurement.top >= -tolerance, true);
     Test.assertIsEqual(measurement.bottom <= viewportHeight + tolerance, true);
+
     // ...and so must the map-info bar, which is the control that used to be clipped
     Test.assertIsEqual(measurement.infoTop >= -tolerance, true);
     Test.assertIsEqual(measurement.infoBottom <= viewportHeight + tolerance, true);

@@ -8,6 +8,7 @@ Read only the linked section of each doc: search for its heading and read to the
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Summaries, tags, properties, components and hook comments | [JSDoc conventions](../../docs/programming/best-practices.md#documentation-conventions)                     |
 | Propagated errors                                         | [Propagating throws](../../docs/programming/best-practices.md#propagating-throws-from-called-functions)     |
+| Blank-line spacing before `//` comments                   | [Line comments](../../docs/programming/best-practices.md#line-comments)                                     |
 | Trace levels, localStorage controls, render/hook naming   | [Logger conventions](../../docs/programming/logging.md#characteristics-to-know-when-using-logger)           |
 | Business-flow logging ownership                           | [Where to log](../../docs/programming/logging.md#where-to-log--controllers-not-store-state-files)           |
 | Explicit return types                                     | [Type safety](../../docs/programming/best-practices.md#1--clearly-identify-the-types-of-data-you-are-using) |

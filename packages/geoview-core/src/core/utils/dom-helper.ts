@@ -1089,6 +1089,7 @@ export abstract class DomHelper {
     return whenThisThen(
       (): HTMLElement | undefined =>
         // The footer bar renders its panel buttons as tabs
+        // TODO: Refactor #3748
         containerType === CONTAINER_TYPE.APP_BAR
           ? DomHelper.getAppBarButton(mapId, TABS.LEGEND)
           : DomHelper.getGVElementById(mapId, `tab-${TABS.LEGEND}`),
