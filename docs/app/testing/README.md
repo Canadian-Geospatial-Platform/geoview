@@ -37,12 +37,11 @@ Add `test-suite` to your map configuration:
 | ------------------ | ---------------------------------------------------- |
 | `suite-core`       | Date/utility function tests                          |
 | `suite-config`     | Layer configuration validation                       |
-| `suite-map`        | Map zoom, projection, basemap, UI                    |
+| `suite-map`        | Map interactions and map-scoped UI tests             |
 | `suite-layer`      | Layer add/remove, legend, queries                    |
 | `suite-map-config` | Map config creation/destruction                      |
 | `suite-geochart`   | Geochart plugin (requires geochart)                  |
 | `suite-details`    | Details panel (requires details)                     |
-| `suite-ui`         | DOM-level UI tests                                   |
 | `suite-utilities`  | Utility function tests (core, date, geo, projection) |
 | `suite-swiper`     | Swiper plugin tests (requires swiper)                |
 | `suite-time-slider` | Time Slider plugin tests (requires time-slider)       |

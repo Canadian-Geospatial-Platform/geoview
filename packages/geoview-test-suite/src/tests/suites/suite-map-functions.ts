@@ -51,7 +51,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       <b>Language</b> — Runtime language switch<br/>
       <b>Layers</b> — Non-queryable exclusion from details, hoverable state, geometry group z-index<br/>
       <b>Details</b> — Layer selection persistence across tab switches<br/>
-      <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction`;
+      <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction<br/>
+      <b>UI</b> — Details panel top anchor; footer-height getter for non-React consumers`;
   }
 
   /**
@@ -60,7 +61,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 18;
+    return 19;
   }
 
   /**
@@ -188,6 +189,16 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     // Wait until fullscreen state cleanup completes before returning the suite result
     await pFullscreenViewRestoration;
 
+    // Finish remaining map tests before the UI tests change the active app-bar tab
+    await Promise.all([pZIndex, pSetLanguage]);
+
+    // Test details panel guide and Top anchor
+    const pDetailsPanelTopAnchor = this.#mapTester.testGuideDetailsPanelTopAnchor();
+    await pDetailsPanelTopAnchor;
+
+    // Test UIController.getFooterHeight from a non-React consumer
+    const pControllerGetFooterHeight = this.#mapTester.testControllerGetFooterHeight();
+
     // Resolve when all
     return Promise.all([
       pmapState,
@@ -207,6 +218,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       pLayerHoverableState,
       pDetailsLayerSelectionPersistence,
       pFullscreenViewRestoration,
+      pDetailsPanelTopAnchor,
+      pControllerGetFooterHeight,
     ]);
   }
 }

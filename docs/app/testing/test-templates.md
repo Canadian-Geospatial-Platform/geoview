@@ -26,10 +26,10 @@ Before writing a test, classify it into one of these groups:
 
 ### Group 3 — Map (state, projection, interaction)
 
-| Category            | Tester Class      | Suite Class        | Execution Pattern  |
-| ------------------- | ----------------- | ------------------ | ------------------ |
-| **Map Interaction** | `MapTester`       | `suite-map`        | Sequential `await` |
-| **Map Config**      | `MapConfigTester` | `suite-map-config` | Sequential `await` |
+| Category                     | Tester Class      | Suite Class        | Execution Pattern                     |
+| ---------------------------- | ----------------- | ------------------ | ------------------------------------- |
+| **Map Interaction / UI**     | `MapTester`       | `suite-map`        | Complex mixed; UI checks last         |
+| **Map Config**               | `MapConfigTester` | `suite-map-config` | Sequential `await`                   |
 
 ### Group 4 — Component Panels (footer bar tabs, app bar features)
 
@@ -37,7 +37,6 @@ Before writing a test, classify it into one of these groups:
 | ----------------- | ----------------------- | ------------------------ | ----------------------------------- |
 | **Details Panel** | `DetailsTester`         | `suite-details`          | Guarded (`details` tab required)    |
 | **Data Table**    | `DataTableTester` (new) | `suite-data-table` (new) | Guarded (`data-table` tab required) |
-| **UI / DOM**      | `UITester`              | `suite-ui`               | `Promise.all()`                     |
 
 ### Group 5 — Plugins (external packages)
 
@@ -48,7 +47,7 @@ Before writing a test, classify it into one of these groups:
 | **Time Slider** | `TimeSliderTester` (new) | `suite-time-slider` (new) | Guarded (`time-slider` plugin required) |
 | **Drawer**      | `DrawerTester` (new)     | `suite-drawer` (new)      | Guarded (`drawer` plugin required)      |
 
-> **Choosing the right group:** Pure function with no side effects → Group 1. Adds/removes/queries a layer → Group 2. Changes map zoom/projection/basemap → Group 3. Interacts with a footer bar tab or app bar panel → Group 4. Tests a plugin package → Group 5.
+> **Choosing the right group:** Pure function with no side effects → Group 1. Adds/removes/queries a layer → Group 2. Changes map state or tests map-scoped UI → Group 3. Tests a dedicated Details or Data Table panel suite → Group 4. Tests a plugin package → Group 5.
 
 ---
 

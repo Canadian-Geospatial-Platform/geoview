@@ -140,7 +140,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 
 | #   | File                                                           | Area                                                                  | Est. Time    | Tests (A/C/M)        |
 | --- | -------------------------------------------------------------- | --------------------------------------------------------------------- | ------------ | -------------------- |
-| 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite execution                                        | 5 min        | 315 executions       |
+| 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite pass status                                      | 5 min        | See checklist        |
 | 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications                  | 25 min       | 56 (0/15/41)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation                        | 15 min       | 20 (2/7/11)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers                      | 15 min       | 23 (6/16/1)          |
@@ -198,7 +198,7 @@ Before testing, ensure the following setup:
 
 Before starting manual testing, run the automated test suite.
 
-The automated suite declares **229 tests** across 12 registered suites. The release checklist executes the layer suite for both EPSG:3978 and EPSG:3857, for **272 test executions** when all listed suites run. See [00-automated-suite.md](00-automated-suite.md) for the full checklist.
+See the [automated checklist](00-automated-suite.md) for the registered suite executions and their pass status.
 
 ## Config Files Reference
 

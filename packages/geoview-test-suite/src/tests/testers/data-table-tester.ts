@@ -341,7 +341,7 @@ export class DataTableTester extends GVAbstractTester {
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
-        this.finalizeStepRemoveLayerAndAssert(test, layerPath);
+        this.removeLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -621,15 +621,18 @@ export class DataTableTester extends GVAbstractTester {
         // Wait for layer registration and data-table to be loaded with the layer in question
         await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
 
+        // Clear existing highlights so the test only tracks the row zoom highlight
         const { mapController } = this.getControllersRegistry();
         mapController.removeHighlightedFeature('all');
 
+        // Use an enabled row zoom button to exercise the data table's temporary highlight
         const zoomButton = DomHelper.DataTable.getFirstRowZoomButton(this.getMapId());
         if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
 
         test.addStep('Clicking the first row zoom button...');
         zoomButton.click();
 
+        // Ignore removal events and wait for an added feature with a trackable UID
         test.addStep('Waiting for the row zoom highlight to appear...');
         const highlightEvent = await mapController.onceFeatureHighlighted(
           (event) => event.operation === 'added' && event.feature !== 'all' && Boolean(event.feature.uid)
@@ -642,6 +645,7 @@ export class DataTableTester extends GVAbstractTester {
         const featureUid = highlightEvent.feature.uid;
         const shown = getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === featureUid);
 
+        // Allow a timing margin beyond the highlight timeout before checking the same feature
         test.addStep('Waiting for the row zoom highlight to expire...');
         await delay(TIMEOUT.featureHighlight * 2);
         const remaining = getStoreMapHighlightedFeatures(this.getMapId()).some(
@@ -656,6 +660,7 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(result.remaining, false);
       },
       () => {
+        // Leave no highlights behind if the test fails before automatic expiry
         this.getControllersRegistry().mapController.removeHighlightedFeature('all');
       }
     );

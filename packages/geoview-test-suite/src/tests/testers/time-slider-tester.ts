@@ -105,7 +105,6 @@ export class TimeSliderTester extends GVAbstractTester {
    */
   testConstrainValues(): Promise<Test<TimeSliderConstraintResult>> {
     const baseValues: TypeTimeSliderValues = {
-      delay: 1000,
       defaultValues: [0, 1000],
       discreteValues: false,
       field: 'date',
@@ -255,7 +254,7 @@ export class TimeSliderTester extends GVAbstractTester {
       (test) => {
         // If the test was running
         if (isRunningOnVPN) {
-          this.finalizeStepRemoveLayerAndAssert(test, groupPath);
+          this.removeLayerConfigAndAssert(test, groupPath);
         }
       }
     );

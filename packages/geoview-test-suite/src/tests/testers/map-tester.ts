@@ -30,6 +30,7 @@ import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
+  getStoreAppHeight,
   getStoreAppDisplayLanguage,
   getStoreAppIsCrosshairsActive,
   getStoreAppIsFullscreenActive,
@@ -480,6 +481,7 @@ export class MapTester extends GVAbstractTester {
           for (const bottom of [0, 35, 100, 35]) {
             test.addStep(`Testing bottom padding ${bottom}px at rotation ${rotation}...`);
             uiController.setCrosshairActive(false);
+
             // eslint-disable-next-line no-await-in-loop -- Each case must commit crosshair deactivation before reactivation.
             await delay(50);
             view.padding = [0, 0, bottom, 0];
@@ -491,6 +493,7 @@ export class MapTester extends GVAbstractTester {
             if (!stale) throw new TestError('Rendered map coordinate transform must be available');
             setStoreMapPointerPosition(mapId, stale);
             uiController.setCrosshairActive(true);
+
             // eslint-disable-next-line no-await-in-loop -- Observe the activation effect before dispatching this case's keys.
             await delay(50);
 
@@ -538,6 +541,7 @@ export class MapTester extends GVAbstractTester {
       (test, results): void => {
         test.addStep('Verifying rendered alignment, activation reset, and both keyboard drawing coordinates...');
         Test.assertIsEqual(results.length, 8);
+
         for (const result of results) {
           Test.assertIsDefined('activation pointer', result.pointer);
           Test.assertIsDefined('converted position', result.position);
@@ -685,25 +689,25 @@ export class MapTester extends GVAbstractTester {
 
         test.addStep('Entering fullscreen, changing map size, and exiting through the fullscreen API...');
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         map.setSize([...fullscreenSize]);
         this.getControllersRegistry().uiController.setFullScreen(false);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         await mapViewer.waitForRender();
         const afterButtonExit = getViewState();
 
         test.addStep('Repeating fullscreen with an Esc-style fullscreenchange exit...');
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         map.setSize([...fullscreenSize]);
         dispatchFullscreenChange(null);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         await mapViewer.waitForRender();
         const afterEscExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, then exiting...');
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         map.setSize([...fullscreenSize]);
         const centerBeforeInteraction = view.getCenter();
         const resolutionBeforeInteraction = view.getResolution();
@@ -717,13 +721,13 @@ export class MapTester extends GVAbstractTester {
         view.setResolution(resolutionBeforeInteraction / 2);
         const expectedInteractiveView = getViewState();
         dispatchFullscreenChange(null);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         await mapViewer.waitForRender();
         const afterInteractiveExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, resizing again (e.g. footer resize), then exiting...');
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         map.setSize([...fullscreenSize]);
         await mapViewer.waitForRender();
         const centerBeforeResizeInteraction = view.getCenter();
@@ -737,19 +741,19 @@ export class MapTester extends GVAbstractTester {
         ]);
         view.setResolution(resolutionBeforeResizeInteraction / 2);
         // Let the 'moveend' for the interaction fire before the next size change
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         await mapViewer.waitForRender();
         map.setSize([fullscreenSize[0], fullscreenSize[1] - 100]);
         const expectedInteractiveResizeView = getViewState();
         dispatchFullscreenChange(null);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         await mapViewer.waitForRender();
         const afterInteractiveResizeExit = getViewState();
 
         test.addStep('Rejecting a fullscreen request and verifying fullscreen state cleanup...');
         shouldRejectFullscreenRequest = true;
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
-        await delay(50);
+        await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         const rejectedRequestIsInactive = !getStoreAppIsFullscreenActive(this.getMapId());
         shouldRejectFullscreenRequest = false;
 
@@ -1158,6 +1162,66 @@ export class MapTester extends GVAbstractTester {
         // Restore original language
         test.addStep(`Restoring language to '${originalLanguage}'...`);
         await this.getMapViewer().setLanguage(originalLanguage);
+      }
+    );
+  }
+
+  /**
+   * Test selecting details panel and finding the "Top" anchor in the guide container.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testGuideDetailsPanelTopAnchor(): Promise<Test<HTMLAnchorElement | null>> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test Details Panel - Select and Find Top Anchor',
+      async (test) => {
+        test.addStep('Selecting details panel and wait for the UI to refresh...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'details');
+
+        test.addStep('Finding guide-container div...');
+        const guideContainer = DomHelper.getGuideContainer(mapId);
+        if (!guideContainer) throw new Error('guide-container div not found');
+
+        test.addStep('Searching for "Top" anchor tag within guide-container...');
+        const anchorElements = guideContainer.querySelectorAll('a');
+        let foundTopAnchor: HTMLAnchorElement | null = null;
+
+        for (let index = 0; index < anchorElements.length; index++) {
+          const anchor = anchorElements[index];
+          if (anchor.textContent?.trim() === 'Top') {
+            foundTopAnchor = anchor;
+            break;
+          }
+        }
+
+        return foundTopAnchor;
+      },
+      (test, result) => {
+        test.addStep('Verifying "Top" anchor tag was not found...');
+        Test.assertIsEqual(result, null);
+      }
+    );
+  }
+
+  /**
+   * Test that a non-React consumer can read the footer height through the UI controller.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testControllerGetFooterHeight(): Promise<Test<string>> {
+    return this.test(
+      'Test UIController.getFooterHeight (non-React consumer)',
+      (test) => {
+        test.addStep('Calling getFooterHeight via the controller registry (non-React path)...');
+        return DomHelper.getDataFooterHeight(this.getMapId(), getStoreAppHeight(this.getMapId()));
+      },
+      (test, result) => {
+        test.addStep('Verifying a CSS length string was returned...');
+        Test.assertIsDefined('footerHeight', result);
+        Test.assertIsEqual(/(px|%)$/.test(result), true);
       }
     );
   }

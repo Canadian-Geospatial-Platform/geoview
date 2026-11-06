@@ -9,6 +9,7 @@ import { ZoomOutIcon } from '@/ui/icons';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -43,7 +44,7 @@ export default function ZoomOut(): JSX.Element {
 
   return (
     <IconButton
-      id={`${mapId}-button-zoom-out`}
+      id={DomHelper.buildButtonZoomOutId(mapId)}
       aria-label={t('mapnav.zoomOut')}
       tooltipPlacement="left"
       onClick={handleZoomOut}

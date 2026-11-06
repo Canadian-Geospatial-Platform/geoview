@@ -19,7 +19,6 @@ import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
 import { GVTestSuiteLayerFunctions } from './tests/suites/suite-layer-functions';
 import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
-import { GVTestSuiteUI } from './tests/suites/suite-ui';
 import { GVTestSuiteDetails } from './tests/suites/suite-details';
 import { GVTestSuiteUtilities } from './tests/suites/suite-utilities';
 import { GVTestSuiteSwiper } from './tests/suites/suite-swiper';
@@ -121,9 +120,6 @@ class TestSuitePlugin extends AbstractPlugin {
       } else if (suite === 'suite-map-config') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
-      } else if (suite === 'suite-ui') {
-        // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-details') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer, this.controllerRegistry));
@@ -254,7 +250,11 @@ class TestSuitePlugin extends AbstractPlugin {
    */
   getDescriptionAsHtml(): string {
     // For each Test Suite
-    return this.testSuites.map((suite) => suite.getDescriptionAsHtml()).join('<br/>');
+    return this.testSuites
+      .map(
+        (suite) => `<div class="test-suite-description"><div><b>[${suite.getName()}]</b><br/></div>${suite.getDescriptionAsHtml()}</div>`
+      )
+      .join('');
   }
 
   /**
@@ -444,27 +444,6 @@ class TestSuitePlugin extends AbstractPlugin {
     // Set the running on VPN flag for all all test suites
     this.testSuites.forEach((testSuite) => {
       testSuite.setIsRunningOnVPN(runningOnVPN);
-    });
-  }
-
-  /**
-   * Gets whether the test suites are configured to run sequentially.
-   *
-   * @returns Whether the test suites are running sequentially
-   */
-  getIsRunningSequentially(): boolean {
-    return this.testSuites[0]?.getIsRunningSequentially() ?? false;
-  }
-
-  /**
-   * Sets the sequential execution flag on all registered test suites.
-   *
-   * @param runningSequentially - Whether test suites should run sequentially
-   */
-  setIsRunningSequentially(runningSequentially: boolean): void {
-    // Set the running sequentially flag for all test suites
-    this.testSuites.forEach((testSuite) => {
-      testSuite.setIsRunningSequentially(runningSequentially);
     });
   }
 

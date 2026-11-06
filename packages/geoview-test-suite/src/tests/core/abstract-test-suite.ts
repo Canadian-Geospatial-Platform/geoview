@@ -32,9 +32,6 @@ export abstract class AbstractTestSuite {
   /** Indicates whether the plugin is running the heavy tests */
   #isRunningHeavyTests = false;
 
-  /** Indicates whether the test suite should force sequential execution of tests */
-  #isRunningSequentially = false;
-
   /** Indicates if the test suite should only run the DEBUG tests */
   DEBUG_RUN_ONLY_DEBUG_FUNCTION = false; // true or false or isLocalhost()
 
@@ -227,24 +224,6 @@ export abstract class AbstractTestSuite {
    */
   setIsRunningHeavyTests(isRunningHeavyTests: boolean): void {
     this.#isRunningHeavyTests = isRunningHeavyTests;
-  }
-
-  /**
-   * Gets whether sequential execution is forced for tests in this suite.
-   *
-   * @returns Whether tests in this suite are forced to run sequentially
-   */
-  getIsRunningSequentially(): boolean {
-    return this.#isRunningSequentially;
-  }
-
-  /**
-   * Sets whether sequential execution is forced for tests in this suite.
-   *
-   * @param isRunningSequentially - Whether tests in this suite should be forced to run sequentially
-   */
-  setIsRunningSequentially(isRunningSequentially: boolean): void {
-    this.#isRunningSequentially = isRunningSequentially;
   }
 
   /**

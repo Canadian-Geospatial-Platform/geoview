@@ -44,6 +44,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests layer controller functions and feature-query behavior:<br/>
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
+      <b>Layer visibility</b> — Explicit visibility updates and implicit toggles through the public LayerApi<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
       <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
@@ -67,12 +68,13 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#layerTester.testAddWMSDuplicateGroupNames();
+    await this.#layerTester.testSetGeojsonSourceReplacesFeatures();
+    await this.#layerTester.testSetGeojsonSourceReprojectsFeatures();
 
     // Resolve when all
-    return Promise.all([pDevTest0]);
+    return Promise.resolve();
   }
 
   /**
@@ -81,12 +83,8 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Keep if running sequentially
-    const isRunningSequentially = this.getIsRunningSequentially();
-
     // Test WMS duplicate nested group names (issue #3521)
     const pLayerWMSDuplicateGroupNames = this.#layerTester.testAddWMSDuplicateGroupNames();
-    if (isRunningSequentially) await pLayerWMSDuplicateGroupNames;
 
     // Test zoom to extent of a layer with only 1 point feature
     await this.#layerTester.testZoomExtentWithOneFeature();
@@ -111,6 +109,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test resolving the first layer under a root id (e.g. a GeoCore UUID) — issue #3633
     await this.#layerTester.testGetGeoviewLayerByRootId();
+
+    // Test the public LayerApi explicit visibility and toggle behavior
+    await this.#layerTester.testSetOrToggleLayerVisibility();
 
     // Test that reloading a layer preserves its position in the layer order — issue #3666
     await this.#layerTester.testReloadLayerPreservesPosition();
