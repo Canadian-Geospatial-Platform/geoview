@@ -151,13 +151,13 @@ export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Elemen
         abortControllerRef.current?.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
-        mapController.performMapClickAction(currentPointerPosition, controller.signal).catch((error: unknown) => {
+        mapController.performMapClickAction(currentPointerPosition, controller.signal, isCrosshairsActive).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('performMapClickAction in Crosshair.handleDefaultInteraction', error);
         });
       }
     },
-    [mapController]
+    [mapController, isCrosshairsActive]
   );
 
   /**

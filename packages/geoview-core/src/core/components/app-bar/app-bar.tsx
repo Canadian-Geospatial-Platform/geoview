@@ -44,7 +44,6 @@ import {
   useStoreUIAppBarPanelIds,
 } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
@@ -115,16 +114,37 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
   const interaction = useStoreMapInteraction();
-  const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const appBarComponents = useStoreUIAppbarComponents();
-  const { tabId, isOpen, isFocusTrapped } = useStoreUIActiveAppBarTab();
+  const { tabId, isOpen, isFocusTrapped, returnFocusToMap } = useStoreUIActiveAppBarTab();
   const hiddenTabs = useStoreUIHiddenTabs();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const activeTrapGeoViewRef = useRef(activeTrapGeoView);
+  const focusRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const isSharedModeEnabled = useStoreGeoViewSharedMode();
   const uiController = useUIController();
   const mapController = useMapController();
 
   const geoviewElement = DomHelper.getMapTargetElement(mapId);
+
+  useEffect(() => {
+    activeTrapGeoViewRef.current = activeTrapGeoView;
+  }, [activeTrapGeoView]);
+
+  useEffect(() => {
+    if (!isOpen || focusRestoreTimeoutRef.current === undefined) return;
+
+    clearTimeout(focusRestoreTimeoutRef.current);
+    focusRestoreTimeoutRef.current = undefined;
+  }, [isOpen, tabId]);
+
+  useEffect(() => {
+    return (): void => {
+      if (focusRestoreTimeoutRef.current !== undefined) {
+        clearTimeout(focusRestoreTimeoutRef.current);
+        focusRestoreTimeoutRef.current = undefined;
+      }
+    };
+  }, []);
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
@@ -283,19 +303,26 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const handleGeneralCloseClicked = useCallback(
     (buttonId: string): void => {
       // TODO: REVIEW - Not ideal that a core component such as app-bar is responsible for managing focus return logic to the map. Consider delegating this responsibility to a higher-level controller or context. Also, it shouldn't know about the 'details' id either.
-      const returnFocusToMap = isCrosshairsActive && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
+      const restoreMapFocus = returnFocusToMap && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
+
+      if (focusRestoreTimeoutRef.current !== undefined) {
+        clearTimeout(focusRestoreTimeoutRef.current);
+        focusRestoreTimeoutRef.current = undefined;
+      }
 
       if (isFocusTrapped) {
-        setTimeout(() => {
+        focusRestoreTimeoutRef.current = setTimeout(() => {
+          focusRestoreTimeoutRef.current = undefined;
           // Explicitly request focus indicator for keyboard users
-          const focusTarget = returnFocusToMap ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
+          const focusTarget = restoreMapFocus ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
           focusTarget?.focus({ focusVisible: true });
+          if (restoreMapFocus && activeTrapGeoViewRef.current) uiController.setCrosshairActive(true);
         }, TIMEOUT.dataPanelLoading);
       }
 
-      uiController.setActiveAppBarTab(buttonId, false, false);
+      uiController.setActiveAppBarTab(buttonId, false, false, false);
     },
-    [uiController, isFocusTrapped, mapId, isCrosshairsActive]
+    [uiController, isFocusTrapped, mapId, returnFocusToMap]
   );
 
   /**
