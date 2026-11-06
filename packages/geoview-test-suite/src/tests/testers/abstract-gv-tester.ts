@@ -7,7 +7,7 @@ import type { API } from 'geoview-core/api/api';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { delay, generateId } from 'geoview-core/core/utils/utilities';
-import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -17,6 +17,7 @@ import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from 'geoview-core/core/stor
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
@@ -1186,11 +1187,14 @@ export abstract class GVAbstractTester extends AbstractTester {
     const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
 
     // Keep the blank fixture queryable for tests that inject features after loading.
-    const config = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, GVAbstractTester.GEOJSON_METADATA_META_BLANK, false, [
+    const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, GVAbstractTester.GEOJSON_METADATA_META_BLANK, false, [
       { id: GVAbstractTester.GEOJSON_BLANK },
     ]);
 
-    await this.addLayerOnMap(test, config);
+    // Redirect to helper to add the layer to the map and wait
+    await this.addLayerOnMap(test, gvConfig);
+
+    // Wait for the layer to be loaded at least once
     return this.waitLayerAtLayerPath(test, layerPath, true);
   }
 
@@ -1833,12 +1837,12 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   async addLayerGeoJSONPointsSettings<T>(test: Test<T>, waitForChild = false): Promise<AbstractBaseGVLayer> {
     const geoviewLayerId = generateId();
-    const layerConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
+    const gvConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
     const groupPath = `${geoviewLayerId}/point-feature-group`;
     const layerPath = waitForChild ? `${groupPath}/points_1.json` : groupPath;
 
-    // Add the layer to the map and get the AbstractGeoViewLayer
-    await this.addLayerOnMap(test, layerConfig);
+    // Redirect to helper to add the layer to the map and wait
+    await this.addLayerOnMap(test, gvConfig);
 
     // Wait for the layer to be loaded at least once
     return this.waitLayerAtLayerPath(test, layerPath);
@@ -1862,7 +1866,10 @@ export abstract class GVAbstractTester extends AbstractTester {
       { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
     ]);
 
+    // Redirect to helper to add the layer to the map and wait
     await this.addLayerOnMap(test, gvConfig);
+
+    // Wait for the layer to be loaded at least once
     return this.waitLayerAtLayerPath(test, layerPath);
   }
 
@@ -1884,7 +1891,10 @@ export abstract class GVAbstractTester extends AbstractTester {
       { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
     ]);
 
+    // Redirect to helper to add the layer to the map and wait
     await this.addLayerOnMap(test, gvConfig);
+
+    // Wait for the layer to be loaded at least once
     return this.waitLayerAtLayerPath(test, layerPath);
   }
 
@@ -2086,6 +2096,7 @@ export abstract class GVAbstractTester extends AbstractTester {
       layerEntries
     );
 
+    // Redirect to helper to add the layer to the map and wait
     await this.addLayerOnMap(test, gvConfig);
 
     if (includeAirport) {
@@ -2154,6 +2165,8 @@ export abstract class GVAbstractTester extends AbstractTester {
     await layer.waitForLoadedOnce();
 
     // Wait until the legend has been queried
+    // TODO: CHECK - Do we really have to wait for the legend to be queried if we're waiting for the layer to be loaded just above?
+    // TO.DOCONT: Can the legend arrive after loaded status in some layer types maybe? Vector layers?
     test.addStep(`Wait for the legend to be queried...`);
     await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLegendQueried(layerPath, acceptNoIconsOrNoData);
 
@@ -2232,6 +2245,46 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Return the map viewer
     return mapViewer;
+  }
+
+  /**
+   * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
+   * and sets up the details UI with that layer. Steps are logged to the provided test instance.
+   *
+   * This will return the results of the query itself as a promise.
+   * Remember than the UI is batched and you should await for the batched results to propagate before verifying the results are appearing in the UI.
+   *
+   * @template T - The type parameter for the test instance
+   * @param test - The test instance used to log each step of the details setup process
+   * @param layerPath - The unique path or ID of the layer to interact with
+   * @param lonlat - The longitude/latitude coordinate at which to query the layer
+   * @returns A promise that resolves to the layer after setup is complete
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+   */
+  async queryAtCoordinateRetrieveResultsForLayer<T>(
+    test: Test<T>,
+    layer: AbstractGVLayer,
+    lonlat: Coordinate
+  ): Promise<TypeFeatureInfoEntry[] | undefined> {
+    // Get the layer and make sure it's in loaded status
+    await layer.waitForLoadedOnce();
+
+    // Update the step
+    test.addStep(`Perform query operation at given coordinates...`);
+    const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
+
+    // Get the results for the specific layer from the query results
+    const queryResultForLayer = queryResults[layer.getLayerPath()];
+
+    // Wait specifically for the results of this query
+    const promiseResult = await queryResultForLayer.promiseResult;
+
+    // Wait for the geometries if we must (EsriDynamic particularity)
+    await promiseResult?.promiseGeometries;
+
+    // Return the features
+    return queryResultForLayer.features;
   }
 
   /**

@@ -24,7 +24,6 @@ import {
   getStoreLayerOrderedLayerPaths,
 } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
-import type { TypeFeatureInfoResultSet } from 'geoview-core/core/stores/states/feature-info-state';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { CONTAINER_TYPE } from 'geoview-core/core/utils/constant';
@@ -1727,7 +1726,7 @@ export class LayerTester extends GVAbstractTester {
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig);
 
-        // Find the layer and wait until its ready
+        // Find the layer and wait until its ready, see GV note above
         await this.waitLayerAtLayerPath(test, layerPath, true);
       },
       undefined,
@@ -2512,19 +2511,11 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
         const gvLayer = (setupLayer = await this.addLayerEsriDynamicTopProjectsWithRestrictedOutfields(test));
-        const layerPath = gvLayer.getLayerPath();
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
-        // Perform a map click using the feature info layer set
-        const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
-
-        // Wait on the promise of the query for the layer path in question
-        const promiseResult = await queryResults[layerPath].promiseResult;
-
-        // Wait on the promise of geometries (EsriDynamic particularity)
-        await promiseResult?.promiseGeometries;
-
-        // Now return the results, now that we're sure the geometries were also gathered
-        return { gvLayer, data: promiseResult?.results };
+        // Query the layer at the given coordinates
+        const data = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, clickCoordinate);
+        return { gvLayer, data };
       },
       (test, result) => {
         // Check if the feature has a valid extent property
@@ -2763,7 +2754,7 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
         const gvLayer = (setupLayer = await this.addLayerEsriDynamicGNWTBoundaries(test));
-        const layerPath = gvLayer.getLayerPath();
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath()) as GVEsriDynamic;
 
         // Use the map's non-zoomed home extent so the identify pixel tolerance sweeps a wide enough ground area to
         // return all the coincident polygons meeting at the junction (a tight zoom returns only the closest 2)
@@ -2772,17 +2763,11 @@ export class LayerTester extends GVAbstractTester {
 
         // Query exactly at the shared boundary/junction
         test.addStep('Querying at the junction coordinate...');
-        const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(junctionLonLat);
-        const promiseResult = await queryResults[layerPath].promiseResult;
-
-        // Wait for geometries (EsriDynamic assigns them after the initial result via a separate query)
-        await promiseResult?.promiseGeometries;
-        const results = promiseResult?.results ?? [];
+        const results = (await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, junctionLonLat)) ?? [];
 
         // Ground truth: fetch each returned OBJECTID's own geometry (in the map projection) and measure the distance
         // between its extent center and the paired entry's extent center
         test.addStep('Fetching ground-truth geometry per OBJECTID and measuring pairing...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath) as GVEsriDynamic;
         const outSR = this.getMapViewer().getProjectionNumber();
         const oidField = layer.getLayerConfig().getOutfieldsPKNameOrDefault('OBJECTID');
 
@@ -2839,7 +2824,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the fixture layer and WMS feature-query results
    */
-  testQueryWMSLayerForWFSFeaturesCities(): Promise<Test<LayerTestResult<TypeFeatureInfoResultSet>>> {
+  testQueryWMSLayerForWFSFeaturesCities(): Promise<Test<LayerTestResult<TypeFeatureInfoEntry[] | undefined>>> {
     const layerName = 'Cities';
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
@@ -2849,23 +2834,21 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
         const gvLayer = (setupLayer = await this.addLayerWMSCitiesWithWFS(test));
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
-        // Perform a map click using the feature info layer set
-        const queryResult = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
-
-        // Return the query result
-        return { gvLayer, data: queryResult };
+        // Query the layer at the given coordinates
+        const data = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, clickCoordinate);
+        return { gvLayer, data };
       },
       (test, result) => {
-        // Get the result for the layer in question
-        const resultCities = result.data[result.gvLayer.getLayerPath()];
+        const resultCities = result.data;
 
         // Check if the feature has a valid extent property
         test.addStep('Checking for results in the query...');
         Test.assertIsDefined('resultCities', resultCities);
-        Test.assertIsArrayLengthMinimal(resultCities.features, 1);
-        Test.assertIsDefined('resultCities.features[0]', resultCities.features?.[0]);
-        Test.assertIsDefined('resultCities.features[0].geometry', resultCities.features?.[0].geometry);
+        Test.assertIsArrayLengthMinimal(resultCities, 1);
+        Test.assertIsDefined('resultCities[0]', resultCities[0]);
+        Test.assertIsDefined('resultCities[0].geometry', resultCities[0].geometry);
       },
       (test, result) => {
         const gvLayer = result?.gvLayer ?? setupLayer;
@@ -2885,7 +2868,7 @@ export class LayerTester extends GVAbstractTester {
    * @param isRunningOnVPN - Whether the test environment can access the VPN-only service
    * @returns A promise that resolves with the fixture layer and WMS feature-query results
    */
-  testQueryWMSLayerForWFSFeaturesAirborne(isRunningOnVPN: boolean): Promise<Test<LayerTestResult<TypeFeatureInfoResultSet>>> {
+  testQueryWMSLayerForWFSFeaturesAirborne(isRunningOnVPN: boolean): Promise<Test<LayerTestResult<TypeFeatureInfoEntry[] | undefined>>> {
     const layerName = 'Airborne Radioactivity';
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
@@ -2901,23 +2884,21 @@ export class LayerTester extends GVAbstractTester {
 
         // Add the fixture and wait for its selected layer to be ready
         const gvLayer = (setupLayer = await this.addLayerWMSAirborneWithWFS(test));
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
-        // Perform a map click using the feature info layer set
-        const queryResult = await this.getControllersRegistry().layerSetController.queryAtLonLat(clickCoordinate);
-
-        // Return the query result
-        return { gvLayer, data: queryResult };
+        // Query the layer at the given coordinates
+        const data = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, clickCoordinate);
+        return { gvLayer, data };
       },
       (test, result) => {
-        // Get the result for the layer in question
-        const resultAirborne = result.data[result.gvLayer.getLayerPath()];
+        const resultAirborne = result.data;
 
         // Check if the feature has a valid extent property
         test.addStep('Checking for results in the query...');
         Test.assertIsDefined('resultAirborne', resultAirborne);
-        Test.assertIsArrayLengthMinimal(resultAirborne.features, 1);
-        Test.assertIsDefined('resultAirborne.features[0]', resultAirborne.features?.[0]);
-        Test.assertIsDefined('resultAirborne.features[0].geometry', resultAirborne.features?.[0].geometry);
+        Test.assertIsArrayLengthMinimal(resultAirborne, 1);
+        Test.assertIsDefined('resultAirborne[0]', resultAirborne[0]);
+        Test.assertIsDefined('resultAirborne[0].geometry', resultAirborne[0].geometry);
       },
       (test, result) => {
         const gvLayer = result?.gvLayer ?? setupLayer;
