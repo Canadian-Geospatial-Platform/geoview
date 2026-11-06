@@ -1,10 +1,12 @@
 import type { Coordinate } from 'ol/coordinate';
+import { getCenter } from 'ol/extent';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
@@ -256,6 +258,70 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
+   * Tests that zoom-to-feature keeps the feature visible next to an open app-bar panel.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat - The coordinate on the map to query
+   * @returns A promise resolving when the test completes
+   */
+  testZoomToFeatureWithPanelOffset(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomWithPanelOffset>> {
+    return this.test(
+      `Test Zoom to feature keeps the feature out of the open details panel on layer ${layerPath}...`,
+      async (test) => {
+        // Get the layer and query the coordinate to get features
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat);
+
+        // Verify we have features with extent
+        test.addStep('Verifying feature has extent for zoom...');
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+        const feature = features[0];
+        Test.assertIsDefined('feature.extent', feature.extent);
+
+        // Make sure the details panel is open over the map and settled
+        await this.toggleAppbarTab(test, 'details', true);
+        await DomHelper.waitForReactIdle();
+
+        // Compute the padding like the Details zoom button does
+        test.addStep('Computing the panel-aware fit padding...');
+        const mapSize = this.getControllersRegistry().mapController.getMapSize();
+        const padding = MapFitPadding.getAppBarPanelPadding(this.getMapId(), 'details', mapSize);
+
+        // Zoom to the feature with the computed padding
+        test.addStep('Zooming to feature extent with the panel-aware padding...');
+        await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
+          layerPath,
+          feature,
+          feature.extent,
+          GVAbstractTester.USE_ZOOM_ANIMATION,
+          { padding }
+        );
+
+        // Locate the feature center on screen
+        const pixel = this.getMapViewer().map.getPixelFromCoordinate(getCenter(feature.extent));
+
+        // Return the test execution results
+        return {
+          basePaddingLeft: MapFitPadding.getDefaultPadding()[3],
+          paddingLeft: padding[3],
+          centerPixelX: pixel ? pixel[0] : undefined,
+        };
+      },
+      (test, result) => {
+        // Verify the open panel was detected as overlapping the map
+        test.addStep('Verifying the left padding includes the panel overlap...');
+        Test.assertIsEqual(result.paddingLeft > result.basePaddingLeft, true);
+
+        // Verify the feature center is outside the area covered by the panel
+        test.addStep('Verifying the feature center is in the part of the map not covered by the panel...');
+        Test.assertIsDefined('centerPixelX', result.centerPixelX);
+        Test.assertIsEqual(result.centerPixelX >= result.paddingLeft, true);
+      }
+    );
+  }
+
+  /**
    * Tests that nameField configuration controls the feature display label.
    *
    * @returns A promise resolving when the test completes
@@ -440,6 +506,16 @@ export class DetailsTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Result type for the testZoomToFeatureWithPanelOffset test execution. */
+export type TestZoomWithPanelOffset = {
+  /** The default left padding, in map pixels, without any panel offset. */
+  basePaddingLeft: number;
+  /** The left padding, in map pixels, including the open panel overlap. */
+  paddingLeft: number;
+  /** The x map pixel of the feature center after the zoom. */
+  centerPixelX: number | undefined;
+};
 
 /** Result type for the testClearAllHighlights test execution. */
 export type TestDetailsHighlights = {
