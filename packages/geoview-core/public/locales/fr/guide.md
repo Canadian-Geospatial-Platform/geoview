@@ -125,12 +125,8 @@ La carte n'est pas pleinement conforme au niveau AA des Règles pour l'accessibi
 - L'ouverture des panneaux déclenche des pièges de focus pour accélérer la navigation ; la touche Échap ferme les panneaux et ramène le focus sur l'élément déclencheur.
 - En mode plein écran, la touche Échap permet de quitter le mode plein écran plutôt que de fermer les panneaux qui ont été ouverts.
 - Dans un panneau latéral, appuyez sur **Tab** jusqu’à ce que sa zone de contenu défilante reçoive le focus, puis utilisez les touches **fléchées** pour la faire défiler. Le défilement reste dans le panneau lorsqu’il atteint le haut ou le bas.
-
-Le mouvement ou le positionnement de la souris peut provoquer un comportement inattendu en mode de navigation au clavier. Pour éviter ce problème :
-
-- Avant de tabuler vers la visionneuse pour activer le mode de navigation au clavier (WCAG), éloignez votre souris de la fenêtre du navigateur.
-- Évitez de déplacer votre souris après avoir activé le mode de navigation au clavier.
-- Avant d'activer le mode plein écran de la visionneuse, éloignez votre souris de l'endroit où la visionneuse apparaîtra, afin qu'elle ne chevauche pas la souris lorsque la visionneuse s'agrandit pour remplir l'écran. Placer la souris dans l'un des coins de votre écran devrait aider à éviter tout problème.
+- Sur les cartes dynamiques, utilisez **Paramètres**, sous Notifications, pour activer ou désactiver la navigation au clavier. Le mouvement de la souris ne désactive pas le mode ; les panneaux normaux conservent leurs limites de navigation au clavier tout en permettant une interaction volontaire avec les commandes à l'extérieur.
+- Le commutateur des paramètres reste ouvert et conserve le focus lorsqu'il change d'état. Échap ou **Fermer** ramène le focus aux paramètres ; un clic ailleurs conserve le focus sur la commande sélectionnée.
 
 ### Utilisateurs de lecteurs d'écran
 

@@ -34,6 +34,10 @@ Activating the keyboard crosshair replaces any stale mouse pointer position.
 
 On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the top "Skip to main content - Map" link. Activating that link focuses the map and activates crosshair-based interaction.
 
+- Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
+- Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.
+- Settings temporarily takes focus-trap ownership from another panel. Escape or its Close button returns focus to Settings; clicking elsewhere closes it without pulling focus away from the clicked target. Genuine modal dialogs keep strict focus containment.
+
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair
 
@@ -50,7 +54,7 @@ for developer guidance.
 
 #### Focus Traps for Enhanced Navigation
 
-In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a focus trap that confines keyboard navigation within that panel. Auto-opened panels may remain outside the active trap.
+In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a keyboard boundary within that panel. Only one inner panel owns that boundary at a time; opening Settings temporarily suspends the previous owner. Normal panels are non-modal, so deliberate pointer interaction outside them is permitted without changing the mode. Auto-opened panels may remain outside the active boundary.
 
 - This speeds up navigation by preventing focus from cycling through the entire map
 - Close the active panel or selection by pressing **Esc** — focus returns to the associated button
@@ -139,20 +143,15 @@ This mutual exclusion pattern supports multi-panel workflows:
 - Provides exit controls so users can return to the surrounding viewer navigation
 - Supports explicit activation (Enter/Space on a layer) to enter panel content
 
-### 3. Mouse Movement Can Disrupt WCAG Mode
+### 3. Alternating Mouse and Keyboard Input
 
 **Behavior:**
 
-Moving the mouse over the viewer after entering the keyboard-navigation flow exits keyboard mode and dismisses the entry prompt if it is still open. Pointer placement alone does not trigger this transition.
+Moving the mouse does not exit keyboard navigation mode. Users can alternate between pointer and keyboard input without losing the setting. Pointer interaction may move focus to the control being used; focus is not pulled back into the viewer when the user clicks outside a non-modal panel.
 
-To stay in keyboard navigation mode:
+The active panel's Tab/Shift+Tab boundary remains available while keyboard navigation is enabled. Use its Close or Exit control, or press Ctrl+Q, to leave the corresponding keyboard-navigation context. Static maps do not expose the Settings switch.
 
-- Move the pointer away from the viewer before entering keyboard mode
-- Avoid moving the mouse while navigating with the keyboard
-
-**Rationale:**
-
-Mouse movement is treated as a return to mouse interaction, so the viewer releases its keyboard focus trap. This explains the mode change; unresponsive buttons or broken focus traps are not intended behavior.
+Genuine modal dialogs continue to contain focus until they are dismissed.
 
 ---
 

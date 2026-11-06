@@ -213,7 +213,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...uiState,
-            focusItem: { activeElementId: uiFocus.activeElementId, callbackElementId: uiFocus.callbackElementId },
+            focusItem: { ...uiFocus },
             focusRestoreRequest: undefined,
           },
         });
@@ -594,8 +594,24 @@ export const useStoreUINavBarButtonPanelVersion = (): number =>
 /** Hooks the map-control popover close request counter. */
 export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewStore(), (state) => state.uiState.popoverCloseVersion);
 
+/**
+ * Gets the map-control popover close request counter.
+ *
+ * @param mapId - The map identifier
+ * @returns The current close request version
+ */
+export const getStoreUIPopoverCloseVersion = (mapId: string): number => getStoreUIState(mapId).popoverCloseVersion;
+
 /** Hooks the current focus-trap item from the UI state. */
 export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
+
+/**
+ * Gets the current focus-trap item from the map's UI state.
+ *
+ * @param mapId - The map identifier
+ * @returns The focus item and its focus-entry behavior
+ */
+export const getStoreUIFocusItem = (mapId: string): FocusItemProps => getStoreUIState(mapId).focusItem;
 
 /** Hooks the pending focus restoration request for the UI shell. */
 export const useStoreUIFocusRestoreRequest = (): TypeFocusRestoreRequest | undefined =>
@@ -603,6 +619,14 @@ export const useStoreUIFocusRestoreRequest = (): TypeFocusRestoreRequest | undef
 
 /** Hooks whether the GeoView-level keyboard focus trap is active. */
 export const useStoreUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
+
+/**
+ * Gets whether the GeoView-level keyboard focus trap is active.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether keyboard navigation mode is enabled
+ */
+export const getStoreUIActiveTrapGeoView = (mapId: string): boolean => getStoreUIState(mapId).activeTrapGeoView;
 
 /** Hooks the footer panel resize value. */
 export const useStoreUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
@@ -820,6 +844,9 @@ export type FocusItemProps = {
 
   /** The id of the element to restore focus to when the trap is released, or false. */
   callbackElementId: string | false;
+
+  /** Whether acquiring this focus owner should move focus to its Exit control. */
+  focusOnEntry?: boolean;
 };
 
 /** A one-shot request for the UI shell to restore focus after a focus trap closes. */
