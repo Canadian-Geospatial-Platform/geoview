@@ -100,7 +100,7 @@ import {
   getStoreMapStateJson,
   getStoreMapGeolocatorSearchArea,
 } from '@/core/stores/states/map-state';
-import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -1172,17 +1172,17 @@ export class MapViewer {
   /**
    * Simulate a map click and return promises of store update and ui update.
    *
+   * This will return the results of the query itself as a promise.
+   * Remember than the UI is batched and you should await for the batched results to propagate before verifying the results are appearing in the UI.
+   *
    * @param lonlat - The lonlat coordinates to simulate
    * @returns The simulated map click information
    */
-  simulateMapClick(lonlat: Coordinate): SimulatedMapClick {
+  simulateMapClick(lonlat: Coordinate): Promise<TypeFeatureInfoResultSet> {
     // Prepare the promise when the query initiated by the emitted map single-click event has ended
     const promiseQuery = this.controllers.layerSetController.featureInfoLayerSet
       .onceQueryEnded((event) => event.coordinate === lonlat)
       .then((event) => event.resultSet);
-
-    // Prepare the promise when the query + UI batch propagation delay + buffer to make sure of Zustand delays
-    const promiseQueryBatched = promiseQuery.then(() => delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH + 300));
 
     // Transform lonlat to map projection
     const projCode = this.getProjection().getCode();
@@ -1200,7 +1200,7 @@ export class MapViewer {
     this.#emitMapSingleClick(clickCoordinates);
 
     // Return the simulated map click information
-    return { promiseQuery, promiseQueryBatched };
+    return promiseQuery;
   }
 
   /**
@@ -3541,13 +3541,3 @@ export interface MarkerIconShowedEvent extends MapBaseEvent {
  * Delegate for the marker icon showed event handler function signature.
  */
 export type MarkerIconShowedDelegate = EventDelegateBase<MapViewer, MarkerIconShowedEvent, void>;
-
-/**
- * Define a return type for a map click simulation to be able to await on different promises.
- */
-export type SimulatedMapClick = {
-  /** Promise resolving when the query of the map click is complete */
-  promiseQuery: Promise<TypeFeatureInfoResultSet>;
-  /** Promise resolving when the query of the map click is complete and the UI has been updated */
-  promiseQueryBatched: Promise<void>;
-};
