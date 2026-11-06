@@ -3,6 +3,7 @@ import {
   type ReactNode,
   type ReactElement,
   type KeyboardEvent,
+  type MouseEvent,
   useEffect,
   useCallback,
   useState,
@@ -56,6 +57,7 @@ import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
 import Share from './buttons/share';
+import { Settings } from './buttons/settings';
 import { getSxClasses } from './app-bar-style';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
@@ -76,8 +78,12 @@ interface GroupPanelType {
 
 /** Props for the AppBar component. */
 type AppBarProps = {
+  /** The app-bar API. */
   api: AppBarApi;
+  /** Scrolls the shell into view when a panel opens. */
   onScrollShellIntoView: () => void;
+  /** Changes the existing keyboard-navigation mode. */
+  onKeyboardNavigationModeChange: (active: boolean) => void;
 };
 
 /** Record of button panel ids to their configuration. */
@@ -98,7 +104,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi, onScrollShellIntoView } = props;
+  const { api: appBarApi, onScrollShellIntoView, onKeyboardNavigationModeChange } = props;
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -132,7 +138,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
   geoviewElementRef.current = geoviewElement;
 
   // Scroll indicator state (consolidated to reduce re-renders)
-  const [scrollState, setScrollState] = useState({ isScrollable: false, canScrollUp: false, canScrollDown: false });
+  const [scrollState, setScrollState] = useState<{ isScrollable: boolean; canScrollUp: boolean; canScrollDown: boolean }>({
+    isScrollable: false,
+    canScrollUp: false,
+    canScrollDown: false,
+  });
   const appBarListRef = useRef<HTMLUListElement>(null);
   const rafIdRef = useRef<number | undefined>(undefined);
 
@@ -235,13 +245,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   /**
    * Handles when an app-bar button is clicked.
-   *
-   * @param buttonId - The id of the clicked button
    */
   const handleButtonClicked = useCallback(
-    (buttonId: string): void => {
+    (event: MouseEvent<HTMLButtonElement>): void => {
+      const buttonId = event.currentTarget.dataset.panelButtonId ?? '';
       // Get the button panel
       const buttonPanel = memoButtonPanels[buttonId];
+      if (!buttonPanel) {
+        logger.logError(`AppBar button references an unknown panel: ${buttonId}`);
+        return;
+      }
       uiController.setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
     [memoButtonPanels, uiController]
@@ -268,6 +281,22 @@ export function AppBar(props: AppBarProps): JSX.Element {
       uiController.setActiveAppBarTab(buttonId, false, false);
     },
     [uiController, isFocusTrapped, mapId, isCrosshairsActive]
+  );
+
+  /**
+   * Handles Escape on an app-bar panel.
+   */
+  const handlePanelKeyDown = useCallback(
+    (event: KeyboardEvent, buttonId: string): void => {
+      if (event.key === 'Escape') {
+        // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+        // eslint-disable-next-line no-restricted-syntax
+        const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
+        if (isLightboxOpen) return;
+      }
+      handleEscapeKey(event.key, () => handleGeneralCloseClicked(buttonId));
+    },
+    [handleGeneralCloseClicked]
   );
 
   /**
@@ -540,7 +569,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               tooltipPlacement="right"
               className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
               size="small"
-              onClick={() => handleButtonClicked(buttonPanel.button.id)}
+              data-panel-button-id={buttonPanel.button.id}
+              onClick={handleButtonClicked}
             >
               {buttonPanel.button.children}
             </IconButton>
@@ -605,7 +635,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
       </ListItem>
     );
 
-    // 5. Version
+    // 5. Settings is always available on dynamic maps and is intentionally not configuration-controlled.
+    if (interaction === 'dynamic') {
+      items.push(
+        <ListItem key="settings">
+          <Settings onKeyboardNavigationModeChange={onKeyboardNavigationModeChange} />
+        </ListItem>
+      );
+    }
+
+    // 6. Version
     items.push(
       <ListItem key="version">
         <Version />
@@ -613,7 +652,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
     );
 
     return items;
-  }, [memoBottomItems, showExportButton, showShareButton, mapId, activeModalId, sxClasses]);
+  }, [memoBottomItems, showExportButton, showShareButton, interaction, onKeyboardNavigationModeChange, mapId, activeModalId, sxClasses]);
 
   /**
    * Applies marginTop: auto to the first bottom item to push all items to the bottom.
@@ -696,23 +735,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               button={buttonPanel.button}
               onOpen={handlePanelOpen}
               onClose={handlePanelClose}
-              onKeyDown={(event: KeyboardEvent) => {
-                // Early exit if lightbox is handling ESC
-                if (event.key === 'Escape') {
-                  // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
-                  // eslint-disable-next-line no-restricted-syntax
-                  const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
-                  if (isLightboxOpen) {
-                    return;
-                  }
-                }
-                handleEscapeKey(event.key, () => {
-                  handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-                });
-              }}
-              onGeneralClose={() => {
-                handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-              }}
+              onKeyDown={handlePanelKeyDown}
+              onGeneralClose={handleGeneralCloseClicked}
             />
           );
         }

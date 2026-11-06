@@ -34,7 +34,8 @@ Read only the linked section of each doc: search for its heading and read to the
   Update the tracked count on decreases too, so adding a point after undo produces feedback.
 - On-map drawing hints (`DrawingHint`): mouse wording ("Click") by default; keyboard wording when keyboard navigation
   (`activeTrapGeoView`) or the crosshair is active, prefixed with `drawingHint.focusMap` (Ctrl+M) until the crosshair
-  is active. Never mix the two wordings in one message. Mouse use ends keyboard navigation mode, so test with keyboard input.
+  is active. Never mix the two wordings in one message. Pointer use does not end keyboard navigation mode; test
+  pointer actions while it is active and crosshair-only use while it is inactive.
   The hint is a `role="status"` live region (not `aria-hidden`): a screen reader hears the same text, no extra strings.
 - Pointer Enter/Space: `Crosshair` also handles Enter/Space at the mouse pointer while measuring or drawing (not
   editing). Pointer handlers are suspended then, so it tracks the pointer itself and focuses the map on pointer down.
@@ -178,20 +179,39 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
 - [Map](../../packages/geoview-core/src/core/components/map/map.tsx) updates crosshair state on Tab release
   for focus within its own root. It activates only when the map target itself is focused and does not
   manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
+- [MapViewer](../../packages/geoview-core/src/geo/map/map-viewer.ts) must not let mouseenter or
+  mouseleave move focus while `activeTrapGeoView` is enabled. Keep OpenLayers interactions configured
+  with `defaultInteractions({ onFocusOnly: false })` so wheel and drag input still works when another
+  control owns focus. A real map blur releases crosshair interactions only; it must not disable the mode.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
-  `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and enable its viewer-level trap.
-  [FocusTrapDialog](../../packages/geoview-core/src/core/containers/focus-trap.tsx) handles entry,
-  Ctrl+Q exit, and the shell mousemove listener. After Enable closes the dialog, focus
+  `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and keep its viewer-level Tab boundary.
+  The dynamic-map Settings switch and entry prompt must invoke the same mode lifecycle through the
+  Shell callback; never add a config flag or a separate mode state. Settings stays mounted in the app bar
+  below Notifications on dynamic maps only. After Enable closes the prompt, focus
   `DomHelper.getMainMap(mapId)`: the main-content skip link for dynamic maps, or the static map container.
   Do not focus the OpenLayers target or activate the crosshair on entry; the skip link owns that action.
-  Check `movementX`/`movementY`: zero movement must not
-  exit keyboard mode during resize/fullscreen transitions. Keep listener cleanup paired with exit.
+  The inactive entry prompt may be dismissed by real pointer movement outside the prompt, but movement
+  must not disable an already-enabled mode. Ignore zero movement and cancel any pending focus job when
+  dismissing the prompt.
   Fullscreen exit restores map focus for active crosshair drawing/measurement on the next animation
   frame, after browser focus restoration. Cancel pending restoration on controller unhook or fullscreen re-entry.
 - [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
-  coordinates active panel targets. Close-button visibility is not equivalent to active-trap ownership.
+  coordinates a single active inner focus owner; close-button visibility is not equivalent to ownership.
+  Use `focusOnEntry: false` when temporarily taking ownership for Settings so it does not jump to Exit.
+  Restore the previous owner after an Escape/Close dismissal, but do not steal focus after pointer
+  click-away or supersede focus after a genuine modal opens. Non-modal shell, panel, and Popper traps
+  may disable enforcement while retaining their Tab boundaries; never relax containment for actual
+  modal dialogs. Remove `aria-modal` from non-modal panels.
   App-bar panel Escape dismissal must use the same close handler as the header Close button:
   Details returns focus to the map while the crosshair is active, not to the Details toolbar button.
+  Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
+  a newer modal or panel.
+  About, Notifications, and navbar popovers read the current store owner in their coordination effects.
+  If a different active owner exists, close without restoring focus; acquire ownership only when unowned.
+  Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.
+  Use [useMapPopover](../../packages/geoview-core/src/core/components/common/hooks/use-map-popover.ts)
+  for app-bar map popovers so Ctrl/Cmd+M closure is derived before map focus and cannot reclaim focus
+  in a passive effect.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
   also checks toggle/mobile mode, content, and right-panel visibility.
 - Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. It takes the
@@ -263,6 +283,9 @@ Contract: [Select naming](../../docs/app/accessibility.md#select-naming) and
   `Omit<IconButtonProps, 'aria-label'>` plus required `'aria-label': string`.
   This catches missing props, not empty/meaningless labels. The wrapper forwards `aria-disabled`
   without blocking `onClick`; callers must return early in activation handlers.
+- [Switch](../../packages/geoview-core/src/ui/switch/switch.tsx) must use a caller-supplied `id`
+  consistently for both the input and `FormControlLabel.htmlFor`; otherwise the visible label may
+  not become the switch's accessible name. Verify custom-ID switches with a role/name accessibility query.
 - [Select](../../packages/geoview-core/src/ui/select/select.tsx) uses an exclusive label/aria-label
   union, but TypeScript accepts empty strings. Runtime checks log missing, conflicting, empty, or
   whitespace-only naming props through `logger.logError` without interrupting rendering.

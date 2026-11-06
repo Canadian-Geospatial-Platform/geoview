@@ -33,11 +33,15 @@ import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreAppNotifications } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import {
+  getStoreUIFocusItem,
+  useStoreUIActiveFocusItem,
+  useStoreUIActiveTrapGeoView,
+  type FocusItemProps,
+} from '@/core/stores/states/ui-state';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { getSxClasses } from './notifications-style';
 
@@ -293,6 +297,8 @@ const Notifications = memo((): JSX.Element => {
   const bellButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const removeAllButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
+  const previousOpenRef = useRef(open);
 
   // Ref to read the latest notificationsCount inside the notifications effect without making it a dep
   const notificationsCountRef = useRef(notificationsCount);
@@ -302,6 +308,7 @@ const Notifications = memo((): JSX.Element => {
   const notifications = useStoreAppNotifications();
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const focusItem = useStoreUIActiveFocusItem();
   const uiController = useUIController();
 
   // Get container
@@ -314,6 +321,7 @@ const Notifications = memo((): JSX.Element => {
   const closeButtonId = `${mapId}-notification-close-button`;
   const bellButtonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`;
   const removeAllButtonId = `${mapId}-notification-remove-all-button`;
+  const focusTrapId = `${mapId}-notification-focus-trap`;
 
   // Animation
   const shakeAnimation = useShake();
@@ -327,23 +335,68 @@ const Notifications = memo((): JSX.Element => {
    */
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
-      if (open) close();
-      else openAt(event.currentTarget);
+      if (open) {
+        close();
+        return;
+      }
+
+      const previousFocusItem = openAt(event.currentTarget);
+      if (activeTrapGeoView) {
+        previousFocusItemRef.current = previousFocusItem;
+        uiController.enableFocusTrap({
+          activeElementId: focusTrapId,
+          callbackElementId: bellButtonId,
+          focusOnEntry: false,
+        });
+      }
     },
-    [open, close, openAt]
+    [activeTrapGeoView, bellButtonId, close, focusTrapId, open, openAt, uiController]
   );
 
   /**
    * Handles when the user clicks away from the notification popover.
    */
+  const closePopover = useCallback(
+    (restoreTrigger: boolean): void => {
+      if (getStoreUIFocusItem(mapId).activeElementId === focusTrapId) {
+        uiController.enableFocusTrap({
+          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
+          focusOnEntry: false,
+        });
+      }
+      previousFocusItemRef.current = undefined;
+      close();
+      if (restoreTrigger) bellButtonRef.current?.focus();
+    },
+    [close, focusTrapId, mapId, uiController]
+  );
+
+  /**
+   * Closes the notifications popover without stealing click-away focus.
+   */
   const handleClickAway = useCallback((): void => {
-    if (open) close();
-  }, [open, close]);
+    if (open) closePopover(false);
+  }, [closePopover, open]);
+
+  /**
+   * Closes the notifications popover and returns focus to its button.
+   */
+  const handleClose = useCallback((): void => {
+    closePopover(true);
+  }, [closePopover]);
+
+  /**
+   * Handles Escape as a local, explicit popover dismissal.
+   */
+  const handleKeyDown = useCallback(
+    (key: string): void => {
+      if (key === 'Escape') closePopover(true);
+    },
+    [closePopover]
+  );
 
   /**
    * Removes a single notification.
-   *
-   * @param key - The notification key to remove
    */
   const handleRemoveNotification = useCallback(
     (key: string): void => {
@@ -378,6 +431,28 @@ const Notifications = memo((): JSX.Element => {
   );
 
   // #endregion Handlers
+
+  /**
+   * Acquires unowned focus in keyboard mode and yields to newer owners or controller closure.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('NOTIFICATIONS - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
+    const currentFocusItem = getStoreUIFocusItem(mapId);
+    if (open && currentFocusItem.activeElementId && currentFocusItem.activeElementId !== focusTrapId) {
+      closePopover(false);
+    } else if (open && activeTrapGeoView && currentFocusItem.activeElementId !== focusTrapId) {
+      if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
+      uiController.enableFocusTrap({
+        activeElementId: focusTrapId,
+        callbackElementId: bellButtonId,
+        focusOnEntry: false,
+      });
+    }
+
+    const wasOpen = previousOpenRef.current;
+    previousOpenRef.current = open;
+    if (wasOpen && !open) closePopover(false);
+  }, [activeTrapGeoView, bellButtonId, closePopover, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
 
   // Effects
   /**
@@ -471,7 +546,6 @@ const Notifications = memo((): JSX.Element => {
           role="dialog"
           id={dialogId}
           aria-labelledby={titleId}
-          aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
@@ -479,7 +553,7 @@ const Notifications = memo((): JSX.Element => {
           onClose={handleClickAway}
           container={shellContainer}
           focusSelector={`#${closeButtonId}`}
-          focusTrap={activeTrapGeoView}
+          focusTrap={activeTrapGeoView && focusItem.activeElementId === focusTrapId}
           modifiers={[
             {
               name: 'eventListeners',
@@ -495,11 +569,11 @@ const Notifications = memo((): JSX.Element => {
             },
           ]}
           sx={memoSxClasses.popper}
-          handleKeyDown={handleEscapeKey}
+          handleKeyDown={handleKeyDown}
         >
           <Paper component="section" sx={memoSxClasses.popoverPaper}>
             <NotificationHeader
-              onClose={handleClickAway}
+              onClose={handleClose}
               t={t}
               sxClasses={memoSxClasses}
               titleId={titleId}
