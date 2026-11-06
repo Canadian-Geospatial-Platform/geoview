@@ -5,7 +5,7 @@ import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-type
 import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -1073,6 +1073,27 @@ export abstract class DomHelper {
    */
   static getWCAGBottomLink(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'wcag-bottomlink');
+  }
+
+  /**
+   * Waits for the legend's panel button to render in an app bar or footer bar container.
+   *
+   * @param mapId - The map identifier
+   * @param containerType - The container where the legend is displayed
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+   * @returns A promise that resolves with the legend app bar button, or the legend footer bar tab
+   * @throws {Error} When the root element is not found or the button is not rendered before the timeout
+   */
+  static waitForLegendPanelButton(mapId: string, containerType: TypeContainerBox, timeout?: number): Promise<HTMLElement> {
+    // whenThisThen only resolves with a truthy value, so the element is never undefined
+    return whenThisThen(
+      (): HTMLElement | undefined =>
+        // The footer bar renders its panel buttons as tabs
+        containerType === CONTAINER_TYPE.APP_BAR
+          ? DomHelper.getAppBarButton(mapId, TABS.LEGEND)
+          : DomHelper.getGVElementById(mapId, `tab-${TABS.LEGEND}`),
+      timeout
+    ) as Promise<HTMLElement>;
   }
 
   /**

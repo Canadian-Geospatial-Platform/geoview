@@ -194,6 +194,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    * @param suffix - Optional suffix to append (e.g., '-panel-btn', '-panel')
    * @returns The full element ID
    */
+  // TODO: ALex, refactor this to use domHelper getAppBarButton, investigate footerBar as well #3638
   const getButtonElementId = useCallback(
     (buttonId: string, suffix?: string): string => {
       return `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}${suffix ?? ''}`;
