@@ -19,6 +19,11 @@ export function useAppBarPanelFitOptions(): () => GVFitOptions {
   const mapController = useMapController();
   const { tabId, isOpen } = useStoreUIActiveAppBarTab();
 
+  /**
+   * Gets the fit options whose padding keeps the open app-bar panel (if any) from obscuring the zoomed feature.
+   *
+   * @returns The fit options holding the padding in map pixels
+   */
   return useCallback((): GVFitOptions => {
     const padding =
       isOpen && tabId ? MapFitPadding.getAppBarPanelPadding(mapId, tabId, mapController.getMapSize()) : MapFitPadding.getDefaultPadding();
