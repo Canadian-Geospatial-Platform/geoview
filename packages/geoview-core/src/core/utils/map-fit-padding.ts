@@ -1,8 +1,5 @@
 import { DomHelper } from '@/core/utils/dom-helper';
-import { OL_ZOOM_PIXEL_PADDING } from '@/core/utils/constant';
-
-/** Map fit padding in map pixels ordered as top, right, bottom, left. */
-export type TypeMapFitPadding = [number, number, number, number];
+import { OL_ZOOM_PIXEL_PADDING, type TypeMapFitPadding } from '@/core/utils/constant';
 
 /** DOM measurements used to keep fitted extents out of the area covered by an app-bar panel. */
 export abstract class MapFitPadding {

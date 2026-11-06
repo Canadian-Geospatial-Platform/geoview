@@ -4,8 +4,7 @@ import type { Extent } from 'ol/extent';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
-import { OL_ZOOM_PIXEL_PADDING } from '@/core/utils/constant';
-import type { TypeMapFitPadding } from '@/core/utils/map-fit-padding';
+import type { TypeMapFitPadding } from '@/core/utils/constant';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
@@ -55,14 +54,6 @@ export interface TypeStacPreviewAsset {
  * Preview overlays are raw OpenLayers layers: they are not part of the GeoView layer system (no legend, no store entry).
  */
 export class StacBrowserController extends AbstractMapViewerController {
-  /** Padding (in pixels) used when zooming to a STAC extent, same as the feature zoom of Details and Data Table. */
-  static readonly ZOOM_PADDING: TypeMapFitPadding = [
-    OL_ZOOM_PIXEL_PADDING,
-    OL_ZOOM_PIXEL_PADDING,
-    OL_ZOOM_PIXEL_PADDING,
-    OL_ZOOM_PIXEL_PADDING,
-  ];
-
   /** Preview overlays currently on the map, keyed by a caller-provided id. */
   #overlays = new Map<string, BaseLayer>();
 
@@ -156,7 +147,7 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid (propagated from `zoomToExtent()`)
    */
-  zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeMapFitPadding = StacBrowserController.ZOOM_PADDING): Promise<void> {
+  zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeMapFitPadding): Promise<void> {
     const extent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), this.getMapViewer().getProjection(), 25);
     return this.getControllersRegistry().mapController.zoomToExtent(extent, true, {
       padding,
