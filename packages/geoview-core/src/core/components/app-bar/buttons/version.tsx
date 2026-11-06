@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
@@ -13,11 +13,15 @@ import { Box, Link } from '@/ui/layout';
 import { List } from '@/ui/list/list';
 import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { useShellContainer } from '@/core/containers/shell-container-context';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import {
+  getStoreUIFocusItem,
+  useStoreUIActiveFocusItem,
+  useStoreUIActiveTrapGeoView,
+  type FocusItemProps,
+} from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { DomHelper } from '@/core/utils/dom-helper';
@@ -68,6 +72,7 @@ export default function Version(): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const focusItem = useStoreUIActiveFocusItem();
   const uiController = useUIController();
 
   // Get container
@@ -75,8 +80,34 @@ export default function Version(): JSX.Element {
 
   // State
   const { open, anchorEl, openAt, close } = useMapPopover();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
+  const previousOpenRef = useRef(open);
+  const focusTrapId = DomHelper.buildAppBarVersionFocusTrapId(mapId);
+  const buttonId = DomHelper.buildAppBarVersionButtonId(mapId);
 
   // #region Handlers
+
+  /**
+   * Restores the previous inner focus owner without scheduling another focus jump.
+   *
+   * @param restoreTrigger - Whether this was an explicit keyboard dismissal
+   */
+  const closePanel = useCallback(
+    (restoreTrigger: boolean): void => {
+      const currentFocusItem = getStoreUIFocusItem(mapId);
+      if (currentFocusItem.activeElementId === focusTrapId) {
+        uiController.enableFocusTrap({
+          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
+          focusOnEntry: false,
+        });
+      }
+      previousFocusItemRef.current = undefined;
+      close();
+      if (restoreTrigger) buttonRef.current?.focus();
+    },
+    [close, focusTrapId, mapId, uiController]
+  );
 
   /**
    * Handles when the version button is clicked to toggle the popover.
@@ -84,39 +115,72 @@ export default function Version(): JSX.Element {
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       if (open) {
-        close();
-        uiController.disableFocusTrap();
+        closePanel(true);
         return;
       }
-      openAt(event.currentTarget);
-
-      // Register focus trap with button as the return target
-      uiController.enableFocusTrap({
-        activeElementId: DomHelper.buildAppBarVersionFocusTrapId(mapId),
-        callbackElementId: DomHelper.buildAppBarVersionButtonId(mapId),
-      });
+      const previousFocusItem = openAt(event.currentTarget);
+      if (activeTrapGeoView) {
+        previousFocusItemRef.current = previousFocusItem;
+        uiController.enableFocusTrap({
+          activeElementId: focusTrapId,
+          callbackElementId: buttonId,
+          focusOnEntry: false,
+        });
+      }
     },
-    [mapId, uiController, open, openAt, close]
+    [activeTrapGeoView, buttonId, closePanel, focusTrapId, open, openAt, uiController]
   );
 
   /**
    * Handles clicking away from the version popover to close it.
    */
   const handleClickAway = useCallback((): void => {
-    if (open) {
-      close();
-      // Restore focus to the button that opened the panel
-      uiController.disableFocusTrap();
-    }
-  }, [open, close, uiController]);
+    if (open) closePanel(false);
+  }, [closePanel, open]);
+
+  /**
+   * Handles Escape as an explicit keyboard dismissal.
+   */
+  const handleKeyDown = useCallback(
+    (key: string): void => {
+      if (key === 'Escape') closePanel(true);
+    },
+    [closePanel]
+  );
+
+  /**
+   * Closes the About panel and returns focus to its button.
+   */
+  const handleClose = useCallback((): void => {
+    closePanel(true);
+  }, [closePanel]);
 
   // #endregion
+
+  /**
+   * Coordinates this popover with the one active inner focus owner.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('VERSION - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
+    const currentFocusItem = getStoreUIFocusItem(mapId);
+    if (open && currentFocusItem.activeElementId && currentFocusItem.activeElementId !== focusTrapId) {
+      closePanel(false);
+    } else if (open && activeTrapGeoView && currentFocusItem.activeElementId !== focusTrapId) {
+      if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
+      uiController.enableFocusTrap({ activeElementId: focusTrapId, callbackElementId: buttonId, focusOnEntry: false });
+    }
+
+    const wasOpen = previousOpenRef.current;
+    previousOpenRef.current = open;
+    if (wasOpen && !open) closePanel(false);
+  }, [activeTrapGeoView, buttonId, closePanel, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={interaction === 'dynamic' ? memoSxClasses.versionButtonBoxDynamic : memoSxClasses.versionButtonBoxStatic}>
         <IconButton
           id={DomHelper.buildAppBarVersionButtonId(mapId)}
+          iconRef={buttonRef}
           aria-haspopup="dialog"
           aria-label={t('appbar.version')}
           tooltipPlacement="right"
@@ -132,7 +196,6 @@ export default function Version(): JSX.Element {
           role="dialog"
           id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-dialog`}
           aria-labelledby={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}
-          aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
@@ -155,7 +218,7 @@ export default function Version(): JSX.Element {
             },
           ]}
           sx={memoSxClasses.popper}
-          handleKeyDown={handleEscapeKey}
+          handleKeyDown={handleKeyDown}
         >
           <FocusTrapContainer
             focusTrapContainerId={DomHelper.buildAppBarVersionFocusTrapId(mapId)}
@@ -175,7 +238,7 @@ export default function Version(): JSX.Element {
                 <IconButton
                   sx={memoSxClasses.versionCloseButton}
                   className="buttonPopperClose"
-                  onClick={handleClickAway}
+                  onClick={handleClose}
                   size="small"
                   aria-label={t('general.close')}
                   tooltipPlacement="right"

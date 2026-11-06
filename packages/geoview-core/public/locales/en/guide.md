@@ -125,12 +125,8 @@ This map is not fully compliant with Web Content Accessibility Guidelines (WCAG)
 - Opening panels triggers focus traps to speed up navigation, with Esc closing panels and returning focus to the triggering element.
 - In full-screen mode, the Esc key will exit full-screen rather than close any panels that have been opened.
 - In a side panel, press **Tab** until its scrollable content area has focus, then use the **arrow** keys to scroll. Scrolling stays within the panel at its top and bottom edges.
-
-Mouse movement or placement can cause unexpected behaviour with keyboard navigation mode. To avoid this:
-
-- Before tabbing into the viewer to enter keyboard navigation (WCAG) mode, move your mouse away from the browser window.
-- Avoid moving your mouse after enabling keyboard navigation mode.
-- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+- On dynamic maps, use **Settings** below Notifications to turn keyboard navigation on or off. Mouse movement does not turn the mode off; normal panels keep their keyboard boundaries while allowing deliberate pointer interaction elsewhere.
+- The Settings switch stays open and focused when changed. Escape or **Close** returns focus to Settings; clicking elsewhere preserves focus on the control you clicked.
 
 ### Screen Reader Users
 

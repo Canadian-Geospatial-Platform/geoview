@@ -199,7 +199,6 @@ export function Geolocator(): JSX.Element {
       ref={panelRef}
       component="section"
       role={isPanelOpen ? 'dialog' : undefined}
-      aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')}
       sx={{ ...memoSxClasses.root, visibility: isPanelOpen ? 'visible' : 'hidden' }}
