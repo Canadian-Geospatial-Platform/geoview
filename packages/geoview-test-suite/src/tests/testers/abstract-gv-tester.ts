@@ -6,13 +6,14 @@ import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { generateId } from 'geoview-core/core/utils/utilities';
+import { delay, generateId } from 'geoview-core/core/utils/utilities';
 import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from 'geoview-core/core/stores/states/feature-info-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
@@ -1197,7 +1198,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * Adds the labour force GeoCore fixture and waits for all six Esri Dynamic raster sublayers and their legends.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns A promise that resolves with the loaded 'Canecumene' layer after its legend has been queried
    */
   async addLayerEsriDynamicWithRasterLayersViaGeocore<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
     const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
@@ -2243,11 +2244,10 @@ export abstract class GVAbstractTester extends AbstractTester {
   async simulateMapClickWaitForBatchedQuery(test: Test, clickCoordinates: Coordinate): Promise<void> {
     // Simulate map click
     test.addStep(`Simulating map click on all queryable layers for coordinate [${clickCoordinates.join(', ')}]...`);
-    const promiseMapclick = this.getMapViewer().simulateMapClick(clickCoordinates);
+    await this.getMapViewer().simulateMapClick(clickCoordinates);
 
     // Wait for batched query
-    test.addStep(`Waiting on the query to complete and get in the store...`);
-    await promiseMapclick.promiseQueryBatched;
+    await GVAbstractTester.waitForBatchedQueryPropagation(test);
   }
 
   /**
@@ -2355,6 +2355,19 @@ export abstract class GVAbstractTester extends AbstractTester {
     };
 
     return layerConfig as TypeGeoviewLayerConfig;
+  }
+
+  /**
+   * Logs a test step and waits for the query batching.
+   *
+   * @param test - The test instance used to log the propagation wait
+   * @returns A promise that resolves after the batching interval and buffer have elapsed
+   */
+  static async waitForBatchedQueryPropagation(test: Test): Promise<void> {
+    // Wait for the query to go through the batch logic in the UI
+    test.addStep(`Waiting on the query to complete and get in the store...`);
+    await delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH);
+    await DomHelper.waitForReactIdle();
   }
 
   // #endregion STATIC METHODS PUBLIC
