@@ -2304,15 +2304,10 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       'Test geocore inline listOfLayerEntryConfig override',
       async (test) => {
-        test.addStep('Adding geocore layer with inline custom listOfLayerEntryConfig...');
-        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(
-          geocoreUuid,
-          customLayerEntryConfig
-        );
+        // Add the geoview layer by geocore uuid
+        await this.addLayerOnMapFromUUID(test, geocoreUuid, customLayerEntryConfig);
 
-        test.addStep('Waiting for the geocore layer to be added...');
-        await result?.promiseLayer;
-
+        // Create map config from map state
         test.addStep('Creating map config from current map state...');
         return this.getControllersRegistry().mapController.createMapConfigFromMapState();
       },
@@ -2364,15 +2359,10 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       'Test geocore simplified inline layerName override precedence',
       async (test) => {
-        test.addStep('Adding geocore layer with simplified inline layerName override...');
-        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(
-          geocoreUuid,
-          customLayerEntryConfig
-        );
+        // Add the geoview layer by geocore uuid
+        await this.addLayerOnMapFromUUID(test, geocoreUuid, customLayerEntryConfig);
 
-        test.addStep('Waiting for the geocore layer to be added...');
-        await result?.promiseLayer;
-
+        // Create map config from map state
         test.addStep('Creating map config from current map state...');
         return this.getControllersRegistry().mapController.createMapConfigFromMapState();
       },
