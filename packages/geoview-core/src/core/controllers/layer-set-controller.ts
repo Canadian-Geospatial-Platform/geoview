@@ -195,6 +195,9 @@ export class LayerSetController extends AbstractMapViewerController {
    * Performs a details query at the provided longitude/latitude.
    * This call will also open the details panel if not already open.
    *
+   * This will return the results of the query itself as a promise.
+   * Remember than the UI is batched and you should await for the batched results to propagate before verifying the results are appearing in the UI.
+   *
    * @param longlat - The longitude/latitude coordinates to query
    */
   queryAtLonLat(longlat: Coordinate): Promise<TypeFeatureInfoResultSet> {
