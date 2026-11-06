@@ -109,17 +109,8 @@ export class GeochartTester extends GVAbstractTester {
     return this.test(
       'Test Geochart',
       async (test) => {
-        // Update the step
-        test.addStep(`Adding the layer on the map for ${uuid}`);
-
         // Add the geoview layer by geocore uuid
-        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid);
-
-        // Update the step
-        test.addStep(`Adding the layer on the map...`);
-
-        // Wait for the layer to be processed (bit optional)
-        await result?.promiseLayer;
+        await this.addLayerOnMapFromUUID(test, uuid);
 
         // Continue the test and return the layer
         return this.helperStepLayerWithGeochart(test, layerPathAdd, lonlat);
