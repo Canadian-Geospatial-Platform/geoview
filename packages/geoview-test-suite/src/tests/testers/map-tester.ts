@@ -16,6 +16,7 @@ import {
   type TypeMapMouseInfo,
   type TypeValidMapProjectionCodes,
   type TypeViewportBoundaryLonLat,
+  type TypeFeatureInfoEntry,
 } from 'geoview-core/api/types/map-schema-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
@@ -23,7 +24,6 @@ import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreDetailsFeatures,
   getStoreDetailsSelectedLayerPath,
-  type TypeFeatureInfoResultSetEntry,
   type TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/states/feature-info-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -1339,7 +1339,7 @@ export class MapTester extends GVAbstractTester {
    *
    * @param layerPath - The layer path to test
    * @param lonlat - The coordinates to query
-   * @returns A promise that resolves with the Test containing the number of layers in details state
+   * @returns A promise that resolves with the layer and feature arrays before disabling queries, while disabled, and after re-enabling
    */
   testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
     return this.test(
@@ -1354,46 +1354,22 @@ export class MapTester extends GVAbstractTester {
         // Wait for the layer to be loaded after the zoom, a guarantee
         await layer.waitForLoadedStatus();
 
-        // Perform a map click using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        const results1 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOnTemp = results1[layerPath];
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
+        // Query the layer at the given coordinates
+        const layerDataOn = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Set layer non queryable, this will also clear the result set automatically
         test.addStep(`Setting layer '${layerPath}' as non-queryable...`);
         layer.setQueryable(false);
 
-        // Perform a map click using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        const results2 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOffTemp = results2[layerPath];
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
+        // Query the layer at the given coordinates
+        const layerDataOff = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Set layer queryable again
         test.addStep(`Setting layer '${layerPath}' as queryable again...`);
         layer.setQueryable(true);
 
-        // Perform a map click using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        const results3 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOn2Temp = results3[layerPath];
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
+        // Query the layer at the given coordinates
+        const layerDataOn2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Return the test results
         return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
@@ -1403,15 +1379,15 @@ export class MapTester extends GVAbstractTester {
         const [layerDataOn, layerDataOff, layerDataOn2] = result.results;
 
         test.addStep('Verifying layer data features when queryable...');
-        Test.assertIsArray(layerDataOn?.features);
-        Test.assertIsArrayLengthEqual(layerDataOn.features, 2);
+        Test.assertIsArray(layerDataOn);
+        Test.assertIsArrayLengthEqual(layerDataOn, 2);
 
         test.addStep('Verifying no layer data features when non-queryable...');
-        Test.assertIsUndefined('features', layerDataOff?.features);
+        Test.assertIsUndefined('features', layerDataOff);
 
         test.addStep('Verifying layer data features when queryable again...');
-        Test.assertIsArray(layerDataOn2?.features);
-        Test.assertIsArrayLengthEqual(layerDataOn2.features, 2);
+        Test.assertIsArray(layerDataOn2);
+        Test.assertIsArrayLengthEqual(layerDataOn2, 2);
       },
       (_test, result) => {
         // Make sure to turn it back to queryable
@@ -1918,7 +1894,7 @@ type TypeFullscreenViewRestorationResult = {
 };
 
 /** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
-type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoResultSetEntry | undefined)[]>;
+type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoEntry[] | undefined)[]>;
 
 /** Represents a layer paired with hover feature information results collected before and after an operation. */
 type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
