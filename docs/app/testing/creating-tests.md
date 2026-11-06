@@ -149,11 +149,26 @@ map root. It throws `TestError` if the container is missing; reuse this root rat
 appending fixture maps to the runner page.
 
 ```typescript
-this.helperStepAddLayerOnMap(test, gvConfig); // Add layer and wait
-this.helperStepAddLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
-this.helperStepCheckLayerAtLayerPath(test, layerPath); // Wait for layer ready
-this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath); // Cleanup
+this.addLayerOnMap(test, gvConfig); // Add layer and wait for creation
+this.addLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
+this.waitLayerAtLayerPath(test, layerPath); // Wait for loading and legend resolution
+this.finalizeStepRemoveLayerAndAssert(test, layerPath); // Cleanup
 ```
+
+For successful layer setup, use a fixture-specific `addLayer...` helper on `GVAbstractTester`,
+such as `addLayerEsriDynamicHistoFloodEvents(test)` or `addLayerEsriFeatureForestIndustry(test)`.
+These helpers create the fixture configuration, add it to the map, and return the selected
+layer after loading and legend resolution. Multi-layer fixtures also wait for the required
+siblings. Assertions, the behavior under test, and cleanup remain in the tester.
+
+Fixture helpers own ID generation; callers derive runtime paths from the returned layer's
+`getLayerPath()` instead of creating IDs or paths before the test. GeoCore fixtures use their service
+UUID rather than a generated ID. For a test that returns query data or other observations, return
+the fixture alongside those observations (for example, `{ gvLayer, data: queryResult }`), so
+assertions and cleanup can use `result.gvLayer.getLayerPath()`. Multi-layer tests retain the returned
+layer instances and derive sibling or parent paths from those instances.
+Keep VPN/projection skip guards in the test before calling the helper. Tests expecting addition
+or loading errors continue using the lower-level helpers inside `testError()`.
 
 **Static helpers** on `LayerTester` (require explicit `mapId`):
 
