@@ -3,7 +3,20 @@ import type { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import type { DrawGeometryType } from '@/core/stores/states/drawer-state';
 import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
+/** Describes the visible map hint for drawing, measurement, or editing. */
+export type TypeDrawingHint = {
+    /** The tool that owns the drawing workflow. */
+    tool: 'drawing' | 'measurement';
+    /** Geometry workflow described by the hint. */
+    geometry: DrawGeometryType;
+    /** Whether the first coordinate has been placed. */
+    started: boolean;
+} | {
+    /** Identifies the editing workflow. */
+    tool: 'editing';
+} | undefined;
 /**
  * Represents the application-level Zustand store slice.
  *
@@ -27,8 +40,6 @@ export interface IAppState {
     geolocatorServiceURL: string | undefined;
     /** The URL of the metadata service used for layer metadata lookups. */
     metadataServiceURL: string | undefined;
-    /** The root HTML element that hosts the GeoView map instance. */
-    geoviewHTMLElement: HTMLElement;
     /** The current height (in pixels) of the map container. */
     height: number;
     /** The base URL for GeoView static assets (scripts, images, etc.). */
@@ -37,6 +48,8 @@ export interface IAppState {
     isCircularProgressActive: boolean;
     /** Whether the map crosshairs overlay is currently active. */
     isCrosshairsActive: boolean;
+    /** Current drawing instructions displayed on the map, if any. */
+    drawingHint: TypeDrawingHint;
     /** Whether the viewer is currently in fullscreen mode. */
     isFullscreenActive: boolean;
     /** The list of active notification messages shown to the user. */
@@ -55,6 +68,8 @@ export interface IAppState {
     actions: {
         setCircularProgress: (active: boolean) => void;
         setCrosshairActive: (active: boolean) => void;
+        /** Sets the visible drawing or editing instructions. */
+        setDrawingHint: (drawingHint: TypeDrawingHint) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
         setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
         setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
@@ -91,6 +106,8 @@ export declare const useStoreAppIsCircularProgressActive: () => boolean;
 export declare const getStoreAppIsCrosshairsActive: (mapId: string) => boolean;
 /** Hook that returns whether the crosshairs overlay is active. */
 export declare const useStoreAppIsCrosshairsActive: () => boolean;
+/** Hook that returns the current on-map drawing instructions. */
+export declare const useStoreAppDrawingHint: () => TypeDrawingHint;
 /**
  * Gets the disabled layer types for the given map.
  *
@@ -184,24 +201,6 @@ export declare const getStoreAppMetadataServiceURL: (mapId: string) => string | 
 /** Hook that returns the metadata service URL. */
 export declare const useStoreAppMetadataServiceURL: () => string | undefined;
 /**
- * Gets the root GeoView HTML element for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The HTML element hosting the map.
- */
-export declare const getStoreAppGeoviewHTMLElement: (mapId: string) => HTMLElement;
-/** Hook that returns the root GeoView HTML element for the current map. */
-export declare const useStoreAppGeoviewHTMLElement: () => HTMLElement;
-/**
- * Hook that returns a map-scoped element lookup for the current map.
- *
- * The returned function resolves an element by its map-relative suffix (without the `${mapId}-`
- * prefix) inside the current map's root element, so lookups never collide across maps on the page.
- *
- * @returns A stable function `(suffix) => HTMLElement | undefined` scoped to the current map
- */
-export declare const useGVElementById: () => ((suffix: string) => HTMLElement | undefined);
-/**
  * Gets the map container height for the given map.
  *
  * @param mapId - The map identifier.
@@ -246,25 +245,6 @@ export declare const useStoreAppNotifications: () => NotificationDetailsType[];
 export declare const getStoreAppShowUnsymbolizedFeatures: (mapId: string) => boolean;
 /** Hook that returns whether unsymbolized features should be displayed. */
 export declare const useStoreAppShowUnsymbolizedFeatures: () => boolean;
-/**
- * Hook that returns the shell container HTML element for the current map.
- *
- * Delegates to `useGVElementById` so the shell is resolved through the single reactive-lookup path
- * (map-scoped query anchored on the reactively-stored root element), rather than a hand-written query.
- *
- * @returns The shell container element.
- */
-export declare const useStoreAppShellContainer: () => HTMLElement;
-/**
- * Hook that returns the OpenLayers map target element for the current map.
- *
- * Reactive counterpart to `getGVMapTargetElement`: resolved through the reactive-lookup path so a component
- * re-renders once the element is mounted. Use this for render-time needs; use `getGVMapTargetElement(mapId)`
- * for imperative access in effects, handlers, controllers, or non-React code.
- *
- * @returns The map target element, or undefined when the map is not yet mounted.
- */
-export declare const useStoreAppMapTargetElement: () => HTMLElement | undefined;
 /**
  * Gets whether to show highlight bounding boxes around layer features for the given map.
  *
@@ -321,6 +301,13 @@ export declare const setStoreAppDisplayDateTimezone: (mapId: string, displayDate
  * @param active - Whether the crosshairs are active
  */
 export declare const setStoreAppCrosshairActive: (mapId: string, active: boolean) => void;
+/**
+ * Sets the current on-map drawing instructions.
+ *
+ * @param mapId - The map identifier
+ * @param drawingHint - The drawing type and whether its sketch has started
+ */
+export declare const setStoreAppDrawingHint: (mapId: string, drawingHint: TypeDrawingHint) => void;
 /**
  * Sets the fullscreen mode active state.
  *

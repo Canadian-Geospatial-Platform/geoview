@@ -4,13 +4,14 @@ import { Overlay } from 'ol';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
 import type { Extent } from 'ol/extent';
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
-import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeViewportBoundaryLonLat } from '@/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings, TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeViewportBoundaryLonLat, TypeScaleInfo } from '@/api/types/map-schema-types';
 import type { EffectiveLayerScales, TypeLegend } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -38,7 +39,6 @@ import { type GVFitOptions } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import { type TypeScaleInfo } from '@/core/stores/states/map-state';
 import { type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from './feature-highlight';
@@ -59,13 +59,19 @@ export declare class MapViewer {
     static readonly EFFECTIVE_SCALE_VISIBILITY_BUFFER = 0.11;
     /** Map features configuration properties */
     mapFeaturesConfig: TypeMapFeaturesConfig;
+    /** URL used to load the map configuration, when initialized from a config URL. */
+    readonly mapConfigUrl: string | undefined;
     /** The id of the map */
     mapId: string;
     /** The OpenLayers map instance */
     map: OLMap;
     /** Plugins attached to the map */
     plugins: PluginsContainer;
-    /** The overview map React root */
+    /**
+     * The separate overview-map React root, retained for cleanup.
+     *
+     * @deprecated Use the overview toggle's portal in the owning React tree; removed in a future breaking release
+     */
     overviewRoot: Root | undefined;
     /** Used to access button bar API to create buttons and button panels on the app-bar */
     appBarApi: AppBarApi;
@@ -115,16 +121,18 @@ export declare class MapViewer {
      *
      * @param mapFeaturesConfig - Map properties
      * @param i18instance - Language instance
+     * @param mapConfigUrl - Optional URL used to load the map configuration
      */
-    constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n);
+    constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n, mapConfigUrl?: string);
     /**
      * Create an Open Layer map from configuration attached to the class.
      * This function is called from a useEffect and should be running synchronously.
      *
      * @param mapElement - HTML element to create the map within
+     * @param keyboardTarget - HTML element to attach keyboard events to
      * @returns The OpenLayer map
      */
-    createMap(mapElement: HTMLElement): OLMap;
+    createMap(mapElement: HTMLElement, keyboardTarget: HTMLElement): OLMap;
     /**
      * Initializes map, layer class and geometries.
      * This function must be called once the Map is rendered.
@@ -148,6 +156,12 @@ export declare class MapViewer {
      * @returns The north pole marker overlay
      */
     getNorthPoleMarkerOverlay(): Overlay;
+    /**
+     * Retrieves the scale information from the DOM elements.
+     *
+     * @returns The scale information object
+     */
+    getScaleInfoFromDomElement(): TypeScaleInfo;
     /**
      * Gets a plugin by its id.
      *
@@ -527,42 +541,6 @@ export declare class MapViewer {
      */
     initTransformInteractions(options?: Partial<TransformOptions>): Transform;
     /**
-     * Gets the map keyboard event target element.
-     *
-     * @returns The map container HTML element, if found
-     */
-    getHTMLElementMapContainer(): HTMLElement | undefined;
-    /**
-     * Gets the scale control bar metric element.
-     *
-     * @returns The scale control bar metric HTML element, if found
-     */
-    getHTMLElementScaleControlBarMetric(): HTMLElement | undefined;
-    /**
-     * Gets the scale control bar imperial element.
-     *
-     * @returns The scale control bar imperial HTML element, if found
-     */
-    getHTMLElementScaleControlBarImperial(): HTMLElement | undefined;
-    /**
-     * Gets the north pole marker element.
-     *
-     * @returns The north pole marker HTML element, if found
-     */
-    getHTMLElementNorthPole(): HTMLElement | undefined;
-    /**
-     * Gets the click marker element.
-     *
-     * @returns The click marker HTML element, if found
-     */
-    getHTMLElementClickMarker(): HTMLElement | undefined;
-    /**
-     * Gets the map info bar element.
-     *
-     * @returns The map info bar HTML element, if found
-     */
-    getHTMLElementMapInfo(): HTMLElement | undefined;
-    /**
      * Calculates the height of the map-info bar in map coordinate units.
      *
      * This is useful for understanding how much of the map extent is hidden beneath the map-info bar overlay.
@@ -571,7 +549,7 @@ export declare class MapViewer {
      *
      * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
      */
-    getHTMLElementMapInfoHeightInMapUnits(): number;
+    getMapInfoHeightInMapUnits(): number;
     /**
      * Updates the OL View padding to account for the map-info bar height.
      *
@@ -581,12 +559,6 @@ export declare class MapViewer {
      * (e.g., on mount, expand/collapse).
      */
     updateViewPadding(): void;
-    /**
-     * Retrieves the scale information from the DOM elements.
-     *
-     * @returns The scale information object
-     */
-    getScaleInfoFromDomElement(): TypeScaleInfo;
     /**
      * Computes the effective minimum and maximum scales for a layer from its configuration and initial settings.
      *
@@ -654,6 +626,27 @@ export declare class MapViewer {
      * @throws {CancelledError} When another interaction interrupts the fit animation
      */
     fitViewportToMidpointsLonLat(midpointWSENCoords: readonly Coordinate[], useRotation?: boolean, useAnimation?: boolean): Promise<void>;
+    /**
+     * Gets map position information at a rendered viewport pixel, accounting for view padding and rotation.
+     *
+     * @param pixel - The pixel relative to the map viewport
+     * @returns The position information, or undefined before a coordinate transform is available
+     */
+    getMapPositionFromPixel(pixel: Pixel): TypeMapMouseInfo | undefined;
+    /**
+     * Gets the map position under a pointer given in browser client coordinates.
+     *
+     * @param clientX - The pointer X position in the browser viewport
+     * @param clientY - The pointer Y position in the browser viewport
+     * @returns The position, or undefined when the pointer is outside the map or the viewport has no size
+     */
+    getMapPositionFromClientPoint(clientX: number, clientY: number): TypeMapMouseInfo | undefined;
+    /**
+     * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
+     *
+     * @returns The position, or undefined before the viewport has a size
+     */
+    getViewportCenterPosition(): TypeMapMouseInfo | undefined;
     /**
      * Transforms extent from LonLat to the current projection of the map.
      *
@@ -732,6 +725,25 @@ export declare class MapViewer {
      * @param map - Map to unregister events on
      */
     unregisterMapPointerHandlers(map: OLMap): void;
+    /**
+     * Receives a map-scoped keyboard event from the React map component.
+     *
+     * @param event - The keyboard event and map focus context
+     */
+    notifyMapKeyboardEvent(event: MapKeyboardEvent): void;
+    /**
+     * Registers a map keyboard event callback.
+     *
+     * @param callback - The callback to be executed whenever a keyboard event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapKeyboardEvent(callback: MapKeyboardEventDelegate): MapKeyboardEventDelegate;
+    /**
+     * Unregisters a map keyboard event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapKeyboardEvent(callback: MapKeyboardEventDelegate): void;
     /**
      * Registers a map init event callback.
      *
@@ -1042,6 +1054,14 @@ export type GeometryJsonResponseGeometry = {
 /** Base interface for map events */
 export interface MapBaseEvent {
 }
+/** Event raised for a keyboard event scoped to a map instance. */
+export interface MapKeyboardEvent extends MapBaseEvent {
+    keyboardEvent: KeyboardEvent;
+    isTextInputFocused: boolean;
+    isMapTargetFocused: boolean;
+}
+/** Delegate for the map keyboard event handler function signature. */
+export type MapKeyboardEventDelegate = EventDelegateBase<MapViewer, MapKeyboardEvent, void>;
 /**
  * Delegate for the map init event handler function signature.
  */

@@ -198,7 +198,7 @@ export declare class WFS extends AbstractGeoViewVector {
     static getFieldType(fieldName: string, layerConfig: OgcWfsLayerEntryConfig): TypeOutfieldsType;
     /**
      * Generic format fallback strategy: tries the preferred format first, then falls back to no specific format.
-     * Accepts custom parse functions so callers can plug in their own fetch+parse pipeline.
+     * Accepts custom parse functions while retaining a common parsed WFS feature-page shape for paging.
      *
      * @param layerConfig - The WFS layer entry configuration
      * @param queryFnJSON - A function that receives a URL and optional request settings and queries the response as JSON
@@ -207,10 +207,26 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param outfields - Optional list of fields to return (propertyName parameter)
      * @param filter - Optional OGC XML filter string
      * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
-     * @returns A promise that resolves with the result of the parse function
+     * @returns A promise that resolves with all parsed features and their source projection
      * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
      * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
      */
-    static fetchWithFormatFallback<T>(layerConfig: OgcWfsLayerEntryConfig, queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<T>, queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<T>, outfields: TypeOutfields[] | undefined, bboxExtent: string | undefined, filter: string | undefined, srsName: string | undefined): Promise<T>;
+    static fetchWithFormatFallback(layerConfig: OgcWfsLayerEntryConfig, queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, outfields: TypeOutfields[] | undefined, bboxExtent: string | undefined, filter: string | undefined, srsName: string | undefined): Promise<TypeWFSFeaturePage>;
+    /**
+     * Reads WFS result paging counts from a JSON or XML feature collection.
+     *
+     * @param responseData - The raw WFS response
+     * @returns The numeric matched and returned counts, when provided by the service
+     */
+    static readWFSPageMetadata(responseData: unknown): TypeWFSPageMetadata;
 }
+/** Numeric result counts advertised by a WFS feature collection. */
+export type TypeWFSPageMetadata = {
+    /** Total matching features, when the service reports a numeric total. */
+    numberMatched?: number;
+    /** Features returned in this response page, when reported. */
+    numberReturned?: number;
+};
+/** Parsed WFS features and the response counts needed to detect a capped result. */
+export type TypeWFSFeaturePage = SourceFeaturesInfo & TypeWFSPageMetadata;
 //# sourceMappingURL=wfs.d.ts.map

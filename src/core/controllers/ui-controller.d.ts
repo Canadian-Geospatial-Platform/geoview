@@ -1,8 +1,8 @@
-import type { Coordinate } from 'ol/coordinate';
-import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { type FocusItemProps, type TypeFooterTabEntry } from '@/core/stores/states/ui-state';
+import { type TypeDrawingHint } from '@/core/stores/states/app-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -115,6 +115,12 @@ export declare class UIController extends AbstractMapViewerController {
      */
     disableFocusTrap(callbackElementId?: string): void;
     /**
+     * Completes a focus restoration request handled by the UI shell.
+     *
+     * @param requestId - The identifier of the completed request
+     */
+    completeFocusRestore(requestId: number): void;
+    /**
      * Sets the active state of the GeoView focus trap.
      *
      * @param active - Whether the GeoView trap is active
@@ -169,6 +175,22 @@ export declare class UIController extends AbstractMapViewerController {
      * @param active - Whether the crosshair is active
      */
     setCrosshairActive(active: boolean): void;
+    /**
+     * Closes map-control popovers and releases their focus trap without restoring caller focus.
+     */
+    closeMapPopovers(): void;
+    /**
+     * Returns focus to the measurement button.
+     *
+     * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+     */
+    focusMeasurementButton(): void;
+    /**
+     * Sets the current on-map drawing instructions.
+     *
+     * @param drawingHint - The drawing type and whether its sketch has started
+     */
+    setDrawingHint(drawingHint: TypeDrawingHint): void;
     /**
      * Activates or deactivates WCAG keyboard map interactions (pan and zoom).
      *
@@ -237,25 +259,6 @@ export declare class UIController extends AbstractMapViewerController {
      * @returns A promise that resolves when the guide has been created and stored
      */
     createGuide(): Promise<void>;
-    /**
-     * Gets the current geolocator search area from the store.
-     *
-     * @returns The current geolocator search area, or undefined if not set
-     */
-    getMapGeolocatorSearchArea(): {
-        coords: Coordinate;
-        bbox?: Extent;
-    } | undefined;
-    /**
-     * Gets the effective footer height for the map.
-     *
-     * Prefers a consumer-provided `data-footer-height` attribute on the root element, falling back to the store's
-     * app height. Combines a DOM read with a store value, so it lives on the controller rather than in `dom-helper`
-     * (which must stay store-free). Callable from non-React code via `mapViewer.controllers.uiController`.
-     *
-     * @returns The footer height as a CSS length string (e.g. '600px')
-     */
-    getFooterHeight(): string;
     /**
      * Resizes the map viewer height without destroying and recreating the MapViewer.
      *

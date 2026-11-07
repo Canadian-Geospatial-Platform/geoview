@@ -3,6 +3,17 @@ import type { IGeoViewColors, IGeoViewFontSizes } from '@/ui/style/types';
 export declare const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 /** Default base font size multiplier in rem units */
 export declare const defaultFontSize = 1;
+/** Canonical typography sizes in design pixels, converted through the owning theme's pxToRem. */
+export declare const TYPOGRAPHY_SCALE: {
+    readonly xs: 12;
+    readonly sm: 14;
+    readonly default: 16;
+    readonly md: 18;
+    readonly lg: 20;
+    readonly xl: 24;
+    readonly xxl: 32;
+    readonly display: 48;
+};
 /**
  * Named border-radius tokens, spread onto `theme.shape`.
  *
@@ -91,6 +102,13 @@ export declare const opacity: {
 };
 /** Default GeoView color palette with primary, secondary, and semantic colors */
 export declare const geoViewColors: IGeoViewColors;
-/** GeoView font size scale from xs to xxl with dynamic multiplier entries */
+/**
+ * Generates compatibility font sizes using the owning theme's calibrated conversion.
+ *
+ * @param pxToRem - Calibrated theme conversion from design pixels to rem
+ * @returns Named scale sizes and retained legacy multiplier entries
+ */
+export declare const getGeoViewFontSizes: (pxToRem: (size: number) => string) => IGeoViewFontSizes;
+/** @deprecated Uses an uncalibrated 16px root. Read the owning map's theme.typography instead. */
 export declare const geoViewFontSizes: IGeoViewFontSizes;
 //# sourceMappingURL=default.d.ts.map

@@ -41,6 +41,14 @@ export declare class NavBarApi {
      */
     getNavBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null;
     /**
+     * Sets the open state of a registered nav-bar panel.
+     *
+     * @param buttonPanelId - The id of the button panel
+     * @param isOpen - Whether the panel should be open
+     * @returns Whether the panel exists and can be opened
+     */
+    setButtonPanelOpen(buttonPanelId: string, isOpen: boolean): boolean;
+    /**
      * Removes a nav-bar button or panel using its id.
      *
      * @param buttonPanelId - The id of the panel or button to remove

@@ -28,8 +28,6 @@ import { type FetchWithProxyResult } from '@/geo/utils/utilities';
  */
 export declare abstract class AbstractGeoViewLayer {
     #private;
-    /** The default hit tolerance the query should be using */
-    static readonly DEFAULT_HIT_TOLERANCE: number;
     /** The default waiting time before showing a warning about the metadata taking a long time to get processed. */
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
     /** The interval between repeated metadata fetch warnings after the initial one has been shown. */
@@ -40,8 +38,6 @@ export declare abstract class AbstractGeoViewLayer {
     static readonly INTERNAL_OGCAPIFEATURE_FOR_WMS_GEOVIEW_LAYER_ID = "ogcApiFeatureConfigForWms";
     /** The default display date mode used when generating default configurations */
     static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode;
-    /** The default hit tolerance */
-    hitTolerance: number;
     /**
      * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.

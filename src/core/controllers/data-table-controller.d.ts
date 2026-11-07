@@ -45,6 +45,7 @@ export declare class DataTableController extends AbstractMapViewerController {
     setGlobalFilterRecord(layerPath: string, globalFilterValue: string): void;
     /**
      * Sets the column filters state for a specific layer in the data table, which determines the filters applied to individual columns for that layer.
+     * Empty filter values are omitted so the store only contains active filters.
      *
      * @param layerPath - The path of the layer to update
      * @param columnFilters - The column filters state to set for the layer

@@ -115,6 +115,13 @@ export declare const getStoreDataTableLayerSettings: (mapId: string) => Record<s
 /** Hook that returns the per-layer data table settings record. */
 export declare const useStoreDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 /**
+ * Gets the filtered row count recorded for a layer.
+ *
+ * @param layerPath - The layer path whose row count is read
+ * @returns The recorded filtered row count, or zero when no count is recorded
+ */
+export declare const getStoreDataTableRowsFilteredCount: (mapId: string, layerPath: string) => number;
+/**
  * Gets the feature info entries for a specific layer from the data table store.
  *
  * @param mapId - The map identifier

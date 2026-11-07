@@ -18,8 +18,6 @@ export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
  */
 export declare class EsriDynamic extends AbstractGeoViewRaster {
     #private;
-    static DEFAULT_HIT_TOLERANCE: number;
-    hitTolerance: number;
     /**
      * Constructs an EsriDynamic Layer configuration processor.
      *

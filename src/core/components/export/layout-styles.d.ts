@@ -52,7 +52,7 @@ export declare const SHARED_STYLES: {
     };
     readonly title: {
         readonly fontSize: 16;
-        readonly fontWeight: "semibold";
+        readonly fontWeight: "bold";
         readonly textAlign: "center";
         readonly marginBottom: 10;
     };
@@ -311,7 +311,7 @@ export declare const PDF_STYLES: {
     };
     readonly title: {
         readonly fontSize: 16;
-        readonly fontWeight: "semibold";
+        readonly fontWeight: "bold";
         readonly textAlign: "center";
         readonly marginBottom: 10;
     };
@@ -452,7 +452,7 @@ export declare const CANVAS_STYLES: {
     readonly title: {
         readonly fontSize: "16px";
         readonly margin: "0 0 10px 0";
-        readonly fontWeight: "semibold";
+        readonly fontWeight: "bold";
         readonly textAlign: "center";
         readonly marginBottom: 10;
     };

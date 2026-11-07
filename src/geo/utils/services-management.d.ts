@@ -1,3 +1,4 @@
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 /** Handles known service-specific quirks that require special treatment. */
 export declare class ServicesManagement {
     /**
@@ -29,5 +30,12 @@ export declare class ServicesManagement {
      * @returns The layer identifier with its `ms:` prefix added or removed
      */
     static toggleMsLayerIdPrefix(layerId: string): string;
+    /**
+     * If no primary-key outfield is configured, marks the first `pk_lyr_id` outfield as type `oid`, falling back to `id`.
+     * Field-name matching is case-insensitive; `pk_lyr_id` is preferred for CDTK layers.
+     *
+     * @param layerConfig - The layer configuration whose outfields are checked and may be modified
+     */
+    static guessAssignationOfPrimaryKeyField(layerConfig: AbstractBaseLayerEntryConfig): void;
 }
 //# sourceMappingURL=services-management.d.ts.map

@@ -20,6 +20,8 @@ export interface IFeatureInfoState {
     layerDataArrayBatchLayerPathBypass: string;
     /** The layer path of the currently selected layer in the details panel. */
     selectedLayerPath: string;
+    /** The index of the currently selected feature in the details panel. */
+    currentFeatureIndex: number;
     /** Whether the coordinate info feature is enabled. */
     coordinateInfoEnabled: boolean;
     /** Whether the coordinate info toggle switch is hidden from the UI. */
@@ -38,6 +40,7 @@ export interface IFeatureInfoState {
         setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
         setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
         setSelectedLayerPath: (selectedLayerPath: string) => void;
+        setCurrentFeatureIndex: (currentFeatureIndex: number) => void;
         setCoordinateInfoEnabled: (coordinateInfoEnabled: boolean) => void;
         updateCoordinateInfoLayer: (features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus) => void;
     };
@@ -53,6 +56,10 @@ export declare const LAYER_PATH_COORDINATE_INFO = "coordinate-info";
 export declare const getStoreDetailsSelectedLayerPath: (mapId: string) => string;
 /** Hook that returns the selected layer path in the details panel. */
 export declare const useStoreDetailsSelectedLayerPath: () => string;
+/** Gets the selected feature index in the details panel. */
+export declare const getStoreDetailsCurrentFeatureIndex: (mapId: string) => number;
+/** Hook that returns the selected feature index in the details panel. */
+export declare const useStoreDetailsCurrentFeatureIndex: () => number;
 /**
  * Gets the layer query status for a given layer path.
  *
@@ -127,6 +134,8 @@ export declare const setStoreDetailsLayerDataArrayBatchLayerPathBypass: (mapId: 
  * @param selectedLayerPath - The layer path to select
  */
 export declare const setStoreDetailsSelectedLayerPath: (mapId: string, selectedLayerPath: string) => void;
+/** Sets the selected feature index in the details panel. */
+export declare const setStoreDetailsCurrentFeatureIndex: (mapId: string, currentFeatureIndex: number) => void;
 /**
  * Adds a feature to the checked features list in the store.
  *

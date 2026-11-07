@@ -2,7 +2,7 @@ import { ConfigApi } from '@/api/config/config-api';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { Plugin } from '@/api/plugin/plugin';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { buildGVElementId, getGVElementById, getGVElementByFullId, getGVGuidebox, getGVMapTargetElement, getGVRootElement, getGVShellElement, queryGVSelector, queryGVSelectorAll } from '@/core/utils/dom-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import * as Utilities from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -28,21 +28,17 @@ export declare class API {
         date: typeof DateMgt;
         renderer: typeof GeoviewRenderer;
         dom: {
-            buildGVElementId: typeof buildGVElementId;
-            getGVRootElement: typeof getGVRootElement;
-            getGVElementById: typeof getGVElementById;
-            getGVElementByFullId: typeof getGVElementByFullId;
-            getGVMapTargetElement: typeof getGVMapTargetElement;
-            getGVShellElement: typeof getGVShellElement;
-            getGVGuidebox: typeof getGVGuidebox;
-            queryGVSelector: typeof queryGVSelector;
-            queryGVSelectorAll: typeof queryGVSelectorAll;
+            buildGVElementId: typeof DomHelper.buildGVElementId;
+            getGVRootElement: typeof DomHelper.getGVRootElement;
+            getGVElementById: typeof DomHelper.getGVElementById;
+            getGVElementByFullId: typeof DomHelper.getGVElementByFullId;
+            getGVMapTargetElement: typeof DomHelper.getMapTargetElement;
+            getGVShellElement: typeof DomHelper.getShellElement;
+            getGVGuidebox: typeof DomHelper.getGuidebox;
+            queryGVSelector: typeof DomHelper.queryGVSelector;
+            queryGVSelectorAll: typeof DomHelper.queryGVSelectorAll;
         };
     };
-    /**
-     * Initiates the event and projection objects.
-     */
-    constructor();
     /**
      * Gets the list of all map IDs currently in the collection.
      *
