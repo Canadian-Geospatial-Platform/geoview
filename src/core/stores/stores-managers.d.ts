@@ -50,6 +50,15 @@ export declare const helperDeleteFromArray: <T extends TypeResultSetEntry>(layer
  */
 export declare const helperPropagateArrayStoreBatch: <T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry>(mapId: string, layerDataArray: T[], batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>, timeDelayBetweenPropagations: number, onSetStoreLayerDataArray: (layerDataArray: T[]) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void) => Promise<void>;
 /**
+ * Waits for a subscribed value to become defined.
+ *
+ * @param getValue - Returns the current value, or undefined while it is unavailable
+ * @param subscribe - Registers a change listener and returns its unsubscribe function
+ * @returns A promise that resolves with the first defined value
+ * @throws When reading the value or subscribing throws
+ */
+export declare function helperWaitForValueWithSubscription<T>(getValue: () => T | undefined, subscribe: (listener: () => void) => () => void): Promise<T>;
+/**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
  */
 export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {

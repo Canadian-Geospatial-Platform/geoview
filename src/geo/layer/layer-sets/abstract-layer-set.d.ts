@@ -25,7 +25,7 @@ export declare abstract class AbstractLayerSet {
      * Constructs a new LayerSet instance.
      *
      * @param mapViewer - The MapViewer instance to work with
-     * @param controllerRegistry - The ControllerRegistry instance to work with
+     * @param controllerRegistry - The Controller Registry instance to work with
      * @param layerDomain - The LayerDomain instance to work with
      */
     constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
@@ -138,12 +138,13 @@ export declare abstract class AbstractLayerSet {
      */
     waitForLayerConfigToGetRegistered(layerPath: string): Promise<LayerConfigRegisteredEvent>;
     /**
-     * Waits for a layer config to be registered in the all-feature-info-layer-set.
+     * Waits for a layer's GV layer to be registered in this layer set.
      *
-     * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+     * The layer config must reach `processed` before its GV layer can be created and registered.
      *
      * @param layerPath - The unique path identifying the layer to check for registration
-     * @returns A promise that resolves when the layer is registered
+     * @returns A promise that resolves with the registration event
+     * @throws {Error} When the layer config is already in an error state or enters one before registration
      */
     waitForLayerToGetRegistered(layerPath: string): Promise<LayerRegisteredEvent>;
     /**

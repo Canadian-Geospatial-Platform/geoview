@@ -40,13 +40,6 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      */
     initializeLayerFilterState(layerPath: string): void;
     /**
-     * Checks if a layer is ready to have filters applied.
-     *
-     * @param layerPath - The layer path
-     * @returns True if the layer is in a 'processed' or 'loaded' state
-     */
-    isLayerReady(layerPath: string): boolean;
-    /**
      * Builds a SQL-like filter expression for a layer based on its current filter state.
      *
      * Includes both domain base filters (for attributes with filterMissingDomainValues)
@@ -135,27 +128,6 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      */
     getLayerFieldUniqueValues(layerPath: string, attribute: TypeFilterAttribute): (string | number)[];
     /**
-     * Processes unique values through domain mapping if applicable.
-     *
-     * Domain processing only applies to 'select' and 'multiselect' filter types.
-     * When a domain is defined:
-     * - Optionally filters out values not in the domain (if filterMissingDomainValues is true)
-     * - Orders values according to the domain order (not alphabetical)
-     *
-     * @param uniqueValues - Array of unique values from the layer (alphabetically sorted)
-     * @param attribute - The attribute configuration
-     * @returns Filtered and ordered array of values
-     */
-    processDomainForUniqueValues(uniqueValues: (string | number)[], attribute: TypeFilterAttribute): (string | number)[];
-    /**
-     * Gets the display label for a value using the attribute's domain mapping.
-     *
-     * @param attribute - The attribute configuration
-     * @param value - The raw value from the layer
-     * @returns The display label from the domain, or the stringified value if no domain match
-     */
-    getDisplayLabel(attribute: TypeFilterAttribute, value: string | number): string;
-    /**
      * Ensures that all configured layers have their features queried.
      *
      * This method reads the filter panel configuration and triggers feature queries
@@ -169,59 +141,6 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      * @returns A promise that resolves when all queries have been triggered (or skipped if not needed)
      */
     ensureLayerFeaturesQueried(): Promise<void>;
-    /**
-     * Computes timestamp bounds from unique date values.
-     *
-     * Parses date values (strings or epoch numbers) using DateMgt and returns
-     * the min/max timestamps along with formatted display dates.
-     *
-     * @param uniqueValues - Array of date values from layer features
-     * @returns Object with min/max timestamps and formatted display dates, or null if no valid dates
-     */
-    getDateBounds(uniqueValues: (string | number)[]): {
-        min: number;
-        max: number;
-        minDate: string;
-        maxDate: string;
-    } | null;
-    /**
-     * Formats a numeric value for display, grouped by thousands and locale-aware.
-     *
-     * @param value - The numeric value to format
-     * @param attribute - The filter attribute containing number format and currency information
-     * @returns The formatted number value as a string
-     */
-    formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string;
-    /**
-     * Formats a timestamp value for display in the UI.
-     *
-     * Uses DateMgt to format timestamps consistently across the application.
-     *
-     * @param timestamp - Milliseconds since epoch
-     * @returns Formatted date string (e.g., "Jan 15, 2020")
-     */
-    formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string;
-    /**
-     * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
-     *
-     * Uses DateMgt to ensure consistent date formatting in SQL filter strings.
-     *
-     * @param timestamp - Milliseconds since epoch
-     * @returns Date string in YYYY-MM-DD format
-     */
-    formatDateForFilter(timestamp: number): string;
-    /**
-     * Applies a calendar-aware date step to a timestamp.
-     *
-     * Uses Day.js (via DateMgt) to handle calendar arithmetic correctly,
-     * including variable-length months and leap years.
-     *
-     * @param timestamp - The starting timestamp in milliseconds
-     * @param dateStep - The step type from attribute config (day, week, month, year, etc.)
-     * @param direction - 1 for forward (right arrow), -1 for backward (left arrow)
-     * @returns The adjusted timestamp in milliseconds
-     */
-    applyDateStep(timestamp: number, dateStep: string, direction: 1 | -1): number;
     /**
      * Checks if a filter value is a range value.
      *
@@ -243,5 +162,86 @@ export declare class FilterPanelController extends AbstractMapViewerController {
      * @returns Escaped string
      */
     static escapeString(str: string): string;
+    /**
+     * Formats a numeric value for display, grouped by thousands and locale-aware.
+     *
+     * @param value - The numeric value to format
+     * @param attribute - The filter attribute containing number format and currency information
+     * @returns The formatted number value as a string
+     */
+    static formatNumberForDisplay(value: number, attribute: TypeFilterAttribute, displayLanguage: TypeDisplayLanguage): string;
+    /**
+     * Formats a timestamp value for display in the UI.
+     *
+     * Uses DateMgt to format timestamps consistently across the application.
+     *
+     * @param timestamp - Milliseconds since epoch
+     * @returns Formatted date string (e.g., "Jan 15, 2020")
+     */
+    static formatDateForDisplay(timestamp: number, displayLanguage: TypeDisplayLanguage): string;
+    /**
+     * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
+     *
+     * Uses DateMgt to ensure consistent date formatting in SQL filter strings.
+     *
+     * @param timestamp - Milliseconds since epoch
+     * @returns Date string in YYYY-MM-DD format
+     */
+    static formatDateForFilter(mapId: string, timestamp: number): string;
+    /**
+     * Checks if a layer is ready to have filters applied.
+     *
+     * @param layerPath - The layer path
+     * @returns True if the layer is in a 'processed' or 'loaded' state
+     */
+    static isLayerReady(mapId: string, layerPath: string): boolean;
+    /**
+     * Applies a calendar-aware date step to a timestamp.
+     *
+     * Uses Day.js (via DateMgt) to handle calendar arithmetic correctly,
+     * including variable-length months and leap years.
+     *
+     * @param timestamp - The starting timestamp in milliseconds
+     * @param dateStep - The step type from attribute config (day, week, month, year, etc.)
+     * @param direction - 1 for forward (right arrow), -1 for backward (left arrow)
+     * @returns The adjusted timestamp in milliseconds
+     */
+    static applyDateStep(timestamp: number, dateStep: string, direction: 1 | -1): number;
+    /**
+     * Gets the display label for a value using the attribute's domain mapping.
+     *
+     * @param attribute - The attribute configuration
+     * @param value - The raw value from the layer
+     * @returns The display label from the domain, or the stringified value if no domain match
+     */
+    static getDisplayLabel(attribute: TypeFilterAttribute, value: string | number): string;
+    /**
+     * Computes timestamp bounds from unique date values.
+     *
+     * Parses date values (strings or epoch numbers) using DateMgt and returns
+     * the min/max timestamps along with formatted display dates.
+     *
+     * @param uniqueValues - Array of date values from layer features
+     * @returns Object with min/max timestamps and formatted display dates, or null if no valid dates
+     */
+    static getDateBounds(uniqueValues: (string | number)[]): {
+        min: number;
+        max: number;
+        minDate: string;
+        maxDate: string;
+    } | null;
+    /**
+     * Processes unique values through domain mapping if applicable.
+     *
+     * Domain processing only applies to 'select' and 'multiselect' filter types.
+     * When a domain is defined:
+     * - Optionally filters out values not in the domain (if filterMissingDomainValues is true)
+     * - Orders values according to the domain order (not alphabetical)
+     *
+     * @param uniqueValues - Array of unique values from the layer (alphabetically sorted)
+     * @param attribute - The attribute configuration
+     * @returns Filtered and ordered array of values
+     */
+    static processDomainForUniqueValues(uniqueValues: (string | number)[], attribute: TypeFilterAttribute): (string | number)[];
 }
 //# sourceMappingURL=filter-panel-controller.d.ts.map

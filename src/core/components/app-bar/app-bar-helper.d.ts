@@ -8,6 +8,7 @@ import type { ButtonPanelType } from './app-bar';
  * @param setterCallback - State setter for the button panels record
  * @param status - Whether the panel should be open (true) or closed (false)
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export declare const helpOpenClosePanelByIdState: (buttonId: string, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>, status: boolean, isFocusTrapped?: boolean) => void;
 /**
@@ -16,6 +17,7 @@ export declare const helpOpenClosePanelByIdState: (buttonId: string, setterCallb
  * @param buttonId - The id of the button panel to open
  * @param setterCallback - State setter for the button panels record
  * @param isFocusTrapped - Optional whether focus should be trapped in the panel
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export declare const helpOpenPanelById: (buttonId: string, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>, isFocusTrapped?: boolean) => void;
 /**
@@ -27,6 +29,7 @@ export declare const helpOpenPanelById: (buttonId: string, setterCallback: Dispa
  * @param buttonId - The id of the button panel to close
  * @param setterCallback - State setter for the button panels record
  * @param focusWhenNoElementCallback - Optional callback invoked when the button element cannot be found
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export declare const helpClosePanelById: (mapId: string, buttonId: string, setterCallback: Dispatch<SetStateAction<Record<string, TypeButtonPanel>>>, focusWhenNoElementCallback?: () => void) => void;
 /**
@@ -34,16 +37,7 @@ export declare const helpClosePanelById: (mapId: string, buttonId: string, sette
  *
  * @param buttonPanels - The current button panels state
  * @param setterCallback - State setter for the button panels record
+ * @deprecated 2026-10-29 - Not used anymore - delete?
  */
 export declare const helpCloseAll: (buttonPanels: ButtonPanelType, setterCallback: Dispatch<SetStateAction<ButtonPanelType>>) => void;
-/**
- * Sorts a source array so that items in the enforce array appear first in the specified order.
- *
- * Items not in the enforce array retain their original relative order.
- *
- * @param sourceArray - The array to sort
- * @param enforce - The ordered list of items to prioritize
- * @returns The sorted array with enforced items first
- */
-export declare const enforceArrayOrder: (sourceArray: string[], enforce: string[]) => string[];
 //# sourceMappingURL=app-bar-helper.d.ts.map

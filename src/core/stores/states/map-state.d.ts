@@ -1,7 +1,7 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Size } from 'ol/size';
-import type { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker, TypeMapMouseInfo, TypeMapState, TypeCorePackagesConfig, TypeGlobalSettings, TypeViewSettings, TypeValidNavBarProps, TypeFooterBarProps, TypeAppBarProps, TypeOverviewMapProps, TypeValidMapComponentProps, TypeValidMapCorePackageProps, TypeExternalPackagesProps, TypeServiceUrls, TypeConfigMeta } from '@/api/types/map-schema-types';
+import type { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker, TypeMapMouseInfo, TypeMapState, TypeCorePackagesConfig, TypeGlobalSettings, TypeViewSettings, TypeValidNavBarProps, TypeFooterBarProps, TypeAppBarProps, TypeOverviewMapProps, TypeValidMapComponentProps, TypeValidMapCorePackageProps, TypeExternalPackagesProps, TypeServiceUrls, TypeConfigMeta, TypeScaleInfo } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -324,19 +324,6 @@ export declare const setStoreMapHighlightedFeatures: (mapId: string, highlighted
 export declare const setStoreMapMoveEnd: (mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: number, isNorthVisible: boolean, zoom: number, mapExtent: Extent, scale: TypeScaleInfo) => void;
 /** Sets the fix north state in the store. */
 export declare const setStoreMapFixNorth: (mapId: string, fixNorth: boolean) => void;
-/** Represents the map scale display information for metric and imperial units. */
-export interface TypeScaleInfo {
-    /** The line width for the metric scale bar. */
-    lineWidthMetric: string;
-    /** The label text for the metric scale bar. */
-    labelGraphicMetric: string;
-    /** The line width for the imperial scale bar. */
-    lineWidthImperial: string;
-    /** The label text for the imperial scale bar. */
-    labelGraphicImperial: string;
-    /** The numeric scale label. */
-    labelNumeric: string;
-}
 /** Represents the north arrow display state. */
 export interface TypeNorthArrow {
     /** The rotation angle in degrees as a string. */

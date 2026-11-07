@@ -145,6 +145,13 @@ export declare abstract class DateMgt {
     /** The default temporal mode to be used by the application. */
     static DEFAULT_TEMPORAL_MODE: TemporalMode;
     /**
+     * Checks whether a value is a Dayjs instance.
+     *
+     * @param value - The value to check
+     * @returns Whether the value is a Dayjs instance
+     */
+    static isDayjs(value: unknown): value is Dayjs;
+    /**
      * Checks whether an OGC time dimension contains comma-separated discrete values.
      *
      * @param ogcTimeDimension - The OGC time dimension value to check

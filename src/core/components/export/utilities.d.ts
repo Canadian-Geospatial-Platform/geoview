@@ -1,5 +1,5 @@
-import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/states/map-state';
+import type { TypeDisplayLanguage, TypeScaleInfo } from '@/api/types/map-schema-types';
+import type { TypeNorthArrow } from '@/core/stores/states/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { type TypeTimeSliderValues } from '@/core/stores/states/time-slider-state';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';

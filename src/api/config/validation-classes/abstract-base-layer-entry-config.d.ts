@@ -343,12 +343,11 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     hasOutfieldsPK(): boolean;
     /**
-     * Gets the out field which represents the primary key.
+     * Gets the out field which represents the primary key if any.
      *
-     * @returns The outfield
-     * @throws {NoPrimaryKeyFieldError} When no outfields has the type 'oid'
+     * @returns The primary key outfield, or undefined if none exists
      */
-    getOutfieldsPK(): TypeOutfields;
+    getOutfieldsPK(): TypeOutfields | undefined;
     /**
      * Gets the outfields representing date fields.
      *

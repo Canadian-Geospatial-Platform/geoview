@@ -61,6 +61,8 @@ export declare const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 700;
  * Breakdown: overview map (150px) + info bar (40px or 80px) + Room for navBar and spacing (balance).
  */
 export declare const OVERVIEW_MAP_MIN_CONTAINER_HEIGHT = 361;
+/** Top gap (in pixels) left above the map section when app-bar or map-info activation scrolls it into view. */
+export declare const MAP_SECTION_SCROLL_GAP_PX = 50;
 /** Layer lifecycle status values. */
 export declare const LAYER_STATUS: {
     readonly NEW_INSTANCE: "newInstance";

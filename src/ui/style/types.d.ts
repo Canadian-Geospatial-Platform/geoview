@@ -1,5 +1,19 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxProps } from '@mui/system';
+import type { TYPOGRAPHY_SCALE } from '@/ui/style/default';
+/** Named steps in the canonical design-pixel typography scale. */
+export type TypographyScaleKey = keyof typeof TYPOGRAPHY_SCALE;
+/** Standard MUI typography variants plus GeoView's label variant. */
+export type TypographyVariant = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'subtitle1' | 'subtitle2' | 'body1' | 'body2' | 'caption' | 'overline' | 'button' | 'label';
+/** Per-display-theme variant overrides restricted to canonical scale keys. */
+export type TypographyScaleOverrides = Partial<Record<TypographyVariant, TypographyScaleKey>>;
+/** Calibrated conversion and optional display-theme typography overrides. */
+export type ThemeTypographyInput = {
+    /** Converts design pixels with the calibrated base theme. */
+    pxToRem: (size: number) => string;
+    /** Optional scale-key substitutions for this display theme. */
+    scaleOverrides?: TypographyScaleOverrides;
+};
 declare const ColorKeyValues: number[];
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
@@ -98,7 +112,7 @@ export interface IGeoViewColors {
     /** WCAG-compliant focus indicator colors for keyboard navigation */
     focusIndicator: IGeoViewFocusIndicator;
 }
-/** GeoView font size scale interface from xs to xxl with dynamic key support */
+/** Compatibility font-size scale; prefer the owning map's theme.typography. */
 export interface IGeoViewFontSizes {
     xxl: string;
     xl: string;
@@ -107,7 +121,9 @@ export interface IGeoViewFontSizes {
     sm: string;
     xs: string;
     default: string;
-    [key: string]: string;
+    display?: string;
+    /** @deprecated Generated multiplier keys will be removed at the next breaking release. */
+    [key: string]: string | undefined;
 }
 /** GeoView spacing and sizing configuration for UI layout */
 export interface IGeoViewSpacingAndSizing {
