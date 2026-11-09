@@ -64,12 +64,10 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    const pDevTest0 = this.#coreTester.testProxyGetWMTSServiceMetadata();
-    const pDevTest1 = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#coreTester.testProxyGetWMTSServiceMetadata();
 
-    // Resolve when all
-    return Promise.all([pDevTest0, pDevTest1]);
+    return Promise.resolve();
   }
 
   /**
