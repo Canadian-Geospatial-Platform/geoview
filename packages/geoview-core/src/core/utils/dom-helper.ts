@@ -183,7 +183,10 @@ export abstract class DomHelper {
     }
     const visibleIcon = visibilityButton.querySelector('[data-testid="VisibilityOutlinedIcon"]');
     const hiddenIcon = visibilityButton.querySelector('[data-testid="VisibilityOffOutlinedIcon"]');
-    return Boolean(visibleIcon) && !hiddenIcon;
+    if (Boolean(visibleIcon) === Boolean(hiddenIcon)) {
+      throw new Error(`Layer visibility icon state is ambiguous for map '${mapId}', container '${containerType}', layer '${layerPath}'`);
+    }
+    return Boolean(visibleIcon);
   }
 
   /**
