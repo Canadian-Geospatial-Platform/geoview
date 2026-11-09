@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SvgIcon, ClickAwayListener, useTheme } from '@mui/material';
 
-import { useUIController } from '@/core/controllers/use-controllers';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
 import { GeoCaIcon } from '@/ui/svg/svg-icon';
 import { CloseIcon, GitHubIcon } from '@/ui/icons';
@@ -15,13 +14,9 @@ import { Paper } from '@/ui/paper/paper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
+import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
 import { useShellContainer } from '@/core/containers/shell-container-context';
-import {
-  getStoreUIFocusItem,
-  useStoreUIActiveFocusItem,
-  useStoreUIActiveTrapGeoView,
-  type FocusItemProps,
-} from '@/core/stores/states/ui-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { DomHelper } from '@/core/utils/dom-helper';
@@ -73,7 +68,6 @@ export default function Version(): JSX.Element {
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const focusItem = useStoreUIActiveFocusItem();
-  const uiController = useUIController();
 
   // Get container
   const shellContainer = useShellContainer();
@@ -81,10 +75,9 @@ export default function Version(): JSX.Element {
   // State
   const { open, anchorEl, openAt, close } = useMapPopover();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
-  const previousOpenRef = useRef(open);
   const focusTrapId = DomHelper.buildAppBarVersionFocusTrapId(mapId);
   const buttonId = DomHelper.buildAppBarVersionButtonId(mapId);
+  const { claimFocusOwner, releaseFocusOwner, synchronizeOwnership } = usePopoverFocusOwner(focusTrapId, buttonId, close);
 
   // #region Handlers
 
@@ -95,18 +88,11 @@ export default function Version(): JSX.Element {
    */
   const closePanel = useCallback(
     (restoreTrigger: boolean): void => {
-      const currentFocusItem = getStoreUIFocusItem(mapId);
-      if (currentFocusItem.activeElementId === focusTrapId) {
-        uiController.enableFocusTrap({
-          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
-          focusOnEntry: false,
-        });
-      }
-      previousFocusItemRef.current = undefined;
+      releaseFocusOwner();
       close();
       if (restoreTrigger) buttonRef.current?.focus();
     },
-    [close, focusTrapId, mapId, uiController]
+    [close, releaseFocusOwner]
   );
 
   /**
@@ -120,15 +106,10 @@ export default function Version(): JSX.Element {
       }
       const previousFocusItem = openAt(event.currentTarget);
       if (activeTrapGeoView) {
-        previousFocusItemRef.current = previousFocusItem;
-        uiController.enableFocusTrap({
-          activeElementId: focusTrapId,
-          callbackElementId: buttonId,
-          focusOnEntry: false,
-        });
+        claimFocusOwner(previousFocusItem);
       }
     },
-    [activeTrapGeoView, buttonId, closePanel, focusTrapId, open, openAt, uiController]
+    [activeTrapGeoView, claimFocusOwner, closePanel, open, openAt]
   );
 
   /**
@@ -162,18 +143,8 @@ export default function Version(): JSX.Element {
    */
   useEffect(() => {
     logger.logTraceUseEffect('VERSION - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
-    const currentFocusItem = getStoreUIFocusItem(mapId);
-    if (open && currentFocusItem.activeElementId && currentFocusItem.activeElementId !== focusTrapId) {
-      closePanel(false);
-    } else if (open && activeTrapGeoView && currentFocusItem.activeElementId !== focusTrapId) {
-      if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
-      uiController.enableFocusTrap({ activeElementId: focusTrapId, callbackElementId: buttonId, focusOnEntry: false });
-    }
-
-    const wasOpen = previousOpenRef.current;
-    previousOpenRef.current = open;
-    if (wasOpen && !open) closePanel(false);
-  }, [activeTrapGeoView, buttonId, closePanel, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
+    synchronizeOwnership(open, activeTrapGeoView);
+  }, [activeTrapGeoView, focusItem.activeElementId, open, synchronizeOwnership]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>

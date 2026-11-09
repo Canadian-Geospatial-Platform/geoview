@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
@@ -7,6 +7,7 @@ import {
   useStoreUIPopoverCloseVersion,
   type FocusItemProps,
 } from '@/core/stores/states/ui-state';
+import { logger } from '@/core/utils/logger';
 
 /** The open state and handlers of a map-control popover. */
 interface MapPopoverState {
@@ -37,6 +38,14 @@ export function useMapPopover(): MapPopoverState {
   const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
 
   const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
+
+  /**
+   * Clears the stale anchor after render has already closed a controller-dismissed popover.
+   */
+  useEffect((): void => {
+    logger.logTraceUseEffect('USE-MAP-POPOVER - clear stale anchor', openedAtCloseVersion, popoverCloseVersion);
+    if (anchorEl !== null && openedAtCloseVersion !== popoverCloseVersion) setAnchorEl(null);
+  }, [anchorEl, openedAtCloseVersion, popoverCloseVersion]);
 
   /**
    * Closes other popovers on the same map, then opens this one anchored to the given element.

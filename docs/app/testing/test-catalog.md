@@ -81,13 +81,13 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 11         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 18         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
-| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 8          | Mixed parallel + sequential |
+| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 14         | Mixed parallel + sequential |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 16         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **289**    |                             |
+| **Total**         |                         |                                                                                                 | **295**    |                             |
 
 ---
 
@@ -811,18 +811,24 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-ui` · **File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
-**Execution:** Independent tests in parallel, then focus and isolated page-scrolling tests sequentially once no other suite on the page is running · **Guard:** Focus tests skip when their map's test panel is hidden
+**Execution:** Independent tests in parallel, then focus and isolated page-scrolling tests sequentially once no other suite on the page is running · **Guard:** Skip/AppBar focus tests skip when their map's test panel is hidden; popover ownership tests use isolated viewers
 
 | #   | Method                                | Type | Description                                                                          |
 | --- | ------------------------------------- | ---- | ------------------------------------------------------------------------------------ |
 | 1   | `testGuideDetailsPanelTopAnchor`      | test | Test Details Panel - Select and Find Top Anchor                                      |
 | 2   | `testControllerGetFooterHeight`       | test | Test UIController.getFooterHeight (non-React consumer)                               |
 | 3   | `testSkipFocusReturnsToMapLinks`      | test | WCAG Skip returns focus to this map's top and bottom links                            |
-| 4   | `testAppBarFocusRestoreYieldsToNewerFocus` | test | AppBar focus restoration preserves newer focus and normal close return               |
+| 4   | `testAppBarFocusRestoreYieldsToNewerFocus` | test | AppBar preserves newer focus, normal button return, and keyboard-query map focus/crosshair restoration |
 | 5   | `testMapSectionScroll('partial')`     | test | Clipped map-info and top clipping; complete section visibility and repeat stability  |
 | 6   | `testMapSectionScroll('transitions')` | test | Real footer-tab, app-bar and map-info click paths and final viewport bounds          |
 | 7   | `testMapSectionScroll('visible')`     | test | Already visible map remains stationary on repeated activation                        |
 | 8   | `testMapSectionScroll('oversized')`   | test | Taller-than-viewport map aligns with the top gap and stays stable                    |
+| 9   | `testPopoverFocusOwnership('version')` | test | About acquisition, Escape restoration, controller closure without focus return, and yielding |
+| 10  | `testPopoverFocusOwnership('notifications')` | test | Notifications acquisition, Escape restoration, controller closure without focus return, and yielding |
+| 11  | `testPopoverFocusOwnership('navbar')` | test | API/button opening, status echoes, controller closure, restoration/yielding, and unmount cleanup with/without a newer owner |
+| 12  | `testPopoverFocusOwnership('settings')` | test | Settings acquisition, guarded trigger restoration, controller closure without focus return, and yielding |
+| 13  | `testPopperKeyboardBoundary` | test | Attribution trigger Escape; popover/anchor event boundaries, prevented events, callback/virtual anchors, and independent popovers |
+| 14  | `testResizePopoverFocusRestoration` | test | Fullscreen footer Resize explicit Close/Escape/Enter restoration; click-away, pointer commit, and newer-focus preservation |
 
 ---
 

@@ -472,6 +472,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - focus restore on close', isOpen, tabId);
 
+    if (focusRestoreTimeoutRef.current !== undefined) return;
+
     if (!isOpen && tabId) {
       // Get the AppBar button element for the current tab
       const buttonElement = DomHelper.getAppBarButton(mapId, tabId);

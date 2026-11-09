@@ -45,6 +45,8 @@ Source boundaries most likely to produce misleading tests:
 - Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
 - Instance cleanup/helpers differ from LayerTester static assertions requiring mapId.
+- Isolated UI fixtures created with `createMapFromConfigFast` must await `waitForMapReady()` before deletion;
+  otherwise deferred initialization can register handlers against an already-disposed map.
 
 ### Coverage Review — Mapping Changed Code to Tests
 

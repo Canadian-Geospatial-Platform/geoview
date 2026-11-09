@@ -111,6 +111,8 @@ declare module '@mui/material/styles/components' {
 
 declare module '@mui/material/styles/zIndex' {
   interface ZIndex {
+    /** Default floating-popover layer; absent in external MUI themes. */
+    popper?: number;
     olControl: number;
     focusDialog: number;
   }

@@ -26,6 +26,8 @@ Read only the linked section of each doc: search for its heading and read to the
   `aria-pressed` for button toggles, or checkbox semantics for visibility controls.
 - Do not invent focus outlines; reuse theme helpers. `@/ui` custom theme extension reads need `?.`.
 - Use `@/ui` components/icons, not direct MUI UI imports. Standard MUI hooks/types are allowed.
+- The shared Popper defaults to `theme.zIndex.popper` (2000), with the historical 2000 fallback for external
+  MUI themes. Caller `sx` still overrides the default; do not normalize consumer stacking levels during token maintenance.
 - Components take mapId/ControllerRegistry, never MapViewer.
 - Preserve WCAG notes and intentional interaction exceptions.
 - For repeated-action status messages, check consecutive updates rather than only the first one;
@@ -204,11 +206,27 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   modal dialogs. Remove `aria-modal` from non-modal panels.
   App-bar panel Escape dismissal must use the same close handler as the header Close button:
   Details returns focus to the map while the crosshair is active, not to the Details toolbar button.
+  While explicit delayed restoration is pending, skip the immediate close-effect fallback; otherwise its
+  toolbar-button focus is mistaken for newer user focus and blocks map return and crosshair reactivation.
   Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
   a newer modal or panel.
   About, Notifications, and navbar popovers read the current store owner in their coordination effects.
   If a different active owner exists, close without restoring focus; acquire ownership only when unowned.
   Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.
+  Shared snapshot capture, acquisition, release, and coordination live in
+  [usePopoverFocusOwner](../../packages/geoview-core/src/core/components/common/hooks/use-popover-focus-owner.ts).
+  About, Notifications, and navbar effects invoke its common coordination operation; Settings retains its
+  mode-specific effects and guarded trigger-focus policy while sharing the ownership operations.
+  Once `open` is false, ownership coordination only releases ownership; it must not request closure again.
+  The shared hook also releases ownership on unmount, without overwriting a newer owner or moving DOM focus.
+  `useMapPopover` clears stale anchors after controller dismissal, while still deriving closure during render.
+  The shared Popper keyboard boundary includes its content and owning DOM anchor (including callback anchors),
+  but not unrelated controls or virtual-anchor context elements. Attribution keeps focus on its trigger,
+  so Escape must be accepted there; preserve the `defaultPrevented` guard for nested keyboard handlers.
+  Fullscreen footer Resize owns explicit-dismissal restoration in
+  [ResizeFooterPanel](../../packages/geoview-core/src/core/components/footer-bar/hooks/resize-footer-panel.tsx):
+  Close, Escape, and slider Enter return focus to Resize after reflow, unless another control has gained focus.
+  Click-away and pointer commits do not request restoration. Cancel delayed restoration on reopening or unmount.
   Programmatic navbar opens must capture that snapshot before clearing ownership; ignore status echoes
   for already-open panels so the user-opening snapshot is not replaced.
   Use [useMapPopover](../../packages/geoview-core/src/core/components/common/hooks/use-map-popover.ts)
