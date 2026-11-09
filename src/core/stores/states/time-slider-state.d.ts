@@ -85,6 +85,15 @@ export declare const useStoreTimeSliderLayers: () => TimeSliderLayerSet | undefi
  * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
  */
 export declare const getStoreTimeSliderLayer: (mapId: string, layerPath: string) => TypeTimeSliderValues | undefined;
+/**
+ * Waits for a time-slider layer to be added to the store.
+ *
+ * @param mapId - The map id
+ * @param layerPath - The layer path to wait for
+ * @returns A promise that resolves with the registered time-slider values
+ * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized
+ */
+export declare function waitForStoreTimeSliderLayer(mapId: string, layerPath: string): Promise<TypeTimeSliderValues>;
 /** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
 export declare const useStoreTimeSliderLayer: (layerPath: string) => TypeTimeSliderValues | undefined;
 /**

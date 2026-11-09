@@ -213,10 +213,35 @@ export declare class MapController extends AbstractMapViewerController {
      */
     getPixelFromCoordinate(coord: Coordinate): Pixel | undefined;
     /**
+     * Gets map position information at a rendered viewport pixel, accounting for view padding and rotation.
+     *
+     * @param pixel - The pixel relative to the map viewport
+     * @returns The position information, or undefined before a coordinate transform is available
+     */
+    getMapPositionFromPixel(pixel: Pixel): TypeMapMouseInfo | undefined;
+    /**
+     * Gets the map position under a pointer given in browser client coordinates.
+     *
+     * @param clientX - The pointer X position in the browser viewport
+     * @param clientY - The pointer Y position in the browser viewport
+     * @returns The position, or undefined when the pointer is outside the map or the viewport has no size
+     */
+    getMapPositionFromClientPoint(clientX: number, clientY: number): TypeMapMouseInfo | undefined;
+    /**
+     * Gets the map position under the crosshair, centered on the full viewport rather than the padded view.
+     *
+     * @returns The position, or undefined before the viewport has a size
+     */
+    getViewportCenterPosition(): TypeMapMouseInfo | undefined;
+    /**
+     * Synchronizes the pointer store with the center of the rendered crosshair viewport.
+     */
+    synchronizeCrosshairPointerPosition(): void;
+    /**
      * Gets the current map center as a TypeMapMouseInfo object.
      *
-     * Useful as a fallback when the pointer position store has not been set yet
-     * (e.g., when the crosshair is first activated and the user hasn't panned).
+     * This is the logical view center, which can differ from the viewport midpoint when padding is set.
+     * Use getMapPositionFromPixel for interactions anchored to a rendered pixel.
      *
      * @returns The map center position info
      */
@@ -282,6 +307,7 @@ export declare class MapController extends AbstractMapViewerController {
      * Sets the React root for the overview map so it can be destroyed with the map element.
      *
      * @param overviewRoot - The React root element for the overview map
+     * @deprecated Use the overview toggle's portal in the owning React tree; removed in a future breaking release
      */
     setMapOverviewMapRoot(overviewRoot: Root): void;
     /**
@@ -430,11 +456,34 @@ export declare class MapController extends AbstractMapViewerController {
      */
     setActiveMeasurementDraw(draw: Draw | undefined): void;
     /**
+     * Stops measurement before another drawing or editing interaction takes ownership.
+     */
+    stopActiveMeasurement(): void;
+    /**
+     * Removes the last point from the active measurement sketch.
+     *
+     * @returns Whether a point was removed
+     */
+    undoActiveMeasurement(): boolean;
+    /**
      * Gets the active measurement Draw interaction.
      *
      * @returns The active measurement Draw interaction, or undefined if none
      */
     getActiveMeasurementDraw(): Draw | undefined;
+    /**
+     * Registers a measurement-stopped callback.
+     *
+     * @param callback - The callback to register
+     * @returns The registered callback
+     */
+    onMeasurementStopped(callback: MeasurementStoppedDelegate): MeasurementStoppedDelegate;
+    /**
+     * Unregisters a measurement-stopped callback.
+     *
+     * @param callback - The callback to remove
+     */
+    offMeasurementStopped(callback: MeasurementStoppedDelegate): void;
     /**
      * Registers a geolocator search event callback.
      *
@@ -500,4 +549,6 @@ export interface FeatureHighlightedEvent {
  * Delegate for the feature highlighted event handler function signature.
  */
 export type FeatureHighlightedDelegate = EventDelegateBase<MapController, FeatureHighlightedEvent, void>;
+/** Notifies subscribers that measurement has stopped. */
+export type MeasurementStoppedDelegate = EventDelegateBase<MapController, undefined, void>;
 //# sourceMappingURL=map-controller.d.ts.map

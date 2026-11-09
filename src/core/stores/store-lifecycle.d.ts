@@ -6,7 +6,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
  *
  * @param config - The map features configuration used to initialize the store
  */
-export declare const addGeoViewStore: (config: TypeMapFeaturesConfig) => void;
+export declare const addGeoViewStore: (config: TypeMapFeaturesConfig, mapElement: HTMLElement) => void;
 /**
  * Clears the store subscriptions of a map and removes its GeoView store from the stores manager.
  *

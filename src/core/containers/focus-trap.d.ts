@@ -2,8 +2,6 @@
 interface FocusTrapProps {
     /** The map identifier. */
     mapId: string;
-    /** The focus trap element identifier. */
-    focusTrapId: string;
 }
 /**
  * Creates a dialog component to explain to keyboard user how to trigger and remove FocusTrap.

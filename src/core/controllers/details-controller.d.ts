@@ -21,6 +21,12 @@ export declare class DetailsController extends AbstractMapViewerController {
      */
     setSelectedLayerPath(layerPath: string): void;
     /**
+     * Sets the selected feature index in the details panel.
+     *
+     * @param currentFeatureIndex - The feature index to select
+     */
+    setCurrentFeatureIndex(currentFeatureIndex: number): void;
+    /**
      * Sets the layer data array batch layer path bypass in the details panel.
      *
      * @param layerPath - The layer path to set

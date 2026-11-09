@@ -221,6 +221,18 @@ export declare class DrawerController extends AbstractMapViewerController {
      */
     addCoordinateToDrawing(coordinate: number[]): boolean;
     /**
+     * Returns focus to the drawer edit button.
+     *
+     * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+     */
+    focusDrawerEditButton(): void;
+    /**
+     * Returns focus to the drawer draw button.
+     *
+     * Does nothing unless the map itself has focus, and not in fullscreen, where Escape exits fullscreen instead.
+     */
+    focusDrawerDrawButton(): void;
+    /**
      * Finishes the current drawing when using keyboard/crosshair input.
      */
     finishCurrentDrawing(): void;
@@ -263,6 +275,13 @@ export declare class DrawerController extends AbstractMapViewerController {
      * Cancels any currently grabbed transformation and restores handle highlights.
      */
     cancelGrabbedTransform(): void;
+    /**
+     * Handles Escape while editing with the crosshair.
+     *
+     * Cancels a grabbed handle. With nothing left to cancel, returns focus to the edit button.
+     * A selection is cleared by the global Escape handler, which runs after this one.
+     */
+    handleEditingEscape(): void;
     /**
      * Checks if a handle is currently grabbed for transformation.
      *

@@ -67,5 +67,12 @@ export declare class AbstractMapViewerController extends AbstractController {
      * @returns The array of ordered layer paths
      */
     static generateOrderedLayerPaths(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): string[];
+    /**
+     * Checks whether focus can return from the map to a tool button.
+     *
+     * @param mapId - The map identifier
+     * @returns True when the map target has focus and fullscreen mode is inactive
+     */
+    protected static isToolButtonFocusable(mapId: string): boolean;
 }
 //# sourceMappingURL=abstract-map-viewer-controller.d.ts.map

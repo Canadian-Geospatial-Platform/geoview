@@ -1,6 +1,6 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import type { CSSObject } from '@mui/system';
-import type { IGeoViewColors } from '@/ui/style/types';
+import type { IGeoViewColors, ThemeTypographyInput } from '@/ui/style/types';
 /** WCAG 2.1 SC 2.4.7 compliant focus indicator outline width. */
 export declare const FOCUS_OUTLINE_WIDTH = "3px";
 /** Focus indicator outline offset distance from element boundary. */
@@ -33,10 +33,13 @@ export declare const getFormControlFocusIndicatorStyles: (geoViewColors: IGeoVie
  * Configures all MUI component overrides, typography, palette, and spacing
  * to match GeoView's design system.
  *
- * @param geoViewColors - Optional color palette to generate theme from
- * @param themeFont - Optional font family stack to apply to the generated theme
- * @param mode - Optional palette mode ('light' or 'dark') for MUI component defaults
+ * @param options - Colors, font, mode and calibrated typography for the selected display theme
  * @returns Complete MUI ThemeOptions configuration
  */
-export declare const generateThemeOptions: (geoViewColors?: IGeoViewColors, themeFont?: string, mode?: PaletteMode) => ThemeOptions;
+export declare const generateThemeOptions: ({ geoViewColors, themeFont, mode, typography, }: {
+    geoViewColors?: IGeoViewColors;
+    themeFont?: string;
+    mode?: PaletteMode;
+    typography: ThemeTypographyInput;
+}) => ThemeOptions;
 //# sourceMappingURL=themeOptionsGenerator.d.ts.map

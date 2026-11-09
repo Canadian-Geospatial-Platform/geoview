@@ -201,7 +201,17 @@ export declare function getScriptAndAssetURL(): string;
  * @param getName - Callback that returns the item name used for sorting
  * @returns A sorted copy of the items
  */
-export declare function sortByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[];
+export declare function sortArrayByNameDefaultFirst<T>(items: T[], getName: (item: T) => string): T[];
+/**
+ * Sorts a source array so that items in the enforce array appear first in the specified order.
+ *
+ * Items not in the enforce array retain their original relative order.
+ *
+ * @param sourceArray - The array to sort
+ * @param enforce - The ordered list of items to prioritize
+ * @returns The sorted array with enforced items first
+ */
+export declare function sortArrayWithEnforcedValues(sourceArray: string[], enforce: string[]): string[];
 /**
  * Generates a unique id of the specified length.
  *
@@ -362,17 +372,6 @@ export declare function enhanceLinksAccessibility(html: string, announcementText
  * @returns Sanitized HTML with URLs rendered as accessible links
  */
 export declare function linkifyAndSanitizeHtml(content: string, announcementText: string, options?: Parameters<typeof linkifyHtml>[1]): string;
-/**
- * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
- * is removed from the document.
- *
- * When the element is removed, it triggers a cleanup callback and disconnects the observer to prevent memory leaks.
- *
- * @param key - A unique identifier for the element, used to manage observer references
- * @param element - The DOM element to monitor for removal from the DOM tree
- * @param onHTMLElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree
- */
-export declare function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void;
 /**
  * Attempts to place the given HTML element into fullscreen mode.
  *
@@ -608,34 +607,6 @@ export declare function createGuideObject(language: TypeDisplayLanguage, assetsU
  * @param isFocusTrapped - Optional, component is focus trapped enabled
  */
 export declare function handleEscapeKey(key: string, cb?: () => void, callbackId?: string, isFocusTrapped?: boolean): void;
-/**
- * Check if element is in viewport.
- *
- * @param el - The element to check for
- * @returns true if visible, false otherwise
- */
-export declare function isElementInViewport(el: Element): boolean;
-/**
- * Scrolls an element into view only if it's not already visible in the viewport.
- *
- * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
- * For 'start': adds offset pixels above the element.
- * For 'end': adds offset pixels below the element.
- * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
- *
- * @param el - The HTML element to scroll into view if not visible
- * @param blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
- * @param offset - Optional offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
- */
-export declare function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset?: number): void;
-/**
- * Scrolls a list item into view within its scrollable container only, without scrolling the page.
- *
- * Adds a 20px gap for better visibility when scrolling.
- *
- * @param listItem - The list item element to scroll into view
- */
-export declare function scrollListItemIntoView(listItem: HTMLElement): void;
 /**
  * Formats a numeric value according to the display language.
  *

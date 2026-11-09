@@ -1,5 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+import { Projection as OLProjection } from 'ol/proj';
+import type { ProjectionLike } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 /**
  * Class used to handle functions for transforming projections.
@@ -137,7 +138,7 @@ export declare abstract class Projection {
      *
      * Accepts:
      * - A `TypeProjection` object (with `wkid` / `latestWkid` / `wkt`)
-     * - A `ProjectionLike` string (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
+     * - A `ProjectionLike` value (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
      * - A numeric EPSG code (e.g., `4326`)
      *
      * @param projection - The projection identifier to check and register if missing
