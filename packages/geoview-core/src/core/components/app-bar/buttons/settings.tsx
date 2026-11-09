@@ -69,6 +69,8 @@ export function Settings(props: SettingsProps): JSX.Element {
 
   /**
    * Makes Settings the sole active inner focus owner without moving focus.
+   *
+   * @param previousFocusItem - The focus owner captured before the popover opened
    */
   const claimFocusOwner = useCallback(
     (previousFocusItem?: FocusItemProps): void => {

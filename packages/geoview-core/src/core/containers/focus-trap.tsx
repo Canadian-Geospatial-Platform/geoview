@@ -48,7 +48,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // State
   const [open, setOpen] = useState<boolean>(false);
-  const navigationLinkRef = useRef('');
+  const navigationLinkRef = useRef<TypeNavigationLink>('bottom');
 
   // Store
   // Tracks whether the user has entered keyboard navigation mode.
@@ -268,7 +268,12 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   const handleSkip = useCallback((): void => {
     setOpen(false);
-    requestFocus(() => DomHelper.getGVElementById(mapId, navigationLinkRef.current));
+    const navigationLink = navigationLinkRef.current;
+    requestFocus(() => {
+      const targetLink = navigationLink === 'top' ? DomHelper.getWCAGTopLink(mapId) : DomHelper.getWCAGBottomLink(mapId);
+      if (!targetLink) logger.logError(`WCAG ${navigationLink} skip link was not found for map '${mapId}'`);
+      return targetLink;
+    });
   }, [mapId, requestFocus]);
 
   /**
@@ -282,17 +287,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // If Tab from topLink or shift+Tab from bottomLink, focus the map element
     const targetId = (event.target as HTMLElement).id;
-    let linkId = '';
-    if (targetId.endsWith('-wcag-toplink')) linkId = 'toplink';
-    else if (targetId.endsWith('-wcag-bottomlink')) linkId = 'bottomlink';
-    if (
-      (event.code === 'Tab' && !event.shiftKey && linkId === 'toplink') ||
-      (event.code === 'Tab' && event.shiftKey && linkId === 'bottomlink')
-    ) {
+    let link: TypeNavigationLink | undefined;
+    if (targetId.endsWith('-wcag-toplink')) link = 'top';
+    else if (targetId.endsWith('-wcag-bottomlink')) link = 'bottom';
+    if ((event.code === 'Tab' && !event.shiftKey && link === 'top') || (event.code === 'Tab' && event.shiftKey && link === 'bottom')) {
       // prevent the event to tab to inner map
       event.preventDefault();
       event.stopPropagation();
-      navigationLinkRef.current = linkId === 'toplink' ? 'bottomlink' : 'toplink';
+      navigationLinkRef.current = link === 'top' ? 'bottom' : 'top';
 
       setOpen(true);
       // Show the entry prompt at the viewer's keyboard-navigation boundary.
@@ -398,3 +400,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     />
   );
 }
+
+// #region TYPES AND INTERFACES
+
+/** Identifies one of the map-scoped WCAG skip links. */
+type TypeNavigationLink = 'top' | 'bottom';
+
+// #endregion TYPES AND INTERFACES

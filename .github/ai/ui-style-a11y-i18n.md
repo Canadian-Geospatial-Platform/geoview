@@ -209,6 +209,8 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   About, Notifications, and navbar popovers read the current store owner in their coordination effects.
   If a different active owner exists, close without restoring focus; acquire ownership only when unowned.
   Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.
+  Programmatic navbar opens must capture that snapshot before clearing ownership; ignore status echoes
+  for already-open panels so the user-opening snapshot is not replaced.
   Use [useMapPopover](../../packages/geoview-core/src/core/components/common/hooks/use-map-popover.ts)
   for app-bar map popovers so Ctrl/Cmd+M closure is derived before map focus and cannot reclaim focus
   in a passive effect.

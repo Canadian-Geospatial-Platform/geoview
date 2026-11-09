@@ -316,6 +316,7 @@ const Notifications = memo((): JSX.Element => {
   const shellContainer = useShellContainer();
 
   // Element IDs for accessibility and focus management
+  // TODO: Centralize these IDs in DomHelper using buildGVElementId and add notification-specific element getters as needed.
   const dialogId = `${mapId}-notification-dialog`;
   const titleId = `${mapId}-notification-title`;
   const closeButtonId = `${mapId}-notification-close-button`;

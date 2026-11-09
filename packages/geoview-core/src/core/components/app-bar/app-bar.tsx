@@ -36,6 +36,7 @@ import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
+  getStoreUIFocusItem,
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIAppbarComponents,
@@ -120,31 +121,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const activeTrapGeoViewRef = useRef(activeTrapGeoView);
   const focusRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const focusRestoreOwnerRef = useRef<string | false | undefined>(activeModalId);
   const isSharedModeEnabled = useStoreGeoViewSharedMode();
   const uiController = useUIController();
   const mapController = useMapController();
 
   const geoviewElement = DomHelper.getMapTargetElement(mapId);
-
-  useEffect(() => {
-    activeTrapGeoViewRef.current = activeTrapGeoView;
-  }, [activeTrapGeoView]);
-
-  useEffect(() => {
-    if (!isOpen || focusRestoreTimeoutRef.current === undefined) return;
-
-    clearTimeout(focusRestoreTimeoutRef.current);
-    focusRestoreTimeoutRef.current = undefined;
-  }, [isOpen, tabId]);
-
-  useEffect(() => {
-    return (): void => {
-      if (focusRestoreTimeoutRef.current !== undefined) {
-        clearTimeout(focusRestoreTimeoutRef.current);
-        focusRestoreTimeoutRef.current = undefined;
-      }
-    };
-  }, []);
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
@@ -308,13 +290,32 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (focusRestoreTimeoutRef.current !== undefined) {
         clearTimeout(focusRestoreTimeoutRef.current);
         focusRestoreTimeoutRef.current = undefined;
+        focusRestoreOwnerRef.current = undefined;
       }
 
-      if (isFocusTrapped) {
+      if (isFocusTrapped && !activeModalId) {
+        focusRestoreOwnerRef.current = false;
         focusRestoreTimeoutRef.current = setTimeout(() => {
           focusRestoreTimeoutRef.current = undefined;
-          // Explicitly request focus indicator for keyboard users
+          const focusRestoreOwner = focusRestoreOwnerRef.current;
+          focusRestoreOwnerRef.current = undefined;
+          if (getStoreUIFocusItem(mapId).activeElementId !== focusRestoreOwner) return;
+
           const focusTarget = restoreMapFocus ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
+          const panelElement = DomHelper.getAppBarPanel(mapId, buttonId);
+          const activeElement = DomHelper.getActiveElement();
+
+          // Keep the delayed return from stealing focus if another control took focus after the panel closed.
+          const focusMovedOutsidePanel =
+            activeElement &&
+            activeElement.tagName !== 'BODY' &&
+            activeElement.tagName !== 'HTML' &&
+            !panelElement?.contains(activeElement) &&
+            activeElement !== focusTarget;
+
+          if (focusMovedOutsidePanel) return;
+
+          // Explicitly request focus indicator for keyboard users
           focusTarget?.focus({ focusVisible: true });
           if (restoreMapFocus && activeTrapGeoViewRef.current) uiController.setCrosshairActive(true);
         }, TIMEOUT.dataPanelLoading);
@@ -322,7 +323,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
       uiController.setActiveAppBarTab(buttonId, false, false, false);
     },
-    [uiController, isFocusTrapped, mapId, returnFocusToMap]
+    [activeModalId, uiController, isFocusTrapped, mapId, returnFocusToMap]
   );
 
   /**
@@ -419,6 +420,52 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [mapController]);
 
   /**
+   * Keeps the latest keyboard-navigation mode available to delayed focus restoration.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - update keyboard-navigation mode ref', activeTrapGeoView);
+    activeTrapGeoViewRef.current = activeTrapGeoView;
+  }, [activeTrapGeoView]);
+
+  /**
+   * Cancels pending focus restoration when the active app-bar panel changes.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - cancel pending focus restoration', isOpen, tabId);
+    if (!isOpen || focusRestoreTimeoutRef.current === undefined) return;
+
+    clearTimeout(focusRestoreTimeoutRef.current);
+    focusRestoreTimeoutRef.current = undefined;
+    focusRestoreOwnerRef.current = undefined;
+  }, [isOpen, tabId]);
+
+  /**
+   * Cancels pending focus restoration when another component takes logical focus ownership.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - cancel pending focus restoration for newer focus owner', activeModalId);
+    if (focusRestoreTimeoutRef.current === undefined || activeModalId === focusRestoreOwnerRef.current) return;
+
+    clearTimeout(focusRestoreTimeoutRef.current);
+    focusRestoreTimeoutRef.current = undefined;
+    focusRestoreOwnerRef.current = undefined;
+  }, [activeModalId]);
+
+  /**
+   * Clears pending focus restoration when the app bar unmounts.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - clear pending focus restoration');
+    return (): void => {
+      if (focusRestoreTimeoutRef.current !== undefined) {
+        clearTimeout(focusRestoreTimeoutRef.current);
+        focusRestoreTimeoutRef.current = undefined;
+        focusRestoreOwnerRef.current = undefined;
+      }
+    };
+  }, []);
+
+  /**
    * Restores focus when a panel is closed.
    */
   useEffect(() => {
@@ -428,17 +475,28 @@ export function AppBar(props: AppBarProps): JSX.Element {
     if (!isOpen && tabId) {
       // Get the AppBar button element for the current tab
       const buttonElement = DomHelper.getAppBarButton(mapId, tabId);
-      if (buttonElement) {
-        buttonElement.focus();
-      } else {
-        const mapCont = geoviewElementRef.current;
-        mapCont?.focus();
-        if (mapCont?.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
-          mapCont.classList.add('keyboard-focus');
+      const mapElement = geoviewElementRef.current;
+      const focusTarget = buttonElement ?? mapElement;
+      const panelElement = DomHelper.getAppBarPanel(mapId, tabId);
+      const activeElement = DomHelper.getActiveElement();
+      const hasActiveFocusOwner = Boolean(activeModalId);
+
+      // Allow the normal return when focus is still in the closing panel or has fallen back to the document root.
+      const focusMovedOutsidePanel =
+        activeElement &&
+        activeElement.tagName !== 'BODY' &&
+        activeElement.tagName !== 'HTML' &&
+        !panelElement?.contains(activeElement) &&
+        activeElement !== focusTarget;
+
+      if (focusTarget && !focusMovedOutsidePanel && !hasActiveFocusOwner) {
+        focusTarget.focus();
+        if (!buttonElement && focusTarget.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
+          focusTarget.classList.add('keyboard-focus');
         }
       }
     }
-  }, [isOpen, tabId, mapId]);
+  }, [activeModalId, isOpen, tabId, mapId]);
 
   /**
    * Traps the focus in a panel opened from the configuration once a keyboard user moves into it.

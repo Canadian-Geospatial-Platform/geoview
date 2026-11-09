@@ -22,8 +22,17 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Maximum time for browser scrolling and UI layout to settle. */
   static readonly UI_SCROLL_TIMEOUT_MS = 5000;
 
+  /** Maximum time to wait for focus and related UI state transitions. */
+  static readonly UI_FOCUS_TIMEOUT_MS = 5000;
+
+  /** Polling interval for asynchronous UI and focus-state checks. */
+  static readonly UI_POLL_INTERVAL_MS = 50;
+
   /** Stable interval covering delayed footer scrolling and layout transitions. */
   static readonly UI_SCROLL_SETTLE_MS = 500;
+
+  /** Additional wait after AppBar focus restoration to verify the final active element. */
+  static readonly UI_FOCUS_RESTORE_BUFFER_MS = 50;
 
   /** Pixel tolerance for viewport geometry and scroll stability. */
   static readonly UI_SCROLL_TOLERANCE_PX = 2;

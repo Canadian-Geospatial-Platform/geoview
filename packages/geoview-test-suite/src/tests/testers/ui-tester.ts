@@ -1,7 +1,9 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
-import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
-import { getStoreAppHeight } from 'geoview-core/core/stores/states/app-state';
+import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from 'geoview-core/core/utils/constant';
+import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { getStoreAppHeight, getStoreAppIsCrosshairsActive } from 'geoview-core/core/stores/states/app-state';
+import { getStoreUIActiveAppBarTab, getStoreUIActiveTrapGeoView } from 'geoview-core/core/stores/states/ui-state';
+import { TestSkippedError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 
@@ -9,6 +11,8 @@ import { GVAbstractTester } from './abstract-gv-tester';
  * Main UI testing class.
  */
 export class UITester extends GVAbstractTester {
+  // #region OVERRIDES
+
   /**
    * Returns the name of the Tester.
    *
@@ -17,6 +21,10 @@ export class UITester extends GVAbstractTester {
   override getName(): string {
     return 'UITester';
   }
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS - UI TESTS
 
   /**
    * Test selecting details panel and finding "Top" anchor tag in the DOM for guide container.
@@ -91,6 +99,231 @@ export class UITester extends GVAbstractTester {
   }
 
   /**
+   * Verifies AppBar focus restoration preserves a newer focus target and still returns focus after an ordinary close.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAppBarFocusRestoreYieldsToNewerFocus(): Promise<Test<TypeAppBarFocusRestoreResult>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalKeyboardMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
+    const originalAppBarTab = getStoreUIActiveAppBarTab(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+
+    return this.test(
+      'Test AppBar focus restoration preserves newer focus',
+      async (test): Promise<TypeAppBarFocusRestoreResult> => {
+        const testPanel = DomHelper.getGVRootElement(mapId).closest('.tab-content');
+        if (testPanel && (testPanel.getClientRects().length === 0 || window.getComputedStyle(testPanel).visibility !== 'visible')) {
+          throw new TestSkippedError('The UI test map is hidden; run the UI Tests tab directly');
+        }
+
+        const detailsButton = DomHelper.getAppBarButton(mapId, 'details');
+        const getSettingsButton = (): HTMLButtonElement | undefined =>
+          DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-settings-btn`);
+        const settingsButton = getSettingsButton();
+        if (!detailsButton || !settingsButton) throw new Error(`AppBar focus test controls were not found for map '${mapId}'`);
+
+        test.addStep('Enabling keyboard navigation and opening the Details panel...');
+        uiController.setActiveTrapGeoView(true);
+        uiController.setActiveAppBarTab('details', true, true, true);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'details');
+
+        const detailsCloseButton = await whenThisThen(
+          (): HTMLButtonElement | undefined => DomHelper.getAppBarPanelCloseButton(mapId, 'details'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        if (!detailsCloseButton) throw new Error('Details panel close button was not rendered');
+
+        test.addStep('Closing Details and opening Settings before restoration completes...');
+        detailsCloseButton.click();
+        settingsButton.focus();
+        settingsButton.click();
+        await DomHelper.waitForAppbarTabNotSelected(mapId, 'details');
+        await whenThisThen(
+          (): boolean => getSettingsButton()?.getAttribute('aria-expanded') === 'true',
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        const crosshairBeforeNewOwnerRestore = getStoreAppIsCrosshairsActive(mapId);
+        await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        const focusAfterNewOwner = DomHelper.getActiveElement();
+        const crosshairAfterNewOwnerRestore = getStoreAppIsCrosshairsActive(mapId);
+
+        test.addStep('Closing Settings, then closing Details without moving focus to verify normal restoration...');
+        const currentSettingsButton = getSettingsButton();
+        if (!currentSettingsButton) throw new Error(`Settings button was not found for map '${mapId}'`);
+        currentSettingsButton.click();
+        await whenThisThen(
+          (): boolean => getSettingsButton()?.getAttribute('aria-expanded') === 'false',
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        uiController.setActiveAppBarTab('details', true, true, false);
+        await DomHelper.waitForAppbarTabSelected(mapId, 'details');
+        const secondCloseButton = await whenThisThen(
+          (): HTMLButtonElement | undefined => DomHelper.getAppBarPanelCloseButton(mapId, 'details'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        if (!secondCloseButton) throw new Error('Details panel close button was not rendered');
+        secondCloseButton.focus();
+        secondCloseButton.click();
+        await DomHelper.waitForAppbarTabNotSelected(mapId, 'details');
+        await whenThisThen(
+          (): boolean => DomHelper.getActiveElement() === detailsButton,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        const focusAfterOrdinaryClose = DomHelper.getActiveElement();
+
+        return {
+          expectedNewFocusId: settingsButton.id,
+          actualNewFocusId: focusAfterNewOwner?.id ?? '',
+          crosshairBeforeNewOwnerRestore,
+          crosshairAfterNewOwnerRestore,
+          expectedReturnFocusId: detailsButton.id,
+          actualReturnFocusId: focusAfterOrdinaryClose?.id ?? '',
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying newer focus is preserved and ordinary focus restoration still works...');
+        Test.assertIsEqual(result.actualNewFocusId, result.expectedNewFocusId);
+        Test.assertIsEqual(result.crosshairAfterNewOwnerRestore, result.crosshairBeforeNewOwnerRestore);
+        Test.assertIsEqual(result.actualReturnFocusId, result.expectedReturnFocusId);
+      },
+      async (): Promise<void> => {
+        uiController.setActiveAppBarTab(
+          originalAppBarTab.tabId || undefined,
+          originalAppBarTab.isOpen,
+          originalAppBarTab.isFocusTrapped ?? false,
+          originalAppBarTab.returnFocusToMap ?? false
+        );
+        await delay(GVAbstractTester.UI_SCROLL_SETTLE_MS);
+        uiController.setActiveTrapGeoView(originalKeyboardMode);
+        uiController.setCrosshairActive(originalCrosshairActive);
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
+  /**
+   * Verifies Skip returns focus to this map's WCAG links in both directions.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSkipFocusReturnsToMapLinks(): Promise<Test<TypeSkipFocusResult>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalKeyboardMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+
+    return this.test(
+      'Test WCAG Skip returns focus to the same map',
+      async (test): Promise<TypeSkipFocusResult> => {
+        test.addStep('Preparing the map entry prompt and its map-scoped skip links...');
+        if (originalKeyboardMode) uiController.setActiveTrapGeoView(false);
+
+        const topLink = DomHelper.getWCAGTopLink(mapId);
+        const bottomLink = DomHelper.getWCAGBottomLink(mapId);
+        if (!topLink || !bottomLink) throw new Error(`WCAG skip-link elements were not found for map '${mapId}'`);
+
+        test.addStep('Opening the entry prompt through the map skip-link keyboard sequence...');
+        topLink.focus();
+        topLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', bubbles: true, cancelable: true }));
+
+        await whenThisThen(
+          (): boolean => DomHelper.getGVElementById(mapId, 'skip-focus') !== undefined,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+
+        test.addStep('Activating Skip and waiting for the prompt to close...');
+        const skipButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'skip-focus');
+        if (!skipButton) throw new Error(`WCAG Skip button was not found for map '${mapId}'`);
+        skipButton.focus();
+        skipButton.click();
+        await whenThisThen(
+          (): boolean => DomHelper.getGVElementById(mapId, 'skip-focus') === undefined,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        await whenThisThen(
+          (): boolean => DomHelper.getActiveElement() === bottomLink,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        const bottomFocusedElement = DomHelper.getActiveElement();
+        const isBottomLinkFocused = bottomFocusedElement === bottomLink;
+        const actualBottomFocusId = bottomFocusedElement?.id ?? '';
+
+        test.addStep("Opening the entry prompt in reverse from this map's bottom link...");
+        bottomLink.focus();
+        bottomLink.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', shiftKey: true, bubbles: true, cancelable: true })
+        );
+        await whenThisThen(
+          (): boolean => DomHelper.getGVElementById(mapId, 'skip-focus') !== undefined,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+
+        test.addStep('Activating Skip and verifying the reverse destination...');
+        const reverseSkipButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'skip-focus');
+        if (!reverseSkipButton) throw new Error(`WCAG Skip button was not found for map '${mapId}'`);
+        reverseSkipButton.focus();
+        reverseSkipButton.click();
+        await whenThisThen(
+          (): boolean => DomHelper.getGVElementById(mapId, 'skip-focus') === undefined,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        await whenThisThen(
+          (): boolean => DomHelper.getActiveElement() === topLink,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        const topFocusedElement = DomHelper.getActiveElement();
+
+        return {
+          expectedBottomFocusId: bottomLink.id,
+          actualBottomFocusId,
+          isBottomLinkFocused,
+          expectedTopFocusId: topLink.id,
+          actualTopFocusId: topFocusedElement?.id ?? '',
+          isTopLinkFocused: topFocusedElement === topLink,
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying both Skip directions focus links in this map...');
+        Test.assertIsEqual(result.isBottomLinkFocused, true);
+        Test.assertIsEqual(result.actualBottomFocusId, result.expectedBottomFocusId);
+        Test.assertIsEqual(result.isTopLinkFocused, true);
+        Test.assertIsEqual(result.actualTopFocusId, result.expectedTopFocusId);
+      },
+      async (): Promise<void> => {
+        const skipButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'skip-focus');
+        if (skipButton) {
+          skipButton.click();
+          await whenThisThen(
+            (): boolean => DomHelper.getGVElementById(mapId, 'skip-focus') === undefined,
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+        }
+
+        uiController.setActiveTrapGeoView(originalKeyboardMode);
+        uiController.setCrosshairActive(originalCrosshairActive);
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
+  /**
    * Exercises delegated scrolling through real controls in an isolated, scrollable viewer.
    *
    * @param scenario - The viewport regression to exercise
@@ -127,6 +360,8 @@ export class UITester extends GVAbstractTester {
       (): Promise<void> => this.#cleanupScrollFixture(mapId, fixture, originalScroll)
     );
   }
+
+  // #endregion PUBLIC METHODS - UI TESTS
 
   // #region PRIVATE METHODS - MAP SECTION SCROLL
 
@@ -583,6 +818,38 @@ type TypeScrollMeasurement = { top: number; bottom: number; infoTop: number; inf
 
 /** Setup preconditions and geometry returned for assertion-only verification. */
 type TypeScrollResult = { preconditions: boolean[]; measurements: TypeScrollMeasurement[]; viewportHeight: number };
+
+/** Expected and actual focus targets after activating Skip in both navigation directions. */
+type TypeSkipFocusResult = {
+  /** DOM id of the expected destination for forward Skip. */
+  expectedBottomFocusId: string;
+  /** DOM id focused after forward Skip. */
+  actualBottomFocusId: string;
+  /** Whether forward Skip focused this map's bottom link. */
+  isBottomLinkFocused: boolean;
+  /** DOM id of the expected destination for reverse Skip. */
+  expectedTopFocusId: string;
+  /** DOM id focused after reverse Skip. */
+  actualTopFocusId: string;
+  /** Whether reverse Skip focused this map's top link. */
+  isTopLinkFocused: boolean;
+};
+
+/** Expected and actual focus targets for AppBar focus restoration. */
+type TypeAppBarFocusRestoreResult = {
+  /** DOM id expected to retain focus after another control takes focus. */
+  expectedNewFocusId: string;
+  /** DOM id focused after delayed restoration completes. */
+  actualNewFocusId: string;
+  /** Crosshair state before the delayed restoration after Settings takes focus ownership. */
+  crosshairBeforeNewOwnerRestore: boolean;
+  /** Crosshair state after the delayed restoration after Settings takes focus ownership. */
+  crosshairAfterNewOwnerRestore: boolean;
+  /** DOM id of the closed panel button used for normal focus return. */
+  expectedReturnFocusId: string;
+  /** DOM id focused after closing the panel without changing focus. */
+  actualReturnFocusId: string;
+};
 
 /** Rendered fixture controls plus the evidence a scroll scenario accumulates while it runs. */
 type TypeScrollContext = {

@@ -104,10 +104,16 @@ export default function NavbarPanelButton({
     previousRequestedOpen.current = requestedOpen;
 
     if (requestedOpen && buttonRef.current) {
+      // The open-state callback also synchronizes user-opened panels; preserve their original owner snapshot.
+      if (open) return;
+
+      if (activeTrapGeoView && previousFocusItemRef.current === undefined) {
+        previousFocusItemRef.current = getStoreUIFocusItem(mapId);
+      }
       uiController.disableFocusTrap('no-focus');
       openAt(buttonRef.current);
     } else closePanel();
-  }, [buttonPanel.panel?.status, closePanel, openAt, uiController]);
+  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, mapId, open, openAt, uiController]);
 
   /**
    * Notifies the caller when the panel open state changes.
@@ -190,10 +196,14 @@ export default function NavbarPanelButton({
    */
   useEffect(() => {
     logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
+
+    // Read the latest owner because another component's effect may have changed it since render.
     const currentFocusItem = getStoreUIFocusItem(mapId);
     if (open && currentFocusItem.activeElementId && currentFocusItem.activeElementId !== focusTrapId) {
+      // Yield to the newer owner without moving focus back to this panel's trigger.
       closePanelWithFocus(false);
     } else if (open && activeTrapGeoView && currentFocusItem.activeElementId !== focusTrapId) {
+      // Preserve the opening snapshot so ordinary dismissal can restore the previous owner.
       if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
       uiController.enableFocusTrap({
         activeElementId: focusTrapId,
@@ -202,6 +212,7 @@ export default function NavbarPanelButton({
       });
     }
 
+    // Release ownership after an external close, not just a dismissal through this panel's handlers.
     const wasOpen = previousOwnerOpen.current;
     previousOwnerOpen.current = open;
     if (wasOpen && !open) closePanelWithFocus(false);

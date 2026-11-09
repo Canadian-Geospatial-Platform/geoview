@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
 
@@ -76,11 +76,14 @@ export function Map(props: MapProps): JSX.Element {
    *
    * @param event - The map region blur event
    */
-  const handleMapBlur = (event: FocusEvent<HTMLElement>): void => {
-    if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
-      uiController.setCrosshairActive(false);
-    }
-  };
+  const handleMapBlur = useCallback(
+    (event: FocusEvent<HTMLElement>): void => {
+      if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+        uiController.setCrosshairActive(false);
+      }
+    },
+    [uiController]
+  );
 
   /**
    * Initializes the map viewer on mount.
