@@ -51,6 +51,8 @@ Source boundaries most likely to produce misleading tests:
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
 - Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
   `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
+- MUI's automatic icon `data-testid` attributes are development-only. The Layers visibility toggle explicitly supplies
+  its icon IDs so `getVisibleButtonVisibility` also works in production; keep those props when changing the icons.
 - Prefer `waitForLayerToGetRegistered`; polling is fallback only when no event exists.
 - Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
