@@ -621,6 +621,7 @@ export class MapTester extends GVAbstractTester {
    *
    * Simulates browser fullscreen events and map size changes so the test does not depend
    * on transient user activation or an actual fullscreen browser window.
+   * Renders synchronously to process view changes without waiting for map sources to finish loading.
    *
    * @returns A promise that resolves with the view states observed for each exit scenario
    */
@@ -693,7 +694,7 @@ export class MapTester extends GVAbstractTester {
         map.setSize([...fullscreenSize]);
         this.getControllersRegistry().uiController.setFullScreen(false);
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
-        await mapViewer.waitForRender();
+        map.renderSync();
         const afterButtonExit = getViewState();
 
         test.addStep('Repeating fullscreen with an Esc-style fullscreenchange exit...');
@@ -702,7 +703,7 @@ export class MapTester extends GVAbstractTester {
         map.setSize([...fullscreenSize]);
         dispatchFullscreenChange(null);
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
-        await mapViewer.waitForRender();
+        map.renderSync();
         const afterEscExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, then exiting...');
@@ -722,14 +723,14 @@ export class MapTester extends GVAbstractTester {
         const expectedInteractiveView = getViewState();
         dispatchFullscreenChange(null);
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
-        await mapViewer.waitForRender();
+        map.renderSync();
         const afterInteractiveExit = getViewState();
 
         test.addStep('Changing the view while fullscreen, resizing again (e.g. footer resize), then exiting...');
         this.getControllersRegistry().uiController.setFullScreen(true, shellElement);
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
         map.setSize([...fullscreenSize]);
-        await mapViewer.waitForRender();
+        map.renderSync();
         const centerBeforeResizeInteraction = view.getCenter();
         const resolutionBeforeResizeInteraction = view.getResolution();
         if (!centerBeforeResizeInteraction || resolutionBeforeResizeInteraction === undefined) {
@@ -742,12 +743,12 @@ export class MapTester extends GVAbstractTester {
         view.setResolution(resolutionBeforeResizeInteraction / 2);
         // Let the 'moveend' for the interaction fire before the next size change
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
-        await mapViewer.waitForRender();
+        map.renderSync();
         map.setSize([fullscreenSize[0], fullscreenSize[1] - 100]);
         const expectedInteractiveResizeView = getViewState();
         dispatchFullscreenChange(null);
         await delay(50); // TODO: Fix the delay call here, or explain it with a GV comment or use a defined shared constant value
-        await mapViewer.waitForRender();
+        map.renderSync();
         const afterInteractiveResizeExit = getViewState();
 
         test.addStep('Rejecting a fullscreen request and verifying fullscreen state cleanup...');
@@ -795,7 +796,7 @@ export class MapTester extends GVAbstractTester {
         );
         Test.assertIsEqual(result.rejectedRequestIsInactive, true);
       },
-      async (test) => {
+      (test) => {
         test.addStep('Restoring fullscreen APIs, map size and view...');
         shouldRejectFullscreenRequest = false;
         if (mockedFullscreenElement) dispatchFullscreenChange(null);
@@ -823,7 +824,7 @@ export class MapTester extends GVAbstractTester {
           view.setResolution(originalResolution);
           view.setCenter(originalCenter);
         }
-        await mapViewer.waitForRender();
+        map.renderSync();
       }
     );
   }
