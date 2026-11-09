@@ -90,7 +90,16 @@ interface PopperPropsExtend extends PopperProps {
  *
  * @see {@link https://mui.com/material-ui/react-popper/}
  */
-function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = false, children, ...props }: PopperPropsExtend): JSX.Element {
+function PopperUI({
+  open,
+  anchorEl,
+  onClose,
+  handleKeyDown,
+  focusSelector,
+  focusTrap = false,
+  children,
+  ...props
+}: PopperPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/popper/popper');
 
   // Hooks
@@ -122,7 +131,9 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
      * Handles keyboard events for the popper.
      */
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.defaultPrevented || !popperRef.current?.contains(event.target as Node)) return;
+      if (event.defaultPrevented || !(event.target instanceof Node)) return;
+      const anchor = typeof anchorEl === 'function' ? anchorEl() : anchorEl;
+      if (!popperRef.current?.contains(event.target) && !(anchor instanceof Element && anchor.contains(event.target))) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
@@ -134,7 +145,7 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [open, onClose, handleKeyDown]);
+  }, [anchorEl, open, onClose, handleKeyDown]);
 
   /**
    * Manages focus when the popper opens.
@@ -172,9 +183,16 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
     return undefined;
   }, [open, focusSelector, theme.transitions.duration.shortest]);
 
-  // TODO: style - manage z-index in theme
+  // NOTE: The theme owns the default layer; external MUI themes retain the historical fallback.
   return (
-    <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={setPopperRef}>
+    <AnimatedPopper
+      sx={{ zIndex: theme.zIndex?.popper ?? 2000 }}
+      style={fadeInAnimation}
+      {...props}
+      anchorEl={anchorEl}
+      open={open}
+      ref={setPopperRef}
+    >
       {focusTrap ? (
         <FocusTrap open={open} disableEnforceFocus disableAutoFocus disableRestoreFocus>
           {children}

@@ -312,7 +312,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     const handleMouseMove = (event: MouseEvent): void => {
       if (event.movementX === 0 && event.movementY === 0) return;
-      const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-root');
+      const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-paper');
       if (event.target instanceof Node && promptElement?.contains(event.target)) return;
       setOpen(false);
       focusJobRef.current?.cancel();

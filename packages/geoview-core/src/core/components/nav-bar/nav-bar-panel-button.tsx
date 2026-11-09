@@ -19,15 +19,11 @@ import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
+import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
 import { translateTooltip } from '@/core/utils/utilities';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  getStoreUIFocusItem,
-  useStoreUIActiveFocusItem,
-  useStoreUIActiveTrapGeoView,
-  type FocusItemProps,
-} from '@/core/stores/states/ui-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -90,9 +86,12 @@ export default function NavbarPanelButton({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const previousRequestedOpen = useRef(false);
   const previousOpen = useRef(open);
-  const previousOwnerOpen = useRef(open);
-  const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
   const focusTrapId = `${mapId}-${buttonPanel.button.id}-navbar-focus-trap`;
+  const { rememberPreviousOwner, releaseFocusOwner, synchronizeOwnership } = usePopoverFocusOwner(
+    focusTrapId,
+    buttonPanel.button.id,
+    closePanel
+  );
 
   /**
    * Synchronizes externally requested panel visibility.
@@ -107,13 +106,11 @@ export default function NavbarPanelButton({
       // The open-state callback also synchronizes user-opened panels; preserve their original owner snapshot.
       if (open) return;
 
-      if (activeTrapGeoView && previousFocusItemRef.current === undefined) {
-        previousFocusItemRef.current = getStoreUIFocusItem(mapId);
-      }
+      if (activeTrapGeoView) rememberPreviousOwner();
       uiController.disableFocusTrap('no-focus');
       openAt(buttonRef.current);
     } else closePanel();
-  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, mapId, open, openAt, uiController]);
+  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, open, openAt, rememberPreviousOwner, uiController]);
 
   /**
    * Notifies the caller when the panel open state changes.
@@ -134,18 +131,11 @@ export default function NavbarPanelButton({
    */
   const closePanelWithFocus = useCallback(
     (restoreTrigger: boolean): void => {
-      const currentFocusItem = getStoreUIFocusItem(mapId);
-      if (currentFocusItem.activeElementId === focusTrapId) {
-        uiController.enableFocusTrap({
-          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
-          focusOnEntry: false,
-        });
-      }
-      previousFocusItemRef.current = undefined;
+      releaseFocusOwner();
       closePanel();
       if (restoreTrigger) buttonRef.current?.focus();
     },
-    [closePanel, focusTrapId, mapId, uiController]
+    [closePanel, releaseFocusOwner]
   );
 
   /**
@@ -157,10 +147,10 @@ export default function NavbarPanelButton({
         closePanelWithFocus(true);
       } else {
         const previousFocusItem = openAt(event.currentTarget);
-        if (activeTrapGeoView) previousFocusItemRef.current = previousFocusItem;
+        if (activeTrapGeoView) rememberPreviousOwner(previousFocusItem);
       }
     },
-    [activeTrapGeoView, closePanelWithFocus, open, openAt]
+    [activeTrapGeoView, closePanelWithFocus, open, openAt, rememberPreviousOwner]
   );
 
   /**
@@ -197,26 +187,8 @@ export default function NavbarPanelButton({
   useEffect(() => {
     logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
 
-    // Read the latest owner because another component's effect may have changed it since render.
-    const currentFocusItem = getStoreUIFocusItem(mapId);
-    if (open && currentFocusItem.activeElementId && currentFocusItem.activeElementId !== focusTrapId) {
-      // Yield to the newer owner without moving focus back to this panel's trigger.
-      closePanelWithFocus(false);
-    } else if (open && activeTrapGeoView && currentFocusItem.activeElementId !== focusTrapId) {
-      // Preserve the opening snapshot so ordinary dismissal can restore the previous owner.
-      if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
-      uiController.enableFocusTrap({
-        activeElementId: focusTrapId,
-        callbackElementId: buttonPanel.button.id || false,
-        focusOnEntry: false,
-      });
-    }
-
-    // Release ownership after an external close, not just a dismissal through this panel's handlers.
-    const wasOpen = previousOwnerOpen.current;
-    previousOwnerOpen.current = open;
-    if (wasOpen && !open) closePanelWithFocus(false);
-  }, [activeTrapGeoView, buttonPanel.button.id, closePanelWithFocus, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
+    synchronizeOwnership(open, activeTrapGeoView);
+  }, [activeTrapGeoView, focusItem.activeElementId, open, synchronizeOwnership]);
 
   /**
    * Renders the panel content based on the button panel configuration.

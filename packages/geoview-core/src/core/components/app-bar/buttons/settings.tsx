@@ -7,13 +7,9 @@ import { useTheme } from '@mui/material/styles';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
+import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  getStoreUIFocusItem,
-  useStoreUIActiveFocusItem,
-  useStoreUIActiveTrapGeoView,
-  type FocusItemProps,
-} from '@/core/stores/states/ui-state';
+import { getStoreUIFocusItem, useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
@@ -56,7 +52,6 @@ export function Settings(props: SettingsProps): JSX.Element {
   const { open, anchorEl, openAt, close } = useMapPopover();
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
   const previousOpenRef = useRef(open);
 
   const buttonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-settings-btn`;
@@ -64,28 +59,9 @@ export function Settings(props: SettingsProps): JSX.Element {
   const titleId = `${panelId}-title`;
   const switchId = `${panelId}-keyboard-navigation`;
   const settingsOwnerId = `${panelId}-focus`;
+  const { claimFocusOwner, releaseFocusOwner, discardPreviousOwner } = usePopoverFocusOwner(settingsOwnerId, buttonId, close);
 
   // #region Handlers
-
-  /**
-   * Makes Settings the sole active inner focus owner without moving focus.
-   *
-   * @param previousFocusItem - The focus owner captured before the popover opened
-   */
-  const claimFocusOwner = useCallback(
-    (previousFocusItem?: FocusItemProps): void => {
-      const currentFocusItem = getStoreUIFocusItem(mapId);
-      if (currentFocusItem.activeElementId === settingsOwnerId) return;
-
-      if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = previousFocusItem ?? currentFocusItem;
-      uiController.enableFocusTrap({
-        activeElementId: settingsOwnerId,
-        callbackElementId: buttonId,
-        focusOnEntry: false,
-      });
-    },
-    [buttonId, mapId, settingsOwnerId, uiController]
-  );
 
   /**
    * Closes Settings and restores the previous owner only when Settings still owns focus.
@@ -97,18 +73,12 @@ export function Settings(props: SettingsProps): JSX.Element {
       const currentFocusItem = getStoreUIFocusItem(mapId);
       const ownsFocus = currentFocusItem.activeElementId === settingsOwnerId;
 
+      releaseFocusOwner();
       close();
-      if (ownsFocus) {
-        uiController.enableFocusTrap({
-          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
-          focusOnEntry: false,
-        });
-      }
-      previousFocusItemRef.current = undefined;
 
       if (restoreTrigger && (ownsFocus || !currentFocusItem.activeElementId)) triggerRef.current?.focus();
     },
-    [close, mapId, settingsOwnerId, uiController]
+    [close, mapId, releaseFocusOwner, settingsOwnerId]
   );
 
   /**
@@ -182,9 +152,9 @@ export function Settings(props: SettingsProps): JSX.Element {
     logger.logTraceUseEffect('SETTINGS - superseding focus owner', focusItem);
     if (!open || !focusItem.activeElementId || focusItem.activeElementId === settingsOwnerId) return;
 
-    previousFocusItemRef.current = undefined;
+    discardPreviousOwner();
     close();
-  }, [close, focusItem, open, settingsOwnerId]);
+  }, [close, discardPreviousOwner, focusItem, open, settingsOwnerId]);
 
   /**
    * Releases stale ownership when a controller closes this popover, such as Ctrl+M or Ctrl+Q.
@@ -197,17 +167,14 @@ export function Settings(props: SettingsProps): JSX.Element {
       const currentFocusItem = getStoreUIFocusItem(mapId);
       if (currentFocusItem.activeElementId === settingsOwnerId) {
         if (activeTrapGeoView) {
-          uiController.enableFocusTrap({
-            ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
-            focusOnEntry: false,
-          });
+          releaseFocusOwner();
         } else {
           uiController.disableFocusTrap('no-focus');
         }
       }
-      previousFocusItemRef.current = undefined;
+      discardPreviousOwner();
     }
-  }, [activeTrapGeoView, mapId, open, settingsOwnerId, uiController]);
+  }, [activeTrapGeoView, discardPreviousOwner, mapId, open, releaseFocusOwner, settingsOwnerId, uiController]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>

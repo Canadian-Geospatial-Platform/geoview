@@ -53,7 +53,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 8;
+    return 14;
   }
 
   /**
@@ -72,6 +72,12 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
 
     // Focus and page-scrolling tests mutate shared browser state and must not run alongside other maps under "Run all".
     await this.waitForPageExclusivity();
+    await this.#uiTester.testResizePopoverFocusRestoration();
+    await this.#uiTester.testPopperKeyboardBoundary();
+    await this.#uiTester.testPopoverFocusOwnership('version');
+    await this.#uiTester.testPopoverFocusOwnership('notifications');
+    await this.#uiTester.testPopoverFocusOwnership('navbar');
+    await this.#uiTester.testPopoverFocusOwnership('settings');
     await this.#uiTester.testSkipFocusReturnsToMapLinks();
     await this.#uiTester.testAppBarFocusRestoreYieldsToNewerFocus();
     await this.#uiTester.testMapSectionScroll('partial');
