@@ -19,6 +19,18 @@
         padding: 5px 0px;
       }
 
+      button.collapsible {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      button.collapsible > span[id^="stats-"] {
+        flex: 1;
+        text-align: right;
+      }
+
       .tableResults {
         table-layout: fixed;
         width: 100%;
@@ -273,6 +285,13 @@
         Skipped: <span id="allSuitesTestsDoneSkipped" style="color: orange">0</span> |
         Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> |
         Progress: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span>
+        <progress
+          id="allSuitesTestsProgress"
+          aria-label="Overall test progress"
+          value="0"
+          max="1"
+          style="width: 160px; max-width: 100%; vertical-align: middle; margin-left: 8px"
+        ></progress>
       </div>
       <div style="text-align: right">
         Duration: <span id="allSuitesTotalDuration">0</span>
@@ -1326,6 +1345,11 @@
             if (doneFailed) colorFailed = 'red';
 
             statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Success: <span style="color: #00ff00;">${doneSuccess}</span> | Skipped: <span style="color: ${colorSkipped};">${doneSkipped}</span> | Failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Progress: ${done}/${total}/${totalFinal}`;
+            const progress = document.createElement('progress');
+            progress.setAttribute('aria-label', `Test progress for ${mapId}`);
+            progress.style.cssText = 'width:160px; max-width:100%; vertical-align:middle; margin-left:8px;';
+            testSuiteUpdateProgress(progress, done, totalFinal);
+            statsSpan.appendChild(progress);
           }
         });
 
