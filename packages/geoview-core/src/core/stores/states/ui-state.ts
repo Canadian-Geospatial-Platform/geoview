@@ -9,6 +9,8 @@ import type {
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { BUILT_IN_MODAL_IDS, CONTAINER_TYPE } from '@/core/utils/constant';
+import { buildAppBarFocusTrapId, buildTabId } from '@/core/utils/element-id';
 
 // GV States shouldn't import DomHelper
 
@@ -398,10 +400,18 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        * @param id - The panel id to remove
        */
       removeAppBarPanelId: (id: string): void => {
+        const { uiState, mapId } = get();
+        const isActivePanel = uiState.activeAppBarTab.tabId === id;
+        const ownsFocus = uiState.focusItem.activeElementId === buildAppBarFocusTrapId(mapId, id);
         set({
           uiState: {
-            ...get().uiState,
-            appBarPanelIds: get().uiState.appBarPanelIds.filter((panelId) => panelId !== id),
+            ...uiState,
+            appBarPanelIds: uiState.appBarPanelIds.filter((panelId) => panelId !== id),
+            activeAppBarTab: isActivePanel
+              ? { tabId: '', isOpen: false, isFocusTrapped: false, returnFocusToMap: false }
+              : uiState.activeAppBarTab,
+            focusItem: ownsFocus ? { activeElementId: false, callbackElementId: false } : uiState.focusItem,
+            focusRestoreRequest: ownsFocus ? undefined : uiState.focusRestoreRequest,
           },
         });
       },
@@ -463,6 +473,26 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         const isTabOpen = Boolean(normalizedTabId) && isOpen;
         const isFocusTrappedAndKeyboardNavigation = uiState.activeTrapGeoView && isTabOpen ? isFocusTrapped : false;
         const { activeAppBarTab } = uiState;
+        const { mapId } = get();
+        const previousOwnerId = buildAppBarFocusTrapId(mapId, activeAppBarTab.tabId);
+        const ownerId = buildAppBarFocusTrapId(mapId, normalizedTabId);
+        const currentOwnerId = uiState.focusItem.activeElementId;
+        const ownsFocus = currentOwnerId === previousOwnerId;
+        const footerOwnsFocus = currentOwnerId === buildTabId(mapId, uiState.activeFooterBarTab.tabId);
+        let { focusItem } = uiState;
+
+        // AppBar selection replaces the footer boundary, but never a modal or popover owner.
+        if (isFocusTrappedAndKeyboardNavigation && (!currentOwnerId || ownsFocus || footerOwnsFocus)) {
+          focusItem = {
+            activeElementId: ownerId,
+            callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-${normalizedTabId}-panel-btn`,
+            focusOnEntry: false,
+          };
+        } else if (ownsFocus || (uiState.activeTrapGeoView && isTabOpen && footerOwnsFocus)) {
+          // Non-trapped API opens release the footer; focus entry can then acquire the AppBar boundary.
+          focusItem = { activeElementId: false, callbackElementId: false };
+        }
+
         let shouldReturnFocusToMap = false;
         if (!isTabOpen) {
           shouldReturnFocusToMap = false;
@@ -475,6 +505,8 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...uiState,
+            focusItem,
+            focusRestoreRequest: focusItem !== uiState.focusItem ? undefined : uiState.focusRestoreRequest,
             activeAppBarTab: {
               tabId: normalizedTabId,
               isOpen: isTabOpen,
@@ -625,6 +657,21 @@ export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewSt
  * @returns The focus item and its focus-entry behavior
  */
 export const getStoreUIFocusItem = (mapId: string): FocusItemProps => getStoreUIState(mapId).focusItem;
+
+/**
+ * Gets whether a built-in modal dialog owns focus, independently of keyboard navigation mode.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether Export or either data-table modal owns focus
+ */
+export const getStoreUIIsModalActive = (mapId: string): boolean => {
+  const { activeElementId } = getStoreUIFocusItem(mapId);
+  return (
+    activeElementId === BUILT_IN_MODAL_IDS.EXPORT ||
+    activeElementId === BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE ||
+    activeElementId === BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE
+  );
+};
 
 /** Hooks the current focus-trap item from the UI state. */
 export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);

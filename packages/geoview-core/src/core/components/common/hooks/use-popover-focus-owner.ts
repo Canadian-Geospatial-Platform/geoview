@@ -4,6 +4,7 @@ import { useStoreGeoViewMapId, type GeoviewStoreType } from '@/core/stores/geovi
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { getStoreUIFocusItem, type FocusItemProps } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
+import { buildAppBarFocusTrapId, isAppBarFocusTrapId } from '@/core/utils/element-id';
 
 /**
  * Return owners belong to a store instance, not a reusable map ID. Weak keys do not retain destroyed stores;
@@ -99,8 +100,21 @@ export function usePopoverFocusOwner(ownerId: string, buttonId: string | undefin
     try {
       // Late cleanup must not restore ownership into a replacement viewer using the same map ID.
       if (getGeoViewStore(mapId) === store && store.getState().uiState.focusItem.activeElementId === ownerId) {
+        let previousOwner = previousFocusItemRef.current;
+        const { activeAppBarTab } = store.getState().uiState;
+        const previousOwnerId = previousOwner?.activeElementId;
+
+        // An AppBar panel may have closed or switched while this popover owned focus.
+        if (
+          isAppBarFocusTrapId(mapId, previousOwnerId) &&
+          (!activeAppBarTab.isOpen ||
+            !activeAppBarTab.isFocusTrapped ||
+            previousOwnerId !== buildAppBarFocusTrapId(mapId, activeAppBarTab.tabId))
+        ) {
+          previousOwner = undefined;
+        }
         uiController.enableFocusTrap({
-          ...(previousFocusItemRef.current ?? { activeElementId: false, callbackElementId: false }),
+          ...(previousOwner ?? { activeElementId: false, callbackElementId: false }),
           focusOnEntry: false,
         });
       }

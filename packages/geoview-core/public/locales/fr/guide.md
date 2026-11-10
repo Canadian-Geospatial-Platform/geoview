@@ -80,13 +80,16 @@ Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la 
 
 Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer avec le clavier. Utilisez la touche de **tabulation** pour atteindre les liens et les commandes sur la page. Appuyez sur **Maj.** et la touche de **tabulation** pour revenir à l’élément précédent. Utilisez la touche **Entrée** ou la **barre d’espace** pour activer les liens et les commandes.
 
-Si vous utilisez la touche de **tabulation** pour naviguer dans la carte, la fenêtre contextuelle **Navigation clavier** s’affichera. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** pour utiliser la navigation avec le clavier.
+Utilisez la touche de **tabulation** pour entrer dans le visualiseur. Lorsque la fenêtre **Navigation clavier** s'affiche, sélectionnez **Activer** et appuyez sur **Entrée**.
 
-Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
+- Sur les cartes dynamiques, le focus passe au lien **Aller au contenu principal - Carte**. Appuyez de nouveau sur **Entrée** pour focaliser la carte et activer le pointeur en croix ; le bouton Activer seul ne l'active pas.
+- Sur les cartes statiques, le focus passe dans le visualiseur. Utilisez **Tabulation** ou **Maj.+Tabulation** pour atteindre les commandes disponibles. Les cartes statiques ne permettent pas la navigation avec le pointeur en croix, le déplacement de la carte ni le zoom.
+
+Sur les cartes dynamiques, un pointeur en croix s'affiche au centre lorsque la carte reçoit le focus :
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
-La carte peut être rapidement centrée en appuyant sur **Ctrl+M** n'importe où dans l'application GeoView.
+Lorsque le focus se trouve dans un visualiseur dynamique, utilisez **Ctrl+M** (**Cmd+M** sur macOS) pour focaliser la carte et activer le pointeur en croix.
 
 Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** ou **Ctrl+Flèche haut** / **Ctrl+Flèche bas** pour faire un zoom avant ou arrière. Appuyez sur **Maj.+Flèche haut** / **Maj.+Flèche bas** pour augmenter ou diminuer la distance de déplacement de la carte à chaque touche fléchée. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
@@ -105,7 +108,7 @@ Pour les éléments pris en charge, l’information s’affiche lorsque le point
 
 #### Avec le pointeur en croix
 
-La mesure au clavier nécessite la navigation au clavier : appuyez sur **Tabulation** pour focaliser la carte, sélectionnez **Activer** et vérifiez que le pointeur en croix est visible. Ouvrez ensuite **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
+La mesure au clavier nécessite une carte dynamique avec la navigation au clavier activée. Après avoir choisi **Activer**, appuyez sur **Entrée** sur le lien **Aller au contenu principal - Carte** pour activer le pointeur en croix. Ouvrez ensuite **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
 
 - Appuyez sur **Entrée** ou **Espace** pour commencer et ajouter un point à la position du pointeur en croix.
 - Appuyez sur **Maj.+Entrée** ou **Maj.+Espace** pour terminer la mesure.

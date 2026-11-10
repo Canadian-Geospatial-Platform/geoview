@@ -34,10 +34,11 @@ Activating the keyboard crosshair replaces any stale mouse pointer position.
 
 On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and focuses the main-content skip link on dynamic maps, or the viewer shell on static maps so Tab can reach the viewer's controls. Activating the main-content link focuses the map and activates crosshair-based interaction. Choosing Skip instead focuses the outer skip link in the direction of travel.
 
-- Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
+- Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes. Choosing a mode here also handles initial onboarding, so switching it off does not redirect the next internal Tab to the entry prompt.
 - Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.
 - Settings temporarily takes focus-trap ownership from another panel. Escape or its Close button returns focus to Settings; clicking elsewhere closes it without pulling focus away from the clicked target. Genuine modal dialogs keep strict focus containment.
 - Replacing one map-control popover with another preserves the underlying panel's keyboard boundary when the replacement closes; a closed popover is never restored as the active owner.
+- Clicking another control while a popover opens preserves focus on that control, whether it is inside or outside the popover.
 
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair
@@ -57,11 +58,17 @@ for developer guidance.
 
 In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a keyboard boundary within that panel. Only one inner panel owns that boundary at a time; opening Settings temporarily suspends the previous owner. Normal panels are non-modal, so deliberate pointer interaction outside them is permitted without changing the mode. Auto-opened panels may remain outside the active boundary.
 
+Opening an app-bar panel from the footer transfers the keyboard boundary to the app-bar panel. Closing it returns focus to its button without reactivating the footer boundary; select a footer tab to enter that panel again. A newer modal or popover keeps its ownership and focus.
+
+While Export or a data-table modal is open, requests to open map-control popovers are rejected without dismissing the modal or moving focus. Retry after closing the modal; rejected requests are not queued.
+
 - This speeds up navigation by preventing focus from cycling through the entire map
 - Close the active panel or selection by pressing **Esc** — focus returns to the associated button
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
-With the crosshair active, pressing Enter on a feature opens Details and focuses the panel-header Close button. Focus remains there as the feature attributes load. Pressing Enter on Close or pressing Esc closes Details and returns focus to the map for another crosshair query.
+When Details is hosted in the app bar, pressing Enter on a feature with the crosshair active opens Details and focuses the panel-header Close button. Focus remains there as the feature attributes load. Pressing Enter on Close or pressing Esc closes Details and returns focus to the map for another crosshair query, unless another control has taken focus.
+
+If Details is configured in the footer bar, that location takes precedence over the app bar. The app-bar-specific Close-button focus and return-to-map behaviour do not apply to footer-hosted Details.
 
 Sub-panels provide similar functionality.
 Scrollable right-panel content is also a keyboard stop; focus it and use the arrow keys to scroll

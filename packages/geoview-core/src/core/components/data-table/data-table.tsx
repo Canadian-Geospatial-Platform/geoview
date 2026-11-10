@@ -59,7 +59,7 @@ import { useGlobalFilter } from './hooks/useGlobalFilter';
 import { useColumnVisibility } from './hooks/useColumnVisibility';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common/hooks/use-light-box';
-import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
 import type { DataTableProps, DataTableRow } from './data-table-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -841,7 +841,7 @@ function DataTable({
       const feature = filteredFeaturesRef.current[index];
       if (feature) {
         dataTableController.setSelectedFeature(feature);
-        uiController.enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: buttonId });
+        uiController.enableFocusTrap({ activeElementId: BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE, callbackElementId: buttonId });
       }
     },
     [dataTableController, uiController]

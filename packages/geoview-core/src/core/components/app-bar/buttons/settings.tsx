@@ -49,7 +49,7 @@ export function Settings(props: SettingsProps): JSX.Element {
   const uiController = useUIController();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const focusItem = useStoreUIActiveFocusItem();
-  const { open, anchorEl, openAt, close } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close } = useMapPopover();
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const previousOpenRef = useRef(open);
@@ -91,10 +91,10 @@ export function Settings(props: SettingsProps): JSX.Element {
         return;
       }
 
-      const previousFocusItem = openAt(event.currentTarget);
-      if (activeTrapGeoView) claimFocusOwner(previousFocusItem);
+      const result = tryOpenAt(event.currentTarget);
+      if (result.ok && activeTrapGeoView) claimFocusOwner(result.previousFocusItem);
     },
-    [activeTrapGeoView, claimFocusOwner, closePanel, open, openAt]
+    [activeTrapGeoView, claimFocusOwner, closePanel, open, tryOpenAt]
   );
 
   /**

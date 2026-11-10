@@ -164,7 +164,12 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
   focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
   Flush map-control popover closure (navbar, About/Version, Notifications) before focusing the map
-  so MUI focus restoration cannot reclaim focus; clear the registered focus item without restoring caller focus.
+  so MUI focus restoration cannot reclaim focus; clear the registered non-modal focus item without restoring caller focus.
+  `UIController.closeMapPopovers` preserves built-in modal owners through `getStoreUIIsModalActive`
+  (Export and both data-table dialogs), even outside keyboard mode.
+  Their shared focus-owner IDs live in `BUILT_IN_MODAL_IDS` in `core/utils/constant.ts`; use those
+  constants for opening, rendering, and ownership checks. The responsive grid intentionally checks only
+  the two data-table IDs, not Export. Adding a built-in modal also requires reviewing the selector and regression scenarios.
   Derive panel openness from the close-request version during render; closing through a passive
   effect schedules a second render whose focus-trap cleanup can run after map focus. New map-control
   popovers use the `useMapPopover` hook, which owns that derivation, rather than re-implementing it.
@@ -189,9 +194,16 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and keep its viewer-level Tab boundary.
   The dynamic-map Settings switch and entry prompt must invoke the same mode lifecycle through the
   Shell callback; never add a config flag or a separate mode state. Settings stays mounted in the app bar
-  below Notifications on dynamic maps only. After Enable closes the prompt, focus
+  below Notifications on dynamic maps only. `FocusTrapDialog.setKeyboardNavigationMode` must synchronously
+  mark `hasBeenPromptedRef` handled for explicit mode changes, including Settings, so enabling then disabling
+  on a fresh viewer cannot re-arm internal Tab redirection. Keep deliberate outer skip-link entry unchanged.
+  Regression coverage must use a fresh viewer without first opening the prompt, which would mask this bug.
+  After Enable closes the prompt, focus
   `DomHelper.getWCAGLinkToMap(mapId)` when available; otherwise use the cached shell reference (`tabIndex=-1`).
   Outer skip links sit outside the shell's Tab boundary: they are Skip destinations, not Enable destinations.
+  The static-entry regression checks reverse wrapping to the last visible tabbable, not `defaultPrevented`.
+  Synthetic key events cannot perform native Tab movement: when unhandled, focus the shell's active
+  start sentinel to exercise boundary wrapping. Also validate real Shift+Tab in browser checks.
   Do not focus the OpenLayers target or activate the crosshair on entry; the main-content skip link owns that action.
   The inactive entry prompt may be dismissed by real pointer movement outside the prompt, but movement
   must not disable an already-enabled mode. Ignore zero movement and cancel any pending focus job when
@@ -211,14 +223,44 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   toolbar-button focus is mistaken for newer user focus and blocks map return and crosshair reactivation.
   Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
   a newer modal or panel.
+  AppBar ownership changes atomically with `setActiveAppBarTab` in the UI slice, covering trigger,
+  controller/legacy API opens, panel switching, and focus entry into configuration-opened panels.
+  Pure ID construction lives in `core/utils/element-id.ts`: `buildGVElementId`, `buildTabId`
+  (also the footer owner), and `buildAppBarFocusTrapId`. `DomHelper.buildGVElementId` delegates to
+  the pure builder, preserving its public API without making store slices import DOM utilities.
+  Use `isAppBarFocusTrapId` to classify named or unnamed AppBar owners rather than repeating
+  prefix/suffix checks in consumers.
+  Keep literal format assertions for named and unnamed AppBar owners in the ownership regression.
+  A trapped keyboard open may replace an unowned boundary, the selected footer owner, or the previous
+  AppBar owner, never an unrelated modal/popover. Non-trapped API opens release a footer owner
+  without acquiring a boundary until focus enters the panel. Closing clears only the outgoing AppBar owner;
+  it does not restore the footer (AppBar selection replaces it rather than temporarily suspending it).
+  Removing an active AppBar registration clears its tab state and only its own focus owner atomically.
+  Leave a newer owner untouched and clear the tab ID so the close fallback cannot focus a removed trigger.
+  Keep `focusOnEntry: false`: Panel's transition owns Close-button entry focus and must check the
+  current owner before moving it. Explicit dismissal accepts the panel's own ID or no owner, then
+  guards delayed restoration against the cleared owner. The fallback reads the current store, not
+  a render-time ownership snapshot. Popover release must not resurrect an AppBar panel closed or
+  switched while the popover owned focus. Regress footer-to-AppBar trigger/API acquisition, Escape,
+  Close, real Tab boundaries, and modal/popover supersession.
   About, Notifications, and navbar popovers read the current store owner in their coordination effects.
   If a different active owner exists, close without restoring focus; acquire ownership only when unowned.
   Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.
   Shared snapshot capture, acquisition, release, and coordination live in
   [usePopoverFocusOwner](../../packages/geoview-core/src/core/components/common/hooks/use-popover-focus-owner.ts).
-  Before `useMapPopover.openAt` closes outgoing popovers, resolve their underlying return owner through
+  Before `useMapPopover.tryOpenAt` closes outgoing popovers, resolve their underlying return owner through
   the shared hook's store-instance-scoped snapshot registry. Snapshots are flattened on capture and removed on
   release, yield, or unmount; never save the ID of a popover that opening the replacement will close.
+  Reject opening while `getStoreUIIsModalActive` is true, before capturing a snapshot, issuing a close
+  request, or changing the anchor. `tryOpenAt` returns `{ ok: false }` on rejection or
+  `{ ok: true, previousFocusItem }` on success. Consumers narrow on `ok` before passing the snapshot
+  to ownership helpers; those helpers still use an omitted argument to capture the current owner.
+  Navbar external requests must publish `onOpenChange(false)` on rejection: local openness never changed,
+  so the ordinary change effect cannot reset the API status. Do not queue or automatically retry rejected opens.
+  The navbar regression exercises real Export/data-table dialogs in both navigation modes, unchanged focus
+  and owner, shared trigger rejection, explicit controller closure, retry after modal dismissal, and newer-modal
+  cleanup protection. Render the layer-free fixture and await map readiness before opening Export: Shell
+  mounts it only after the map is loaded. Wait for each dialog's entry-focus target before measuring preservation.
   The registry uses weak store keys, not map-ID strings: a recreated viewer gets a separate snapshot
   namespace even when it reuses the same ID, and the registry cannot keep a destroyed store alive.
   Explicitly remove owner entries and empty per-store registries during normal cleanup; weak keys are
@@ -231,7 +273,7 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   contexts using identical owner IDs. Verify A → B → C restores the non-popover owner, and directly
   probe former IDs after release, yield, and unmount before checking fresh capture on reuse.
   These hook-level checks deliberately bypass map-prefixed DOM IDs so collisions cannot mask a missing store boundary.
-  Navbar API opening must use the snapshot returned by `openAt`, just like trigger opening, without
+  Navbar API opening must use the successful snapshot returned by `tryOpenAt`, just like trigger opening, without
   clearing ownership first. Regress footer → About → navbar replacement, unowned entry, and superseding ownership.
   About, Notifications, and navbar effects invoke its common coordination operation; Settings retains its
   mode-specific effects and guarded trigger-focus policy while sharing the ownership operations.
@@ -241,6 +283,10 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   The shared Popper keyboard boundary includes its content and owning DOM anchor (including callback anchors),
   but not unrelated controls or virtual-anchor context elements. Attribution keeps focus on its trigger,
   so Escape must be accepted there; preserve the `defaultPrevented` guard for nested keyboard handlers.
+  Its delayed opening-focus job must yield to any changed non-body focus target, including inputs and
+  buttons inside the popover. Containment does not imply the original focus request still owns focus.
+  Opening-focus regressions schedule the interaction after the opening effect captures initial focus,
+  before its timer runs; cover normal opening and newer input, button, and outside-control focus.
   Fullscreen footer Resize owns explicit-dismissal restoration in
   [ResizeFooterPanel](../../packages/geoview-core/src/core/components/footer-bar/hooks/resize-footer-panel.tsx):
   Close, Escape, and slider Enter return focus to Resize after reflow, unless another control has gained focus.

@@ -38,7 +38,7 @@ import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
-import { TIMEOUT } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { exportFile } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
@@ -365,7 +365,7 @@ export function ExportModal(): JSX.Element {
   return (
     <Dialog
       id={`${mapId}-export-dialog`}
-      open={activeModalId === 'export'}
+      open={activeModalId === BUILT_IN_MODAL_IDS.EXPORT}
       onClose={handleCloseModal}
       slotProps={{
         transition: {

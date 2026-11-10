@@ -287,7 +287,7 @@ const Notifications = memo((): JSX.Element => {
   // State
   const [hasNewNotification, setHasNewNotification] = useState<boolean>(false);
   const [notificationsCount, setNotificationsCount] = useState<number>(0);
-  const { open, anchorEl, openAt, close } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close } = useMapPopover();
 
   // Refs
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -336,12 +336,12 @@ const Notifications = memo((): JSX.Element => {
         return;
       }
 
-      const previousFocusItem = openAt(event.currentTarget);
-      if (activeTrapGeoView) {
-        claimFocusOwner(previousFocusItem);
+      const result = tryOpenAt(event.currentTarget);
+      if (result.ok && activeTrapGeoView) {
+        claimFocusOwner(result.previousFocusItem);
       }
     },
-    [activeTrapGeoView, claimFocusOwner, close, open, openAt]
+    [activeTrapGeoView, claimFocusOwner, close, open, tryOpenAt]
   );
 
   /**

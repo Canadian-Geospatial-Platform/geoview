@@ -11,7 +11,7 @@ import { ProgressBar } from '@/ui/linear-progress/linear-progress';
 import { Typography } from '@/ui/typography/typography';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { getStoreUIFocusItem, useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
@@ -21,7 +21,8 @@ import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { buildAppBarFocusTrapId } from '@/core/utils/element-id';
 
 /** Geolocation search result item. */
 export interface GeoListItem {
@@ -130,9 +131,9 @@ export function Geolocator(): JSX.Element {
   const handleReset = useCallback((): void => {
     setSearchValue('');
     uiController.setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
-    setTimeout(() => {
+    if (!getStoreUIFocusItem(mapId).activeElementId) {
       uiController.disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
-    }, TIMEOUT.deferExecution);
+    }
   }, [setSearchValue, uiController, mapId]);
 
   /**
@@ -153,10 +154,12 @@ export function Geolocator(): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('GEOLOCATOR - focus input', isOpen, tabId);
 
-    if (isOpen && tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && searchInputRef.current) {
+    const ownerId = getStoreUIFocusItem(mapId).activeElementId;
+    const panelOwnerId = buildAppBarFocusTrapId(mapId, DEFAULT_APPBAR_CORE.GEOLOCATOR);
+    if (isOpen && tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && searchInputRef.current && (!ownerId || ownerId === panelOwnerId)) {
       searchInputRef.current?.focus();
     }
-  }, [isOpen, tabId]);
+  }, [isOpen, tabId, mapId]);
 
   /**
    * Handles ESC key to close the geolocator panel.
@@ -206,7 +209,7 @@ export function Geolocator(): JSX.Element {
     >
       <FocusTrapContainer
         open={isPanelOpen && activeTrapGeoView}
-        focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-focus-trap`}
+        focusTrapContainerId={buildAppBarFocusTrapId(mapId, DEFAULT_APPBAR_CORE.GEOLOCATOR)}
         containerType={CONTAINER_TYPE.APP_BAR}
       >
         <Box sx={memoSxClasses.geolocator}>

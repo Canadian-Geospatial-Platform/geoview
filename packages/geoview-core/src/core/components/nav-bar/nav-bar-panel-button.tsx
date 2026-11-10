@@ -80,7 +80,7 @@ export default function NavbarPanelButton({
   }, [theme, panelWidth]);
 
   // States
-  const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close: closePanel } = useMapPopover();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const previousRequestedOpen = useRef(false);
   const previousOpen = useRef(open);
@@ -104,10 +104,15 @@ export default function NavbarPanelButton({
       // The open-state callback also synchronizes user-opened panels; preserve their original owner snapshot.
       if (open) return;
 
-      const previousFocusItem = openAt(buttonRef.current);
-      if (activeTrapGeoView) rememberPreviousOwner(previousFocusItem);
+      const result = tryOpenAt(buttonRef.current);
+      if (!result.ok) {
+        // A rejected request leaves local openness unchanged, so the usual change callback cannot reset it.
+        onOpenChange?.(false);
+        return;
+      }
+      if (activeTrapGeoView) rememberPreviousOwner(result.previousFocusItem);
     } else closePanel();
-  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, open, openAt, rememberPreviousOwner]);
+  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, onOpenChange, open, tryOpenAt, rememberPreviousOwner]);
 
   /**
    * Notifies the caller when the panel open state changes.
@@ -143,11 +148,11 @@ export default function NavbarPanelButton({
       if (open) {
         closePanelWithFocus(true);
       } else {
-        const previousFocusItem = openAt(event.currentTarget);
-        if (activeTrapGeoView) rememberPreviousOwner(previousFocusItem);
+        const result = tryOpenAt(event.currentTarget);
+        if (result.ok && activeTrapGeoView) rememberPreviousOwner(result.previousFocusItem);
       }
     },
-    [activeTrapGeoView, closePanelWithFocus, open, openAt, rememberPreviousOwner]
+    [activeTrapGeoView, closePanelWithFocus, open, tryOpenAt, rememberPreviousOwner]
   );
 
   /**
