@@ -88,13 +88,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [shellContainer]);
 
   /**
-   * Tracks whether the keyboard navigation dialog has been shown to the user.
+   * Tracks whether the entry dialog has opened or the user has explicitly selected a navigation mode.
    * Tab key presses are intercepted and redirected to skip links until this flag is set.
    */
   const hasBeenPromptedRef = useRef(false);
 
   /**
-   * Intercepts Tab key presses to redirect focus to skip links until the user has been prompted.
+   * Intercepts Tab key presses until the entry dialog or an explicit mode selection handles onboarding.
    */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - Tab navigation guard');
@@ -133,7 +133,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   /**
    * Marks the user as having been prompted when the modal opens.
-   * Reset prompt flag when modal is dismissed.
    */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - mark navigation prompt shown', open);
@@ -161,6 +160,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   const setKeyboardNavigationMode = useCallback(
     (active: boolean): void => {
+      hasBeenPromptedRef.current = true;
       focusJobRef.current?.cancel();
       uiController.setActiveTrapGeoView(active);
       if (!active) uiController.setCrosshairActive(false);

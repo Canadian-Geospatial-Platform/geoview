@@ -23,6 +23,7 @@ import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/states/data-table-state';
 import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
+import { BUILT_IN_MODAL_IDS } from '@/core/utils/constant';
 import type { SxStyles } from '@/ui/style/types';
 import { dataTableModalContentStyle, getDataTableModalContentTextStyle, getSxClasses } from './data-table-style';
 import { useFeatureFieldInfos } from './hooks/useFeatureFieldInfos';
@@ -196,8 +197,8 @@ export default function DataTableModal(): JSX.Element {
 
   return (
     <Modal
-      modalId="layerDataTable"
-      open={activeModalId === 'layerDataTable'}
+      modalId={BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE}
+      open={activeModalId === BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE}
       onClose={() => uiController.disableFocusTrap()}
       title={`${t('legend.tableDetails')} ${layerNames[selectedLayerPath!] || ''}`}
       container={shellContainer}

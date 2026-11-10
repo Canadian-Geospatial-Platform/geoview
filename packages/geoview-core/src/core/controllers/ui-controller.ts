@@ -15,6 +15,7 @@ import {
   clearStoreUIFocusRestoreRequest,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
+  getStoreUIIsModalActive,
   hideStoreUITabButton,
   removeStoreUIAppBarPanelId,
   removeStoreUIFooterTab,
@@ -463,10 +464,10 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Closes map-control popovers and releases their focus trap without restoring caller focus.
+   * Closes map-control popovers without restoring caller focus or dismissing an active modal.
    */
   closeMapPopovers(): void {
-    this.disableFocusTrap('no-focus');
+    if (!getStoreUIIsModalActive(this.getMapId())) this.disableFocusTrap('no-focus');
     closeStoreUIMapPopovers(this.getMapId());
   }
 

@@ -17,12 +17,14 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { getStoreUIFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { doTimeout } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { buildAppBarFocusTrapId } from '@/core/utils/element-id';
 
 /** Extra milliseconds added to transition duration to ensure CSS transitions fully complete before callbacks fire. */
 const TRANSITION_BUFFER_MS = 50;
@@ -88,6 +90,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const panelOwnerId = buildAppBarFocusTrapId(mapId, panelId);
 
   // #region Handlers
 
@@ -156,12 +159,14 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     let delayJob: ReturnType<typeof doTimeout> | undefined = undefined;
 
     if (open) {
+      const initialFocus = DomHelper.getActiveElement();
       delayJob = createTransitionDelay(() => {
-        // Focus close button only on user-triggered open (!prevOpen), not initial render.
-        // This prevents focus hijacking with configurations that have an appBar panel open by default,
-        // preserving the host page's natural tab order until GeoView is interacted with.
-        // Focus happens after transition to ensure the button ref is set.
-        if (!prevOpen && closeBtnRef?.current) {
+        const ownerId = getStoreUIFocusItem(mapId).activeElementId;
+        const currentFocus = DomHelper.getActiveElement();
+        const focusChanged = currentFocus && currentFocus !== initialFocus && currentFocus.tagName !== 'BODY';
+
+        // Preserve host-page focus on initial render and yield to newer focus.
+        if (!prevOpen && !focusChanged && closeBtnRef?.current && (!ownerId || ownerId === panelOwnerId)) {
           closeBtnRef.current.focus();
         }
         onOpen?.();
@@ -178,7 +183,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
         delayJob.cancel();
       }
     };
-  }, [open, createTransitionDelay, onOpen, onClose]);
+  }, [open, createTransitionDelay, onOpen, onClose, mapId, panelOwnerId]);
 
   return (
     <Box
@@ -194,11 +199,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-panel`}
       className={`appbar-panel${panelId ? ` appbar-panel-${panelId}` : ''}`}
     >
-      <FocusTrapContainer
-        open={isFocusTrapped}
-        focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-focus-trap`}
-        containerType={CONTAINER_TYPE.APP_BAR}
-      >
+      <FocusTrapContainer open={isFocusTrapped} focusTrapContainerId={panelOwnerId} containerType={CONTAINER_TYPE.APP_BAR}>
         <Card
           sx={{
             ...memoSxClasses.panelCard,

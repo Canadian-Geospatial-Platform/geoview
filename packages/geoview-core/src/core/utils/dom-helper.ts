@@ -6,6 +6,7 @@ import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
+import { buildGVElementId as buildElementId } from '@/core/utils/element-id';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -33,7 +34,7 @@ export abstract class DomHelper {
    * @returns The canonical id string `${mapId}-${suffix}`
    */
   static buildGVElementId(mapId: string, suffix: string): string {
-    return `${mapId}-${suffix}`;
+    return buildElementId(mapId, suffix);
   }
 
   /**

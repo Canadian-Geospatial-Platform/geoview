@@ -16,6 +16,7 @@ import { TabPanel } from '@/ui/tabs/tab-panel';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { buildTabId as createTabId } from '@/core/utils/element-id';
 
 /** Properties defining a tab and its panel content. */
 export type TypeTabs = {
@@ -82,18 +83,6 @@ export interface TypeTabsProps {
   /** Whether the viewer is in fullscreen mode. */
   isFullScreen: boolean;
 }
-
-/**
- * Creates a standardized tab element ID.
- *
- * This ensures unique element IDs when multiple map viewers are rendered
- * on the same page. The format must match the extraction logic in extractTabId.
- *
- * @param mapId - The map identifier
- * @param tabId - The tab identifier
- * @returns Formatted tab ID string
- */
-const createTabId = (mapId: string, tabId: string): string => `${mapId}-tab-${tabId}`;
 
 /**
  * Creates a standardized tab panel element ID.

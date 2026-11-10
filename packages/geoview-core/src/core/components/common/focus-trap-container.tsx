@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
@@ -18,6 +18,9 @@ import { doTimeout } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+
+/** Identifies the panel that owns nested non-modal focus boundaries. */
+export const PanelFocusOwnerContext = createContext<string | undefined>(undefined);
 
 /** Properties for the FocusTrapContainer component. */
 interface FocusTrapContainerProps {
@@ -297,7 +300,9 @@ export const FocusTrapContainer = ({
           </Button>
         )}
         {/* Fit content into the remaining space below Exit so its scroller is not clipped. */}
-        <Box sx={memoSxClasses.content}>{children}</Box>
+        <Box sx={memoSxClasses.content}>
+          <PanelFocusOwnerContext.Provider value={focusTrapContainerId}>{children}</PanelFocusOwnerContext.Provider>
+        </Box>
       </Box>
     </FocusTrap>
   );

@@ -31,6 +31,7 @@ import { logger } from '@/core/utils/logger';
 
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreUIIsModalActive } from '@/core/stores/states/ui-state';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { DomHelper } from '@/core/utils/dom-helper';
 
@@ -121,6 +122,8 @@ export function Map(props: MapProps): JSX.Element {
 
       // Ctrl+M (or Cmd+M on Mac)
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey) {
+        if (getStoreUIIsModalActive(mapId)) return;
+
         // Only activate if map interaction is not static
         if (mapInteraction !== 'static' && mapElement.current) {
           event.preventDefault();
