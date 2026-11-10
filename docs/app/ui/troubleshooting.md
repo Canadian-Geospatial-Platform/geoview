@@ -46,17 +46,15 @@ If you are building an application with GeoView's API (`cgpv.api`), test your in
 
 ### Step 4 — Test Keyboard Navigation (WCAG) Mode
 
-In keyboard navigation (WCAG) mode, mouse movement or placement can cause unexpected behaviour that is difficult to reproduce. For example:
+Keyboard navigation (WCAG) mode supports switching between keyboard and pointer input. You do not need to move the mouse away from the viewer or keep it still, including when entering fullscreen.
 
-- Some buttons may become unresponsive.
-- Pressing certain buttons may not trigger the expected action.
-- Focus traps, which intentionally restrict where you can tab to, may not function as intended.
+When testing:
 
-To avoid these issues:
+- Moving the mouse over or away from the map should not move keyboard focus or turn keyboard navigation mode off.
+- Normal panels keep Tab/Shift+Tab navigation within the active panel. A deliberate click outside may move focus to the clicked control without turning the mode off; keyboard navigation then continues from there.
+- Modal dialogs keep focus within the dialog until dismissed.
 
-- Before tabbing into the viewer to enter WCAG mode, move your mouse away from the browser window.
-- Avoid moving your mouse after entering WCAG mode.
-- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+See [Keyboard Navigation Mode](../accessibility.md#keyboard-navigation-mode) for entry, exit, and panel-focus behaviour. If buttons stop responding or focus moves unexpectedly, report the steps below, including which panel was open and whether you used the keyboard, mouse, or both.
 
 ### Step 5 — Contact the GeoView Team
 

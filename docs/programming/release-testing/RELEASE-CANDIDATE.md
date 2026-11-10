@@ -362,6 +362,8 @@ _(Doc updates, demo cleanup, code organization)_
 
 ## Test Plan Changes
 
+- Expanded the manual WCAG checklist with 11 scenarios for Settings lifecycle, mixed keyboard/pointer input, popover replacement, and footer Details precedence; clarified static-map entry and AppBar-only keyboard-query focus restoration (branch `3694-wcag-mode-button`, documentation follow-up to `f7fa65609b`). WCAG now has 85 manual rows. Recounted definition totals are 956 (63 A / 169 C / 724 M), including pre-existing index drift; this documents coverage to execute, not completed manual validation.
+
 _(Tests added, moved, removed, or reorganized)_
 
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path (`suite-data-table` 12 → 13; `00-automated-suite` total 272 → 273).
