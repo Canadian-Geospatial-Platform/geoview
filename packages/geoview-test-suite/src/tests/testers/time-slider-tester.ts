@@ -13,6 +13,7 @@ import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/laye
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /** Main Time Slider testing class. */
 export class TimeSliderTester extends GVAbstractTester {
@@ -53,25 +54,36 @@ export class TimeSliderTester extends GVAbstractTester {
    */
   testResetValues(): Promise<Test<TimeSliderResetResult>> {
     let originalValues: number[] | undefined;
+    let gvLayer: AbstractBaseGVLayer;
 
     return this.test(
       'Test Time Slider reset restores registered default values...',
       async (test) => {
-        test.addStep('Waiting for the temporal layer and time-slider values to be registered...');
-        await this.getControllersRegistry().layerController.waitForLayerRegistered(TimeSliderTester.TIME_SLIDER_LAYER_PATH);
-        const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        // Add the layer
+        test.addStep('Adding the Historical Flood layer...');
+        gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test);
 
+        // Get the registered time-slider values for the added layer
+        const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), gvLayer.getLayerPath());
+
+        // Select the time-slider tab
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('time-slider');
+
+        // Select the layer in the time-slider
+        this.getControllersRegistry().timeSliderController!.setSelectedLayerPathTimeSlider(gvLayer.getLayerPath());
+
+        // Read the values
         originalValues = [...registeredValues.values];
         const defaultValuesBeforeReset = [...registeredValues.defaultValues];
         const changedValues = defaultValuesBeforeReset.map((value) => value + 1);
 
         test.addStep('Replacing the current store values while preserving the registered defaults...');
-        setStoreTimeSliderValues(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH, changedValues);
+        setStoreTimeSliderValues(this.getMapId(), gvLayer.getLayerPath(), changedValues);
 
         test.addStep('Resetting values through the time-slider controller...');
-        this.getControllersRegistry().timeSliderController!.resetValues(TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        this.getControllersRegistry().timeSliderController!.resetValues(gvLayer.getLayerPath());
 
-        const resetValues = getStoreTimeSliderLayer(this.getMapId(), TimeSliderTester.TIME_SLIDER_LAYER_PATH);
+        const resetValues = getStoreTimeSliderLayer(this.getMapId(), gvLayer.getLayerPath());
         Test.assertIsDefined('resetValues', resetValues);
         return {
           changedValues,
@@ -87,13 +99,14 @@ export class TimeSliderTester extends GVAbstractTester {
         Test.assertIsArrayEqual(result.defaultValuesAfterReset, result.defaultValuesBeforeReset);
       },
       (test) => {
+        // If we had original values, restore them before removing the layer
         if (originalValues) {
           test.addStep('Restoring the original time-slider values...');
-          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(
-            TimeSliderTester.TIME_SLIDER_LAYER_PATH,
-            originalValues
-          );
+          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(gvLayer.getLayerPath(), originalValues);
         }
+
+        // Remove the layer
+        this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(gvLayer.getLayerPath());
       }
     );
   }

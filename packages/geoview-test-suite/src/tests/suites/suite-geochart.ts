@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GeochartTester } from '../testers/geochart-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 
@@ -81,7 +80,8 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#geochartTester.testGeochartPolygonsClick();
     return Promise.resolve();
   }
 
@@ -92,18 +92,12 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Geochart
-    const pGeochartPolygons = this.#geochartTester.testGeochartOpenForLayerMapClick(
-      'geojsonLYR5/polygons.json',
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
-    );
-
-    // Wait for the test with polygons to complete
-    await pGeochartPolygons;
+    await this.#geochartTester.testGeochartPolygonsClick();
 
     // Test Geochart
-    const pGeochartAirborne = this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
+    await this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
 
-    // Resolve when all
-    return Promise.all([pGeochartPolygons, pGeochartAirborne]);
+    // Resolve
+    return Promise.resolve();
   }
 }

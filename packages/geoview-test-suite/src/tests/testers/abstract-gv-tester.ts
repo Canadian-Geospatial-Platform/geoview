@@ -1191,7 +1191,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
 
     // Create the geoview layer config
-    const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+    const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, true, [
       { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
     ]);
 
