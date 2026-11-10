@@ -846,6 +846,125 @@ export class UITester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Verifies enabling keyboard navigation focuses an available destination on dynamic and static maps.
+   *
+   * @returns A promise that resolves with the focus and mode evidence for both interaction types
+   */
+  testKeyboardEnableFocusDestination(): Promise<Test<TypeKeyboardEnableFocusResult[]>> {
+    const scenarios = [
+      { interaction: 'dynamic', entrySuffix: 'wcag-toplink', shiftKey: false, expectedSuffix: 'wcag-link-to-map' },
+      { interaction: 'static', entrySuffix: 'wcag-toplink', shiftKey: false, expectedSuffix: 'shell' },
+      { interaction: 'static', entrySuffix: 'wcag-bottomlink', shiftKey: true, expectedSuffix: 'shell' },
+    ] as const;
+    const mapIds = scenarios.map(({ interaction }) => `enable-focus-${interaction}-${generateId(8)}`);
+    const fixtures = mapIds.map((mapId) => UITester.#createScrollFixture(mapId));
+    const originalFocus = DomHelper.getActiveElement();
+    const originalScroll = { x: window.scrollX, y: window.scrollY };
+
+    return this.test(
+      'Test keyboard navigation Enable focus destination on dynamic and static maps',
+      async (test): Promise<TypeKeyboardEnableFocusResult[]> => {
+        const results: TypeKeyboardEnableFocusResult[] = [];
+
+        for (let index = 0; index < scenarios.length; index++) {
+          const scenario = scenarios[index];
+          const mapId = mapIds[index];
+          const fixture = fixtures[index];
+          test.addStep(`Creating the ${scenario.interaction} map and opening its keyboard-navigation prompt...`);
+          document.body.appendChild(fixture);
+          // eslint-disable-next-line no-await-in-loop -- Viewer scenarios share browser focus and must run sequentially.
+          await this.#createScrollViewer(mapId, 'visible', scenario.interaction);
+
+          // eslint-disable-next-line no-await-in-loop -- Wait for this viewer's entry link before transferring shared focus.
+          const entryLink = await whenThisThen(
+            (): HTMLElement | undefined => DomHelper.getGVElementById<HTMLElement>(mapId, scenario.entrySuffix),
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+          if (!entryLink) throw new Error(`WCAG entry skip link was not rendered for ${scenario.interaction} map '${mapId}'`);
+
+          const expectedDestination = DomHelper.getGVElementById<HTMLElement>(mapId, scenario.expectedSuffix);
+          if (!expectedDestination) throw new Error(`Expected keyboard-navigation focus destination was not rendered for '${mapId}'`);
+
+          entryLink.focus();
+          entryLink.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', shiftKey: scenario.shiftKey, bubbles: true, cancelable: true })
+          );
+
+          // eslint-disable-next-line no-await-in-loop -- The current prompt must open before the next focus action.
+          const enableButton = await whenThisThen(
+            (): HTMLButtonElement | undefined => DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'enable-focus'),
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+          if (!enableButton) throw new Error(`Keyboard-navigation Enable button was not rendered for '${mapId}'`);
+
+          test.addStep(`Enabling keyboard navigation on the ${scenario.interaction} map...`);
+          enableButton.click();
+          // eslint-disable-next-line no-await-in-loop -- Finish this viewer's focus transfer before starting another scenario.
+          await whenThisThen(
+            (): boolean =>
+              getStoreUIActiveTrapGeoView(mapId) &&
+              DomHelper.getGVElementById(mapId, 'enable-focus') === undefined &&
+              DomHelper.getActiveElement() === expectedDestination,
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+
+          const actualFocusId = DomHelper.getActiveElement()?.id ?? '';
+          const shell = DomHelper.getShellElement(mapId);
+          if (!shell) throw new Error(`Keyboard-navigation shell was not rendered for '${mapId}'`);
+          let reverseTabContained = true;
+          if (scenario.interaction === 'static') {
+            test.addStep('Checking that Shift+Tab from the static entry destination stays inside the viewer...');
+            const reverseTab = new KeyboardEvent('keydown', {
+              key: 'Tab',
+              code: 'Tab',
+              shiftKey: true,
+              bubbles: true,
+              cancelable: true,
+            });
+            expectedDestination.dispatchEvent(reverseTab);
+            const reverseTabFocus = DomHelper.getActiveElement();
+            reverseTabContained = reverseTab.defaultPrevented && reverseTabFocus !== undefined && shell.contains(reverseTabFocus);
+          }
+
+          results.push({
+            interaction: scenario.interaction,
+            expectedDestinationId: expectedDestination.id,
+            actualFocusId,
+            keyboardModeEnabled: getStoreUIActiveTrapGeoView(mapId),
+            promptClosed: DomHelper.getGVElementById(mapId, 'enable-focus') === undefined,
+            entryInsideShell: shell.contains(expectedDestination),
+            reverseTabContained,
+          });
+        }
+
+        return results;
+      },
+      (test, results): void => {
+        test.addStep('Verifying both map types enable keyboard navigation and focus a rendered destination...');
+        Test.assertIsEqual(results.length, scenarios.length);
+        results.forEach((result, index): void => {
+          Test.assertIsEqual(result.interaction, scenarios[index].interaction);
+          Test.assertIsEqual(result.actualFocusId, result.expectedDestinationId);
+          Test.assertIsEqual(result.keyboardModeEnabled, true);
+          Test.assertIsEqual(result.promptClosed, true);
+          Test.assertIsEqual(result.entryInsideShell, true);
+          Test.assertIsEqual(result.reverseTabContained, true);
+        });
+      },
+      async (): Promise<void> => {
+        for (let index = 0; index < mapIds.length; index++) {
+          // eslint-disable-next-line no-await-in-loop -- Viewer cleanup must finish before restoring the shared page state.
+          await this.#cleanupScrollFixture(mapIds[index], fixtures[index], originalScroll);
+        }
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
   // #endregion PUBLIC METHODS - UI TESTS
 
   // #region PRIVATE METHODS - MAP SECTION SCROLL
@@ -855,9 +974,10 @@ export class UITester extends GVAbstractTester {
    *
    * @param mapId - The isolated viewer ID
    * @param scenario - The viewport regression, which selects the viewer height
+   * @param interaction - Whether the viewer supports dynamic interaction
    * @returns A promise that resolves once the viewer is created
    */
-  async #createScrollViewer(mapId: string, scenario: TypeScrollScenario): Promise<void> {
+  async #createScrollViewer(mapId: string, scenario: TypeScrollScenario, interaction: 'dynamic' | 'static' = 'dynamic'): Promise<void> {
     // The oversized scenario needs a map taller than the viewport; the others must fit inside it
     const height = Math.round(window.innerHeight * (scenario === 'oversized' ? 1.5 : 0.7));
 
@@ -866,7 +986,7 @@ export class UITester extends GVAbstractTester {
       mapId,
       JSON.stringify({
         map: {
-          interaction: 'dynamic',
+          interaction,
           viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4, [-90, 60]] } },
           basemapOptions: { basemapId: 'nogeom', shaded: false, labeled: false },
           listOfGeoviewLayerConfig: [],
@@ -1340,6 +1460,24 @@ type TypeSkipFocusResult = {
   actualTopFocusId: string;
   /** Whether reverse Skip focused this map's top link. */
   isTopLinkFocused: boolean;
+};
+
+/** Mode and focus evidence after enabling keyboard navigation on dynamic and static maps. */
+type TypeKeyboardEnableFocusResult = {
+  /** Map interaction type exercised by the test. */
+  interaction: 'dynamic' | 'static';
+  /** Expected destination's DOM id. */
+  expectedDestinationId: string;
+  /** Actual focused element's DOM id after enabling. */
+  actualFocusId: string;
+  /** Whether keyboard navigation mode activated. */
+  keyboardModeEnabled: boolean;
+  /** Whether the entry prompt closed. */
+  promptClosed: boolean;
+  /** Whether entry focus is within the viewer's keyboard boundary, rather than an outer skip link. */
+  entryInsideShell: boolean;
+  /** Whether the static shell intercepts reverse Tab and keeps focus inside the viewer. */
+  reverseTabContained: boolean;
 };
 
 /** Expected and actual focus targets for AppBar focus restoration. */

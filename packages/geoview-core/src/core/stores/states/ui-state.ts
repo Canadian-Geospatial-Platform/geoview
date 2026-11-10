@@ -607,9 +607,6 @@ export const useStoreUIAppBarPanelIds = (): string[] => useStore(useGeoViewStore
 export const useStoreUINavBarButtonPanelVersion = (): number =>
   useStore(useGeoViewStore(), (state) => state.uiState.navBarButtonPanelVersion);
 
-/** Hooks the map-control popover close request counter. */
-export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewStore(), (state) => state.uiState.popoverCloseVersion);
-
 /**
  * Gets the map-control popover close request counter.
  *
@@ -618,8 +615,8 @@ export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewSt
  */
 export const getStoreUIPopoverCloseVersion = (mapId: string): number => getStoreUIState(mapId).popoverCloseVersion;
 
-/** Hooks the current focus-trap item from the UI state. */
-export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
+/** Hooks the map-control popover close request counter. */
+export const useStoreUIPopoverCloseVersion = (): number => useStore(useGeoViewStore(), (state) => state.uiState.popoverCloseVersion);
 
 /**
  * Gets the current focus-trap item from the map's UI state.
@@ -628,6 +625,9 @@ export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoVi
  * @returns The focus item and its focus-entry behavior
  */
 export const getStoreUIFocusItem = (mapId: string): FocusItemProps => getStoreUIState(mapId).focusItem;
+
+/** Hooks the current focus-trap item from the UI state. */
+export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
 
 /** Hooks the pending focus restoration request for the UI shell. */
 export const useStoreUIFocusRestoreRequest = (): TypeFocusRestoreRequest | undefined =>

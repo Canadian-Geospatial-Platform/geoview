@@ -32,7 +32,7 @@ the full map viewport center, not the logical view center shifted by map-info-ba
 This remains true after panning, rotating, or expanding/collapsing the map info bar.
 Activating the keyboard crosshair replaces any stale mouse pointer position.
 
-On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the top "Skip to main content - Map" link. Activating that link focuses the map and activates crosshair-based interaction.
+On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and focuses the main-content skip link on dynamic maps, or the viewer shell on static maps so Tab can reach the viewer's controls. Activating the main-content link focuses the map and activates crosshair-based interaction. Choosing Skip instead focuses the outer skip link in the direction of travel.
 
 - Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
 - Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.

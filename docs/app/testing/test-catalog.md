@@ -81,13 +81,13 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 11         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 18         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
-| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 14         | Mixed parallel + sequential |
+| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 15         | Mixed parallel + sequential |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
 | 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 16         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **295**    |                             |
+| **Total**         |                         |                                                                                                 | **296**    |                             |
 
 ---
 
@@ -829,6 +829,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 12  | `testPopoverFocusOwnership('settings')` | test | Settings acquisition, guarded trigger restoration, controller closure without focus return, and yielding |
 | 13  | `testPopperKeyboardBoundary` | test | Attribution trigger Escape; popover/anchor event boundaries, prevented events, callback/virtual anchors, and independent popovers |
 | 14  | `testResizePopoverFocusRestoration` | test | Fullscreen footer Resize explicit Close/Escape/Enter restoration; click-away, pointer commit, and newer-focus preservation |
+| 15  | `testKeyboardEnableFocusDestination` | test | Dynamic link/static shell entry stays inside the viewer boundary; static Shift+Tab is contained |
 
 ---
 

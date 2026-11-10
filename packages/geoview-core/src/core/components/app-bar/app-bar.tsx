@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import {
   type ReactNode,
   type ReactElement,
@@ -13,8 +12,12 @@ import {
   isValidElement,
   cloneElement,
 } from 'react';
+
+import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
+
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { Box } from '@/ui/layout';
 import { List } from '@/ui/list/list';
@@ -55,15 +58,16 @@ import { Datapanel } from '@/core/components/data-table/data-panel';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import Notifications from '@/core/components/notifications/notifications';
 
-import Version from './buttons/version';
-import Share from './buttons/share';
-import { Settings } from './buttons/settings';
-import { getSxClasses } from './app-bar-style';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, sortArrayWithEnforcedValues, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
+
+import Version from './buttons/version';
+import Share from './buttons/share';
+import { Settings } from './buttons/settings';
+import { getSxClasses } from './app-bar-style';
 
 /** Scroll step size in pixels (matches single button height). */
 const BUTTON_HEIGHT = 54;
@@ -153,7 +157,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoButtonPanels = useMemo((): ButtonPanelType => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, tabId, isOpen, isFocusTrapped);
+    logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, appBarApi, tabId, isOpen, isFocusTrapped);
 
     const panels: ButtonPanelType = {};
     appBarPanelIds.forEach((id) => {
@@ -612,7 +616,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   /**
    * Re-order the appbar buttons.
    */
-  const { topPanelNames, bottomPanelNames } = useMemo<{ topPanelNames: string[]; bottomPanelNames: string[] }>(() => {
+  const { topPanelNames: memoTopPanelNames, bottomPanelNames: memoBottomPanelNames } = useMemo<{
+    topPanelNames: string[];
+    bottomPanelNames: string[];
+  }>(() => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
@@ -688,10 +695,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoBottomItems = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomItems', bottomPanelNames);
+    logger.logTraceUseMemo('APP-BAR - memoBottomItems', memoBottomPanelNames);
 
-    return renderButtonPanelItems(bottomPanelNames, true);
-  }, [bottomPanelNames, renderButtonPanelItems]);
+    return renderButtonPanelItems(memoBottomPanelNames, true);
+  }, [memoBottomPanelNames, renderButtonPanelItems]);
 
   // Compute which fixed buttons are shown (reduces repeated conditionals)
   const showExportButton = appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic';
@@ -702,7 +709,17 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoBottomListItems = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomListItems', memoBottomItems.length, showExportButton, showShareButton);
+    logger.logTraceUseMemo(
+      'APP-BAR - memoBottomListItems',
+      memoBottomItems,
+      showExportButton,
+      showShareButton,
+      interaction,
+      onKeyboardNavigationModeChange,
+      mapId,
+      activeModalId,
+      sxClasses
+    );
 
     const items: ReactNode[] = [];
 
@@ -761,7 +778,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoBottomListItemsWithStyle = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomListItemsWithStyle', memoBottomListItems.length);
+    logger.logTraceUseMemo('APP-BAR - memoBottomListItemsWithStyle', memoBottomListItems, sxClasses);
 
     if (memoBottomListItems.length === 0) return [];
 
@@ -803,7 +820,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
         <List ref={appBarListRef} sx={sxClasses.appBarList}>
           {/* Top section buttons */}
-          {renderButtonPanelItems(topPanelNames, false)}
+          {renderButtonPanelItems(memoTopPanelNames, false)}
 
           {/* All bottom items - first one automatically gets marginTop: auto */}
           {memoBottomListItemsWithStyle}

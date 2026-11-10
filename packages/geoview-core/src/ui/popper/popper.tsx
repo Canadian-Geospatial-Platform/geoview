@@ -124,7 +124,7 @@ function PopperUI({
    * Registers keyboard event handlers for the popper.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose');
+    logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose', anchorEl, open, onClose, handleKeyDown);
     if (!open) return;
 
     /**

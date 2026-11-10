@@ -53,7 +53,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 14;
+    return 15;
   }
 
   /**
@@ -79,6 +79,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
     await this.#uiTester.testPopoverFocusOwnership('navbar');
     await this.#uiTester.testPopoverFocusOwnership('settings');
     await this.#uiTester.testSkipFocusReturnsToMapLinks();
+    await this.#uiTester.testKeyboardEnableFocusDestination();
     await this.#uiTester.testAppBarFocusRestoreYieldsToNewerFocus();
     await this.#uiTester.testMapSectionScroll('partial');
     await this.#uiTester.testMapSectionScroll('transitions');
