@@ -42,10 +42,10 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests core framework utilities and service metadata fetching:<br/>
-      <b>URL validation</b> — Simple ping, XYZ tiles, invalid format, unreachable, WMS service<br/>
+      <b>URL validation</b> — Simple ping, XYZ tiles including unauthorized responses, invalid format, unreachable, WMS service<br/>
       <b>Service metadata</b> — WMS, WFS, WMTS GetCapabilities (happy path + bad URL)<br/>
-      <b>Proxy fallback</b> — JSON fetch with CORS proxy retry (happy path + bad URL)<br/>
-      <b>Rendering</b> — GeometryCollection and picture-fill legends; WFS SLD style conversion`;
+      <b>Proxy fallback</b> — JSON fetch with CORS proxy retry for an unreachable URL<br/>
+      <b>Rendering</b> — GeometryCollection and picture-fill legends; WFS SLD conversion with a text-only rule`;
   }
 
   /**
@@ -67,7 +67,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     await this.#coreTester.testProxyGetWMTSServiceMetadata();
 
-    return Promise.resolve();
+    return;
   }
 
   /**

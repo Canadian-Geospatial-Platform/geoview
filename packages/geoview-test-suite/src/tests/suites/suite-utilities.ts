@@ -58,14 +58,15 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests cgpv.api.utilities — pure function unit tests:<br/>
-      <b>Core</b> — range, camelCase, deepEqual, deepClone, deepMerge, shallowEquals, isNumeric,<br/>
-      &nbsp;&nbsp;generateId/isValidUUID, setAlphaColor, isJsonString, escapeRegExp, stringify,<br/>
-      &nbsp;&nbsp;sanitizeHtmlContent, enhanceLinksAccessibility, getLocalizedMessage<br/>
+      <b>Core</b> — range, camelCase, equality, cloning, merging, numeric and empty-object checks,<br/>
+      &nbsp;&nbsp;IDs/UUIDs, color alpha, JSON parsing, image detection, regex escaping, stringification,<br/>
+      &nbsp;&nbsp;property paths, measurements, Datacube paths, HTML sanitization, accessible links, localized messages and Markdown IDs<br/>
       <b>Date</b> — formatDate, ISO short, toMilliseconds, tryParseDate, hasTimeComponents,<br/>
-      &nbsp;&nbsp;isValidTimezone, createRangeOGC, epoch timestamps, US standard, special formats<br/>
+      &nbsp;&nbsp;isValidTimezone, createRangeOGC, date constants, Dayjs parsing, epoch timestamps, US standard, special formats<br/>
       <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union/intersection,<br/>
-      &nbsp;&nbsp;bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl, GeoJSON/EsriJSON projection readers<br/>
-      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, object/identifier/metadata dispatch`;
+      &nbsp;&nbsp;longitude/latitude extent checks, bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl,<br/>
+      &nbsp;&nbsp;GeoJSON/EsriJSON projection readers and embedded CRS precedence<br/>
+      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, string lookup and input dispatch`;
   }
 
   /**

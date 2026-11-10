@@ -1,4 +1,6 @@
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -18,8 +20,10 @@ import {
   getStoreLayerControls,
   getStoreLayerLegendLayerByPath,
   getStoreLayerSelectedLayerPath,
+  getStoreLayerItemVisibility,
 } from 'geoview-core/core/stores/states/layer-state';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { deepMerge } from 'geoview-core/core/utils/utilities';
 import {
   getStoreMapPointMarkers,
   getStoreMapConfigOverviewMap,
@@ -46,6 +50,261 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Tests Ontario/Alberta Details queries, visibility, feature zoom, nameField configuration, summary:false fields, and aliases.
+   *
+   * @returns A promise resolving with query results and zoom levels before and after zooming to a feature
+   */
+  testDetailsForGeoJSONOntarioAlberta(): Promise<Test<DetailsOntarioAlbertaResult>> {
+    const layerPathFromMapConfig = 'geojsonLYR5/polygons.json';
+    const nameField = 'creationDate';
+    const aliasValue = 'Custom Province Name';
+
+    // Both the Ontario fit and the row-zoom action change the view used by subsequent tests.
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+
+    // Test
+    let gvLayer: AbstractGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+    return this.test(
+      `Test Details on Polygons layer...`,
+      async (test) => {
+        // Add the Polygons layer
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        const visibilityAndZoomResults = await this.#executeVisibilityAndZoomScenarios(test, gvLayer);
+        const featureInfoResults = await this.#executeFeatureInfoConfigurationScenarios(
+          test,
+          layerPathFromMapConfig,
+          nameField,
+          aliasValue
+        );
+
+        return { ...visibilityAndZoomResults, ...featureInfoResults };
+      },
+      (test, results) => {
+        MapConfigTester.#assertVisibilityAndZoomResults(test, results);
+        MapConfigTester.#assertFeatureInfoConfigurationResults(test, results, nameField, aliasValue);
+      },
+      async (test) => {
+        // Map recreation replaces the original fixture with this configured layer.
+        // This removes the layer when test is cleaning up.
+        if (fixtureLayerPath && this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(fixtureLayerPath)) {
+          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        }
+        if (this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPathFromMapConfig)) {
+          this.removeLayerConfigAndAssert(test, layerPathFromMapConfig);
+        }
+
+        // Restore the initial extent
+        test.addStep('Restoring the initial map extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+      }
+    );
+  }
+
+  /**
+   * Runs the layer visibility and feature zoom scenarios for the Ontario/Alberta Details test.
+   *
+   * @param test - The test being executed
+   * @param gvLayer - The GeoJSON layer used by the scenarios
+   * @returns The query results and zoom levels captured by the scenarios
+   */
+  async #executeVisibilityAndZoomScenarios(
+    test: Test<DetailsOntarioAlbertaResult>,
+    gvLayer: AbstractGVLayer
+  ): Promise<DetailsVisibilityAndZoomResult> {
+    const layerPath = gvLayer.getLayerPath();
+    const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      GVAbstractTester.ONTARIO_CENTER_LONLAT
+    );
+
+    test.addStep(`Selecting the details for the added layer...`);
+    this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+
+    test.addStep(`Make the layer invisible...`);
+    gvLayer.setVisible(false);
+    const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      GVAbstractTester.ONTARIO_CENTER_LONLAT
+    );
+
+    test.addStep(`Make the layer visible...`);
+    gvLayer.setVisible(true);
+    const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      GVAbstractTester.ALBERTA_CENTER_LONLAT
+    );
+
+    let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+    await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
+    const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      GVAbstractTester.ALBERTA_CENTER_LONLAT
+    );
+
+    item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+    await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
+    const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      gvLayer,
+      GVAbstractTester.ALBERTA_CENTER_LONLAT
+    );
+
+    test.addStep('Recording initial zoom level...');
+    const initialZoom = this.getMapViewer().getView().getZoom();
+    const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    test.addStep('Verifying feature has extent for zoom...');
+    Test.assertIsDefined('features', features);
+    Test.assertIsArrayLengthMinimal(features, 1);
+    const feature = features[0];
+    Test.assertIsDefined('feature.extent', feature.extent);
+
+    test.addStep('Zooming to feature extent...');
+    await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, GVAbstractTester.USE_ZOOM_ANIMATION, {
+      maxZoom: 13,
+    });
+    const finalZoom = this.getMapViewer().getView().getZoom();
+
+    return {
+      resultsOntarioResults,
+      resultsOntarioNoResults,
+      resultsAlbertaNoResults1,
+      resultsAlbertaResults,
+      resultsAlbertaNoResults2,
+      initialZoom,
+      finalZoom,
+    };
+  }
+
+  /**
+   * Runs the name-field, summary, and alias configuration scenarios.
+   *
+   * @param test - The test being executed
+   * @param layerPath - The configured layer path to query
+   * @param nameField - The date field used by the name-field and summary scenarios
+   * @param aliasValue - The expected Province field alias
+   * @returns The feature-info results from each map configuration
+   */
+  async #executeFeatureInfoConfigurationScenarios(
+    test: Test<DetailsOntarioAlbertaResult>,
+    layerPath: string,
+    nameField: string,
+    aliasValue: string
+  ): Promise<DetailsFeatureInfoConfigurationResult> {
+    test.addStep('Creating map with nameField configuration (date field)...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField,
+    });
+    test.addStep('Getting the layer...');
+    const configuredLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const nameFieldResults = await this.queryAtCoordinateRetrieveResultsForLayer(
+      test,
+      configuredLayer,
+      GVAbstractTester.ONTARIO_CENTER_LONLAT
+    );
+
+    test.addStep('Creating map with outfields summary:false configuration...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField: 'Province',
+      outfields: [
+        { name: 'Province', type: 'string' },
+        { name: nameField, type: 'date', summary: false },
+      ],
+    });
+    test.addStep('Getting the layer...');
+    const summaryLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const summaryResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, summaryLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+    test.addStep('Creating map with outfields alias configuration...');
+    await this.#helperCreateMapWithFeatureInfoConfig(test, {
+      queryable: true,
+      nameField: 'Province',
+      outfields: [{ name: 'Province', alias: aliasValue, type: 'string' }],
+    });
+    test.addStep('Getting the layer...');
+    const aliasLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const aliasResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, aliasLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+    return { nameFieldResults, summaryResults, aliasResults };
+  }
+
+  /**
+   * Verifies the query results and zoom change for the visibility scenarios.
+   *
+   * @param test - The test being asserted
+   * @param results - The scenario results
+   */
+  static #assertVisibilityAndZoomResults(test: Test<DetailsOntarioAlbertaResult>, results: DetailsOntarioAlbertaResult): void {
+    test.addStep('Verifying there is 2 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioResults, 2);
+
+    test.addStep('Verifying there is 0 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioNoResults, 0);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults1, 0);
+
+    test.addStep('Verifying there is 1 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaResults, 1);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults2, 0);
+
+    test.addStep('Verifying zoom level changed...');
+    Test.assertIsNotEqual(results.initialZoom, results.finalZoom);
+  }
+
+  /**
+   * Verifies the name-field, summary, and alias feature-info results.
+   *
+   * @param test - The test being asserted
+   * @param results - The configuration scenario results
+   * @param nameField - The date field used by the name-field and summary scenarios
+   * @param aliasValue - The expected Province field alias
+   */
+  static #assertFeatureInfoConfigurationResults(
+    test: Test<DetailsOntarioAlbertaResult>,
+    results: DetailsOntarioAlbertaResult,
+    nameField: string,
+    aliasValue: string
+  ): void {
+    const { nameFieldResults, summaryResults, aliasResults } = results;
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', nameFieldResults);
+    Test.assertIsArrayLengthMinimal(nameFieldResults, 1);
+
+    test.addStep('Verifying nameField is set on result...');
+    Test.assertIsEqual(nameFieldResults[0].nameField, nameField);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', summaryResults);
+    Test.assertIsArrayLengthMinimal(summaryResults, 1);
+
+    test.addStep(`Verifying field '${nameField}' is excluded from fieldInfo...`);
+    Test.assertIsUndefined(`fieldInfo.${nameField}`, summaryResults[0].fieldInfo[nameField]);
+
+    test.addStep('Verifying Province field IS present in fieldInfo...');
+    Test.assertIsDefined('fieldInfo.Province', summaryResults[0].fieldInfo.Province);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', aliasResults);
+    Test.assertIsArrayLengthMinimal(aliasResults, 1);
+
+    test.addStep(`Verifying Province field alias is '${aliasValue}'...`);
+    Test.assertIsDefined('fieldInfo.Province', aliasResults[0].fieldInfo.Province);
+    Test.assertIsEqual(aliasResults[0].fieldInfo.Province.alias, aliasValue);
+  }
+
+  /**
    * Tests that a fixed-height map without a footer bar keeps the requested viewer height.
    *
    * @returns A promise that resolves when the test completes
@@ -57,7 +316,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test fixed-height map without footer bar keeps requested viewer height...',
       async (test) => {
         test.addStep('Creating fixed-height map with no footer bar...');
-        await this.#helperCreateMapConfig(test, mapId, ['footerBar', { tabs: { core: [] } }]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: { tabs: { core: [] } } });
 
         test.addStep('Waiting for layout effects to settle...');
         await DomHelper.waitForReactIdle();
@@ -126,7 +385,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create the map viewer from config
-        await this.#helperCreateMapConfig(test, mapId, [['footerBar', footerBarConfig]]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: footerBarConfig });
 
         // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
         test.addStep('Waiting for the query in the data-table to get processed...');
@@ -191,16 +450,19 @@ export class MapConfigTester extends GVAbstractTester {
         const geocoreLayerConfig = [{ geoviewLayerType: 'geoCore' as TypeGeoviewLayerType, geoviewLayerId: geocoreUuid }];
 
         // Create the map viewer from config (waits for layers loaded)
-        return this.#helperCreateMapConfig(test, mapId, [
-          ['map.listOfGeoviewLayerConfig', geocoreLayerConfig],
-          ['footerBar', footerBarConfig],
-        ]);
+        return this.#helperCreateMapConfig(test, mapId, {
+          map: { listOfGeoviewLayerConfig: geocoreLayerConfig },
+          footerBar: footerBarConfig,
+        });
       },
       (test) => {
         // The bare UUID should have been rewritten to the first resolved layer path in the store selection
         test.addStep('Verifying the layers store selectedLayerPath resolved the UUID to its first layer path...');
         const selectedLayerPath = getStoreLayerSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, expectedLayerPath);
+      },
+      (test) => {
+        this.removeLayerConfigAndAssert(test, geocoreUuid);
       }
     );
   }
@@ -228,7 +490,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create the map viewer from config
-        await this.#helperCreateMapConfig(test, mapId, [['appBar', appBarConfig]]);
+        await this.#helperCreateMapConfig(test, mapId, { appBar: appBarConfig });
 
         // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
         test.addStep('Waiting for the query in the data-table to get processed...');
@@ -280,12 +542,9 @@ export class MapConfigTester extends GVAbstractTester {
       'Test no footerBar or app bar config creates default tabs (layers, data-table) and (geolocator, legend, details, export)',
       async (test) => {
         // Create the mapViewer with footerBar and appBar removed
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['footerBar', null],
-          ['appBar', null],
-        ]);
+        await this.#helperCreateMapConfig(test, mapId, { footerBar: null, appBar: null });
 
-        return mapViewer;
+        return;
       },
       (test) => {
         // Verify that footer bar exists with default tabs
@@ -323,10 +582,7 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create the mapViewer with empty tabs arrays
         const emptyTabsConfig = { tabs: { core: [] } };
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['footerBar', emptyTabsConfig],
-          ['appBar', emptyTabsConfig],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { footerBar: emptyTabsConfig, appBar: emptyTabsConfig });
 
         return mapViewer;
       },
@@ -357,10 +613,10 @@ export class MapConfigTester extends GVAbstractTester {
       'Test panels declared in both appBar and footerBar are removed from the footer bar',
       async (test) => {
         // Create the mapViewer with 'legend' and 'details' declared in BOTH bars
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['appBar', { tabs: { core: ['geolocator', 'legend', 'details'] } }],
-          ['footerBar', { tabs: { core: ['legend', 'layers', 'details', 'data-table'] } }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          appBar: { tabs: { core: ['geolocator', 'legend', 'details'] } },
+          footerBar: { tabs: { core: ['legend', 'layers', 'details', 'data-table'] } },
+        });
 
         return mapViewer;
       },
@@ -395,7 +651,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test no navBar config value creates default navigation controls',
       async (test) => {
         // Create the mapViewer with navBar removed (null)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', null]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { navBar: null });
 
         return mapViewer;
       },
@@ -425,7 +681,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test navBar with empty array has only zoom and rotate',
       async (test) => {
         // Create the mapViewer with empty navBar array
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', []]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { navBar: [] });
 
         return mapViewer;
       },
@@ -459,7 +715,7 @@ export class MapConfigTester extends GVAbstractTester {
         const initialViewConfig = { layerIds: [LAYER_PATH] };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: { initialView: initialViewConfig } } });
 
         // Wait for the zoom to happen on the map upon initialization
         await mapViewer.waitForMapReadyZoomed();
@@ -537,7 +793,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.overlayObjects', overlayObjectsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { overlayObjects: overlayObjectsConfig } });
         return mapViewer;
       },
       (test) => {
@@ -588,7 +844,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
         return mapViewer;
       },
       (test, newMapViewer) => {
@@ -634,7 +890,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map is present when configured in components',
       async (test) => {
         // Create the mapViewer with overview-map in components
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['overview-map', 'north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['overview-map', 'north-arrow'] });
         return mapViewer;
       },
       async (test) => {
@@ -674,7 +930,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map is absent when not in components',
       async (test) => {
         // Create the mapViewer with only north-arrow (no overview-map)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['north-arrow'] });
         return mapViewer;
       },
       (test) => {
@@ -706,7 +962,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test north arrow is present when configured in components',
       async (test) => {
         // Create the mapViewer with north-arrow in components
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: ['north-arrow'] });
         return mapViewer;
       },
       (test) => {
@@ -741,7 +997,7 @@ export class MapConfigTester extends GVAbstractTester {
       'Test north arrow is absent when not in components',
       async (test) => {
         // Create the mapViewer with empty components (no north-arrow)
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', []]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { components: [] });
         return mapViewer;
       },
       (test) => {
@@ -776,10 +1032,10 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map hideOnZoom hides at low zoom, shows above threshold',
       async (test) => {
         // Create the mapViewer with overview-map and hideOnZoom=7, initial zoom 4.5
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['components', ['overview-map', 'north-arrow']],
-          ['overviewMap', { hideOnZoom: 7 }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          components: ['overview-map', 'north-arrow'],
+          overviewMap: { hideOnZoom: 7 },
+        });
         return mapViewer;
       },
       async (test) => {
@@ -837,10 +1093,10 @@ export class MapConfigTester extends GVAbstractTester {
       'Test overview map hideOnZoom with reprojection preserves visibility',
       async (test) => {
         // Create the mapViewer with overview-map, hideOnZoom=7, projection 3978
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
-          ['components', ['overview-map', 'north-arrow']],
-          ['overviewMap', { hideOnZoom: 7 }],
-        ]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, {
+          components: ['overview-map', 'north-arrow'],
+          overviewMap: { hideOnZoom: 7 },
+        });
         return mapViewer;
       },
       async (test) => {
@@ -928,7 +1184,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
         return mapViewer;
       },
       async (test, newMapViewer) => {
@@ -971,7 +1227,7 @@ export class MapConfigTester extends GVAbstractTester {
         };
 
         // Create a new map viewer from a new config
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, { map: { viewSettings: viewSettingsConfig } });
 
         // Call zoomToInitialExtent which navigates to homeView
         test.addStep('Calling zoomToInitialExtent() to navigate to homeView...');
@@ -1011,6 +1267,134 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   // #endregion
+
+  /**
+   * Tests that nameField configuration controls the feature display label.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testNameFieldAsLabel(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'creationDate';
+
+    return this.test(
+      'Test nameField as label in query results...',
+      async (test) => {
+        // Create map with custom featureInfo nameField config using a date field
+        test.addStep('Creating map with nameField configuration (date field)...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: NAME_FIELD,
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the nameField is set correctly on the result
+        test.addStep('Verifying nameField is set on result...');
+        Test.assertIsEqual(result[0].nameField, NAME_FIELD);
+      }
+    );
+  }
+
+  /**
+   * Tests that fields with summary: false are excluded from query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testSummaryFalseHidesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'Province';
+    const HIDDEN_FIELD = 'creationDate';
+
+    return this.test(
+      'Test summary false hides field from query results...',
+      async (test) => {
+        // Create map with outfields config where creationDate has summary: false
+        test.addStep('Creating map with outfields summary:false configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: NAME_FIELD,
+          outfields: [
+            { name: NAME_FIELD, type: 'string' },
+            { name: HIDDEN_FIELD, type: 'date', summary: false },
+          ],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the hidden field is NOT in fieldInfo
+        test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
+        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, result[0].fieldInfo[HIDDEN_FIELD]);
+
+        // Verify that Province field IS present
+        test.addStep('Verifying Province field IS present in fieldInfo...');
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
+      }
+    );
+  }
+
+  /**
+   * Tests that field alias configuration is applied in query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testFieldAliasRenamesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const ALIAS_VALUE = 'Custom Province Name';
+
+    return this.test(
+      'Test field alias renames field in query results...',
+      async (test) => {
+        // Create map with outfields config where Province has a custom alias
+        test.addStep('Creating map with outfields alias configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, {
+          queryable: true,
+          nameField: 'Province',
+          outfields: [{ name: 'Province', alias: ALIAS_VALUE, type: 'string' }],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
+
+        // Verify the alias is applied
+        test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
+        Test.assertIsEqual(result[0].fieldInfo.Province.alias, ALIAS_VALUE);
+      }
+    );
+  }
 
   // #region Initial Settings Controls Tests
 
@@ -1637,10 +2021,9 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with GeoJSON layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: 'geojsonLYR5',
                 geoviewLayerName: 'GeoJSON Sample',
@@ -1656,8 +2039,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         // Verify the filter is accessible on the GV layer via getLayerFilters().getInitialFilter()
@@ -1692,10 +2075,9 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with OGC Feature layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'OGC Feature Lakes',
@@ -1709,8 +2091,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1743,10 +2125,9 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with WFS layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'WFS Current Conditions',
@@ -1760,8 +2141,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1794,10 +2175,9 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Dynamic layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Historical Flood Events',
@@ -1811,8 +2191,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1845,10 +2225,9 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Create a new map viewer from a new config
         test.addStep('Creating map with Esri Feature layer having layerFilter...');
-        await this.#helperCreateMapConfig(test, mapId, [
-          [
-            'map.listOfGeoviewLayerConfig',
-            [
+        await this.#helperCreateMapConfig(test, mapId, {
+          map: {
+            listOfGeoviewLayerConfig: [
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Forest Industry',
@@ -1862,8 +2241,8 @@ export class MapConfigTester extends GVAbstractTester {
                 ],
               },
             ],
-          ],
-        ]);
+          },
+        });
       },
       (test) => {
         test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
@@ -1902,10 +2281,9 @@ export class MapConfigTester extends GVAbstractTester {
     if (states) initialSettings.states = states;
 
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
@@ -1921,8 +2299,8 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
@@ -1947,10 +2325,9 @@ export class MapConfigTester extends GVAbstractTester {
     if (childStates) childInitialSettings.states = childStates;
 
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
@@ -1972,8 +2349,8 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
@@ -1994,10 +2371,9 @@ export class MapConfigTester extends GVAbstractTester {
     childSettings?: Record<string, unknown>
   ): Promise<MapViewer> {
     // Create a new map viewer from a new config
-    return this.#helperCreateMapConfig(test, mapId, [
-      [
-        'map.listOfGeoviewLayerConfig',
-        [
+    return this.#helperCreateMapConfig(test, mapId, {
+      map: {
+        listOfGeoviewLayerConfig: [
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
@@ -2026,23 +2402,66 @@ export class MapConfigTester extends GVAbstractTester {
             ],
           },
         ],
-      ],
-    ]);
+      },
+    });
   }
 
   /**
-   * Helper function to create a basic map configuration with optional overrides.
+   * Creates a map with a GeoJSON polygons layer configured with custom featureInfo settings.
+   *
+   * @param test - The test instance used to log steps
+   * @param featureInfoConfig - The featureInfo configuration to apply to the layer
+   * @returns A promise that resolves when the map is created and layers are loaded
+   */
+  #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, featureInfoConfig: Record<string, unknown>): Promise<MapViewer> {
+    const baseConfig = {
+      map: {
+        interaction: 'dynamic',
+        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
+        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
+        listOfGeoviewLayerConfig: [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'polygons.json',
+                layerName: 'Polygons',
+                source: {
+                  featureInfo: featureInfoConfig,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      components: [],
+      corePackages: ['test-suite'],
+      corePackagesConfig: [{ 'test-suite': { suites: ['suite-map-config'] } }],
+      theme: 'geo.ca',
+      footerBar: {
+        tabs: {
+          core: ['legend', 'layers', 'data-table', 'time-slider', 'geochart'],
+        },
+      },
+    };
+
+    // Replace the map!
+    return this.replaceMap(test, this.getMapId(), baseConfig);
+  }
+
+  /**
+   * Creates an isolated base map configuration with nested overrides, without inheriting the previous test's configuration.
    *
    * @param test - The test instance used to log steps
    * @param mapId - The map identifier
-   * @param overrides - Optional configuration overrides as path-value pairs
-   *  - Array of [path, value] pairs:
-   *     [['footerBar', { tabs: { core: ['data-table'] }, selectedTab: 'data-table' }]]
-   *   - Single [path, value] pair:
-   *     ['map.viewSettings.initialView', { layerIds: ['geojsonLYR5/polygons.json'] }]
+   * @param mapConfigOverrides - Optional nested map configuration to merge with the base fixture
    * @returns A promise that resolves to the created map viewer
    */
-  #helperCreateMapConfig(test: Test, mapId: string, overrides: [string, unknown][] | [string, unknown] = []): Promise<MapViewer> {
+  #helperCreateMapConfig(test: Test, mapId: string, mapConfigOverrides: unknown = {}): Promise<MapViewer> {
     const baseConfig = {
       map: {
         interaction: 'dynamic',
@@ -2085,53 +2504,8 @@ export class MapConfigTester extends GVAbstractTester {
       },
     };
 
-    // Apply overrides - normalize to array format then apply each path-value pair
-    let overridesArray: [string, unknown][] = [];
-    if (overrides.length > 0) {
-      overridesArray = Array.isArray(overrides[0]) ? (overrides as [string, unknown][]) : [overrides as [string, unknown]];
-    }
-    overridesArray.forEach(([path, value]) => {
-      MapConfigTester.#setValueByPath(baseConfig, path, value);
-    });
-
     // Replace the map!
-    return this.replaceMap(test, mapId, baseConfig);
-  }
-
-  /**
-   * Sets a value in an object using a dot-notation path. If value is null or undefined, removes the key.
-   *
-   * @param obj - The object to modify
-   * @param path - Dot-notation path like 'map.viewSettings.initialView'
-   * @param value - The value to set, or null/undefined to remove
-   */
-  static #setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
-    const keys = path.split('.');
-    let current = obj;
-
-    // Validate against prototype pollution
-    const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
-    if (keys.some((key) => dangerousKeys.includes(key))) {
-      throw new Error(`Invalid path: "${path}" contains dangerous keys that could lead to prototype pollution`);
-    }
-
-    // Navigate to the parent of the final key
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
-      if (!Object.prototype.hasOwnProperty.call(current, key) || typeof current[key] !== 'object' || current[key] === null) {
-        current[key] = {};
-      }
-      current = current[key] as Record<string, unknown>;
-    }
-
-    const finalKey = keys[keys.length - 1];
-
-    // If value is null or undefined, remove the key
-    if (value === null || value === undefined) {
-      delete current[finalKey];
-    } else {
-      current[finalKey] = value;
-    }
+    return this.replaceMap(test, mapId, deepMerge(baseConfig, mapConfigOverrides), MAP_CONFIG_TEST_HEIGHT);
   }
 
   /**
@@ -2154,6 +2528,35 @@ export class MapConfigTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Query and zoom results from the Ontario/Alberta visibility scenarios. */
+type DetailsVisibilityAndZoomResult = Pick<
+  DetailsOntarioAlbertaResult,
+  | 'resultsOntarioResults'
+  | 'resultsOntarioNoResults'
+  | 'resultsAlbertaNoResults1'
+  | 'resultsAlbertaResults'
+  | 'resultsAlbertaNoResults2'
+  | 'initialZoom'
+  | 'finalZoom'
+>;
+
+/** Feature-info query results from the field configuration scenarios. */
+type DetailsFeatureInfoConfigurationResult = Pick<DetailsOntarioAlbertaResult, 'nameFieldResults' | 'summaryResults' | 'aliasResults'>;
+
+/** Query and zoom observations for the Ontario/Alberta Details test. */
+type DetailsOntarioAlbertaResult = {
+  resultsOntarioResults: TypeFeatureInfoEntry[] | undefined;
+  resultsOntarioNoResults: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaNoResults1: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaResults: TypeFeatureInfoEntry[] | undefined;
+  resultsAlbertaNoResults2: TypeFeatureInfoEntry[] | undefined;
+  nameFieldResults: TypeFeatureInfoEntry[] | undefined;
+  summaryResults: TypeFeatureInfoEntry[] | undefined;
+  aliasResults: TypeFeatureInfoEntry[] | undefined;
+  initialZoom: number | undefined;
+  finalZoom: number | undefined;
+};
 
 /** Height measurements for fixed-height map layout tests. */
 type TypeMapHeightMeasurements = {

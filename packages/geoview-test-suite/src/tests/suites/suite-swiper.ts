@@ -43,8 +43,8 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests the Swiper plugin lifecycle and rendering isolation:<br/>
-      <b>Lifecycle</b> — Plugin initialization, layer assignment, drag interaction, and cleanup<br/>
-      <b>Rendering isolation</b> — Per-layer render clipping is attached only to selected layers<br/>
+      <b>Lifecycle</b> — Layer activation/deactivation, multi-layer assignment and orientation changes<br/>
+      <b>Rendering isolation</b> — Per-layer render clipping is isolated to descendants of the selected layer path<br/>
       <b>Interactive customization</b> — Per-side clipping, persistence, settings gating, progressive registration, and hover suppression`;
   }
 
@@ -85,12 +85,16 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
     // Run sequentially because both tests modify shared swiper state
     await this.#swiperTester.testSwiperRenderIsolation();
     await this.#swiperTester.testSwiperLifecycle();
+
     // TODO: CHECK - This test was omitted from being called, normal?
     // await this.#swiperTester.testSwiperHoverSuppression();
+
     await this.#swiperTester.testSwiperPerLayerSides();
     await this.#swiperTester.testSwiperProgressiveRegistration();
     await this.#swiperTester.testSwiperConfigPersistence();
     await this.#swiperTester.testSwiperHoverSuppression();
-    return this.#swiperTester.testSwiperSettingsGating();
+    await this.#swiperTester.testSwiperSettingsGating();
+
+    return;
   }
 }

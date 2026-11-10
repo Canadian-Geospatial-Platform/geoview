@@ -43,7 +43,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests layer configuration creation and validation across all supported layer types:<br/>
       <b>ESRI</b> — Dynamic, Feature, Image (happy path + bad URL)<br/>
-      <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL + no capabilities)<br/>
+      <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL), WMS sublayer configurations and WFS without capabilities<br/>
       <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (happy path + bad URL skip/error)<br/>
       <b>GeoCore</b> — Standalone UUID resolution; Add Layer initialization preserves the selected FeatureServer layer<br/>
       <b>Settings</b> — initialSettings cascade to sublayers`;

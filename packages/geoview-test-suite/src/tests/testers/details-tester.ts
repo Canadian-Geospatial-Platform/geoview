@@ -4,12 +4,12 @@ import { getCenter } from 'ol/extent';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
-import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import { getStoreDetailsFeatures, getStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/states/feature-info-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
+import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 
 /**
  * Main Map testing class.
@@ -25,102 +25,26 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
-   * Tests opening the Details panel for a given layer path.
-   *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat1 - The first coordinate on the map to query
-   * @param lonlat2 - The second coordinate on the map to query
-   * @returns A promise resolving when the test completes
-   */
-  testDetailsForGeoJSONOntarioAlberta(layerPath: string, lonlat1: Coordinate, lonlat2: Coordinate): Promise<Test<unknown>> {
-    // Test
-    return this.test(
-      `Test Details on layer ${layerPath}...`,
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // Query the lonlat coordinate
-        const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
-
-        // Select the right layer path
-        test.addStep(`Selecting the details for the added layer...`);
-        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
-
-        // Make the layer invisible
-        test.addStep(`Make the layer invisible...`);
-        layer.setVisible(false);
-
-        // Query the lonlat coordinate
-        const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
-
-        // Make the layer visible
-        test.addStep(`Make the layer visible...`);
-        layer.setVisible(true);
-
-        // Query in Alberta where there should be no results
-        const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
-
-        // Make the Alberta polygon visible
-        let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
-
-        // Query where there now should be some results
-        const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
-
-        // Make the Alberta polygon back to invisible
-        item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
-
-        // Query where there now should be no results
-        const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
-
-        // Return the results of the queries
-        return [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2];
-      },
-      (test, results) => {
-        // Perform assertions
-        const [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2] =
-          results as unknown[][];
-
-        // Check that there was 1 result for the Ontario
-        test.addStep('Verifying there is 2 feature info result for the Ontario query...');
-        Test.assertIsArrayLengthEqual(resultsOntarioResults, 2);
-
-        // Check that there was 0 result for the Ontario
-        test.addStep('Verifying there is 0 feature info result for the Ontario query...');
-        Test.assertIsArrayLengthEqual(resultsOntarioNoResults, 0);
-
-        // Check that there was 0 result for the Alberta
-        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults1, 0);
-
-        // Check that there was 1 result for the Alberta
-        test.addStep('Verifying there is 1 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaResults, 1);
-
-        // Check that there was 0 result for the Alberta
-        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults2, 0);
-      }
-    );
-  }
-
-  /**
    * Tests that clearing all highlights removes highlighted features from the store.
    *
-   * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testClearAllHighlights(lonlat: Coordinate): Promise<Test<TestDetailsHighlights>> {
+  testClearAllHighlights(): Promise<Test<TestDetailsHighlights>> {
+    let fixtureLayerPath: string | undefined;
+
     return this.test(
       `Test Clear all highlights across multiple layers...`,
       async (test) => {
+        // Add the Commemorative layer
+        const fixture = this.addLayerCommemorativeViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
+
         // Wait for the layers to be loaded
         await this.getControllersRegistry().layerController.waitForLayersLoaded();
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
@@ -145,7 +69,7 @@ export class DetailsTester extends GVAbstractTester {
         const clickMarkerAfter = getStoreMapClickMarker(this.getMapId());
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open (should already be open in fact)...`);
@@ -205,54 +129,10 @@ export class DetailsTester extends GVAbstractTester {
         // Verify highlights were cleared while details panel was still open
         test.addStep('Verifying highlighted features were cleared after panel was reopened...');
         Test.assertIsArrayLengthEqual(result.highlighted3After, 1);
-      }
-    );
-  }
-
-  /**
-   * Tests that zoom-to-feature changes the map extent.
-   *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
-   * @returns A promise resolving when the test completes
-   */
-  testZoomToFeature(
-    layerPath: string,
-    lonlat: Coordinate
-  ): Promise<Test<{ initialZoom: number | undefined; finalZoom: number | undefined }>> {
-    return this.test(
-      `Test Zoom to feature on layer ${layerPath}...`,
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // Record initial zoom
-        test.addStep('Recording initial zoom level...');
-        const initialZoom = this.getMapViewer().getView().getZoom();
-
-        // Query the coordinate to get features
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Verify we have features with extent
-        test.addStep('Verifying feature has extent for zoom...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        const feature = features[0];
-        Test.assertIsDefined('feature.extent', feature.extent);
-
-        // Zoom to the feature extent (no animation = instant, no await needed)
-        test.addStep('Zooming to feature extent...');
-        await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, GVAbstractTester.USE_ZOOM_ANIMATION, {
-          maxZoom: 13,
-        });
-
-        // Return the zoom level after zooming
-        return { initialZoom, finalZoom: this.getMapViewer().getView().getZoom() };
       },
-      (test, result) => {
-        // Verify zoom level changed
-        test.addStep('Verifying zoom level changed...');
-        Test.assertIsNotEqual(result.initialZoom, result.finalZoom);
+      (test) => {
+        // Cleanup the map
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -264,12 +144,18 @@ export class DetailsTester extends GVAbstractTester {
    * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testZoomToFeatureWithPanelOffset(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomWithPanelOffset>> {
+  testZoomToFeatureWithPanelOffset(lonlat: Coordinate): Promise<Test<TestZoomWithPanelOffset>> {
+    let fixtureLayerPath: string | undefined;
+
     return this.test(
-      `Test Zoom to feature keeps the feature out of the open details panel on layer ${layerPath}...`,
+      `Test Zoom to feature keeps the feature out of the open details panel...`,
       async (test) => {
+        // Add the GeoJson Polygons layer
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+
         // Get the layer and query the coordinate to get features
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(fixtureLayerPath);
         const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Verify we have features with extent
@@ -291,7 +177,7 @@ export class DetailsTester extends GVAbstractTester {
         // Zoom to the feature with the computed padding
         test.addStep('Zooming to feature extent with the panel-aware padding...');
         await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
-          layerPath,
+          fixtureLayerPath,
           feature,
           feature.extent,
           GVAbstractTester.USE_ZOOM_ANIMATION,
@@ -317,6 +203,10 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying the feature center is in the part of the map not covered by the panel...');
         Test.assertIsDefined('centerPixelX', result.centerPixelX);
         Test.assertIsEqual(result.centerPixelX >= result.paddingLeft, true);
+      },
+      (test) => {
+        // Cleanup the map
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -324,185 +214,73 @@ export class DetailsTester extends GVAbstractTester {
   /**
    * Tests that nameField configuration controls the feature display label.
    *
-   * @returns A promise resolving when the test completes
+   * @returns The original and persisted layer paths and the persisted layer's feature count
    */
-  testNameFieldAsLabel(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const NAME_FIELD = 'creationDate';
-
+  testLayerSelectionPersistence(): Promise<Test<DetailsLayerSelectionResult>> {
+    // Retain each fixture independently so cleanup can run even if adding the second layer fails.
+    let polygons: AbstractGVLayer | undefined;
+    let projects: AbstractBaseGVLayer | undefined;
+    let polygonLayerPath: string | undefined;
+    let projectLayerPath: string | undefined;
     return this.test(
-      'Test nameField as label in query results...',
+      'Test details layer selection persistence across map clicks',
       async (test) => {
-        // Create map with custom featureInfo nameField config using a date field
-        test.addStep('Creating map with nameField configuration (date field)...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: NAME_FIELD,
-        });
+        // Create the candidates here rather than relying on layers configured by the host page.
+        const polygonsFixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        polygonLayerPath = polygonsFixture.layerPath;
+        polygons = await polygonsFixture.promiseLayer;
 
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        const projectsFixture = this.addLayerEsriFeatureTopProjects(test);
+        projectLayerPath = projectsFixture.layerPath;
+        projects = await projectsFixture.promiseLayer;
 
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        // Fixture IDs are generated, so selection and cleanup must use the returned runtime paths.
+        const layerPath1 = polygons.getLayerPath();
+        const layerPath2 = projects.getLayerPath();
+
+        // Let the first completed map query establish the automatic Details selection.
+        await this.simulateMapClickWaitForBatchedQuery(test, [-87.4, 52.9]);
+        test.addStep('Checking selected layer after first click...');
+        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
+        test.addStep(`First selected layer: ${originalLayerPath}`);
+        // Select a different candidate regardless of which fixture was automatically selected first.
+        const expectedLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
+
+        // A subsequent query must respect this explicit selection instead of auto-selecting another result.
+        test.addStep(`Manually selecting the other layer '${expectedLayerPath}'...`);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(expectedLayerPath);
+        // Wait for the second batch to settle before observing selection persistence and refreshed features.
+        await this.simulateMapClickWaitForBatchedQuery(test, [-73.9, 46.5]);
+
+        test.addStep('Checking selected layer after second click...');
+        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
+        test.addStep(`Second selected layer: ${alternateLayerPath}`);
+        // Read features for the actual selected layer, not merely the layer we intended to select.
+        const secondFeatureCount = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath)?.length ?? 0;
+        test.addStep(`Second layer feature count: ${secondFeatureCount}`);
+        return { originalLayerPath, expectedLayerPath, alternateLayerPath, secondFeatureCount };
       },
       (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
+        // A different layer alone is insufficient: it must be exactly the manually selected candidate.
+        test.addStep('Verifying the manually selected layer persisted...');
+        Test.assertIsEqual(result.alternateLayerPath, result.expectedLayerPath);
+        test.addStep('Verifying first and second layers were different...');
+        Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
 
-        // Verify the nameField is set correctly on the result
-        test.addStep('Verifying nameField is set on result...');
-        Test.assertIsEqual(result[0].nameField, NAME_FIELD);
+        // Persistence must retain useful query results, not just a selected path with no features.
+        test.addStep('Verifying second layer has exactly 1 feature...');
+        Test.assertIsEqual(result.secondFeatureCount, 1);
+      },
+      (test) => {
+        try {
+          if (projectLayerPath) this.removeLayerConfigAndAssert(test, projectLayerPath);
+        } finally {
+          // Attempt polygon cleanup even if removing Top Projects fails.
+          if (polygonLayerPath) this.removeLayerConfigAndAssert(test, polygonLayerPath);
+        }
       }
     );
   }
-
-  /**
-   * Tests that fields with summary: false are excluded from query results.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testSummaryFalseHidesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const NAME_FIELD = 'Province';
-    const HIDDEN_FIELD = 'creationDate';
-
-    return this.test(
-      'Test summary false hides field from query results...',
-      async (test) => {
-        // Create map with outfields config where creationDate has summary: false
-        test.addStep('Creating map with outfields summary:false configuration...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: NAME_FIELD,
-          outfields: [
-            { name: NAME_FIELD, type: 'string' },
-            { name: HIDDEN_FIELD, type: 'date', summary: false },
-          ],
-        });
-
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
-
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-      },
-      (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
-
-        // Verify the hidden field is NOT in fieldInfo
-        test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
-        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, result[0].fieldInfo[HIDDEN_FIELD]);
-
-        // Verify that Province field IS present
-        test.addStep('Verifying Province field IS present in fieldInfo...');
-        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
-      }
-    );
-  }
-
-  /**
-   * Tests that field alias configuration is applied in query results.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testFieldAliasRenamesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
-    const mapId = this.getMapId();
-    const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const ALIAS_VALUE = 'Custom Province Name';
-
-    return this.test(
-      'Test field alias renames field in query results...',
-      async (test) => {
-        // Create map with outfields config where Province has a custom alias
-        test.addStep('Creating map with outfields alias configuration...');
-        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
-          queryable: true,
-          nameField: 'Province',
-          outfields: [{ name: 'Province', alias: ALIAS_VALUE, type: 'string' }],
-        });
-
-        // Get the layer
-        test.addStep('Getting the layer...');
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
-
-        // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-      },
-      (test, result) => {
-        // Verify we got results
-        test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', result);
-        Test.assertIsArrayLengthMinimal(result, 1);
-
-        // Verify the alias is applied
-        test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
-        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
-        Test.assertIsEqual(result[0].fieldInfo.Province.alias, ALIAS_VALUE);
-      }
-    );
-  }
-
-  // #region PRIVATE HELPERS
-
-  /**
-   * Creates a map with a GeoJSON polygons layer configured with custom featureInfo settings.
-   *
-   * @param test - The test instance used to log steps
-   * @param mapId - The map identifier
-   * @param featureInfoConfig - The featureInfo configuration to apply to the layer
-   * @returns A promise that resolves when the map is created and layers are loaded
-   */
-  #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, mapId: string, featureInfoConfig: Record<string, unknown>): Promise<MapViewer> {
-    const baseConfig = {
-      map: {
-        interaction: 'dynamic',
-        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
-        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-        listOfGeoviewLayerConfig: [
-          {
-            geoviewLayerId: 'geojsonLYR5',
-            geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
-            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
-            listOfLayerEntryConfig: [
-              {
-                layerId: 'polygons.json',
-                layerName: 'Polygons',
-                source: {
-                  featureInfo: featureInfoConfig,
-                },
-              },
-            ],
-          },
-        ],
-      },
-      components: [],
-      corePackages: ['test-suite'],
-      corePackagesConfig: [{ 'test-suite': { suites: ['suite-details'] } }],
-      theme: 'geo.ca',
-      footerBar: {
-        tabs: {
-          core: ['legend', 'layers'],
-        },
-      },
-    };
-
-    // Replace the map!
-    return this.replaceMap(test, mapId, baseConfig);
-  }
-
-  // #endregion
 }
 
 // #region TYPES AND INTERFACES
@@ -515,6 +293,14 @@ export type TestZoomWithPanelOffset = {
   paddingLeft: number;
   /** The x map pixel of the feature center after the zoom. */
   centerPixelX: number | undefined;
+};
+
+/** Details layer selection before and after a second map click. */
+type DetailsLayerSelectionResult = {
+  originalLayerPath: string;
+  expectedLayerPath: string;
+  alternateLayerPath: string;
+  secondFeatureCount: number;
 };
 
 /** Result type for the testClearAllHighlights test execution. */

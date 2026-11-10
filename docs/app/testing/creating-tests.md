@@ -157,18 +157,46 @@ this.removeLayerConfigAndAssert(test, layerPath); // Cleanup
 
 For successful layer setup, use a fixture-specific `addLayer...` helper on `GVAbstractTester`,
 such as `addLayerEsriDynamicHistoFloodEvents(test)` or `addLayerEsriFeatureForestIndustry(test)`.
-These helpers create the fixture configuration, add it to the map, and return the selected
-layer after loading and legend resolution. Multi-layer fixtures also wait for the required
-siblings. Assertions, the behavior under test, and cleanup remain in the tester.
+Each helper immediately returns `{ layerPath, promiseLayer }`: capture `layerPath` synchronously,
+then await `promiseLayer` for the selected layer after loading and legend resolution.
 
-Fixture helpers own ID generation; callers derive runtime paths from the returned layer's
-`getLayerPath()` instead of creating IDs or paths before the test. GeoCore fixtures use their service
-UUID rather than a generated ID. For a test that returns query data or other observations, return
-the fixture alongside those observations (for example, `{ gvLayer, data: queryResult }`), so
-assertions and cleanup can use `result.gvLayer.getLayerPath()`. Multi-layer tests retain the returned
-layer instances and derive sibling or parent paths from those instances.
-Keep VPN/projection skip guards in the test before calling the helper. Tests expecting addition
-or loading errors continue using the lower-level helpers inside `testError()`.
+When writing a fixture helper, create its configuration with normal synchronous setup code and
+chain addition and readiness with `then()`, rather than an async IIFE:
+
+```typescript
+addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult {
+  const gvLayerId = generateId();
+  const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
+  test.addStep('Creating the Top Projects Esri Feature configuration...');
+  const gvConfig = EsriFeature.createGeoviewLayerConfig(
+    gvLayerId,
+    GVAbstractTester.TOP_PROJECTS_900A_LAYER_NAME,
+    GVAbstractTester.TOP_PROJECTS_900A_URL_MAP_SERVER,
+    false,
+    [{ id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID }]
+  );
+  const promiseLayer = this.addLayerOnMap(test, gvConfig).then(
+    (): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPath)
+  );
+  return { layerPath, promiseLayer };
+}
+```
+
+Synchronous setup exceptions propagate directly from the helper. Addition, loading, and readiness
+failures reject `promiseLayer` without hiding the error, so callers can retain the returned cleanup
+path before awaiting it. Start genuinely asynchronous setup (such as reading a GeoPackage) with its
+own promise, then chain configuration selection, addition, and readiness. Chain required sibling
+waits in order rather than running them concurrently.
+
+Fixture helpers own ID generation. Use the resolved layer's `getLayerPath()` for assertions and
+layer-specific operations. Retain the immediate `layerPath` for finalizer cleanup before awaiting
+`promiseLayer`, so a rejected add/load still leaves a cleanup scope. For metadata-derived children
+whose exact path is not known synchronously, or fixtures that add siblings, `layerPath` may be the
+GeoView root ID; root-scope cleanup removes its configured entries. GeoCore fixtures use their
+service UUID rather than a generated ID. For a test that returns query data or other observations,
+return the fixture alongside those observations (for example, `{ gvLayer, data: queryResult }`).
+Keep VPN/projection skip guards in the test before calling the helper. Tests expecting addition or
+loading errors continue using the lower-level helpers inside `testError()`.
 
 **Static helpers** on `LayerTester` (require explicit `mapId`):
 
@@ -347,14 +375,24 @@ testIsolated(): Promise<Test<void>> {
 ```
 
 Map configuration tests belong in `MapConfigTester` and run sequentially in `suite-map-config`.
-`#helperCreateMapConfig(test, mapId, overrides)` deletes the previous viewer, creates a new one with
+`#helperCreateMapConfig(test, mapId, mapConfig)` deletes the previous viewer, creates a new one with
 `createMapFromConfigFast`, reassigns the tester's viewer **and controllers** using
-`reassignMapViewerAndControllers`, and waits for layer loading.
-Overrides are dot-path/value pairs; `null` removes a property to test absence/defaults.
+`assignMapViewerAndControllers`, and waits for layer loading.
+Overrides are nested configuration objects deep-merged with the helper's base fixture.
+The helper disables current-config inheritance in `replaceMap()` so previous tests' extent targets,
+zoom constraints, and other settings cannot leak into the new map. Other `replaceMap()` callers
+inherit the current configuration by default; pass `false` as its fifth argument for an isolated configuration.
 Use `#helperCreateMapConfigWithInitialSettings` for a flat layer,
 `#helperCreateMapConfigWithGroupInitialSettings` for parent/child states, and
 `#helperCreateMapConfigWithNestedGroupInitialSettings` for full three-level settings.
 Never retain controllers from the destroyed map.
+
+Suites run sequentially but can share a map ID whose viewer is replaced by an earlier suite.
+Before eligibility checks, each GeoView suite binds the current API-registered viewer and its controllers
+to itself and all its testers. During execution, `replaceMap()` notifies the owning suite to update
+those references together. Getters return the assigned references without refreshing them.
+Use those getters after a replacement rather than keeping viewer or controller references from before it.
+See the [test-suite maintenance reference](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/test-suite.md#gotchas--pitfalls).
 
 ### Descriptive Test Names
 

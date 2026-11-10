@@ -38,11 +38,22 @@ Read only the linked section of each doc: search for its heading and read to the
   ([helper contract](../../docs/app/testing/creating-tests.md#helper-methods)). Preserve source options,
   legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
   subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
-- Fixture helpers own generated IDs. Caller assertions and cleanup derive paths from the returned
-  layer, or `result.gvLayer` when observations are returned alongside it. Keep a layer-instance
-  fallback for teardown when execution fails after setup; do not retain caller-generated IDs for cleanup.
+- Fixture helpers return an immediate `GVLayerFixtureResult`: capture `layerPath` before awaiting
+  `promiseLayer`, which resolves to the selected loaded layer. Use the layer's runtime path for
+  assertions and operations; use the captured fixture path for cleanup even when loading rejects.
+  For metadata-derived children or fixtures with siblings, `layerPath` may be the GeoView root cleanup
+  scope while `promiseLayer` still resolves to the actual selected child. Root-scope cleanup removes
+  the entries beneath that root.
+- Fixture authoring follows the linked helper contract: normal synchronous configuration setup and
+  `then()` chains, not async IIFEs or deferred whole-body wrappers. Synchronous setup errors propagate
+  directly; async read/add/readiness failures reject `promiseLayer`, preserving the captured cleanup
+  path. Keep sibling waits serial and metadata-path discovery after addition.
 
 ### Gotchas & Pitfalls
+
+- Data-table global-filter UI checks must edit the search input: `useGlobalFilter` initializes local state
+  from the store and subsequently writes local changes back, but does not consume later programmatic store changes.
+  Target `.data-table-filter-map input` for the map-filter switch rather than any disabled switch in the map.
 
 Read the canonical [gotchas](../../docs/app/testing/test-templates.md#gotchas--pitfalls).
 Source boundaries most likely to produce misleading tests:
@@ -51,12 +62,17 @@ Source boundaries most likely to produce misleading tests:
 - Fullscreen view-restoration tests use `map.renderSync()` to process view changes and `moveend`; do not await
   `waitForRender()` there, since its `rendercomplete` event also depends on map sources finishing loading.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
+- GeoChart starts hidden without configured charts. Tests registering charts dynamically must use `geoChartController.addChart`
+  and call `uiController.showTabButton('geochart')`, matching layer-creator registration; changing the chart store alone does not show the tab.
 - Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
   `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
 - MUI's automatic icon `data-testid` attributes are development-only. The Layers visibility toggle explicitly supplies
   its icon IDs so `getVisibleButtonVisibility` also works in production; keep those props when changing the icons.
 - Prefer `waitForLayerToGetRegistered`; polling is fallback only when no event exists.
-- Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
+- Map recreation must reassign both viewer and controllers. GeoView suites bind the API's current map to themselves
+  and their testers at launch, before eligibility checks. `replaceMap()` emits a replacement event that synchronizes
+  the owning suite and its testers immediately. Do not retain controller locals across replacement.
+  See [test isolation](../../docs/app/testing/creating-tests.md#test-isolation). Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
 - Instance cleanup/helpers differ from LayerTester static assertions requiring mapId.
 
