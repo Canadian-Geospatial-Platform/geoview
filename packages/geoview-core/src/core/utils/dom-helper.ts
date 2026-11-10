@@ -197,6 +197,34 @@ export abstract class DomHelper {
   }
 
   /**
+   * Waits until a layer's visibility button displays the requested eye icon state.
+   *
+   * Retries every 100 milliseconds while the button is missing, its icon state is ambiguous, or the state does not match.
+   * Waits indefinitely if the requested state is never reached.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @param containerType - The app bar or footer bar containing the Layers panel
+   * @param visibility - True to wait for the visible eye icon, or false to wait for the hidden eye icon
+   * @returns A promise that resolves when the button displays the requested visibility state
+   */
+  static async waitVisibleButtonVisibility(
+    mapId: string,
+    layerPath: string,
+    containerType: TypeContainerBox,
+    visibility: boolean
+  ): Promise<void> {
+    await whenThisThen(() => {
+      try {
+        return this.getVisibleButtonVisibility(mapId, layerPath, containerType) === visibility;
+      } catch {
+        return false;
+      }
+    });
+    return;
+  }
+
+  /**
    * Returns visible tabbable elements in keyboard order within a map's focus trap.
    *
    * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.

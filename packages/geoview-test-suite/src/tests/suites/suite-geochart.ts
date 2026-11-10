@@ -43,8 +43,8 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests the Geochart plugin integration:<br/>
-      <b>Interaction</b> — Open geochart panel via simulated map click on layer<br/>
-      <b>GeoCore</b> — Add layer by UUID and verify geochart config loading`;
+      <b>Interaction</b> — Query a polygon layer at a coordinate, open the panel and select its chart<br/>
+      <b>GeoCore</b> — Add layer by UUID, query and select it, and verify geochart config loading`;
   }
 
   /**
@@ -82,7 +82,9 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     await this.#geochartTester.testGeochartPolygonsClick();
-    return Promise.resolve();
+
+    // Resolve
+    return;
   }
 
   /**
@@ -98,6 +100,6 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
     await this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
 
     // Resolve
-    return Promise.resolve();
+    return;
   }
 }

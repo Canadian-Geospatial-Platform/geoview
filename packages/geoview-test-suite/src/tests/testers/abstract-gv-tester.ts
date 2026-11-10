@@ -3,12 +3,14 @@ import type { GeoJSONObject } from 'ol/format/GeoJSON';
 
 import { AbstractTester } from '../core/abstract-tester';
 import { Test } from '../core/test';
+import EventHelper, { type EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import type { API } from 'geoview-core/api/api';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { delay, generateId } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
+import { GeoPackageReader } from 'geoview-core/api/config/reader/geopackage-reader';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
@@ -289,6 +291,14 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly GEOCORE_MARINE_FISHERIES_UUID = '44ef4d33-20b7-45fc-974c-d73a0a8fbae8';
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID + '/0';
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH + '/4';
+
+  /** Geocore UUID for Canada's Commemorative */
+  static readonly GEOCORE_COMMEMORATIVE_UUID = 'ccc75c12-5acc-4a6a-959f-ef6f621147b9';
+  static readonly GEOCORE_COMMEMORATIVE_LAYER_PATH = GVAbstractTester.GEOCORE_COMMEMORATIVE_UUID + '/0';
+
+  /** Geocore UUID for Permafrost Ecoprovince */
+  static readonly GEOCORE_PERMAFROST_ECOPROVINCE_UUID = '4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8';
+  static readonly GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_PATH = GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_UUID + '/6';
 
   /** GNWT administrative boundaries (ESRI Dynamic) — adjacent polygons meet at shared junctions (issue #3636) */
   static readonly GNWT_BOUNDARIES_URL_MAP_SERVER: string =
@@ -1090,6 +1100,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** The controller registry for the tests */
   #controllerRegistry: ControllerRegistry;
 
+  /** Handlers notifying the owning suite that a test replaced its shared map. */
+  #mapReplacedHandlers: MapReplacedDelegate[] = [];
+
   /**
    * Constructs a GeoView specific tester.
    *
@@ -1115,7 +1128,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Gets the MapViewer.
+   * Gets the MapViewer assigned for the current suite execution.
    *
    * @returns The MapViewer
    */
@@ -1149,7 +1162,50 @@ export abstract class GVAbstractTester extends AbstractTester {
     return this.#controllerRegistry;
   }
 
+  /**
+   * Assigns the viewer and its controllers together when a suite starts or replaces its map.
+   *
+   * @param mapViewer - The current map viewer
+   */
+  assignMapViewerAndControllers(mapViewer: MapViewer): void {
+    this.#mapViewer = mapViewer;
+    this.#controllerRegistry = mapViewer.controllers;
+  }
+
   // #region LAYERS ADD / REMOVE
+
+  /**
+   * Adds the railway GeoPackage table containing an empty field name and waits for loading and legend readiness.
+   *
+   * @param test - The test instance used to log fixture setup
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded railway table layer
+   */
+  addGeopackageRailwaysCartoFerDebarcadere<T>(test: Test<T>): GVLayerFixtureResult {
+    const gvLayerId = generateId();
+    const fixtureLayerPath = gvLayerId;
+    const tableId = 'carto_fer_debarcadere';
+
+    test.addStep('Reading the Railways Empty Field GeoPackage...');
+    const promiseLayer = GeoPackageReader.createLayerConfigFromGeoPackage({
+      geoviewLayerId: gvLayerId,
+      geoviewLayerName: 'Railways Empty Field',
+      geoviewLayerType: 'GeoPackage',
+      metadataAccessPath: './datasets/geopackages/railways-emptyfieldname.gpkg',
+    })
+      .then((geopackageConfig): Promise<GeoViewLayerAddedResult> => {
+        const gvConfig = geopackageConfig;
+        const tableConfig = gvConfig.listOfLayerEntryConfig.find((entry) => entry.layerId === tableId);
+        gvConfig.listOfLayerEntryConfig = [tableConfig!];
+
+        // Redirect to helper to add the layer to the map and wait
+        return this.addLayerOnMap(test, gvConfig);
+      })
+      .then((): Promise<AbstractGVLayer> => {
+        // Find the layer and wait until its ready
+        return this.waitLayerAtLayerPath(test, `${gvLayerId}/${tableId}`);
+      });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: `${gvLayerId}/${tableId}`, promiseLayer };
+  }
 
   /**
    * Adds a GeoView layer by GeoCore UUID and waits for its layer creation promise to resolve.
@@ -1177,15 +1233,12 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param test - The test instance used to log layer registration, loading, and legend query steps
    * @param gvLayerName - Optional display name for the GeoView layer
-   * @returns A promise that resolves with the loaded historical flood events layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded historical flood events layer after its legend has been queried
    */
-  async addLayerEsriDynamicHistoFloodEvents<T>(
-    test: Test<T>,
-    gvLayerName = 'Esri Dynamic Histo Flood Events'
-  ): Promise<AbstractBaseGVLayer> {
+  addLayerEsriDynamicHistoFloodEvents<T>(test: Test<T>, gvLayerName = 'Esri Dynamic Histo Flood Events'): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
     const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
 
     // Create the geoview layer config
     const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, true, [
@@ -1193,21 +1246,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds a queryable blank GeoJSON layer and waits for loading and legend resolution, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONBlank<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONBlank<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
 
     // Keep the blank fixture queryable for tests that inject features after loading.
     const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, GVAbstractTester.GEOJSON_METADATA_META_BLANK, false, [
@@ -1215,20 +1269,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Wait for the layer to be loaded at least once
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Wait for the layer to be loaded at least once
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the labour force GeoCore fixture and waits for all six Esri Dynamic raster sublayers and their legends.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded 'Canecumene' layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded 'Canecumene' layer after its legend has been queried
    */
-  async addLayerEsriDynamicWithRasterLayersViaGeocore<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriDynamicWithRasterLayersViaGeocore<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
+    const fixtureLayerPath = gvLayerId;
     const layerPathPetroleum = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM}`;
     const layerPathMinerals = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS}`;
     const layerPathForestry = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY}`;
@@ -1240,46 +1296,105 @@ export abstract class GVAbstractTester extends AbstractTester {
     test.addStep('Creating the GeoView Layer Configuration...');
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMapFromUUID(test, gvLayerId);
-
-    // Find the layer and wait until its ready
-    await this.waitLayerAtLayerPath(test, layerPathPetroleum);
-    await this.waitLayerAtLayerPath(test, layerPathMinerals);
-    await this.waitLayerAtLayerPath(test, layerPathForestry);
-    await this.waitLayerAtLayerPath(test, layerPathFisheries);
-    await this.waitLayerAtLayerPath(test, layerPathAgriculture);
-    return this.waitLayerAtLayerPath(test, layerPathCanecumene);
+    const promiseLayer = this.addLayerOnMapFromUUID(test, gvLayerId)
+      // Find the layer and wait until its ready
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathPetroleum))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathMinerals))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathForestry))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathFisheries))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathAgriculture))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathCanecumene));
+    return { layerPath: fixtureLayerPath, selectedLayerPath: layerPathCanecumene, promiseLayer };
   }
 
   /**
    * Adds the marine fisheries GeoCore fixture, waits for all map layers to load, and resolves its initially hidden group.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded marine fisheries group whose default visibility is false
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded marine fisheries group whose default visibility is false
    * @throws {LayerNotFoundError} When the initially hidden group is not registered
    */
-  async addLayerGeocoreMarineFisheries<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
-    test.addStep('Adding the geocore layer on the map via UUID...');
-    await this.addLayerOnMapFromUUID(test, GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID);
+  addLayerGeocoreMarineFisheriesViaGeocore(test: Test): GVLayerFixtureResult {
+    const fixtureLayerPath = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID;
+    test.addStep('Adding the Fisheries layer on the map via UUID...');
+    const promiseLayer = this.addLayerOnMapFromUUID(test, GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID)
+      .then((): Promise<number> => {
+        test.addStep('Waiting for all layers to be loaded...');
+        return this.getControllersRegistry().layerController.waitForLayersLoaded();
+      })
+      .then((): AbstractGVLayer => {
+        // Return the layer
+        return this.getControllersRegistry().layerController.getGeoviewLayerRegular(
+          GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE
+        );
+      });
+    return {
+      layerPath: fixtureLayerPath,
+      selectedLayerPath: GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE,
+      promiseLayer,
+    };
+  }
 
-    test.addStep('Waiting for all layers to be loaded...');
-    await this.getControllersRegistry().layerController.waitForLayersLoaded();
+  /**
+   * Adds the commemorative map layer via its GeoCore UUID and waits for all map layers to load.
+   *
+   * @param test - The test instance used to log layer addition and loading steps
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the commemorative map layer
+   * @throws {LayerNotFoundError} When the commemorative map layer is not registered
+   */
+  addLayerCommemorativeViaGeocore(test: Test): GVLayerFixtureResult {
+    const fixtureLayerPath = GVAbstractTester.GEOCORE_COMMEMORATIVE_UUID;
+    test.addStep('Adding the Commemorative map layer on the map via UUID...');
+    const promiseLayer = this.addLayerOnMapFromUUID(test, GVAbstractTester.GEOCORE_COMMEMORATIVE_UUID)
+      .then((): Promise<number> => {
+        test.addStep('Waiting for all layers to be loaded...');
+        return this.getControllersRegistry().layerController.waitForLayersLoaded();
+      })
+      .then((): AbstractGVLayer => {
+        // Return the layer
+        return this.getControllersRegistry().layerController.getGeoviewLayerRegular(GVAbstractTester.GEOCORE_COMMEMORATIVE_LAYER_PATH);
+      });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: GVAbstractTester.GEOCORE_COMMEMORATIVE_LAYER_PATH, promiseLayer };
+  }
 
-    return this.getControllersRegistry().layerController.getGeoviewLayer(
-      GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE
-    );
+  /**
+   * Adds the permafrost ecoprovince Esri Feature layer via its GeoCore UUID and waits for all map layers to load.
+   *
+   * @param test - The test instance used to log layer addition and loading steps
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the permafrost ecoprovince layer
+   * @throws {LayerNotFoundError} When the permafrost ecoprovince layer is not registered
+   */
+  addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test: Test): GVLayerFixtureResult {
+    const fixtureLayerPath = GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_UUID;
+    test.addStep('Adding the Permafrost Ecoprovince map layer on the map via UUID...');
+    const promiseLayer = this.addLayerOnMapFromUUID(test, GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_UUID)
+      .then((): Promise<number> => {
+        test.addStep('Waiting for all layers to be loaded...');
+        return this.getControllersRegistry().layerController.waitForLayersLoaded();
+      })
+      .then((): AbstractGVLayer => {
+        // Turn the layer visible, because it's invisible by default
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(
+          GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_PATH
+        );
+        layer.setVisible(true);
+
+        // Return the layer
+        return layer;
+      });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_PATH, promiseLayer };
   }
 
   /**
    * Adds the Esri Feature Forest Industry fixture and waits for its selected layer to load and its legend to be queried.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriFeatureForestIndustry<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriFeatureForestIndustry<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
     const layerUrl = GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
     const gvLayerName = 'Esri Feature Forest Industry';
 
     // Create the config
@@ -1289,22 +1404,46 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
+  }
 
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+  /**
+   * Adds the Top Projects Esri Feature fixture and waits for loading and legend resolution.
+   *
+   * @param test - The test instance used to log layer setup steps
+   * @returns The loaded Top Projects layer
+   */
+  addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult {
+    const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
+    test.addStep('Creating the Top Projects Esri Feature configuration...');
+    const gvConfig = EsriFeature.createGeoviewLayerConfig(
+      gvLayerId,
+      GVAbstractTester.TOP_PROJECTS_900A_LAYER_NAME,
+      GVAbstractTester.TOP_PROJECTS_900A_URL_MAP_SERVER,
+      false,
+      [{ id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID }]
+    );
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the Yukon low-head hydro Esri Feature layer containing invalid geometries and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriFeatureInvalidGeometry<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriFeatureInvalidGeometry<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID}`;
     const layerUrl = GVAbstractTester.LOW_HEAD_HYDRO_DATABASE;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID}`;
     const gvLayerName = 'Yukon Low Head Hydro';
 
     // Create the config
@@ -1314,22 +1453,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the elevation Esri Image layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriImageWithElevation<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriImageWithElevation<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const layerUrl = GVAbstractTester.IMAGE_SERVER_ELEVATION_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const gvLayerName = 'Esri Image Elevation';
 
     // Creating the configuration
@@ -1339,20 +1479,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the USA Esri Image fixture and waits for both cities and roads sublayers and their legends.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriImageWithUSA<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriImageWithUSA<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = gvLayerId;
     const layerUrl = GVAbstractTester.IMAGE_SERVER_USA_URL;
     const layerPathCities = `${gvLayerId}/base-group/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
     const layerPathRoads = `${gvLayerId}/base-group/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_ROADS}`;
@@ -1372,23 +1514,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    await this.waitLayerAtLayerPath(test, layerPathCities);
-    return this.waitLayerAtLayerPath(test, layerPathRoads);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig)
+      // Find the layer and wait until its ready
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathCities))
+      .then((): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPathRoads));
+    return { layerPath: fixtureLayerPath, selectedLayerPath: layerPathRoads, promiseLayer };
   }
 
   /**
    * Adds the OWS Mundialis WMS layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSWithOWSMundialis<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSWithOWSMundialis<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.OWS_MUNDIALIS_LAYER_ID}`;
     const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.OWS_MUNDIALIS_LAYER_ID}`;
     const gvLayerName = 'OWS Mundialis';
 
     // Create the config
@@ -1398,22 +1540,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the Datacube MSI WMS layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSWithDatacubeMSI<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSWithDatacubeMSI<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const layerUrl = GVAbstractTester.DATACUBE_MSI;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const gvLayerName = 'Datacube MSI';
 
     // Create the config
@@ -1429,22 +1572,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the Datacube Ring of Fire Halifax WMS layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSWithDatacubeRingOfFire<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSWithDatacubeRingOfFire<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX}`;
     const layerUrl = GVAbstractTester.DATACUBE_RING_FIRE;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX}`;
     const gvLayerName = 'Halifax';
 
     // Create the config
@@ -1460,22 +1604,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the VPN-only landcover WMS group with a group time dimension and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSLandcoverGroupDimension<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSLandcoverGroupDimension<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
     const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
     const gvLayerName = 'Landcover 2010-2020 (XML)';
 
     // Create the config
@@ -1485,20 +1630,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the VPN-only landcover WMS sublayers directly and waits for their generated group and legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSLandcoverSubLayers<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSLandcoverSubLayers<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = gvLayerId;
     const layerUrl = GVAbstractTester.LANDCOVER_CDTK_URL;
     const layerPathGroup = `${gvLayerId}/base-group`;
     const gvLayerName = 'Landcover 2010-2020 (XML)';
@@ -1512,22 +1659,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPathGroup);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, layerPathGroup);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: layerPathGroup, promiseLayer };
   }
 
   /**
    * Adds the Nonna WMS layer requiring proxy fallback and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSNonna<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSNonna<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.NONNA_WMS_LAYER_ID}`;
     const layerUrl = GVAbstractTester.NONNA_WMS_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.NONNA_WMS_LAYER_ID}`;
     const gvLayerName = 'Nonna WMS';
 
     // Create the config
@@ -1537,20 +1685,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the CanImage WMS group with duplicate nested names and waits for its deeply nested leaf and legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSDuplicateGroupNames<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSDuplicateGroupNames<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = gvLayerId;
     const layerUrl = GVAbstractTester.CANIMAGE_WMS_URL;
     const groupPath = `${gvLayerId}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
     const duplicateGroupPath = `${groupPath}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
@@ -1564,22 +1714,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Reaching this deeply-nested leaf proves the duplicate 'canimage/canimage' path was built and loaded without hanging
-    return this.waitLayerAtLayerPath(test, leafPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Reaching this deeply-nested leaf proves the duplicate 'canimage/canimage' path was built and loaded without hanging
+      return this.waitLayerAtLayerPath(test, leafPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: leafPath, promiseLayer };
   }
 
   /**
    * Adds the world timezones WMTS layer with its tile matrix set and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMTSWorldTimezones<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMTSWorldTimezones<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
     const layerUrl = GVAbstractTester.WORLD_TIMEZONES_WMTS_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
     const gvLayerName = 'World Timezones WMTS';
 
     // Create the config
@@ -1592,22 +1743,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the OpenStreetMap XYZ tiles layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerXYZTilesOSM<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerXYZTilesOSM<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.XYZ_TILES_OSM_LAYER_ID}`;
     const layerUrl = GVAbstractTester.XYZ_TILES_OSM_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.XYZ_TILES_OSM_LAYER_ID}`;
     const gvLayerName = GVAbstractTester.XYZ_TILES_OSM_LAYER_ID;
 
     // Create the config
@@ -1622,22 +1774,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the CBMT vector tiles layer for projection 3978 and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerVectorTilesCBMT<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerVectorTilesCBMT<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
     const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
     const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
     const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
       { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
@@ -1647,22 +1800,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     test.addStep('Creating the GeoView Layer Configuration...');
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the GeoMet current conditions WFS layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWFSGeometCurrentConditions<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWFSGeometCurrentConditions<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const layerUrl = GVAbstractTester.GEOMET_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Create the config
@@ -1672,23 +1826,24 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    // GV Current Conditions isn't returning a legend for us anymore, sending acceptNoIconsOrNoData = true now
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      // GV Current Conditions isn't returning a legend for us anymore, sending acceptNoIconsOrNoData = true now
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the GeoJSON polygons fixture with its service date format and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONWithMetadataPolygons<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONWithMetadataPolygons<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_POLYGONS}`;
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_POLYGONS}`;
     const gvLayerName = 'Polygons JSON';
 
     // Create the config
@@ -1699,22 +1854,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvConfig.serviceDateFormat = 'DD/MM/YYYYTHH:mm:ss';
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the GeoJSON GeometryCollection fixture and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONWithGeometryCollection<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONWithGeometryCollection<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
     const layerUrl = GVAbstractTester.GEOJSON_DATASET_ROOT;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
     const gvLayerName = 'Geometry Collection JSON';
 
     // Create the config
@@ -1724,23 +1880,24 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the Datacube vegetation GeoTIFF layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoTIFFWithDatacubeVegetation<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoTIFFWithDatacubeVegetation<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOTIFF_VEGETATION_FILE}`;
     const layerUrl = GVAbstractTester.GEOTIFF_VEGETATION;
     const gvLayerName = 'Datacube Vegetation';
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOTIFF_VEGETATION_FILE}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -1749,22 +1906,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the station list CSV layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerCSVWithStationList<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerCSVWithStationList<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.CSV_STATION_LIST_FILE}`;
     const layerUrl = GVAbstractTester.CSV_STATION_LIST;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.CSV_STATION_LIST_FILE}`;
     const gvLayerName = 'Station List CSV';
 
     // Create the config
@@ -1774,22 +1932,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the Pygeoapi lakes OGC Feature layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerOGCFeatureWithPygeoapi<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerOGCFeatureWithPygeoapi<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const layerUrl = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const gvLayerName = GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
 
     // Create the config
@@ -1799,22 +1958,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the South Africa WKB layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWKBWithSouthAfrica<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWKBWithSouthAfrica<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.WKB_SOUTH_AFRICA}`;
     const layerUrl = GVAbstractTester.WKB_SOUTH_AFRICA;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WKB_SOUTH_AFRICA}`;
     const gvLayerName = 'WKB South Africa';
 
     // Create the config
@@ -1822,22 +1982,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the tornado KML layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerKMLWithTornado<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerKMLWithTornado<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.KML_TORNADO_FILE}`;
     const layerUrl = GVAbstractTester.KML_TORNADO;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.KML_TORNADO_FILE}`;
     const gvLayerName = 'KML Tornado';
 
     // Create the config
@@ -1845,10 +2006,11 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
@@ -1856,19 +2018,20 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param test - The test instance used to log layer setup steps
    * @param waitForChild - Optional flag to wait for the point child instead of the group
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONPointsSettings<T>(test: Test<T>, waitForChild = false): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONPointsSettingsUnderGroup<T>(test: Test<T>): GVLayerFixtureResult {
     const geoviewLayerId = generateId();
     const gvConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
     const groupPath = `${geoviewLayerId}/point-feature-group`;
-    const layerPath = waitForChild ? `${groupPath}/points_1.json` : groupPath;
+    const layerPath = `${groupPath}/points_1.json`;
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Wait for the layer to be loaded at least once
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Wait for the layer to be loaded at least once
+      return this.waitLayerAtLayerPath(test, layerPath);
+    });
+    return { layerPath: groupPath, selectedLayerPath: layerPath, promiseLayer };
   }
 
   /**
@@ -1876,12 +2039,12 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param test - The test instance used to log layer setup steps
    * @param gvLayerName - Optional display name for the GeoView layer
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriDynamicWaterNetwork<T>(test: Test<T>, gvLayerName = 'Esri Dynamic Water Network'): Promise<AbstractBaseGVLayer> {
+  addLayerEsriDynamicWaterNetwork<T>(test: Test<T>, gvLayerName = 'Esri Dynamic Water Network'): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
     const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -1890,10 +2053,11 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Wait for the layer to be loaded at least once
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Wait for the layer to be loaded at least once
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
@@ -1901,12 +2065,12 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param test - The test instance used to log layer setup steps
    * @param gvLayerName - Optional display name for the GeoView layer
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriFeatureWaterNetwork<T>(test: Test<T>, gvLayerName = 'Esri Feature Water Network'): Promise<AbstractBaseGVLayer> {
+  addLayerEsriFeatureWaterNetwork<T>(test: Test<T>, gvLayerName = 'Esri Feature Water Network'): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
     const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -1915,22 +2079,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Wait for the layer to be loaded at least once
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Wait for the layer to be loaded at least once
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the single-point GeoJSON layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONSinglePoint<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONSinglePoint<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_SINGLE_POINT}`;
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_SINGLE_POINT}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -1939,22 +2104,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds a featureless GeoJSON layer with an explicit extent and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerGeoJSONBlankWithConfiguredExtent<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerGeoJSONBlankWithConfiguredExtent<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -1965,22 +2131,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.getSource().extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the top projects Esri Dynamic layer with restricted outfields and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriDynamicTopProjectsWithRestrictedOutfields<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriDynamicTopProjectsWithRestrictedOutfields<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
     const gvLayerName = 'gvLayerName';
-    const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -2003,22 +2170,23 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.getSource().featureInfo!.outfields = GVAbstractTester.TOP_PROJECTS_900A_OUTFIELDS;
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the GNWT boundaries Esri Dynamic layer and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerEsriDynamicGNWTBoundaries<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerEsriDynamicGNWTBoundaries<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.GNWT_BOUNDARIES_LAYER_ID}`;
     const gvLayerName = 'GNWT Boundaries';
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GNWT_BOUNDARIES_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -2027,20 +2195,22 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Add the layer to the map and wait until it's ready
-    await this.addLayerOnMap(test, gvConfig);
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Adds the cities WMS layer with an explicit WFS layer association and waits for loading, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSCitiesWithWFS<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSCitiesWithWFS<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.CITIES_WMS_LAYER_ID}`;
     const layerName = 'Cities';
-    const layerPath = `${gvLayerId}/${GVAbstractTester.CITIES_WMS_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -2056,23 +2226,24 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.setWfsLayerId(GVAbstractTester.CITIES_WFS_LAYER_ID);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.addLayerOnMap(test, gvConfig).then((): Promise<AbstractGVLayer> => {
+      // Find the layer and wait until its ready
+      return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+    });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
    * Zooms to level 4 and adds the VPN-only airborne radioactivity WMS layer for WFS queries, accepting an empty legend.
    *
    * @param test - The test instance used to log layer setup steps
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSAirborneWithWFS<T>(test: Test<T>): Promise<AbstractBaseGVLayer> {
+  addLayerWMSAirborneWithWFS<T>(test: Test<T>): GVLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID}`;
     const metadataAccessPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_URL;
     const layerName = 'Airborne Radioactivity';
-    const layerPath = `${gvLayerId}/${GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID}`;
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
@@ -2084,13 +2255,17 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // This layer is only visible within range, zoom in a bit
-    await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
-
-    // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
-
-    // Find the layer and wait until its ready
-    return this.waitLayerAtLayerPath(test, layerPath, true);
+    const promiseLayer = this.getControllersRegistry()
+      .mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION)
+      .then((): Promise<GeoViewLayerAddedResult> => {
+        // Redirect to helper to add the layer to the map and wait
+        return this.addLayerOnMap(test, gvConfig);
+      })
+      .then((): Promise<AbstractGVLayer> => {
+        // Find the layer and wait until its ready
+        return this.waitLayerAtLayerPath(test, fixtureLayerPath, true);
+      });
+    return { layerPath: fixtureLayerPath, selectedLayerPath: fixtureLayerPath, promiseLayer };
   }
 
   /**
@@ -2099,10 +2274,11 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param test - The test instance used to log layer setup steps
    * @param geoviewLayerName - Optional configured display name for the GeoView layer
    * @param includeAirport - Optional flag to include and wait for the airport sibling
-   * @returns A promise that resolves with the loaded selected layer after its legend has been queried
+   * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  async addLayerWMSZpegtGroup<T>(test: Test<T>, geoviewLayerName?: string, includeAirport = false): Promise<AbstractBaseGVLayer> {
+  addLayerWMSZpegtGroup<T>(test: Test<T>, geoviewLayerName?: string, includeAirport = false): GVMetadataLayerFixtureResult {
     const gvLayerId = generateId();
+    const fixtureLayerPath = gvLayerId;
     const zpegtLayerId = GVAbstractTester.TRANSPORTS_WMS_ZPEGT_LAYER_ID;
 
     test.addStep('Creating the ZPEGT WMS configuration...');
@@ -2120,26 +2296,33 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap(test, gvConfig);
+    const promiseSelectedLayerPath = this.addLayerOnMap(test, gvConfig)
+      .then((): Promise<AbstractGVLayer> | undefined => {
+        if (includeAirport) {
+          // Resolve by root and layer ID because WMS metadata can add group segments to the runtime path.
+          const airportLayerPath = this.getControllersRegistry()
+            .layerController.getGeoviewLayerPaths()
+            .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${GVAbstractTester.TRANSPORTS_WMS_AIRPORT_LAYER_ID}`));
+          if (!airportLayerPath) throw new Error(`The airport layer was not registered under '${gvLayerId}'.`);
+          // Wait for the sibling to finish loading before verifying the registered group structure.
+          return this.waitLayerAtLayerPath(test, airportLayerPath, true);
+        }
+        return undefined;
+      })
+      .then((): string => {
+        test.addStep('Finding the registered ZPEGT group...');
+        // Match the requested terminal ID without assuming how WMS metadata nests the group.
+        const zpegtLayerPath = this.getControllersRegistry()
+          .layerController.getGeoviewLayerPaths()
+          .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${zpegtLayerId}`));
+        if (!zpegtLayerPath) throw new Error(`The ZPEGT layer was not registered under '${gvLayerId}'.`);
 
-    if (includeAirport) {
-      // Resolve by root and layer ID because WMS metadata can add group segments to the runtime path.
-      const airportLayerPath = this.getControllersRegistry()
-        .layerController.getGeoviewLayerPaths()
-        .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${GVAbstractTester.TRANSPORTS_WMS_AIRPORT_LAYER_ID}`));
-      if (!airportLayerPath) throw new Error(`The airport layer was not registered under '${gvLayerId}'.`);
-      // Wait for the sibling to finish loading before verifying the registered group structure.
-      await this.waitLayerAtLayerPath(test, airportLayerPath, true);
-    }
-
-    test.addStep('Finding the registered ZPEGT group...');
-    // Match the requested terminal ID without assuming how WMS metadata nests the group.
-    const zpegtLayerPath = this.getControllersRegistry()
-      .layerController.getGeoviewLayerPaths()
-      .find((path) => path.startsWith(`${gvLayerId}/`) && path.endsWith(`/${zpegtLayerId}`));
-    if (!zpegtLayerPath) throw new Error(`The ZPEGT layer was not registered under '${gvLayerId}'.`);
-
-    return this.waitLayerAtLayerPath(test, zpegtLayerPath, true);
+        return zpegtLayerPath;
+      });
+    const promiseLayer = promiseSelectedLayerPath.then((selectedLayerPath): Promise<AbstractGVLayer> =>
+      this.waitLayerAtLayerPath(test, selectedLayerPath, true)
+    );
+    return { layerPath: fixtureLayerPath, promiseSelectedLayerPath, promiseLayer };
   }
 
   /**
@@ -2178,7 +2361,11 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  async waitLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractBaseGVLayer> {
+  async waitLayerAtLayerPath<T, U extends AbstractBaseGVLayer>(
+    test: Test<T>,
+    layerPath: string,
+    acceptNoIconsOrNoData = false
+  ): Promise<U> {
     // Wait for the layer to get registered
     test.addStep(`Wait for the layer ${layerPath} to be registered...`);
     const layer = await this.getControllersRegistry().layerController.waitForLayerRegistered(layerPath);
@@ -2194,24 +2381,43 @@ export abstract class GVAbstractTester extends AbstractTester {
     await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLegendQueried(layerPath, acceptNoIconsOrNoData);
 
     // Return the layer
-    return layer;
+    return layer as U;
   }
 
   /**
-   * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
+   * Removes a layer or all top-level entries under a GeoView layer root and asserts that they are gone.
    *
-   * Each step is logged to the provided test instance for traceability.
+   * Fixture cleanup paths may be root IDs when metadata determines the child paths asynchronously.
    *
    * @param test - The test instance used to record each step of the removal process
-   * @param geoviewLayerId - The geoview layer id of the layer config to be removed
+   * @param layerPath - The layer entry path or GeoView layer root ID to remove
    */
   removeLayerConfigAndAssert<T>(test: Test<T>, layerPath: string): void {
+    const { layerController } = this.getControllersRegistry();
+    const exactConfig = layerController.getLayerEntryConfigIfExists(layerPath);
+    if (!exactConfig) {
+      const descendantPaths = layerController.getLayerEntryLayerPaths().filter((path) => path.startsWith(`${layerPath}/`));
+      if (descendantPaths.length === 0) {
+        test.addStep(`No layer entries remain under '${layerPath}'.`);
+        return;
+      }
+
+      const firstEntryDepth = Math.min(...descendantPaths.map((path) => path.split('/').length));
+      const rootEntryPaths = descendantPaths.filter((path) => path.split('/').length === firstEntryDepth);
+      test.addStep(`Removing all layer entries under the GeoView layer root '${layerPath}'...`);
+      rootEntryPaths.forEach((rootEntryPath) => this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(rootEntryPath));
+
+      test.addStep(`Validating all layer entries under '${layerPath}' were removed...`);
+      descendantPaths.forEach((descendantPath) => {
+        Test.assertIsUndefined(`layerEntryConfig ${descendantPath}`, layerController.getLayerEntryConfigIfExists(descendantPath));
+        Test.assertIsUndefined('legendLayer', getStoreLayerLegendLayerByPath(this.getMapId(), descendantPath));
+      });
+      return;
+    }
+
     // Check that the layer is indeed there
     test.addStep(`Checking the geoview layer ${layerPath} exists on the map...`);
-    Test.assertIsDefined(
-      `layerEntryConfig ${layerPath}`,
-      this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPath)
-    );
+    Test.assertIsDefined(`layerEntryConfig ${layerPath}`, exactConfig);
 
     // Remove the added layer
     test.addStep(`Removing the geoview layer ${layerPath} from the map...`);
@@ -2219,10 +2425,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Validate that it's gone from domain
     test.addStep(`Validate that the layer is indeed gone...`);
-    Test.assertIsUndefined(
-      `layerEntryConfig ${layerPath}`,
-      this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPath)
-    );
+    Test.assertIsUndefined(`layerEntryConfig ${layerPath}`, layerController.getLayerEntryConfigIfExists(layerPath));
 
     // Validate that it's gone from store
     const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
@@ -2242,20 +2445,21 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param test - The test instance used to log each step
    * @param mapId - The map identifier to destroy and recreate
    * @param mapConfig - The map configuration object (will be JSON-stringified)
+   * @param divHeight - Optional height for the map container div
    * @returns A promise that resolves with the newly created MapViewer
    */
-  async replaceMap(test: Test, mapId: string, mapConfig: unknown): Promise<MapViewer> {
+  async replaceMap(test: Test, mapId: string, mapConfig: unknown, divHeight?: number): Promise<MapViewer> {
     // Delete current map
     test.addStep('Deleting current map...');
     await this.getApi().deleteMapViewer(mapId, false);
 
     // Wait for layer to load and data table to initialize
     test.addStep('Creating the map from config...');
-    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), 500);
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), divHeight);
 
     // Replace the map viewer and the controller registry in the tester with the new one created from config
-    this.#mapViewer = mapViewer;
-    this.#controllerRegistry = mapViewer.controllers;
+    this.assignMapViewerAndControllers(mapViewer);
+    this.#emitMapReplaced(mapViewer);
 
     // Waiting for layers to get loaded even when map is in a background tab
     test.addStep('Waiting for layers to get loaded even when map is in a background tab...');
@@ -2293,6 +2497,9 @@ export abstract class GVAbstractTester extends AbstractTester {
     // Get the layer and make sure it's in loaded status
     await layer.waitForLoadedOnce();
 
+    // Before querying, make sure the map render is synchronized, this can be necessary for vector layers that were just added to the map
+    await this.getMapViewer().waitForRender();
+
     // Update the step
     test.addStep(`Perform query operation at given coordinates...`);
     const queryResults = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
@@ -2305,6 +2512,9 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Wait for the geometries if we must (EsriDynamic particularity)
     await promiseResult?.promiseGeometries;
+
+    // Results
+    test.addStep(`Query for layer '${layer.getLayerPath()}' returned with ${queryResultForLayer.features?.length ?? 0} results`);
 
     // Return the features
     return queryResultForLayer.features;
@@ -2382,6 +2592,37 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   // #endregion UI INTERACTION METHODS
 
+  // #region EVENTS
+
+  /**
+   * Emits the map replacement event to registered handlers.
+   *
+   * @param mapViewer - The newly created map viewer
+   */
+  #emitMapReplaced(mapViewer: MapViewer): void {
+    EventHelper.emitEvent(this, this.#mapReplacedHandlers, { mapViewer });
+  }
+
+  /**
+   * Registers a handler for map replacements performed by this tester.
+   *
+   * @param callback - The owning suite's replacement handler
+   */
+  onMapReplaced(callback: MapReplacedDelegate): void {
+    EventHelper.onEvent(this.#mapReplacedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a handler for map replacements performed by this tester.
+   *
+   * @param callback - The previously registered replacement handler
+   */
+  offMapReplaced(callback: MapReplacedDelegate): void {
+    EventHelper.offEvent(this.#mapReplacedHandlers, callback);
+  }
+
+  // #endregion EVENTS
+
   // #region STATIC METHODS PUBLIC
 
   /**
@@ -2448,3 +2689,25 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   // #endregion STATIC METHODS PUBLIC
 }
+
+// #region TYPES AND INTERFACES
+
+/**
+ * Immediate cleanup scope and selected runtime path, available before loading or legend readiness.
+ * Cleanup may target the GeoView root to remove siblings; selectedLayerPath identifies exactly the layer resolved by promiseLayer.
+ */
+export type GVLayerFixtureResult = {
+  layerPath: string;
+  selectedLayerPath: string;
+  promiseLayer: Promise<AbstractGVLayer>;
+};
+
+/** Metadata-dependent selection exposes its resolved path separately without guessing a child path from the cleanup root. */
+export type GVMetadataLayerFixtureResult = Omit<GVLayerFixtureResult, 'selectedLayerPath'> & {
+  promiseSelectedLayerPath: Promise<string>;
+};
+
+/** Notifies a suite that a tester created a replacement viewer for its shared map. */
+type MapReplacedDelegate = EventDelegateBase<GVAbstractTester, { mapViewer: MapViewer }, void>;
+
+// #endregion TYPES AND INTERFACES

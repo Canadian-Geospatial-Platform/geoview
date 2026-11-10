@@ -6,9 +6,11 @@ import Point from 'ol/geom/Point';
 import { Projection as OLProjection } from 'ol/proj';
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { GVGeoJSON } from 'geoview-core/geo/layer/gv-layers/vector/gv-geojson';
+import { AbstractGVVector } from 'geoview-core/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVVectorSource } from 'geoview-core/geo/layer/source/vector-source';
-import { getStoreMapStateJson } from 'geoview-core/core/stores/states/map-state';
+import { getStoreMapHoverFeatureInfo, getStoreMapStateJson } from 'geoview-core/core/stores/states/map-state';
 import { getStoreDataTableFeaturesByPath } from 'geoview-core/core/stores/states/data-table-state';
+import type { TypeHoverFeatureInfo } from 'geoview-core/core/stores/states/feature-info-state';
 import type {
   TypeMapFeaturesInstance,
   TypeFeatureInfoResult,
@@ -22,6 +24,7 @@ import {
   getStoreLayerIsHiddenOnMap,
   getStoreLayerInVisibleRangeLayerPaths,
   getStoreLayerOrderedLayerPaths,
+  getStoreLayerVisible,
 } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { generateId } from 'geoview-core/core/utils/utilities';
@@ -52,13 +55,15 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
-import type { TypeContainerBox } from 'geoview-core/core/types/global-types';
 
 /**
  * Main Layer testing class.
  */
 export class LayerTester extends GVAbstractTester {
-  /** The GeoCore UUID used for simplified inline layer name override tests. */
+  /** The GeoCore UUID used for simplified inline layer name override tests.
+   *
+   * @deprecated Move this elsewhere
+   */
   static readonly GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
 
   /**
@@ -86,6 +91,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns Immutable feature and query results for assertion
    */
   #testGeojsonSource(reproject: boolean): Promise<Test<GeojsonInjectionResult>> {
+    let fixtureLayerPath: string | undefined;
     const mapViewer = this.getMapViewer();
     const initialProjection = getStoreMapStateJson(this.getMapId()).currentProjection;
 
@@ -129,7 +135,9 @@ export class LayerTester extends GVAbstractTester {
         : 'Test public GeoJSON object injection and JSON-string replacement...',
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        layer = await this.addLayerGeoJSONBlank(test);
+        const fixture = this.addLayerGeoJSONBlank(test);
+        fixtureLayerPath = fixture.layerPath;
+        layer = await fixture.promiseLayer;
         if (!(layer instanceof GVGeoJSON)) throw new TestError('Expected a GeoJSON layer for injection');
         const layerPath = layer.getLayerPath();
 
@@ -213,7 +221,7 @@ export class LayerTester extends GVAbstractTester {
 
         try {
           // Remove the isolated test layer even when an earlier assertion failed.
-          if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
         } finally {
           if (reproject) {
             // Restore the shared map state even when injection, assertions, or layer cleanup failed.
@@ -336,12 +344,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriDynamicHistoFloodEvents(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Dynamic Histo Flood Events on map...`,
       (test) => {
         // Add the layer and return the added layer instance
-        return this.addLayerEsriDynamicHistoFloodEvents(test);
+        const fixture = this.addLayerEsriDynamicHistoFloodEvents(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -354,9 +365,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -367,12 +378,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the test result
    */
   testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Dynamic with Raster Layers via Geocore...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriDynamicWithRasterLayersViaGeocore(test);
+        const fixture = this.addLayerEsriDynamicWithRasterLayersViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         const rootId = result.getGeoviewLayerId();
@@ -427,9 +441,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, (result.getParentRoot() ?? result).getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -511,12 +525,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureForestIndustry(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Feature Forest Industry on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriFeatureForestIndustry(test);
+        const fixture = this.addLayerEsriFeatureForestIndustry(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -529,9 +546,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.FOREST_INDUSTRY_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -580,21 +597,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureInvalidGeometry(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding 'Yukon Low head' on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriFeatureInvalidGeometry(test);
+        const fixture = this.addLayerEsriFeatureInvalidGeometry(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), undefined, undefined);
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -609,21 +629,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriImageWithElevation(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Image Elevation on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriImageWithElevation(test);
+        const fixture = this.addLayerEsriImageWithElevation(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -634,25 +657,29 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriImageWithUSA(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding Esri Image USA on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriImageWithUSA(test);
+        const fixture = this.addLayerEsriImageWithUSA(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
+        // Perform assertions
         const group = result.getParentRoot();
         Test.assertIsDefined('group', group);
         const layerPathCities = `${group.getLayerPath()}/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
-        // Perform assertions
+
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), layerPathCities);
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, (result.getParentRoot() ?? result).getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -705,21 +732,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Mundialis on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSWithOWSMundialis(test);
+        const fixture = this.addLayerWMSWithOWSMundialis(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.OWS_MUNDIALIS_ICON_IMAGE);
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -730,21 +760,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithDatacubeMSI(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Datacube MSI on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSWithDatacubeMSI(test);
+        const fixture = this.addLayerWMSWithDatacubeMSI(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.DATACUBE_MSI_ICON_IMAGE);
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -755,12 +788,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithDatacubeRingOfFire(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Datacube Ring of Fire XML Halifax on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSWithDatacubeRingOfFire(test);
+        const fixture = this.addLayerWMSWithDatacubeRingOfFire(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -772,9 +808,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -789,6 +825,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerLandcoverGroupDimension(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Landcover pointing to a group layer with a group time dimension...`,
@@ -799,7 +836,9 @@ export class LayerTester extends GVAbstractTester {
         }
 
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSLandcoverGroupDimension(test);
+        const fixture = this.addLayerWMSLandcoverGroupDimension(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -823,11 +862,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), true);
         Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, true);
       },
-      (test, result) => {
+      (test) => {
         // If the test was running
         if (isRunningOnVPN) {
           // Redirect to helper to clean up and assert
-          this.removeLayerConfigAndAssert(test, result.getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
         }
       }
     );
@@ -843,6 +882,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerLandcoverGroupDimensionNegative(isRunningOnVPN: boolean): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Landcover pointing to sub-layers directly, negating the group time dimension...`,
@@ -853,7 +893,9 @@ export class LayerTester extends GVAbstractTester {
         }
 
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSLandcoverSubLayers(test);
+        const fixture = this.addLayerWMSLandcoverSubLayers(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -877,11 +919,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(firstChild.getLayerConfig().getAddedViaAGroup(), false);
         Test.assertIsEqual(firstChild.getLayerConfig().getTimeDimension()?.isGroupDimension, false);
       },
-      (test, result) => {
+      (test) => {
         // If the test was running
         if (isRunningOnVPN) {
           // Redirect to helper to clean up and assert
-          this.removeLayerConfigAndAssert(test, result.getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
         }
       }
     );
@@ -893,20 +935,23 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSNonna(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMS Nonna on map (proxy fallback)...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSNonna(test);
+        const fixture = this.addLayerWMSNonna(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -967,12 +1012,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMSDuplicateGroupNames(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding CanImage WMS with duplicate nested group names on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSDuplicateGroupNames(test);
+        const fixture = this.addLayerWMSDuplicateGroupNames(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         const groupPath = `${result.getGeoviewLayerId()}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
@@ -986,9 +1034,9 @@ export class LayerTester extends GVAbstractTester {
         // The deeply-nested leaf must exist and have loaded
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert (removing the outer group removes the whole subtree)
-        this.removeLayerConfigAndAssert(test, (result.getParentRoot() ?? result).getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1046,20 +1094,23 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWMTSWorldTimezones(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WMTS World Timezones on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMTSWorldTimezones(test);
+        const fixture = this.addLayerWMTSWorldTimezones(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1115,20 +1166,23 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddXYZTilesOSM(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding XYZ Tiles OSM on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerXYZTilesOSM(test);
+        const fixture = this.addLayerXYZTilesOSM(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1181,6 +1235,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddVectorTilesCBMT(): Promise<Test<AbstractBaseGVLayer | LayerEntryNotSupportingProjectionError>> {
+    let fixtureLayerPath: string | undefined;
     // If the map projection is 3978
     if (this.getMapViewer().getProjectionNumber() === 3978) {
       // Test a true positive
@@ -1188,15 +1243,17 @@ export class LayerTester extends GVAbstractTester {
         `Test Adding Vector Tiles CBMT 3978 on map...`,
         (test) => {
           // Add the fixture and wait for its selected layer to be ready
-          return this.addLayerVectorTilesCBMT(test);
+          const fixture = this.addLayerVectorTilesCBMT(test);
+          fixtureLayerPath = fixture.layerPath;
+          return fixture.promiseLayer;
         },
         (test, result) => {
           // Perform assertions
           LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
         },
-        (test, result) => {
+        (test) => {
           // Redirect to helper to clean up and assert
-          this.removeLayerConfigAndAssert(test, result.getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
         }
       );
     }
@@ -1276,12 +1333,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWFSLayerWithWithGeometCurrentConditions(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding WFS with Geomet Current Conditions layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWFSGeometCurrentConditions(test);
+        const fixture = this.addLayerWFSGeometCurrentConditions(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -1289,9 +1349,9 @@ export class LayerTester extends GVAbstractTester {
         // GV Current Conditions isn't returning a legend for us anymore, sending checkIconsList = undefined now
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), undefined, undefined);
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1381,12 +1441,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddGeoJSONWithMetadataPolygons(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding GeoJSON with Metadata layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerGeoJSONWithMetadataPolygons(test);
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -1399,9 +1462,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1412,20 +1475,23 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddGeoJSONWithGeometryCollection(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding GeoJSON GeometryCollection layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerGeoJSONWithGeometryCollection(test);
+        const fixture = this.addLayerGeoJSONWithGeometryCollection(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Verify the layer exists and legend information was created
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1483,21 +1549,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise resolving when the test completes
    */
   testAddGeotiffLayerWithDatacubeVegetation(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding GeoTIFF Datacube Vegetation on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerGeoTIFFWithDatacubeVegetation(test);
+        const fixture = this.addLayerGeoTIFFWithDatacubeVegetation(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         return LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1555,12 +1624,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddCSVWithStationList(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding a CSV with Station List layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerCSVWithStationList(test);
+        const fixture = this.addLayerCSVWithStationList(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -1573,9 +1645,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.CSV_STATION_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1633,12 +1705,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddOGCFeatureWithPygeoapi(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding an OGC Feature with Pygeoapi layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixture = this.addLayerOGCFeatureWithPygeoapi(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
@@ -1651,9 +1726,9 @@ export class LayerTester extends GVAbstractTester {
           GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
         );
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1706,21 +1781,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddWKBWithSouthAfrica(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding a WKB with South Africa layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWKBWithSouthAfrica(test);
+        const fixture = this.addLayerWKBWithSouthAfrica(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1776,21 +1854,24 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddKMLWithTornado(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding a KML with Tornado layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerKMLWithTornado(test);
+        const fixture = this.addLayerKMLWithTornado(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
       },
-      (test, result) => {
+      (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1846,6 +1927,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and generated map configuration
    */
   testInitialSettingsCascade(): Promise<Test<LayerTestResult<TypeMapFeaturesInstance | undefined>>> {
+    let fixtureLayerPath: string | undefined;
     // Expected config
     const expectedResults = {
       groupHighlight: false,
@@ -1854,12 +1936,13 @@ export class LayerTester extends GVAbstractTester {
     };
 
     // Test the WMS
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       'Test initial settings cascade',
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerGeoJSONPointsSettings(test));
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
 
         // Return created map config
         return { gvLayer, data: this.getControllersRegistry().mapController.createMapConfigFromMapState() };
@@ -1886,10 +1969,9 @@ export class LayerTester extends GVAbstractTester {
           expectedResults.childHighlight
         );
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1905,11 +1987,14 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriDynamicWithDomainField(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     return this.test(
       `Test Adding Esri Dynamic Water Network and checking domain field...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriDynamicWaterNetwork(test);
+        const fixture = this.addLayerEsriDynamicWaterNetwork(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Verify the layer exists
@@ -1945,8 +2030,8 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('codedValues', codedDomain.codedValues);
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
-      (test, result) => {
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+      (test) => {
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -1958,11 +2043,14 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureWithDomainField(): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     return this.test(
       `Test Adding Esri Feature Water Network and checking domain field...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerEsriFeatureWaterNetwork(test);
+        const fixture = this.addLayerEsriFeatureWaterNetwork(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         // Verify the layer exists
@@ -1998,8 +2086,8 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('codedValues', codedDomain.codedValues);
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
-      (test, result) => {
-        this.removeLayerConfigAndAssert(test, result.getLayerPath());
+      (test) => {
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2012,14 +2100,16 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and domain-translated query results
    */
   testEsriDynamicDomainFieldQueryValue(): Promise<Test<LayerTestResult<TypeFeatureInfoResult>>> {
+    let fixtureLayerPath: string | undefined;
     const gvLayerName = 'Esri Dynamic Water Network Query';
 
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test Esri Dynamic Water Network domain field query value translation...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriDynamicWaterNetwork(test, gvLayerName));
+        const fixture = this.addLayerEsriDynamicWaterNetwork(test, gvLayerName);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layerPath = gvLayer.getLayerPath();
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
@@ -2075,9 +2165,8 @@ export class LayerTester extends GVAbstractTester {
           Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry.value as string);
         }
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+      (test) => {
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2090,14 +2179,16 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and domain-translated query results
    */
   testEsriFeatureDomainFieldQueryValue(): Promise<Test<LayerTestResult<TypeFeatureInfoResult>>> {
+    let fixtureLayerPath: string | undefined;
     const gvLayerName = 'Esri Feature Water Network Query';
 
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test Esri Feature Water Network domain field query value translation...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriFeatureWaterNetwork(test, gvLayerName));
+        const fixture = this.addLayerEsriFeatureWaterNetwork(test, gvLayerName);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layerPath = gvLayer.getLayerPath();
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
@@ -2152,16 +2243,63 @@ export class LayerTester extends GVAbstractTester {
           Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry.value as string);
         }
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+      (test) => {
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
 
   // #endregion DOMAIN FIELDS
 
-  // #region GROUP LAYER VISIBILITY
+  /**
+   * Tests repeated layer renaming through the public LayerApi and synchronization with the legend store.
+   *
+   * @returns A promise that resolves with the fixture layer and runtime/store name snapshots after each rename
+   */
+  testSetLayerName(): Promise<Test<LayerTestResult<(string | undefined)[]>>> {
+    let fixtureLayerPath: string | undefined;
+    const firstName = 'Renamed points layer';
+    const secondName = 'Renamed points layer again';
+
+    return this.test(
+      'Test LayerApi.setLayerName updates the runtime layer and legend store...',
+      async (test) => {
+        // Add the fixture and wait for its selected layer to be ready
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+
+        // Capture the cleanup path before loading so finalization can remove even a partially loaded fixture.
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        const layerPath = gvLayer.getLayerPath();
+
+        test.addStep('Renaming the layer through LayerApi.setLayerName...');
+        this.getMapViewer().layer.setLayerName(layerPath, firstName);
+
+        // Snapshot both names before the second rename can overwrite the first operation's result.
+        const firstRuntimeName = gvLayer.getLayerName();
+        const firstStoreName = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.layerName;
+
+        // A second name verifies that subsequent calls replace an existing runtime override.
+        test.addStep('Renaming the same layer again through LayerApi.setLayerName...');
+        this.getMapViewer().layer.setLayerName(layerPath, secondName);
+        const secondRuntimeName = gvLayer.getLayerName();
+        const secondStoreName = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.layerName;
+
+        return { gvLayer, data: [firstRuntimeName, firstStoreName, secondRuntimeName, secondStoreName] };
+      },
+      (test, result) => {
+        // Each rename must propagate to the legend store as well as the runtime layer.
+        test.addStep('Verifying both renames update the runtime layer and legend store...');
+        Test.assertIsArrayEqual(result.data, [firstName, firstName, secondName, secondName]);
+      },
+      (test) => {
+        // Remove the renamed fixture even when execution or an assertion fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  // #region LAYER VISIBILITY
 
   /**
    * Tests adding a geocore layer that has group layers with defaultVisibility set to false.
@@ -2170,6 +2308,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddGeocoreWithGroupDefaultVisibilityFalse(isRunningHeavyTests: boolean): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding layer with group layer defaultVisibility to false...`,
@@ -2179,7 +2318,9 @@ export class LayerTester extends GVAbstractTester {
           throw new TestSkippedError('Not running the heavy tests');
         }
 
-        return this.addLayerGeocoreMarineFisheries(test);
+        const fixture = this.addLayerGeocoreMarineFisheriesViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         const gvLayerPathWithGroupVisibilityFalse = result.getLayerPath();
@@ -2203,11 +2344,101 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Checking that group layer with defaultVisibility=false is not visible in the store...');
         Test.assertIsEqual(storeLayer?.visible, false);
       },
-      (test, result) => {
+      (test) => {
         // If the test was running
         if (isRunningHeavyTests) {
           // Redirect to helper to clean up and assert
-          this.removeLayerConfigAndAssert(test, (result.getParentRoot() ?? result).getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        }
+      }
+    );
+  }
+
+  /**
+   * Tests explicit visibility updates and implicit toggles through the public LayerApi.
+   *
+   * @returns A promise that resolves with the fixture layer and visibility snapshots in operation order
+   */
+  testSetOrToggleLayerVisibility(): Promise<Test<LayerTestResult<boolean[]>>> {
+    let fixtureLayerPath: string | undefined;
+    const mapId = this.getMapId();
+
+    // Preserve the app-bar selection and focus-trap state for restoration after the test.
+    const previousActiveAppBarTab = getStoreUIActiveAppBarTab(mapId);
+
+    return this.test(
+      'Test LayerApi.setOrToggleLayerVisibility sets and toggles layer visibility...',
+      async (test) => {
+        // Add the fixture and wait for its selected layer to be ready
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        const layerPathPoints = gvLayer.getLayerPath();
+
+        // Render the Layers panel so each API change can also be observed through its eye control.
+        test.addStep('Opening the Layers panel to inspect the layer visibility control...');
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('layers');
+
+        // Wait for both tab activation and the layer's DOM entry before reading UI state.
+        await DomHelper.waitForFooterTabSelected(mapId, 'layers');
+
+        // Get the layer api
+        const layerApi = this.getMapViewer().layer;
+
+        // Explicit false establishes a hidden starting state independently of the fixture's default.
+        test.addStep('Explicitly hide the layer and wait for eye-control state to update...');
+        layerApi.setOrToggleLayerVisibility(layerPathPoints, false);
+
+        // Wait until the UI visibility updates
+        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
+        const visibilityState1 = getStoreLayerVisible(mapId, layerPathPoints);
+
+        // Explicit true must restore visibility after the preceding hide operation.
+        test.addStep('Explicitly showing the layer and capturing the store and eye-control state...');
+        layerApi.setOrToggleLayerVisibility(layerPathPoints, true);
+
+        // Wait until the UI visibility updates
+        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
+        const visibilityState2 = getStoreLayerVisible(mapId, layerPathPoints);
+
+        // Omitting the visibility argument exercises the toggle branch from visible to hidden.
+        test.addStep('Toggling the visible layer off and capturing the store and eye-control state...');
+        layerApi.setOrToggleLayerVisibility(layerPathPoints);
+
+        // Wait until the UI visibility updates
+        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
+        const visibilityState3 = getStoreLayerVisible(mapId, layerPathPoints);
+
+        // Repeat the implicit toggle from the opposite state to cover both transition directions.
+        test.addStep('Toggling the hidden layer on and capturing the store and eye-control state...');
+        layerApi.setOrToggleLayerVisibility(layerPathPoints);
+
+        // Wait until the UI visibility updates
+        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
+        const visibilityState4 = getStoreLayerVisible(mapId, layerPathPoints);
+
+        // Keep snapshots in operation order so assertions consume observations without repeating API calls.
+        return { gvLayer, data: [visibilityState1, visibilityState2, visibilityState3, visibilityState4] };
+      },
+      (test, result) => {
+        // The assertions expect six booleans per snapshot; slices follow the operation order above.
+        test.addStep('Verifying all visibility states happened correctly in the store...');
+        Test.assertIsArrayEqual(result.data, [false, true, false, true]);
+      },
+      async (test) => {
+        try {
+          // Remove the fixture and verify cleanup through the shared layer-removal helper.
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        } finally {
+          // Restore app-bar state even if fixture removal fails, avoiding contamination of later tests.
+          this.getControllersRegistry().uiController.setActiveAppBarTab(
+            previousActiveAppBarTab.tabId,
+            previousActiveAppBarTab.isOpen,
+            previousActiveAppBarTab.isFocusTrapped ?? false
+          );
+
+          // Let restoration render before the next test begins interacting with the shared viewer.
+          await DomHelper.waitForReactIdle();
         }
       }
     );
@@ -2221,14 +2452,16 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSetLayerVisibleIncludingParents(): Promise<Test<ParentCrawlVisibilityResult>> {
-    let setupLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
 
     // Test
     return this.test(
       `Test hidden-by-parent child and setLayerVisibleIncludingParents parent crawl...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerGeoJSONPointsSettings(test, true));
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const childPath = gvLayer.getLayerPath();
         const parent = gvLayer.getParentRoot();
         Test.assertIsDefined('parent', parent);
@@ -2285,15 +2518,407 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(result.afterShow.childEffectiveVisible, true);
         Test.assertIsEqual(result.afterShow.childHidden, false);
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, (gvLayer.getParentRoot() ?? gvLayer).getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
 
-  // #endregion GROUP LAYER VISIBILITY
+  // #endregion LAYER VISIBILITY
+
+  /**
+   * Tests parent/child opacity propagation, independent child updates, and parent caps through the public LayerApi.
+   *
+   * @returns A promise that resolves with runtime and legend-store snapshots after each parent or child update
+   */
+  testSetLayerOpacity(): Promise<Test<LayerTestResult<LayerOpacitySnapshot[]>>> {
+    let fixtureLayerPath: string | undefined;
+
+    return this.test(
+      'Test LayerApi.setLayerOpacity propagates parent opacity and caps independent child updates...',
+      async (test) => {
+        // Add the fixture and wait for its selected layer to be ready
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+
+        // Capture the cleanup path before loading so a failed setup still removes the fixture.
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        const parent = gvLayer.getParent();
+        if (!parent) throw new TestError('The opacity fixture must have a parent group');
+        const data: LayerOpacitySnapshot[] = [];
+
+        const updates = [
+          // Parent updates must cascade to the child and update the child's legend opacity limit.
+          { layer: parent, opacity: 1 },
+          { layer: parent, opacity: 0.4 },
+
+          // Lowering a child must leave its parent unchanged; a later parent update replaces the child's value.
+          { layer: gvLayer, opacity: 0.2 },
+          { layer: parent, opacity: 0.6 },
+
+          // Requests above the parent cap affect the requested store value, but not the child's capped runtime opacity.
+          { layer: gvLayer, opacity: 0.9 },
+
+          // Zero opacity must propagate, prevent a child from becoming opaque, and remain reversible.
+          { layer: parent, opacity: 0 },
+          { layer: gvLayer, opacity: 1 },
+          { layer: parent, opacity: 1 },
+
+          // With the parent fully opaque, a child can again take an independent fractional value.
+          { layer: gvLayer, opacity: 0.4 },
+        ];
+
+        for (const { layer, opacity } of updates) {
+          test.addStep(`Setting opacity of '${layer.getLayerPath()}' to ${opacity}...`);
+          this.getMapViewer().layer.setLayerOpacity(layer.getLayerPath(), opacity);
+
+          // Capture both layers before the next operation changes them.
+          const parentStore = getStoreLayerLegendLayerByPath(this.getMapId(), parent.getLayerPath());
+          const childStore = getStoreLayerLegendLayerByPath(this.getMapId(), gvLayer.getLayerPath());
+          data.push({
+            parentOpacity: parent.getOpacity(),
+            childOpacity: gvLayer.getOpacity(),
+            parentStoreOpacity: parentStore?.opacity,
+            childStoreOpacity: childStore?.opacity,
+            childMaxFromParent: childStore?.opacityMaxFromParent,
+          });
+        }
+
+        return { gvLayer, data };
+      },
+      (test, result) => {
+        // Expected tuples are parent runtime, child runtime, parent store, child store, and child limit.
+        const expected = [
+          [1, 1, 1, 1, 1],
+          [0.4, 0.4, 0.4, 0.4, 0.4],
+          [0.4, 0.2, 0.4, 0.2, 0.4],
+          [0.6, 0.6, 0.6, 0.6, 0.6],
+          [0.6, 0.6, 0.6, 0.9, 0.6],
+          [0, 0, 0, 0, 0],
+          [0, 0, 0, 1, 0],
+          [1, 1, 1, 1, 1],
+          [1, 0.4, 1, 0.4, 1],
+        ];
+        Test.assertIsEqual(result.data.length, expected.length);
+        for (const [index, snapshot] of result.data.entries()) {
+          test.addStep(`Verifying parent/child runtime opacity, store opacity, and parent limit after update ${index + 1}...`);
+          Test.assertIsArrayEqual(
+            [
+              snapshot.parentOpacity,
+              snapshot.childOpacity,
+              snapshot.parentStoreOpacity,
+              snapshot.childStoreOpacity,
+              snapshot.childMaxFromParent,
+            ],
+            expected[index]
+          );
+        }
+      },
+      (test) => {
+        // Remove the fixture even when an opacity assertion fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests public queryable updates and synchronization with the legend store.
+   *
+   * @returns A promise that resolves with runtime and store flag snapshots after disabling and re-enabling queries
+   */
+  testSetLayerQueryable(): Promise<Test<LayerTestResult<(boolean | undefined)[]>>> {
+    let fixtureLayerPath: string | undefined;
+
+    return this.test(
+      'Test LayerApi.setLayerQueryable updates runtime and store flags...',
+      async (test) => {
+        // Use a source declared queryable in metadata; the points settings fixture explicitly disables source queries.
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+
+        // Retain the cleanup scope even if loading fails before the runtime layer is available.
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        const layerPath = gvLayer.getLayerPath();
+        const snapshots: (boolean | undefined)[] = [];
+
+        // Exercise both transition directions and repeated assignments through the public entry point.
+        for (const queryable of [true, false, false, true]) {
+          test.addStep(`Setting layer queryable to ${queryable} through LayerApi.setLayerQueryable...`);
+          this.getMapViewer().layer.setLayerQueryable(layerPath, queryable);
+          const storeLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
+
+          // Capture runtime and store values before the next queryable update.
+          snapshots.push(gvLayer.getQueryable(), storeLayer?.queryable);
+        }
+
+        return { gvLayer, data: snapshots };
+      },
+      (test, result) => {
+        test.addStep('Verifying runtime and store queryable transitions and repeated assignments...');
+        Test.assertIsArrayEqual(result.data, [true, true, false, false, false, false, true, true]);
+      },
+      (test) => {
+        // Finalization removes the fixture whether execution or verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests public hoverable updates and synchronization with the legend store.
+   *
+   * @returns A promise that resolves with runtime and store flag snapshots after disabling and re-enabling hover
+   */
+  testSetLayerHoverable(): Promise<Test<LayerTestResult<(boolean | undefined)[]>>> {
+    let fixtureLayerPath: string | undefined;
+
+    return this.test(
+      'Test LayerApi.setLayerHoverable updates runtime and store flags...',
+      async (test) => {
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+
+        // Retain the cleanup scope even if loading fails before the runtime layer is available.
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        const layerPath = gvLayer.getLayerPath();
+        const snapshots: (boolean | undefined)[] = [];
+
+        // Exercise both transition directions and repeated assignments through the public entry point.
+        for (const hoverable of [true, false, false, true]) {
+          test.addStep(`Setting layer hoverable to ${hoverable} through LayerApi.setLayerHoverable...`);
+          this.getMapViewer().layer.setLayerHoverable(layerPath, hoverable);
+          const storeLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
+
+          // Capture runtime and store values before the next hoverable update.
+          snapshots.push(gvLayer.getHoverable(), storeLayer?.hoverable);
+        }
+
+        return { gvLayer, data: snapshots };
+      },
+      (test, result) => {
+        test.addStep('Verifying runtime and store hoverable transitions and repeated assignments...');
+        Test.assertIsArrayEqual(result.data, [true, true, false, false, false, false, true, true]);
+      },
+      (test) => {
+        // Finalization removes the fixture whether execution or verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that non-queryable layers do not appear in details state when clicking on the map.
+   *
+   * This test performs the following operations:
+   * 1. Gets the first layer from the map
+   * 2. Sets the layer as non-queryable
+   * 3. Simulates a map click
+   * 4. Verifies that the layer results does not appear in the details state
+   *
+   * @returns A promise that resolves with the layer and feature arrays before disabling queries, while disabled, and after re-enabling
+   */
+  testNonQueryableLayerNotInDetails(): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
+    const lonlat = [-88, 52];
+    let gvLayer: AbstractGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+    return this.test(
+      'Test non-queryable layer not in details after map click',
+      async (test) => {
+        // Make sure the map has no pre-existing layers
+        this.getControllersRegistry().layerCreatorController.removeAllGeoviewLayers();
+
+        // Add GeoJson Polygons layer
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        // The layer should be initially queryable
+        if (!gvLayer.getQueryable()) throw new TestError(`False precondition, the layer ${fixtureLayerPath} wasn't initially queryable.`);
+
+        // Wait for the layer to be loaded after the zoom, a guarantee
+        await gvLayer.waitForLoadedStatus();
+
+        // Query the layer at the given coordinates
+        const layerDataOn = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, lonlat);
+
+        // Set layer non queryable, this will also clear the result set automatically
+        test.addStep(`Setting layer '${fixtureLayerPath}' as non-queryable...`);
+        gvLayer.setQueryable(false);
+
+        // Query the layer at the given coordinates
+        const layerDataOff = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, lonlat);
+
+        // Set layer queryable again
+        test.addStep(`Setting layer '${fixtureLayerPath}' as queryable again...`);
+        gvLayer.setQueryable(true);
+
+        // Query the layer at the given coordinates
+        const layerDataOn2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, lonlat);
+
+        // Return the test results
+        return { layer: gvLayer, results: [layerDataOn, layerDataOff, layerDataOn2] };
+      },
+      (test, result) => {
+        // Get the results
+        const [layerDataOn, layerDataOff, layerDataOn2] = result.results;
+
+        test.addStep('Verifying layer data features when queryable...');
+        Test.assertIsArray(layerDataOn);
+        Test.assertIsArrayLengthEqual(layerDataOn, 2);
+
+        test.addStep('Verifying no layer data features when non-queryable...');
+        Test.assertIsUndefined('features', layerDataOff);
+
+        test.addStep('Verifying layer data features when queryable again...');
+        Test.assertIsArray(layerDataOn2);
+        Test.assertIsArrayLengthEqual(layerDataOn2, 2);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that non-hoverable layers do not appear in hover state when hovering on the map.
+   *
+   * This test performs the following operations:
+   * 1. Gets the first layer from the map
+   * 2. Sets the layer as non-hoverable
+   * 3. Simulates a map hover
+   * 4. Verifies that the layer results does not appear in the hover state
+   *
+   * @returns A promise that resolves with the Test containing the hover states
+   */
+  testLayerHoverableState(): Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>> {
+    const lonlat = [-88, 52];
+    let gvLayer: AbstractGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+    return this.test(
+      'Test layer hoverable state in hoverFeatureInfoLayerSet',
+      async (test) => {
+        // Make sure the map has no pre-existing layers
+        this.getControllersRegistry().layerCreatorController.removeAllGeoviewLayers();
+
+        // Add GeoJson Polygons layer
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        // The layer should be initially hoverable
+        if (!gvLayer.getHoverable()) throw new TestError(`False precondition, the layer ${fixtureLayerPath} wasn't initially hoverable.`);
+
+        // Wait for the layer to be loaded after the zoom, a guarantee
+        await gvLayer.waitForLoadedStatus();
+
+        // Get the hover info layer set
+        const hoverInfoLayerSet = this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet;
+
+        // Perform a hover query using the hover feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await hoverInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${fixtureLayerPath}'...`);
+        const layerDataOnTemp = getStoreMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
+
+        // Set layer non queryable, this will also clear the result set automatically
+        test.addStep(`Setting layer '${fixtureLayerPath}' as non-hoverable...`);
+        gvLayer.setHoverable(false);
+
+        // Perform a hover query using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await hoverInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${fixtureLayerPath}'...`);
+        const layerDataOffTemp = getStoreMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
+
+        // Set layer hoverable again
+        test.addStep(`Setting layer '${fixtureLayerPath}' as hoverable again...`);
+        gvLayer.setHoverable(true);
+
+        // Perform a hover query using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await hoverInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${fixtureLayerPath}'...`);
+        const layerDataOn2Temp = getStoreMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
+
+        // Return the test results
+        return { layer: gvLayer, results: { layerDataOn, layerDataOff, layerDataOn2 } };
+      },
+      (test, result) => {
+        test.addStep('Verifying layer data features when hoverable...');
+        Test.assertJsonObject(result.results.layerDataOn, { fieldInfo: { value: 'Ontario' } });
+
+        test.addStep('Verifying layer data features when not hoverable...');
+        Test.assertIsUndefined('result.layerDataOff', result.results.layerDataOff);
+
+        test.addStep('Verifying layer data features when hoverable again...');
+        Test.assertJsonObject(result.results.layerDataOn2, { fieldInfo: { value: 'Ontario' } });
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests text visibility updates through the layer controller and synchronization with the legend store.
+   *
+   * @returns A promise that resolves with runtime and store text-visibility snapshots
+   */
+  testSetLayerTextVisibility(): Promise<Test<LayerTestResult<(boolean | undefined)[]>>> {
+    let fixtureLayerPath: string | undefined;
+
+    return this.test(
+      'Test LayerController.setLayerTextVisibility updates runtime and store flags...',
+      async (test) => {
+        const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
+
+        // Retain the cleanup scope even if loading fails before the vector layer is available.
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        if (!(gvLayer instanceof AbstractGVVector)) throw new TestError('The text visibility fixture must be a vector layer');
+        const layerPath = gvLayer.getLayerPath();
+        const snapshots: (boolean | undefined)[] = [];
+
+        // Exercise both transition directions and repeated assignments of the independent text flag.
+        for (const visible of [true, false, false, true]) {
+          test.addStep(`Setting layer text visibility to ${visible} through LayerController.setLayerTextVisibility...`);
+          this.getControllersRegistry().layerController.setLayerTextVisibility(layerPath, visible);
+          const storeLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
+
+          // Capture runtime and store values before the next text-visibility update.
+          snapshots.push(gvLayer.getTextVisible(), storeLayer?.textVisible);
+        }
+
+        return { gvLayer, data: snapshots };
+      },
+      (test, result) => {
+        test.addStep('Verifying runtime and store text-visibility transitions and repeated assignments...');
+        Test.assertIsArrayEqual(result.data, [true, true, false, false, false, false, true, true]);
+      },
+      (test) => {
+        // Finalization removes the fixture whether execution or verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
 
   // #region GEOCORE CUSTOM CONFIG
 
@@ -2422,13 +3047,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the loaded GeoJSON layer
    */
   testZoomExtentWithOneFeature(): Promise<Test<AbstractBaseGVLayer>> {
-    let setupLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test zoom to extent on GeoJSON with only one point feature...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const layer = (setupLayer = await this.addLayerGeoJSONSinglePoint(test));
+        const fixture = this.addLayerGeoJSONSinglePoint(test);
+        fixtureLayerPath = fixture.layerPath;
+        const layer = await fixture.promiseLayer;
         const layerPath = layer.getLayerPath();
 
         // Wait for the bounds to be processed
@@ -2445,10 +3072,9 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Reading the bounds on the layer...');
         Test.assertIsDefined('bounds', result.getBounds());
       },
-      (test, result) => {
-        const gvLayer = result ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2493,13 +3119,15 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the loaded GeoJSON layer
    */
   testZoomExtentWithoutFeaturesWithConfiguredExtent(): Promise<Test<AbstractBaseGVLayer>> {
-    let setupLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test zoom to extent on GeoJSON without features but a configured extent...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const layer = (setupLayer = await this.addLayerGeoJSONBlankWithConfiguredExtent(test));
+        const fixture = this.addLayerGeoJSONBlankWithConfiguredExtent(test);
+        fixtureLayerPath = fixture.layerPath;
+        const layer = await fixture.promiseLayer;
         const layerPath = layer.getLayerPath();
 
         // Wait for the bounds to be processed
@@ -2516,10 +3144,9 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Reading the bounds on the layer...');
         Test.assertIsDefined('bounds', result.getBounds());
       },
-      (test, result) => {
-        const gvLayer = result ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2532,14 +3159,16 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and feature results, or undefined data when no results are available
    */
   testFeatureHasGeometryWhenOutfieldsHasNoGeometryField(): Promise<Test<LayerTestResult<TypeFeatureInfoEntry[] | undefined>>> {
+    let fixtureLayerPath: string | undefined;
     const clickCoordinate = [-86.395, 52.737];
 
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test feature has geometry even when outfields configuration has no geometry field...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriDynamicTopProjectsWithRestrictedOutfields(test));
+        const fixture = this.addLayerEsriDynamicTopProjectsWithRestrictedOutfields(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
         // Query the layer at the given coordinates
@@ -2553,10 +3182,9 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('feature', feature);
         Test.assertIsDefined('feature.extent', feature.extent);
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2571,12 +3199,14 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and the layer resolved by its root ID
    */
   testGetGeoviewLayerByRootId(): Promise<Test<LayerTestResult<AbstractBaseGVLayer>>> {
-    let setupLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     return this.test(
       `Test getGeoviewLayerByRootId resolves the first layer under a root id...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Root Id Resolver'));
+        const fixture = this.addLayerEsriDynamicHistoFloodEvents(test, 'Root Id Resolver');
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
 
         // Root-id resolution must return the first layer under that id (this is the function under test)
         test.addStep('Resolving the first layer under the root id...');
@@ -2592,112 +3222,9 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('resolved', result.data);
         Test.assertIsEqual(result.data.getLayerPath(), result.gvLayer.getLayerPath());
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
-      }
-    );
-  }
-
-  /**
-   * Tests explicit visibility updates and implicit toggles through the public LayerApi.
-   *
-   * @returns A promise that resolves with the fixture layer and visibility snapshots in operation order
-   */
-  testSetOrToggleLayerVisibility(): Promise<Test<LayerTestResult<boolean[]>>> {
-    const mapId = this.getMapId();
-
-    // Preserve the app-bar selection and focus-trap state for restoration after the test.
-    const previousActiveAppBarTab = getStoreUIActiveAppBarTab(mapId);
-
-    let setupLayer: AbstractBaseGVLayer | undefined;
-    return this.test(
-      'Test LayerApi.setOrToggleLayerVisibility sets and toggles layer visibility...',
-      async (test) => {
-        // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerGeoJSONPointsSettings(test, true));
-        const layerPathPoints = gvLayer.getLayerPath();
-
-        // Render the Layers panel so each API change can also be observed through its eye control.
-        test.addStep('Opening the Layers panel to inspect the layer visibility control...');
-        this.getControllersRegistry().uiController.setActiveFooterBarTab('layers');
-
-        // Wait for both tab activation and the layer's DOM entry before reading UI state.
-        await DomHelper.waitForFooterTabSelected(mapId, 'layers');
-
-        // Get the layer api
-        const layerApi = this.getMapViewer().layer;
-
-        // Explicit false establishes a hidden starting state independently of the fixture's default.
-        // Each capture waits for React before reading the store and rendered visibility control.
-        test.addStep('Explicitly hiding the layer and capturing the store and eye-control state...');
-        const hideState = await LayerTester.#captureVisibilityState(
-          mapId,
-          layerPathPoints,
-          CONTAINER_TYPE.FOOTER_BAR,
-          layerApi.setOrToggleLayerVisibility(layerPathPoints, false)
-        );
-
-        // Explicit true must restore visibility after the preceding hide operation.
-        test.addStep('Explicitly showing the layer and capturing the store and eye-control state...');
-        const showState = await LayerTester.#captureVisibilityState(
-          mapId,
-          layerPathPoints,
-          CONTAINER_TYPE.FOOTER_BAR,
-          layerApi.setOrToggleLayerVisibility(layerPathPoints, true)
-        );
-
-        // Omitting the visibility argument exercises the toggle branch from visible to hidden.
-        test.addStep('Toggling the visible layer off and capturing the store and eye-control state...');
-        const toggleOffState = await LayerTester.#captureVisibilityState(
-          mapId,
-          layerPathPoints,
-          CONTAINER_TYPE.FOOTER_BAR,
-          layerApi.setOrToggleLayerVisibility(layerPathPoints)
-        );
-
-        // Repeat the implicit toggle from the opposite state to cover both transition directions.
-        test.addStep('Toggling the hidden layer on and capturing the store and eye-control state...');
-        const toggleOnState = await LayerTester.#captureVisibilityState(
-          mapId,
-          layerPathPoints,
-          CONTAINER_TYPE.FOOTER_BAR,
-          layerApi.setOrToggleLayerVisibility(layerPathPoints)
-        );
-
-        // Keep snapshots in operation order so assertions consume observations without repeating API calls.
-        return { gvLayer, data: [...hideState, ...showState, ...toggleOffState, ...toggleOnState] };
-      },
-      (test, result) => {
-        // The assertions expect six booleans per snapshot; slices follow the operation order above.
-        test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is hidden...');
-        const hiddenState = [false, true, false, true, false, false];
-        Test.assertIsArrayEqual(result.data.slice(0, 6), hiddenState);
-
-        test.addStep('Verifying the API, store, pressed state, and eye icon agree when the layer is visible...');
-        const visibleState = [true, true, true, true, true, true];
-        Test.assertIsArrayEqual(result.data.slice(6, 12), visibleState);
-
-        // Implicit toggles must produce the same observations as the corresponding explicit updates.
-        Test.assertIsArrayEqual(result.data.slice(12, 18), hiddenState);
-        Test.assertIsArrayEqual(result.data.slice(18, 24), visibleState);
-      },
-      async (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
-        try {
-          // Remove the fixture and verify cleanup through the shared layer-removal helper.
-          if (gvLayer) this.removeLayerConfigAndAssert(test, (gvLayer.getParentRoot() ?? gvLayer).getLayerPath());
-        } finally {
-          // Restore app-bar state even if fixture removal fails, avoiding contamination of later tests.
-          this.getControllersRegistry().uiController.setActiveAppBarTab(
-            previousActiveAppBarTab.tabId,
-            previousActiveAppBarTab.isOpen,
-            previousActiveAppBarTab.isFocusTrapped ?? false
-          );
-          // Let restoration render before the next test begins interacting with the shared viewer.
-          await DomHelper.waitForReactIdle();
-        }
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2712,19 +3239,22 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the rebuilt layer, neighboring fixtures, and layer order snapshots
    */
   testReloadLayerPreservesPosition(): Promise<Test<LayerReloadPositionResult>> {
-    const setupLayers: AbstractBaseGVLayer[] = [];
+    const fixtureLayerPaths: string[] = [];
 
     return this.test(
       `Test reloading a layer preserves its position in the layer order...`,
       async (test) => {
         // Add three layers so there is a layer before and after the one being reloaded
         test.addStep('Adding three layers on the map...');
-        const precedingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload A');
-        setupLayers.push(precedingLayer);
-        const layerToReload = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload B');
-        setupLayers.push(layerToReload);
-        const followingLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload C');
-        setupLayers.push(followingLayer);
+        const precedingFixture = this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload A');
+        fixtureLayerPaths.push(precedingFixture.layerPath);
+        const precedingLayer = await precedingFixture.promiseLayer;
+        const reloadFixture = this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload B');
+        fixtureLayerPaths.push(reloadFixture.layerPath);
+        const layerToReload = await reloadFixture.promiseLayer;
+        const followingFixture = this.addLayerEsriDynamicHistoFloodEvents(test, 'Reload C');
+        fixtureLayerPaths.push(followingFixture.layerPath);
+        const followingLayer = await followingFixture.promiseLayer;
 
         // Get the layer of the layer to reload
         const layerPath = layerToReload.getLayerPath();
@@ -2753,10 +3283,9 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('reloadedLayer', this.getMapViewer().layer.getGeoviewLayerIfExists(layerPath));
         Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
       },
-      (test, result) => {
+      (test) => {
         // Clean up the three layers
-        const layers = result ? [result.precedingLayer, result.gvLayer, result.followingLayer] : setupLayers;
-        layers.forEach((gvLayer) => this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath()));
+        fixtureLayerPaths.forEach((layerPath) => this.removeLayerConfigAndAssert(test, layerPath));
       }
     );
   }
@@ -2773,14 +3302,16 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and per-feature geometry comparisons
    */
   testEsriDynamicJunctionGeometryPairing(): Promise<Test<LayerTestResult<{ comparisons: { oid: number; distance: number }[] }>>> {
+    let fixtureLayerPath: string | undefined;
     const junctionLonLat = GVAbstractTester.GNWT_BOUNDARIES_JUNCTION_LONLAT;
 
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test ESRI Dynamic junction geometry pairs to its own OBJECTID...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriDynamicGNWTBoundaries(test));
+        const fixture = this.addLayerEsriDynamicGNWTBoundaries(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath()) as GVEsriDynamic;
 
         // Use the map's non-zoomed home extent so the identify pixel tolerance sweeps a wide enough ground area to
@@ -2833,11 +3364,10 @@ export class LayerTester extends GVAbstractTester {
           Test.assertIsEqualWithinTolerance(comparison.distance, 0, GVAbstractTester.JUNCTION_PAIRING_TOLERANCE_METERS);
         });
       },
-      async (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      async (test) => {
         // Restore the initial view then remove the layer
         await this.getControllersRegistry().mapController.zoomToInitialExtent(false);
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2852,15 +3382,17 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and WMS feature-query results
    */
   testQueryWMSLayerForWFSFeaturesCities(): Promise<Test<LayerTestResult<TypeFeatureInfoEntry[] | undefined>>> {
+    let fixtureLayerPath: string | undefined;
     const layerName = 'Cities';
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test WMS query at lon/lat via associated WFS service ${layerName}...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerWMSCitiesWithWFS(test));
+        const fixture = this.addLayerWMSCitiesWithWFS(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
         // Query the layer at the given coordinates
@@ -2877,10 +3409,9 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('resultCities[0]', resultCities[0]);
         Test.assertIsDefined('resultCities[0].geometry', resultCities[0].geometry);
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // Redirect to helper to clean up and assert
-        if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2896,11 +3427,11 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and WMS feature-query results
    */
   testQueryWMSLayerForWFSFeaturesAirborne(isRunningOnVPN: boolean): Promise<Test<LayerTestResult<TypeFeatureInfoEntry[] | undefined>>> {
+    let fixtureLayerPath: string | undefined;
     const layerName = 'Airborne Radioactivity';
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
     // Test
-    let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test WMS query at lon/lat via associated WFS service ${layerName}...`,
       async (test) => {
@@ -2910,7 +3441,9 @@ export class LayerTester extends GVAbstractTester {
         }
 
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerWMSAirborneWithWFS(test));
+        const fixture = this.addLayerWMSAirborneWithWFS(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
         // Query the layer at the given coordinates
@@ -2927,12 +3460,11 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('resultAirborne[0]', resultAirborne[0]);
         Test.assertIsDefined('resultAirborne[0].geometry', resultAirborne[0].geometry);
       },
-      (test, result) => {
-        const gvLayer = result?.gvLayer ?? setupLayer;
+      (test) => {
         // If the test was running
         if (isRunningOnVPN) {
           // Redirect to helper to clean up and assert
-          if (gvLayer) this.removeLayerConfigAndAssert(test, gvLayer.getLayerPath());
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
         }
       }
     );
@@ -2941,34 +3473,6 @@ export class LayerTester extends GVAbstractTester {
   // #endregion LAYER FUNCTIONS
 
   // #region HELPERS
-  /**
-   * Captures the LayerApi result, store visibility and rendered eye-control state.
-   *
-   * @param mapId - The map identifier
-   * @param layerPath - The full layer path in the footer Layers panel
-   * @param containerType - The type of container where the visibility button is located
-   * @param apiResult - The visibility returned by the LayerApi call
-   * @returns The API result, store existence and visibility, button existence, pressed state, and eye icon visibility
-   */
-  static async #captureVisibilityState(
-    mapId: string,
-    layerPath: string,
-    containerType: TypeContainerBox,
-    apiResult: boolean
-  ): Promise<boolean[]> {
-    await DomHelper.waitForReactIdle();
-    const storeLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-    const visibilityButton = DomHelper.getVisibleButton(mapId, layerPath, containerType);
-
-    return [
-      apiResult,
-      storeLayer !== undefined,
-      storeLayer?.visible ?? false,
-      visibilityButton !== undefined,
-      visibilityButton?.getAttribute('aria-pressed') === 'true',
-      DomHelper.getVisibleButtonVisibility(mapId, layerPath, containerType),
-    ];
-  }
 
   /**
    * Asserts that a layer with the given path exists in the map's legend store.
@@ -3078,11 +3582,14 @@ export class LayerTester extends GVAbstractTester {
     expectedGroupName: string,
     expectedParentName?: string
   ): Promise<Test<AbstractBaseGVLayer>> {
+    let fixtureLayerPath: string | undefined;
     return this.test(
       description,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSZpegtGroup(test, geoviewLayerName, includeAirport);
+        const fixture = this.addLayerWMSZpegtGroup(test, geoviewLayerName, includeAirport);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
       (test, result) => {
         test.addStep('Verifying the resolved ZPEGT group name and metadata-derived sublayer names...');
@@ -3107,7 +3614,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // A failed setup may leave no path to remove; otherwise remove the registered subtree.
-        if (result) this.removeLayerConfigAndAssert(test, (result.getParentRoot() ?? result).getLayerPath());
+        if (result) if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -3116,6 +3623,20 @@ export class LayerTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Runtime and legend-store observations after one parent or child opacity update. */
+type LayerOpacitySnapshot = {
+  /** Parent group's runtime opacity. */
+  parentOpacity: number;
+  /** Child's runtime opacity, capped by its parent. */
+  childOpacity: number;
+  /** Parent group's opacity in the legend store. */
+  parentStoreOpacity: number | undefined;
+  /** Requested child opacity in the legend store, which may exceed the runtime parent cap. */
+  childStoreOpacity: number | undefined;
+  /** Child's legend opacity limit inherited from its parent. */
+  childMaxFromParent: number | undefined;
+};
 
 /** Fixture layer and observations returned by a layer behavior test. */
 type LayerTestResult<T> = {
@@ -3184,6 +3705,27 @@ type ParentCrawlVisibilityResult = {
     childEffectiveVisible: boolean;
     childHidden: boolean;
   };
+};
+
+/** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
+type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoEntry[] | undefined)[]>;
+
+/** Represents a layer paired with hover feature information results collected before and after an operation. */
+type LayerWithBeforeAfterHover<T> = LayerWithResults<
+  T,
+  {
+    layerDataOn: TypeHoverFeatureInfo | undefined;
+    layerDataOff: TypeHoverFeatureInfo | undefined;
+    layerDataOn2: TypeHoverFeatureInfo | undefined;
+  }
+>;
+
+/** Generic structure associating a layer with a set of related results. */
+type LayerWithResults<T, U> = {
+  /** The layer instance. */
+  layer: T;
+  /** The results associated with the layer. */
+  results: U;
 };
 
 // #endregion TYPES AND INTERFACES

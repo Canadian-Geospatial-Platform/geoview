@@ -58,6 +58,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Abort all in-flight queries from a previous call and create a fresh controller for this call
     this.#abortController.abort();
     this.#abortController = new AbortController();
+    this.clearResults();
+
+    // Before querying, make sure the map render is synchronized, this can be necessary for vector layers that were just added to the map
+    await this.mapViewer.waitForRender();
 
     // The result set to be returned
     const querySet: TypeHoverResultSet = {};

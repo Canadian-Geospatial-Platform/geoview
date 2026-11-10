@@ -8,24 +8,24 @@ import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions
 /**
  * Abstract base class for creating suite of tests.
  */
-export abstract class AbstractTestSuite {
+export abstract class AbstractTestSuite<TTester extends AbstractTester = AbstractTester> {
   /** The Testers in the Test Suite */
-  #testers: AbstractTester[] = [];
+  #testers: TTester[] = [];
 
   /** Callback delegates for the test started event */
-  #onTestersTestStartedHandlers: TesterTestDelegate[] = [];
+  #onTestersTestStartedHandlers: TesterTestDelegate<TTester>[] = [];
 
   /** Callback delegates for the test updated event */
-  #onTestersTestUpdatedHandlers: TesterTestUpdatedDelegate[] = [];
+  #onTestersTestUpdatedHandlers: TesterTestUpdatedDelegate<TTester>[] = [];
 
   /** Callback delegates for the test success event */
-  #onTestersTestSuccessHandlers: TesterSuccessDelegate[] = [];
+  #onTestersTestSuccessHandlers: TesterSuccessDelegate<TTester>[] = [];
 
   /** Callback delegates for the test failure event */
-  #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
+  #onTestersTestFailureHandlers: TesterFailureDelegate<TTester>[] = [];
 
   /** Callback delegates for the test skipped event */
-  #onTestersTestSkippedHandlers: TesterSkippedDelegate[] = [];
+  #onTestersTestSkippedHandlers: TesterSkippedDelegate<TTester>[] = [];
 
   /** Indicates whether the plugin is running on a VPN */
   #isRunningOnVPN = false;
@@ -282,7 +282,7 @@ export abstract class AbstractTestSuite {
    *
    * @param tester - The tester to initialize
    */
-  addTester(tester: AbstractTester): void {
+  addTester(tester: TTester): void {
     // Add it
     this.#testers.push(tester);
 
@@ -380,7 +380,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that started the test
    * @param event - The event containing the test that has started
    */
-  #handleTesterTestStarted(sender: AbstractTester, event: TestEvent): void {
+  #handleTesterTestStarted(sender: TTester, event: TestEvent): void {
     // Re-emit
     this.#emitTestStarted({ ...event, tester: sender });
   }
@@ -392,7 +392,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that updated the test
    * @param event - The event containing the updated test and its internal event
    */
-  #handleTesterTestStepUpdated(sender: AbstractTester, event: TestUpdatedEvent): void {
+  #handleTesterTestStepUpdated(sender: TTester, event: TestUpdatedEvent): void {
     // Re-emit
     this.#emitTestUpdated({ ...event, tester: sender });
   }
@@ -404,7 +404,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that completed the test successfully
    * @param event - The event containing the test and its resulting data
    */
-  #handleTesterSuccess(sender: AbstractTester, event: SuccessEvent): void {
+  #handleTesterSuccess(sender: TTester, event: SuccessEvent): void {
     // Re-emit
     this.#emitSuccess({ ...event, tester: sender });
   }
@@ -416,7 +416,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that encountered the failure
    * @param event - The event containing the test and the associated error
    */
-  #handleTesterFailure(sender: AbstractTester, event: FailureEvent): void {
+  #handleTesterFailure(sender: TTester, event: FailureEvent): void {
     // Re-emit
     this.#emitFailure({ ...event, tester: sender });
   }
@@ -428,7 +428,7 @@ export abstract class AbstractTestSuite {
    * @param sender - The tester instance that encountered the skip
    * @param event - The event containing the test and the associated error
    */
-  #handleTesterSkipped(sender: AbstractTester, event: SkippedEvent): void {
+  #handleTesterSkipped(sender: TTester, event: SkippedEvent): void {
     // Re-emit
     this.#emitSkipped({ ...event, tester: sender });
   }
@@ -442,7 +442,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitTestStarted(event: TesterTestEvent): void {
+  #emitTestStarted(event: TesterTestEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestStartedHandlers, event);
   }
@@ -452,7 +452,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onTestStarted(callback: TesterTestDelegate): void {
+  onTestStarted(callback: TesterTestDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestStartedHandlers, callback);
   }
@@ -462,7 +462,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offTestStarted(callback: TesterTestDelegate): void {
+  offTestStarted(callback: TesterTestDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestStartedHandlers, callback);
   }
@@ -472,7 +472,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitTestUpdated(event: TesterTestUpdatedEvent): void {
+  #emitTestUpdated(event: TesterTestUpdatedEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestUpdatedHandlers, event);
   }
@@ -482,7 +482,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onTestUpdated(callback: TesterTestUpdatedDelegate): void {
+  onTestUpdated(callback: TesterTestUpdatedDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestUpdatedHandlers, callback);
   }
@@ -492,7 +492,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offTestUpdated(callback: TesterTestUpdatedDelegate): void {
+  offTestUpdated(callback: TesterTestUpdatedDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestUpdatedHandlers, callback);
   }
@@ -502,7 +502,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitSuccess(event: TesterSuccessEvent): void {
+  #emitSuccess(event: TesterSuccessEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestSuccessHandlers, event);
   }
@@ -512,7 +512,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSuccess(callback: TesterSuccessDelegate): void {
+  onSuccess(callback: TesterSuccessDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestSuccessHandlers, callback);
   }
@@ -522,7 +522,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSuccess(callback: TesterSuccessDelegate): void {
+  offSuccess(callback: TesterSuccessDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestSuccessHandlers, callback);
   }
@@ -532,7 +532,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitFailure(event: TesterFailureEvent): void {
+  #emitFailure(event: TesterFailureEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestFailureHandlers, event);
   }
@@ -542,7 +542,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onFailure(callback: TesterFailureDelegate): void {
+  onFailure(callback: TesterFailureDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestFailureHandlers, callback);
   }
@@ -552,7 +552,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offFailure(callback: TesterFailureDelegate): void {
+  offFailure(callback: TesterFailureDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestFailureHandlers, callback);
   }
@@ -562,7 +562,7 @@ export abstract class AbstractTestSuite {
    *
    * @param event - The event to emit
    */
-  #emitSkipped(event: TesterSkippedEvent): void {
+  #emitSkipped(event: TesterSkippedEvent<TTester>): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onTestersTestSkippedHandlers, event);
   }
@@ -572,7 +572,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onSkipped(callback: TesterSkippedDelegate): void {
+  onSkipped(callback: TesterSkippedDelegate<TTester>): void {
     // Register the event handler
     EventHelper.onEvent(this.#onTestersTestSkippedHandlers, callback);
   }
@@ -582,7 +582,7 @@ export abstract class AbstractTestSuite {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offSkipped(callback: TesterSkippedDelegate): void {
+  offSkipped(callback: TesterSkippedDelegate<TTester>): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onTestersTestSkippedHandlers, callback);
   }
@@ -591,41 +591,61 @@ export abstract class AbstractTestSuite {
 }
 
 /** Define an event for the delegate. */
-export interface TesterTestEvent extends TestEvent {
-  tester: AbstractTester;
+export interface TesterTestEvent<TTester extends AbstractTester = AbstractTester> extends TestEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterTestDelegate = EventDelegateBase<AbstractTestSuite, TesterTestEvent, void>;
+export type TesterTestDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterTestEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterTestUpdatedEvent extends TestUpdatedEvent {
-  tester: AbstractTester;
+export interface TesterTestUpdatedEvent<TTester extends AbstractTester = AbstractTester> extends TestUpdatedEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterTestUpdatedDelegate = EventDelegateBase<AbstractTestSuite, TesterTestUpdatedEvent, void>;
+export type TesterTestUpdatedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterTestUpdatedEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterSuccessEvent extends SuccessEvent {
-  tester: AbstractTester;
+export interface TesterSuccessEvent<TTester extends AbstractTester = AbstractTester> extends SuccessEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterSuccessDelegate = EventDelegateBase<AbstractTestSuite, TesterSuccessEvent, void>;
+export type TesterSuccessDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterSuccessEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterFailureEvent extends FailureEvent {
-  tester: AbstractTester;
+export interface TesterFailureEvent<TTester extends AbstractTester = AbstractTester> extends FailureEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterFailureDelegate = EventDelegateBase<AbstractTestSuite, TesterFailureEvent, void>;
+export type TesterFailureDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterFailureEvent<TTester>,
+  void
+>;
 
 /** Define an event for the delegate. */
-export interface TesterSkippedEvent extends SkippedEvent {
-  tester: AbstractTester;
+export interface TesterSkippedEvent<TTester extends AbstractTester = AbstractTester> extends SkippedEvent {
+  tester: TTester;
 }
 
 /** Define a delegate for the event handler function signature. */
-export type TesterSkippedDelegate = EventDelegateBase<AbstractTestSuite, TesterSkippedEvent, void>;
+export type TesterSkippedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  TesterSkippedEvent<TTester>,
+  void
+>;

@@ -102,6 +102,7 @@ export interface IAppState {
 
   /** Store actions callable from adaptors. */
   actions: {
+    setShowUnsymbolizedFeatures: (show: boolean) => void;
     setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
     /** Sets the visible drawing or editing instructions. */
@@ -171,6 +172,20 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     },
 
     actions: {
+      /**
+       * Sets whether features without symbology are displayed.
+       *
+       * @param show - Whether to display unsymbolized features
+       */
+      setShowUnsymbolizedFeatures: (show: boolean): void => {
+        set({
+          appState: {
+            ...get().appState,
+            showUnsymbolizedFeatures: show,
+          },
+        });
+      },
+
       /**
        * Sets the circularProgress state.
        *
@@ -589,6 +604,16 @@ export const getStoreAppDisplayDateFormatDefault = (mapId: string): TypeDisplayD
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+
+/**
+ * Sets whether unsymbolized features are displayed at runtime without changing the map configuration.
+ *
+ * @param mapId - The map identifier
+ * @param show - Whether to display unsymbolized features
+ */
+export const setStoreAppShowUnsymbolizedFeatures = (mapId: string, show: boolean): void => {
+  getStoreAppState(mapId).actions.setShowUnsymbolizedFeatures(show);
+};
 
 /**
  * Sets the circular progress indicator active state.

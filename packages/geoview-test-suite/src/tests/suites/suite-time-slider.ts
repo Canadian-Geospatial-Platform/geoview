@@ -82,7 +82,7 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
     await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
 
     // Resolve when all
-    return Promise.resolve();
+    return;
   }
 
   /**
@@ -95,6 +95,6 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
     await this.#timeSliderTester.testConstrainValues();
     await this.#timeSliderTester.testWMSLayerLandcoverGroupDimensionFlags(this.getIsRunningOnVPN());
 
-    return Promise.resolve();
+    return;
   }
 }

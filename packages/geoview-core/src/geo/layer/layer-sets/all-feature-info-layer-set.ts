@@ -10,6 +10,7 @@ import {
   setStoreDataTableQueryStatusAndFeatures,
   setStoreDataTableInitialSettings,
   getStoreDataTableQueryStatus,
+  getStoreDataTableSelectedLayerPath,
 } from '@/core/stores/states/data-table-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -84,6 +85,11 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param layerPath - The layer path to delete from the store
    */
   protected override onDeleteFromStore(layerPath: string): void {
+    // If the layer that was selected in the DataTable is the layer that just got deleted, reset the selected layer
+    if (getStoreDataTableSelectedLayerPath(this.getMapId()) === layerPath) {
+      this.controllerRegistry.dataTableController.setSelectedLayerPath('');
+    }
+
     // Remove it from data table info array
     deleteStoreDataTableFeatureAllInfo(this.getMapId(), layerPath, () => {
       this.controllerRegistry.uiController.hideTabButton('data-table');
