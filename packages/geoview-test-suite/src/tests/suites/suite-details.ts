@@ -2,9 +2,9 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { DetailsTester } from '../testers/details-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite.
@@ -44,9 +44,9 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests the Details panel feature info display and interaction:<br/>
-      <b>Feature info</b> — Query GeoJSON layer at Ontario/Alberta extent<br/>
       <b>Highlight</b> — Clear all highlights after selection<br/>
       <b>Navigation</b> — Zoom to feature from details panel (bounded for points), including with the panel open over the map; zoom to all results of a layer; pan to the next feature<br/>
+      <b>Selection</b> — Manually selected layer persists across map clicks<br/>
       <b>Config overrides</b> — nameField as label, summary:false hides field, field alias renaming`;
   }
 
@@ -81,8 +81,10 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
-    return Promise.resolve();
+    await this.#detailsTester.testClearAllHighlights();
+
+    // Resolve
+    return;
   }
 
   /**
@@ -91,21 +93,11 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Test Details with polygons (visibility toggling)
-    await this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
-      'geojsonLYR5/polygons.json',
-      GVAbstractTester.ONTARIO_CENTER_LONLAT,
-      GVAbstractTester.ALBERTA_CENTER_LONLAT
-    );
-
     // Test clear all highlights
-    await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
-
-    // Test zoom to feature
-    await this.#detailsTester.testZoomToFeature('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    await this.#detailsTester.testClearAllHighlights();
 
     // Test zoom to feature with an open app-bar panel (changes zoom, sequential)
-    await this.#detailsTester.testZoomToFeatureWithPanelOffset('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    await this.#detailsTester.testZoomToFeatureWithPanelOffset(GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
     // Test zoom to all results of a layer (changes zoom, sequential)
     await this.#detailsTester.testZoomToResultsGroupExtent('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
@@ -119,12 +111,10 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
       GVAbstractTester.ONTARIO_CENTER_LONLAT
     );
 
-    // Tests that recreate the map with custom featureInfo config (sequential)
-    await this.#detailsTester.testNameFieldAsLabel();
-    await this.#detailsTester.testSummaryFalseHidesField();
-    await this.#detailsTester.testFieldAliasRenamesField();
+    // Test the selection persistence across map clicks
+    await this.#detailsTester.testLayerSelectionPersistence();
 
     // Resolve when all done
-    return Promise.resolve();
+    return;
   }
 }

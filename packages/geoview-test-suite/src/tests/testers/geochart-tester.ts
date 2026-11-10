@@ -1,11 +1,13 @@
 import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { GeoViewGeoChartConfig } from 'geoview-core/api/config/reader/uuid-config-reader';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
-import { TestError } from '../core/exceptions';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /**
  * Main Map testing class.
@@ -21,19 +23,98 @@ export class GeochartTester extends GVAbstractTester {
   }
 
   /**
-   * Tests opening the Geochart for a given layer path.
+   * Tests opening the polygon layer's chart after querying an Ontario coordinate.
    *
-   * @param layerPath - The layer path of the layer
-   * @param lonlat - The coordinate on the map to query
-   * @returns A promise that resolves when the test completes
+   * @returns A promise that resolves with the queried polygon layer
    */
-  testGeochartOpenForLayerMapClick(layerPath: string, lonlat: Coordinate): Promise<Test<AbstractGVLayer>> {
+  testGeochartPolygonsClick(): Promise<Test<AbstractGVLayer>> {
+    const geochartConfig = {
+      layers: [
+        {
+          layerId: 'TBD-BELOW',
+          propertyValue: 'data',
+          propertyDisplay: 'label',
+        },
+      ],
+      chart: 'pie',
+      geochart: {
+        xAxis: {
+          property: 'label',
+        },
+        yAxis: {
+          property: 'data',
+        },
+      },
+      category: {
+        property: 'location',
+      },
+      datasources: [
+        {
+          display: 'Feature',
+          items: [
+            {
+              data: 92,
+              label: 'Hockey',
+              location: 'Victoria',
+            },
+            {
+              data: 43.54,
+              label: 'Baseball',
+              location: 'Victoria',
+            },
+            {
+              data: 12.3,
+              label: 'Basketball',
+              location: 'Victoria',
+            },
+            {
+              data: 66,
+              label: 'Football',
+              location: 'Victoria',
+            },
+            {
+              data: 75,
+              label: 'Soccer',
+              location: 'Victoria',
+            },
+            {
+              data: 553,
+              label: 'Hockey',
+              location: 'Toronto',
+            },
+            {
+              data: 54,
+              label: 'Baseball',
+              location: 'Toronto',
+            },
+          ],
+        },
+      ],
+    } as GeoViewGeoChartConfig;
+
     // Test
+    let gvLayer: AbstractBaseGVLayer;
+    let fixtureLayerPath: string | undefined;
     return this.test(
-      `Test Geochart on layer ${layerPath}...`,
-      (test) => {
+      `Test Geochart on GeoJSON Polygons...`,
+      async (test) => {
+        const { geoChartController, uiController } = this.getControllersRegistry();
+        if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
+
+        // Add the Polygons layer
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        // Set the layer path in the geochart configuration
+        geochartConfig.layers[0].layerId = gvLayer.getLayerPath();
+
+        // Make sure the configuration is set
+        geoChartController.addChart(gvLayer.getLayerPath(), geochartConfig);
+        uiController.showTabButton('geochart');
+
         // Continue the test and return the layer
-        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPath, lonlat);
+        return this.queryLonLatSelectLayerInPanel(test, gvLayer.getLayerPath(), GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -42,8 +123,11 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep(`Verifying ${layerPath} is the selected layer for the geochart...`);
-        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPath);
+        test.addStep(`Verifying ${gvLayer.getLayerPath()} is the selected layer for the geochart...`);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), gvLayer.getLayerPath());
+      },
+      (test) => {
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -114,7 +198,7 @@ export class GeochartTester extends GVAbstractTester {
         await this.addLayerOnMapFromUUID(test, uuid);
 
         // Continue the test and return the layer
-        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPathAdd, lonlat);
+        return this.queryLonLatSelectLayerInPanel(test, layerPathAdd, lonlat);
       },
       (test) => {
         // Perform assertions
@@ -151,9 +235,8 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {TestError} When the controller is unavailable or the query returns no processed features
    * @throws {Error} When the current query does not reach the batched GeoChart data before the timeout
    */
-  async waitForLayerQueryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
+  async queryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
     const { layerController, uiController, geoChartController } = this.getControllersRegistry();
-    if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
 
     // Get the layer
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
@@ -173,11 +256,11 @@ export class GeochartTester extends GVAbstractTester {
 
     // Select the right layer path
     test.addStep(`Selecting the geochart for the added layer...`);
-    geoChartController.setSelectedLayerPath(layerPath);
+    geoChartController?.setSelectedLayerPath(layerPath);
     await DomHelper.waitForReactIdle();
 
     // Wait for fun so that we can see the actual chart in the UI before terminating the test
-    await GVAbstractTester.waitForFun();
+    await test.waitForFun();
 
     // Return the layer
     return layer;

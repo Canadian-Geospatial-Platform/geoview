@@ -21,7 +21,7 @@ import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
-import { formatDuration, generateId } from 'geoview-core/core/utils/utilities';
+import { delay, formatDuration, generateId } from 'geoview-core/core/utils/utilities';
 
 export class Test<T = unknown> {
   /** A unique id for the test */
@@ -528,6 +528,21 @@ export class Test<T = unknown> {
     return formatDuration(duration);
   }
 
+  /**
+   * Waits for a purely aesthetic delay to allow the test UI to visually catch up.
+   *
+   * This should only be used for display purposes (e.g., giving the human observer time to see
+   * intermediate state changes in the test runner UI). Never use this for functional synchronization.
+   *
+   * @param period - Optional delay in milliseconds (default: 5000)
+   * @returns A promise that resolves after the delay
+   */
+  waitForFun(period = 5000): Promise<void> {
+    // Wait for the React UI to actually pick up on the store update
+    this.addStep(`Waiting for ${period / 1000} seconds for a human to look hypothetically at the UI...`);
+    return delay(period);
+  }
+
   // #region EVENT LOOP MONITOR
 
   /** The heartbeat interval in milliseconds used to probe event loop availability. */
@@ -847,6 +862,31 @@ export class Test<T = unknown> {
     });
 
     // If we get here, arrays have equal primitive values and in the same order
+    return;
+  }
+
+  /**
+   * Asserts that two numeric arrays have equal lengths and corresponding values within an absolute tolerance, in the same order.
+   *
+   * @param actualValue - The actual numeric array being checked
+   * @param expectedValue - The expected numeric array to compare against
+   * @param tolerance - The maximum allowed absolute difference between corresponding values, inclusive
+   * @throws {AssertionValueNotAnArrayError} When either value is not an array
+   * @throws {AssertionArrayLengthError} When the arrays have different lengths
+   * @throws {AssertionArraysNotEqualError} When corresponding values fail the tolerance comparison
+   */
+  static assertIsArrayEqualWithinTolerance(actualValue: number[], expectedValue: number[], tolerance: number): void {
+    // Redirect using a primitive comparer with tolerance
+    this.#assertIsArrayEqualComparer(actualValue, expectedValue, (value1: number, value2: number): boolean => {
+      try {
+        this.assertIsEqualWithinTolerance(value1, value2, tolerance);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    // If we get here, arrays have equal primitive values within the specified tolerance and in the same order
     return;
   }
 

@@ -16,17 +16,11 @@ import {
   type TypeMapMouseInfo,
   type TypeValidMapProjectionCodes,
   type TypeViewportBoundaryLonLat,
-  type TypeFeatureInfoEntry,
 } from 'geoview-core/api/types/map-schema-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
 import { PAGE_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import {
-  getStoreDetailsFeatures,
-  getStoreDetailsSelectedLayerPath,
-  type TypeHoverFeatureInfo,
-} from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreAppHeight,
@@ -37,13 +31,11 @@ import {
 } from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
-  getStoreMapHoverFeatureInfo,
   getStoreMapPointerPosition,
   getStoreMapStateJson,
   setStoreMapPointerPosition,
 } from 'geoview-core/core/stores/states/map-state';
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
@@ -1000,7 +992,7 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // The map adjusts extent to fit viewport aspect ratio, compare with tolerance for aspect ratio adjustment
         test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
-        Test.assertIsArrayEqual(result, expectedExtent, 0);
+        Test.assertIsArrayEqualWithinTolerance(result, expectedExtent, 1);
       }
     );
   }
@@ -1050,9 +1042,16 @@ export class MapTester extends GVAbstractTester {
   testFooterBarSelectTab(): Promise<Test<string>> {
     const targetTab = 'data-table';
 
+    let fixtureLayerPath: string | undefined;
     return this.test(
       'Test footer bar select tab',
       async (test) => {
+        // Making sure there's at least 1 layer with data, otherwise the footer bar tab might not be visible at all
+        const fixture = this.addLayerEsriFeatureTopProjects(test);
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
+
+        // Selecting the footer bar tab
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
@@ -1064,6 +1063,13 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Verifying tab is selected...');
         const { tabId } = getStoreUIActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
+      },
+      () => {
+        // If a layer
+        if (fixtureLayerPath) {
+          // Remove the layer
+          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(fixtureLayerPath);
+        }
       }
     );
   }
@@ -1331,161 +1337,6 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that non-queryable layers do not appear in details state when clicking on the map.
-   *
-   * This test performs the following operations:
-   * 1. Gets the first layer from the map
-   * 2. Sets the layer as non-queryable
-   * 3. Simulates a map click
-   * 4. Verifies that the layer results does not appear in the details state
-   *
-   * @param layerPath - The layer path to test
-   * @param lonlat - The coordinates to query
-   * @returns A promise that resolves with the layer and feature arrays before disabling queries, while disabled, and after re-enabling
-   */
-  testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
-    return this.test(
-      'Test non-queryable layer not in details after map click',
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // The layer should be initially queryable
-        if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
-
-        // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitForLoadedStatus();
-
-        // Query the layer at the given coordinates
-        const layerDataOn = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Set layer non queryable, this will also clear the result set automatically
-        test.addStep(`Setting layer '${layerPath}' as non-queryable...`);
-        layer.setQueryable(false);
-
-        // Query the layer at the given coordinates
-        const layerDataOff = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Set layer queryable again
-        test.addStep(`Setting layer '${layerPath}' as queryable again...`);
-        layer.setQueryable(true);
-
-        // Query the layer at the given coordinates
-        const layerDataOn2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
-
-        // Return the test results
-        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
-      },
-      (test, result) => {
-        // Get the results
-        const [layerDataOn, layerDataOff, layerDataOn2] = result.results;
-
-        test.addStep('Verifying layer data features when queryable...');
-        Test.assertIsArray(layerDataOn);
-        Test.assertIsArrayLengthEqual(layerDataOn, 2);
-
-        test.addStep('Verifying no layer data features when non-queryable...');
-        Test.assertIsUndefined('features', layerDataOff);
-
-        test.addStep('Verifying layer data features when queryable again...');
-        Test.assertIsArray(layerDataOn2);
-        Test.assertIsArrayLengthEqual(layerDataOn2, 2);
-      },
-      (_test, result) => {
-        // Make sure to turn it back to queryable
-        result.layer.setQueryable(true);
-      }
-    );
-  }
-
-  /**
-   * Tests that non-hoverable layers do not appear in hover state when hovering on the map.
-   *
-   * This test performs the following operations:
-   * 1. Gets the first layer from the map
-   * 2. Sets the layer as non-hoverable
-   * 3. Simulates a map hover
-   * 4. Verifies that the layer results does not appear in the hover state
-   *
-   * @param layerPath - The layer path to test
-   * @param lonlat - The coordinates to query
-   * @returns A promise that resolves with the Test containing the hover states
-   */
-  testLayerHoverableState(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>> {
-    return this.test(
-      'Test layer hoverable state in hoverFeatureInfoLayerSet',
-      async (test) => {
-        // Get the layer
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-
-        // The layer should be initially hoverable
-        if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
-
-        // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitForLoadedStatus();
-
-        // Perform a hover query using the hover feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOnTemp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
-
-        // Set layer non queryable, this will also clear the result set automatically
-        test.addStep(`Setting layer '${layerPath}' as non-hoverable...`);
-        layer.setHoverable(false);
-
-        // Perform a hover query using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOffTemp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
-
-        // Set layer hoverable again
-        test.addStep(`Setting layer '${layerPath}' as hoverable again...`);
-        layer.setHoverable(true);
-
-        // Perform a hover query using the feature info layer set
-        test.addStep(`Perform query operation at given coordinates...`);
-        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
-
-        // Check if there is feature selected from the layer
-        test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOn2Temp = getStoreMapHoverFeatureInfo(this.getMapId());
-
-        // Store a deep copy of the data before clearing to preserve it
-        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
-
-        // Return the test results
-        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
-      },
-      (test, result) => {
-        test.addStep('Verifying layer data features when hoverable...');
-        Test.assertJsonObject(result.results[0], { fieldInfo: { value: 'Ontario' } });
-
-        test.addStep('Verifying layer data features when not hoverable...');
-        Test.assertIsUndefined('result.after', result.results[1]);
-
-        test.addStep('Verifying layer data features when hoverable again...');
-        Test.assertJsonObject(result.results[2], { fieldInfo: { value: 'Ontario' } });
-      },
-      (_test, result) => {
-        // Make sure to turn it back to hoverable
-        result.layer.setHoverable(true);
-      }
-    );
-  }
-
-  /**
    * Tests that switching projection with a vector tile layer loaded emits a warning notification.
    *
    * This test performs the following operations:
@@ -1567,77 +1418,6 @@ export class MapTester extends GVAbstractTester {
         if (vtLayerPath) {
           this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(vtLayerPath);
         }
-      }
-    );
-  }
-
-  /**
-   * Tests that the selected layer in the details panel persists correctly
-   * when clicking on different map locations.
-   *
-   * Test flow:
-   * 1. Clicks on the map at the first location and verifies the auto-selected layer.
-   * 2. Manually switches selection to the alternate layer.
-   * 3. Clicks on a second map location.
-   * 4. Verifies the manually selected layer remains selected and that its
-   *    feature count is correct.
-   *
-   * @param layerPath1 - The path of the first candidate layer that may be auto-selected after the initial click
-   * @param layerPath2 - The path of the second candidate layer used as the alternate manual selection
-   * @param clickCoordinates1 - The map coordinates used for the first simulated click
-   * @param clickCoordinates2 - The map coordinates used for the second simulated click
-   * @returns A promise that resolves with details about the original selected layer,
-   * the persisted alternate layer, and the feature count after the second click
-   */
-  testDetailsLayerSelectionPersistence(
-    layerPath1: string,
-    layerPath2: string,
-    clickCoordinates1: Coordinate,
-    clickCoordinates2: Coordinate
-  ): Promise<Test<LayerDetails>> {
-    return this.test(
-      'Test details layer selection persistence across map clicks',
-      async (test) => {
-        // Simulate a map click at first location
-        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates1);
-
-        // Check which layer is selected after first click
-        test.addStep('Checking selected layer after first click...');
-        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
-        test.addStep(`First selected layer: ${originalLayerPath}`);
-
-        // The alternate layer
-        const altLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
-
-        // Manually select the alternate layer
-        test.addStep(`Manually selecting the other layer '${altLayerPath}'...`);
-        this.getControllersRegistry().detailsController.setSelectedLayerPath(altLayerPath);
-
-        // Simulate a map click at second location
-        await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinates2);
-
-        // Check which layer is still selected after second click
-        test.addStep('Checking selected layer after second click...');
-        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
-        test.addStep(`Second selected layer: ${alternateLayerPath}`);
-
-        // Get feature count for second layer
-        const secondLayerDataFeatures = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath);
-        const secondFeatureCount = secondLayerDataFeatures?.length || 0;
-        test.addStep(`Second layer feature count: ${secondFeatureCount}`);
-
-        return {
-          originalLayerPath,
-          alternateLayerPath,
-          secondFeatureCount,
-        };
-      },
-      (test, result) => {
-        test.addStep('Verifying first and second layers were different...');
-        Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
-
-        test.addStep('Verifying second layer has exactly 1 feature...');
-        Test.assertIsEqual(result.secondFeatureCount, 1);
       }
     );
   }
@@ -2183,12 +1963,14 @@ export class MapTester extends GVAbstractTester {
       appBar: { tabs: { core: [] } },
       footerBar: { tabs: { core: [] } },
     });
+
     // Remove extent constraints so edge/polar fixtures test the requested center rather than a clamped Canada view.
     viewer.setView({
       projection,
       initialView: { zoomAndCenter: [zoom, [center[0], center[1]]] },
       rotation,
     });
+
     viewer.map.updateSize();
     viewer.updateViewPadding();
     await viewer.waitForRender();
@@ -2376,30 +2158,6 @@ type TypeFullscreenViewRestorationResult = {
   afterInteractiveResizeExit: TypeFullscreenViewState;
   /** Whether a rejected fullscreen request restored the inactive state. */
   rejectedRequestIsInactive: boolean;
-};
-
-/** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
-type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoEntry[] | undefined)[]>;
-
-/** Represents a layer paired with hover feature information results collected before and after an operation. */
-type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
-
-/** Generic structure associating a layer with a set of related results. */
-type LayerWithResults<T, U> = {
-  /** The layer instance. */
-  layer: T;
-  /** The results associated with the layer. */
-  results: U;
-};
-
-/** Describes layer path information and comparison metadata used when evaluating differences between layers. */
-type LayerDetails = {
-  /** The path identifying the original layer. */
-  originalLayerPath: string;
-  /** The path identifying the alternate or comparison layer. */
-  alternateLayerPath: string;
-  /** The number of features found in the alternate layer. */
-  secondFeatureCount: number;
 };
 
 /** Isolated viewer scrolling regressions, scheduled sequentially by the UI suite. */

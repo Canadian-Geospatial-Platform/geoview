@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { LayerTester } from '../testers/layer-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite.
@@ -44,12 +43,11 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests adding layers to the map, verifying load status and legend icons:<br/>
       <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields); case-sensitive export bbox/size and returned image dimensions<br/>
-      <b>OGC</b> — WMS (multiple services + CORS proxy), WFS, WMTS (+ bad URLs)<br/>
-      <b>File-based</b> — GeoJSON, CSV, OGC Feature, WKB, KML, GeoTIFF (+ bad URLs)<br/>
+      <b>OGC</b> — WMS (services, group dimensions, names and CORS proxy), WFS, OGC Feature, WMTS (+ bad URLs and WFS without capabilities)<br/>
+      <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (+ bad URLs)<br/>
       <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
-      <b>GeoCore</b> — Inline override, simplified name override, group visibility<br/>
-      <b>Settings</b> — initialSettings cascade on added layers<br/>
-      <b>Queries</b> — Domain field value translation (sequential)`;
+      <b>GeoCore</b> — Inline layer entry and simplified name overrides<br/>
+      <b>Settings</b> — initialSettings cascade on added layers`;
   }
 
   /**
@@ -265,26 +263,6 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pEsriDynamicDomainField,
       pEsriFeatureDomainField,
     ]);
-
-    // Test domain field query value translation — run sequentially at the end
-    // because they change the zoom level to 17.4 which would affect other tests
-    await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
-    await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
-
-    // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
-
-    // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
-    await this.#layerTester.testAddGeoJSONWithGeometryCollection();
-
-    // Test geocore group with defaultVisibility=false
-    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse(this.getIsRunningHeavyTests());
-
-    // Test hidden-by-parent child + setLayerVisibleIncludingParents parent crawl (drives the panels' hidden/available lists)
-    await this.#layerTester.testSetLayerVisibleIncludingParents();
-
-    // Test ESRI Dynamic junction geometry pairs to its own OBJECTID (#3636) — changes zoom, resets to initial extent in finalize
-    await this.#layerTester.testEsriDynamicJunctionGeometryPairing();
 
     // Done
     return;

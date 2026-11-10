@@ -3,8 +3,14 @@ import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
+import { GeoPackageReader } from 'geoview-core/api/config/reader/geopackage-reader';
 import type { IDataTableSettings, TypeColumnFiltersState } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
+import {
+  getStoreAppDisplayDateFormatDefault,
+  getStoreAppDisplayLanguage,
+  getStoreAppShowUnsymbolizedFeatures,
+  setStoreAppShowUnsymbolizedFeatures,
+} from 'geoview-core/core/stores/states/app-state';
 import { getStoreLayerDisplayDateFormat } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import {
@@ -20,17 +26,12 @@ import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { logger } from 'geoview-core/core/utils/logger';
 import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /**
  * Main Data Table testing class.
  */
 export class DataTableTester extends GVAbstractTester {
-  /** The GeoJSON layer path used for data table tests. */
-  static readonly GEOJSON_LAYER_PATH = 'geojsonLYR5/polygons.json';
-
-  /** The GeoPackage layer path whose table contains an empty/blank field name (a column named ''). */
-  static readonly GEOPACKAGE_EMPTY_FIELD_LAYER_PATH = 'railwaysEmptyField/carto_fer_debarcadere';
-
   // #region OVERRIDES
 
   /**
@@ -47,48 +48,142 @@ export class DataTableTester extends GVAbstractTester {
   // #region PUBLIC METHODS
 
   /**
-   * Tests that allFeaturesDataArray is populated after layer loads.
+   * Tests GeoJSON data-table population, visibility, filtering, map-filter state, and temporary row-zoom highlight expiry.
+   * Restores the initial map extent during cleanup so view changes do not affect subsequent tests.
    *
-   * @param layerPath - The layer path to check
-   * @param expectedCount - The expected number of feature entries
-   * @returns A promise that resolves with the feature entries when the test completes
+   * @returns A promise that resolves with the initial table state and row counts after each filter
    */
-  testAllFeaturesDataArrayPopulated(layerPath: string, expectedCount: number): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
+  testAddGeoJsonCheckDataTablePopulated(): Promise<Test<GeoJsonDataTableResult>> {
+    // Both the Ontario fit and the row-zoom action change the view used by subsequent tests.
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
+    const globalFilterValue = 'Ontario';
+
+    // Deliberately use a count different from the four-feature fixture to detect a setter that does nothing.
+    const expectedRowsFiltered = 3;
+
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     return this.test(
-      `Test allFeaturesDataArray is populated for layer ${layerPath}...`,
-      (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        return this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+      `Test allFeaturesDataArray is populated for layer GeoJson...`,
+      async (test) => {
+        // Wait for fixture loading and legend readiness before opening its data table.
+        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        // The fixture generates its own ID, so every operation must use the returned layer's path.
+        const layerPath = gvLayer.getLayerPath();
+
+        // Wait for the selected layer's all-features query before reading initial settings or applying filters.
+        const geojsonData = await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+
+        // Exercise store-only setters and restore their baseline before the UI-driven scenarios.
+        const settingsResult = this.#hideColumnsAndUpdateRowCountThenRestore(test, layerPath, expectedRowsFiltered);
+
+        // Finish the cumulative column/global searches and clear them before testing the map extent.
+        const filtersResult = await this.#applyColumnAndGlobalFilters(test, layerPath, globalFilterValue);
+
+        // Wait for the Ontario fit and both extent-filter states before the row zoom changes the view again.
+        const extentResult = await this.#zoomToOntarioAndToggleExtentFilter(test, layerPath);
+
+        // Observe highlight creation and automatic expiry before returning the combined result.
+        const highlightResult = await this.#zoomToRowAndWaitForHighlightExpiry(test, layerPath);
+
+        // Preserve the combined subject and assertion-only callback while keeping each scenario focused.
+        return { geojsonData, ...settingsResult, ...filtersResult, ...extentResult, ...highlightResult };
       },
-      (test, result) => {
-        test.addStep('Verifying allFeaturesDataArray has entries for the layer...');
-        Test.assertIsArrayLengthEqual(result, expectedCount);
+      (test, result) => DataTableTester.#assertGeoJsonDataTableResult(test, result, expectedRowsFiltered, globalFilterValue),
+      async (test) => {
+        try {
+          if (gvLayer) {
+            // Remove the global search before clearing the table's column-filter inputs.
+            test.addStep('Clearing global filter...');
+            this.getControllersRegistry().dataTableController.setGlobalFilterRecord(gvLayer.getLayerPath(), '');
+            // Let React process the store update before interacting with the clear-filters toolbar.
+            await DomHelper.waitForReactIdle();
+          }
+          // Wait for the toolbar's filter reset to settle before removing the fixture.
+          await this.clearDataTableFilters(test);
+        } finally {
+          // Leave no highlights behind if execution fails before automatic expiry.
+          this.getControllersRegistry().mapController.removeHighlightedFeature('all');
+
+          // If a layer
+          if (fixtureLayerPath) {
+            // Remove the layer
+            this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+          }
+
+          // Await view restoration so the next test cannot start while this test is still changing the map.
+          test.addStep('Restoring the initial map extent...');
+          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+        }
       }
     );
   }
 
   /**
-   * Tests that geoviewID column is hidden by default in layersDataTableSetting.
+   * Tests Commemorative data-table population and setting/clearing column filters in the store.
    *
-   * @param layerPath - The layer path whose column visibility settings are checked
-   * @returns A promise that resolves with the layer data-table settings when the test completes
+   * NOTE: This test only verifies store-level set/clear. The MRT table does not react to programmatic
+   * `setColumnFiltersRecord` changes — it manages its own internal filter state. Therefore, `rowsFilteredRecord`
+   * cannot be verified here (it only updates when the user interacts with the filter UI directly).
+   *
+   * @returns A promise that resolves with the table state and filters before and after clearing
    */
-  testGeoviewIdColumnHiddenByDefault(layerPath: string): Promise<Test<IDataTableSettings>> {
+  testAddCommemorativeCheckDataTablePopulated(): Promise<Test<CommemorativeDataTableResult>> {
+    const columnFilters: TypeColumnFiltersState = [
+      { id: 'JUR_EN', value: 'Ontario' },
+      { id: 'CONFLICT_EN', value: 'First' },
+    ];
+
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     return this.test(
-      'Test geoviewID column hidden by default...',
+      `Test allFeaturesDataArray is populated for layer Commemorative...`,
       async (test) => {
+        // Add the Commemorative layer to the map and wait for it to be registered
+        const fixture = this.addLayerCommemorativeViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+        const layerPath = gvLayer.getLayerPath();
+
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+        const commemorativeData = await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
 
         // Get the settings
-        const settings = getStoreDataTableLayerSettings(this.getMapId());
-        return settings[layerPath];
+        const settings = getStoreDataTableLayerSettings(this.getMapId())[layerPath];
+
+        test.addStep(`Setting ${columnFilters.length} active column filters and an empty range filter in the store...`);
+        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, [
+          ...columnFilters,
+          { id: 'emptyRange', value: [undefined, undefined] },
+        ]);
+        const filtersBefore = getStoreDataTableLayerSettings(this.getMapId())[layerPath]?.columnFiltersRecord;
+
+        test.addStep('Clearing column filters...');
+        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, []);
+        const filtersAfter = getStoreDataTableLayerSettings(this.getMapId())[layerPath]?.columnFiltersRecord;
+
+        // Return the data
+        return { commemorativeData, settings, filtersBefore, filtersAfter };
       },
       (test, result) => {
-        test.addStep('Verifying geoviewID column visibility is false...');
-        Test.assertIsDefined('layerSettings', result);
-        Test.assertIsDefined('columnVisibilityRecord', result.columnVisibilityRecord);
-        Test.assertIsEqual(result.columnVisibilityRecord.geoviewID, false);
+        test.addStep('Verifying allFeaturesDataArray has entries for the layer...');
+        Test.assertIsArrayLengthEqual(result.commemorativeData, 600);
+
+        test.addStep(`Verifying only the ${columnFilters.length} active filters are stored...`);
+        Test.assertIsArrayLengthEqual(result.filtersBefore, columnFilters.length);
+
+        test.addStep('Verifying filters are empty after clear...');
+        Test.assertIsArrayLengthEqual(result.filtersAfter, 0);
+      },
+      (test) => {
+        // If a layer
+        if (fixtureLayerPath) {
+          // Remove the layer
+          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        }
       }
     );
   }
@@ -100,15 +195,44 @@ export class DataTableTester extends GVAbstractTester {
    * accessorFn"). GeoPackage preserves a blank-named column verbatim, so opening its data table exercises the crash
    * path. The test passes when the data table is created (its table element renders) for the layer.
    *
-   * @param layerPath - The layer path whose table contains an empty-named field
    * @returns A promise that resolves with whether the table rendered when the test completes
    */
-  testEmptyFieldNameDoesNotCrashDataTable(layerPath: string): Promise<Test<boolean>> {
+  testEmptyFieldNameDoesNotCrashDataTable(): Promise<Test<boolean>> {
+    let setupLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
     return this.test(
       'Test empty field name renders the data table without crashing...',
       async (test) => {
+        const failingFixture = (() => {
+          const originalReader = GeoPackageReader.createLayerConfigFromGeoPackage;
+          GeoPackageReader.createLayerConfigFromGeoPackage = () => Promise.reject(new Error('Expected fixture reader failure'));
+          try {
+            return this.addGeopackageRailwaysCartoFerDebarcadere(test);
+          } finally {
+            GeoPackageReader.createLayerConfigFromGeoPackage = originalReader;
+          }
+        })();
+        Test.assertIsEqual(typeof failingFixture.layerPath, 'string');
+        Test.assertIsNotEqual(failingFixture.layerPath, '');
+        Test.assertIsEqual(failingFixture.promiseLayer instanceof Promise, true);
+
+        let fixtureFailure: unknown;
+        try {
+          await failingFixture.promiseLayer;
+        } catch (error) {
+          fixtureFailure = error;
+        }
+        Test.assertIsDefined('fixtureFailure', fixtureFailure);
+        Test.assertIsEqual(fixtureFailure instanceof Error, true);
+        if (fixtureFailure instanceof Error) Test.assertIsEqual(fixtureFailure.message, 'Expected fixture reader failure');
+
+        // Add railways empty field layer
+        const fixture = this.addGeopackageRailwaysCartoFerDebarcadere(test);
+        fixtureLayerPath = fixture.layerPath;
+        setupLayer = await fixture.promiseLayer;
+
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, setupLayer.getLayerPath());
 
         // Wait for the table element to render; MRT throws during render if a column has an empty id + accessorFn
         test.addStep('Waiting for the data table to be created...');
@@ -120,170 +244,9 @@ export class DataTableTester extends GVAbstractTester {
       (test, result) => {
         test.addStep('Verifying the data table was created without crashing...');
         Test.assertIsEqual(result, true);
-      }
-    );
-  }
-
-  /**
-   * Tests that mapFilteredRecord is true by default for a layer.
-   *
-   * @returns A promise that resolves with the map-filter state when the test completes
-   */
-  testLayerDataIsFiltered(): Promise<Test<{ mapFiltered: boolean | undefined }>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
-    return this.test(
-      'Test mapFilteredRecord is true by default...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Get the value
-        const mapFiltered = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
-        return { mapFiltered };
-      },
-      (test, result) => {
-        const { mapFiltered } = result;
-        test.addStep('Verifying mapFilteredRecord is true by default...');
-        Test.assertIsEqual(mapFiltered, true);
-      }
-    );
-  }
-
-  /**
-   * Tests province text filtering and minimum/maximum date filtering on the polygon layer.
-   *
-   * @returns A promise that resolves with the row counts after each filter
-   */
-  testPolygonsAdditionalFilters(): Promise<Test<{ provinceFilterCount: number; minDateFilterCount: number; maxDateFilterCount: number }>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
-    return this.test(
-      'Test polygons additional filters...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Find the data table column filter input for the 'name' column and set its value
-        await this.setDataTableColumnFilterInput(test, layerPath, 'province', 'on');
-
-        // Get the data table rows count after applying the name filter
-        const provinceFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
-
-        // Find the data table column filter input for the 'creationDate' column and set its minimum value
-        await this.setDataTableColumnFilterInputMin(test, layerPath, 'creationDate', '2020-01-01');
-
-        // Get the data table rows count after applying the minimum date filter
-        const minDateFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
-
-        // Find the data table column filter input for the 'creationDate' column and set its maximum value
-        await this.setDataTableColumnFilterInputMax(test, layerPath, 'creationDate', '2020-03-01');
-
-        // Get the data table rows count after applying the maximum date filter
-        const maxDateFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
-
-        // Return the row counts for each filter state
-        return { provinceFilterCount, minDateFilterCount, maxDateFilterCount };
-      },
-      (test, result) => {
-        test.addStep('Verifying polygons additional filters...');
-        Test.assertIsEqual(result.provinceFilterCount, 2);
-        Test.assertIsEqual(result.minDateFilterCount, 2);
-        Test.assertIsEqual(result.maxDateFilterCount, 1);
-      },
-      async (test) => {
-        // Reset the filters to none
-        await this.clearDataTableFilters(test);
-      }
-    );
-  }
-
-  /**
-   * Tests that setting mapFilteredRecord to false updates the store.
-   *
-   * @param layerPath - The layer path whose map-filter state is changed
-   * @returns A promise that resolves with the map-filter state when the test completes
-   */
-  testSetMapFilteredRecordFalse(layerPath: string): Promise<Test<boolean | undefined>> {
-    return this.test(
-      'Test setting mapFilteredRecord to false...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Set to false
-        test.addStep('Setting mapFilteredRecord to false...');
-        this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, false);
-
-        // Read back
-        return getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
-      },
-      (test, result) => {
-        test.addStep('Verifying mapFilteredRecord was set to false...');
-        Test.assertIsEqual(result, false);
       },
       (test) => {
-        // Restore to true
-        test.addStep('Restoring mapFilteredRecord to true...');
-        this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
-      }
-    );
-  }
-
-  /**
-   * Tests that setting a global filter updates the store.
-   *
-   * @param layerPath - The layer path whose global filter is changed
-   * @param globalFilterValue - The global filter value to apply
-   * @returns A promise that resolves with the filter value and switch state when the test completes
-   */
-  testGlobalFilterRecord(
-    layerPath: string,
-    globalFilterValue: string
-  ): Promise<Test<{ globalFilter: string; isFilterMapDisabled: boolean }>> {
-    return this.test(
-      'Test global filter record updates store and disables map filter toggle...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Ensure mapFilteredRecord is true before setting global filter
-        this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
-
-        // Set a global filter
-        test.addStep(`Setting global filter to '${globalFilterValue}'...`);
-        this.getControllersRegistry().dataTableController.setGlobalFilterRecord(layerPath, globalFilterValue);
-
-        // Read back global filter value from store
-        const settings = getStoreDataTableLayerSettings(this.getMapId());
-        const globalFilter = settings[layerPath]?.globalFilterRecord;
-
-        // Check the DOM for the disabled state of the filter-map switch
-        // The Switch component renders with label text from t('dataTable.filterMap')
-        // When disabled, the MUI Switch input element has the 'disabled' attribute
-        test.addStep('Checking DOM for disabled filter-map switch...');
-        const mapId = this.getMapId();
-        const switchInputs = DomHelper.queryGVSelectorAll(mapId, '.MuiSwitch-input');
-        let isFilterMapDisabled = false;
-        switchInputs.forEach((input) => {
-          if ((input as HTMLInputElement).disabled) {
-            isFilterMapDisabled = true;
-          }
-        });
-
-        // Clear the global filter
-        test.addStep('Clearing global filter...');
-        this.getControllersRegistry().dataTableController.setGlobalFilterRecord(layerPath, '');
-
-        return { globalFilter, isFilterMapDisabled };
-      },
-      (test, result) => {
-        const { globalFilter, isFilterMapDisabled } = result;
-        test.addStep(`Verifying global filter was set to ${globalFilterValue}'...`);
-        Test.assertIsEqual(globalFilter, globalFilterValue);
-
-        test.addStep('Verifying filter-map switch is disabled in DOM when global filter is active...');
-        Test.assertIsEqual(isFilterMapDisabled, true);
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -354,132 +317,6 @@ export class DataTableTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that column filters can be set and cleared in the store.
-   *
-   * NOTE: This test only verifies store-level set/clear. The MRT table does not react to programmatic
-   * `setColumnFiltersRecord` changes — it manages its own internal filter state. Therefore, `rowsFilteredRecord`
-   * cannot be verified here (it only updates when the user interacts with the filter UI directly).
-   *
-   * @param layerPath - The layer path whose column filters are changed
-   * @param columnFilters - The column filters to set before clearing
-   * @returns A promise that resolves with the filters before and after clearing
-   */
-  testClearFiltersResetsState(
-    layerPath: string,
-    columnFilters: TypeColumnFiltersState
-  ): Promise<Test<{ filtersBefore: unknown[]; filtersAfter: unknown[] }>> {
-    return this.test(
-      'Test clear filters resets columnFiltersRecord...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Set column filters in store
-        test.addStep(`Setting ${columnFilters.length} active column filters and an empty range filter in the store...`);
-        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, [
-          ...columnFilters,
-          { id: 'emptyRange', value: [undefined, undefined] },
-        ]);
-
-        // Verify they were set
-        const settingsBefore = getStoreDataTableLayerSettings(this.getMapId());
-        const filtersBefore = settingsBefore[layerPath]?.columnFiltersRecord;
-
-        // Clear the filters
-        test.addStep('Clearing column filters...');
-        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, []);
-
-        // Read back
-        const settingsAfter = getStoreDataTableLayerSettings(this.getMapId());
-        const filtersAfter = settingsAfter[layerPath]?.columnFiltersRecord;
-
-        return { filtersBefore, filtersAfter };
-      },
-      (test, result) => {
-        const { filtersBefore, filtersAfter } = result;
-        test.addStep(`Verifying only the ${columnFilters.length} active filters are stored...`);
-        Test.assertIsArrayLengthEqual(filtersBefore, columnFilters.length);
-
-        test.addStep('Verifying filters are empty after clear...');
-        Test.assertIsArrayLengthEqual(filtersAfter, 0);
-      }
-    );
-  }
-
-  /**
-   * Tests that column visibility can be toggled in the store.
-   *
-   * @param layerPath - The layer path whose column visibility is changed
-   * @param col1 - The first column ID expected to be hidden
-   * @param col2 - The second column ID expected to remain hidden
-   * @returns A promise that resolves with the column visibility record after hiding the columns
-   */
-  testColumnVisibilityToggle(layerPath: string, col1: string, col2: string): Promise<Test<Record<string, boolean>>> {
-    return this.test(
-      'Test column visibility toggle updates store...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Hide Province column
-        test.addStep('Hiding Province column...');
-        this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, { geoviewID: false, Province: false });
-
-        // Read back
-        const settings = getStoreDataTableLayerSettings(this.getMapId());
-        const visibilityAfterHide = settings[layerPath]?.columnVisibilityRecord;
-
-        // Restore
-        test.addStep('Restoring column visibility...');
-        this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, { geoviewID: false });
-
-        return visibilityAfterHide;
-      },
-      (test, result) => {
-        test.addStep(`Verifying ${col1} column is hidden...`);
-        Test.assertIsEqual(result[col1], false);
-
-        test.addStep(`Verifying ${col2} column is still hidden...`);
-        Test.assertIsEqual(result[col2], false);
-      }
-    );
-  }
-
-  /**
-   * Tests that rowsFilteredRecord updates after setting a row count.
-   *
-   * @param layerPath - The layer path whose filtered row count is changed
-   * @param rows - The row count to set and verify
-   * @returns A promise that resolves with the recorded row count
-   */
-  testRowsFilteredRecordCount(layerPath: string, rows: number): Promise<Test<number>> {
-    return this.test(
-      'Test rowsFilteredRecord updates in store...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Set rows filtered count
-        test.addStep(`Setting rowsFilteredRecord to ${rows}...`);
-        this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, rows);
-
-        // Read back
-        const rowsFiltered = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
-
-        // Reset
-        test.addStep('Resetting rowsFilteredRecord to 0...');
-        this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, 0);
-
-        return rowsFiltered;
-      },
-      (test, result) => {
-        test.addStep(`Verifying rowsFilteredRecord is ${rows}...`);
-        Test.assertIsEqual(result, rows);
-      }
-    );
-  }
-
-  /**
    * Tests that filter-by-extent toggle is present for vector layers.
    *
    * @param layerPath - The vector layer path to check
@@ -515,15 +352,22 @@ export class DataTableTester extends GVAbstractTester {
   /**
    * Tests that filter-by-extent toggle is absent for Esri Dynamic layers.
    *
-   * @param layerPath - The Esri Dynamic layer path to check
    * @returns A promise that resolves with whether the filter-by-extent toggle is present
    */
-  testFilterByExtentUnavailableForEsriDynamic(layerPath: string): Promise<Test<boolean>> {
+  testFilterByExtentUnavailableForEsriDynamic(): Promise<Test<boolean>> {
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+
     return this.test(
       'Test filter-by-extent toggle absent for Esri Dynamic layer...',
       async (test) => {
+        // Add the Esri Dynamic Forest layer
+        const fixture = this.addLayerEsriFeatureForestIndustry(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, gvLayer.getLayerPath());
 
         // Check DOM — FilterDataToExtent is NOT rendered for Esri Dynamic (conditional: {!isEsriDynamic && ...})
         // The component uses the label t('dataTable.filterDataToExtent') — look for its absence
@@ -542,230 +386,10 @@ export class DataTableTester extends GVAbstractTester {
       (test, result) => {
         test.addStep('Verifying filter-by-extent toggle is NOT present for Esri Dynamic...');
         Test.assertIsEqual(result, false);
-      }
-    );
-  }
-
-  /**
-   * Tests that filter-by-extent filters features to the current map extent on GeoJSON layer.
-   *
-   * @returns A promise that resolves with the summary text for both extent-filter states
-   */
-  testFilterByExtentOnGeoJSONOntario(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-    const MAP_WIDTH_WHEN_3_FEATURES_SHOW = 1747;
-
-    return this.test(
-      'Test filter-by-extent on GeoJSON layer (zoom to Ontario)...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Force OL to recalculate viewport dimensions (needed when the map tab is hidden)
-        this.getMapViewer().map.updateSize();
-
-        // Zoom to Ontario using lonlat extent via MapViewer directly (same as console: cgpv.api.getMapViewer().zoomToLonLatExtentOrCoordinate)
-        test.addStep('Zooming to Ontario extent...');
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(GVAbstractTester.ONTARIO_EXTENT, GVAbstractTester.USE_ZOOM_ANIMATION);
-
-        // Wait for render after zoom
-        await this.getMapViewer().waitForRender();
-
-        // Get the dom element we want to track for changes
-        test.addStep('Waiting for filter-results-summary to render...');
-        const summaryEl = await DomHelper.DataTable.waitForFilterResultsSummary(this.getMapId());
-
-        // Trigger the store change
-        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
-
-        // Wait for react to update the content
-        await DomHelper.waitForReactIdle();
-
-        // Read DOM summary text with filter enabled
-        test.addStep('Reading filter-results-summary with extent filter ON...');
-        const summaryTextEnabled = summaryEl.textContent;
-
-        // Disable filter by extent
-        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
-
-        // Wait for react to update the content
-        await DomHelper.waitForReactIdle();
-
-        // Read DOM summary text with filter disabled
-        test.addStep('Reading filter-results-summary with extent filter OFF...');
-        const summaryTextDisabled = summaryEl.textContent;
-
-        return { summaryTextEnabled, summaryTextDisabled };
       },
-      (test, result) => {
-        const { summaryTextEnabled, summaryTextDisabled } = result as { summaryTextEnabled: string; summaryTextDisabled: string };
-
-        // If the map width is greater than map width when 3 features show
-        let includeCount = '2';
-        if (this.getMapViewer().map.getSize()![0] >= MAP_WIDTH_WHEN_3_FEATURES_SHOW) {
-          includeCount = '3';
-        }
-
-        test.addStep(`Verifying extent filter shows "${includeCount} of 4 row(s) filtered" (got "${summaryTextEnabled}")...`);
-        Test.assertIsEqual(summaryTextEnabled.includes(`${includeCount} of 4 row(s) filtered`), true);
-
-        test.addStep(`Verifying without extent filter shows "3 of 4 row(s) filtered" (got "${summaryTextDisabled}")...`);
-        Test.assertIsEqual(summaryTextDisabled.includes('3'), true);
-        Test.assertIsEqual(summaryTextDisabled.includes('4'), true);
-      }
-    );
-  }
-
-  /**
-   * Tests that map pans re-render the table only when extent filtering is enabled for its layer.
-   *
-   * Every map extent change (pan, zoom, fullscreen or footer resize) used to rebuild the whole table, which made
-   * entering fullscreen with an open table slow.
-   *
-   * @param layerPath - The layer path to open in the data table
-   * @returns A promise that resolves with extent-change and DataTable-render observations for both filter states
-   */
-  testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableRenders>> {
-    let originalCenter: Coordinate | undefined;
-    let originalFilterDataToExtent: boolean | undefined;
-
-    return this.test(
-      'Test panning the map does not re-render the data table...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        originalFilterDataToExtent = getStoreDataTableLayerSettings(this.getMapId())[layerPath]?.filterDataToExtent ?? false;
-
-        // Establish a settled baseline with extent filtering disabled
-        test.addStep('Disabling filter-by-extent and waiting for the data table to render...');
-        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
-        await DomHelper.DataTable.waitForDataTable(this.getMapId());
-
-        const mapViewer = this.getMapViewer();
-        mapViewer.map.updateSize();
-        mapViewer.map.renderSync();
-        await DomHelper.waitForReactIdle();
-
-        const view = mapViewer.getView();
-        const center = view.getCenter();
-        const resolution = view.getResolution();
-        if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
-        originalCenter = [...center];
-
-        // Include the map ID because the logger singleton counter is shared by all maps on the page.
-        const dataTableRenderTrace = `components/data-table/data-table - ${this.getMapId()}`;
-        const getDataTableRenderCount = (): number => {
-          const renderCount = logger.logCountRenderPerComponent[dataTableRenderTrace];
-          if (renderCount === undefined) throw new Error('DataTable render tracing is unavailable in this test environment.');
-          return renderCount;
-        };
-
-        test.addStep('Panning with extent filtering disabled and tracking DataTable renders...');
-        const extentBeforeWithoutFilter = getStoreMapExtent(this.getMapId());
-        const renderCountBeforeWithoutFilter = getDataTableRenderCount();
-        view.setCenter([center[0] + resolution * 100, center[1]]);
-        mapViewer.map.renderSync();
-        await DomHelper.waitForReactIdle();
-        const extentChangedWithoutFilter = JSON.stringify(extentBeforeWithoutFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
-        const renderCountAfterWithoutFilter = getDataTableRenderCount();
-        const tableRendersWithoutFilter = renderCountAfterWithoutFilter - renderCountBeforeWithoutFilter;
-
-        // Return to the starting extent before confirming filtered data refreshes on a later pan
-        view.setCenter(originalCenter);
-        mapViewer.map.renderSync();
-        await DomHelper.waitForReactIdle();
-
-        test.addStep('Enabling extent filtering, then panning and tracking DataTable renders...');
-        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
-        await DomHelper.waitForReactIdle();
-        const extentBeforeWithFilter = getStoreMapExtent(this.getMapId());
-        const renderCountBeforeWithFilter = getDataTableRenderCount();
-        view.setCenter([originalCenter[0] + resolution * 100, originalCenter[1]]);
-        mapViewer.map.renderSync();
-        await DomHelper.waitForReactIdle();
-
-        const extentChangedWithFilter = JSON.stringify(extentBeforeWithFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
-        const renderCountAfterWithFilter = getDataTableRenderCount();
-        const tableRendersWithFilter = renderCountAfterWithFilter - renderCountBeforeWithFilter;
-        return { extentChangedWithoutFilter, tableRendersWithoutFilter, extentChangedWithFilter, tableRendersWithFilter };
-      },
-      (test, result) => {
-        test.addStep('Verifying a pan with extent filtering disabled changed the map extent without rendering DataTable...');
-        Test.assertIsEqual(result.extentChangedWithoutFilter, true);
-        Test.assertIsEqual(result.tableRendersWithoutFilter, 0);
-
-        test.addStep('Verifying a pan with extent filtering enabled changed the map extent and rendered DataTable...');
-        Test.assertIsEqual(result.extentChangedWithFilter, true);
-        Test.assertIsEqual(result.tableRendersWithFilter > 0, true);
-      },
-      async (): Promise<void> => {
-        if (originalFilterDataToExtent !== undefined) {
-          this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, originalFilterDataToExtent);
-        }
-        if (originalCenter) {
-          const mapViewer = this.getMapViewer();
-          mapViewer.getView().setCenter(originalCenter);
-          mapViewer.map.renderSync();
-          await DomHelper.waitForReactIdle();
-        }
-      }
-    );
-  }
-
-  /**
-   * Tests that a temporary zoom highlight (as used by the data table row zoom) is removed automatically.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testTemporaryZoomHighlightExpires(layerPath: string): Promise<Test<{ shown: boolean; remaining: boolean }>> {
-    return this.test(
-      'Test temporary zoom highlight is removed automatically...',
-      async (test) => {
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
-
-        // Clear existing highlights so the test only tracks the row zoom highlight
-        const { mapController } = this.getControllersRegistry();
-        mapController.removeHighlightedFeature('all');
-
-        // Use an enabled row zoom button to exercise the data table's temporary highlight
-        const zoomButton = DomHelper.DataTable.getFirstRowZoomButton(this.getMapId());
-        if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
-
-        test.addStep('Clicking the first row zoom button...');
-        zoomButton.click();
-
-        // Ignore removal events and wait for an added feature with a trackable UID
-        test.addStep('Waiting for the row zoom highlight to appear...');
-        const highlightEvent = await mapController.onceFeatureHighlighted(
-          (event) => event.operation === 'added' && event.feature !== 'all' && Boolean(event.feature.uid)
-        );
-        if (highlightEvent.feature === 'all' || !highlightEvent.feature.uid) {
-          throw new Error(`No feature UID was included in the row zoom highlight event for ${layerPath}.`);
-        }
-
-        // Get the feature uid from the highlight event
-        const featureUid = highlightEvent.feature.uid;
-        const shown = getStoreMapHighlightedFeatures(this.getMapId()).some((highlightedFeature) => highlightedFeature.uid === featureUid);
-
-        // Allow a timing margin beyond the highlight timeout before checking the same feature
-        test.addStep('Waiting for the row zoom highlight to expire...');
-        await delay(TIMEOUT.featureHighlight * 2);
-        const remaining = getStoreMapHighlightedFeatures(this.getMapId()).some(
-          (highlightedFeature) => highlightedFeature.uid === featureUid
-        );
-
-        return { shown, remaining };
-      },
-      (test, result) => {
-        test.addStep('Verifying the row zoom highlight appeared and then expired...');
-        Test.assertIsEqual(result.shown, true);
-        Test.assertIsEqual(result.remaining, false);
-      },
-      () => {
-        // Leave no highlights behind if the test fails before automatic expiry
-        this.getControllersRegistry().mapController.removeHighlightedFeature('all');
+      (test) => {
+        // Cleanup
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -773,21 +397,87 @@ export class DataTableTester extends GVAbstractTester {
   /**
    * Tests that showUnsymbolizedFeatures: false pre-filters the data table to exclude unsymbolized features.
    *
-   * @param layerPath - The layer path whose unsymbolized features are excluded
-   * @param countFilter - The expected number of features shown
-   * @param countTotal - The expected total number of features
    * @returns A promise that resolves with the feature count and summary text
    */
-  testShowUnsymbolizedFeaturesFalsePrefiltersTable(
-    layerPath: string,
-    countFilter: number,
-    countTotal: number
-  ): Promise<Test<{ featureCount: number; summaryText: string }>> {
+  testShowUnsymbolizedFeaturesTrue(): Promise<Test<{ featureCount: number; summaryText: string }>> {
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+    const countTotal = 213;
+
+    // Get the global settings before the test
+    const showUnsymbolizedFeaturesBefore = getStoreAppShowUnsymbolizedFeatures(this.getMapId());
+
     return this.test(
-      'Test showUnsymbolizedFeatures false pre-filters data table (68 of 213)...',
+      `Test showUnsymbolizedFeatures true not pre-filtering data table...`,
       async (test) => {
+        // Update the global setting for this test
+        setStoreAppShowUnsymbolizedFeatures(this.getMapId(), true);
+
+        // Add Permafrost layer
+        const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
         // Wait for layer registration and data-table to be loaded with the layer in question
-        const features = await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+        const features = await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, gvLayer.getLayerPath());
+        const featureCount = features?.length ?? 0;
+
+        // Wait for the dom element we want to check for content
+        test.addStep('Waiting for filter-results-summary to render with the content...');
+        const summaryEl = await DomHelper.DataTable.waitForFilterResultsSummary(this.getMapId());
+
+        // Check the DOM for the filter results summary text
+        test.addStep('Checking DOM for filter-results-summary...');
+        const summaryText = summaryEl.textContent;
+
+        await test.waitForFun();
+
+        return { featureCount, summaryText };
+      },
+      (test, result) => {
+        const { summaryText } = result;
+        test.addStep(`Verifying DOM summary shows "${countTotal} feature(s)" (got "${summaryText}")...`);
+        Test.assertIsEqual(summaryText.includes(`${countTotal} feature(s)`), true);
+      },
+      (test) => {
+        // Cleanup: remove the added layer if it exists
+        if (fixtureLayerPath) {
+          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        }
+
+        // Reset the global setting
+        setStoreAppShowUnsymbolizedFeatures(this.getMapId(), showUnsymbolizedFeaturesBefore);
+      }
+    );
+  }
+
+  /**
+   * Tests that showUnsymbolizedFeatures: false pre-filters the data table to exclude unsymbolized features.
+   *
+   * @returns A promise that resolves with the feature count and summary text
+   */
+  testShowUnsymbolizedFeaturesFalse(): Promise<Test<{ featureCount: number; summaryText: string }>> {
+    let gvLayer: AbstractBaseGVLayer | undefined;
+    let fixtureLayerPath: string | undefined;
+    const countFilter = 68;
+    const countTotal = 213;
+
+    // Get the global settings before the test
+    const showUnsymbolizedFeaturesBefore = getStoreAppShowUnsymbolizedFeatures(this.getMapId());
+
+    return this.test(
+      `Test showUnsymbolizedFeatures false pre-filters data table (${countFilter} of ${countTotal})...`,
+      async (test) => {
+        // Update the global setting for this test
+        setStoreAppShowUnsymbolizedFeatures(this.getMapId(), false);
+
+        // Add Permafrost layer
+        const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        gvLayer = await fixture.promiseLayer;
+
+        // Wait for layer registration and data-table to be loaded with the layer in question
+        const features = await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, gvLayer.getLayerPath());
         const featureCount = features?.length ?? 0;
 
         // Wait for the dom element we want to check for content
@@ -805,6 +495,15 @@ export class DataTableTester extends GVAbstractTester {
         test.addStep(`Verifying DOM summary shows "${countFilter} feature(s) showing (${countTotal} total)" (got "${summaryText}")...`);
         Test.assertIsEqual(summaryText.includes(countFilter.toString()), true);
         Test.assertIsEqual(summaryText.includes(countTotal.toString()), true);
+      },
+      (test) => {
+        // Cleanup: remove the added layer if it exists
+        if (fixtureLayerPath) {
+          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        }
+
+        // Reset the global setting
+        setStoreAppShowUnsymbolizedFeatures(this.getMapId(), showUnsymbolizedFeaturesBefore);
       }
     );
   }
@@ -933,6 +632,263 @@ export class DataTableTester extends GVAbstractTester {
   // #region PRIVATE METHODS
 
   /**
+   * Captures default settings and exercises visibility and row-count setters without changing the later filter baseline.
+   *
+   * @param test - The test instance used to log scenario steps
+   * @param layerPath - The generated GeoJSON layer path
+   * @param expectedRowsFiltered - The synthetic row count used to exercise the setter
+   * @returns The initial settings and setter observations
+   */
+  #hideColumnsAndUpdateRowCountThenRestore(
+    test: Test<GeoJsonDataTableResult>,
+    layerPath: string,
+    expectedRowsFiltered: number
+  ): GeoJsonSettingsResult {
+    // Capture the initial settings before controller updates replace them in the store.
+    const settings = getStoreDataTableLayerSettings(this.getMapId())[layerPath];
+
+    // Keep the default map-filter state separate from the explicit false/true changes below.
+    const mapFiltered = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
+
+    // Exercise the visibility setter without exposing the internal geoviewID column.
+    test.addStep('Hiding Province column...');
+    this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, { geoviewID: false, Province: false });
+    const visibilityAfterHide = getStoreDataTableLayerSettings(this.getMapId())[layerPath].columnVisibilityRecord;
+
+    // Restore the original visibility before later checks interact with the filter inputs.
+    test.addStep('Restoring column visibility...');
+    this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, settings.columnVisibilityRecord);
+
+    // This checks the store setter independently of row counts calculated by the rendered table.
+    const initialRowsFiltered = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
+    test.addStep(`Setting rowsFilteredRecord to ${expectedRowsFiltered}...`);
+    this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, expectedRowsFiltered);
+    const rowsFilteredAfterSet = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
+
+    // Do not let the synthetic count become the baseline for the UI-driven filtering checks.
+    test.addStep('Restoring rowsFilteredRecord before applying filters...');
+    this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, initialRowsFiltered);
+
+    return { settings, mapFiltered, visibilityAfterHide, rowsFilteredAfterSet };
+  }
+
+  /**
+   * Captures cumulative column filters and global-filter behavior, then clears the global search before extent checks.
+   *
+   * @param test - The test instance used to log scenario steps
+   * @param layerPath - The generated GeoJSON layer path
+   * @param globalFilterValue - The global search value to store
+   * @returns Column-filter counts, explicit map-filter state, and global-filter observations
+   */
+  async #applyColumnAndGlobalFilters(
+    test: Test<GeoJsonDataTableResult>,
+    layerPath: string,
+    globalFilterValue: string
+  ): Promise<GeoJsonFiltersResult> {
+    // Use the filter inputs so the table recalculates its rows; store-only changes do not exercise that path.
+    await this.setDataTableColumnFilterInput(test, layerPath, 'province', 'on');
+    const provinceFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
+
+    // Keep the province filter active while progressively narrowing the creation-date range.
+    await this.setDataTableColumnFilterInputMin(test, layerPath, 'creationDate', '2020-01-01');
+    const minDateFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
+
+    // Adding the upper bound distinguishes a working range filter from a minimum-only filter.
+    await this.setDataTableColumnFilterInputMax(test, layerPath, 'creationDate', '2020-03-01');
+    const maxDateFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), layerPath);
+
+    // Capture the explicit opt-out before re-enabling map filtering for the global-filter scenario.
+    test.addStep('Setting mapFilteredRecord to false...');
+    this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, false);
+    const mapFilteredAfterSet = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
+
+    // Isolate global filtering from the province/date filters and start with map filtering enabled.
+    await this.clearDataTableFilters(test);
+    this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
+
+    test.addStep(`Setting global filter to '${globalFilterValue}'...`);
+
+    // TODO: REVIEW CLAUDE - Review this paragraph automatically added by Claude
+    // The table owns the search state; its hook writes to the store but does not read later store changes.
+    const searchInput = DomHelper.queryGVSelector<HTMLInputElement>(
+      this.getMapId(),
+      '.data-table-panel .data-table-top-toolbar form[role="search"] input'
+    );
+    if (!searchInput) throw new Error(`No data-table global search input is available for ${layerPath}.`);
+    DomHelper.setInputValue(searchInput, globalFilterValue);
+    await whenThisThen(() => getStoreDataTableLayerSettings(this.getMapId())[layerPath].globalFilterRecord === globalFilterValue);
+
+    await DomHelper.waitForReactIdle();
+    const globalFilter = getStoreDataTableLayerSettings(this.getMapId())[layerPath].globalFilterRecord;
+
+    // A stored global-filter value alone does not prove that the rendered switch has become disabled.
+    test.addStep('Checking DOM for disabled filter-map switch...');
+    const filterMapInput = DomHelper.queryGVSelector<HTMLInputElement>(this.getMapId(), '.data-table-panel .data-table-filter-map input');
+    if (!filterMapInput) throw new Error(`No data-table filter-map switch is available for ${layerPath}.`);
+    const isFilterMapDisabled = filterMapInput.disabled;
+
+    // Extent filtering must run without the global search or the earlier column filters restricting its baseline.
+    test.addStep('Clearing global filter before testing the Ontario extent...');
+
+    // TODO: REVIEW CLAUDE - Review this paragraph automatically added by Claude
+    DomHelper.setInputValue(searchInput, '');
+    await whenThisThen(() => getStoreDataTableLayerSettings(this.getMapId())[layerPath].globalFilterRecord === '');
+    await DomHelper.waitForReactIdle();
+
+    return { provinceFilterCount, minDateFilterCount, maxDateFilterCount, mapFilteredAfterSet, globalFilter, isFilterMapDisabled };
+  }
+
+  /**
+   * Captures the Ontario extent-filter summary and verifies restoration through a pre-toggle baseline snapshot.
+   *
+   * @param test - The test instance used to log scenario steps
+   * @param layerPath - The generated GeoJSON layer path
+   * @returns The viewport-dependent expected count and summaries before, during, and after extent filtering
+   */
+  async #zoomToOntarioAndToggleExtentFilter(test: Test<GeoJsonDataTableResult>, layerPath: string): Promise<GeoJsonExtentResult> {
+    // The existing Ontario-fit expectation depends on the rendered viewport width, not just the requested extent.
+    const mapWidthWhenThreeFeaturesShow = 1747;
+    // Recalculate the viewport before fitting, since the containing map tab may have changed size.
+    this.getMapViewer().map.updateSize();
+    test.addStep('Zooming to Ontario extent...');
+    await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(
+      GVAbstractTester.ONTARIO_EXTENT,
+      GVAbstractTester.USE_ZOOM_ANIMATION
+    );
+
+    // Wait for the fitted map to finish rendering before observing the extent-dependent table.
+    await this.getMapViewer().waitForRender();
+
+    // An unusable viewport would make the width-dependent polygon expectation meaningless.
+    const mapSize = this.getMapViewer().map.getSize();
+    if (!mapSize || mapSize[0] <= 0 || mapSize[1] <= 0) throw new Error('A usable map viewport is required to test extent filtering.');
+
+    // A wider viewport includes a third polygon after the Ontario fit.
+    const extentFilteredCount = mapSize[0] >= mapWidthWhenThreeFeaturesShow ? 3 : 2;
+
+    test.addStep('Waiting for filter-results-summary to render...');
+    const summaryEl = await DomHelper.DataTable.waitForFilterResultsSummary(this.getMapId());
+
+    // Other table/visibility filters may remain active; extent filtering must restore this baseline, not assume four visible rows.
+    const summaryTextBeforeExtent = summaryEl.textContent;
+
+    // Keep the summary element across both toggles so the observations come from the same mounted table.
+    this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
+    await DomHelper.waitForReactIdle();
+    test.addStep('Reading filter-results-summary with extent filter ON...');
+    const summaryTextEnabled = summaryEl.textContent;
+
+    // Disabling extent filtering must restore the same summary observed before enabling it.
+    this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
+    await DomHelper.waitForReactIdle();
+    test.addStep('Reading filter-results-summary with extent filter OFF...');
+    const summaryTextDisabled = summaryEl.textContent;
+
+    return { extentFilteredCount, summaryTextBeforeExtent, summaryTextEnabled, summaryTextDisabled };
+  }
+
+  /**
+   * Exercises the row-zoom UI and captures whether its feature highlight appears and expires.
+   *
+   * @param test - The test instance used to log scenario steps
+   * @param layerPath - The generated GeoJSON layer path, included in setup errors
+   * @returns Highlight presence before and after the expiry delay
+   */
+  async #zoomToRowAndWaitForHighlightExpiry(test: Test<GeoJsonDataTableResult>, layerPath: string): Promise<GeoJsonHighlightResult> {
+    // Isolate the row-zoom highlight from highlights created by earlier interactions.
+    const { mapController } = this.getControllersRegistry();
+    mapController.removeHighlightedFeature('all');
+    // Use the row's real UI action rather than adding a highlight directly through the controller.
+    const zoomButton = DomHelper.DataTable.getFirstRowZoomButton(this.getMapId());
+    if (!zoomButton) throw new Error(`No enabled row zoom button is available for ${layerPath}.`);
+
+    // Subscribe before clicking so even a synchronously emitted highlight event is captured.
+    test.addStep('Waiting for the row zoom highlight to appear...');
+    const highlightPromise = mapController.onceFeatureHighlighted(
+      // Ignore removal notifications and bulk-feature events that cannot identify the highlighted row.
+      (event) => event.operation === 'added' && event.feature !== 'all' && Boolean(event.feature.uid)
+    );
+    test.addStep('Clicking the first row zoom button...');
+    zoomButton.click();
+    const highlightEvent = await highlightPromise;
+    if (highlightEvent.feature === 'all' || !highlightEvent.feature.uid) {
+      throw new Error(`No feature UID was included in the row zoom highlight event for ${layerPath}.`);
+    }
+
+    // Track the same feature through expiry instead of checking whether any highlight remains.
+    const featureUid = highlightEvent.feature.uid;
+    const highlightShown = getStoreMapHighlightedFeatures(this.getMapId()).some(
+      (highlightedFeature) => highlightedFeature.uid === featureUid
+    );
+    // Allow a timing margin beyond automatic expiry without weakening the same-feature removal check.
+    test.addStep('Waiting for the row zoom highlight to expire...');
+    await delay(TIMEOUT.featureHighlight * 2);
+    const highlightRemaining = getStoreMapHighlightedFeatures(this.getMapId()).some(
+      (highlightedFeature) => highlightedFeature.uid === featureUid
+    );
+
+    return { highlightShown, highlightRemaining };
+  }
+
+  /**
+   * Verifies the captured GeoJSON scenarios without reading the subsequently changed store.
+   *
+   * @param test - The test instance used to log assertions
+   * @param result - The observations returned by the execution callback
+   * @param expectedRowsFiltered - The expected synthetic row count
+   * @param globalFilterValue - The expected global search value
+   */
+  static #assertGeoJsonDataTableResult(
+    test: Test<GeoJsonDataTableResult>,
+    result: GeoJsonDataTableResult,
+    expectedRowsFiltered: number,
+    globalFilterValue: string
+  ): void {
+    // Verify captured observations only; execution has already cleared or changed several of these states.
+    test.addStep('Verifying allFeaturesDataArray has entries for the layer...');
+    Test.assertIsArrayLengthEqual(result.geojsonData, 4);
+    Test.assertIsDefined('columnVisibilityRecord', result.settings.columnVisibilityRecord);
+    Test.assertIsEqual(result.settings.columnVisibilityRecord.geoviewID, false);
+
+    test.addStep('Verifying mapFilteredRecord is true by default...');
+    Test.assertIsEqual(result.mapFiltered, true);
+
+    test.addStep('Verifying Province and geoviewID columns are hidden after toggling visibility...');
+    Test.assertIsEqual(result.visibilityAfterHide.Province, false);
+    Test.assertIsEqual(result.visibilityAfterHide.geoviewID, false);
+
+    test.addStep(`Verifying rowsFilteredRecord was set to ${expectedRowsFiltered}...`);
+    Test.assertIsEqual(result.rowsFilteredAfterSet, expectedRowsFiltered);
+
+    // These counts reflect cumulative province, minimum-date, and maximum-date restrictions.
+    test.addStep('Verifying polygons additional filters...');
+    Test.assertIsEqual(result.provinceFilterCount, 2);
+    Test.assertIsEqual(result.minDateFilterCount, 2);
+    Test.assertIsEqual(result.maxDateFilterCount, 1);
+
+    test.addStep('Verifying mapFilteredRecord was set to false...');
+    Test.assertIsEqual(result.mapFilteredAfterSet, false);
+
+    test.addStep(`Verifying global filter was set to '${globalFilterValue}'...`);
+    Test.assertIsEqual(result.globalFilter, globalFilterValue);
+
+    test.addStep('Verifying filter-map switch is disabled in DOM when global filter is active...');
+    Test.assertIsEqual(result.isFilterMapDisabled, true);
+
+    test.addStep(`Verifying extent filter shows "${result.extentFilteredCount} of 4 row(s) filtered"...`);
+    Test.assertIsEqual(result.summaryTextEnabled?.includes(`${result.extentFilteredCount} of 4 row(s) filtered`), true);
+
+    // Compare against the actual baseline so unrelated visibility/filter rules remain respected.
+    test.addStep('Verifying disabling extent filtering restores the pre-extent summary...');
+    Test.assertIsEqual(result.summaryTextDisabled, result.summaryTextBeforeExtent);
+
+    // Both observations are required: an absent highlight from the start must not count as successful expiry.
+    test.addStep('Verifying the row zoom highlight appeared and then expired...');
+    Test.assertIsEqual(result.highlightShown, true);
+    Test.assertIsEqual(result.highlightRemaining, false);
+  }
+
+  /**
    * Waits for a data table column filter value to be stored and for React to finish rendering.
    *
    * @param layerPath - The layer path whose filter should be checked
@@ -965,16 +921,51 @@ export class DataTableTester extends GVAbstractTester {
 
 // #region TYPES AND INTERFACES
 
-/** Result of the map pan data table re-render test. */
-export type TestMapPanTableRenders = {
-  /** Whether the map extent changed when extent filtering was disabled. */
-  extentChangedWithoutFilter: boolean;
-  /** The number of DataTable renders when extent filtering was disabled. */
-  tableRendersWithoutFilter: number;
-  /** Whether the map extent changed when extent filtering was enabled. */
-  extentChangedWithFilter: boolean;
-  /** The number of DataTable renders when extent filtering was enabled. */
-  tableRendersWithFilter: number;
+/** Commemorative table state and column-filter snapshots before and after clearing. */
+type CommemorativeDataTableResult = {
+  commemorativeData: TypeFeatureInfoEntry[] | undefined;
+  settings: IDataTableSettings;
+  filtersBefore: TypeColumnFiltersState | undefined;
+  filtersAfter: TypeColumnFiltersState | undefined;
+};
+
+/** Default GeoJSON settings and store setter observations. */
+type GeoJsonSettingsResult = Pick<GeoJsonDataTableResult, 'settings' | 'mapFiltered' | 'visibilityAfterHide' | 'rowsFilteredAfterSet'>;
+
+/** Column/global filter observations captured before the extent scenario. */
+type GeoJsonFiltersResult = Pick<
+  GeoJsonDataTableResult,
+  'provinceFilterCount' | 'minDateFilterCount' | 'maxDateFilterCount' | 'mapFilteredAfterSet' | 'globalFilter' | 'isFilterMapDisabled'
+>;
+
+/** Extent-filter summary snapshots and the viewport-dependent expected count. */
+type GeoJsonExtentResult = Pick<
+  GeoJsonDataTableResult,
+  'extentFilteredCount' | 'summaryTextBeforeExtent' | 'summaryTextEnabled' | 'summaryTextDisabled'
+>;
+
+/** Presence of the row-zoom highlight before and after expiry. */
+type GeoJsonHighlightResult = Pick<GeoJsonDataTableResult, 'highlightShown' | 'highlightRemaining'>;
+
+/** Initial GeoJSON table state, visibility/row-count updates, and filter observations. */
+type GeoJsonDataTableResult = {
+  geojsonData: TypeFeatureInfoEntry[] | undefined;
+  settings: IDataTableSettings;
+  mapFiltered: boolean | undefined;
+  visibilityAfterHide: Record<string, boolean>;
+  rowsFilteredAfterSet: number;
+  mapFilteredAfterSet: boolean | undefined;
+  globalFilter: string;
+  isFilterMapDisabled: boolean;
+  provinceFilterCount: number;
+  minDateFilterCount: number;
+  maxDateFilterCount: number;
+  extentFilteredCount: number;
+  summaryTextBeforeExtent: string | null;
+  summaryTextEnabled: string | null;
+  summaryTextDisabled: string | null;
+  highlightShown: boolean;
+  highlightRemaining: boolean;
 };
 
 // #endregion TYPES AND INTERFACES

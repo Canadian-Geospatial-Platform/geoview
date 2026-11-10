@@ -43,11 +43,12 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests the Data Table footer panel store and DOM behavior:<br/>
-      <b>Features</b> — allFeaturesDataArray population (GeoJSON + ESRI)<br/>
-      <b>Settings</b> — geoviewID column hidden, column visibility toggle, rows filtered count<br/>
-      <b>Filters</b> — mapFilteredRecord default/set, global filter disables toggle, column filter set/clear, Cities name and population range filters<br/>
-      <b>Extent filter</b> — Available for vector, unavailable for ESRI Dynamic, zoom-to-Ontario filtering, no table re-render on map pan when off<br/>
-      <b>Style filter</b> — showUnsymbolizedFeatures:false pre-filters table rows`;
+      <b>Features</b> — GeoJSON and Commemorative data population; empty GeoPackage field name renders without crashing<br/>
+      <b>Settings and filters</b> — GeoJSON column visibility, row counts, map-filter state, column/global filters and Ontario extent filtering;<br/>
+      &nbsp;&nbsp;Commemorative column filter store set/clear; Cities name and population range filters<br/>
+      <b>Extent filter</b> — Toggle absence check on the ESRI Feature Forest Industry fixture<br/>
+      <b>Row zoom</b> — Temporary highlight creation and expiry<br/>
+      <b>Style filter</b> — showUnsymbolizedFeatures true and false table summaries`;
   }
 
   /**
@@ -56,7 +57,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 17;
+    return 7;
   }
 
   /**
@@ -86,8 +87,10 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // await this.#dataTableTester.testLayerDataIsFiltered();
     await this.#dataTableTester.testCitiesNameFilterCount();
-    await this.#dataTableTester.testPolygonsAdditionalFilters();
-    return Promise.resolve();
+    await this.#dataTableTester.testAddGeoJsonCheckDataTablePopulated();
+
+    // Resolve
+    return;
   }
 
   /**
@@ -97,26 +100,13 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Sequential — tests interact with shared data table state
-    await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
-    await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 600);
-    await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault(DataTableTester.GEOJSON_LAYER_PATH);
-    await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable(DataTableTester.GEOPACKAGE_EMPTY_FIELD_LAYER_PATH);
-    await this.#dataTableTester.testLayerDataIsFiltered();
-    await this.#dataTableTester.testPolygonsAdditionalFilters();
-    await this.#dataTableTester.testSetMapFilteredRecordFalse(DataTableTester.GEOJSON_LAYER_PATH);
-    await this.#dataTableTester.testGlobalFilterRecord(DataTableTester.GEOJSON_LAYER_PATH, 'Ontario');
+    await this.#dataTableTester.testAddGeoJsonCheckDataTablePopulated();
+    await this.#dataTableTester.testAddCommemorativeCheckDataTablePopulated();
+    await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable();
     await this.#dataTableTester.testCitiesNameFilterCount();
-    await this.#dataTableTester.testClearFiltersResetsState('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', [
-      { id: 'JUR_EN', value: 'Ontario' },
-      { id: 'CONFLICT_EN', value: 'First' },
-    ]);
-    await this.#dataTableTester.testColumnVisibilityToggle(DataTableTester.GEOJSON_LAYER_PATH, 'Province', 'geoviewID');
-    await this.#dataTableTester.testRowsFilteredRecordCount(DataTableTester.GEOJSON_LAYER_PATH, 3);
-    await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic('forest_industry/0');
-    await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
-    await this.#dataTableTester.testMapPanDoesNotRerenderDataTable(DataTableTester.GEOJSON_LAYER_PATH);
-    await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable('4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8/6', 68, 213);
-    await this.#dataTableTester.testTemporaryZoomHighlightExpires(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic();
+    await this.#dataTableTester.testShowUnsymbolizedFeaturesTrue();
+    await this.#dataTableTester.testShowUnsymbolizedFeaturesFalse();
 
     // Done
     return;
