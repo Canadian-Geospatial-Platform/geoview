@@ -60,6 +60,7 @@ import Notifications from '@/core/components/notifications/notifications';
 
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
+import { buildAppBarFocusTrapId } from '@/core/utils/element-id';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, sortArrayWithEnforcedValues, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -71,6 +72,24 @@ import { getSxClasses } from './app-bar-style';
 
 /** Scroll step size in pixels (matches single button height). */
 const BUTTON_HEIGHT = 54;
+
+/**
+ * Checks whether current focus has moved somewhere that panel dismissal must preserve.
+ *
+ * @param panelElement - The closing panel, when still mounted
+ * @param focusTarget - The intended focus-return target
+ * @returns Whether another control has taken focus
+ */
+function hasFocusMovedOutsidePanel(panelElement: HTMLElement | undefined, focusTarget: HTMLElement | undefined): boolean {
+  const activeElement = DomHelper.getActiveElement();
+  return Boolean(
+    activeElement &&
+    activeElement.tagName !== 'BODY' &&
+    activeElement.tagName !== 'HTML' &&
+    !panelElement?.contains(activeElement) &&
+    activeElement !== focusTarget
+  );
+}
 
 /** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
@@ -288,7 +307,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const handleGeneralCloseClicked = useCallback(
     (buttonId: string): void => {
-      // TODO: REVIEW - Not ideal that a core component such as app-bar is responsible for managing focus return logic to the map. Consider delegating this responsibility to a higher-level controller or context. Also, it shouldn't know about the 'details' id either.
+      // TODO: REVIEW - Focus ownership and return policy is split between AppBar and the UI store. Consider consolidating it in a higher-level controller or context; AppBar should not need to special-case the 'details' id.
       const restoreMapFocus = returnFocusToMap && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
 
       if (focusRestoreTimeoutRef.current !== undefined) {
@@ -297,7 +316,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
         focusRestoreOwnerRef.current = undefined;
       }
 
-      if (isFocusTrapped && !activeModalId) {
+      const currentOwnerId = getStoreUIFocusItem(mapId).activeElementId;
+      const panelOwnerId = buildAppBarFocusTrapId(mapId, buttonId);
+      uiController.setActiveAppBarTab(buttonId, false, false, false);
+
+      if (isFocusTrapped && (!currentOwnerId || currentOwnerId === panelOwnerId)) {
         focusRestoreOwnerRef.current = false;
         focusRestoreTimeoutRef.current = setTimeout(() => {
           focusRestoreTimeoutRef.current = undefined;
@@ -307,27 +330,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
           const focusTarget = restoreMapFocus ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
           const panelElement = DomHelper.getAppBarPanel(mapId, buttonId);
-          const activeElement = DomHelper.getActiveElement();
-
           // Keep the delayed return from stealing focus if another control took focus after the panel closed.
-          const focusMovedOutsidePanel =
-            activeElement &&
-            activeElement.tagName !== 'BODY' &&
-            activeElement.tagName !== 'HTML' &&
-            !panelElement?.contains(activeElement) &&
-            activeElement !== focusTarget;
-
-          if (focusMovedOutsidePanel) return;
+          if (hasFocusMovedOutsidePanel(panelElement, focusTarget)) return;
 
           // Explicitly request focus indicator for keyboard users
           focusTarget?.focus({ focusVisible: true });
           if (restoreMapFocus && activeTrapGeoViewRef.current) uiController.setCrosshairActive(true);
         }, TIMEOUT.dataPanelLoading);
       }
-
-      uiController.setActiveAppBarTab(buttonId, false, false, false);
     },
-    [activeModalId, uiController, isFocusTrapped, mapId, returnFocusToMap]
+    [uiController, isFocusTrapped, mapId, returnFocusToMap]
   );
 
   /**
@@ -484,18 +496,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
       const mapElement = geoviewElementRef.current;
       const focusTarget = buttonElement ?? mapElement;
       const panelElement = DomHelper.getAppBarPanel(mapId, tabId);
-      const activeElement = DomHelper.getActiveElement();
-      const hasActiveFocusOwner = Boolean(activeModalId);
+      const hasActiveFocusOwner = Boolean(getStoreUIFocusItem(mapId).activeElementId);
 
       // Allow the normal return when focus is still in the closing panel or has fallen back to the document root.
-      const focusMovedOutsidePanel =
-        activeElement &&
-        activeElement.tagName !== 'BODY' &&
-        activeElement.tagName !== 'HTML' &&
-        !panelElement?.contains(activeElement) &&
-        activeElement !== focusTarget;
-
-      if (focusTarget && !focusMovedOutsidePanel && !hasActiveFocusOwner) {
+      if (focusTarget && !hasFocusMovedOutsidePanel(panelElement, focusTarget) && !hasActiveFocusOwner) {
         focusTarget.focus();
         if (!buttonElement && focusTarget.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
           focusTarget.classList.add('keyboard-focus');

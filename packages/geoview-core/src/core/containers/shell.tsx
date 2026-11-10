@@ -9,7 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
-import { MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
 
 import { Box, Link } from '@/ui/layout';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
@@ -590,9 +590,9 @@ export function Shell(props: ShellProps): JSX.Element {
             {/* modal section start */}
             <FocusTrapDialog mapId={mapViewer.mapId} registerModeAction={registerModeAction} />
             {mapLoaded && <ExportModal />}
-            {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
+            {focusItem.activeElementId === BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE && <DataTableModal />}
             {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
-            {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
+            {focusItem.activeElementId === BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE && <FeatureDetailModal />}
             {/* modal section end */}
             {Object.keys(components).map((key: string) => {
               return <Fragment key={key}>{components[key]}</Fragment>;

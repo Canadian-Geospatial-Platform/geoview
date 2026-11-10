@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
+  getStoreUIIsModalActive,
   getStoreUIPopoverCloseVersion,
   useStoreUIPopoverCloseVersion,
   type FocusItemProps,
@@ -9,14 +10,17 @@ import {
 import { logger } from '@/core/utils/logger';
 import { getPopoverReturnFocusItem } from './use-popover-focus-owner';
 
+/** An opening either supplies its return owner or is rejected without changing popover state. */
+type MapPopoverOpenResult = { ok: true; previousFocusItem: FocusItemProps } | { ok: false };
+
 /** The open state and handlers of a map-control popover. */
 interface MapPopoverState {
   /** Whether the popover is open. */
   open: boolean;
   /** The element the popover is anchored to, or null when closed. */
   anchorEl: HTMLElement | null;
-  /** Opens the popover and returns the underlying owner, skipping the outgoing popover being closed. */
-  openAt: (element: HTMLElement) => FocusItemProps;
+  /** Attempts to open the popover, returning its underlying owner only on success. */
+  tryOpenAt: (element: HTMLElement) => MapPopoverOpenResult;
   /** Closes the popover. */
   close: () => void;
 }
@@ -51,16 +55,21 @@ export function useMapPopover(): MapPopoverState {
    * Closes other popovers on the same map, then opens this one anchored to the given element.
    *
    * @param element - The element to anchor the popover to
-   * @returns The return owner, excluding the outgoing popover that this opening closes
+   * @returns Success with the underlying return owner, or rejection when a modal blocks opening
    */
-  const openAt = useCallback(
-    (element: HTMLElement): FocusItemProps => {
+  const tryOpenAt = useCallback(
+    (element: HTMLElement): MapPopoverOpenResult => {
+      if (getStoreUIIsModalActive(mapId)) {
+        logger.logDebug('Map popover opening rejected while a modal owns focus', mapId);
+        return { ok: false };
+      }
+
       const previousFocusItem = getPopoverReturnFocusItem(mapId);
       uiController.closeMapPopovers();
       // Read the updated close-request version so this new popover is not closed by the request above.
       setOpenedAtCloseVersion(getStoreUIPopoverCloseVersion(mapId));
       setAnchorEl(element);
-      return previousFocusItem;
+      return { ok: true, previousFocusItem };
     },
     [mapId, uiController]
   );
@@ -70,5 +79,5 @@ export function useMapPopover(): MapPopoverState {
    */
   const close = useCallback((): void => setAnchorEl(null), []);
 
-  return { open, anchorEl, openAt, close };
+  return { open, anchorEl, tryOpenAt, close };
 }

@@ -4,6 +4,13 @@ import type { FitOptions } from 'ol/View';
 /** Repository URL for GitHub. */
 export const GITHUB_REPO = 'https://github.com/Canadian-Geospatial-Platform/geoview';
 
+/** Focus-owner identifiers shared by built-in modal opening, rendering, and ownership checks. */
+export const BUILT_IN_MODAL_IDS = {
+  EXPORT: 'export',
+  LAYER_DATA_TABLE: 'layerDataTable',
+  FEATURE_DETAIL_DATA_TABLE: 'featureDetailDataTable',
+} as const;
+
 /** Geo URL and display text. */
 export const GEO_URL_TEXT = {
   url: 'https://geo.ca/',

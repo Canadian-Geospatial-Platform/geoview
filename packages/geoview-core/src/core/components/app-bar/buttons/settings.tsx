@@ -12,6 +12,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getStoreUIFocusItem, useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { handleEscapeKey } from '@/core/utils/utilities';
 import { Box } from '@/ui/layout';
 import { CloseIcon, SettingsIcon } from '@/ui/icons';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -49,7 +50,7 @@ export function Settings(props: SettingsProps): JSX.Element {
   const uiController = useUIController();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const focusItem = useStoreUIActiveFocusItem();
-  const { open, anchorEl, openAt, close } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close } = useMapPopover();
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const previousOpenRef = useRef(open);
@@ -91,10 +92,10 @@ export function Settings(props: SettingsProps): JSX.Element {
         return;
       }
 
-      const previousFocusItem = openAt(event.currentTarget);
-      if (activeTrapGeoView) claimFocusOwner(previousFocusItem);
+      const result = tryOpenAt(event.currentTarget);
+      if (result.ok && activeTrapGeoView) claimFocusOwner(result.previousFocusItem);
     },
-    [activeTrapGeoView, claimFocusOwner, closePanel, open, openAt]
+    [activeTrapGeoView, claimFocusOwner, closePanel, open, tryOpenAt]
   );
 
   /**
@@ -201,6 +202,8 @@ export function Settings(props: SettingsProps): JSX.Element {
           placement="right-end"
           strategy="fixed"
           focusSelector={`#${switchId}`}
+          handleKeyDown={handleEscapeKey}
+          onClose={handleClose}
           sx={memoSxClasses.popper}
           modifiers={[
             { name: 'eventListeners', options: { scroll: false, resize: true } },
@@ -216,6 +219,7 @@ export function Settings(props: SettingsProps): JSX.Element {
             <Paper
               component="section"
               id={panelId}
+              tabIndex={-1}
               role="dialog"
               aria-labelledby={titleId}
               sx={memoSxClasses.panel}

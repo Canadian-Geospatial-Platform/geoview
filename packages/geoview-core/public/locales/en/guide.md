@@ -80,13 +80,16 @@ Click-hold on the box in the overview map and drag it to change the extent of th
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
 
-Using the **Tab** key to navigate to the map and the **Keyboard Navigation** prompt will appears. Select **Enable** and press **Enter** to use keyboard navigation.
+Use **Tab** to enter the viewer. When the **Keyboard navigation** prompt appears, select **Enable** and press **Enter**.
 
-When the map gains focus, a crosshair is displayed in the center of the map:
+- On dynamic maps, focus moves to **Skip to main content - Map**. Press **Enter** again to focus the map and activate the crosshair; Enable alone does not activate it.
+- On static maps, focus moves into the viewer. Use **Tab** or **Shift+Tab** to reach its available controls. Static maps do not support crosshair navigation, panning, or zooming.
+
+On dynamic maps, a crosshair is displayed in the center when the map gains focus:
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Crosshair marker displayed in the center of the map for keyboard navigation" style="width: 90%; height: 100px;"/>
 
-The map can quickly be focused using **Ctrl+M** anywhere within the GeoView application.
+With focus inside a dynamic viewer, use **Ctrl+M** (**Cmd+M** on macOS) to focus the map and activate the crosshair.
 
 Use the **arrow** keys to move the map and **+** / **-** keys or **Ctrl+Up** / **Ctrl+Down** to zoom in and out. Press **Shift+Up** / **Shift+Down** to increase or decrease how far the map pans with each arrow key press. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
 
@@ -105,7 +108,7 @@ Information will be shown for supported features when the crosshair is positione
 
 #### With the crosshair
 
-Keyboard measuring requires keyboard navigation: press **Tab** to focus the map, select **Enable**, and make sure the crosshair is visible. Then open **Measure**, enable the tool, and choose **Distance** or **Area**.
+Keyboard measuring requires a dynamic map with keyboard navigation enabled. After choosing **Enable**, press **Enter** on **Skip to main content - Map** to activate the crosshair. Then open **Measure**, enable the tool, and choose **Distance** or **Area**.
 
 - Press **Enter** or **Spacebar** to start and add a point at the crosshair.
 - Press **Shift+Enter** or **Shift+Spacebar** to finish the measurement.

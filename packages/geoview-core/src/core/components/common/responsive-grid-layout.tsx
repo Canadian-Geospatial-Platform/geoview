@@ -1,5 +1,5 @@
 import type { ReactNode, Ref } from 'react';
-import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +19,7 @@ import type { SxStyles } from '@/ui/style/types';
 import { composeSxProps } from '@/ui/style/types';
 
 import { ResponsiveGrid } from './responsive-grid';
+import { PanelFocusOwnerContext } from './focus-trap-container';
 import { getSxClasses, TOP_PANEL_STYLES } from './responsive-grid-layout-style';
 import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
 import { FullScreenDialog } from './full-screen-dialog';
@@ -28,9 +29,9 @@ import { transformMarkdownIds } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreAppGuide, useStoreAppIsCrosshairsActive, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
-import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
+import { getStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS, TABS } from '@/core/utils/constant';
 
 /** SxProps for the main row root container. */
 // TODO: To prevent the right panel toolbar to be hidden on first click of group layer. There is still a jump on first selection
@@ -78,7 +79,7 @@ interface ResponsiveGridLayoutExposedMethods {
  * conflicts between the FocusTrap and modal's own focus management.
  * Note: Update this list if new modals are added that can open within the right panel.
  */
-const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
+const MODAL_ELEMENT_IDS = [BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE, BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE] as const;
 
 /**
  * Creates the two-panel responsive grid layout with guide, enlarge, and fullscreen support.
@@ -134,6 +135,7 @@ const ResponsiveGridLayout = forwardRef(
     const isFocusTrap = useStoreUIActiveTrapGeoView();
     const isMapFullScreen = useStoreAppIsFullscreenActive();
     const focusItem = useStoreUIActiveFocusItem();
+    const panelFocusOwnerId = useContext(PanelFocusOwnerContext);
     const shellContainer = useShellContainer();
 
     // States
@@ -366,11 +368,25 @@ const ResponsiveGridLayout = forwardRef(
     useEffect(() => {
       logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - focus close button when right panel visible', isRightPanelVisible, hasContent);
       if (isRightPanelVisible && hasContent && !isGuideOpen && !isCrosshairsActive && closeBtnRef.current) {
-        requestAnimationFrame(() => {
+        const frame = requestAnimationFrame(() => {
+          // Map blur clears the crosshair during a keyboard query; preserve query focus
+          // using the current return state and focus target when the frame runs.
+          const appBarTab = getStoreUIActiveAppBarTab(mapId);
+          const activeElement = DomHelper.getActiveElementWithinMap(mapId);
+          const isKeyboardQueryFocus =
+            containerType === CONTAINER_TYPE.APP_BAR &&
+            appBarTab.isOpen &&
+            appBarTab.tabId === TABS.DETAILS &&
+            appBarTab.returnFocusToMap &&
+            (activeElement === DomHelper.getMapTargetElement(mapId) ||
+              activeElement === DomHelper.getAppBarPanelCloseButton(mapId, TABS.DETAILS));
+          if (isKeyboardQueryFocus) return;
           closeBtnRef.current?.focus();
         });
+        return (): void => cancelAnimationFrame(frame);
       }
-    }, [isRightPanelVisible, hasContent, isGuideOpen, isCrosshairsActive]);
+      return undefined;
+    }, [isRightPanelVisible, hasContent, isGuideOpen, isCrosshairsActive, mapId, containerType]);
 
     /**
      * Handles the enlarge toggle button click.
@@ -672,13 +688,13 @@ const ResponsiveGridLayout = forwardRef(
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
-      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open within it
-      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !isModalOpen;
+      // Only the owning panel may activate this non-modal boundary.
+      const shouldTrapFocus =
+        isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !isModalOpen && focusItem.activeElementId === panelFocusOwnerId;
 
       // Wrap the content box in FocusTrap - control activation via 'open' prop
-      // disableAutoFocus is used to prevent modals fighting for focus when opened
       const wrappedMainContent = (
-        <FocusTrap open={shouldTrapFocus} disableAutoFocus>
+        <FocusTrap open={shouldTrapFocus} disableEnforceFocus disableAutoFocus disableRestoreFocus>
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused
