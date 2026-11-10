@@ -216,6 +216,23 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.
   Shared snapshot capture, acquisition, release, and coordination live in
   [usePopoverFocusOwner](../../packages/geoview-core/src/core/components/common/hooks/use-popover-focus-owner.ts).
+  Before `useMapPopover.openAt` closes outgoing popovers, resolve their underlying return owner through
+  the shared hook's store-instance-scoped snapshot registry. Snapshots are flattened on capture and removed on
+  release, yield, or unmount; never save the ID of a popover that opening the replacement will close.
+  The registry uses weak store keys, not map-ID strings: a recreated viewer gets a separate snapshot
+  namespace even when it reuses the same ID, and the registry cannot keep a destroyed store alive.
+  Explicitly remove owner entries and empty per-store registries during normal cleanup; weak keys are
+  a lifetime safeguard, not a substitute for cleanup or a guarantee of immediate garbage collection.
+  Release checks that the registered store is still the captured instance before restoring focus,
+  so late cleanup cannot modify a replacement viewer. Discard snapshots in `finally` even if restoration
+  throws; do not swallow restoration errors. Regress deletion with About/navbar active, same-ID recreation,
+  and preservation of another live map's owner and return snapshot.
+  The navbar ownership regression also mounts disposable hook probes under two real store/controller
+  contexts using identical owner IDs. Verify A → B → C restores the non-popover owner, and directly
+  probe former IDs after release, yield, and unmount before checking fresh capture on reuse.
+  These hook-level checks deliberately bypass map-prefixed DOM IDs so collisions cannot mask a missing store boundary.
+  Navbar API opening must use the snapshot returned by `openAt`, just like trigger opening, without
+  clearing ownership first. Regress footer → About → navbar replacement, unowned entry, and superseding ownership.
   About, Notifications, and navbar effects invoke its common coordination operation; Settings retains its
   mode-specific effects and guarded trigger-focus policy while sharing the ownership operations.
   Once `open` is false, ownership coordination only releases ownership; it must not request closure again.

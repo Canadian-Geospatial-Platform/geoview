@@ -21,7 +21,6 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
 import { translateTooltip } from '@/core/utils/utilities';
-import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 
@@ -65,7 +64,6 @@ export default function NavbarPanelButton({
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const focusItem = useStoreUIActiveFocusItem();
   const mapId = useStoreGeoViewMapId();
-  const uiController = useUIController();
   const shellContainer = useShellContainer();
 
   // Extract panel width if provided
@@ -106,11 +104,10 @@ export default function NavbarPanelButton({
       // The open-state callback also synchronizes user-opened panels; preserve their original owner snapshot.
       if (open) return;
 
-      if (activeTrapGeoView) rememberPreviousOwner();
-      uiController.disableFocusTrap('no-focus');
-      openAt(buttonRef.current);
+      const previousFocusItem = openAt(buttonRef.current);
+      if (activeTrapGeoView) rememberPreviousOwner(previousFocusItem);
     } else closePanel();
-  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, open, openAt, rememberPreviousOwner, uiController]);
+  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, open, openAt, rememberPreviousOwner]);
 
   /**
    * Notifies the caller when the panel open state changes.

@@ -47,6 +47,12 @@ Source boundaries most likely to produce misleading tests:
 - Instance cleanup/helpers differ from LayerTester static assertions requiring mapId.
 - Isolated UI fixtures created with `createMapFromConfigFast` must await `waitForMapReady()` before deletion;
   otherwise deferred initialization can register handlers against an already-disposed map.
+  Off-screen, layer-free fixtures may need `viewer.map.renderSync()` before that wait to trigger initialization.
+- After enabling keyboard mode programmatically, let React commit before clicking a popover trigger;
+  its handler captures the rendered mode. Use the existing UI focus-restoration buffer before establishing the test owner.
+- Popover ownership tests resolve the expected dialog through `aria-labelledby` and its translated title,
+  then its translated Close label (Notifications uses `appbar.closeNotificationsDialog`). Never select the first dialog/button.
+  Close waits target that same dialog; unrelated dialogs must not determine completion.
 
 ### Coverage Review — Mapping Changed Code to Tests
 

@@ -1,9 +1,15 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { Popper } from 'geoview-core/ui/popper/popper';
 import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from 'geoview-core/core/utils/constant';
-import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { delay, generateId, getLocalizedMessage, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreAppHeight, getStoreAppIsCrosshairsActive, setStoreAppFullScreenActive } from 'geoview-core/core/stores/states/app-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveTrapGeoView, getStoreUIFocusItem } from 'geoview-core/core/stores/states/ui-state';
+import { getGeoViewStore } from 'geoview-core/core/stores/stores-managers';
+import { getPopoverReturnFocusItem, usePopoverFocusOwner } from 'geoview-core/core/components/common/hooks/use-popover-focus-owner';
+import { StoreContext } from 'geoview-core/core/stores/store-context';
+import { ControllerContext } from 'geoview-core/core/controllers/base/controller-manager';
+import { logger } from 'geoview-core/core/utils/logger';
+import type { ReactElement } from 'react';
 import { TestSkippedError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -355,10 +361,7 @@ export class UITester extends GVAbstractTester {
           GVAbstractTester.UI_POLL_INTERVAL_MS
         );
         const acquiredOwner = getStoreUIFocusItem(mapId).activeElementId;
-        const dialog = DomHelper.getGVRootElement(mapId).querySelector<HTMLElement>('[role="dialog"]');
-        if (!dialog) throw new Error(`Popover dialog was not rendered for '${consumer}'`);
-        const closeButton = dialog.querySelector<HTMLButtonElement>('button');
-        if (!closeButton) throw new Error('Popover close button was not rendered');
+        const closeButton = this.#requirePopoverCloseButton(mapId, consumer);
         closeButton.focus();
         closeButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
         await whenThisThen(
@@ -379,8 +382,7 @@ export class UITester extends GVAbstractTester {
         footerExit.focus();
         uiController.closeMapPopovers();
         await whenThisThen(
-          (): boolean =>
-            getStoreUIFocusItem(mapId).activeElementId !== ownerId && !DomHelper.getGVRootElement(mapId).querySelector('[role="dialog"]'),
+          (): boolean => getStoreUIFocusItem(mapId).activeElementId !== ownerId && !this.#findOwnershipDialog(mapId, consumer),
           GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
           GVAbstractTester.UI_POLL_INTERVAL_MS
         );
@@ -401,6 +403,8 @@ export class UITester extends GVAbstractTester {
         const yieldedOwner = getStoreUIFocusItem(mapId).activeElementId;
         const focusPreserved = DomHelper.getActiveElement() === footerExit;
         const unmountChecks: boolean[] = [];
+        const handoffChecks =
+          consumer === 'navbar' ? await this.#checkNavbarPopoverHandoff(test, mapId, navbarId, ownerId, footerOwnerId) : [];
 
         if (consumer === 'navbar') {
           test.addStep('Removing an active navbar popover, then removing one superseded by a newer owner...');
@@ -443,6 +447,10 @@ export class UITester extends GVAbstractTester {
             }
           }
         }
+        const lifecycleEvidence =
+          consumer === 'navbar'
+            ? await this.#checkPopoverStoreLifecycle(test, mapId, fixture)
+            : { lifecycleChecks: [], registryChecks: {} };
         return {
           acquiredOwner,
           expectedOwner: ownerId,
@@ -455,6 +463,8 @@ export class UITester extends GVAbstractTester {
           expectedNewOwner: newerOwnerId,
           focusPreserved,
           unmountChecks,
+          handoffChecks,
+          ...lifecycleEvidence,
         };
       },
       (test, result): void => {
@@ -468,10 +478,29 @@ export class UITester extends GVAbstractTester {
         Test.assertIsEqual(result.focusPreserved, true);
         Test.assertIsEqual(result.unmountChecks.length, consumer === 'navbar' ? 4 : 0);
         result.unmountChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
+        Test.assertIsEqual(result.handoffChecks.length, consumer === 'navbar' ? 6 : 0);
+        result.handoffChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
+        Test.assertIsEqual(result.lifecycleChecks.length, consumer === 'navbar' ? 8 : 0);
+        result.lifecycleChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
+        Test.assertIsEqual(Object.keys(result.registryChecks).length, consumer === 'navbar' ? 20 : 0);
+        Object.entries(result.registryChecks).forEach(([scenario, passed]): void => {
+          test.addStep(`Verifying registry boundary: ${scenario}`);
+          Test.assertIsEqual(passed, true);
+        });
       },
       async (): Promise<void> => {
-        await this.#cleanupScrollFixture(mapId, fixture, originalScroll);
-        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+        const lifecycleMapId = `${mapId}-lifecycle`;
+        try {
+          if (this.getApi().hasMapViewer(lifecycleMapId)) {
+            await this.#waitForPopoverViewerReady(lifecycleMapId);
+            await this.getApi().deleteMapViewer(lifecycleMapId, true);
+          }
+        } finally {
+          // Off-screen, layer-free fixtures need a render before cleanup waits for map readiness.
+          if (this.getApi().hasMapViewer(mapId)) this.getApi().getMapViewer(mapId).map.renderSync();
+          await this.#cleanupScrollFixture(mapId, fixture, originalScroll);
+          if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+        }
       }
     );
   }
@@ -970,6 +999,364 @@ export class UITester extends GVAbstractTester {
   // #region PRIVATE METHODS - MAP SECTION SCROLL
 
   /**
+   * Finds the expected map-scoped dialog by its accessible title, never by DOM order.
+   *
+   * @param mapId - The isolated viewer
+   * @param consumer - The popover whose accessible title is expected
+   * @returns The matching dialog, or undefined after it closes
+   */
+  #findOwnershipDialog(mapId: string, consumer: TypePopoverConsumer): HTMLElement | undefined {
+    const language = this.getApi().getMapViewer(mapId).getDisplayLanguage();
+    const title = consumer === 'navbar' ? 'Focus ownership probe' : getLocalizedMessage(language, `appbar.${consumer}`);
+    const dialogs = DomHelper.getGVRootElement(mapId).querySelectorAll<HTMLElement>('[role="dialog"][aria-labelledby]');
+    const matches = Array.from(dialogs).filter((dialog): boolean => {
+      const labelIds = dialog.getAttribute('aria-labelledby')?.split(/\s+/) ?? [];
+      const accessibleTitle = labelIds.map((id): string => DomHelper.getGVElementByFullId(mapId, id)?.textContent?.trim() ?? '').join(' ');
+      return accessibleTitle === title;
+    });
+    if (matches.length > 1) throw new Error(`Multiple '${title}' dialogs were rendered for '${mapId}'`);
+    return matches[0];
+  }
+
+  /**
+   * Requires the named dialog's translated Close control, allowing unrelated buttons and dialogs.
+   *
+   * @param mapId - The isolated viewer
+   * @param consumer - The popover being dismissed
+   * @returns The unique Close button inside the expected dialog
+   */
+  #requirePopoverCloseButton(mapId: string, consumer: TypePopoverConsumer): HTMLButtonElement {
+    const dialog = this.#findOwnershipDialog(mapId, consumer);
+    if (!dialog) throw new Error(`Popover dialog was not rendered for '${consumer}'`);
+    const language = this.getApi().getMapViewer(mapId).getDisplayLanguage();
+    const closeLabel = getLocalizedMessage(language, consumer === 'notifications' ? 'appbar.closeNotificationsDialog' : 'general.close');
+    const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button[aria-label]')).filter(
+      (button): boolean => button.getAttribute('aria-label') === closeLabel
+    );
+    if (buttons.length !== 1) throw new Error(`Expected one '${closeLabel}' button in the '${consumer}' dialog; found ${buttons.length}`);
+    return buttons[0];
+  }
+
+  /**
+   * Exercises the real ownership hook with deliberately colliding owner IDs, independent of DOM ID generation.
+   *
+   * @param test - The running test receiving registry scenario steps
+   * @param mapIds - Two live viewers supplying real store and controller contexts
+   * @param fixture - The host for disposable React roots
+   * @returns Named isolation, flattening, cleanup, and fresh-snapshot evidence
+   */
+  async #checkPopoverRegistryBoundaries(test: Test, mapIds: [string, string], fixture: HTMLElement): Promise<Record<string, boolean>> {
+    const { createRoot, createElement, react } = window.cgpv.reactUtilities;
+    const handles = new Map<string, ReturnType<typeof usePopoverFocusOwner>>();
+    const closeCounts = new Map<string, number>();
+    const ownerIds = ['registry-popover-a', 'registry-popover-b', 'registry-popover-c'];
+    const roots = mapIds.map((mapId) => {
+      const host = document.createElement('div');
+      fixture.appendChild(host);
+      return { mapId, host, root: createRoot(host) };
+    });
+    const checks: Record<string, boolean> = {};
+
+    /** Exposes committed hook operations without introducing map-specific owner IDs. */
+    const OwnershipProbe = ({ mapId, ownerId }: { mapId: string; ownerId: string }): ReactElement => {
+      logger.logTraceRender('UI-TESTER - ownership registry probe', mapId, ownerId);
+      const key = `${mapId}:${ownerId}`;
+      const operations = usePopoverFocusOwner(ownerId, undefined, (): void => {
+        closeCounts.set(key, (closeCounts.get(key) ?? 0) + 1);
+      });
+      react.useEffect((): (() => void) => {
+        logger.logTraceUseEffect('UI-TESTER - register ownership probe', key, operations);
+        handles.set(key, operations);
+        return (): void => {
+          handles.delete(key);
+        };
+      }, [key, operations]);
+      return createElement('span', {}, ownerId);
+    };
+
+    /** Commits a selected set of probes under the viewer's actual contexts. */
+    const renderProbes = async (index: number, ids: string[]): Promise<void> => {
+      const { mapId, root } = roots[index];
+      root.render(
+        createElement(
+          StoreContext.Provider,
+          { value: mapId },
+          createElement(
+            ControllerContext.Provider,
+            { value: this.getApi().getMapViewer(mapId).controllers },
+            ...ids.map((ownerId): ReactElement => createElement(OwnershipProbe, { key: ownerId, mapId, ownerId }))
+          )
+        )
+      );
+      await whenThisThen(
+        (): boolean => ownerIds.every((id) => handles.has(`${mapId}:${id}`) === ids.includes(id)),
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+    };
+
+    /** Resolves a committed probe or fails with the missing map and owner. */
+    const probe = (mapId: string, ownerId: string): ReturnType<typeof usePopoverFocusOwner> => {
+      const operations = handles.get(`${mapId}:${ownerId}`);
+      if (!operations) throw new Error(`Ownership probe '${ownerId}' was not mounted for '${mapId}'`);
+      return operations;
+    };
+
+    try {
+      test.addStep('Mounting identical popover owner IDs in two independent map contexts...');
+      for (const mapId of mapIds) this.getApi().getMapViewer(mapId).controllers.uiController.closeMapPopovers();
+      await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+      await renderProbes(0, ownerIds);
+      await renderProbes(1, ownerIds);
+      for (const mapId of mapIds) {
+        this.getApi()
+          .getMapViewer(mapId)
+          .controllers.uiController.enableFocusTrap({
+            activeElementId: `${mapId}-underlying`,
+            callbackElementId: false,
+            focusOnEntry: false,
+          });
+        probe(mapId, ownerIds[0]).claimFocusOwner();
+      }
+      for (const mapId of mapIds) {
+        checks[`${mapId}:same-owner-id-isolation`] = getPopoverReturnFocusItem(mapId).activeElementId === `${mapId}-underlying`;
+      }
+
+      for (let index = 0; index < mapIds.length; index++) {
+        const mapId = mapIds[index];
+        const { uiController } = this.getApi().getMapViewer(mapId).controllers;
+        const [a, b, c] = ownerIds;
+        test.addStep(`Checking A -> B -> C replacement and cleanup on '${mapId}'...`);
+        probe(mapId, b).claimFocusOwner();
+        probe(mapId, a).synchronizeOwnership(true, true);
+        probe(mapId, c).claimFocusOwner();
+        probe(mapId, b).synchronizeOwnership(true, true);
+        checks[`${mapId}:chain-flattened`] = getPopoverReturnFocusItem(mapId).activeElementId === `${mapId}-underlying`;
+        probe(mapId, c).releaseFocusOwner();
+        checks[`${mapId}:chain-restored`] = getStoreUIFocusItem(mapId).activeElementId === `${mapId}-underlying`;
+
+        for (const [path, ownerId] of [
+          ['release', c],
+          ['yield', a],
+          ['unmount', b],
+        ] as const) {
+          if (path === 'unmount') {
+            probe(mapId, ownerId).claimFocusOwner();
+            // eslint-disable-next-line no-await-in-loop -- Commit removal before probing its former registry entry.
+            await renderProbes(
+              index,
+              ownerIds.filter((id): boolean => id !== ownerId)
+            );
+          }
+          uiController.enableFocusTrap({ activeElementId: ownerId, callbackElementId: false, focusOnEntry: false });
+          checks[`${mapId}:${path}-snapshot-removed`] =
+            getPopoverReturnFocusItem(mapId).activeElementId === ownerId &&
+            (path !== 'yield' || closeCounts.get(`${mapId}:${ownerId}`) === 1);
+          if (path === 'unmount') {
+            // eslint-disable-next-line no-await-in-loop -- Remount before verifying fresh snapshot capture.
+            await renderProbes(index, ownerIds);
+          }
+          const freshOwner = `${mapId}-fresh-${path}`;
+          uiController.enableFocusTrap({ activeElementId: freshOwner, callbackElementId: false, focusOnEntry: false });
+          probe(mapId, ownerId).claimFocusOwner();
+          probe(mapId, ownerId).releaseFocusOwner();
+          checks[`${mapId}:${path}-fresh-snapshot`] = getStoreUIFocusItem(mapId).activeElementId === freshOwner;
+        }
+        checks[`${mapId}:other-map-unaffected`] =
+          index === 0
+            ? getStoreUIFocusItem(mapIds[1]).activeElementId === a &&
+              getPopoverReturnFocusItem(mapIds[1]).activeElementId === `${mapIds[1]}-underlying`
+            : getStoreUIFocusItem(mapIds[0]).activeElementId === `${mapIds[0]}-fresh-unmount`;
+      }
+      return checks;
+    } finally {
+      for (const { mapId, root, host } of roots) {
+        root.unmount();
+        host.remove();
+        this.getApi().getMapViewer(mapId).controllers.uiController.enableFocusTrap({
+          activeElementId: false,
+          callbackElementId: false,
+          focusOnEntry: false,
+        });
+      }
+    }
+  }
+
+  /**
+   * Completes off-screen map initialization before ownership setup or destruction.
+   *
+   * @param mapId - The isolated viewer, which may have just returned from fast creation
+   * @returns A promise that resolves after the map and its initial UI effects are ready
+   */
+  async #waitForPopoverViewerReady(mapId: string): Promise<void> {
+    const viewer = this.getApi().getMapViewer(mapId);
+    await whenThisThen((): boolean => !!viewer.map, GVAbstractTester.UI_FOCUS_TIMEOUT_MS, GVAbstractTester.UI_POLL_INTERVAL_MS);
+    viewer.map.renderSync();
+    await viewer.waitForMapReady();
+  }
+
+  /**
+   * Destroys viewers with active popovers, reuses their map ID, and checks a surviving map's snapshot.
+   *
+   * @param test - The running test receiving lifecycle steps
+   * @param mapId - The surviving viewer whose ownership must remain unchanged
+   * @param fixture - The host for the second viewer, removed by the test finalizer even on failure
+   * @returns Snapshot isolation and same-ID recreation evidence for About and navbar destruction
+   */
+  async #checkPopoverStoreLifecycle(
+    test: Test,
+    mapId: string,
+    fixture: HTMLElement
+  ): Promise<{ lifecycleChecks: boolean[]; registryChecks: Record<string, boolean> }> {
+    const lifecycleMapId = `${mapId}-lifecycle`;
+    const target = document.createElement('div');
+    target.id = lifecycleMapId;
+    fixture.appendChild(target);
+    await this.#createScrollViewer(lifecycleMapId, 'visible');
+    await this.#waitForPopoverViewerReady(lifecycleMapId);
+    const registryChecks = await this.#checkPopoverRegistryBoundaries(test, [mapId, lifecycleMapId], fixture);
+    const survivor = this.getApi().getMapViewer(mapId).controllers.uiController;
+    const footerOwnerId = `${mapId}-tab-layers`;
+    survivor.enableFocusTrap({ activeElementId: footerOwnerId, callbackElementId: footerOwnerId, focusOnEntry: false });
+    const aboutButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+    if (!aboutButton) throw new Error('Surviving About trigger was not rendered for the lifecycle test');
+    aboutButton.click();
+    await whenThisThen(
+      (): boolean => getStoreUIFocusItem(mapId).activeElementId === DomHelper.buildAppBarVersionFocusTrapId(mapId),
+      GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+      GVAbstractTester.UI_POLL_INTERVAL_MS
+    );
+    const checks: boolean[] = [];
+
+    for (const consumer of ['version', 'navbar'] as const) {
+      test.addStep(`Deleting a viewer with active ${consumer} ownership and recreating the same map ID...`);
+      const viewer = this.getApi().getMapViewer(lifecycleMapId);
+      const originalStore = getGeoViewStore(lifecycleMapId);
+      const navbarId = `${lifecycleMapId}-probe`;
+      const ownerId =
+        consumer === 'version'
+          ? DomHelper.buildAppBarVersionFocusTrapId(lifecycleMapId)
+          : `${lifecycleMapId}-${navbarId}-navbar-focus-trap`;
+      if (consumer === 'navbar') {
+        viewer.navBarApi.createNavbarButtonPanel(
+          { id: navbarId, 'aria-label': 'Lifecycle probe', children: 'Probe' },
+          { title: 'Lifecycle probe', content: 'Lifecycle probe', icon: 'Probe', status: false },
+          'default'
+        );
+      }
+      const buttonSuffix = consumer === 'navbar' ? 'probe' : `${CONTAINER_TYPE.APP_BAR}-version-btn`;
+      // eslint-disable-next-line no-await-in-loop -- Mount the closed popover before establishing its previous owner.
+      const button = await whenThisThen(
+        (): HTMLButtonElement | undefined => DomHelper.getGVElementById<HTMLButtonElement>(lifecycleMapId, buttonSuffix),
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+      if (!button) throw new Error(`Lifecycle ${consumer} trigger was not rendered`);
+      viewer.controllers.uiController.setActiveTrapGeoView(true);
+      // eslint-disable-next-line no-await-in-loop -- Commit keyboard mode before clicking a trigger whose handler captures that mode.
+      await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+      viewer.controllers.uiController.enableFocusTrap({
+        activeElementId: `${lifecycleMapId}-tab-layers`,
+        callbackElementId: false,
+        focusOnEntry: false,
+      });
+      if (consumer === 'navbar') viewer.navBarApi.setButtonPanelOpen(navbarId, true);
+      else button.click();
+      // eslint-disable-next-line no-await-in-loop -- Delete only after the popover has registered its snapshot.
+      await whenThisThen(
+        (): boolean => getStoreUIFocusItem(lifecycleMapId).activeElementId === ownerId,
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+      checks.push(getPopoverReturnFocusItem(lifecycleMapId).activeElementId === `${lifecycleMapId}-tab-layers`);
+      // eslint-disable-next-line no-await-in-loop -- Destruction while the popover is active is the operation under test.
+      await this.getApi().deleteMapViewer(lifecycleMapId, false);
+      checks.push(
+        getStoreUIFocusItem(mapId).activeElementId === DomHelper.buildAppBarVersionFocusTrapId(mapId) &&
+          getPopoverReturnFocusItem(mapId).activeElementId === footerOwnerId
+      );
+      // eslint-disable-next-line no-await-in-loop -- Reuse the same target only after its old viewer is fully removed.
+      await this.#createScrollViewer(lifecycleMapId, 'visible');
+      // eslint-disable-next-line no-await-in-loop -- Initial UI effects must settle before probing ownership or starting the next case.
+      await this.#waitForPopoverViewerReady(lifecycleMapId);
+      checks.push(getGeoViewStore(lifecycleMapId) !== originalStore && getStoreUIFocusItem(lifecycleMapId).activeElementId === false);
+
+      // Probe the old owner ID directly: a new store must not resolve it through the destroyed store's snapshot.
+      this.getApi().getMapViewer(lifecycleMapId).controllers.uiController.enableFocusTrap({
+        activeElementId: ownerId,
+        callbackElementId: false,
+        focusOnEntry: false,
+      });
+      checks.push(getPopoverReturnFocusItem(lifecycleMapId).activeElementId === ownerId);
+    }
+    return { lifecycleChecks: checks, registryChecks };
+  }
+
+  /**
+   * Replaces About with an API-opened navbar and verifies that closed popovers never become return owners.
+   *
+   * @param test - The running test receiving scenario steps
+   * @param mapId - The isolated viewer
+   * @param navbarId - The registered navbar probe
+   * @param navbarOwnerId - The navbar's focus owner
+   * @param footerOwnerId - The still-open footer's focus owner
+   * @returns Ownership and outgoing-dialog closure evidence for each replacement
+   */
+  async #checkNavbarPopoverHandoff(
+    test: Test,
+    mapId: string,
+    navbarId: string,
+    navbarOwnerId: string,
+    footerOwnerId: string
+  ): Promise<boolean[]> {
+    const viewer = this.getApi().getMapViewer(mapId);
+    const { uiController } = viewer.controllers;
+    const aboutButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
+    if (!aboutButton) throw new Error('About trigger was not rendered for the navbar handoff test');
+    const checks: boolean[] = [];
+
+    for (const scenario of ['footer', 'unowned', 'superseded'] as const) {
+      test.addStep(`Replacing About with an API-opened navbar (${scenario})...`);
+      uiController.enableFocusTrap({
+        activeElementId: scenario === 'unowned' ? false : footerOwnerId,
+        callbackElementId: scenario === 'unowned' ? false : footerOwnerId,
+        focusOnEntry: false,
+      });
+      aboutButton.click();
+      // eslint-disable-next-line no-await-in-loop -- About must acquire ownership before the API replaces it.
+      await whenThisThen(
+        (): boolean => getStoreUIFocusItem(mapId).activeElementId === DomHelper.buildAppBarVersionFocusTrapId(mapId),
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+      viewer.navBarApi.setButtonPanelOpen(navbarId, true);
+      // eslint-disable-next-line no-await-in-loop -- Wait for the replacement's ownership before dismissing it.
+      await whenThisThen(
+        (): boolean => getStoreUIFocusItem(mapId).activeElementId === navbarOwnerId,
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+      checks.push(DomHelper.getGVElementById(mapId, `${CONTAINER_TYPE.APP_BAR}-version-title`) === undefined);
+      const closeButton = this.#requirePopoverCloseButton(mapId, 'navbar');
+      if (scenario === 'superseded') {
+        uiController.enableFocusTrap({ activeElementId: `${mapId}-handoff-new-owner`, callbackElementId: false, focusOnEntry: false });
+      }
+      closeButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
+      // eslint-disable-next-line no-await-in-loop -- Settle close effects before testing the restored owner or opening About again.
+      await whenThisThen(
+        (): boolean => !this.#findOwnershipDialog(mapId, 'navbar'),
+        GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+        GVAbstractTester.UI_POLL_INTERVAL_MS
+      );
+      let expectedOwner: string | false = footerOwnerId;
+      if (scenario === 'unowned') expectedOwner = false;
+      if (scenario === 'superseded') expectedOwner = `${mapId}-handoff-new-owner`;
+      checks.push(getStoreUIFocusItem(mapId).activeElementId === expectedOwner);
+    }
+    return checks;
+  }
+
+  /**
    * Renders the isolated viewer with app-bar, map-info and footer controls.
    *
    * @param mapId - The isolated viewer ID
@@ -1435,6 +1822,12 @@ type TypePopoverOwnershipResult = {
   expectedNewOwner: string;
   focusPreserved: boolean;
   unmountChecks: boolean[];
+  /** Outgoing About closure and valid return ownership for navbar replacement scenarios. */
+  handoffChecks: boolean[];
+  /** Active-popover destruction, same-ID recreation, and surviving-map snapshot isolation. */
+  lifecycleChecks: boolean[];
+  /** Named checks for colliding owner IDs, three-popover flattening, and stale-record removal. */
+  registryChecks: Record<string, boolean>;
 };
 
 /** Isolated viewer scrolling regressions, scheduled sequentially by the UI suite. */

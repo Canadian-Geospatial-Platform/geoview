@@ -37,6 +37,7 @@ On first tab into the viewer, users are prompted to enable keyboard navigation m
 - Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
 - Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.
 - Settings temporarily takes focus-trap ownership from another panel. Escape or its Close button returns focus to Settings; clicking elsewhere closes it without pulling focus away from the clicked target. Genuine modal dialogs keep strict focus containment.
+- Replacing one map-control popover with another preserves the underlying panel's keyboard boundary when the replacement closes; a closed popover is never restored as the active owner.
 
 - Press Ctrl + Q to exit keyboard navigation mode
 - Press Ctrl + M (or Cmd + M on macOS) with focus inside a dynamic viewer to focus the map and activate the crosshair

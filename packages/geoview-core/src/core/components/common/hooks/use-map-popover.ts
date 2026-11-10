@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
-  getStoreUIFocusItem,
   getStoreUIPopoverCloseVersion,
   useStoreUIPopoverCloseVersion,
   type FocusItemProps,
 } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
+import { getPopoverReturnFocusItem } from './use-popover-focus-owner';
 
 /** The open state and handlers of a map-control popover. */
 interface MapPopoverState {
@@ -15,7 +15,7 @@ interface MapPopoverState {
   open: boolean;
   /** The element the popover is anchored to, or null when closed. */
   anchorEl: HTMLElement | null;
-  /** Opens the popover and returns the focus owner that was active before it opened. */
+  /** Opens the popover and returns the underlying owner, skipping the outgoing popover being closed. */
   openAt: (element: HTMLElement) => FocusItemProps;
   /** Closes the popover. */
   close: () => void;
@@ -51,11 +51,11 @@ export function useMapPopover(): MapPopoverState {
    * Closes other popovers on the same map, then opens this one anchored to the given element.
    *
    * @param element - The element to anchor the popover to
-   * @returns The focus owner that was active before the popover opened
+   * @returns The return owner, excluding the outgoing popover that this opening closes
    */
   const openAt = useCallback(
     (element: HTMLElement): FocusItemProps => {
-      const previousFocusItem = getStoreUIFocusItem(mapId);
+      const previousFocusItem = getPopoverReturnFocusItem(mapId);
       uiController.closeMapPopovers();
       // Read the updated close-request version so this new popover is not closed by the request above.
       setOpenedAtCloseVersion(getStoreUIPopoverCloseVersion(mapId));

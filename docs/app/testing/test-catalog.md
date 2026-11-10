@@ -825,7 +825,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 8   | `testMapSectionScroll('oversized')`   | test | Taller-than-viewport map aligns with the top gap and stays stable                    |
 | 9   | `testPopoverFocusOwnership('version')` | test | About acquisition, Escape restoration, controller closure without focus return, and yielding |
 | 10  | `testPopoverFocusOwnership('notifications')` | test | Notifications acquisition, Escape restoration, controller closure without focus return, and yielding |
-| 11  | `testPopoverFocusOwnership('navbar')` | test | API/button opening, status echoes, controller closure, restoration/yielding, and unmount cleanup with/without a newer owner |
+| 11  | `testPopoverFocusOwnership('navbar')` | test | API/button opening, About replacement, status echoes, restoration/yielding, unmount cleanup, active-popover viewer deletion/same-ID recreation; hook probes verify identical owner IDs across maps, A→B→C flattening, and release/yield/unmount snapshot removal and fresh reuse |
 | 12  | `testPopoverFocusOwnership('settings')` | test | Settings acquisition, guarded trigger restoration, controller closure without focus return, and yielding |
 | 13  | `testPopperKeyboardBoundary` | test | Attribution trigger Escape; popover/anchor event boundaries, prevented events, callback/virtual anchors, and independent popovers |
 | 14  | `testResizePopoverFocusRestoration` | test | Fullscreen footer Resize explicit Close/Escape/Enter restoration; click-away, pointer commit, and newer-focus preservation |
