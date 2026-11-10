@@ -2571,14 +2571,12 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the fixture layer and the layer resolved by its root ID
    */
   testGetGeoviewLayerByRootId(): Promise<Test<LayerTestResult<AbstractBaseGVLayer>>> {
-    const gvLayerName = 'Root Id Resolver';
-
     let setupLayer: AbstractBaseGVLayer | undefined;
     return this.test(
       `Test getGeoviewLayerByRootId resolves the first layer under a root id...`,
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const gvLayer = (setupLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, gvLayerName));
+        const gvLayer = (setupLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, 'Root Id Resolver'));
 
         // Root-id resolution must return the first layer under that id (this is the function under test)
         test.addStep('Resolving the first layer under the root id...');

@@ -379,7 +379,7 @@ export type GeoCoreConfigResponseLayer = {
 };
 
 /** The GeoChart JSON object expected by GeoView */
-// GV This type is the core equivalent of the homonym 'GeoViewGeoChartConfig' in geoview-geochart\geochart-types.ts
+// GV This type is the core equivalent of the homonym 'GeoChartConfig' in geoview-geochart\types.ts
 export type GeoViewGeoChartConfig = {
   layers: GeoChartGeoCoreConfigLayer[]; // For us, this is an array, compared to GeoCore where it's not.
 };
