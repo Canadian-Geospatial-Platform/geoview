@@ -1,9 +1,18 @@
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { buildAppBarFocusTrapId, buildGVElementId, buildTabId, isAppBarFocusTrapId } from 'geoview-core/core/utils/element-id';
 import { Popper } from 'geoview-core/ui/popper/popper';
-import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from 'geoview-core/core/utils/constant';
-import { delay, generateId, getLocalizedMessage, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { Switch } from 'geoview-core/ui/switch/switch';
+import { BUILT_IN_MODAL_IDS, CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from 'geoview-core/core/utils/constant';
+import { delay, doTimeout, generateId, getLocalizedMessage, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreAppHeight, getStoreAppIsCrosshairsActive, setStoreAppFullScreenActive } from 'geoview-core/core/stores/states/app-state';
-import { getStoreUIActiveAppBarTab, getStoreUIActiveTrapGeoView, getStoreUIFocusItem } from 'geoview-core/core/stores/states/ui-state';
+import {
+  getStoreUIActiveAppBarTab,
+  getStoreUIActiveFooterBarTab,
+  getStoreUIActiveTrapGeoView,
+  getStoreUIFocusItem,
+  getStoreUIIsModalActive,
+  getStoreUIPopoverCloseVersion,
+} from 'geoview-core/core/stores/states/ui-state';
 import { getGeoViewStore } from 'geoview-core/core/stores/stores-managers';
 import { getPopoverReturnFocusItem, usePopoverFocusOwner } from 'geoview-core/core/components/common/hooks/use-popover-focus-owner';
 import { StoreContext } from 'geoview-core/core/stores/store-context';
@@ -32,6 +41,54 @@ export class UITester extends GVAbstractTester {
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS - UI TESTS
+
+  /**
+   * Verifies modal focus-owner classification without rendering dialogs or depending on DOM focus.
+   *
+   * @returns Classification evidence with restoration of the original focus owner
+   */
+  testModalFocusOwnerClassification(): Promise<Test<TypeOwnershipCheck[]>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalFocusItem = getStoreUIFocusItem(mapId);
+
+    return this.test(
+      'Test built-in modal focus-owner classification',
+      (test): TypeOwnershipCheck[] => {
+        test.addStep('Classifying built-in modals, non-modal boundaries, and an unowned viewer...');
+        const checks: TypeOwnershipCheck[] = [];
+
+        // Keep owner changes synchronous and finish unowned so intermediate modal IDs never render dialogs.
+        for (const [ownerId, expected] of [
+          [BUILT_IN_MODAL_IDS.EXPORT, true],
+          [BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE, true],
+          [BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE, true],
+          [buildTabId(mapId, 'layers'), false],
+          [buildAppBarFocusTrapId(mapId, 'legend'), false],
+          [DomHelper.buildAppBarVersionFocusTrapId(mapId), false],
+          [false, false],
+        ] as const) {
+          uiController.enableFocusTrap({ activeElementId: ownerId, callbackElementId: false, focusOnEntry: false });
+          checks.push({
+            source: String(ownerId),
+            phase: 'modal focus-owner classification',
+            actual: getStoreUIIsModalActive(mapId),
+            expected,
+          });
+        }
+        return checks;
+      },
+      (test, checks): void => {
+        checks.forEach(({ source, actual, expected }): void => {
+          test.addStep(`Verifying modal classification for '${source}'`);
+          Test.assertIsEqual(actual, expected);
+        });
+      },
+      (): void => {
+        uiController.enableFocusTrap(originalFocusItem);
+      }
+    );
+  }
 
   /**
    * Verifies Resize returns focus only for explicit dismissal, without overriding newer focus.
@@ -150,7 +207,7 @@ export class UITester extends GVAbstractTester {
   }
 
   /**
-   * Verifies Escape handling stays within a popover and its owning DOM anchor.
+   * Verifies popover keyboard boundaries and opening focus yield to newer interactions.
    *
    * @returns Keyboard-boundary evidence and isolated fixture cleanup
    */
@@ -214,24 +271,63 @@ export class UITester extends GVAbstractTester {
         unmount = (): void => root.unmount();
         let closeCount = 0;
         let otherCloseCount = 0;
+        let expectedOpeningTarget: HTMLElement | undefined;
+        let openingInteractionError: unknown;
+        let openingStartedAtAnchor = false;
+
+        /** Moves focus after the opening effect captures its starting element but before its timer runs. */
+        function OpeningFocusProbe({ scenario }: { scenario: string }): ReactElement {
+          react.useEffect(() => {
+            const job = doTimeout(0);
+            job.promise
+              .then((result): void => {
+                if (result !== 'timeout') return;
+                openingStartedAtAnchor = DomHelper.getActiveElement() === anchor;
+                const suffix = scenario === 'normal' ? 'content' : scenario;
+                const target = scenario === 'outside' ? unrelated : host.querySelector<HTMLElement>(`#${mapId}-${suffix}`);
+                if (!target) throw new Error(`Popover interaction target '${scenario}' was not rendered`);
+                expectedOpeningTarget = target;
+                if (scenario !== 'normal') {
+                  target.focus();
+                  target.click();
+                }
+              })
+              .catch((error: unknown): void => {
+                openingInteractionError = error;
+                logger.logError('Popover opening interaction failed:', error);
+              });
+            return (): void => job.cancel();
+          }, [scenario]);
+          return createElement(
+            'div',
+            { 'data-opening-scenario': scenario },
+            createElement('button', { id: `${mapId}-content` }, 'Popover content'),
+            createElement('input', { id: `${mapId}-input`, 'aria-label': 'Opening focus input' }),
+            createElement('button', { id: `${mapId}-other-button` }, 'Other popover button')
+          );
+        }
 
         /** Renders the wrapper with the supplied anchor type and waits for effect registration. */
-        const renderProbe = async (probeAnchor: Parameters<typeof Popper>[0]['anchorEl']): Promise<void> => {
+        const renderProbe = async (probeAnchor: Parameters<typeof Popper>[0]['anchorEl'], openingScenario?: string): Promise<void> => {
           root.render(
             createElement(
               react.Fragment,
               {},
               createElement(Popper, {
+                key: openingScenario ?? 'keyboard',
                 open: true,
                 anchorEl: probeAnchor,
                 container: host,
+                focusSelector: openingScenario ? `#${mapId}-content` : undefined,
                 onClose: (): void => {
                   closeCount += 1;
                 },
                 handleKeyDown: (key, close): void => {
                   if (key === 'Escape') close();
                 },
-                children: createElement('button', { id: `${mapId}-content` }, 'Popover content'),
+                children: openingScenario
+                  ? createElement(OpeningFocusProbe, { scenario: openingScenario })
+                  : createElement('button', { id: `${mapId}-content`, 'data-opening-scenario': 'keyboard' }, 'Popover content'),
               }),
               createElement(Popper, {
                 open: true,
@@ -248,7 +344,7 @@ export class UITester extends GVAbstractTester {
             )
           );
           await whenThisThen(
-            (): boolean => host.querySelector(`#${mapId}-content`) !== null,
+            (): boolean => host.querySelector(`[data-opening-scenario="${openingScenario ?? 'keyboard'}"]`) !== null,
             GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
             GVAbstractTester.UI_POLL_INTERVAL_MS
           );
@@ -275,11 +371,28 @@ export class UITester extends GVAbstractTester {
         evidence.push(closeCount === 3);
         escape(content);
         evidence.push(closeCount === 4);
+
+        test.addStep('Checking normal opening focus and newer interactions inside and outside the popover...');
+        for (const scenario of ['normal', 'input', 'other-button', 'outside']) {
+          anchor.focus();
+          expectedOpeningTarget = undefined;
+          openingInteractionError = undefined;
+          openingStartedAtAnchor = false;
+          // eslint-disable-next-line no-await-in-loop -- Opening scenarios share focus and must use separate mounted popovers.
+          await renderProbe(anchor, scenario);
+
+          // eslint-disable-next-line no-await-in-loop -- Wait beyond opening focus before recording each interaction's final focus.
+          await delay(GVAbstractTester.UI_SCROLL_SETTLE_MS);
+          if (openingInteractionError) throw openingInteractionError;
+          evidence.push(
+            openingStartedAtAnchor && expectedOpeningTarget !== undefined && DomHelper.getActiveElement() === expectedOpeningTarget
+          );
+        }
         return evidence;
       },
       (test, evidence): void => {
         test.addStep('Verifying trigger/content Escape handling, prevented events, and unrelated-owner isolation...');
-        Test.assertIsEqual(evidence.length, 10);
+        Test.assertIsEqual(evidence.length, 14);
         evidence.forEach((passed): void => Test.assertIsEqual(passed, true));
       },
       async (): Promise<void> => {
@@ -327,13 +440,14 @@ export class UITester extends GVAbstractTester {
           version: DomHelper.buildAppBarVersionFocusTrapId(mapId),
         };
         const ownerId = ownerIds[consumer];
-        const footerOwnerId = `${mapId}-tab-layers`;
+        const footerOwnerId = buildTabId(mapId, 'layers');
         const button = await whenThisThen(
           (): HTMLButtonElement | undefined => DomHelper.getGVElementById<HTMLButtonElement>(mapId, buttonSuffix),
           GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
           GVAbstractTester.UI_POLL_INTERVAL_MS
         );
         if (!button) throw new Error(`Popover trigger was not rendered for '${consumer}'`);
+        const modalChecks = consumer === 'navbar' ? await this.#checkModalPopoverExclusion(test, mapId, navbarId) : {};
         uiController.setActiveTrapGeoView(true);
         uiController.setActiveFooterBarTab('layers');
         uiController.setFooterBarIsOpen(true);
@@ -371,6 +485,30 @@ export class UITester extends GVAbstractTester {
         );
         const restoredOwner = getStoreUIFocusItem(mapId).activeElementId;
         const triggerFocused = DomHelper.getActiveElement()?.id === button.id;
+
+        test.addStep('Switching footer tabs underneath the popover, then opening an AppBar panel...');
+        button.click();
+        await whenThisThen(
+          (): boolean => getStoreUIFocusItem(mapId).activeElementId === ownerId,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        uiController.setActiveFooterBarTab('details');
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        const ownerDuringFooterSwitch = getStoreUIFocusItem(mapId).activeElementId;
+        button.click();
+        await whenThisThen(
+          (): boolean => getStoreUIFocusItem(mapId).activeElementId !== ownerId,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        const ownerAfterFooterSwitch = getStoreUIFocusItem(mapId).activeElementId;
+        uiController.setActiveAppBarTab('legend', true, true);
+        const ownerAfterAppBarOpen = getStoreUIFocusItem(mapId).activeElementId;
+        uiController.setActiveAppBarTab('legend', false, false);
+        uiController.setActiveFooterBarTab('layers');
+        uiController.enableFocusTrap({ activeElementId: footerOwnerId, callbackElementId: footerOwnerId, focusOnEntry: false });
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
 
         test.addStep('Closing through the controller without returning DOM focus to the trigger...');
         button.click();
@@ -457,6 +595,10 @@ export class UITester extends GVAbstractTester {
           restoredOwner,
           expectedPreviousOwner: footerOwnerId,
           triggerFocused,
+          ownerDuringFooterSwitch,
+          ownerAfterFooterSwitch,
+          ownerAfterAppBarOpen,
+          expectedAppBarOwner: buildAppBarFocusTrapId(mapId, 'legend'),
           externalCloseOwner,
           externalCloseFocusPreserved,
           yieldedOwner,
@@ -464,6 +606,7 @@ export class UITester extends GVAbstractTester {
           focusPreserved,
           unmountChecks,
           handoffChecks,
+          modalChecks,
           ...lifecycleEvidence,
         };
       },
@@ -472,6 +615,9 @@ export class UITester extends GVAbstractTester {
         Test.assertIsEqual(result.acquiredOwner, result.expectedOwner);
         Test.assertIsEqual(result.restoredOwner, result.expectedPreviousOwner);
         Test.assertIsEqual(result.triggerFocused, true);
+        Test.assertIsEqual(result.ownerDuringFooterSwitch, result.expectedOwner);
+        Test.assertIsEqual(result.ownerAfterFooterSwitch, false);
+        Test.assertIsEqual(result.ownerAfterAppBarOpen, result.expectedAppBarOwner);
         Test.assertIsEqual(result.externalCloseOwner, false);
         Test.assertIsEqual(result.externalCloseFocusPreserved, true);
         Test.assertIsEqual(result.yieldedOwner, result.expectedNewOwner);
@@ -480,9 +626,39 @@ export class UITester extends GVAbstractTester {
         result.unmountChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
         Test.assertIsEqual(result.handoffChecks.length, consumer === 'navbar' ? 6 : 0);
         result.handoffChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
+        if (consumer === 'navbar') {
+          for (const mode of ['pointer', 'keyboard']) {
+            for (const modalId of [
+              BUILT_IN_MODAL_IDS.EXPORT,
+              BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE,
+              BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE,
+            ]) {
+              for (const check of [
+                'owner-preserved',
+                'dialog-and-focus-preserved',
+                'opening-rejected',
+                'shared-triggers-rejected',
+                'controller-close-preserves-modal',
+                'retry-opened',
+                'dismissal-does-not-reopen-modal',
+                'newer-modal-survives-popover-cleanup',
+              ]) {
+                const key = `${modalId}:${mode}:${check}`;
+                test.addStep(`Verifying required modal exclusion check: ${key}`);
+                Test.assertIsEqual(Object.prototype.hasOwnProperty.call(result.modalChecks, key), true);
+              }
+            }
+          }
+        } else {
+          Test.assertIsEqual(Object.keys(result.modalChecks).length, 0);
+        }
+        Object.entries(result.modalChecks).forEach(([scenario, passed]): void => {
+          test.addStep(`Verifying modal exclusion: ${scenario}`);
+          Test.assertIsEqual(passed, true);
+        });
         Test.assertIsEqual(result.lifecycleChecks.length, consumer === 'navbar' ? 8 : 0);
         result.lifecycleChecks.forEach((passed): void => Test.assertIsEqual(passed, true));
-        Test.assertIsEqual(Object.keys(result.registryChecks).length, consumer === 'navbar' ? 20 : 0);
+        Test.assertIsEqual(Object.keys(result.registryChecks).length, consumer === 'navbar' ? 28 : 0);
         Object.entries(result.registryChecks).forEach(([scenario, passed]): void => {
           test.addStep(`Verifying registry boundary: ${scenario}`);
           Test.assertIsEqual(passed, true);
@@ -588,7 +764,9 @@ export class UITester extends GVAbstractTester {
     const originalKeyboardMode = getStoreUIActiveTrapGeoView(mapId);
     const originalCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
     const originalAppBarTab = getStoreUIActiveAppBarTab(mapId);
+    const originalFocusItem = getStoreUIFocusItem(mapId);
     const originalFocus = DomHelper.getActiveElement();
+    const removalPanelId = `ownership-removal-${generateId(8)}`;
 
     return this.test(
       'Test AppBar focus restoration preserves newer focus',
@@ -603,6 +781,215 @@ export class UITester extends GVAbstractTester {
           DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-settings-btn`);
         const settingsButton = getSettingsButton();
         if (!detailsButton || !settingsButton) throw new Error(`AppBar focus test controls were not found for map '${mapId}'`);
+
+        test.addStep('Transferring footer ownership on trigger, controller and legacy API opens...');
+        uiController.setActiveTrapGeoView(true);
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        const ownershipChecks: TypeOwnershipCheck[] = [];
+        test.addStep('Removing an owned AppBar panel without clearing a newer owner or moving focus...');
+        const { appBarApi } = this.getMapViewer();
+        for (const superseded of [false, true]) {
+          const source = superseded ? 'removal with newer owner' : 'removal while owned';
+          test.addStep(`Mounting the closed panel for ${source}...`);
+          appBarApi.createAppbarPanel(
+            { id: removalPanelId, 'aria-label': 'Ownership removal probe', children: 'Probe' },
+            { title: 'Ownership removal probe', icon: 'Probe', content: 'Ownership removal probe' }
+          );
+          // eslint-disable-next-line no-await-in-loop -- Mount closed before opening; initially open panels intentionally do not autofocus.
+          await whenThisThen(
+            (): boolean => {
+              const card = DomHelper.getAppBarPanel(mapId, removalPanelId)?.querySelector<HTMLElement>('.panel-card');
+              return card !== undefined && card !== null && window.getComputedStyle(card).display === 'none';
+            },
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+          uiController.enableFocusTrap({ activeElementId: false, callbackElementId: false });
+          test.addStep(`Opening the mounted panel for ${source}...`);
+          uiController.setActiveAppBarTab(removalPanelId, true, true);
+          // eslint-disable-next-line no-await-in-loop -- Verify each registered panel mounts before testing its removal.
+          await whenThisThen(
+            (): boolean => DomHelper.getActiveElement() === DomHelper.getAppBarPanelCloseButton(mapId, removalPanelId),
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+          ownershipChecks.push({
+            source,
+            phase: 'acquisition',
+            actual: getStoreUIFocusItem(mapId).activeElementId,
+            expected: buildAppBarFocusTrapId(mapId, removalPanelId),
+          });
+          const newerOwnerId = `${mapId}-removal-newer-owner`;
+          if (superseded) {
+            uiController.enableFocusTrap({ activeElementId: newerOwnerId, callbackElementId: false, focusOnEntry: false });
+          }
+          settingsButton.focus();
+          appBarApi.removeAppbarPanel(removalPanelId);
+
+          // eslint-disable-next-line no-await-in-loop -- Removal cases share ownership and must settle before recreating the panel.
+          await delay(GVAbstractTester.UI_SCROLL_SETTLE_MS);
+          const activeTab = getStoreUIActiveAppBarTab(mapId);
+          ownershipChecks.push(
+            { source, phase: 'registry removal', actual: appBarApi.getAppBarButtonPanelById(removalPanelId) !== null, expected: false },
+            {
+              source,
+              phase: 'owner after removal',
+              actual: getStoreUIFocusItem(mapId).activeElementId,
+              expected: superseded ? newerOwnerId : false,
+            },
+            { source, phase: 'tab cleared', actual: activeTab.tabId, expected: '' },
+            { source, phase: 'panel closed', actual: activeTab.isOpen, expected: false },
+            { source, phase: 'boundary disabled', actual: activeTab.isFocusTrapped, expected: false },
+            { source, phase: 'focus preserved', actual: DomHelper.getActiveElement()?.id, expected: settingsButton.id }
+          );
+        }
+        uiController.enableFocusTrap({ activeElementId: false, callbackElementId: false });
+        ownershipChecks.push(
+          { source: 'ID builder', phase: 'shell format', actual: buildGVElementId(mapId, 'shell'), expected: `${mapId}-shell` },
+          { source: 'ID builder', phase: 'footer format', actual: buildTabId(mapId, 'layers'), expected: `${mapId}-tab-layers` },
+          {
+            source: 'ID builder',
+            phase: 'named AppBar format',
+            actual: buildAppBarFocusTrapId(mapId, 'details'),
+            expected: `${mapId}-appBar-details-focus-trap`,
+          },
+          {
+            source: 'ID builder',
+            phase: 'undefined AppBar ID format',
+            actual: buildAppBarFocusTrapId(mapId),
+            expected: `${mapId}-appBar-focus-trap`,
+          },
+          {
+            source: 'ID builder',
+            phase: 'empty AppBar ID format',
+            actual: buildAppBarFocusTrapId(mapId, ''),
+            expected: `${mapId}-appBar-focus-trap`,
+          }
+        );
+        const ownerClassificationCases = [
+          { id: buildAppBarFocusTrapId(mapId, 'details'), expected: true },
+          { id: buildAppBarFocusTrapId(mapId), expected: true },
+          { id: buildAppBarFocusTrapId(`${mapId}-other`, 'details'), expected: false },
+          { id: buildTabId(mapId, 'layers'), expected: false },
+          { id: `${mapId}-appBar-settings-panel-focus`, expected: false },
+          { id: `${mapId}-appBar-version-ft`, expected: false },
+          { id: false, expected: false },
+          { id: undefined, expected: false },
+        ] as const;
+        ownerClassificationCases.forEach(({ id, expected }): void => {
+          ownershipChecks.push({
+            source: 'ID classifier',
+            phase: `classifying ${id}`,
+            actual: isAppBarFocusTrapId(mapId, id),
+            expected,
+          });
+        });
+        const panelOwnerId = buildAppBarFocusTrapId(mapId, 'details');
+        const footerOwnerId = buildTabId(mapId, getStoreUIActiveFooterBarTab(mapId).tabId);
+        for (const source of ['trigger', 'controller', 'legacy', 'untrapped', 'toggle', 'external-close'] as const) {
+          test.addStep(`Checking AppBar ownership through ${source}...`);
+          uiController.setActiveAppBarTab('details', false, false);
+          uiController.enableFocusTrap({ activeElementId: footerOwnerId, callbackElementId: footerOwnerId, focusOnEntry: false });
+
+          // eslint-disable-next-line no-await-in-loop -- Opening paths share the same panel and must commit before trigger activation.
+          await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+          if (source === 'trigger') detailsButton.click();
+          else if (source === 'legacy') this.getMapViewer().appBarApi.selectTab('details');
+          else uiController.setActiveAppBarTab('details', true, source !== 'untrapped');
+
+          // eslint-disable-next-line no-await-in-loop -- Each opening must finish before testing its dismissal.
+          await whenThisThen(
+            (): boolean => DomHelper.getActiveElement() === DomHelper.getAppBarPanelCloseButton(mapId, 'details'),
+            GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+            GVAbstractTester.UI_POLL_INTERVAL_MS
+          );
+          ownershipChecks.push({
+            source,
+            phase: 'acquisition',
+            actual: getStoreUIFocusItem(mapId).activeElementId,
+            expected: panelOwnerId,
+          });
+          const closeButton = DomHelper.getAppBarPanelCloseButton(mapId, 'details');
+          if (!closeButton) throw new Error('Details close button was not rendered during ownership checks');
+          if (source === 'controller') {
+            closeButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+          } else if (source === 'toggle') detailsButton.click();
+          else if (source === 'external-close') uiController.setActiveAppBarTab('details', false, false);
+          else closeButton.click();
+
+          // eslint-disable-next-line no-await-in-loop -- Wait for delayed restoration before testing the next opening.
+          await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+          ownershipChecks.push(
+            { source, phase: 'dismissal owner', actual: getStoreUIFocusItem(mapId).activeElementId, expected: false },
+            { source, phase: 'trigger focus return', actual: DomHelper.getActiveElement()?.id, expected: detailsButton.id }
+          );
+        }
+
+        test.addStep('Closing an AppBar panel underneath Settings without restoring its stale owner...');
+        uiController.setActiveAppBarTab('details', true, true);
+        await whenThisThen(
+          (): boolean => DomHelper.getActiveElement() === DomHelper.getAppBarPanelCloseButton(mapId, 'details'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        settingsButton.click();
+        const settingsOwnerId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-settings-panel-focus`;
+        await whenThisThen(
+          (): boolean => getStoreUIFocusItem(mapId).activeElementId === settingsOwnerId,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        uiController.setActiveAppBarTab('details', false, false);
+        ownershipChecks.push({
+          source: 'Settings',
+          phase: 'AppBar closed underneath popover',
+          actual: getStoreUIFocusItem(mapId).activeElementId,
+          expected: settingsOwnerId,
+        });
+        getSettingsButton()?.click();
+        await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        ownershipChecks.push(
+          { source: 'Settings', phase: 'stale owner released', actual: getStoreUIFocusItem(mapId).activeElementId, expected: false },
+          { source: 'Settings', phase: 'trigger focus return', actual: DomHelper.getActiveElement()?.id, expected: settingsButton.id }
+        );
+
+        test.addStep('Preserving a newer owner during API opening and dismissal...');
+        const newerOwnerId = `${mapId}-appbar-newer-owner`;
+        uiController.enableFocusTrap({ activeElementId: newerOwnerId, callbackElementId: false, focusOnEntry: false });
+        settingsButton.focus();
+        uiController.setActiveAppBarTab('details', true, true);
+        await delay(GVAbstractTester.UI_SCROLL_SETTLE_MS);
+        ownershipChecks.push(
+          {
+            source: 'newer owner',
+            phase: 'API open owner preserved',
+            actual: getStoreUIFocusItem(mapId).activeElementId,
+            expected: newerOwnerId,
+          },
+          {
+            source: 'newer owner',
+            phase: 'API open focus preserved',
+            actual: DomHelper.getActiveElement()?.id,
+            expected: settingsButton.id,
+          }
+        );
+        DomHelper.getAppBarPanelCloseButton(mapId, 'details')?.click();
+        await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        ownershipChecks.push(
+          {
+            source: 'newer owner',
+            phase: 'dismissal owner preserved',
+            actual: getStoreUIFocusItem(mapId).activeElementId,
+            expected: newerOwnerId,
+          },
+          {
+            source: 'newer owner',
+            phase: 'dismissal focus preserved',
+            actual: DomHelper.getActiveElement()?.id,
+            expected: settingsButton.id,
+          }
+        );
+        uiController.enableFocusTrap({ activeElementId: false, callbackElementId: false });
 
         test.addStep('Enabling keyboard navigation and opening the Details panel...');
         uiController.setActiveTrapGeoView(true);
@@ -690,6 +1077,7 @@ export class UITester extends GVAbstractTester {
         await delay(TIMEOUT.dataPanelLoading + GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
 
         return {
+          ownershipChecks,
           expectedNewFocusId: settingsSwitch.id,
           actualNewFocusId: focusAfterNewOwner?.id ?? '',
           crosshairBeforeNewOwnerRestore,
@@ -703,6 +1091,10 @@ export class UITester extends GVAbstractTester {
       },
       (test, result): void => {
         test.addStep('Verifying newer focus is preserved and ordinary focus restoration still works...');
+        result.ownershipChecks.forEach((check): void => {
+          test.addStep(`Verifying ${check.source}: ${check.phase} (expected ${check.expected}, actual ${check.actual})...`);
+          Test.assertIsEqual(check.actual, check.expected);
+        });
         Test.assertIsEqual(result.actualNewFocusId, result.expectedNewFocusId);
         Test.assertIsEqual(result.crosshairAfterNewOwnerRestore, result.crosshairBeforeNewOwnerRestore);
         Test.assertIsEqual(result.actualReturnFocusId, result.expectedReturnFocusId);
@@ -710,6 +1102,7 @@ export class UITester extends GVAbstractTester {
         Test.assertIsEqual(result.crosshairAfterQueryClose, true);
       },
       async (): Promise<void> => {
+        this.getMapViewer().appBarApi.removeAppbarPanel(removalPanelId);
         uiController.setActiveAppBarTab(
           originalAppBarTab.tabId || undefined,
           originalAppBarTab.isOpen,
@@ -719,6 +1112,7 @@ export class UITester extends GVAbstractTester {
         await delay(GVAbstractTester.UI_SCROLL_SETTLE_MS);
         uiController.setActiveTrapGeoView(originalKeyboardMode);
         uiController.setCrosshairActive(originalCrosshairActive);
+        uiController.enableFocusTrap({ ...originalFocusItem, focusOnEntry: false });
         if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
       }
     );
@@ -735,10 +1129,17 @@ export class UITester extends GVAbstractTester {
     const originalKeyboardMode = getStoreUIActiveTrapGeoView(mapId);
     const originalCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
     const originalFocus = DomHelper.getActiveElement();
+    let didStartPreparation = false;
 
     return this.test(
       'Test WCAG Skip returns focus to the same map',
       async (test): Promise<TypeSkipFocusResult> => {
+        const testPanel = DomHelper.getGVRootElement(mapId).closest('.tab-content');
+        if (testPanel && (testPanel.getClientRects().length === 0 || window.getComputedStyle(testPanel).visibility !== 'visible')) {
+          throw new TestSkippedError('The UI test map is hidden; run the UI Tests tab directly');
+        }
+
+        didStartPreparation = true;
         test.addStep('Preparing the map entry prompt and its map-scoped skip links...');
         if (originalKeyboardMode) uiController.setActiveTrapGeoView(false);
 
@@ -820,6 +1221,8 @@ export class UITester extends GVAbstractTester {
         Test.assertIsEqual(result.actualTopFocusId, result.expectedTopFocusId);
       },
       async (): Promise<void> => {
+        if (!didStartPreparation) return;
+
         const skipButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'skip-focus');
         if (skipButton) {
           skipButton.click();
@@ -954,9 +1357,29 @@ export class UITester extends GVAbstractTester {
               bubbles: true,
               cancelable: true,
             });
+            const tabbable = DomHelper.getGVVisibleTabbable(mapId, shell);
+            const lastTabbable = tabbable.at(-1);
+            if (!lastTabbable) throw new Error(`Static viewer '${mapId}' has no visible keyboard destination`);
+
             expectedDestination.dispatchEvent(reverseTab);
+
+            // Synthetic key events do not perform native Tab movement; exercise the boundary the browser would reach.
+            if (!reverseTab.defaultPrevented) {
+              const startBoundary = shell.previousElementSibling;
+              if (!(startBoundary instanceof HTMLElement) || !startBoundary.matches('[data-testid="sentinelStart"][tabindex="0"]')) {
+                throw new Error(`Static viewer '${mapId}' has no active start boundary`);
+              }
+              startBoundary.focus();
+            }
+
+            // eslint-disable-next-line no-await-in-loop -- Complete this viewer's boundary wrap before checking the next scenario.
+            await whenThisThen(
+              (): boolean => DomHelper.getActiveElement() === lastTabbable,
+              GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+              GVAbstractTester.UI_POLL_INTERVAL_MS
+            );
             const reverseTabFocus = DomHelper.getActiveElement();
-            reverseTabContained = reverseTab.defaultPrevented && reverseTabFocus !== undefined && shell.contains(reverseTabFocus);
+            reverseTabContained = reverseTabFocus === lastTabbable && shell.contains(reverseTabFocus);
           }
 
           results.push({
@@ -994,9 +1417,363 @@ export class UITester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Verifies a Settings mode selection satisfies the fresh-viewer entry guard without opening its dialog.
+   *
+   * @returns Named mode, prompt and focus evidence from an isolated viewer
+   */
+  testSettingsModeSatisfiesEntryGuard(): Promise<Test<Record<string, boolean>>> {
+    const mapId = `settings-entry-${generateId(8)}`;
+    const fixture = UITester.#createScrollFixture(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+    const originalScroll = { x: window.scrollX, y: window.scrollY };
+
+    return this.test(
+      'Test Settings mode selection satisfies the keyboard entry guard',
+      async (test): Promise<Record<string, boolean>> => {
+        test.addStep('Creating a fresh viewer without opening its entry dialog...');
+        document.body.appendChild(fixture);
+        await this.#createScrollViewer(mapId, 'visible');
+        const settingsButton = await whenThisThen(
+          (): HTMLButtonElement | undefined =>
+            DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-settings-btn`),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        if (!settingsButton) throw new Error(`Settings trigger was not rendered for '${mapId}'`);
+
+        settingsButton.focus();
+        const initialTab = new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', bubbles: true, cancelable: true });
+        settingsButton.dispatchEvent(initialTab);
+        const checks: Record<string, boolean> = {
+          freshGuardActive: initialTab.defaultPrevented && DomHelper.getActiveElement() === DomHelper.getWCAGTopLink(mapId),
+          promptInitiallyClosed: DomHelper.getGVElementById(mapId, 'enable-focus') === undefined,
+          modeInitiallyDisabled: !getStoreUIActiveTrapGeoView(mapId),
+        };
+
+        test.addStep('Opening Settings by pointer and enabling then disabling keyboard navigation...');
+        settingsButton.click();
+        const settingsSwitch = await whenThisThen(
+          (): HTMLInputElement | undefined =>
+            DomHelper.getGVElementById<HTMLInputElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-settings-panel-keyboard-navigation`),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        if (!settingsSwitch) throw new Error(`Settings switch was not rendered for '${mapId}'`);
+        checks.switchHasSwitchRole = settingsSwitch.getAttribute('role') === 'switch';
+        checks.switchHasAccessibleName = Boolean(settingsSwitch.labels?.[0]?.textContent?.trim());
+        checks.switchAriaCheckedInitially = settingsSwitch.getAttribute('aria-checked') === String(settingsSwitch.checked);
+        await whenThisThen(
+          (): boolean => DomHelper.getActiveElement() === settingsSwitch,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        settingsSwitch.click();
+        await whenThisThen(
+          (): boolean =>
+            getStoreUIActiveTrapGeoView(mapId) &&
+            settingsSwitch.checked &&
+            settingsSwitch.getAttribute('aria-checked') === String(settingsSwitch.checked),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks.switchAriaCheckedWhenEnabled = settingsSwitch.getAttribute('aria-checked') === 'true';
+        checks.enabledWithoutPrompt =
+          DomHelper.getActiveElement() === settingsSwitch && DomHelper.getGVElementById(mapId, 'enable-focus') === undefined;
+
+        settingsSwitch.click();
+        await whenThisThen(
+          (): boolean =>
+            !getStoreUIActiveTrapGeoView(mapId) &&
+            !settingsSwitch.checked &&
+            settingsSwitch.getAttribute('aria-checked') === String(settingsSwitch.checked),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks.switchAriaCheckedWhenDisabled = settingsSwitch.getAttribute('aria-checked') === 'false';
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        checks.settingsRemainsOpen = settingsButton.getAttribute('aria-expanded') === 'true';
+        checks.switchRetainsFocus = DomHelper.getActiveElement() === settingsSwitch;
+        checks.crosshairDisabled = !getStoreAppIsCrosshairsActive(mapId);
+
+        test.addStep('Checking internal Tab and Shift+Tab after the explicit Settings selection...');
+        settingsSwitch.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', bubbles: true, cancelable: true }));
+        checks.settingsTabNotRedirected = DomHelper.getActiveElement() === settingsSwitch;
+        settingsSwitch.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
+        await whenThisThen(
+          (): boolean => settingsButton.getAttribute('aria-expanded') === 'false' && DomHelper.getActiveElement() === settingsButton,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        [false, true].forEach((shiftKey): void => {
+          const tab = new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', shiftKey, bubbles: true, cancelable: true });
+          settingsButton.dispatchEvent(tab);
+          checks[shiftKey ? 'reverseTabNotIntercepted' : 'forwardTabNotIntercepted'] =
+            !tab.defaultPrevented && DomHelper.getActiveElement() === settingsButton;
+        });
+        checks.promptRemainsClosed = DomHelper.getGVElementById(mapId, 'enable-focus') === undefined;
+
+        test.addStep('Preserving deliberate entry through the outer skip link...');
+        const topLink = DomHelper.getWCAGTopLink(mapId);
+        if (!topLink) throw new Error(`WCAG top link was not rendered for '${mapId}'`);
+        topLink.focus();
+        topLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', code: 'Tab', bubbles: true, cancelable: true }));
+        await whenThisThen(
+          (): boolean => DomHelper.getGVElementById(mapId, 'enable-focus') !== undefined,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks.explicitEntryStillPrompts = DomHelper.getGVElementById(mapId, 'enable-focus') !== undefined;
+        return checks;
+      },
+      (test, checks): void => {
+        test.addStep('Verifying Settings handles onboarding without changing ordinary entry-link behavior...');
+        Object.entries(checks).forEach(([name, passed]): void => {
+          test.addStep(`Verifying ${name}`);
+          Test.assertIsEqual(passed, true);
+        });
+      },
+      async (): Promise<void> => {
+        await this.#cleanupScrollFixture(mapId, fixture, originalScroll);
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
+  /**
+   * Verifies switch markup exposes an accessible name and live checked state for controlled and uncontrolled use.
+   *
+   * @returns Switch role, label, slot-prop preservation, and checked-state evidence with fixture cleanup
+   */
+  testSwitchAccessibleMarkup(): Promise<Test<Record<string, boolean>>> {
+    const fixture = document.createElement('div');
+    const switchIds = { controlled: `switch-controlled-${generateId(8)}`, uncontrolled: `switch-uncontrolled-${generateId(8)}` };
+    const inputs: { controlled?: HTMLInputElement; uncontrolled?: HTMLInputElement } = {};
+    let cleanupRoot: (() => void) | undefined;
+
+    return this.test(
+      'Test Switch accessible markup and checked state',
+      async (test): Promise<Record<string, boolean>> => {
+        test.addStep('Rendering controlled and uncontrolled switches with caller input slot props...');
+        document.body.appendChild(fixture);
+        const { createRoot, createElement, react } = window.cgpv.reactUtilities;
+        const root = createRoot(fixture);
+        cleanupRoot = (): void => root.unmount();
+
+        const SwitchProbe = (): ReactElement => {
+          const [controlledChecked, setControlledChecked] = react.useState(false);
+          return createElement(
+            'div',
+            {},
+            createElement(Switch, {
+              id: switchIds.controlled,
+              label: 'Controlled accessibility switch',
+              checked: controlledChecked,
+              onChange: (_event, checked): void => setControlledChecked(checked),
+              slotProps: {
+                input: () => ({
+                  'aria-checked': true,
+                  title: 'function-slot',
+                  ref: (element: HTMLInputElement | null): void => {
+                    if (element) inputs.controlled = element;
+                  },
+                }),
+              },
+            }),
+            createElement(Switch, {
+              id: switchIds.uncontrolled,
+              label: 'Uncontrolled accessibility switch',
+              defaultChecked: true,
+              slotProps: {
+                input: {
+                  'aria-checked': false,
+                  title: 'object-slot',
+                  ref: (element: HTMLInputElement | null): void => {
+                    if (element) inputs.uncontrolled = element;
+                  },
+                },
+              },
+            })
+          );
+        };
+
+        root.render(createElement(SwitchProbe));
+        await whenThisThen(
+          (): boolean => Boolean(inputs.controlled && inputs.uncontrolled),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+
+        const controlledInput = inputs.controlled;
+        const uncontrolledInput = inputs.uncontrolled;
+        if (!controlledInput || !uncontrolledInput) throw new Error('Switch accessibility probes were not rendered');
+
+        const checks: Record<string, boolean> = {
+          controlledSwitchRole: controlledInput.getAttribute('role') === 'switch',
+          controlledAccessibleName: Boolean(controlledInput.labels?.[0]?.textContent?.trim()),
+          controlledInitialAriaChecked: controlledInput.getAttribute('aria-checked') === String(controlledInput.checked),
+          controlledFunctionSlotPropsPreserved: controlledInput.title === 'function-slot',
+          uncontrolledSwitchRole: uncontrolledInput.getAttribute('role') === 'switch',
+          uncontrolledAccessibleName: Boolean(uncontrolledInput.labels?.[0]?.textContent?.trim()),
+          uncontrolledInitialAriaChecked: uncontrolledInput.getAttribute('aria-checked') === String(uncontrolledInput.checked),
+          uncontrolledObjectSlotPropsPreserved: uncontrolledInput.title === 'object-slot',
+        };
+
+        test.addStep('Toggling the controlled and uncontrolled switches and checking their generated aria-checked attributes...');
+        controlledInput.click();
+        await whenThisThen(
+          (): boolean => controlledInput.checked && controlledInput.getAttribute('aria-checked') === 'true',
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks.controlledAriaCheckedUpdates = controlledInput.getAttribute('aria-checked') === 'true';
+
+        uncontrolledInput.click();
+        await whenThisThen(
+          (): boolean => !uncontrolledInput.checked && uncontrolledInput.getAttribute('aria-checked') === 'false',
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks.uncontrolledAriaCheckedUpdates = uncontrolledInput.getAttribute('aria-checked') === 'false';
+        return checks;
+      },
+      (test, checks): void => {
+        Object.entries(checks).forEach(([name, passed]): void => {
+          test.addStep(`Verifying ${name}`);
+          Test.assertIsEqual(passed, true);
+        });
+      },
+      (): void => {
+        cleanupRoot?.();
+        fixture.remove();
+      }
+    );
+  }
+
   // #endregion PUBLIC METHODS - UI TESTS
 
   // #region PRIVATE METHODS - MAP SECTION SCROLL
+
+  /**
+   * Verifies modal exclusion and navbar API retry through real dialogs in both navigation modes.
+   *
+   * @param test - The running test receiving scenario steps
+   * @param mapId - The isolated viewer
+   * @param navbarId - The registered navbar probe
+   * @returns Named modal-preservation, rejection, retry, and dismissal evidence
+   */
+  async #checkModalPopoverExclusion(test: Test, mapId: string, navbarId: string): Promise<Record<string, boolean>> {
+    const viewer = this.getApi().getMapViewer(mapId);
+    const { uiController, dataTableController } = viewer.controllers;
+    viewer.map.renderSync();
+    await viewer.waitForMapReady();
+    dataTableController.setSelectedFeature({ featureKey: 0, geoviewLayerType: 'GeoJSON', fieldInfo: {}, layerPath: 'modal-probe' });
+    const checks: Record<string, boolean> = {};
+
+    for (const keyboardMode of [false, true]) {
+      uiController.setActiveTrapGeoView(keyboardMode);
+      // eslint-disable-next-line no-await-in-loop -- The trigger handlers must observe the committed navigation mode.
+      await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+      for (const modalId of [
+        BUILT_IN_MODAL_IDS.EXPORT,
+        BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE,
+        BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE,
+      ]) {
+        const scenario = `${modalId}:${keyboardMode ? 'keyboard' : 'pointer'}`;
+        test.addStep(`Rejecting navbar API opening while ${scenario} owns focus...`);
+        uiController.enableFocusTrap({ activeElementId: modalId, callbackElementId: false, focusOnEntry: false });
+        const entryFocusId = modalId === BUILT_IN_MODAL_IDS.EXPORT ? `${mapId}-export-title-input` : `${modalId}-close-button`;
+
+        // eslint-disable-next-line no-await-in-loop -- Each modal must finish entry focus before its navbar request.
+        const dialog = await whenThisThen(
+          (): HTMLElement | undefined => {
+            const candidate = DomHelper.queryGVSelector<HTMLElement>(mapId, '[role="dialog"][aria-modal="true"]');
+            const focused = DomHelper.getActiveElement();
+            return focused?.id === entryFocusId && candidate?.contains(focused) ? candidate : undefined;
+          },
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        if (!dialog) throw new Error(`Modal '${modalId}' did not finish entry focus`);
+        const originalFocus = DomHelper.getActiveElement();
+        const originalOwner = getStoreUIFocusItem(mapId);
+        const closeVersion = getStoreUIPopoverCloseVersion(mapId);
+        viewer.navBarApi.setButtonPanelOpen(navbarId, true);
+        // eslint-disable-next-line no-await-in-loop -- Rejection must reset the external request so later retries work.
+        await whenThisThen(
+          (): boolean => viewer.navBarApi.getNavBarButtonPanelById(navbarId)?.panel?.status === false,
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks[`${scenario}:owner-preserved`] = getStoreUIFocusItem(mapId) === originalOwner;
+        checks[`${scenario}:dialog-and-focus-preserved`] =
+          dialog.isConnected && !!originalFocus && dialog.contains(originalFocus) && DomHelper.getActiveElement() === originalFocus;
+        checks[`${scenario}:opening-rejected`] =
+          !this.#findOwnershipDialog(mapId, 'navbar') &&
+          viewer.navBarApi.getNavBarButtonPanelById(navbarId)?.panel?.status === false &&
+          getStoreUIPopoverCloseVersion(mapId) === closeVersion;
+
+        for (const consumer of ['version', 'notifications', 'settings'] as const) {
+          const trigger = DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-${consumer}-btn`);
+          if (!trigger) throw new Error(`Popover trigger '${consumer}' was not rendered`);
+          trigger.click();
+        }
+        // eslint-disable-next-line no-await-in-loop -- All shared trigger consumers must handle a rejected opening without claiming ownership.
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        checks[`${scenario}:shared-triggers-rejected`] =
+          getStoreUIFocusItem(mapId) === originalOwner &&
+          getStoreUIPopoverCloseVersion(mapId) === closeVersion &&
+          DomHelper.getActiveElement() === originalFocus &&
+          !(['version', 'notifications', 'settings'] as const).some((consumer): boolean => !!this.#findOwnershipDialog(mapId, consumer));
+
+        uiController.closeMapPopovers();
+        // eslint-disable-next-line no-await-in-loop -- Settle close effects before checking the newer modal owner.
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        checks[`${scenario}:controller-close-preserves-modal`] =
+          getStoreUIFocusItem(mapId) === originalOwner && dialog.isConnected && DomHelper.getActiveElement() === originalFocus;
+        uiController.disableFocusTrap('no-focus');
+        // eslint-disable-next-line no-await-in-loop -- Modal transitions must finish before the retry.
+        await whenThisThen((): boolean => !dialog.isConnected, GVAbstractTester.UI_FOCUS_TIMEOUT_MS, GVAbstractTester.UI_POLL_INTERVAL_MS);
+
+        viewer.navBarApi.setButtonPanelOpen(navbarId, true);
+        // eslint-disable-next-line no-await-in-loop -- Each retry must open before dismissal.
+        await whenThisThen(
+          (): boolean => !!this.#findOwnershipDialog(mapId, 'navbar'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        checks[`${scenario}:retry-opened`] = !!this.#findOwnershipDialog(mapId, 'navbar');
+        this.#requirePopoverCloseButton(mapId, 'navbar').click();
+        // eslint-disable-next-line no-await-in-loop -- Settle ownership release to detect stale modal resurrection.
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        checks[`${scenario}:dismissal-does-not-reopen-modal`] =
+          getStoreUIFocusItem(mapId).activeElementId === false &&
+          !this.#findOwnershipDialog(mapId, 'navbar') &&
+          !DomHelper.queryGVSelector(mapId, '[role="dialog"][aria-modal="true"]');
+
+        viewer.navBarApi.setButtonPanelOpen(navbarId, true);
+        // eslint-disable-next-line no-await-in-loop -- Establish an outgoing popover before the modal supersedes it.
+        await whenThisThen(
+          (): boolean => !!this.#findOwnershipDialog(mapId, 'navbar'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+        uiController.enableFocusTrap({ activeElementId: modalId, callbackElementId: false, focusOnEntry: false });
+        uiController.closeMapPopovers();
+        // eslint-disable-next-line no-await-in-loop -- Popover cleanup must not overwrite the newer modal.
+        await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
+        checks[`${scenario}:newer-modal-survives-popover-cleanup`] = getStoreUIFocusItem(mapId).activeElementId === modalId;
+        uiController.disableFocusTrap('no-focus');
+        // eslint-disable-next-line no-await-in-loop -- Finish modal cleanup before the next scenario.
+        await whenThisThen(
+          (): boolean => !DomHelper.queryGVSelector(mapId, '[role="dialog"][aria-modal="true"]'),
+          GVAbstractTester.UI_FOCUS_TIMEOUT_MS,
+          GVAbstractTester.UI_POLL_INTERVAL_MS
+        );
+      }
+    }
+    return checks;
+  }
 
   /**
    * Finds the expected map-scoped dialog by its accessible title, never by DOM order.
@@ -1168,6 +1945,35 @@ export class UITester extends GVAbstractTester {
               getPopoverReturnFocusItem(mapIds[1]).activeElementId === `${mapIds[1]}-underlying`
             : getStoreUIFocusItem(mapIds[0]).activeElementId === `${mapIds[0]}-fresh-unmount`;
       }
+
+      test.addStep('Checking selected, expanded, existing footer owners before popover release...');
+      const mapId = mapIds[0];
+      const { uiController } = this.getApi().getMapViewer(mapId).controllers;
+      const customTab = 'popover-owner-test';
+      for (const scenario of ['valid', 'switched', 'collapsed', 'cleared', 'removed', 'hidden', 'missing', 'guide'] as const) {
+        let tabId = customTab;
+        if (scenario === 'guide') tabId = 'guide';
+        if (scenario === 'missing') tabId = 'missing-tab';
+        uiController.addFooterTab({ id: customTab });
+        uiController.showTabButton(tabId);
+        uiController.setActiveFooterBarTab(tabId);
+        uiController.setFooterBarIsOpen(true);
+        const footerOwner = buildTabId(mapId, tabId);
+        uiController.enableFocusTrap({ activeElementId: footerOwner, callbackElementId: footerOwner, focusOnEntry: false });
+        probe(mapId, ownerIds[0]).claimFocusOwner();
+        if (scenario === 'switched') uiController.setActiveFooterBarTab('layers');
+        if (scenario === 'collapsed') uiController.setFooterBarIsOpen(false);
+        if (scenario === 'cleared') uiController.setActiveFooterBarTab(undefined);
+        if (scenario === 'removed') uiController.removeFooterTab(customTab);
+        if (scenario === 'hidden') uiController.hideTabButton(customTab);
+        probe(mapId, ownerIds[0]).releaseFocusOwner();
+        checks[`${mapId}:footer-${scenario}`] =
+          getStoreUIFocusItem(mapId).activeElementId === (scenario === 'valid' || scenario === 'guide' ? footerOwner : false);
+      }
+      uiController.removeFooterTab(customTab);
+      uiController.showTabButton(customTab);
+      uiController.setActiveFooterBarTab('layers');
+      uiController.setFooterBarIsOpen(true);
       return checks;
     } finally {
       for (const { mapId, root, host } of roots) {
@@ -1216,7 +2022,7 @@ export class UITester extends GVAbstractTester {
     await this.#waitForPopoverViewerReady(lifecycleMapId);
     const registryChecks = await this.#checkPopoverRegistryBoundaries(test, [mapId, lifecycleMapId], fixture);
     const survivor = this.getApi().getMapViewer(mapId).controllers.uiController;
-    const footerOwnerId = `${mapId}-tab-layers`;
+    const footerOwnerId = buildTabId(mapId, 'layers');
     survivor.enableFocusTrap({ activeElementId: footerOwnerId, callbackElementId: footerOwnerId, focusOnEntry: false });
     const aboutButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, `${CONTAINER_TYPE.APP_BAR}-version-btn`);
     if (!aboutButton) throw new Error('Surviving About trigger was not rendered for the lifecycle test');
@@ -1256,7 +2062,7 @@ export class UITester extends GVAbstractTester {
       // eslint-disable-next-line no-await-in-loop -- Commit keyboard mode before clicking a trigger whose handler captures that mode.
       await delay(GVAbstractTester.UI_FOCUS_RESTORE_BUFFER_MS);
       viewer.controllers.uiController.enableFocusTrap({
-        activeElementId: `${lifecycleMapId}-tab-layers`,
+        activeElementId: buildTabId(lifecycleMapId, 'layers'),
         callbackElementId: false,
         focusOnEntry: false,
       });
@@ -1816,6 +2622,10 @@ type TypePopoverOwnershipResult = {
   restoredOwner: string | false;
   expectedPreviousOwner: string;
   triggerFocused: boolean;
+  ownerDuringFooterSwitch: string | false;
+  ownerAfterFooterSwitch: string | false;
+  ownerAfterAppBarOpen: string | false;
+  expectedAppBarOwner: string;
   externalCloseOwner: string | false;
   externalCloseFocusPreserved: boolean;
   yieldedOwner: string | false;
@@ -1824,6 +2634,8 @@ type TypePopoverOwnershipResult = {
   unmountChecks: boolean[];
   /** Outgoing About closure and valid return ownership for navbar replacement scenarios. */
   handoffChecks: boolean[];
+  /** Export and both data-table modals reject navbar opens, preserve focus, and permit a clean retry. */
+  modalChecks: Record<string, boolean>;
   /** Active-popover destruction, same-ID recreation, and surviving-map snapshot isolation. */
   lifecycleChecks: boolean[];
   /** Named checks for colliding owner IDs, three-popover flattening, and stale-record removal. */
@@ -1873,8 +2685,22 @@ type TypeKeyboardEnableFocusResult = {
   reverseTabContained: boolean;
 };
 
+/** Captured ownership evidence with enough context to identify a failing transition. */
+type TypeOwnershipCheck = {
+  /** Opening path or scenario under test. */
+  source: string;
+  /** Ownership or focus transition being verified. */
+  phase: string;
+  /** Captured owner or focused element identifier. */
+  actual: string | boolean | undefined;
+  /** Required owner or focused element identifier. */
+  expected: string | boolean;
+};
+
 /** Expected and actual focus targets for AppBar focus restoration. */
 type TypeAppBarFocusRestoreResult = {
+  /** Trigger/API acquisition, dismissal, and superseding-owner checks. */
+  ownershipChecks: TypeOwnershipCheck[];
   /** DOM id expected to retain focus after another control takes focus. */
   expectedNewFocusId: string;
   /** DOM id focused after delayed restoration completes. */

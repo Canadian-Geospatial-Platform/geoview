@@ -53,6 +53,13 @@ Source boundaries most likely to produce misleading tests:
 - Popover ownership tests resolve the expected dialog through `aria-labelledby` and its translated title,
   then its translated Close label (Notifications uses `appbar.closeNotificationsDialog`). Never select the first dialog/button.
   Close waits target that same dialog; unrelated dialogs must not determine completion.
+- Focus tests using the host UI map must skip hidden `.tab-content` panels before changing state.
+  Run All may leave that map under `visibility: hidden`, where skip links cannot receive focus.
+  If preparation never started, finalization must not dismiss dialogs, restore state, or move focus.
+- Dynamic AppBar test panels must render closed before an autofocus-dependent opening. Registering and
+  opening synchronously can batch into an initially open mount, which intentionally does not autofocus.
+  Wait for the mounted panel card with `display: none` before opening; Close only renders while open.
+  Do not manually focus Close or extend timeouts.
 
 ### Coverage Review — Mapping Changed Code to Tests
 

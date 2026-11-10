@@ -7,6 +7,7 @@ import { DownloadIcon } from '@/ui/icons';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
+import { BUILT_IN_MODAL_IDS } from '@/core/utils/constant';
 
 /** Props for the ExportButton component. */
 interface ExportProps {
@@ -40,7 +41,7 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
       aria-label={t('appbar.export')}
       aria-haspopup="dialog"
       tooltipPlacement="right"
-      onClick={() => uiController.enableFocusTrap({ activeElementId: 'export', callbackElementId: id })}
+      onClick={() => uiController.enableFocusTrap({ activeElementId: BUILT_IN_MODAL_IDS.EXPORT, callbackElementId: id })}
       sx={sxDetails}
       className={className}
       disabled={layersAreLoading}

@@ -30,7 +30,7 @@ import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreAppGuide, useStoreAppIsCrosshairsActive, useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 /** SxProps for the main row root container. */
 // TODO: To prevent the right panel toolbar to be hidden on first click of group layer. There is still a jump on first selection
@@ -78,7 +78,7 @@ interface ResponsiveGridLayoutExposedMethods {
  * conflicts between the FocusTrap and modal's own focus management.
  * Note: Update this list if new modals are added that can open within the right panel.
  */
-const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
+const MODAL_ELEMENT_IDS = [BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE, BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE] as const;
 
 /**
  * Creates the two-panel responsive grid layout with guide, enlarge, and fullscreen support.

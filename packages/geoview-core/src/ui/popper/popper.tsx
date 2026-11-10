@@ -162,12 +162,7 @@ function PopperUI({
         .then((result) => {
           if (result !== 'timeout') return;
           const currentFocus = DomHelper.getActiveElement();
-          if (
-            currentFocus &&
-            currentFocus !== initialFocus &&
-            currentFocus.tagName !== 'BODY' &&
-            !popperRef.current?.contains(currentFocus)
-          ) {
+          if (currentFocus && currentFocus !== initialFocus && currentFocus.tagName !== 'BODY') {
             return;
           }
           const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;

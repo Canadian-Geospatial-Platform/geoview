@@ -16,7 +16,7 @@ import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { TABS, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, TABS, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 /**
  * Creates the lightweight feature detail modal component.
@@ -73,8 +73,8 @@ export default function FeatureDetailModal(): JSX.Element {
 
   return (
     <Modal
-      modalId="featureDetailDataTable"
-      open={activeModalId === 'featureDetailDataTable' && !!feature}
+      modalId={BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE}
+      open={activeModalId === BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE && !!feature}
       onClose={() => {
         // Don't close the modal if the LightBox is open
         // The LightBox will handle its own close and focus restoration

@@ -73,7 +73,7 @@ export default function Version(): JSX.Element {
   const shellContainer = useShellContainer();
 
   // State
-  const { open, anchorEl, openAt, close } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close } = useMapPopover();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const focusTrapId = DomHelper.buildAppBarVersionFocusTrapId(mapId);
   const buttonId = DomHelper.buildAppBarVersionButtonId(mapId);
@@ -104,12 +104,12 @@ export default function Version(): JSX.Element {
         closePanel(true);
         return;
       }
-      const previousFocusItem = openAt(event.currentTarget);
-      if (activeTrapGeoView) {
-        claimFocusOwner(previousFocusItem);
+      const result = tryOpenAt(event.currentTarget);
+      if (result.ok && activeTrapGeoView) {
+        claimFocusOwner(result.previousFocusItem);
       }
     },
-    [activeTrapGeoView, claimFocusOwner, closePanel, open, openAt]
+    [activeTrapGeoView, claimFocusOwner, closePanel, open, tryOpenAt]
   );
 
   /**
