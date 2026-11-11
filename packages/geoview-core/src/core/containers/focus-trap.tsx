@@ -169,35 +169,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   );
 
   /**
-   * Schedules a focus request after the entry dialog updates, unless focus has moved elsewhere.
+   * After the keyboard-navigation entry dialog closes, focuses the requested target unless the user has moved focus elsewhere.
    *
    * @param getTarget - Resolves the map-scoped destination after rendering
    */
   const requestFocus = useCallback(
     (getTarget: () => HTMLElement | undefined): void => {
       focusJobRef.current?.cancel();
-      const focusedElement = DomHelper.getActiveElement();
-      const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-root');
-      const focusJob = doTimeout(FOCUS_DELAY);
-      focusJobRef.current = focusJob;
-      focusJob.promise
-        .then((result) => {
-          if (result !== 'timeout') return;
-
-          const currentElement = DomHelper.getActiveElement();
-          if (
-            currentElement &&
-            currentElement !== focusedElement &&
-            currentElement.tagName !== 'BODY' &&
-            !promptElement?.contains(currentElement)
-          ) {
-            return;
-          }
-          getTarget()?.focus({ preventScroll: true, focusVisible: true });
-        })
-        .catch((error) => {
-          logger.logError('FocusTrapDialog focus delay rejected unexpectedly:', error);
-        });
+      focusJobRef.current = DomHelper.focusAfterEntryDialog(mapId, getTarget, FOCUS_DELAY);
     },
     [mapId]
   );
@@ -319,7 +298,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     const handleMouseMove = (event: MouseEvent): void => {
       if (event.movementX === 0 && event.movementY === 0) return;
-      const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-paper');
+
+      // Unlike the focus check, use only the visible dialog here so moving onto the backdrop dismisses it.
+      const promptElement = DomHelper.getKeyboardNavigationDialogTitle(mapId)?.closest('.MuiDialog-paper');
       if (event.target instanceof Node && promptElement?.contains(event.target)) return;
       setOpen(false);
       focusJobRef.current?.cancel();

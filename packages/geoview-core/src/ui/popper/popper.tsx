@@ -9,7 +9,6 @@ import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
-import { doTimeout } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Stable animated wrapper so popper rerenders do not remount its focus trap. */
@@ -156,21 +155,10 @@ function PopperUI({
 
     // Focus management when popper opens
     if (open && focusSelector) {
-      const initialFocus = DomHelper.getActiveElement();
-      const focusJob = doTimeout(theme.transitions.duration.shortest);
-      focusJob.promise
-        .then((result) => {
-          if (result !== 'timeout') return;
-          const currentFocus = DomHelper.getActiveElement();
-          if (currentFocus && currentFocus !== initialFocus && currentFocus.tagName !== 'BODY') {
-            return;
-          }
-          const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
-          focusElement?.focus();
-        })
-        .catch((error: unknown) => {
-          logger.logError('Popper focus delay rejected unexpectedly:', error);
-        });
+      const focusJob = DomHelper.focusElementAfterDelay(
+        () => popperRef.current?.querySelector<HTMLElement>(focusSelector) ?? undefined,
+        theme.transitions.duration.shortest
+      );
 
       return (): void => focusJob.cancel();
     }

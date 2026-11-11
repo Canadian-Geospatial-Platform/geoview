@@ -363,7 +363,7 @@ _(Doc updates, demo cleanup, code organization)_
 ## Test Plan Changes
 
 - Expanded the manual WCAG checklist with 11 scenarios for Settings lifecycle, mixed keyboard/pointer input, popover replacement, and footer Details precedence; clarified static-map entry and AppBar-only keyboard-query focus restoration (branch `3694-wcag-mode-button`, documentation follow-up to `f7fa65609b`). WCAG now has 85 manual rows. Recounted definition totals are 956 (63 A / 169 C / 724 M), including pre-existing index drift; this documents coverage to execute, not completed manual validation.
-- Expanded automated `suite-ui` from 6 to 17 declared tests for focus ownership/restoration, keyboard Settings entry, popper boundaries, and page scrolling; synchronized the test catalog and automated checklist. The checklist now declares 347 release executions, including a `suite-data-table` count correction from 15 to 16. These figures describe coverage to execute, not completed test runs.
+- Expanded automated `suite-ui` from 6 to 18 declared tests for focus ownership/restoration, keyboard Settings entry, popper boundaries, and page scrolling; synchronized the test catalog and automated checklist. The checklist now declares 347 release executions, including a `suite-data-table` count correction from 15 to 16. These figures describe coverage to execute, not completed test runs.
 
 _(Tests added, moved, removed, or reorganized)_
 
