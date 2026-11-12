@@ -28,11 +28,19 @@ Read only the linked section of each doc: search for its heading and read to the
 - Keep execution/result, assertion-only verification and cleanup separate; `Test<T>` matches the returned subject.
 - Use `test.addStep`, generated IDs, shared constants, instance helpers and `testError` for expected errors.
 - Map-state-changing tests run sequentially after independent parallel tests.
-- After any automated test change, audit **all suites** against actual full-pipeline calls and both count docs;
-  include heavy-gated tests, exclude debug/commented calls, count suite-layer twice only in the release checklist.
+- Keep each changed suite's `getTestsTotalFinal()` aligned with its full-pipeline calls; include heavy-gated
+  tests and exclude debug/commented calls. The catalog is unnumbered and the release checklist has no test
+  totals, so test changes do not require documentation count reconciliation.
 - Do not modify framework `tests/core/` merely to implement a feature test.
 - Tester files declare every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class
   (see [Step 1](../../docs/app/testing/creating-tests.md#step-1-create-a-tester)); never above the class.
+- Successful fixture setup lives in specific `GVAbstractTester.addLayer...` helpers
+  ([helper contract](../../docs/app/testing/creating-tests.md#helper-methods)). Preserve source options,
+  legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
+  subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
+- Fixture helpers own generated IDs. Caller assertions and cleanup derive paths from the returned
+  layer, or `result.gvLayer` when observations are returned alongside it. Keep a layer-instance
+  fallback for teardown when execution fails after setup; do not retain caller-generated IDs for cleanup.
 
 ### Gotchas & Pitfalls
 
@@ -40,7 +48,13 @@ Read the canonical [gotchas](../../docs/app/testing/test-templates.md#gotchas--p
 Source boundaries most likely to produce misleading tests:
 
 - `setMapZoomLevel` returns void; await controller zoom when completion matters.
+- Fullscreen view-restoration tests use `map.renderSync()` to process view changes and `moveend`; do not await
+  `waitForRender()` there, since its `rendercomplete` event also depends on map sources finishing loading.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
+- Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
+  `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
+- MUI's automatic icon `data-testid` attributes are development-only. The Layers visibility toggle explicitly supplies
+  its icon IDs so `getVisibleButtonVisibility` also works in production; keep those props when changing the icons.
 - Prefer `waitForLayerToGetRegistered`; polling is fallback only when no event exists.
 - Map recreation must reassign both viewer and controllers. Overrides use `null` to remove keys.
 - Guard async result-set handlers when removal can delete the entry before settlement.
@@ -56,7 +70,8 @@ AI-specific workflow for TestCreator Mode 2. Classifications/templates are canon
 | Exported utilities / validation / API return values  | Group 1: CoreTester, Utilities*Tester, ConfigTester                                 |
 | Layer class/config/rendering/legend/query/layer sets | Group 2: ConfigTester + LayerTester lifecycle/query/legend as applicable            |
 | MapController / shared zoom/projection/center        | Group 3: MapTester (sequential)                                                     |
-| Details/table/guide/app-bar/footer-bar/UIController  | Group 4: matching panel tester or UITester                                          |
+| Dedicated Details/Data Table panel behavior         | Group 4: matching panel tester                                                     |
+| Map-scoped guide/app-bar/footer-bar/UIController    | Group 3: MapTester                                                                 |
 | Geochart/swiper/time-slider/drawer/other plugin      | Group 5: guarded plugin tester; confirm an existing suite before inventing a tester |
 | LayerController methods                              | Classify by behavior: lifecycle (2), map state (3), panel state (4)                 |
 | Bug fix                                              | Reproduce the smallest failing behavior in its corresponding group                  |

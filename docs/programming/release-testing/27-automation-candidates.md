@@ -42,8 +42,8 @@ These tests from the release plan are already covered by the existing test suite
 | Error layer configs (all types)    | `suite-config` → `test*BadUrl`                                         |
 | Settings cascade to sublayers      | `suite-config` → `testSettingsCascadeToSublayers`                      |
 | Swiper lifecycle                   | `suite-swiper` → `testSwiperLifecycle`                                 |
-| All layer types load correctly     | `suite-layer` → 34 tests                                               |
-| All utility functions              | `suite-utilities` → 52 tests                                           |
+| All layer types load correctly     | Existing `suite-layer` coverage                                        |
+| All utility functions              | Existing `suite-utilities` coverage                                    |
 
 ---
 
@@ -130,7 +130,7 @@ These tests from the release plan are already covered by the existing test suite
 | 35  | **Data table column visibility toggle** — Hide/show columns, verify store `columnVisibility` updates     | P2       | Store-based check                    |
 | 36  | **Geolocator search + zoom** — Search for location, verify map zooms to result extent                    | P2       | API integration, requires service up |
 
-### Fullscreen & DOM State (suite-ui or suite-map-config)
+### Fullscreen & DOM State (suite-map or suite-map-config)
 
 | #   | Test                                                                                                | Priority | Notes                                                          |
 | --- | --------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
@@ -145,7 +145,7 @@ These tests from the release plan are already covered by the existing test suite
 | 40  | **Basemap persists across projection** — Switch projection, verify store `basemapId` unchanged                        | P1       | Store check after `mapController.setProjection()`  |
 | 41  | **TLS/SL config basemap state** — Load TLS/SL configs, verify store has correct labeled/shaded values                 | P1       | `createMapFromConfigFast` + store assertion        |
 
-### Navbar DOM Checks (suite-map-config or suite-ui)
+### Navbar DOM Checks (suite-map-config or suite-map)
 
 | #   | Test                                                                                                    | Priority | Notes                                                                                                |
 | --- | ------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |

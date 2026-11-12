@@ -515,7 +515,8 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>/<span id="testsTotalFinal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Progress: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>/<span id="testsTotalFinal-${mapId}">0</span>
+      <progress id="testsProgress-${mapId}" aria-label="Test progress for ${mapId}" value="0" max="1" style="width:160px; max-width:100%; vertical-align:middle; margin-left:8px;"></progress>
     </div>
     <div style="text-align:right;">
       Duration: <span id="testsDuration-${mapId}">0</span>
@@ -590,6 +591,13 @@ function testSuiteGetLiveDuration(plugin, idPrefix = '') {
   return Date.now() - timerInfo.startedAt;
 }
 
+function testSuiteUpdateProgress(progress, done, total) {
+  if (!progress) return;
+  progress.max = total > 0 ? total : 1;
+  progress.value = Math.max(0, Math.min(done, total));
+  progress.title = `${done}/${total}`;
+}
+
 function testSuiteUpdateTotals(plugin, idPrefix = '') {
   const prefix = idPrefix ? idPrefix + '-' : '';
   const suitesCompleted = document.getElementById(prefix + 'suitesCompleted-' + plugin.mapViewer.mapId);
@@ -625,6 +633,11 @@ function testSuiteUpdateTotals(plugin, idPrefix = '') {
   if (testsTotal) testsTotal.textContent = plugin.getTestsTotal();
   const testsTotalFinal = document.getElementById(prefix + 'testsTotalFinal-' + plugin.mapViewer.mapId);
   if (testsTotalFinal) testsTotalFinal.textContent = plugin.getTestsTotalFinal();
+  testSuiteUpdateProgress(
+    document.getElementById(prefix + 'testsProgress-' + plugin.mapViewer.mapId),
+    plugin.getTestsDone(),
+    plugin.getTestsTotalFinal()
+  );
 }
 
 function testSuiteUpdateTotalsDurations(plugin, idPrefix = '') {
@@ -689,6 +702,7 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsTotal.textContent = totalTestsTotal;
   const testsTotalFinal = document.getElementById('allSuitesTestsTotalFinal');
   testsTotalFinal.textContent = totalTestsTotalFinal;
+  testSuiteUpdateProgress(document.getElementById('allSuitesTestsProgress'), totalTestsDone, totalTestsTotalFinal);
 }
 
 function testSuiteUpdateGrandTotalDurations(plugins) {

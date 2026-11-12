@@ -686,7 +686,11 @@ export function SingleLayer({
             aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
             aria-pressed={isVisible}
           >
-            {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+            {isVisible ? (
+              <VisibilityOutlinedIcon data-testid="VisibilityOutlinedIcon" />
+            ) : (
+              <VisibilityOffOutlinedIcon data-testid="VisibilityOffOutlinedIcon" />
+            )}
           </IconButton>
         )}
       </>

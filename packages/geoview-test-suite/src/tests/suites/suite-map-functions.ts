@@ -51,7 +51,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       <b>Language</b> — Runtime language switch<br/>
       <b>Layers</b> — Non-queryable exclusion from details, hoverable state, geometry group z-index<br/>
       <b>Details</b> — Layer selection persistence across tab switches<br/>
-      <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction`;
+      <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction<br/>
+      <b>UI</b> — Details panel top anchor; footer-height getter for non-React consumers`;
   }
 
   /**
@@ -60,7 +61,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 18;
+    return 20;
   }
 
   /**
@@ -188,6 +189,25 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     // Wait until fullscreen state cleanup completes before returning the suite result
     await pFullscreenViewRestoration;
 
+    // Finish remaining map tests before the UI tests change the active app-bar tab
+    await Promise.all([pZIndex, pSetLanguage]);
+
+    // Test details panel guide and Top anchor
+    const pDetailsPanelTopAnchor = this.#mapTester.testGuideDetailsPanelTopAnchor();
+    await pDetailsPanelTopAnchor;
+
+    // Test UIController.getFooterHeight from a non-React consumer
+    const pControllerGetFooterHeight = this.#mapTester.testControllerGetFooterHeight();
+
+    // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
+    // TODO: ALEX - Fix the promise returns here in next PR
+    // TODO: It'd be great it we could know in the UI that the suite is waiting on something here (there's not test to write a step here.. we need a 'suite-step' logic too)
+    await this.waitForPageExclusivity();
+    await this.#mapTester.testMapSectionScroll('partial');
+    await this.#mapTester.testMapSectionScroll('transitions');
+    await this.#mapTester.testMapSectionScroll('visible');
+    await this.#mapTester.testMapSectionScroll('oversized');
+
     // Resolve when all
     return Promise.all([
       pmapState,
@@ -207,6 +227,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       pLayerHoverableState,
       pDetailsLayerSelectionPersistence,
       pFullscreenViewRestoration,
+      pDetailsPanelTopAnchor,
+      pControllerGetFooterHeight,
     ]);
   }
 }

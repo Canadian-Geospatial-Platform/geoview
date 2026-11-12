@@ -19,6 +19,18 @@
         padding: 5px 0px;
       }
 
+      button.collapsible {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      button.collapsible > span[id^="stats-"] {
+        flex: 1;
+        text-align: right;
+      }
+
       .tableResults {
         table-layout: fixed;
         width: 100%;
@@ -99,6 +111,12 @@
       .group-tabs {
         display: none;
         margin-bottom: 0;
+      }
+
+      .test-suite-description {
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        background-color: #e8eaf6;
       }
 
       .group-header {
@@ -206,12 +224,6 @@
         <span id="vpnStatus" class="toggle-status off">OFF</span>
       </label>
       <label class="toggle-switch">
-        <input type="checkbox" id="runSequentially" onchange="toggleRunSequentially(this.checked)" />
-        <span class="toggle-slider"></span>
-        <span class="toggle-label">Run sequentially</span>
-        <span id="runSequentiallyStatus" class="toggle-status off">OFF</span>
-      </label>
-      <label class="toggle-switch">
         <input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)" />
         <span class="toggle-slider"></span>
         <span class="toggle-label">Heavy tests</span>
@@ -231,9 +243,7 @@
 
     <!-- Group 1: Core / Utility -->
     <div id="group1-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core</button>
-      <button class="tab-button" onclick="openTab(event, 'map1-test')">Config Validation</button>
-      <button class="tab-button" onclick="openTab(event, 'map9-test')">Utilities</button>
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core / Utilities / Config Validation</button>
     </div>
 
     <!-- Group 2: Layers -->
@@ -251,7 +261,6 @@
 
     <!-- Group 4: Components -->
     <div id="group4-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map7-test')">UI Tests</button>
       <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
       <button class="tab-button" onclick="openTab(event, 'map11-test')">Data Table</button>
     </div>
@@ -275,7 +284,14 @@
         Success: <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> |
         Skipped: <span id="allSuitesTestsDoneSkipped" style="color: orange">0</span> |
         Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> |
-        Done: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span>
+        Progress: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span>
+        <progress
+          id="allSuitesTestsProgress"
+          aria-label="Overall test progress"
+          value="0"
+          max="1"
+          style="width: 160px; max-width: 100%; vertical-align: middle; margin-left: 8px"
+        ></progress>
       </div>
       <div style="text-align: right">
         Duration: <span id="allSuitesTotalDuration">0</span>
@@ -289,29 +305,11 @@
 
       <!-- Map 0 Results -->
       <button id="collapsible-map0" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 0 - Core Tests</span>
-        <span id="stats-map0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span style="font-weight: bold">Map 0 - Tests Core / Utilities / Config</span>
+        <span id="stats-map0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map0-results"></div>
-      </div>
-
-      <!-- Map 1 Results -->
-      <button id="collapsible-map1" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 1 - Config Tests</span>
-        <span id="stats-map1" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map1-results"></div>
-      </div>
-
-      <!-- Map 9 Results -->
-      <button id="collapsible-map9" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 9 - Utilities Tests</span>
-        <span id="stats-map9" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map9-results"></div>
       </div>
 
       <!-- Group 2: Layers -->
@@ -320,7 +318,7 @@
       <!-- Map 2 Results -->
       <button id="collapsible-map2" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3857)</span>
-        <span id="stats-map2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map2-results"></div>
@@ -329,7 +327,7 @@
       <!-- Map 3 Results -->
       <button id="collapsible-map3" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3978)</span>
-        <span id="stats-map3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map3-results"></div>
@@ -338,7 +336,7 @@
       <!-- Map 3F Results -->
       <button id="collapsible-map3F" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 3F - Layer Functions</span>
-        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map3F-results"></div>
@@ -350,7 +348,7 @@
       <!-- Map 4 Results -->
       <button id="collapsible-map4" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 4 - Map Functions Tests</span>
-        <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map4-results"></div>
@@ -359,7 +357,7 @@
       <!-- Map 6 Results -->
       <button id="collapsible-map6" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 6 - Map Config Tests</span>
-        <span id="stats-map6" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map6" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map6-results"></div>
@@ -368,19 +366,10 @@
       <!-- Group 4: Components -->
       <div class="group-header">Group 4 - Components</div>
 
-      <!-- Map 7 Results -->
-      <button id="collapsible-map7" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 7 - UI Tests</span>
-        <span id="stats-map7" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAll-map7-results"></div>
-      </div>
-
       <!-- Map 8 Results -->
       <button id="collapsible-map8" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 8 - Details Tests</span>
-        <span id="stats-map8" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map8" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map8-results"></div>
@@ -392,7 +381,7 @@
       <!-- Map 5 Results -->
       <button id="collapsible-map5" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 5 - Geochart Tests</span>
-        <span id="stats-map5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map5-results"></div>
@@ -401,7 +390,7 @@
       <!-- Map 10 Results -->
       <button id="collapsible-map10" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 10 - Swiper Tests</span>
-        <span id="stats-map10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map10-results"></div>
@@ -410,7 +399,7 @@
       <!-- Map 11 Results -->
       <button id="collapsible-map11" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 11 - Data Table Tests</span>
-        <span id="stats-map11" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map11" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map11-results"></div>
@@ -419,7 +408,7 @@
       <!-- Map 12 Results -->
       <button id="collapsible-map12" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 12 - Time Slider Tests</span>
-        <span id="stats-map12" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Done: 0/0</span>
+        <span id="stats-map12" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAll-map12-results"></div>
@@ -462,55 +451,12 @@
           'theme': 'geo.ca',
           'corePackagesConfig': [
             {
-              'test-suite': { 'suites': ['suite-core'] }
+              'test-suite': { 'suites': ['suite-core', 'suite-utilities', 'suite-config'] }
             }
           ],
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"
-      ></div>
-    </div>
-
-    <!-- Map 1 Tab -->
-    <div id="map1-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT1">1. Tests on map 1</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map1"></div>
-      <br />
-      <div
-        id="map1"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'viewSettings': {
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            }
-          },
-          'components': [],
-          'footerBar': {
-            'tabs': {
-              'core': [
-                'layers'
-              ]
-            }
-          },
-          'corePackages': ['test-suite'],
-          'theme': 'geo.ca',
-          'corePackagesConfig': [
-            {
-              'test-suite': { 'suites': ['suite-config'] }
-            }
-          ]
         }"
       ></div>
     </div>
@@ -898,50 +844,6 @@
     </div>
 
     <!-- Map 7 Tab -->
-    <div id="map7-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT7">7. Tests on map 7</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map7"></div>
-      <br />
-      <div
-        id="map7"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'transport',
-            'shaded': true,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': []
-        },
-        'components': [],
-        'footerBar': {
-          'tabs': {
-            'core': [
-              'layers'
-            ]
-          }
-        },
-        'corePackages': ['test-suite'],
-        'theme': 'geo.ca',
-        'corePackagesConfig': [
-          {
-            'test-suite': { 'suites': ['suite-ui'] }
-          }
-        ]
-      }"
-      ></div>
-    </div>
-
     <!-- Map 8 Tab -->
     <div id="map8-test" class="tab-content">
       <div class="map-title-holder">
@@ -998,49 +900,6 @@
           'corePackagesConfig': [
             {
               'test-suite': { 'suites': ['suite-details'] }
-            }
-          ]
-        }"
-      ></div>
-    </div>
-
-    <!-- Map 9 Tab -->
-    <div id="map9-test" class="tab-content">
-      <div class="map-title-holder">
-        <h4 id="HEVNT9">9. Tests on map 9 (Utilities)</h4>
-        <a class="ref-link" href="#top">Top</a>
-      </div>
-
-      <div id="testSuiteTable-map9"></div>
-      <br />
-      <div
-        id="map9"
-        class="geoview-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'viewSettings': {
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            }
-          },
-          'components': [],
-          'footerBar': {
-            'tabs': {
-              'core': [
-                'layers'
-              ]
-            }
-          },
-          'corePackages': ['test-suite'],
-          'theme': 'geo.ca',
-          'corePackagesConfig': [
-            {
-              'test-suite': { 'suites': ['suite-utilities'] }
             }
           ]
         }"
@@ -1413,13 +1272,6 @@
           toggleVPN(true);
         }
 
-        // Update the run sequentially toggle button based on the plugin's configuration defined in the code
-        const btnRunningSequentially = document.getElementById('runSequentially');
-        if (btnRunningSequentially && plugin.getIsRunningSequentially()) {
-          btnRunningSequentially.checked = true;
-          toggleRunSequentially(true);
-        }
-
         // Update the heavy tests toggle button based on the plugin's configuration defined in the code
         const btnRunningHeavyTests = document.getElementById('heavyTestsToggle');
         if (btnRunningHeavyTests && plugin.getIsRunningHeavyTests()) {
@@ -1492,7 +1344,12 @@
             let colorFailed = '#00ff00'; // green
             if (doneFailed) colorFailed = 'red';
 
-            statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Success: <span style="color: #00ff00;">${doneSuccess}</span> | Skipped: <span style="color: ${colorSkipped};">${doneSkipped}</span> | Failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Done: ${done}/${total}/${totalFinal}`;
+            statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Success: <span style="color: #00ff00;">${doneSuccess}</span> | Skipped: <span style="color: ${colorSkipped};">${doneSkipped}</span> | Failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Progress: ${done}/${total}/${totalFinal}`;
+            const progress = document.createElement('progress');
+            progress.setAttribute('aria-label', `Test progress for ${mapId}`);
+            progress.style.cssText = 'width:160px; max-width:100%; vertical-align:middle; margin-left:8px;';
+            testSuiteUpdateProgress(progress, done, totalFinal);
+            statsSpan.appendChild(progress);
           }
         });
 
@@ -1576,12 +1433,6 @@
       function toggleVPN(checked) {
         toggleOption(checked, 'vpnStatus', (plugin, value) => {
           plugin.setIsRunningOnVPN(value);
-        });
-      }
-
-      function toggleRunSequentially(checked) {
-        toggleOption(checked, 'runSequentiallyStatus', (plugin, value) => {
-          plugin.setIsRunningSequentially(value);
         });
       }
 

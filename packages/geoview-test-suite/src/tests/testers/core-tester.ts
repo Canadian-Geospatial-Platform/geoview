@@ -7,7 +7,7 @@ import type {
 } from 'geoview-core/api/types/layer-schema-types';
 import type { PingResult } from 'geoview-core/core/utils/utilities';
 import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
-import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
+import { ResponseError } from 'geoview-core/core/exceptions/core-exceptions';
 import { EsriRenderer, type EsriUniqueValueRenderer } from 'geoview-core/geo/utils/renderer/esri-renderer';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 import { WfsRenderer } from 'geoview-core/geo/utils/renderer/wfs-renderer';
@@ -474,12 +474,12 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Tests getWMSServiceMetadata with an unreachable URL.
    *
-   * Asserts that a NetworkError is thrown when the service cannot be reached even through the proxy.
+   * Asserts that a ResponseError is thrown when the service cannot be reached even through the proxy.
    *
    * @returns A promise that resolves when the test completes
    */
-  testProxyGetWMSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
-    return this.testError(`Test GeoUtilities.getWMSServiceMetadata with bad URL...`, NetworkError, async (test) => {
+  testProxyGetWMSServiceMetadataBadUrl(): Promise<Test<ResponseError>> {
+    return this.testError(`Test GeoUtilities.getWMSServiceMetadata with bad URL...`, ResponseError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMS metadata from bad URL: ${url}...`);
       await GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
@@ -514,12 +514,12 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Tests getWFSServiceMetadata with an unreachable URL.
    *
-   * Asserts that a NetworkError is thrown when the service cannot be reached even through the proxy.
+   * Asserts that a ResponseError is thrown when the service cannot be reached even through the proxy.
    *
    * @returns A promise that resolves when the test completes
    */
-  testProxyGetWFSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
-    return this.testError(`Test GeoUtilities.getWFSServiceMetadata with bad URL...`, NetworkError, async (test) => {
+  testProxyGetWFSServiceMetadataBadUrl(): Promise<Test<ResponseError>> {
+    return this.testError(`Test GeoUtilities.getWFSServiceMetadata with bad URL...`, ResponseError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WFS metadata from bad URL: ${url}...`);
       await GeoUtilities.getWFSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
@@ -554,12 +554,12 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Tests getWMTSServiceMetadata with an unreachable URL.
    *
-   * Asserts that a NetworkError is thrown when the service cannot be reached even through the proxy.
+   * Asserts that a ResponseError is thrown when the service cannot be reached even through the proxy.
    *
    * @returns A promise that resolves when the test completes
    */
-  testProxyGetWMTSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
-    return this.testError(`Test GeoUtilities.getWMTSServiceMetadata with bad URL...`, NetworkError, async (test) => {
+  testProxyGetWMTSServiceMetadataBadUrl(): Promise<Test<ResponseError>> {
+    return this.testError(`Test GeoUtilities.getWMTSServiceMetadata with bad URL...`, ResponseError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMTS metadata from bad URL: ${url}...`);
       await GeoUtilities.getWMTSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
@@ -598,12 +598,12 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Tests fetchJsonWithProxyFallback with an unreachable URL.
    *
-   * Asserts that a NetworkError is thrown when the endpoint cannot be reached even through the proxy.
+   * Asserts that a ResponseError is thrown when the endpoint cannot be reached even through the proxy.
    *
    * @returns A promise that resolves when the test completes
    */
-  testFetchJsonWithProxyFallbackBadUrl(): Promise<Test<NetworkError>> {
-    return this.testError(`Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...`, NetworkError, async (test) => {
+  testFetchJsonWithProxyFallbackBadUrl(): Promise<Test<ResponseError>> {
+    return this.testError(`Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...`, ResponseError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching JSON metadata from bad URL: ${url}...`);
       await GeoUtilities.fetchJsonWithProxyFallback<Record<string, unknown>>(

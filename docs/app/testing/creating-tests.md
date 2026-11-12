@@ -123,7 +123,7 @@ testBadUrlFails(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     },
     undefined,  // optional: additional assertion on the error
     (test) => {
-      this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
+      this.removeLayerConfigAndAssert(test, layerPath);
     }
   );
 }
@@ -149,11 +149,26 @@ map root. It throws `TestError` if the container is missing; reuse this root rat
 appending fixture maps to the runner page.
 
 ```typescript
-this.helperStepAddLayerOnMap(test, gvConfig); // Add layer and wait
-this.helperStepAddLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
-this.helperStepCheckLayerAtLayerPath(test, layerPath); // Wait for layer ready
-this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath); // Cleanup
+this.addLayerOnMap(test, gvConfig); // Add layer and wait for creation
+this.addLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
+this.waitLayerAtLayerPath(test, layerPath); // Wait for loading and legend resolution
+this.removeLayerConfigAndAssert(test, layerPath); // Cleanup
 ```
+
+For successful layer setup, use a fixture-specific `addLayer...` helper on `GVAbstractTester`,
+such as `addLayerEsriDynamicHistoFloodEvents(test)` or `addLayerEsriFeatureForestIndustry(test)`.
+These helpers create the fixture configuration, add it to the map, and return the selected
+layer after loading and legend resolution. Multi-layer fixtures also wait for the required
+siblings. Assertions, the behavior under test, and cleanup remain in the tester.
+
+Fixture helpers own ID generation; callers derive runtime paths from the returned layer's
+`getLayerPath()` instead of creating IDs or paths before the test. GeoCore fixtures use their service
+UUID rather than a generated ID. For a test that returns query data or other observations, return
+the fixture alongside those observations (for example, `{ gvLayer, data: queryResult }`), so
+assertions and cleanup can use `result.gvLayer.getLayerPath()`. Multi-layer tests retain the returned
+layer instances and derive sibling or parent paths from those instances.
+Keep VPN/projection skip guards in the test before calling the helper. Tests expecting addition
+or loading errors continue using the lower-level helpers inside `testError()`.
 
 **Static helpers** on `LayerTester` (require explicit `mapId`):
 
@@ -216,13 +231,12 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 }
 ```
 
-`getTestsTotalFinal()` is required for every concrete suite. Count each `testXXXX()` / `testErrorXXXX()`
-call in the full `onLaunchTestSuite()`, including heavy tests gated by `getIsRunningHeavyTests()`.
-Exclude debug-only and commented-out calls. On every automated test addition/removal/rename, audit
-**all registered suites**, not just the changed suite: reconcile actual calls, TS totals,
-`test-catalog.md` summary rows, and `00-automated-suite.md` rows. The release checklist runs suite-layer
-twice (LCC and WM); the catalog counts it once. Recompute each document's total from its own rows.
-Update individual catalog entries as well as summary counts; do not blindly increment already-drifted totals.
+`getTestsTotalFinal()` is required for every concrete suite. Keep it equal to the full
+`onLaunchTestSuite()` call count, including heavy tests gated by `getIsRunningHeavyTests()` and
+excluding debug-only or commented-out calls. The test catalog is an unnumbered inventory, and the
+automated release checklist tracks pass status without test totals. Update catalog entries when test
+methods are added, removed, or renamed; update checklist rows only when the suite list or execution
+variants change. There are no documentation totals to reconcile.
 
 ### Conditional Execution
 

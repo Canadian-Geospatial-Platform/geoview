@@ -12,7 +12,7 @@ import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
+import { LayerStatusErrorError, LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import type {
   AbstractBaseGVLayer,
   LayerBaseDelegate,
@@ -55,6 +55,7 @@ import {
   type MosaicRuleChangedDelegate,
 } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { doTimeout } from '@/core/utils/utilities';
 
 /**
  * Domain class responsible for managing layer registrations and lifecycle.
@@ -532,18 +533,91 @@ export class LayerDomain {
   /**
    * Waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
    *
-   * Resolves immediately if the layer is already registered; otherwise subscribes to the `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+   * Resolves immediately if the layer is already registered; otherwise waits for registration and rejects if its config enters the error state.
    *
    * @param layerPath - The layer path to the layer's configuration
    * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
    * @returns A promise that resolves to a GeoView layer associated to the layer path
+   * @throws {LayerStatusErrorError} When the layer config enters the error state before registration
+   * @throws {Error} When the optional timeout expires before registration
    */
-  async waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer> {
-    // Return a promise that resolves when the layer is registered, or immediately if it already is
+  waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer> {
+    // Avoid installing event listeners when registration has already completed.
     const existing = this.getGeoviewLayerIfExists(layerPath);
     if (existing) return Promise.resolve(existing);
-    const eventResponse = await this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath, timeout);
-    return eventResponse.layer;
+
+    // A config can fail before its GeoView layer is added to the registry.
+    const existingConfig = this.getLayerEntryConfigIfExists(layerPath);
+    if (existingConfig?.layerStatus === 'error') {
+      throw new LayerStatusErrorError(layerPath, existingConfig.getLayerName());
+    }
+
+    return new Promise<AbstractBaseGVLayer>((resolve, reject) => {
+      // Keep timeout optional to preserve callers that intentionally wait without a deadline.
+      const timeoutJob = timeout === undefined ? undefined : doTimeout(timeout);
+
+      // Store unsubscriptions as handlers are attached so every terminal path can release all listeners.
+      const unsubscribeHandlers: Array<() => void> = [];
+
+      // Registration, config error, and timeout all compete to settle this promise.
+      const cleanup = (): void => {
+        unsubscribeHandlers.forEach((unsubscribe) => unsubscribe());
+        timeoutJob?.cancel();
+      };
+
+      // Status events are shared across this domain, so only reject for the requested layer path.
+      const rejectForConfigError = (config: ConfigBaseClass): void => {
+        if (config.layerPath !== layerPath || config.layerStatus !== 'error') return;
+
+        // Stop the registration wait before propagating the config failure.
+        cleanup();
+        reject(new LayerStatusErrorError(layerPath, config.getLayerName()));
+      };
+
+      // Resolve only when the matching layer registers; unrelated registrations leave this wait pending.
+      const layerRegisteredHandler: DomainLayerRegisteredDelegate = (_sender, event): void => {
+        if (event.layer.getLayerPath() !== layerPath) return;
+
+        cleanup();
+        resolve(event.layer);
+      };
+
+      // A config may first enter the domain already marked as an error.
+      const layerEntryConfigRegisteredHandler: DomainLayerStatusChangedDelegate = (_sender, event): void => {
+        rejectForConfigError(event.config);
+      };
+
+      // Once the config is known, watch for it transitioning into the error state.
+      const layerStatusChangedHandler: DomainLayerStatusChangedDelegate = (_sender, event): void => {
+        if (event.status !== 'error') return;
+
+        rejectForConfigError(event.config);
+      };
+
+      // Register each listener and its matching cleanup action together.
+      this.onLayerRegistered(layerRegisteredHandler);
+      unsubscribeHandlers.push(() => this.offLayerRegistered(layerRegisteredHandler));
+      this.onLayerEntryConfigRegistered(layerEntryConfigRegisteredHandler);
+      unsubscribeHandlers.push(() => this.offLayerEntryConfigRegistered(layerEntryConfigRegisteredHandler));
+      this.onLayerStatusChanged(layerStatusChangedHandler);
+      unsubscribeHandlers.push(() => this.offLayerStatusChanged(layerStatusChangedHandler));
+
+      // If the deadline expires first, reject and remove the still-pending event listeners.
+      if (timeout !== undefined) {
+        timeoutJob?.promise
+          .then((result) => {
+            if (result !== 'timeout') return;
+
+            cleanup();
+            reject(new Error(`Event awaiting abandoned: exceeded timeout of ${timeout} ms.`));
+          })
+          .catch((error: unknown) => {
+            // Keep unexpected timeout-job failures from leaving the event subscriptions behind.
+            cleanup();
+            reject(error);
+          });
+      }
+    });
   }
 
   /**

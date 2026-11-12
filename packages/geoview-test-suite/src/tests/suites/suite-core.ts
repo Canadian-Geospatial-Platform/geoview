@@ -64,12 +64,10 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    const pDevTest0 = this.#coreTester.testProxyGetWMTSServiceMetadata();
-    const pDevTest1 = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#coreTester.testProxyGetWMTSServiceMetadata();
 
-    // Resolve when all
-    return Promise.all([pDevTest0, pDevTest1]);
+    return Promise.resolve();
   }
 
   /**
@@ -77,59 +75,40 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Keep if running sequentially
-    const isRunningSequentially = this.getIsRunningSequentially();
-
+  protected override onLaunchTestSuite(): Promise<unknown> {
     // Test validateAndPingUrl (simple)
     const pSimplePingValid = this.#coreTester.testSimplePingValidReachable();
-    if (isRunningSequentially) await pSimplePingValid;
 
     const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
-    if (isRunningSequentially) await pSimplePingXyz;
 
     const pSimplePingXyz401 = this.#coreTester.testSimplePingXyzTileUrlUnauthorized();
-    if (isRunningSequentially) await pSimplePingXyz401;
 
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
-    if (isRunningSequentially) await pPingInvalidFormat;
 
     const pPingUnreachable = this.#coreTester.testValidateAndPingUrlUnreachable();
-    if (isRunningSequentially) await pPingUnreachable;
 
     const pPingWmsService = this.#coreTester.testValidateAndPingUrlWmsService();
-    if (isRunningSequentially) await pPingWmsService;
 
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
-    if (isRunningSequentially) await pGeometryCollectionLegendStyles;
 
     const pEsriPictureFillLegendStyles = this.#coreTester.testEsriPictureFillLegendStyles();
-    if (isRunningSequentially) await pEsriPictureFillLegendStyles;
 
     const pWmsMetadata = this.#coreTester.testProxyGetWMSServiceMetadata();
-    if (isRunningSequentially) await pWmsMetadata;
 
     const pWmsMetadataBadUrl = this.#coreTester.testProxyGetWMSServiceMetadataBadUrl();
-    if (isRunningSequentially) await pWmsMetadataBadUrl;
 
     const pWfsMetadata = this.#coreTester.testProxyGetWFSServiceMetadata();
-    if (isRunningSequentially) await pWfsMetadata;
 
     const pWfsMetadataBadUrl = this.#coreTester.testProxyGetWFSServiceMetadataBadUrl();
-    if (isRunningSequentially) await pWfsMetadataBadUrl;
 
     const pWfsStyleWithTextOnlyRule = this.#coreTester.testWfsStyleWithTextOnlyRule();
-    if (isRunningSequentially) await pWfsStyleWithTextOnlyRule;
 
     const pWmtsMetadata = this.#coreTester.testProxyGetWMTSServiceMetadata();
-    if (isRunningSequentially) await pWmtsMetadata;
 
     const pWmtsMetadataBadUrl = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
-    if (isRunningSequentially) await pWmtsMetadataBadUrl;
 
     // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
-    if (isRunningSequentially) await pFetchJsonProxyBadUrl;
 
     // Resolve when all parallel tests are done
     return Promise.all([

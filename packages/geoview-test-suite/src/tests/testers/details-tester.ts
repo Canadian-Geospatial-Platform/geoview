@@ -7,7 +7,6 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
 /**
@@ -38,10 +37,9 @@ export class DetailsTester extends GVAbstractTester {
       async (test) => {
         // Get the layer
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-        await layer.waitForLoadedOnce();
 
         // Query the lonlat coordinate
-        const resultsOntarioResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
+        const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
 
         // Select the right layer path
         test.addStep(`Selecting the details for the added layer...`);
@@ -52,28 +50,28 @@ export class DetailsTester extends GVAbstractTester {
         layer.setVisible(false);
 
         // Query the lonlat coordinate
-        const resultsOntarioNoResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
+        const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat1);
 
         // Make the layer visible
         test.addStep(`Make the layer visible...`);
         layer.setVisible(true);
 
         // Query in Alberta where there should be no results
-        const resultsAlbertaNoResults1 = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
+        const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
 
         // Make the Alberta polygon visible
         let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
         await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
 
         // Query where there now should be some results
-        const resultsAlbertaResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
+        const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
 
         // Make the Alberta polygon back to invisible
         item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
         await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
 
         // Query where there now should be no results
-        const resultsAlbertaNoResults2 = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
+        const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat2);
 
         // Return the results of the queries
         return [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2];
@@ -104,33 +102,6 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsArrayLengthEqual(resultsAlbertaNoResults2, 0);
       }
     );
-  }
-
-  /**
-   * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
-   * and sets up the details UI with that layer. Steps are logged to the provided test instance.
-   *
-   * @template T - The type parameter for the test instance
-   * @param test - The test instance used to log each step of the details setup process
-   * @param layerPath - The unique path or ID of the layer to interact with
-   * @param lonlat - The longitude/latitude coordinate at which to query the layer
-   * @returns A promise that resolves to the layer after setup is complete
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
-   */
-  async helperStepQueryLayerAtCoordinate<T>(
-    test: Test<T>,
-    layer: AbstractGVLayer,
-    lonlat: Coordinate
-  ): Promise<TypeFeatureInfoEntry[] | undefined> {
-    // Get the layer and make sure it's in loaded status
-    await layer.waitForLoadedOnce();
-
-    // Update the step
-    test.addStep(`Perform query operation at given coordinates...`);
-
-    // Perform a map click using the feature info layer set
-    return (await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat))[layer.getLayerPath()].features;
   }
 
   /**
@@ -258,7 +229,7 @@ export class DetailsTester extends GVAbstractTester {
         const initialZoom = this.getMapViewer().getView().getZoom();
 
         // Query the coordinate to get features
-        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Verify we have features with extent
         test.addStep('Verifying feature has extent for zoom...');
@@ -309,7 +280,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results
@@ -354,7 +325,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results
@@ -399,7 +370,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results

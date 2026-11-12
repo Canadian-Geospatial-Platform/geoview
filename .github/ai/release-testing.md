@@ -11,14 +11,16 @@ Read only the linked section of each doc: search for its heading and read to the
 | Tables, progress links, test maps and snippet IDs                                    | [Definition and test-page format](../../docs/programming/release-testing/README.md#definition-and-test-page-format) |
 | Current files/time estimates/counts                                                  | [Document structure](../../docs/programming/release-testing/README.md#document-structure)                           |
 | Issue assignment/results/sign-off                                                    | [Release process](../../docs/programming/release-testing/README.md#release-testing-process)                         |
-| Automated suite counts (layer runs twice)                                            | [Suite count rules](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite)                            |
+| Automated suite method-count contract                                                | [Suite count rules](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite)                            |
 | Executing automated suites                                                           | [Automated checklist](../../docs/programming/release-testing/00-automated-suite.md)                                 |
 
 ## Sync rules after any test change
 
-Apply the linked maintenance rules in the same edit session, not later.
-Keep automated rows as `A` rather than deleting them. Recount definition rows, section checkboxes and
-README totals; changing Auto flags also changes the A/C/M breakdown. Include the RC tracker and
+Apply the linked maintenance rules in the same edit session, not later. For automated tests, update
+the unnumbered catalog inventory when methods change; update the pass/fail checklist only when suites
+or execution variants change. Neither document maintains test totals. For manual-plan changes, keep
+automated rows as `A` rather than deleting them, then recount definition rows, section checkboxes,
+and README totals; changing Auto flags also changes the A/C/M breakdown. Include the RC tracker and
 affected public test catalog/architecture/helper docs. Do not treat "increment both" as proof of correctness.
 
 ## Release candidate update workflow

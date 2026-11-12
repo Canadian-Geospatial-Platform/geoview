@@ -4,6 +4,7 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
+import { TestError } from '../core/exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /**
@@ -32,7 +33,7 @@ export class GeochartTester extends GVAbstractTester {
       `Test Geochart on layer ${layerPath}...`,
       (test) => {
         // Continue the test and return the layer
-        return this.helperStepLayerWithGeochart(test, layerPath, lonlat);
+        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPath, lonlat);
       },
       (test) => {
         // Perform assertions
@@ -109,20 +110,11 @@ export class GeochartTester extends GVAbstractTester {
     return this.test(
       'Test Geochart',
       async (test) => {
-        // Update the step
-        test.addStep(`Adding the layer on the map for ${uuid}`);
-
         // Add the geoview layer by geocore uuid
-        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid);
-
-        // Update the step
-        test.addStep(`Adding the layer on the map...`);
-
-        // Wait for the layer to be processed (bit optional)
-        await result?.promiseLayer;
+        await this.addLayerOnMapFromUUID(test, uuid);
 
         // Continue the test and return the layer
-        return this.helperStepLayerWithGeochart(test, layerPathAdd, lonlat);
+        return this.waitForLayerQueryLonLatSelectLayerInPanel(test, layerPathAdd, lonlat);
       },
       (test) => {
         // Perform assertions
@@ -140,7 +132,7 @@ export class GeochartTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
-        this.finalizeStepRemoveLayerAndAssert(test, layerPathRemove);
+        this.removeLayerConfigAndAssert(test, layerPathRemove);
       }
     );
   }
@@ -151,34 +143,38 @@ export class GeochartTester extends GVAbstractTester {
    *
    * @template T - The type parameter for the test instance
    * @param test - The test instance used to log each step of the geochart setup process
-   * @param mapViewer - The map viewer containing the layer and UI context
    * @param layerPath - The unique path or ID of the layer to interact with
    * @param lonlat - The longitude/latitude coordinate at which to query the layer
    * @returns A promise that resolves to the layer after setup is complete
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+   * @throws {TestError} When the controller is unavailable or the query returns no processed features
+   * @throws {Error} When the current query does not reach the batched GeoChart data before the timeout
    */
-  async helperStepLayerWithGeochart<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
+  async waitForLayerQueryLonLatSelectLayerInPanel<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
+    const { layerController, uiController, geoChartController } = this.getControllersRegistry();
+    if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
+
     // Get the layer
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
-    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const layer = layerController.getGeoviewLayerRegular(layerPath);
 
-    // Wait until the layer has at least loaded once
-    test.addStep(`Waiting for its layer 'loaded' status...`);
-    await layer.waitForLoadedOnce();
+    // Query the layer at the given coordinates
+    await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
-    // Perform a map click using the feature info layer set
-    test.addStep(`Perform query operation at given coordinates...`);
-    await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
+    // Wait for the batched query to propagate to the store
+    await GVAbstractTester.waitForBatchedQueryPropagation(test);
 
     // Set the footer tab to Geochart
     test.addStep(`Setting active footerbar tab to geochart and wait for UI to refresh...`);
-    this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
+    uiController.setActiveFooterBarTab('geochart', true);
     await DomHelper.waitForFooterTabSelected(this.getMapId(), 'geochart');
+    await DomHelper.waitForReactIdle();
 
     // Select the right layer path
     test.addStep(`Selecting the geochart for the added layer...`);
-    this.getControllersRegistry().geoChartController?.setSelectedLayerPath(layerPath);
+    geoChartController.setSelectedLayerPath(layerPath);
+    await DomHelper.waitForReactIdle();
 
     // Wait for fun so that we can see the actual chart in the UI before terminating the test
     await GVAbstractTester.waitForFun();
