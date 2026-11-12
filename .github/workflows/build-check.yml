@@ -1,14 +1,15 @@
-name: Build Geoview on PR comment lock
+name: Build Geoview on PR lock or label
 
 on:
   pull_request:
-    # Deliberate maintainer-controlled build trigger; do not broaden this policy.
-    types: [locked]
+    # Deliberate maintainer-controlled build trigger (locking or labeling requires triage/write access); do not broaden this policy.
+    types: [locked, labeled]
 
 permissions: {}
 
 concurrency:
-  group: pr-build-${{ github.event.pull_request.number }}
+  # Ignored events (other labels) get a unique group so they never cancel a running build
+  group: "pr-build-${{ github.event.pull_request.number }}${{ (github.event.action == 'locked' || github.event.label.name == 'abuild: Activate PR build') && '' || format('-ignored-{0}', github.run_id) }}"
   cancel-in-progress: true
 
 env:
@@ -17,6 +18,8 @@ env:
 jobs:
   build:
     name: build-geoview
+    # Run on lock, or when the build label is applied (other labels are ignored)
+    if: "github.event.action == 'locked' || github.event.label.name == 'abuild: Activate PR build'"
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:

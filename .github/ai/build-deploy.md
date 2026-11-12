@@ -30,8 +30,9 @@ Public workflow behavior, administrator prerequisites, and known limits:
 - Keep `main.yml` caller permissions aligned with reusable build/deploy jobs.
   Pass the exact SHA and immutable artifact ID; never restore `dist` from a cache
   or check out a moving branch for a SHA-labelled build.
-- `build-check.yml` deliberately uses only `pull_request: locked`; preserve its
-  `build-geoview` check identity and never switch to privileged fork execution.
+- `build-check.yml` deliberately uses only `pull_request: locked` and `labeled` (the `abuild: Activate PR build` label,
+  needed because the new PR Overview has no Lock action); preserve its `build-geoview` check identity, keep ignored
+  label events out of the build concurrency group, and never switch to privileged fork execution.
 - `rush build` uses non-mutating `packages/` checks before the existing production
   pipeline. Local auto-fixes remain explicit commands.
 - `type-build.yml` emits `types/src/app.d.ts`, not `types/app.d.ts`; retain that
