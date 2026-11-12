@@ -5,7 +5,7 @@ import { Draw } from 'geoview-core/geo/interaction/draw';
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, generateId } from 'geoview-core/core/utils/utilities';
+import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import {
   MAP_CENTER,
   MAP_ZOOM_LEVEL,
@@ -20,14 +20,13 @@ import {
 } from 'geoview-core/api/types/map-schema-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
+import { MAP_SECTION_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreDetailsFeatures,
   getStoreDetailsSelectedLayerPath,
   type TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/states/feature-info-state';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreAppHeight,
@@ -44,6 +43,8 @@ import {
   setStoreMapPointerPosition,
 } from 'geoview-core/core/stores/states/map-state';
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import { Projection } from 'geoview-core/geo/utils/projection';
 import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
@@ -1641,7 +1642,489 @@ export class MapTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Exercises delegated scrolling through real controls in an isolated, scrollable viewer.
+   *
+   * @param scenario - The viewport regression to exercise
+   * @returns The test with preconditions and final browser geometry
+   */
+  testMapSectionScroll(scenario: TypeScrollScenario): Promise<Test<TypeScrollResult>> {
+    // Unique ID so the fixture never collides with the suite map or another scroll test
+    const mapId = `scroll-${generateId(8)}`;
+
+    // Captured up front so cleanup can leave the page where the next test expects it
+    const originalScroll = { x: window.scrollX, y: window.scrollY };
+
+    // Built now but only mounted when the test runs, and always removed in cleanup
+    const fixture = MapTester.#createScrollFixture(mapId);
+
+    return this.test(
+      `Test map-section scroll - ${scenario}`,
+      async (test): Promise<TypeScrollResult> => {
+        // Mount the host in the page, then render the viewer into it
+        test.addStep('Creating an isolated viewer with app-bar, map-info and footer controls...');
+        document.body.appendChild(fixture);
+        await this.#createScrollViewer(mapId, scenario);
+
+        // Locate the rendered controls and let the initial layout settle before touching anything
+        const context = await MapTester.#createScrollContext(test, mapId);
+
+        // Drive the scenario; it records preconditions and measurements on the context
+        await MapTester.#runScrollScenario(context, scenario);
+
+        // Return evidence only; every assertion lives in the verification callback
+        return { preconditions: context.preconditions, measurements: context.measurements, viewportHeight: window.innerHeight };
+      },
+      (test, result): void => MapTester.#verifyScroll(test, scenario, result),
+      (): Promise<void> => this.#cleanupScrollFixture(mapId, fixture, originalScroll)
+    );
+  }
+
   // #endregion PUBLIC METHODS - MAP FUNCTIONS
+
+  // #region PRIVATE METHODS - MAP SECTION SCROLL
+
+  /**
+   * Renders the isolated viewer with app-bar, map-info and footer controls.
+   *
+   * @param mapId - The isolated viewer ID
+   * @param scenario - The viewport regression, which selects the viewer height
+   * @returns A promise that resolves once the viewer is created
+   */
+  async #createScrollViewer(mapId: string, scenario: TypeScrollScenario): Promise<void> {
+    // The oversized scenario needs a map taller than the viewport; the others must fit inside it
+    const height = Math.round(window.innerHeight * (scenario === 'oversized' ? 1.5 : 0.7));
+
+    // Layer-free map with one app-bar tab and two footer tabs: just enough controls to drive the delegated scrolling
+    await this.getApi().createMapFromConfigFast(
+      mapId,
+      JSON.stringify({
+        map: {
+          interaction: 'dynamic',
+          viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4, [-90, 60]] } },
+          basemapOptions: { basemapId: 'nogeom', shaded: false, labeled: false },
+          listOfGeoviewLayerConfig: [],
+        },
+        appBar: { tabs: { core: ['legend'] } },
+        footerBar: { tabs: { core: ['layers', 'details'] } },
+        navBar: ['fullscreen'],
+        corePackages: [],
+      }),
+      height
+    );
+  }
+
+  /**
+   * Deletes the isolated viewer, removes its host and restores the page scroll position.
+   *
+   * @param mapId - The isolated viewer ID
+   * @param fixture - The host element mounted in the page
+   * @param originalScroll - The page scroll position captured before the test
+   * @returns A promise that resolves once the page is back to its original state
+   */
+  async #cleanupScrollFixture(mapId: string, fixture: HTMLElement, originalScroll: { x: number; y: number }): Promise<void> {
+    try {
+      // The viewer may not exist when setup failed early, so check before deleting
+      if (this.getApi().hasMapViewer(mapId)) await this.getApi().deleteMapViewer(mapId, true);
+    } finally {
+      // Runs even if deleting the viewer throws, so a failure never leaves the page scrolled or the host mounted
+      fixture.remove();
+      window.scrollTo({ left: originalScroll.x, top: originalScroll.y, behavior: 'instant' });
+    }
+  }
+
+  // #endregion PRIVATE METHODS - MAP SECTION SCROLL
+
+  // #region STATIC PRIVATE METHODS - MAP SECTION SCROLL
+
+  /**
+   * Creates the host element that makes the page scrollable around the isolated viewer.
+   *
+   * @param mapId - The ID given to the viewer's target element
+   * @returns The host element, not yet attached to the page
+   */
+  static #createScrollFixture(mapId: string): HTMLElement {
+    const fixture = document.createElement('div');
+    const target = document.createElement('div');
+    target.id = mapId;
+
+    // One viewport of padding above and two below lets the section be scrolled to any position, including clipped at either edge
+    fixture.style.cssText = `padding-top: ${window.innerHeight}px; padding-bottom: ${window.innerHeight * 2}px; width: min(900px, 100%);`;
+    fixture.appendChild(target);
+    return fixture;
+  }
+
+  /**
+   * Resolves the rendered controls once the viewer shell is ready.
+   *
+   * @param test - The running test, used to record steps
+   * @param mapId - The isolated viewer ID
+   * @returns A promise that resolves with the controls and empty evidence collections
+   */
+  static async #createScrollContext(test: Test, mapId: string): Promise<TypeScrollContext> {
+    // The app-bar button only exists once the shell has rendered, so it doubles as the readiness signal
+    const button = await DomHelper.waitForLegendPanelButton(mapId, 'appBar', GVAbstractTester.UI_SCROLL_TIMEOUT_MS);
+
+    // Fail fast with a clear message if any control is missing, rather than a null error mid-scenario
+    const section = MapTester.#requireElement(mapId, 'map');
+    const info = MapTester.#requireElement(mapId, 'mapInfo');
+    const footer = MapTester.#requireElement(mapId, 'tabsContainer');
+
+    // Measurements taken before the initial layout settles would be unstable
+    await MapTester.#waitForScrollLayout(section);
+
+    // Baseline preconditions: the map-info bar belongs to the section and the section is actually rendered
+    const preconditions: boolean[] = [section.contains(info), section.getBoundingClientRect().height > 0];
+    return { test, mapId, section, info, button, footer, preconditions, measurements: [] };
+  }
+
+  /**
+   * Runs the scroll sequence matching the scenario.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @param scenario - The viewport regression to exercise
+   * @returns A promise that resolves once the sequence has finished
+   */
+  static async #runScrollScenario(context: TypeScrollContext, scenario: TypeScrollScenario): Promise<void> {
+    switch (scenario) {
+      case 'partial':
+        await MapTester.#runPartialScroll(context);
+        break;
+      case 'transitions':
+        await MapTester.#runTransitionsScroll(context);
+        break;
+      case 'visible':
+        await MapTester.#runVisibleScroll(context);
+        break;
+      default:
+        // 'oversized'
+        await MapTester.#runOversizedScroll(context);
+    }
+  }
+
+  /**
+   * Runs the partial scenario: a section shorter than the viewport with its map-info bar clipped below the fold.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the sequence has finished
+   */
+  static async #runPartialScroll(context: TypeScrollContext): Promise<void> {
+    const { test, section, info, button, preconditions } = context;
+    const { height } = section.getBoundingClientRect();
+
+    // Push the section down so its top is on screen while the map-info bar at its bottom falls below the viewport
+    await MapTester.#positionSection(context, window.innerHeight - height + 40);
+    const buttonRect = button.getBoundingClientRect();
+    preconditions.push(
+      // The section must fit the viewport, otherwise this would be the oversized case
+      height < window.innerHeight,
+      // The app-bar button must be on screen so the click is a plausible user action
+      buttonRect.top >= 0 && buttonRect.bottom <= window.innerHeight,
+      // The map-info bar must be clipped, which is the condition the delegated scroll has to repair
+      info.getBoundingClientRect().bottom > window.innerHeight
+    );
+
+    test.addStep('Activating a visible app-bar button with map-info clipped below the viewport...');
+
+    // First click opens the panel and second closes it; the page must not move between the two activations
+    await MapTester.#activateAppBar(context);
+    await MapTester.#activateAppBar(context);
+
+    // Clip the top of the section instead and activate again to cover the opposite edge
+    await MapTester.#positionSection(context, -40);
+    await MapTester.#activateAppBar(context);
+  }
+
+  /**
+   * Runs the transitions scenario: footer tab, app bar from the footer view, then the map-info bar.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the sequence has finished
+   */
+  static async #runTransitionsScroll(context: TypeScrollContext): Promise<void> {
+    const { test, section, footer, preconditions } = context;
+
+    // Footer first: its tab scrolls the footer into view and leaves the map section clipped above
+    await MapTester.#activateFooterTab(context);
+
+    // Activate the app bar from that clipped position, which the delegated scroll must repair
+    await MapTester.#activateAppBarFromClosed(context);
+
+    test.addStep('Returning from the footer-view position through the app bar...');
+
+    // Scroll until the section's bottom edge reaches the viewport top, i.e. the footer-view position
+    await MapTester.#positionSection(context, -section.getBoundingClientRect().height);
+
+    // The footer must still be on screen, otherwise this is not the footer-view position
+    preconditions.push(footer.getBoundingClientRect().top >= -GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+    await MapTester.#activateAppBarFromClosed(context);
+
+    // Last transition: the map-info bar while the map is clipped at the top
+    await MapTester.#activateMapInfo(context);
+  }
+
+  /**
+   * Runs the visible scenario: a section already fully on screen must not be moved.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the sequence has finished
+   */
+  static async #runVisibleScroll(context: TypeScrollContext): Promise<void> {
+    const { section, info, preconditions, measurements } = context;
+
+    // Place the whole section comfortably inside the viewport
+    await MapTester.#positionSection(context, 60);
+
+    // Baseline taken before any activation so the later measurements can be compared with an untouched page
+    measurements.push(MapTester.#measureScroll(section, info));
+
+    // Both edges of the section must be on screen, otherwise nothing proves the "no unnecessary scroll" behavior
+    preconditions.push(measurements[0].top >= 0, measurements[0].bottom <= window.innerHeight);
+
+    // Open then close the panel; the page must stay where it is
+    await MapTester.#activateAppBar(context);
+    await MapTester.#activateAppBar(context);
+  }
+
+  /**
+   * Runs the oversized scenario: a section taller than the viewport is aligned to its top edge.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the sequence has finished
+   */
+  static async #runOversizedScroll(context: TypeScrollContext): Promise<void> {
+    const { section, preconditions } = context;
+
+    // Start slightly below the top so the delegated scroll has something to correct
+    await MapTester.#positionSection(context, 40);
+
+    // The section must really be taller than the viewport, otherwise it could not exercise the oversized path
+    preconditions.push(section.getBoundingClientRect().height > window.innerHeight);
+
+    // Open then close the panel; the top alignment must be stable across both activations
+    await MapTester.#activateAppBar(context);
+    await MapTester.#activateAppBar(context);
+  }
+
+  /**
+   * Activates the layers footer tab while the footer sits inside the scroll helper's top clearance.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the footer has settled
+   */
+  static async #activateFooterTab(context: TypeScrollContext): Promise<void> {
+    const { test, mapId, section, footer, preconditions } = context;
+    const helperOffset = GVAbstractTester.UI_SCROLL_HELPER_OFFSET_PX;
+
+    // Keep the footer control visible but inside the helper's top clearance
+    await MapTester.#positionSection(context, helperOffset / 2 - section.getBoundingClientRect().height);
+    test.addStep('Activating a footer tab through its delegated click path...');
+    const initialFooterRect = footer.getBoundingClientRect();
+
+    // The footer must start inside the clearance zone, otherwise the activation would have nothing to scroll
+    preconditions.push(initialFooterRect.top >= 0 && initialFooterRect.top < helperOffset);
+
+    // Click the real tab so the delegated click handler, not a direct scroll call, performs the scroll
+    MapTester.#requireElement(mapId, 'tab-layers').click();
+    await MapTester.#waitForScrollLayout(footer);
+
+    // Log the final footer bounds so a failed alignment check can be diagnosed from the report
+    const footerRect = footer.getBoundingClientRect();
+    test.addStep(`Footer bounds after activation: top=${footerRect.top}, bottom=${footerRect.bottom}, viewport=${window.innerHeight}`);
+
+    // The helper must leave the footer's bottom edge at the viewport bottom minus its clearance
+    preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+  }
+
+  /**
+   * Activates the map-info bar while the map is clipped at the top.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the geometry has been recorded
+   */
+  static async #activateMapInfo(context: TypeScrollContext): Promise<void> {
+    const { test, section, info, preconditions, measurements } = context;
+
+    test.addStep('Activating the map-info bar while the map is clipped at the top...');
+
+    // Clip the top of the section; the bar itself stays on screen below it
+    await MapTester.#positionSection(context, -40);
+
+    // The bar must be fully visible, otherwise the click would not be the on-screen user action under test
+    const infoRect = info.getBoundingClientRect();
+    preconditions.push(infoRect.top >= 0 && infoRect.bottom <= window.innerHeight);
+
+    // Map-info buttons (expand, attribution, position, scale) stop propagation by design; click the bar itself
+    info.click();
+    await MapTester.#waitForScrollLayout(section);
+    measurements.push(MapTester.#measureScroll(section, info));
+  }
+
+  /**
+   * Positions the section without smooth scrolling, then waits for browser layout.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @param top - Desired viewport top of the section
+   * @returns A promise that resolves once the section layout has settled
+   */
+  static async #positionSection(context: TypeScrollContext, top: number): Promise<void> {
+    const { section } = context;
+
+    // Instant rather than smooth, so the next measurement is never taken mid-animation
+    window.scrollTo({ top: window.scrollY + section.getBoundingClientRect().top - top, behavior: 'instant' });
+    await MapTester.#waitForScrollLayout(section);
+  }
+
+  /**
+   * Activates the delegated app-bar callback and records the settled map geometry.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the geometry has been recorded
+   */
+  static async #activateAppBar(context: TypeScrollContext): Promise<void> {
+    const { section, info, button, measurements } = context;
+
+    // A real click exercises the delegated handler exactly as a user would
+    button.click();
+
+    // Measure only after scrolling and layout have settled, or the reading would be transient
+    await MapTester.#waitForScrollLayout(section);
+    measurements.push(MapTester.#measureScroll(section, info));
+  }
+
+  /**
+   * Opens the app-bar panel from a clipped section, then closes it while the section is visible.
+   *
+   * @param context - The rendered controls and evidence collections
+   * @returns A promise that resolves once the panel is closed and the section has settled
+   */
+  static async #activateAppBarFromClosed(context: TypeScrollContext): Promise<void> {
+    const { section, button } = context;
+
+    // Open the panel and record the geometry the delegated scroll produced
+    await MapTester.#activateAppBar(context);
+
+    // Close it again while the section is visible: closing restores focus to the toggle, and doing it
+    // off-screen would let the browser's focus scroll re-center the button and override the scroll under test
+    button.click();
+    await MapTester.#waitForScrollLayout(section);
+  }
+
+  /**
+   * Asserts the scenario preconditions, every recorded measurement and repeated-activation stability.
+   *
+   * @param test - The running test, used to record steps
+   * @param scenario - The viewport regression that was exercised
+   * @param result - The evidence returned by the scenario
+   */
+  static #verifyScroll(test: Test, scenario: TypeScrollScenario, result: TypeScrollResult): void {
+    test.addStep('Verifying setup preconditions, final bounds and repeated-activation stability...');
+
+    // A failed precondition means the fixture was not in the intended state, so fail before judging the geometry
+    result.preconditions.forEach((condition, index): void => {
+      if (!condition) Test.assertFail(`Scroll scenario "${scenario}" setup/transition check ${index + 1} failed.`);
+    });
+
+    // Every recorded measurement must satisfy the scenario's geometry rules
+    result.measurements.forEach((measurement, index): void => {
+      test.addStep(`Activation ${index + 1}: ${JSON.stringify(measurement)}, viewport=${result.viewportHeight}`);
+      MapTester.#assertScrollMeasurement(scenario, measurement, result.viewportHeight);
+    });
+
+    // The second activation must not move the page; the transitions scenario scrolls between activations on purpose
+    if (scenario !== 'transitions') {
+      Test.assertIsEqualWithinTolerance(
+        result.measurements[1].scrollY,
+        result.measurements[0].scrollY,
+        GVAbstractTester.UI_SCROLL_TOLERANCE_PX
+      );
+    }
+  }
+
+  /**
+   * Asserts one measurement against the geometry expected for the scenario.
+   *
+   * @param scenario - The viewport regression that was exercised
+   * @param measurement - The geometry captured after an activation
+   * @param viewportHeight - The viewport height when the test ran
+   */
+  static #assertScrollMeasurement(scenario: TypeScrollScenario, measurement: TypeScrollMeasurement, viewportHeight: number): void {
+    const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
+    const gap = MAP_SECTION_SCROLL_GAP_PX;
+
+    // A section taller than the viewport cannot fit, so it is aligned with its top at the standard gap and nothing else applies
+    if (scenario === 'oversized') {
+      Test.assertIsEqualWithinTolerance(measurement.top, gap, tolerance);
+      return;
+    }
+
+    // A section that was already visible keeps its position, so only the clipped scenarios assert an exact top offset
+    if (scenario !== 'visible') {
+      // The top lands at the standard gap, or at the remaining space when gap plus section height would overflow the viewport
+      const expectedOffset = Math.min(gap, viewportHeight - (measurement.bottom - measurement.top));
+      Test.assertIsEqualWithinTolerance(measurement.top, expectedOffset, tolerance);
+    }
+
+    // The whole section must end up inside the viewport...
+    Test.assertIsEqual(measurement.top >= -tolerance, true);
+    Test.assertIsEqual(measurement.bottom <= viewportHeight + tolerance, true);
+
+    // ...and so must the map-info bar, which is the control that used to be clipped
+    Test.assertIsEqual(measurement.infoTop >= -tolerance, true);
+    Test.assertIsEqual(measurement.infoBottom <= viewportHeight + tolerance, true);
+  }
+
+  /**
+   * Gets a required fixture element or fails explicitly when setup is incomplete.
+   *
+   * @param mapId - The isolated viewer ID
+   * @param suffix - The element ID suffix
+   * @returns The rendered element
+   */
+  static #requireElement(mapId: string, suffix: string): HTMLElement {
+    const element = DomHelper.getGVElementById(mapId, suffix);
+    if (!element) throw new Error(`Scroll fixture element not found: ${mapId}-${suffix}`);
+    return element;
+  }
+
+  /**
+   * Waits for page scrolling and the measured element's layout to remain stable, with a bounded timeout.
+   *
+   * @param element - The element whose geometry must settle
+   * @returns A promise resolving after scrolling and layout settle
+   */
+  static async #waitForScrollLayout(element: HTMLElement): Promise<void> {
+    let previous = '';
+    let stableSince = performance.now();
+    await whenThisThen(
+      (): boolean => {
+        const rect = element.getBoundingClientRect();
+        const current = `${window.scrollY},${rect.top},${rect.height}`;
+        if (current !== previous) {
+          previous = current;
+          stableSince = performance.now();
+        }
+        return performance.now() - stableSince >= GVAbstractTester.UI_SCROLL_SETTLE_MS;
+      },
+      GVAbstractTester.UI_SCROLL_TIMEOUT_MS,
+      50
+    );
+  }
+
+  /**
+   * Captures the map section and map-info viewport bounds after an activation.
+   *
+   * @param section - The complete map section
+   * @param info - The map-info bar contained in the section
+   * @returns Geometry and page scroll measurements
+   */
+  static #measureScroll(section: HTMLElement, info: HTMLElement): TypeScrollMeasurement {
+    const rect = section.getBoundingClientRect();
+    const infoRect = info.getBoundingClientRect();
+    return { top: rect.top, bottom: rect.bottom, infoTop: infoRect.top, infoBottom: infoRect.bottom, scrollY: window.scrollY };
+  }
+
+  // #endregion STATIC PRIVATE METHODS - MAP SECTION SCROLL
 
   // #region PRIVATE METHODS - VIEWPORT BOUNDARY
 
@@ -1916,6 +2399,27 @@ type LayerDetails = {
   alternateLayerPath: string;
   /** The number of features found in the alternate layer. */
   secondFeatureCount: number;
+};
+
+/** Isolated viewer scrolling regressions, scheduled sequentially by the UI suite. */
+type TypeScrollScenario = 'partial' | 'transitions' | 'visible' | 'oversized';
+
+/** Browser geometry captured after a real control activation. */
+type TypeScrollMeasurement = { top: number; bottom: number; infoTop: number; infoBottom: number; scrollY: number };
+
+/** Setup preconditions and geometry returned for assertion-only verification. */
+type TypeScrollResult = { preconditions: boolean[]; measurements: TypeScrollMeasurement[]; viewportHeight: number };
+
+/** Rendered fixture controls plus the evidence a scroll scenario accumulates while it runs. */
+type TypeScrollContext = {
+  test: Test;
+  mapId: string;
+  section: HTMLElement;
+  info: HTMLElement;
+  button: HTMLElement;
+  footer: HTMLElement;
+  preconditions: boolean[];
+  measurements: TypeScrollMeasurement[];
 };
 
 // #endregion TYPES AND INTERFACES
