@@ -293,6 +293,7 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Added a persistent Settings button on dynamic maps with an EN/FR Keyboard navigation switch that controls the existing mode; coordinated focus ownership across Settings and map-control popovers, and preserved map focus after keyboard feature queries (#3694; branch `3694-wcag-mode-button`, commits `a36c22ab7c`, `9ec33c0c26`, `729ace72b6`, `bc84756565`, `a5310f772e`, `f7fa65609b`, `2cacf5e38d`).
 - Added shared EN/FR on-map guidance for measurement, drawer geometries, and editing (mouse wording, or keyboard wording starting with Ctrl+M when keyboard navigation is on); measurement vertex undo via Ctrl+Z/Backspace; Enter/Space at the mouse pointer while measuring or drawing; corrected crosshair artwork/coordinate alignment; and improved Ctrl+M popover closure, Escape returning focus to the Measure/Toggle Drawing/Toggle editing button, and fullscreen-exit map focus. Measurement and drawer drawing/editing now exclude each other, and drawer mode transitions keep Details queries suppressed ([Canadian-Geospatial-Platform/geoview#3712](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3712), commit `9de43e4d9f`). This records implemented behavior, not completion of the issue's full WCAG/embedded/fullscreen validation.
 - Standardized border-radius values with named MUI theme shape tokens across core and plugins, replacing inconsistent radii and documenting/enforcing the shared token system (#3681)
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
@@ -360,6 +361,9 @@ _(Doc updates, demo cleanup, code organization)_
 - Documented the map-section scroll contract in `docs/app/accessibility.md`, with linked implementation notes in the AI UI reference. Added a documentation ownership/duplication check (item 16) to the `BranchReview` agent, the `review-branch` skill and `using-ai.md` (#3708)
 
 ## Test Plan Changes
+
+- Expanded the manual WCAG checklist with 11 scenarios for Settings lifecycle, mixed keyboard/pointer input, popover replacement, and footer Details precedence; clarified static-map entry and AppBar-only keyboard-query focus restoration (branch `3694-wcag-mode-button`, documentation follow-up to `f7fa65609b`). WCAG now has 85 manual rows. Recounted definition totals are 956 (63 A / 169 C / 724 M), including pre-existing index drift; this documents coverage to execute, not completed manual validation.
+- Expanded automated `suite-ui` from 6 to 18 declared tests for focus ownership/restoration, keyboard Settings entry, popper boundaries, and page scrolling; synchronized the test catalog and automated checklist. The checklist now declares 347 release executions, including a `suite-data-table` count correction from 15 to 16. These figures describe coverage to execute, not completed test runs.
 
 _(Tests added, moved, removed, or reorganized)_
 

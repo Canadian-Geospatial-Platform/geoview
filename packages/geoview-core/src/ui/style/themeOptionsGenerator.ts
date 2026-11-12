@@ -397,6 +397,7 @@ export const generateThemeOptions = ({
       drawer: 1200,
       modal: 1300,
       snackbar: 1400,
+      popper: 2000,
       tooltip: 15000,
       olControl: 500,
       focusDialog: 1300,

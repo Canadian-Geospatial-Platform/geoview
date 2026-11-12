@@ -38,16 +38,22 @@ The checklist counts release executions rather than unique test methods. `suite-
 | 3   | `suite-utilities`                        | 57      | [ ] Pass |
 | 4   | `suite-layer` (LCC — EPSG:3978)          | 49      | [ ] Pass |
 | 5   | `suite-layer` (WM — EPSG:3857)           | 49      | [ ] Pass |
-| 6   | `suite-layer-functions` (WM — EPSG:3857) | 11       | [ ] Pass |
+| 6   | `suite-layer-functions` (WM — EPSG:3857) | 11      | [ ] Pass |
 | 7   | `suite-map`                              | 18      | [ ] Pass |
 | 8   | `suite-map-config`                       | 57      | [ ] Pass |
-| 9   | `suite-ui`                               | 6       | [ ] Pass |
+| 9   | `suite-ui`                               | 18      | [ ] Pass |
 | 10  | `suite-details`                          | 6       | [ ] Pass |
-| 11  | `suite-data-table`                       | 15      | [ ] Pass |
+| 11  | `suite-data-table`                       | 16      | [ ] Pass |
 | 12  | `suite-geochart`                         | 2       | [ ] Pass |
 | 13  | `suite-swiper`                           | 7       | [ ] Pass |
 | 14  | `suite-time-slider`                      | 3       | [ ] Pass |
-|     | **Total**                                | **334** |          |
+|     | **Total**                                | **348** |          |
+
+The UI suite includes footer-to-AppBar ownership checks for trigger/controller/API opens,
+Escape/Close and external dismissal, plus preservation of newer focus owners. Right-panel entry
+checks cover Ctrl+M followed by map blur, newer focus/ownership before the entry frame, delayed
+Details results while Settings owns focus, discarded guide-open requests, and successful explicit
+result selection including same-action guide closure.
 
 ## What to Do if a Suite Fails
 

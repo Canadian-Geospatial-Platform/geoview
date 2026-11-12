@@ -9,7 +9,7 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
-import { MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
 
 import { Box, Link } from '@/ui/layout';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
@@ -76,6 +76,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const theme = useTheme();
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellElement, setShellElement] = useState<HTMLElement | undefined>();
+  const keyboardNavigationModeActionRef = useRef<((active: boolean) => void) | undefined>(undefined);
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -83,13 +84,13 @@ export function Shell(props: ShellProps): JSX.Element {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   // State snackbar
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
 
   // State for transient status announcements
-  const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState('');
-  const [processingCompleteAnnouncement, setProcessingCompleteAnnouncement] = useState('');
+  const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState<string>('');
+  const [processingCompleteAnnouncement, setProcessingCompleteAnnouncement] = useState<string>('');
 
   // Store
   const mapLoaded = useStoreMapLoaded();
@@ -106,11 +107,43 @@ export function Shell(props: ShellProps): JSX.Element {
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
 
-  // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
+  /**
+   * Registers the FocusTrapDialog-owned keyboard-navigation lifecycle action.
+   *
+   * @param action - The action that performs a coordinated mode transition
+   * @returns A cleanup callback that removes the action when the dialog unmounts
+   */
+  const registerModeAction = useCallback((action: (active: boolean) => void): (() => void) => {
+    keyboardNavigationModeActionRef.current = action;
+    return (): void => {
+      if (keyboardNavigationModeActionRef.current === action) keyboardNavigationModeActionRef.current = undefined;
+    };
+  }, []);
+
+  /**
+   * Delegates a Settings switch change to the mode lifecycle owner.
+   *
+   * @param active - Whether keyboard navigation should be enabled
+   */
+  const handleKeyboardNavigationModeChange = useCallback((active: boolean): void => {
+    const changeMode = keyboardNavigationModeActionRef.current;
+    if (!changeMode) {
+      logger.logError('Keyboard-navigation mode action is not registered');
+      return;
+    }
+    changeMode(active);
+  }, []);
+
+  // TODO: Revisit whether requestAnimationFrame makes setTimeout unnecessary for focus restoration.
   // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
+  // WCAG Issue #3222: RAF seems to be working well for timing purposes.
   // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
   // See issue #3222 for more detail.
+  /**
+   * Restores focus after a controller requests a focus target.
+   */
   useEffect(() => {
+    logger.logTraceUseEffect('SHELL - restore requested focus', focusRestoreRequest, mapId, uiController);
     if (!focusRestoreRequest) return undefined;
 
     const requestId = requestAnimationFrame(() => {
@@ -124,7 +157,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
-  const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
+  const [collapsedFooterHeight, setCollapsedFooterHeight] = useState<number>(0);
 
   const gvRootElement = DomHelper.getGVRootElement(mapId);
 
@@ -490,7 +523,7 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
+      <FocusTrap open={activeTrapGeoView} disableEnforceFocus disableAutoFocus disableRestoreFocus getTabbable={getShellTabbable}>
         <Box
           ref={setShellElementRef}
           id={DomHelper.buildShellId(mapViewer.mapId)}
@@ -531,7 +564,11 @@ export function Shell(props: ShellProps): JSX.Element {
               className="mapContainer"
               ref={mapShellContainerRef}
             >
-              <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+              <AppBar
+                api={mapViewer.appBarApi}
+                onScrollShellIntoView={handleScrollShellIntoView}
+                onKeyboardNavigationModeChange={handleKeyboardNavigationModeChange}
+              />
               <Box sx={memoSxClasses.mapContainer}>
                 <Map viewer={mapViewer} />
               </Box>
@@ -551,11 +588,11 @@ export function Shell(props: ShellProps): JSX.Element {
               <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
             ))}
             {/* modal section start */}
-            <FocusTrapDialog mapId={mapViewer.mapId} />
+            <FocusTrapDialog mapId={mapViewer.mapId} registerModeAction={registerModeAction} />
             {mapLoaded && <ExportModal />}
-            {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
+            {focusItem.activeElementId === BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE && <DataTableModal />}
             {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
-            {focusItem.activeElementId === 'featureDetailDataTable' && <FeatureDetailModal />}
+            {focusItem.activeElementId === BUILT_IN_MODAL_IDS.FEATURE_DETAIL_DATA_TABLE && <FeatureDetailModal />}
             {/* modal section end */}
             {Object.keys(components).map((key: string) => {
               return <Fragment key={key}>{components[key]}</Fragment>;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useId } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useId } from 'react';
 import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -19,8 +19,10 @@ import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
-import { handleEscapeKey, translateTooltip } from '@/core/utils/utilities';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
+import { translateTooltip } from '@/core/utils/utilities';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -60,6 +62,8 @@ export default function NavbarPanelButton({
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const focusItem = useStoreUIActiveFocusItem();
+  const mapId = useStoreGeoViewMapId();
   const shellContainer = useShellContainer();
 
   // Extract panel width if provided
@@ -76,21 +80,43 @@ export default function NavbarPanelButton({
   }, [theme, panelWidth]);
 
   // States
-  const { open, anchorEl, openAt, close: closePanel } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close: closePanel } = useMapPopover();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const previousRequestedOpen = useRef(false);
   const previousOpen = useRef(open);
+  const focusTrapId = `${mapId}-${buttonPanel.button.id}-navbar-focus-trap`;
+  const { rememberPreviousOwner, releaseFocusOwner, synchronizeOwnership } = usePopoverFocusOwner(
+    focusTrapId,
+    buttonPanel.button.id,
+    closePanel
+  );
 
+  /**
+   * Synchronizes externally requested panel visibility.
+   */
   useEffect((): void => {
     logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - external open state', buttonPanel.panel?.status);
     const requestedOpen = buttonPanel.panel?.status ?? false;
     if (requestedOpen === previousRequestedOpen.current) return;
     previousRequestedOpen.current = requestedOpen;
 
-    if (requestedOpen && buttonRef.current) openAt(buttonRef.current);
-    else closePanel();
-  }, [buttonPanel.panel?.status, closePanel, openAt]);
+    if (requestedOpen && buttonRef.current) {
+      // The open-state callback also synchronizes user-opened panels; preserve their original owner snapshot.
+      if (open) return;
 
+      const result = tryOpenAt(buttonRef.current);
+      if (!result.ok) {
+        // A rejected request leaves local openness unchanged, so the usual change callback cannot reset it.
+        onOpenChange?.(false);
+        return;
+      }
+      if (activeTrapGeoView) rememberPreviousOwner(result.previousFocusItem);
+    } else closePanel();
+  }, [activeTrapGeoView, buttonPanel.panel?.status, closePanel, onOpenChange, open, tryOpenAt, rememberPreviousOwner]);
+
+  /**
+   * Notifies the caller when the panel open state changes.
+   */
   useEffect((): void => {
     logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - open state callback', open);
     if (previousOpen.current === open) return;
@@ -101,26 +127,70 @@ export default function NavbarPanelButton({
   // #region Handlers
 
   /**
+   * Closes the panel and optionally restores focus to its trigger.
+   *
+   * @param restoreTrigger - Whether to restore focus to the trigger after closing
+   */
+  const closePanelWithFocus = useCallback(
+    (restoreTrigger: boolean): void => {
+      releaseFocusOwner();
+      closePanel();
+      if (restoreTrigger) buttonRef.current?.focus();
+    },
+    [closePanel, releaseFocusOwner]
+  );
+
+  /**
    * Handles when the user clicks the navbar button to toggle the panel.
    */
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    if (open) {
-      closePanel();
-    } else {
-      openAt(event.currentTarget);
-    }
-  };
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      if (open) {
+        closePanelWithFocus(true);
+      } else {
+        const result = tryOpenAt(event.currentTarget);
+        if (result.ok && activeTrapGeoView) rememberPreviousOwner(result.previousFocusItem);
+      }
+    },
+    [activeTrapGeoView, closePanelWithFocus, open, tryOpenAt, rememberPreviousOwner]
+  );
 
   /**
    * Handles when the user clicks away from the popover.
    */
-  const handleClickAway = (): void => {
+  const handleClickAway = useCallback((): void => {
     if (open) {
-      closePanel();
+      closePanelWithFocus(false);
     }
-  };
+  }, [closePanelWithFocus, open]);
 
-  // #endregion Handlers
+  /**
+   * Handles Escape as an explicit keyboard dismissal.
+   */
+  const handleKeyDown = useCallback(
+    (key: string): void => {
+      if (key === 'Escape') closePanelWithFocus(true);
+    },
+    [closePanelWithFocus]
+  );
+
+  /**
+   * Closes the panel from its header button and restores focus.
+   */
+  const handleClose = useCallback((): void => {
+    closePanelWithFocus(true);
+  }, [closePanelWithFocus]);
+
+  // #endregion
+
+  /**
+   * Acquires unowned focus in keyboard mode and yields to newer owners or controller closure.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('NAV-BAR-PANEL-BUTTON - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
+
+    synchronizeOwnership(open, activeTrapGeoView);
+  }, [activeTrapGeoView, focusItem.activeElementId, open, synchronizeOwnership]);
 
   /**
    * Renders the panel content based on the button panel configuration.
@@ -175,9 +245,9 @@ export default function NavbarPanelButton({
           focusSelector="button"
           role="dialog"
           aria-labelledby={dialogTitleId}
-          focusTrap={activeTrapGeoView}
+          focusTrap={activeTrapGeoView && focusItem.activeElementId === focusTrapId}
           sx={memoSxClasses.popper}
-          handleKeyDown={handleEscapeKey}
+          handleKeyDown={handleKeyDown}
         >
           <Paper sx={memoSxClasses.popoverPaper}>
             <Box sx={memoSxClasses.popoverTitleContainer}>
@@ -185,7 +255,13 @@ export default function NavbarPanelButton({
                 {t(buttonPanel.panel?.title as string) ?? ''}
               </DialogTitle>
               <Box sx={memoSxClasses.popoverTitleActions}>
-                <IconButton className="buttonPopperClose" size="small" aria-label={t('general.close')} onClick={closePanel} color="inherit">
+                <IconButton
+                  className="buttonPopperClose"
+                  size="small"
+                  aria-label={t('general.close')}
+                  onClick={handleClose}
+                  color="inherit"
+                >
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </Box>

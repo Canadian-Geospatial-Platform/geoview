@@ -17,12 +17,14 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { getStoreUIFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { doTimeout } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { buildAppBarFocusTrapId } from '@/core/utils/element-id';
 
 /** Extra milliseconds added to transition duration to ensure CSS transitions fully complete before callbacks fire. */
 const TRANSITION_BUFFER_MS = 50;
@@ -32,14 +34,14 @@ export type TypePanelAppProps = {
   panel: TypePanelProps;
   button: IconButtonPropsExtend;
 
-  // Callback when the user clicked the general close button
-  onGeneralClose?: () => void;
-  // Callback when the panel has completed opened (and transitioned in)
+  /** Callback when the user clicks the general close button. */
+  onGeneralClose?: (buttonId: string) => void;
+  /** Callback when the panel has completed opening and transitioning in. */
   onOpen?: () => void;
-  // Callback when the panel has been closed
+  /** Callback when the panel has been closed. */
   onClose?: () => void;
-  // Callback when the panel has been closed by escape key
-  onKeyDown?: (event: KeyboardEvent) => void;
+  /** Callback when the panel receives a keydown event. */
+  onKeyDown?: (event: KeyboardEvent, buttonId: string) => void;
 };
 
 /**
@@ -73,6 +75,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const panelButtonId = typeof button.id === 'string' ? button.id : '';
   const panelContainerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
@@ -87,6 +90,28 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   // Store
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const panelOwnerId = buildAppBarFocusTrapId(mapId, panelId);
+
+  // #region Handlers
+
+  /**
+   * Forwards keydown events with the owning panel button ID.
+   */
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent): void => {
+      onKeyDown?.(event, panelButtonId);
+    },
+    [panelButtonId, onKeyDown]
+  );
+
+  /**
+   * Closes this panel through its owning callback.
+   */
+  const handleGeneralClose = useCallback((): void => {
+    onGeneralClose?.(panelButtonId);
+  }, [panelButtonId, onGeneralClose]);
+
+  // #endregion Handlers
 
   /**
    * Creates a cancellable delay for panel transitions.
@@ -134,12 +159,14 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     let delayJob: ReturnType<typeof doTimeout> | undefined = undefined;
 
     if (open) {
+      const initialFocus = DomHelper.getActiveElement();
       delayJob = createTransitionDelay(() => {
-        // Focus close button only on user-triggered open (!prevOpen), not initial render.
-        // This prevents focus hijacking with configurations that have an appBar panel open by default,
-        // preserving the host page's natural tab order until GeoView is interacted with.
-        // Focus happens after transition to ensure the button ref is set.
-        if (!prevOpen && closeBtnRef?.current) {
+        const ownerId = getStoreUIFocusItem(mapId).activeElementId;
+        const currentFocus = DomHelper.getActiveElement();
+        const focusChanged = currentFocus && currentFocus !== initialFocus && currentFocus.tagName !== 'BODY';
+
+        // Preserve host-page focus on initial render and yield to newer focus.
+        if (!prevOpen && !focusChanged && closeBtnRef?.current && (!ownerId || ownerId === panelOwnerId)) {
           closeBtnRef.current.focus();
         }
         onOpen?.();
@@ -156,7 +183,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
         delayJob.cancel();
       }
     };
-  }, [open, createTransitionDelay, onOpen, onClose]);
+  }, [open, createTransitionDelay, onOpen, onClose, mapId, panelOwnerId]);
 
   return (
     <Box
@@ -164,7 +191,6 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       role={open && activeTrapGeoView ? 'dialog' : undefined}
       aria-label={t('general.panelLabel', { title: t(panel.title) })}
       aria-hidden={!open}
-      aria-modal={open && activeTrapGeoView ? true : undefined}
       sx={{
         ...memoSxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
@@ -173,11 +199,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-panel`}
       className={`appbar-panel${panelId ? ` appbar-panel-${panelId}` : ''}`}
     >
-      <FocusTrapContainer
-        open={isFocusTrapped}
-        focusTrapContainerId={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-focus-trap`}
-        containerType={CONTAINER_TYPE.APP_BAR}
-      >
+      <FocusTrapContainer open={isFocusTrapped} focusTrapContainerId={panelOwnerId} containerType={CONTAINER_TYPE.APP_BAR}>
         <Card
           sx={{
             ...memoSxClasses.panelCard,
@@ -185,7 +207,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef}
-          onKeyDown={(event: KeyboardEvent) => onKeyDown?.(event)}
+          onKeyDown={handleKeyDown}
           {...{ 'data-id': button.id }}
           className="panel-card"
           {...rest}
@@ -208,7 +230,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
                   aria-label={t('general.close')}
                   tooltipPlacement="right"
                   size="small"
-                  onClick={() => onGeneralClose?.()}
+                  onClick={handleGeneralClose}
                   iconRef={closeBtnRef}
                   className="cgpv-panel-close"
                 >

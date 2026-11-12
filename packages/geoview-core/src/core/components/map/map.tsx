@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
 
 import { useTranslation } from 'react-i18next';
@@ -30,6 +31,7 @@ import { logger } from '@/core/utils/logger';
 
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreUIIsModalActive } from '@/core/stores/states/ui-state';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { DomHelper } from '@/core/utils/dom-helper';
 
@@ -71,6 +73,20 @@ export function Map(props: MapProps): JSX.Element {
   const hasRun = useRef<boolean>(false);
 
   /**
+   * Deactivates crosshair interactions when keyboard focus leaves the map region.
+   *
+   * @param event - The map region blur event
+   */
+  const handleMapBlur = useCallback(
+    (event: FocusEvent<HTMLElement>): void => {
+      if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+        uiController.setCrosshairActive(false);
+      }
+    },
+    [uiController]
+  );
+
+  /**
    * Initializes the map viewer on mount.
    */
   useEffect(() => {
@@ -106,6 +122,8 @@ export function Map(props: MapProps): JSX.Element {
 
       // Ctrl+M (or Cmd+M on Mac)
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey) {
+        if (getStoreUIIsModalActive(mapId)) return;
+
         // Only activate if map interaction is not static
         if (mapInteraction !== 'static' && mapElement.current) {
           event.preventDefault();
@@ -167,6 +185,7 @@ export function Map(props: MapProps): JSX.Element {
       tabIndex={mapInteraction === 'static' ? -1 : 0}
       role="region"
       aria-label={t('map.container', { mapId })}
+      onBlur={handleMapBlur}
     >
       <Typography role="status" aria-live="polite" sx={visuallyHidden}>
         {shortcutMessage}

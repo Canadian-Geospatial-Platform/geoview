@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
@@ -18,6 +18,9 @@ import { doTimeout } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+
+/** Identifies the panel that owns nested non-modal focus boundaries. */
+export const PanelFocusOwnerContext = createContext<string | undefined>(undefined);
 
 /** Properties for the FocusTrapContainer component. */
 interface FocusTrapContainerProps {
@@ -48,13 +51,12 @@ const extractTabName = (fullTabId: string, mapId: string): string => {
 /**
  * Traps keyboard tab focus within a container.
  *
- * TODO: Remove memo — children prop (ReactNode) creates new references on every parent render,
- * making shallow comparison always fail and negating any memo performance benefit.
+ * TODO (resolved): Removed memo because freshly created JSX children defeat shallow prop comparison.
  *
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export const FocusTrapContainer = memo(({
+export const FocusTrapContainer = ({
   children,
   open = false,
   focusTrapContainerId,
@@ -120,6 +122,7 @@ export const FocusTrapContainer = memo(({
    * Cancels a pending restore-focus job on unmount.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP-CONTAINER - cancel pending focus restoration');
     return () => {
       closeDelayJobRef.current?.cancel();
     };
@@ -177,8 +180,10 @@ export const FocusTrapContainer = memo(({
     // Log
     logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - activeTrapGeoView', activeTrapGeoView);
 
-    if (!activeTrapGeoView) uiController.disableFocusTrap();
-  }, [activeTrapGeoView, uiController]);
+    if (!activeTrapGeoView && focusItem.activeElementId === focusTrapContainerId) {
+      uiController.disableFocusTrap('no-focus');
+    }
+  }, [activeTrapGeoView, focusItem.activeElementId, focusTrapContainerId, uiController]);
 
   /**
    * Sends focus to the exit button when this trap receives focus.
@@ -190,11 +195,12 @@ export const FocusTrapContainer = memo(({
     // Create cancellable delay job to force the rendering before focusing
     let delayJob: ReturnType<typeof doTimeout> | undefined;
 
-    if (focusTrapContainerId === focusItem.activeElementId) {
+    if (focusTrapContainerId === focusItem.activeElementId && focusItem.focusOnEntry !== false) {
+      const currentFocus = DomHelper.getActiveElement();
       delayJob = doTimeout(TIMEOUT.focusDelay);
       delayJob.promise
         .then((result) => {
-          if (result === 'timeout') {
+          if (result === 'timeout' && DomHelper.getActiveElement() === currentFocus) {
             // Explicitly request focus indicator for keyboard users
             DomHelper.getGVElementByFullId(mapId, exitBtnId)?.focus({ focusVisible: true });
           }
@@ -228,7 +234,15 @@ export const FocusTrapContainer = memo(({
     // (not when activeTrapGeoView toggles for already-open panels)
     if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && wasJustOpened) {
       // Auto-enable focus trap when footer panel opens
-      uiController.enableFocusTrap({ activeElementId: focusTrapContainerId, callbackElementId: focusTrapContainerId });
+      // Both IDs intentionally refer to this panel:
+      // activeElementId identifies which panel manages keyboard navigation;
+      // callbackElementId identifies where focus returns if no other target is supplied.
+      // The footer Exit button overrides that default and returns focus to its tab.
+      uiController.enableFocusTrap({
+        activeElementId: focusTrapContainerId,
+        callbackElementId: focusTrapContainerId,
+        focusOnEntry: DomHelper.getActiveElement()?.matches(':focus-visible') ?? false,
+      });
     }
   }, [containerType, activeTrapGeoView, open, focusTrapContainerId, uiController]);
 
@@ -251,7 +265,11 @@ export const FocusTrapContainer = memo(({
         // Add focus listener directly to the container
         const handleContainerFocus = (): void => {
           // Use the same approach as tab selection - directly enable focus trap
-          uiController.enableFocusTrap({ activeElementId: focusTrapContainerId, callbackElementId: focusTrapContainerId });
+          uiController.enableFocusTrap({
+            activeElementId: focusTrapContainerId,
+            callbackElementId: focusTrapContainerId,
+            focusOnEntry: false,
+          });
         };
 
         container.addEventListener('focusin', handleContainerFocus);
@@ -265,11 +283,13 @@ export const FocusTrapContainer = memo(({
     return undefined;
   }, [containerType, activeTrapGeoView, open, focusTrapContainerId, focusItem.activeElementId, uiController, mapId]);
 
-  // disableAutoFocus: prevents MUI FocusTrap from auto-focusing first child. Without this, First item inside FocusTrap (<Box>) gets focus first.
-  // disableRestoreFocus: to prevent fighting for focus between multiple FocusTraps
-  // <Box tabIndex={-1}: MUI will add this automatically if not set. Adding here to prevent console log noise
+  // disableEnforceFocus: allows focus outside this non-modal panel without pulling it back.
+  // disableAutoFocus: lets our focus-handling logic decide whether to move focus on entry.
+  // disableRestoreFocus: lets our close-handling logic decide where focus returns.
+  // tabIndex={-1}: makes the container programmatically focusable without adding a Tab stop;
+  // setting it explicitly also avoids MUI's missing-tabIndex warning.
   return (
-    <FocusTrap open={memoIsActive} disableAutoFocus disableRestoreFocus>
+    <FocusTrap open={memoIsActive} disableEnforceFocus disableAutoFocus disableRestoreFocus>
       <Box
         tabIndex={-1}
         sx={composeSxProps(memoSxClasses.container, memoShowExitButton ? memoSxClasses.withExitButton : undefined)}
@@ -280,9 +300,11 @@ export const FocusTrapContainer = memo(({
           </Button>
         )}
         {/* Fit content into the remaining space below Exit so its scroller is not clipped. */}
-        <Box sx={memoSxClasses.content}>{children}</Box>
+        <Box sx={memoSxClasses.content}>
+          <PanelFocusOwnerContext.Provider value={focusTrapContainerId}>{children}</PanelFocusOwnerContext.Provider>
+        </Box>
       </Box>
     </FocusTrap>
   );
-});
+};
 FocusTrapContainer.displayName = 'FocusTrapContainer';

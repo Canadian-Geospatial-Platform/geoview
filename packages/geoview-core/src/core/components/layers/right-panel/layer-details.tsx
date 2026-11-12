@@ -62,7 +62,7 @@ import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-contr
 import { LayerSettingsPanel } from './layer-settings/layer-settings';
 import { LayerInfoPanel } from './layer-info/layer-info';
 import { logger } from '@/core/utils/logger';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { BUILT_IN_MODAL_IDS, LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
@@ -338,7 +338,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       navigateToDataTable({ layerPath });
     } else {
       // Otherwise, open the data table modal
-      uiController.enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
+      uiController.enableFocusTrap({ activeElementId: BUILT_IN_MODAL_IDS.LAYER_DATA_TABLE, callbackElementId: tableDetailsButtonId });
     }
   }, [
     isTableButtonDisabled,

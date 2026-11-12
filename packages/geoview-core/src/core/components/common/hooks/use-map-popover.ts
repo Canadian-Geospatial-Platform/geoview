@@ -1,5 +1,17 @@
-import { useCallback, useState } from 'react';
-import { useStoreUIPopoverCloseVersion } from '@/core/stores/states/ui-state';
+import { useCallback, useEffect, useState } from 'react';
+import { useUIController } from '@/core/controllers/use-controllers';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import {
+  getStoreUIIsModalActive,
+  getStoreUIPopoverCloseVersion,
+  useStoreUIPopoverCloseVersion,
+  type FocusItemProps,
+} from '@/core/stores/states/ui-state';
+import { logger } from '@/core/utils/logger';
+import { getPopoverReturnFocusItem } from './use-popover-focus-owner';
+
+/** An opening either supplies its return owner or is rejected without changing popover state. */
+type MapPopoverOpenResult = { ok: true; previousFocusItem: FocusItemProps } | { ok: false };
 
 /** The open state and handlers of a map-control popover. */
 interface MapPopoverState {
@@ -7,14 +19,15 @@ interface MapPopoverState {
   open: boolean;
   /** The element the popover is anchored to, or null when closed. */
   anchorEl: HTMLElement | null;
-  /** Opens the popover anchored to the given element. */
-  openAt: (element: HTMLElement) => void;
+  /** Attempts to open the popover, returning its underlying owner only on success. */
+  tryOpenAt: (element: HTMLElement) => MapPopoverOpenResult;
   /** Closes the popover. */
   close: () => void;
 }
 
 /**
- * Tracks the open state of a map-control popover that also closes on a map popover close request (Ctrl+M).
+ * Tracks the open state of a map-control popover. Closes when another popover opens on the same map
+ * or a map popover close request is issued (for example, Ctrl+M).
  *
  * Openness is derived during render from the close-request version rather than reset in an effect: an effect
  * schedules a second render whose focus-trap cleanup can run after the map has been focused.
@@ -23,22 +36,42 @@ interface MapPopoverState {
  */
 export function useMapPopover(): MapPopoverState {
   const popoverCloseVersion = useStoreUIPopoverCloseVersion();
+  const mapId = useStoreGeoViewMapId();
+  const uiController = useUIController();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openedAtCloseVersion, setOpenedAtCloseVersion] = useState<number>(popoverCloseVersion);
 
   const open = anchorEl !== null && openedAtCloseVersion === popoverCloseVersion;
 
   /**
-   * Opens the popover anchored to the given element.
+   * Clears the stale anchor after render has already closed a controller-dismissed popover.
+   */
+  useEffect((): void => {
+    logger.logTraceUseEffect('USE-MAP-POPOVER - clear stale anchor', openedAtCloseVersion, popoverCloseVersion);
+    if (anchorEl !== null && openedAtCloseVersion !== popoverCloseVersion) setAnchorEl(null);
+  }, [anchorEl, openedAtCloseVersion, popoverCloseVersion]);
+
+  /**
+   * Closes other popovers on the same map, then opens this one anchored to the given element.
    *
    * @param element - The element to anchor the popover to
+   * @returns Success with the underlying return owner, or rejection when a modal blocks opening
    */
-  const openAt = useCallback(
-    (element: HTMLElement): void => {
-      setOpenedAtCloseVersion(popoverCloseVersion);
+  const tryOpenAt = useCallback(
+    (element: HTMLElement): MapPopoverOpenResult => {
+      if (getStoreUIIsModalActive(mapId)) {
+        logger.logDebug('Map popover opening rejected while a modal owns focus', mapId);
+        return { ok: false };
+      }
+
+      const previousFocusItem = getPopoverReturnFocusItem(mapId);
+      uiController.closeMapPopovers();
+      // Read the updated close-request version so this new popover is not closed by the request above.
+      setOpenedAtCloseVersion(getStoreUIPopoverCloseVersion(mapId));
       setAnchorEl(element);
+      return { ok: true, previousFocusItem };
     },
-    [popoverCloseVersion]
+    [mapId, uiController]
   );
 
   /**
@@ -46,5 +79,5 @@ export function useMapPopover(): MapPopoverState {
    */
   const close = useCallback((): void => setAnchorEl(null), []);
 
-  return { open, anchorEl, openAt, close };
+  return { open, anchorEl, tryOpenAt, close };
 }

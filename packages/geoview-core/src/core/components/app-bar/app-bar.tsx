@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import {
   type ReactNode,
   type ReactElement,
   type KeyboardEvent,
+  type MouseEvent,
   useEffect,
   useCallback,
   useState,
@@ -12,8 +12,12 @@ import {
   isValidElement,
   cloneElement,
 } from 'react';
+
+import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
+
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { Box } from '@/ui/layout';
 import { List } from '@/ui/list/list';
@@ -35,6 +39,7 @@ import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
+  getStoreUIFocusItem,
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIAppbarComponents,
@@ -43,7 +48,6 @@ import {
   useStoreUIAppBarPanelIds,
 } from '@/core/stores/states/ui-state';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi } from '@/core/components/app-bar/app-bar-api';
@@ -54,17 +58,38 @@ import { Datapanel } from '@/core/components/data-table/data-panel';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import Notifications from '@/core/components/notifications/notifications';
 
-import Version from './buttons/version';
-import Share from './buttons/share';
-import { getSxClasses } from './app-bar-style';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
+import { buildAppBarFocusTrapId } from '@/core/utils/element-id';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, sortArrayWithEnforcedValues, handleEscapeKey, toArray, translateTooltip } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
+import Version from './buttons/version';
+import Share from './buttons/share';
+import { Settings } from './buttons/settings';
+import { getSxClasses } from './app-bar-style';
+
 /** Scroll step size in pixels (matches single button height). */
 const BUTTON_HEIGHT = 54;
+
+/**
+ * Checks whether current focus has moved somewhere that panel dismissal must preserve.
+ *
+ * @param panelElement - The closing panel, when still mounted
+ * @param focusTarget - The intended focus-return target
+ * @returns Whether another control has taken focus
+ */
+function hasFocusMovedOutsidePanel(panelElement: HTMLElement | undefined, focusTarget: HTMLElement | undefined): boolean {
+  const activeElement = DomHelper.getActiveElement();
+  return Boolean(
+    activeElement &&
+    activeElement.tagName !== 'BODY' &&
+    activeElement.tagName !== 'HTML' &&
+    !panelElement?.contains(activeElement) &&
+    activeElement !== focusTarget
+  );
+}
 
 /** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
@@ -76,8 +101,12 @@ interface GroupPanelType {
 
 /** Props for the AppBar component. */
 type AppBarProps = {
+  /** The app-bar API. */
   api: AppBarApi;
+  /** Scrolls the shell into view when a panel opens. */
   onScrollShellIntoView: () => void;
+  /** Changes the existing keyboard-navigation mode. */
+  onKeyboardNavigationModeChange: (active: boolean) => void;
 };
 
 /** Record of button panel ids to their configuration. */
@@ -98,7 +127,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-bar/app-bar');
 
-  const { api: appBarApi, onScrollShellIntoView } = props;
+  const { api: appBarApi, onScrollShellIntoView, onKeyboardNavigationModeChange } = props;
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -109,11 +138,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
   const interaction = useStoreMapInteraction();
-  const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const appBarComponents = useStoreUIAppbarComponents();
-  const { tabId, isOpen, isFocusTrapped } = useStoreUIActiveAppBarTab();
+  const { tabId, isOpen, isFocusTrapped, returnFocusToMap } = useStoreUIActiveAppBarTab();
   const hiddenTabs = useStoreUIHiddenTabs();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const activeTrapGeoViewRef = useRef(activeTrapGeoView);
+  const focusRestoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const focusRestoreOwnerRef = useRef<string | false | undefined>(activeModalId);
   const isSharedModeEnabled = useStoreGeoViewSharedMode();
   const uiController = useUIController();
   const mapController = useMapController();
@@ -132,7 +163,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
   geoviewElementRef.current = geoviewElement;
 
   // Scroll indicator state (consolidated to reduce re-renders)
-  const [scrollState, setScrollState] = useState({ isScrollable: false, canScrollUp: false, canScrollDown: false });
+  const [scrollState, setScrollState] = useState<{ isScrollable: boolean; canScrollUp: boolean; canScrollDown: boolean }>({
+    isScrollable: false,
+    canScrollUp: false,
+    canScrollDown: false,
+  });
   const appBarListRef = useRef<HTMLUListElement>(null);
   const rafIdRef = useRef<number | undefined>(undefined);
 
@@ -141,7 +176,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoButtonPanels = useMemo((): ButtonPanelType => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, tabId, isOpen, isFocusTrapped);
+    logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, appBarApi, tabId, isOpen, isFocusTrapped);
 
     const panels: ButtonPanelType = {};
     appBarPanelIds.forEach((id) => {
@@ -250,13 +285,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   /**
    * Handles when an app-bar button is clicked.
-   *
-   * @param buttonId - The id of the clicked button
    */
   const handleButtonClicked = useCallback(
-    (buttonId: string): void => {
+    (event: MouseEvent<HTMLButtonElement>): void => {
+      const buttonId = event.currentTarget.dataset.panelButtonId ?? '';
       // Get the button panel
       const buttonPanel = memoButtonPanels[buttonId];
+      if (!buttonPanel) {
+        logger.logError(`AppBar button references an unknown panel: ${buttonId}`);
+        return;
+      }
       uiController.setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
     [memoButtonPanels, uiController]
@@ -269,20 +307,55 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const handleGeneralCloseClicked = useCallback(
     (buttonId: string): void => {
-      // TODO: REVIEW - Not ideal that a core component such as app-bar is responsible for managing focus return logic to the map. Consider delegating this responsibility to a higher-level controller or context. Also, it shouldn't know about the 'details' id either.
-      const returnFocusToMap = isCrosshairsActive && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
+      // TODO: REVIEW - Focus ownership and return policy is split between AppBar and the UI store. Consider consolidating it in a higher-level controller or context; AppBar should not need to special-case the 'details' id.
+      const restoreMapFocus = returnFocusToMap && buttonId === DEFAULT_APPBAR_CORE.DETAILS;
 
-      if (isFocusTrapped) {
-        setTimeout(() => {
-          // Explicitly request focus indicator for keyboard users
-          const focusTarget = returnFocusToMap ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
-          focusTarget?.focus({ focusVisible: true });
-        }, TIMEOUT.dataPanelLoading);
+      if (focusRestoreTimeoutRef.current !== undefined) {
+        clearTimeout(focusRestoreTimeoutRef.current);
+        focusRestoreTimeoutRef.current = undefined;
+        focusRestoreOwnerRef.current = undefined;
       }
 
-      uiController.setActiveAppBarTab(buttonId, false, false);
+      const currentOwnerId = getStoreUIFocusItem(mapId).activeElementId;
+      const panelOwnerId = buildAppBarFocusTrapId(mapId, buttonId);
+      uiController.setActiveAppBarTab(buttonId, false, false, false);
+
+      if (isFocusTrapped && (!currentOwnerId || currentOwnerId === panelOwnerId)) {
+        focusRestoreOwnerRef.current = false;
+        focusRestoreTimeoutRef.current = setTimeout(() => {
+          focusRestoreTimeoutRef.current = undefined;
+          const focusRestoreOwner = focusRestoreOwnerRef.current;
+          focusRestoreOwnerRef.current = undefined;
+          if (getStoreUIFocusItem(mapId).activeElementId !== focusRestoreOwner) return;
+
+          const focusTarget = restoreMapFocus ? geoviewElementRef.current : DomHelper.getAppBarButton(mapId, buttonId);
+          const panelElement = DomHelper.getAppBarPanel(mapId, buttonId);
+          // Keep the delayed return from stealing focus if another control took focus after the panel closed.
+          if (hasFocusMovedOutsidePanel(panelElement, focusTarget)) return;
+
+          // Explicitly request focus indicator for keyboard users
+          focusTarget?.focus({ focusVisible: true });
+          if (restoreMapFocus && activeTrapGeoViewRef.current) uiController.setCrosshairActive(true);
+        }, TIMEOUT.dataPanelLoading);
+      }
     },
-    [uiController, isFocusTrapped, mapId, isCrosshairsActive]
+    [uiController, isFocusTrapped, mapId, returnFocusToMap]
+  );
+
+  /**
+   * Handles Escape on an app-bar panel.
+   */
+  const handlePanelKeyDown = useCallback(
+    (event: KeyboardEvent, buttonId: string): void => {
+      if (event.key === 'Escape') {
+        // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
+        // eslint-disable-next-line no-restricted-syntax
+        const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
+        if (isLightboxOpen) return;
+      }
+      handleEscapeKey(event.key, () => handleGeneralCloseClicked(buttonId));
+    },
+    [handleGeneralCloseClicked]
   );
 
   /**
@@ -363,26 +436,77 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [mapController]);
 
   /**
+   * Keeps the latest keyboard-navigation mode available to delayed focus restoration.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - update keyboard-navigation mode ref', activeTrapGeoView);
+    activeTrapGeoViewRef.current = activeTrapGeoView;
+  }, [activeTrapGeoView]);
+
+  /**
+   * Cancels pending focus restoration when the active app-bar panel changes.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - cancel pending focus restoration', isOpen, tabId);
+    if (!isOpen || focusRestoreTimeoutRef.current === undefined) return;
+
+    clearTimeout(focusRestoreTimeoutRef.current);
+    focusRestoreTimeoutRef.current = undefined;
+    focusRestoreOwnerRef.current = undefined;
+  }, [isOpen, tabId]);
+
+  /**
+   * Cancels pending focus restoration when another component takes logical focus ownership.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - cancel pending focus restoration for newer focus owner', activeModalId);
+    if (focusRestoreTimeoutRef.current === undefined || activeModalId === focusRestoreOwnerRef.current) return;
+
+    clearTimeout(focusRestoreTimeoutRef.current);
+    focusRestoreTimeoutRef.current = undefined;
+    focusRestoreOwnerRef.current = undefined;
+  }, [activeModalId]);
+
+  /**
+   * Clears pending focus restoration when the app bar unmounts.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('APPBAR - clear pending focus restoration');
+    return (): void => {
+      if (focusRestoreTimeoutRef.current !== undefined) {
+        clearTimeout(focusRestoreTimeoutRef.current);
+        focusRestoreTimeoutRef.current = undefined;
+        focusRestoreOwnerRef.current = undefined;
+      }
+    };
+  }, []);
+
+  /**
    * Restores focus when a panel is closed.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - focus restore on close', isOpen, tabId);
 
+    if (focusRestoreTimeoutRef.current !== undefined) return;
+
     if (!isOpen && tabId) {
       // Get the AppBar button element for the current tab
       const buttonElement = DomHelper.getAppBarButton(mapId, tabId);
-      if (buttonElement) {
-        buttonElement.focus();
-      } else {
-        const mapCont = geoviewElementRef.current;
-        mapCont?.focus();
-        if (mapCont?.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
-          mapCont.classList.add('keyboard-focus');
+      const mapElement = geoviewElementRef.current;
+      const focusTarget = buttonElement ?? mapElement;
+      const panelElement = DomHelper.getAppBarPanel(mapId, tabId);
+      const hasActiveFocusOwner = Boolean(getStoreUIFocusItem(mapId).activeElementId);
+
+      // Allow the normal return when focus is still in the closing panel or has fallen back to the document root.
+      if (focusTarget && !hasFocusMovedOutsidePanel(panelElement, focusTarget) && !hasActiveFocusOwner) {
+        focusTarget.focus();
+        if (!buttonElement && focusTarget.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
+          focusTarget.classList.add('keyboard-focus');
         }
       }
     }
-  }, [isOpen, tabId, mapId]);
+  }, [activeModalId, isOpen, tabId, mapId]);
 
   /**
    * Traps the focus in a panel opened from the configuration once a keyboard user moves into it.
@@ -496,7 +620,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   /**
    * Re-order the appbar buttons.
    */
-  const { topPanelNames, bottomPanelNames } = useMemo<{ topPanelNames: string[]; bottomPanelNames: string[] }>(() => {
+  const { topPanelNames: memoTopPanelNames, bottomPanelNames: memoBottomPanelNames } = useMemo<{
+    topPanelNames: string[];
+    bottomPanelNames: string[];
+  }>(() => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
@@ -555,7 +682,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               tooltipPlacement="right"
               className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
               size="small"
-              onClick={() => handleButtonClicked(buttonPanel.button.id)}
+              data-panel-button-id={buttonPanel.button.id}
+              onClick={handleButtonClicked}
             >
               {buttonPanel.button.children}
             </IconButton>
@@ -571,10 +699,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoBottomItems = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomItems', bottomPanelNames);
+    logger.logTraceUseMemo('APP-BAR - memoBottomItems', memoBottomPanelNames);
 
-    return renderButtonPanelItems(bottomPanelNames, true);
-  }, [bottomPanelNames, renderButtonPanelItems]);
+    return renderButtonPanelItems(memoBottomPanelNames, true);
+  }, [memoBottomPanelNames, renderButtonPanelItems]);
 
   // Compute which fixed buttons are shown (reduces repeated conditionals)
   const showExportButton = appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic';
@@ -585,7 +713,17 @@ export function AppBar(props: AppBarProps): JSX.Element {
    */
   const memoBottomListItems = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomListItems', memoBottomItems.length, showExportButton, showShareButton);
+    logger.logTraceUseMemo(
+      'APP-BAR - memoBottomListItems',
+      memoBottomItems,
+      showExportButton,
+      showShareButton,
+      interaction,
+      onKeyboardNavigationModeChange,
+      mapId,
+      activeModalId,
+      sxClasses
+    );
 
     const items: ReactNode[] = [];
 
@@ -620,7 +758,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
       </ListItem>
     );
 
-    // 5. Version
+    // 5. Settings is always available on dynamic maps and is intentionally not configuration-controlled.
+    if (interaction === 'dynamic') {
+      items.push(
+        <ListItem key="settings">
+          <Settings onKeyboardNavigationModeChange={onKeyboardNavigationModeChange} />
+        </ListItem>
+      );
+    }
+
+    // 6. Version
     items.push(
       <ListItem key="version">
         <Version />
@@ -628,14 +775,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
     );
 
     return items;
-  }, [memoBottomItems, showExportButton, showShareButton, mapId, activeModalId, sxClasses]);
+  }, [memoBottomItems, showExportButton, showShareButton, interaction, onKeyboardNavigationModeChange, mapId, activeModalId, sxClasses]);
 
   /**
    * Applies marginTop: auto to the first bottom item to push all items to the bottom.
    */
   const memoBottomListItemsWithStyle = useMemo((): ReactNode[] => {
     // Log
-    logger.logTraceUseMemo('APP-BAR - memoBottomListItemsWithStyle', memoBottomListItems.length);
+    logger.logTraceUseMemo('APP-BAR - memoBottomListItemsWithStyle', memoBottomListItems, sxClasses);
 
     if (memoBottomListItems.length === 0) return [];
 
@@ -677,7 +824,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
         <List ref={appBarListRef} sx={sxClasses.appBarList}>
           {/* Top section buttons */}
-          {renderButtonPanelItems(topPanelNames, false)}
+          {renderButtonPanelItems(memoTopPanelNames, false)}
 
           {/* All bottom items - first one automatically gets marginTop: auto */}
           {memoBottomListItemsWithStyle}
@@ -711,23 +858,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
               button={buttonPanel.button}
               onOpen={handlePanelOpen}
               onClose={handlePanelClose}
-              onKeyDown={(event: KeyboardEvent) => {
-                // Early exit if lightbox is handling ESC
-                if (event.key === 'Escape') {
-                  // The lightbox is a single page-wide overlay (yarl portal); a global check is intentional.
-                  // eslint-disable-next-line no-restricted-syntax
-                  const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
-                  if (isLightboxOpen) {
-                    return;
-                  }
-                }
-                handleEscapeKey(event.key, () => {
-                  handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-                });
-              }}
-              onGeneralClose={() => {
-                handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-              }}
+              onKeyDown={handlePanelKeyDown}
+              onGeneralClose={handleGeneralCloseClicked}
             />
           );
         }

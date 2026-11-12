@@ -19,8 +19,9 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreUIFooterPanelResizeValue, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
-import { handleEscapeKey } from '@/core/utils/utilities';
+import { doTimeout, handleEscapeKey } from '@/core/utils/utilities';
 import { TIMEOUT } from '@/core/utils/constant';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Available resize percentage values. */
 const RESIZE_VALUES = [35, 50, 100];
@@ -65,9 +66,9 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Refs
   const resizeButtonRef = useRef<HTMLButtonElement>(null);
-  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const panelRef = useRef<HTMLDivElement>(null);
   const prevOpenRef = useRef<boolean>(false);
-  const keyboardCloseRef = useRef<boolean>(false);
+  const restoreFocusPanelRef = useRef<HTMLElement | undefined>(undefined);
   const isPointerInteractionRef = useRef<boolean>(false);
 
   // Get container
@@ -99,6 +100,14 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   }, [pendingValue, uiController]);
 
   /**
+   * Closes an explicitly dismissed popper and requests guarded trigger-focus restoration.
+   */
+  const handleExplicitClose = useCallback((): void => {
+    restoreFocusPanelRef.current = panelRef.current ?? undefined;
+    handleClose();
+  }, [handleClose]);
+
+  /**
    * Handles toggling the resize popper open or closed.
    */
   const handleClick = useCallback(
@@ -125,7 +134,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
    * Handles keyboard events on the slider container.
    *
    * Arrow keys snap between mark values (35/50/100) instead of stepping by 1.
-   * Enter closes the popper and applies the pending value.
+   * Enter or Escape closes the popper and applies the pending value.
    * All keyboard events are stopped from propagating to the map's OpenLayers handlers.
    */
   const handleSliderKeyDown = useCallback(
@@ -138,10 +147,9 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
       event.stopPropagation();
       event.preventDefault();
 
-      // Enter closes the popper and applies the pending value
-      if (event.key === 'Enter') {
-        keyboardCloseRef.current = true;
-        handleClose();
+      // Enter and Escape explicitly dismiss the panel, unlike click-away or a pointer commit
+      if (event.key === 'Enter' || event.key === 'Escape') {
+        handleExplicitClose();
         return;
       }
 
@@ -156,7 +164,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
         if (prev !== undefined) setPendingValue(prev);
       }
     },
-    [pendingValue, footerPanelResizeValue, handleClose]
+    [pendingValue, footerPanelResizeValue, handleExplicitClose]
   );
 
   /**
@@ -200,39 +208,35 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   // #endregion Handlers
 
   /**
-   * Restores focus to the Resize button when the popper closes via keyboard (Enter key).
-   *
-   * Only restores focus on Enter-key close to avoid stealing focus from click-away or mouse drag closes.
-   * Uses 100ms timeout to allow DOM reflow to complete after footer panel resize.
+   * Restores focus after explicit dismissal, allowing resize reflow without overriding newer focus.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('RESIZE-FOOTER-PANEL - restore focus', open);
 
-    // When popper closes, reset the flag and attempt focus restoration
-    if (prevOpenRef.current && !open) {
-      // Reset flag at start of close transition — before any async callbacks
-      const wasKeyboardClose = keyboardCloseRef.current;
-      keyboardCloseRef.current = false;
-
-      // Only restore focus if this was a keyboard-initiated close and button is available
-      if (resizeButtonRef.current && wasKeyboardClose) {
-        focusTimeoutRef.current = setTimeout(() => {
-          resizeButtonRef.current?.focus({ focusVisible: true });
-          focusTimeoutRef.current = undefined;
-        }, TIMEOUT.resizeButtonFocusRestore);
-      }
-    }
-
-    // Track previous open state for next render
+    const closingPanel = prevOpenRef.current && !open ? restoreFocusPanelRef.current : undefined;
+    restoreFocusPanelRef.current = undefined;
     prevOpenRef.current = open;
+    if (!closingPanel) return undefined;
 
-    return () => {
-      if (focusTimeoutRef.current !== undefined) {
-        clearTimeout(focusTimeoutRef.current);
-        focusTimeoutRef.current = undefined;
-      }
-    };
+    const focusJob = doTimeout(TIMEOUT.resizeButtonFocusRestore);
+    focusJob.promise
+      .then((result): void => {
+        if (result !== 'timeout') return;
+        const activeElement = DomHelper.getActiveElement();
+        const button = resizeButtonRef.current;
+        if (
+          button?.isConnected &&
+          (!activeElement || activeElement.tagName === 'BODY' || activeElement === button || closingPanel.contains(activeElement))
+        ) {
+          button.focus({ focusVisible: true });
+        }
+      })
+      .catch((error: unknown): void => {
+        logger.logError('Resize footer focus restoration rejected unexpectedly:', error);
+      });
+
+    return (): void => focusJob.cancel();
   }, [open]);
 
   return (
@@ -261,10 +265,10 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           handleKeyDown={handleEscapeKey}
-          onClose={handleClose}
+          onClose={handleExplicitClose}
           sx={memoSxClasses.popper}
         >
-          <Paper component="section" sx={memoSxClasses.panel}>
+          <Paper ref={panelRef} component="section" sx={memoSxClasses.panel}>
             <Box component="header" sx={memoSxClasses.header}>
               <Typography component="h2" variant="h6" sx={memoSxClasses.title}>
                 {t('footerBar.resizeTooltip')}
@@ -274,7 +278,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
                 className="buttonPopperClose"
                 tooltip={t('general.close')}
                 size="small"
-                onClick={handleClose}
+                onClick={handleExplicitClose}
                 aria-label={t('general.close')}
               >
                 <CloseIcon />

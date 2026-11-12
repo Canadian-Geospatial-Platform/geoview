@@ -9,7 +9,7 @@ import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
-import { delay } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Stable animated wrapper so popper rerenders do not remount its focus trap. */
 const AnimatedPopper = animated(MaterialPopper);
@@ -89,7 +89,16 @@ interface PopperPropsExtend extends PopperProps {
  *
  * @see {@link https://mui.com/material-ui/react-popper/}
  */
-function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = false, children, ...props }: PopperPropsExtend): JSX.Element {
+function PopperUI({
+  open,
+  anchorEl,
+  onClose,
+  handleKeyDown,
+  focusSelector,
+  focusTrap = false,
+  children,
+  ...props
+}: PopperPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/popper/popper');
 
   // Hooks
@@ -114,13 +123,20 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
    * Registers keyboard event handlers for the popper.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose');
+    logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose', anchorEl, open, onClose, handleKeyDown);
     if (!open) return;
 
     /**
      * Handles keyboard events for the popper.
      */
     const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.defaultPrevented || !(event.target instanceof Node)) return;
+      const anchor = typeof anchorEl === 'function' ? anchorEl() : anchorEl;
+      if (!popperRef.current?.contains(event.target) && !(anchor instanceof Element && anchor.contains(event.target))) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       handleKeyDown?.(event.key, () => open && onClose?.());
     };
 
@@ -128,7 +144,7 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [open, onClose, handleKeyDown]);
+  }, [anchorEl, open, onClose, handleKeyDown]);
 
   /**
    * Manages focus when the popper opens.
@@ -139,35 +155,29 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
     // Focus management when popper opens
     if (open && focusSelector) {
-      let isOpen = true;
+      const focusJob = DomHelper.focusElementAfterDelay(
+        () => popperRef.current?.querySelector<HTMLElement>(focusSelector) ?? undefined,
+        theme.transitions.duration.shortest
+      );
 
-      // Wait the transition period then focus the close button when popover opens
-      delay(theme.transitions.duration.shortest)
-        .then(() => {
-          if (!isOpen) return;
-
-          const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
-          if (focusElement) {
-            focusElement.focus();
-          }
-        })
-        .catch(() => {
-          logger.logPromiseFailed('in delay in UI.POPPER - open');
-        });
-
-      return (): void => {
-        isOpen = false;
-      };
+      return (): void => focusJob.cancel();
     }
 
     return undefined;
   }, [open, focusSelector, theme.transitions.duration.shortest]);
 
-  // TODO: style - manage z-index in theme
+  // NOTE: The theme owns the default layer; external MUI themes retain the historical fallback.
   return (
-    <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={setPopperRef}>
+    <AnimatedPopper
+      sx={{ zIndex: theme.zIndex?.popper ?? 2000 }}
+      style={fadeInAnimation}
+      {...props}
+      anchorEl={anchorEl}
+      open={open}
+      ref={setPopperRef}
+    >
       {focusTrap ? (
-        <FocusTrap open={open} disableAutoFocus>
+        <FocusTrap open={open} disableEnforceFocus disableAutoFocus disableRestoreFocus>
           {children}
         </FocusTrap>
       ) : (

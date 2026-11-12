@@ -88,13 +88,18 @@ export class AbstractMapViewerController extends AbstractController {
    *
    * @param coordinates - The coordinates of the map click event
    * @param abortSignal - Optional signal to abort the operation
+   * @param returnFocusToMap - Whether focus should return to the map when query details close
    */
-  performMapClickAction(coordinates: TypeMapMouseInfo, abortSignal?: AbortSignal): Promise<TypeFeatureInfoResultSet> {
+  performMapClickAction(
+    coordinates: TypeMapMouseInfo,
+    abortSignal?: AbortSignal,
+    returnFocusToMap = false
+  ): Promise<TypeFeatureInfoResultSet> {
     // Redirect to map controller
     this.getControllersRegistry().mapController.setClickCoordinates(coordinates, abortSignal);
 
     // Perform a query at the clicked lonlat using layerSetController
-    return this.getControllersRegistry().layerSetController.queryAtLonLat(coordinates.lonlat);
+    return this.getControllersRegistry().layerSetController.queryAtLonLat(coordinates.lonlat, returnFocusToMap);
   }
 
   // #region STATIC METHODS

@@ -15,6 +15,7 @@ import {
   clearStoreUIFocusRestoreRequest,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
+  getStoreUIIsModalActive,
   hideStoreUITabButton,
   removeStoreUIAppBarPanelId,
   removeStoreUIFooterTab,
@@ -282,10 +283,17 @@ export class UIController extends AbstractMapViewerController {
    * @param tab - The tab identifier to activate, or undefined to deactivate
    * @param isOpen - Whether the tab panel is open
    * @param isFocusTrapped - Whether focus should be trapped in the panel
+   * @param returnFocusToMap - Whether closing the panel should return focus to the map
+   * @remarks A tab identifier is required when opening a panel.
    */
-  setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {
+  setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean, returnFocusToMap?: boolean): void {
+    if (isOpen && !tab) {
+      logger.logError('Cannot open an app bar panel without a tab identifier');
+      return;
+    }
+
     // Save in the store
-    setStoreUIActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
+    setStoreUIActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped, returnFocusToMap);
   }
 
   /**
@@ -456,10 +464,10 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Closes map-control popovers and releases their focus trap without restoring caller focus.
+   * Closes map-control popovers without restoring caller focus or dismissing an active modal.
    */
   closeMapPopovers(): void {
-    this.disableFocusTrap('no-focus');
+    if (!getStoreUIIsModalActive(this.getMapId())) this.disableFocusTrap('no-focus');
     closeStoreUIMapPopovers(this.getMapId());
   }
 

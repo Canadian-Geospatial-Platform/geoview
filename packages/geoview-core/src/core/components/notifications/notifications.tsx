@@ -33,11 +33,11 @@ import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreAppNotifications } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
+import { usePopoverFocusOwner } from '@/core/components/common/hooks/use-popover-focus-owner';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { getSxClasses } from './notifications-style';
 
@@ -287,7 +287,7 @@ const Notifications = memo((): JSX.Element => {
   // State
   const [hasNewNotification, setHasNewNotification] = useState<boolean>(false);
   const [notificationsCount, setNotificationsCount] = useState<number>(0);
-  const { open, anchorEl, openAt, close } = useMapPopover();
+  const { open, anchorEl, tryOpenAt, close } = useMapPopover();
 
   // Refs
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -302,6 +302,7 @@ const Notifications = memo((): JSX.Element => {
   const notifications = useStoreAppNotifications();
   const interaction = useStoreMapInteraction();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const focusItem = useStoreUIActiveFocusItem();
   const uiController = useUIController();
 
   // Get container
@@ -309,11 +310,14 @@ const Notifications = memo((): JSX.Element => {
   const shellContainer = useShellContainer();
 
   // Element IDs for accessibility and focus management
+  // TODO: Centralize these IDs in DomHelper using buildGVElementId and add notification-specific element getters as needed.
   const dialogId = `${mapId}-notification-dialog`;
   const titleId = `${mapId}-notification-title`;
   const closeButtonId = `${mapId}-notification-close-button`;
   const bellButtonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`;
   const removeAllButtonId = `${mapId}-notification-remove-all-button`;
+  const focusTrapId = `${mapId}-notification-focus-trap`;
+  const { claimFocusOwner, releaseFocusOwner, synchronizeOwnership } = usePopoverFocusOwner(focusTrapId, bellButtonId, close);
 
   // Animation
   const shakeAnimation = useShake();
@@ -327,23 +331,59 @@ const Notifications = memo((): JSX.Element => {
    */
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
-      if (open) close();
-      else openAt(event.currentTarget);
+      if (open) {
+        close();
+        return;
+      }
+
+      const result = tryOpenAt(event.currentTarget);
+      if (result.ok && activeTrapGeoView) {
+        claimFocusOwner(result.previousFocusItem);
+      }
     },
-    [open, close, openAt]
+    [activeTrapGeoView, claimFocusOwner, close, open, tryOpenAt]
   );
 
   /**
-   * Handles when the user clicks away from the notification popover.
+   * Closes the notifications popover and optionally restores focus to its trigger.
+   *
+   * @param restoreTrigger - Whether to restore focus to the trigger after closing
+   */
+  const closePopover = useCallback(
+    (restoreTrigger: boolean): void => {
+      releaseFocusOwner();
+      close();
+      if (restoreTrigger) bellButtonRef.current?.focus();
+    },
+    [close, releaseFocusOwner]
+  );
+
+  /**
+   * Closes the notifications popover without stealing click-away focus.
    */
   const handleClickAway = useCallback((): void => {
-    if (open) close();
-  }, [open, close]);
+    if (open) closePopover(false);
+  }, [closePopover, open]);
+
+  /**
+   * Closes the notifications popover and returns focus to its button.
+   */
+  const handleClose = useCallback((): void => {
+    closePopover(true);
+  }, [closePopover]);
+
+  /**
+   * Handles Escape as a local, explicit popover dismissal.
+   */
+  const handleKeyDown = useCallback(
+    (key: string): void => {
+      if (key === 'Escape') closePopover(true);
+    },
+    [closePopover]
+  );
 
   /**
    * Removes a single notification.
-   *
-   * @param key - The notification key to remove
    */
   const handleRemoveNotification = useCallback(
     (key: string): void => {
@@ -378,6 +418,14 @@ const Notifications = memo((): JSX.Element => {
   );
 
   // #endregion Handlers
+
+  /**
+   * Acquires unowned focus in keyboard mode and yields to newer owners or controller closure.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('NOTIFICATIONS - focus owner', open, activeTrapGeoView, focusItem.activeElementId);
+    synchronizeOwnership(open, activeTrapGeoView);
+  }, [activeTrapGeoView, focusItem.activeElementId, open, synchronizeOwnership]);
 
   // Effects
   /**
@@ -471,7 +519,6 @@ const Notifications = memo((): JSX.Element => {
           role="dialog"
           id={dialogId}
           aria-labelledby={titleId}
-          aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
@@ -479,7 +526,7 @@ const Notifications = memo((): JSX.Element => {
           onClose={handleClickAway}
           container={shellContainer}
           focusSelector={`#${closeButtonId}`}
-          focusTrap={activeTrapGeoView}
+          focusTrap={activeTrapGeoView && focusItem.activeElementId === focusTrapId}
           modifiers={[
             {
               name: 'eventListeners',
@@ -495,11 +542,11 @@ const Notifications = memo((): JSX.Element => {
             },
           ]}
           sx={memoSxClasses.popper}
-          handleKeyDown={handleEscapeKey}
+          handleKeyDown={handleKeyDown}
         >
           <Paper component="section" sx={memoSxClasses.popoverPaper}>
             <NotificationHeader
-              onClose={handleClickAway}
+              onClose={handleClose}
               t={t}
               sxClasses={memoSxClasses}
               titleId={titleId}

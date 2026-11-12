@@ -43,6 +43,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests UI component rendering and DOM structure:<br/>
       <b>Guide/Details</b> — Panel top anchor positioning<br/>
+      <b>Keyboard navigation</b> — Skip focus remains within the current map; AppBar focus restoration yields to newer focus<br/>
       <b>Viewport scrolling</b> — Complete map visibility, footer transitions and stable oversized alignment`;
   }
 
@@ -52,7 +53,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 6;
+    return 18;
   }
 
   /**
@@ -66,11 +67,23 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
 
     // Test the UIController.getFooterHeight getter from a non-React consumer (controller registry)
     const pFooterHeight = this.#uiTester.testControllerGetFooterHeight();
+    const pSwitchAccessibility = this.#uiTester.testSwitchAccessibleMarkup();
 
-    await Promise.all([pDetailsPanel, pFooterHeight]);
+    await Promise.all([pDetailsPanel, pFooterHeight, pSwitchAccessibility]);
 
-    // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
+    // Focus and page-scrolling tests mutate shared browser state and must not run alongside other maps under "Run all".
     await this.waitForPageExclusivity();
+    await this.#uiTester.testModalFocusOwnerClassification();
+    await this.#uiTester.testResizePopoverFocusRestoration();
+    await this.#uiTester.testPopperKeyboardBoundary();
+    await this.#uiTester.testPopoverFocusOwnership('version');
+    await this.#uiTester.testPopoverFocusOwnership('notifications');
+    await this.#uiTester.testPopoverFocusOwnership('navbar');
+    await this.#uiTester.testPopoverFocusOwnership('settings');
+    await this.#uiTester.testSkipFocusReturnsToMapLinks();
+    await this.#uiTester.testKeyboardEnableFocusDestination();
+    await this.#uiTester.testSettingsModeSatisfiesEntryGuard();
+    await this.#uiTester.testAppBarFocusRestoreYieldsToNewerFocus();
     await this.#uiTester.testMapSectionScroll('partial');
     await this.#uiTester.testMapSectionScroll('transitions');
     await this.#uiTester.testMapSectionScroll('visible');

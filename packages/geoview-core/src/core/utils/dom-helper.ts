@@ -2,10 +2,12 @@
 // GV This file is meant to hold a complex abstract class with nested-classes to separate DOM-related utilities for GeoView maps.
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-types';
+import type { DelayJob } from '@/core/utils/utilities';
 import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
+import { buildGVElementId as buildElementId } from '@/core/utils/element-id';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -33,7 +35,7 @@ export abstract class DomHelper {
    * @returns The canonical id string `${mapId}-${suffix}`
    */
   static buildGVElementId(mapId: string, suffix: string): string {
-    return `${mapId}-${suffix}`;
+    return buildElementId(mapId, suffix);
   }
 
   /**
@@ -184,6 +186,33 @@ export abstract class DomHelper {
   static getActiveElement(): Element | undefined {
     const { activeElement } = document;
     return activeElement ?? undefined;
+  }
+
+  /**
+   * Waits briefly, then focuses the requested element unless focus has moved elsewhere.
+   *
+   * Focus falling back to the document body does not prevent the focus transfer.
+   *
+   * @param getTarget - Resolves the target after the delay, using the caller's ref or scoped lookup
+   * @param delay - Delay in milliseconds before attempting to focus
+   * @returns A job the caller must cancel when the owning UI closes or unmounts
+   */
+  static focusElementAfterDelay(getTarget: () => HTMLElement | undefined, delay: number): DelayJob {
+    const initialFocus = DomHelper.getActiveElement();
+    const focusJob = doTimeout(delay);
+    focusJob.promise
+      .then((result) => {
+        if (result !== 'timeout') return;
+        const currentFocus = DomHelper.getActiveElement();
+
+        // Don't take focus away if it moved to another element during the delay.
+        if (currentFocus && currentFocus !== initialFocus && currentFocus.tagName !== 'BODY') return;
+        getTarget()?.focus();
+      })
+      .catch((error: unknown) => {
+        logger.logError('DomHelper.focusElementAfterDelay failed:', error);
+      });
+    return focusJob;
   }
 
   /**
@@ -1033,6 +1062,51 @@ export abstract class DomHelper {
    */
   static getWCAGLinkToMap(mapId: string): HTMLElement | undefined {
     return DomHelper.getGVElementById(mapId, 'wcag-link-to-map');
+  }
+
+  /**
+   * Gets the title element of the map's keyboard-navigation entry dialog.
+   *
+   * @param mapId - The map identifier
+   * @returns The dialog title element, or undefined when it is not present
+   * @throws {Error} When the map's root element is not found
+   */
+  static getKeyboardNavigationDialogTitle(mapId: string): HTMLElement | undefined {
+    return DomHelper.getGVElementById(mapId, 'wcag-dialog-title');
+  }
+
+  /**
+   * After the keyboard-navigation entry dialog closes, focuses the target unless focus has moved outside that dialog.
+   *
+   * @param mapId - The map identifier
+   * @param getTarget - Resolves the map-scoped destination after the delay
+   * @param delay - Delay in milliseconds to allow the dialog to update
+   * @returns A job the caller must cancel when the request is superseded or its owner unmounts
+   * @throws {Error} When the map's root element is not found
+   */
+  static focusAfterEntryDialog(mapId: string, getTarget: () => HTMLElement | undefined, delay: number): DelayJob {
+    const focusedElement = DomHelper.getActiveElement();
+
+    // Use the whole dialog here: focus on MUI's surrounding container still belongs to the entry dialog.
+    const promptElement = DomHelper.getKeyboardNavigationDialogTitle(mapId)?.closest('.MuiDialog-root');
+    const focusJob = doTimeout(delay);
+    focusJob.promise
+      .then((result) => {
+        if (result !== 'timeout') return;
+
+        const currentElement = DomHelper.getActiveElement();
+        const focusMovedOutsideEntryDialog =
+          currentElement &&
+          currentElement !== focusedElement &&
+          currentElement.tagName !== 'BODY' &&
+          !promptElement?.contains(currentElement);
+        if (focusMovedOutsideEntryDialog) return;
+        getTarget()?.focus({ preventScroll: true, focusVisible: true });
+      })
+      .catch((error: unknown) => {
+        logger.logError('DomHelper.focusAfterEntryDialog failed:', error);
+      });
+    return focusJob;
   }
 
   /**

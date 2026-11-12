@@ -81,13 +81,13 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | 11         | Mixed parallel + sequential |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | 18         | Complex mixed               |
 | 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | 57         | Fully sequential            |
-| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 6          | Mixed parallel + sequential |
+| 4. Components     | `suite-ui`              | `UITester`                                                                                      | 18         | Mixed parallel + sequential |
 | 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 15         | Guarded sequential          |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | 16         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | 2          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | 7          | Guarded sequential          |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | 3          | Guarded sequential          |
-| **Total**         |                         |                                                                                                 | **285**    |                             |
+| **Total**         |                         |                                                                                                 | **299**    |                             |
 
 ---
 
@@ -811,16 +811,28 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 [↑ Back to top](#table-of-contents)
 
 **Suite:** `suite-ui` · **File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
-**Execution:** Independent tests in parallel, then isolated page-scrolling tests sequentially once no other suite on the page is running · **Guard:** None
+**Execution:** Independent tests in parallel, then focus and isolated page-scrolling tests sequentially once no other suite on the page is running · **Guard:** Skip/AppBar focus tests skip when their map's test panel is hidden; popover ownership tests use isolated viewers
 
-| #   | Method                                | Type | Description                                                                         |
-| --- | ------------------------------------- | ---- | ----------------------------------------------------------------------------------- |
-| 1   | `testGuideDetailsPanelTopAnchor`      | test | Test Details Panel - Select and Find Top Anchor                                     |
-| 2   | `testControllerGetFooterHeight`       | test | Test UIController.getFooterHeight (non-React consumer)                              |
-| 3   | `testMapSectionScroll('partial')`     | test | Clipped map-info and top clipping; complete section visibility and repeat stability |
-| 4   | `testMapSectionScroll('transitions')` | test | Real footer-tab, app-bar and map-info click paths and final viewport bounds         |
-| 5   | `testMapSectionScroll('visible')`     | test | Already visible map remains stationary on repeated activation                       |
-| 6   | `testMapSectionScroll('oversized')`   | test | Taller-than-viewport map aligns with the top gap and stays stable                   |
+| #   | Method                                       | Type | Description                                                                                                                                                                                                                                                                                                                                                                  |
+| --- | -------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `testGuideDetailsPanelTopAnchor`             | test | Test Details Panel - Select and Find Top Anchor                                                                                                                                                                                                                                                                                                                              |
+| 2   | `testControllerGetFooterHeight`              | test | Test UIController.getFooterHeight (non-React consumer)                                                                                                                                                                                                                                                                                                                       |
+| 3   | `testSkipFocusReturnsToMapLinks`             | test | WCAG Skip returns focus to this map's top and bottom links                                                                                                                                                                                                                                                                                                                   |
+| 4   | `testAppBarFocusRestoreYieldsToNewerFocus`   | test | Footer-to-AppBar ownership and dismissal; keyboard-query map/crosshair return; right-panel entry yields to newer focus/ownership and delayed results; guide-open requests are discarded while same-action guide closure and selection still enter content                                                                                                                    |
+| 5   | `testMapSectionScroll('partial')`            | test | Clipped map-info and top clipping; complete section visibility and repeat stability                                                                                                                                                                                                                                                                                          |
+| 6   | `testMapSectionScroll('transitions')`        | test | Real footer-tab, app-bar and map-info click paths and final viewport bounds                                                                                                                                                                                                                                                                                                  |
+| 7   | `testMapSectionScroll('visible')`            | test | Already visible map remains stationary on repeated activation                                                                                                                                                                                                                                                                                                                |
+| 8   | `testMapSectionScroll('oversized')`          | test | Taller-than-viewport map aligns with the top gap and stays stable                                                                                                                                                                                                                                                                                                            |
+| 9   | `testPopoverFocusOwnership('version')`       | test | About acquisition, Escape restoration, controller closure without focus return, and yielding                                                                                                                                                                                                                                                                                 |
+| 10  | `testPopoverFocusOwnership('notifications')` | test | Notifications acquisition, Escape restoration, controller closure without focus return, and yielding                                                                                                                                                                                                                                                                         |
+| 11  | `testPopoverFocusOwnership('navbar')`        | test | API/button opening, About replacement, status echoes, restoration/yielding, modal containment, exclusion and retry in keyboard/pointer modes, newer-modal preservation, unmount cleanup, active-popover viewer deletion/same-ID recreation; hook probes verify identical owner IDs across maps, A→B→C flattening, and release/yield/unmount snapshot removal and fresh reuse |
+| 12  | `testPopoverFocusOwnership('settings')`      | test | Settings acquisition, guarded trigger restoration, controller closure without focus return, yielding, and switch focus with nested responsive-panel boundary suspension and restoration                                                                                                                                                                                      |
+| 13  | `testPopperKeyboardBoundary`                 | test | Attribution trigger Escape; popover/anchor event boundaries, prevented events, callback/virtual anchors, independent popovers, and opening-focus preservation for newer input/button/outside interactions                                                                                                                                                                    |
+| 14  | `testResizePopoverFocusRestoration`          | test | Fullscreen footer Resize explicit Close/Escape/Enter restoration; click-away, pointer commit, and newer-focus preservation                                                                                                                                                                                                                                                   |
+| 15  | `testKeyboardEnableFocusDestination`         | test | Dynamic link/static shell entry stays inside the viewer boundary; static Shift+Tab is contained                                                                                                                                                                                                                                                                              |
+| 16  | `testModalFocusOwnerClassification`          | test | Store-backed selector classifies all three built-in modal IDs, footer/AppBar/popover owners, and no owner without DOM-focus dependencies                                                                                                                                                                                                                                     |
+| 17  | `testSettingsModeSatisfiesEntryGuard`        | test | Fresh-viewer Settings enable/disable handles onboarding, preserves switch focus, verifies its switch role, accessible name and live `aria-checked` state, and avoids internal Tab/Shift+Tab redirection                                                                                                                                                                      |
+| 18  | `testSwitchAccessibleMarkup`                 | test | Controlled and uncontrolled switches keep generated `aria-checked` synchronized with checked state, expose an associated label, and preserve object/function input slot props                                                                                                                                                                                                |
 
 ---
 
@@ -855,17 +867,18 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | 2   | `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for the 600-feature Esri layer...                                            |
 | 3   | `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                                                                          |
 | 4   | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing...                                    |
-| 5   | `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                                                        |
-| 6   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                                                          |
-| 7   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                                                          |
-| 8   | `testCitiesNameFilterCount`                        | test | Test Cities name filter for "mo" returns 30; population minimum 1,000,000 returns 6; maximum 1,750,000 returns 3... |
-| 9   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                                                    |
-| 10  | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                                                      |
-| 11  | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                                                         |
-| 12  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                                                       |
-| 13  | `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                                                         |
-| 14  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                                                       |
-| 14  | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                                                           |
+| 5   | `testLayerDataIsFiltered`                          | test | Test mapFilteredRecord is true by default...                                                                        |
+| 6   | `testPolygonsAdditionalFilters`                    | test | Test polygon province and date filters update the filtered row count...                                             |
+| 7   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                                                          |
+| 8   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                                                          |
+| 9   | `testCitiesNameFilterCount`                        | test | Test Cities name filter for "mo" returns 30; population minimum 1,000,000 returns 6; maximum 1,750,000 returns 3... |
+| 10  | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                                                    |
+| 11  | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                                                      |
+| 12  | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                                                         |
+| 13  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                                                       |
+| 14  | `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                                                         |
+| 15  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                                                       |
+| 16  | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                                                           |
 
 ---
 
@@ -884,7 +897,6 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | --- | -------------------------------------------- | ---- | ---------------------------------------- |
 | 1   | `testGeochartOpenForLayerMapClick`           | test | Test Geochart on layer _{layerPath}_ ... |
 | 2   | `testAddGeocoreLayerUUIDForGeochartAirborne` | test | Test Geochart (Geocore Airborne)         |
-| 3   | `testAddGeocoreLayerUUIDForGeochart`         | test | Test Geochart (Geocore UUID)             |
 
 ---
 
