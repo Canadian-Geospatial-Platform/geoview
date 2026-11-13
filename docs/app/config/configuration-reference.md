@@ -3683,6 +3683,10 @@ inline entries > GCS custom entries > RCS defaults, without mixing entries acros
 Name-only inline overrides remain a separate compatibility branch: `layerName` becomes
 `geoviewLayerName` and, for a single entry, that entry's name too.
 
+Add Layer initialization preserves a single selected ESRI Feature entry when GeoCore returns a
+service-root metadata URL plus a separate layer id. Direct ESRI Feature URLs still require a
+numeric layer endpoint (for example, `/FeatureServer/6`).
+
 Adding VCS support requires all three consumption paths: initial load conversion callback,
 runtime UUID add, and Add Layer UI state/merge before `addGeoviewLayer`.
 The UI must also call `doneAdding()` and show `layers.errorNotLoaded` when conversion fails

@@ -48,7 +48,7 @@ import {
   NoPrimaryKeyFieldError,
 } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
+import { encodeLayersParam, getNextOgcFeaturePageUrl } from '@/core/utils/ogc-url-helper';
 import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -1078,7 +1078,7 @@ export class GVWMS extends AbstractGVRaster {
     const inputProjection = supportedCrs ? projectionCode : undefined;
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, inputProjection, projectionCode);
     const requestedPageUrls = new Set([url]);
-    let nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(responseData, url);
+    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, url);
 
     while (nextPageUrl && !requestedPageUrls.has(nextPageUrl)) {
       requestedPageUrls.add(nextPageUrl);
@@ -1093,7 +1093,7 @@ export class GVWMS extends AbstractGVRaster {
       // eslint-disable-next-line no-await-in-loop
       const nextPageFeatures = await GeoUtilities.readFeaturesFromGeoJSON(nextPageResponse, inputProjection, projectionCode);
       sourceFeaturesInfo.features.push(...nextPageFeatures.features);
-      nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(nextPageResponse, nextPageUrl);
+      nextPageUrl = getNextOgcFeaturePageUrl(nextPageResponse, nextPageUrl);
     }
 
     // Done fetching the features, time to apply the filters if any
@@ -1955,32 +1955,6 @@ export class GVWMS extends AbstractGVRaster {
     // If we have a style, we want to make sure to only get the features for which we have a style
     // If we have no style, we do our best to include any/all features
     return !layerStyle;
-  }
-
-  /**
-   * Resolves the next page URL from an OGC API Features response.
-   *
-   * @param responseData - The OGC API Features response
-   * @param currentPageUrl - The URL of the current page, used to resolve relative links
-   * @returns The absolute next page URL, or undefined when the response has no next link
-   */
-  static #getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: string): string | undefined {
-    if (typeof responseData !== 'object' || responseData === null || !('links' in responseData) || !Array.isArray(responseData.links)) {
-      return undefined;
-    }
-
-    const nextLink = responseData.links.find((link: unknown): link is { rel: 'next'; href: string } => {
-      return (
-        typeof link === 'object' && link !== null && 'rel' in link && link.rel === 'next' && 'href' in link && typeof link.href === 'string'
-      );
-    });
-
-    if (!nextLink) return undefined;
-
-    const nextPageUrl = new URL(nextLink.href, currentPageUrl);
-    const currentPageCrs = new URL(currentPageUrl).searchParams.get('crs');
-    if (currentPageCrs && !nextPageUrl.searchParams.has('crs')) nextPageUrl.searchParams.set('crs', currentPageCrs);
-    return nextPageUrl.toString();
   }
 
   // #endregion STATIC PRIVATE METHODS

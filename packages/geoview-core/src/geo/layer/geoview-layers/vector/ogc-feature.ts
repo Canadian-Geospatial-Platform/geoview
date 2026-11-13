@@ -15,6 +15,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { getNextOgcFeaturePageUrl } from '@/core/utils/ogc-url-helper';
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
@@ -233,12 +234,14 @@ export class OgcFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the loading of the vector features for the layer by fetching OGC Feature data and converting it
-   * into OpenLayers {@link Feature} feature instances.
+   * into OpenLayers {@link Feature} feature instances, following advertised next-page links until exhausted.
    *
    * @param layerConfig - The configuration object for the vector layer, containing source and data access information
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
-   * @returns A promise that resolves to an array of OpenLayers features
+   * @returns A promise that resolves with all pages' OpenLayers features and the interpreted source projection
+   * @throws {Error} When pagination repeats an already requested page
+   * @throws {LayerSourceFailedToLoadError} When any page request fails
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -246,14 +249,46 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
-    // Build the URL
-    const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}collections/${layerConfig.layerId}/items`;
+    // Resolve links against the service URL, never against the proxy's outer URL.
+    const url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items`;
 
     // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
-    const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () => Fetch.fetchJson(url));
+    const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
+      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(url), { headers: { Accept: 'application/geo+json, application/json' } })
+    );
 
-    // Read the features
-    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(
+      responseData,
+      readOptions.dataProjection,
+      readOptions.featureProjection
+    );
+    const requestedPageUrls = new Set([url]);
+    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, url);
+
+    while (nextPageUrl) {
+      // Reject broken paging rather than reporting a silently truncated layer as successfully loaded.
+      if (requestedPageUrls.has(nextPageUrl)) throw new Error(`OGC API Features pagination repeated page '${nextPageUrl}'.`);
+      requestedPageUrls.add(nextPageUrl);
+      const pageUrl = layerConfig.getUrlWithProxyWhenNeeded(nextPageUrl);
+
+      // GV Each request depends on the next link returned by the preceding page.
+      // eslint-disable-next-line no-await-in-loop
+      const pageResponse = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
+        Fetch.fetchJson(pageUrl, { headers: { Accept: 'application/geo+json, application/json' } })
+      );
+
+      // Keep the first page's interpreted projection when later pages omit CRS metadata.
+      // eslint-disable-next-line no-await-in-loop
+      const pageFeatures = await GeoUtilities.readFeaturesFromGeoJSON(
+        pageResponse,
+        sourceFeaturesInfo.dataProjection,
+        readOptions.featureProjection
+      );
+      for (const feature of pageFeatures.features) sourceFeaturesInfo.features.push(feature);
+      nextPageUrl = getNextOgcFeaturePageUrl(pageResponse, nextPageUrl);
+    }
+
+    return sourceFeaturesInfo;
   }
 
   /**

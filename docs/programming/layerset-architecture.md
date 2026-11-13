@@ -274,6 +274,7 @@ async queryLayers(location?: undefined, extent?: Extent): Promise<void> {
 
 - Can return large datasets
 - WFS 2.0 responses that report more matched than returned features are paged sequentially with `count` and `startIndex`; a detected primary key is used for stable ordering when available
+- OGC API Features vector sources follow advertised `rel="next"` links sequentially, including relative links, until no next page remains. Every page uses the layer's proxy settings; a failed page or repeated page URL fails loading rather than publishing partial results. Services must advertise next links; GeoView does not guess non-standard offset parameters.
 - Paging is not streaming: all retrieved features are still held in memory, and large GeoJSON sources have no common paging strategy
 - Query button disabling to prevent concurrent queries
 

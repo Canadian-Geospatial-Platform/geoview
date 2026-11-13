@@ -435,6 +435,35 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests a case-sensitive ESRI export service through its GeoCore record and actual image loader.
+   *
+   * @returns A promise that resolves with the loaded layer, export parameters, and requested/returned image dimensions
+   */
+  testAddEsriDynamicCaseSensitiveExport(): Promise<Test<AbstractBaseGVLayer>> {
+    const uuid = GVAbstractTester.ESRI_DYNAMIC_CASE_SENSITIVE_EXPORT_UUID;
+    const layerPath = `${uuid}/0`;
+
+    return this.test(
+      'Test GeoCore ESRI Dynamic export with case-sensitive bbox and size parameters...',
+      async (test) => {
+        // Add the layer using the UUID
+        await this.addLayerOnMapFromUUID(test, uuid);
+
+        // Wait for the layer to get registered
+        return this.waitLayerAtLayerPath(test, layerPath, false);
+      },
+      (result) => {
+        // At this point, the layer successfully loaded
+        Test.assertIsDefined('result', result);
+      },
+      (test) => {
+        // Remove the UUID root even when creation, image loading, or an assertion fails.
+        this.removeLayerConfigAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests the behavior of initializing an Esri Dynamic layer configuration using an invalid metadata URL.
    *
    * This test verifies that when an Esri Dynamic layer configuration is initialized with an invalid or unreachable
