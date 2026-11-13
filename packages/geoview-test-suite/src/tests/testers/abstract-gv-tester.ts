@@ -96,6 +96,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   static FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 
+  /** Quebec invasive species service whose export endpoint requires case-sensitive parameter names. */
+  // TODO: ALEX - CHECK FOR DUPLICATION UPON REBASE OF THE MORE TESTS REFACTOR
+  static readonly ESRI_DYNAMIC_CASE_SENSITIVE_EXPORT_UUID = '31f841b6-a544-47f9-93fb-b111a46fc654';
+
   /** Permafrost GeoCore record whose RCS FeatureServer URL selects layer 6. */
   // TODO: ALEX - CHECK FOR DUPLICATION UPON REBASE OF THE MORE TESTS REFACTOR
   static readonly GEOCORE_PERMAFROST_ECOPROVINCE_UUID = '4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8';

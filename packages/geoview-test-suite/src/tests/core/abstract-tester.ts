@@ -223,7 +223,7 @@ export abstract class AbstractTester {
   protected onPerformingTestAssertions(test: Test): void {
     // Update the status and step
     test.setStatus('verifying');
-    test.addStep('Verifying assertions...', 'major');
+    test.addStep('Verifying assertions...', 'major', test.getColorBasedOnStatus());
 
     // Emit something?
     // this.#emitTesting({ test });
@@ -312,7 +312,7 @@ export abstract class AbstractTester {
     // If we do have a callback for finalization
     if (callback) {
       // Add done step
-      test.addStep('Cleaning up...', 'major');
+      test.addStep('Cleaning up...', 'major', test.getColorBasedOnStatus());
     }
   }
 
@@ -325,15 +325,9 @@ export abstract class AbstractTester {
     // Move the test from the running list and add it to the done list
     this.#moveTestFromRunningToDone(test);
 
-    // Determine the color based on status
-    const status = test.getStatus();
-    let color = 'red';
-    if (status === 'success') color = 'green';
-    else if (status === 'skipped') color = 'orange';
-
     // Add done step
     test.setTimeEnd(new Date());
-    test.addStep('Done', 'major', color);
+    test.addStep('Done', 'major', test.getColorBasedOnStatus());
 
     // Emit
     this.#emitDone({ test });
