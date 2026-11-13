@@ -72,20 +72,20 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 
 ### Summary
 
-| Group             | Suite                   | Tester(s)                                                                                       | Execution                   |
-| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | --------------------------- |
-| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | Parallel                    |
-| 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | Parallel                    |
-| 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | Parallel                    |
-| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | Mixed parallel + sequential |
-| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | Mixed parallel + sequential |
+| Group             | Suite                   | Tester(s)                                                                                       | Execution                     |
+| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------- |
+| 1. Core / Utility | `suite-core`            | `CoreTester`                                                                                    | Parallel                      |
+| 1. Core / Utility | `suite-config`          | `ConfigTester`                                                                                  | Parallel                      |
+| 1. Core / Utility | `suite-utilities`       | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | Parallel                      |
+| 2. Layers         | `suite-layer`           | `LayerTester`                                                                                   | Mixed parallel + sequential   |
+| 2. Layers         | `suite-layer-functions` | `LayerTester`                                                                                   | Mixed parallel + sequential   |
 | 3. Map            | `suite-map`             | `MapTester`                                                                                     | Complex mixed; UI checks last |
-| 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | Fully sequential            |
-| 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | Guarded sequential          |
-| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | Guarded sequential          |
-| 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | Guarded sequential          |
-| 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | Guarded sequential          |
-| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | Guarded sequential          |
+| 3. Map            | `suite-map-config`      | `MapConfigTester`, `MapTester`                                                                  | Fully sequential              |
+| 4. Components     | `suite-details`         | `DetailsTester`                                                                                 | Guarded sequential            |
+| 4. Components     | `suite-data-table`      | `DataTableTester`                                                                               | Guarded sequential            |
+| 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | Guarded sequential            |
+| 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | Guarded sequential            |
+| 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | Guarded sequential            |
 
 ---
 
@@ -592,8 +592,8 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 
 [↑ Back to top](#table-of-contents)
 
-| Method                            | Type | Description                                                                                             |
-| --------------------------------- | ---- | ------------------------------------------------------------------------------------------------------- |
+| Method                           | Type | Description                                                                                           |
+| -------------------------------- | ---- | ----------------------------------------------------------------------------------------------------- |
 | `testSetOrToggleLayerVisibility` | test | Test explicit visibility values and no-argument toggles through `LayerApi.setOrToggleLayerVisibility` |
 
 ---
@@ -609,27 +609,27 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 **Suite:** `suite-map` · **File:** `tests/suites/suite-map-functions.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
 **Execution:** Complex mixed — sequential `await` for state-modifying tests · **Guard:** None
 
-| Method                                 | Type | Description                                                                                  |
-| -------------------------------------- | ---- | -------------------------------------------------------------------------------------------- |
-| `testInitialMapState`                  | test | Test projection                                                                              |
-| `testMapZoom`                          | test | Test zoom                                                                                    |
-| `testSwitchProjectionAndExtent`        | test | Test switch projection back and forth, zoom and zoom to initial extent                       |
-| `testGeometryGroupZIndex`              | test | Test geometry group z-index get/set operations                                               |
-| `testZoomToExtent`                     | test | Test zoom to lon/lat extent                                                                  |
-| `testZoomToCoordinate`                 | test | Test zoom to lon/lat coordinate                                                              |
-| `testFooterBarSelectTab`               | test | Test footer bar select tab                                                                   |
-| `testAppBarSelectTab`                  | test | Test app bar select tab                                                                      |
-| `testFooterBarCreateTab`               | test | Test footer bar create custom tab                                                            |
-| `testSetLanguage`                      | test | Test set language to French                                                                  |
-| `testCreateAndSetBasemap`              | test | Test create and set basemap                                                                  |
-| `testNorthArrowRotationLCC`            | test | Test north arrow rotation in LCC projection for British Columbia                             |
-| `testNonQueryableLayerNotInDetails`    | test | Test non-queryable layer not in details after map click                                      |
-| `testLayerHoverableState`              | test | Test layer hoverable state in hoverFeatureInfoLayerSet                                       |
-| `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                   |
-| `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                     |
-| `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction |
-| `testGuideDetailsPanelTopAnchor`       | test | Test selecting the Details panel and verifying the guide’s Top anchor behavior               |
-| `testControllerGetFooterHeight`        | test | Test `UIController.getFooterHeight()` from a non-React consumer                              |
+| Method                                 | Type | Description                                                                                                         |
+| -------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------- |
+| `testInitialMapState`                  | test | Test projection                                                                                                     |
+| `testMapZoom`                          | test | Test zoom                                                                                                           |
+| `testSwitchProjectionAndExtent`        | test | Test switch projection back and forth, zoom and zoom to initial extent                                              |
+| `testGeometryGroupZIndex`              | test | Test geometry group z-index get/set operations                                                                      |
+| `testZoomToExtent`                     | test | Test zoom to lon/lat extent                                                                                         |
+| `testZoomToCoordinate`                 | test | Test zoom to lon/lat coordinate                                                                                     |
+| `testFooterBarSelectTab`               | test | Test footer bar select tab                                                                                          |
+| `testAppBarSelectTab`                  | test | Test app bar select tab                                                                                             |
+| `testFooterBarCreateTab`               | test | Test footer bar create custom tab                                                                                   |
+| `testSetLanguage`                      | test | Test set language to French                                                                                         |
+| `testCreateAndSetBasemap`              | test | Test create and set basemap                                                                                         |
+| `testNorthArrowRotationLCC`            | test | Test north arrow rotation in LCC projection for British Columbia                                                    |
+| `testNonQueryableLayerNotInDetails`    | test | Test non-queryable layer not in details after map click                                                             |
+| `testLayerHoverableState`              | test | Test layer hoverable state in hoverFeatureInfoLayerSet                                                              |
+| `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                                          |
+| `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                                            |
+| `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction                        |
+| `testGuideDetailsPanelTopAnchor`       | test | Test selecting the Details panel and verifying the guide’s Top anchor behavior                                      |
+| `testControllerGetFooterHeight`        | test | Test `UIController.getFooterHeight()` from a non-React consumer                                                     |
 | `testCrosshairCoordinates`             | test | Test SVG artwork center alignment, stale pointer reset, and Enter/Space drawing with padding, panning, and rotation |
 
 ---
@@ -825,14 +825,15 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 **Suite:** `suite-details` · **File:** `tests/suites/suite-details.ts` · **Tester:** `DetailsTester` (`tests/testers/details-tester.ts`)
 **Execution:** Sequential + parallel · **Guard:** `details` must be in `footerBar.tabs.core`
 
-| Method                       | Type | Description                                          |
-| ---------------------------- | ---- | ---------------------------------------------------- |
-| `testDetailsOnLayer`         | test | Test Details on layer _{layerPath}_ ...              |
-| `testClearAllHighlights`     | test | Test Clear all highlights on layer _{layerPath}_ ... |
-| `testZoomToFeature`          | test | Test Zoom to feature on layer _{layerPath}_ ...      |
-| `testNameFieldAsLabel`       | test | Test nameField as label in query results...          |
-| `testSummaryFalseHidesField` | test | Test summary false hides field from query results... |
-| `testFieldAliasRenamesField` | test | Test field alias renames field in query results...   |
+| Method                         | Type | Description                                          |
+| ------------------------------ | ---- | ---------------------------------------------------- |
+| `testDetailsOnLayer`           | test | Test Details on layer _{layerPath}_ ...              |
+| `testClearAllHighlights`       | test | Test Clear all highlights on layer _{layerPath}_ ... |
+| `testZoomToFeature`            | test | Test Zoom to feature on layer _{layerPath}_ ...      |
+| `testZoomToResultsGroupExtent` | test | Test Zoom to all results for layer _{layerPath}_ ... |
+| `testNameFieldAsLabel`         | test | Test nameField as label in query results...          |
+| `testSummaryFalseHidesField`   | test | Test summary false hides field from query results... |
+| `testFieldAliasRenamesField`   | test | Test field alias renames field in query results...   |
 
 ---
 
@@ -843,23 +844,23 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 **Suite:** `suite-data-table` · **File:** `tests/suites/suite-data-table.ts` · **Tester:** `DataTableTester` (`tests/testers/data-table-tester.ts`)
 **Execution:** Sequential · **Guard:** `data-table` must be in `footerBar.tabs.core`
 
-| Method                                             | Type | Description                                                                      |
-| -------------------------------------------------- | ---- | -------------------------------------------------------------------------------- |
-| `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for GeoJSON layer...                      |
-| `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for the 600-feature Esri layer...         |
-| `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                                       |
-| `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
-| `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                     |
-| `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                       |
-| `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                       |
+| Method                                             | Type | Description                                                                                                         |
+| -------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------- |
+| `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for GeoJSON layer...                                                         |
+| `testAllFeaturesDataArrayPopulated`                | test | Test allFeaturesDataArray is populated for the 600-feature Esri layer...                                            |
+| `testGeoviewIdColumnHiddenByDefault`               | test | Test geoviewID column hidden by default...                                                                          |
+| `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing...                                    |
+| `testMapFilteredRecordDefault`                     | test | Test mapFilteredRecord is true by default...                                                                        |
+| `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                                                                          |
+| `testGlobalFilterRecord`                           | test | Test global filter record updates store...                                                                          |
 | `testCitiesNameFilterCount`                        | test | Test Cities name filter for "mo" returns 30; population minimum 1,000,000 returns 6; maximum 1,750,000 returns 3... |
-| `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                 |
-| `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                  |
-| `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                      |
-| `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |
-| `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                     |
-| `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
-| `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                        |
+| `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...                                                                    |
+| `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                                                                      |
+| `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                                                         |
+| `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                                                       |
+| `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                                                         |
+| `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                                                       |
+| `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                                                           |
 
 ---
 

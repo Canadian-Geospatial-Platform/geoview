@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon } from '@/ui/icons';
+import { ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, ZoomToResultsExtentIcon } from '@/ui/icons';
 import { Box } from '@/ui/layout';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -44,7 +44,9 @@ import { DomHelper } from '@/core/utils/dom-helper';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
-import { useMapController, useUIController, useDetailsController } from '@/core/controllers/use-controllers';
+import { useMapController, useUIController, useDetailsController, useLayerController } from '@/core/controllers/use-controllers';
+import { LayerController } from '@/core/controllers/layer-controller';
+import { useAppBarPanelFitOptions } from '@/core/components/common/hooks/use-app-bar-panel-fit-options';
 
 /** Properties for the details panel component. */
 interface DetailsPanelType {
@@ -110,6 +112,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const uiController = useUIController();
   const mapController = useMapController();
   const detailsController = useDetailsController();
+  const layerController = useLayerController();
+  const getPanelFitOptions = useAppBarPanelFitOptions();
 
   // States
   const currentFeatureIndex = useStoreDetailsCurrentFeatureIndex();
@@ -118,6 +122,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const previousHighlightedFeaturesRef = useRef<TypeFeatureInfoEntry[]>([]);
   const previousLayerFeaturesRef = useRef<TypeFeatureInfoEntry[] | undefined>(undefined);
   const layoutRef = useRef<LayoutExposedMethods>(null);
+  const resultsZoomContextRef = useRef({ layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates });
   // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
   const userDismissedGuideRef = useRef<boolean>(false);
   const prevButtonRef = useRef<HTMLButtonElement>(null);
@@ -373,6 +378,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   }, [memoSelectedLayerDataFeatures, currentFeatureIndex]);
 
   /**
+   * Memoizes whether the selected layer's current-click results have a combined (union) extent to zoom to.
+   */
+  const memoCanZoomToResultsExtent = useMemo((): boolean => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoCanZoomToResultsExtent', memoSelectedLayerDataFeatures?.length);
+
+    return !!LayerController.getFeaturesEmbeddedExtent(memoSelectedLayerDataFeatures);
+  }, [memoSelectedLayerDataFeatures]);
+
+  /**
    * Memoizes the current feature has geometry.
    */
   const memoCurrentFeatureHasGeometry = useMemo(() => {
@@ -413,6 +428,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     previousFeatureSelectionRef.current = { layerPath: selectedLayerPath, featureCount };
   }, [detailsController, selectedLayerPath, memoSelectedLayerDataFeatures?.length]);
+
+  /** Replaces the results zoom context on a new map click or layer switch so pending group zooms become stale. */
+  useEffect(() => {
+    logger.logTraceUseEffect('DETAILS-PANEL - update results zoom context', selectedLayerPath, mapClickCoordinates);
+
+    resultsZoomContextRef.current = { layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates };
+  }, [selectedLayerPath, mapClickCoordinates]);
 
   /**
    * Effect used when the structural layers list changes.
@@ -595,6 +617,35 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const handleNextFeature = useCallback((): void => {
     handleFeatureNavigateChange(1);
   }, [handleFeatureNavigateChange]);
+
+  /**
+   * Handles a click on the zoom to all results button.
+   * Zooms to the union of every current-click result of the selected layer, regardless of the checked features.
+   */
+  const handleZoomToResultsExtent = useCallback((): void => {
+    // The button is only aria-disabled, so guard here as well
+    if (!memoCanZoomToResultsExtent || !memoSelectedLayerDataFeatures) return;
+
+    // Capture the zoom context so a new click or layer switch during the extent lookup cancels the zoom
+    const layerPath = selectedLayerPath;
+    const clickCoordinates = mapClickCoordinates;
+    const isStale = (): boolean =>
+      resultsZoomContextRef.current.layerPath !== layerPath || resultsZoomContextRef.current.clickCoordinates !== clickCoordinates;
+
+    layerController
+      .zoomToFeaturesGroupExtent(layerPath, memoSelectedLayerDataFeatures, getPanelFitOptions(), isStale)
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('zoomToFeaturesGroupExtent in handleZoomToResultsExtent in DetailsPanel', error);
+      });
+  }, [
+    getPanelFitOptions,
+    layerController,
+    mapClickCoordinates,
+    memoCanZoomToResultsExtent,
+    memoSelectedLayerDataFeatures,
+    selectedLayerPath,
+  ]);
 
   /**
    * Handles click to change the selected layer in left panel.
@@ -818,27 +869,38 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
                 .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
             </Box>
             {memoSelectedLayerData?.features && memoSelectedLayerData.features.length > 1 && (
-              <Box role="group" aria-label={t('details.featureNavigation')} sx={memoSxClasses.rightPanelButtons}>
+              <Box sx={memoSxClasses.rightPanelButtons}>
                 <IconButton
-                  iconRef={prevButtonRef}
-                  aria-label={t('details.previousFeatureBtn')}
+                  aria-label={t('details.zoomToResultsExtent')}
                   tooltipPlacement="top"
-                  onClick={handlePrevFeature}
-                  aria-disabled={isPrevDisabled}
+                  onClick={handleZoomToResultsExtent}
+                  aria-disabled={!memoCanZoomToResultsExtent}
                   className="buttonOutline"
                 >
-                  <ArrowBackIosOutlinedIcon />
+                  <ZoomToResultsExtentIcon />
                 </IconButton>
-                <IconButton
-                  iconRef={nextButtonRef}
-                  aria-label={t('details.nextFeatureBtn')}
-                  tooltipPlacement="top"
-                  onClick={handleNextFeature}
-                  aria-disabled={isNextDisabled}
-                  className="buttonOutline"
-                >
-                  <ArrowForwardIosOutlinedIcon />
-                </IconButton>
+                <Box role="group" aria-label={t('details.featureNavigation')} sx={memoSxClasses.rightPanelButtons}>
+                  <IconButton
+                    iconRef={prevButtonRef}
+                    aria-label={t('details.previousFeatureBtn')}
+                    tooltipPlacement="top"
+                    onClick={handlePrevFeature}
+                    aria-disabled={isPrevDisabled}
+                    className="buttonOutline"
+                  >
+                    <ArrowBackIosOutlinedIcon />
+                  </IconButton>
+                  <IconButton
+                    iconRef={nextButtonRef}
+                    aria-label={t('details.nextFeatureBtn')}
+                    tooltipPlacement="top"
+                    onClick={handleNextFeature}
+                    aria-disabled={isNextDisabled}
+                    className="buttonOutline"
+                  >
+                    <ArrowForwardIosOutlinedIcon />
+                  </IconButton>
+                </Box>
               </Box>
             )}
           </Box>

@@ -140,6 +140,7 @@ export {
   ZoomIn as ZoomInSearchIcon,
   ZoomInMap as ZoomToFilteredExtentIcon,
   ZoomOut as ZoomOutSearchIcon,
+  ZoomOutMap as ZoomToResultsExtentIcon,
 } from '@mui/icons-material';
 
 export { LegendIcon, ClearHighlightIcon } from '@/ui/svg/svg-icon';
