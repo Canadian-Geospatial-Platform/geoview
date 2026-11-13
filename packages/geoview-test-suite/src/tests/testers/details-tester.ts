@@ -270,7 +270,7 @@ export class DetailsTester extends GVAbstractTester {
       async (test) => {
         // Get the layer and query the coordinate to get features
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
 
         // Verify we have features with extent
         test.addStep('Verifying feature has extent for zoom...');
