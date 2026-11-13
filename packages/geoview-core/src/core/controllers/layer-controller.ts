@@ -101,7 +101,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, OL_ZOOM_FEATURES_GROUP_MAX_SCALE, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -852,6 +852,55 @@ export class LayerController extends AbstractMapViewerController {
 
     // Zoom to it
     await this.getControllersRegistry().mapController.zoomToExtent(extent);
+  }
+
+  /**
+   * Zooms to the combined extent of a group of feature results (e.g. all results of one layer for the current map click).
+   *
+   * Group zoom policy:
+   * - Unions every valid geometry extent; invalid (non-finite or inverted) extents and entries without geometry
+   *   (e.g. pure WMS, whose extent is only the click point) are ignored.
+   * - Features without a valid geometry extent are looked up by object id when possible; lookup failures are logged and ignored.
+   * - The zoom-in is bounded so a tiny or coincident-point union never zooms closer than
+   *   `OL_ZOOM_FEATURES_GROUP_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
+   * - The layer visibility-scale range always wins: the bound is relaxed to remain inside the layer's zoomed-out limit and,
+   *   when the union cannot fit inside that limit, the map centers on the union at the limit (some results may be outside).
+   * - After zooming, the union is shown with a fading bounding box; the click marker and feature highlights are unchanged.
+   *
+   * @param layerPath - The layer path the features belong to
+   * @param features - The feature results forming the group
+   * @param fitOptions - Optional fit options (e.g. padding) to merge the group and layer constraints into
+   * @param isStale - Optional callback telling whether the group became stale (new click or layer switch) while extents were resolved
+   * @returns A promise that resolves with true when the map was zoomed, or false when the request became stale
+   * @throws {NoExtentError} When no valid extent could be determined from the provided features
+   */
+  async zoomToFeaturesGroupExtent(
+    layerPath: string,
+    features: TypeFeatureInfoEntry[],
+    fitOptions?: GVFitOptions,
+    isStale?: () => boolean
+  ): Promise<boolean> {
+    // Union the valid embedded extents, then look up the extents of features that don't carry a valid one
+    let extent = LayerController.getFeaturesEmbeddedExtent(features);
+    const lookedUpExtent = await this.#lookupMissingFeaturesExtent(layerPath, features);
+    extent = GeoUtilities.getExtentUnion(extent, lookedUpExtent);
+
+    // Never move the map for a group replaced while the asynchronous lookup was running
+    if (isStale?.()) return false;
+
+    // If no valid extent could be determined
+    if (!extent || !LayerController.#isUsableExtent(extent)) throw new NoExtentError(layerPath);
+
+    // Zoom with the bounded zoom-in policy, and keep the layer's own scale constraints
+    await this.zoomToExtentRestricted(layerPath, extent, true, {
+      ...(fitOptions ?? {}),
+      ...this.#getFeaturesGroupFitConstraints(layerPath),
+    });
+
+    // Show the zoomed group extent unless the group was replaced during the animation
+    if (isStale?.()) return false;
+    this.getControllersRegistry().mapController.highlightBBox(extent, false);
+    return true;
   }
 
   /**
@@ -2947,9 +2996,84 @@ export class LayerController extends AbstractMapViewerController {
     delete this.#layersBeingDeleted[layerPath];
   }
 
+  /**
+   * Looks up, by object id, the extent of the features that don't carry a valid extent.
+   *
+   * Lookup failures (e.g. unsupported layer type or service error) are logged and ignored, so the group
+   * zoom can still use the extents that are available.
+   *
+   * @param layerPath - The layer path
+   * @param features - The feature info entries
+   * @returns A promise resolving with the valid looked-up extent, or undefined when none could be determined
+   */
+  async #lookupMissingFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<Extent | undefined> {
+    const featuresNeedingLookup = features.filter((feature) => !LayerController.#hasGeometryExtent(feature));
+    if (featuresNeedingLookup.length === 0) return undefined;
+
+    // Determine the oid field from the first feature that has one
+    const oidField = featuresNeedingLookup
+      .map((feature) => Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid'))
+      .find((field) => !!field);
+    if (!oidField) return undefined;
+
+    const objectIds = featuresNeedingLookup
+      .map((feature) => feature.fieldInfo[oidField]?.value)
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+    if (objectIds.length === 0) return undefined;
+
+    try {
+      const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIds, oidField);
+      return LayerController.#isUsableExtent(lookedUpExtent) ? lookedUpExtent : undefined;
+    } catch (error: unknown) {
+      // Log and continue with the embedded extents
+      logger.logWarning(`Unable to look up the missing feature extents for layer '${layerPath}'`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Gets the fit constraints bounding how far a feature group zoom can zoom in.
+   *
+   * @param layerPath - The layer path used to look up the zoomed-out limit
+   * @returns The fit options holding the minimum resolution, or empty options when it can't be determined
+   */
+  #getFeaturesGroupFitConstraints(layerPath: string): GVFitOptions {
+    const { mapController } = this.getControllersRegistry();
+    const groupMinResolution = mapController.getResolutionFromScale(OL_ZOOM_FEATURES_GROUP_MAX_SCALE);
+    if (groupMinResolution === undefined) return {};
+
+    // Keep the current resolution when the map is already closer than the group bound
+    const currentResolution = this.getMapViewer().getView().getResolution();
+    let minResolution = currentResolution !== undefined ? Math.min(groupMinResolution, currentResolution) : groupMinResolution;
+
+    // Relax the bound so the zoom never ends up outside the layer's zoomed-out visibility limit
+    const { minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), this.getLayerEntryConfig(layerPath));
+    const layerMaxResolution = minScaleZoomAt ? mapController.getResolutionFromScale(minScaleZoomAt) : undefined;
+    if (layerMaxResolution !== undefined) minResolution = Math.min(minResolution, layerMaxResolution);
+
+    return { minResolution };
+  }
+
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Unions the valid geometry extents embedded in feature info entries.
+   *
+   * Only entries with a geometry contribute: pure WMS GetFeatureInfo entries have no geometry and their extent is
+   * only the click point, so they are ignored. Extents that are not 4 finite numbers or whose minimum exceeds
+   * their maximum are ignored as well.
+   *
+   * @param features - The feature info entries
+   * @returns The union of the valid geometry extents, or undefined when none is valid
+   */
+  static getFeaturesEmbeddedExtent(features: TypeFeatureInfoEntry[] | undefined): Extent | undefined {
+    return (features ?? []).reduce<Extent | undefined>(
+      (union, feature) => (LayerController.#hasGeometryExtent(feature) ? GeoUtilities.getExtentUnion(union, feature.extent) : union),
+      undefined
+    );
+  }
 
   /**
    * Starts bounds calculation and stores bounds as they get calculated.
@@ -3013,6 +3137,29 @@ export class LayerController extends AbstractMapViewerController {
 
     // Return the bounds on the layer we were calculating the bounds for
     return returnedBounds;
+  }
+
+  /**
+   * Checks whether an extent can be used to zoom: 4 finite numbers ordered as [minX, minY, maxX, maxY].
+   *
+   * @param extent - The extent to check
+   * @returns True when the extent is usable
+   */
+  static #isUsableExtent(extent: Extent | undefined): extent is Extent {
+    return !!extent && GeoUtilities.isValidExtent(extent) && extent[0] <= extent[2] && extent[1] <= extent[3];
+  }
+
+  /**
+   * Checks whether a feature info entry has a geometry with a usable extent.
+   *
+   * Entries without geometry (e.g. pure WMS GetFeatureInfo results) only carry the click point as extent,
+   * which does not represent the feature location.
+   *
+   * @param feature - The feature info entry to check
+   * @returns True when the entry has a geometry and a usable extent
+   */
+  static #hasGeometryExtent(feature: TypeFeatureInfoEntry): feature is TypeFeatureInfoEntry & { extent: Extent } {
+    return !!feature.geometry && LayerController.#isUsableExtent(feature.extent);
   }
 
   // #endregion STATIC METHODS

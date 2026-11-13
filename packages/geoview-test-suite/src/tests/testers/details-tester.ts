@@ -1,10 +1,13 @@
 import type { Coordinate } from 'ol/coordinate';
-import { getCenter } from 'ol/extent';
+import { containsExtent, getCenter } from 'ol/extent';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
+import type { Extent, TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
+import { LayerController } from 'geoview-core/core/controllers/layer-controller';
+import { OL_ZOOM_FEATURES_GROUP_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
@@ -322,6 +325,178 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
+   * Tests zooming to the combined extent of a group of Details results (the "zoom to all results" button).
+   *
+   * Covers spatially distinct points, coincident points, tiny extents, polygons with lines,
+   * missing/invalid extents and stale group requests.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat - The coordinate on the map to query
+   * @returns A promise resolving when the test completes
+   */
+  testZoomToResultsGroupExtent(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToResultsGroupExtent>> {
+    return this.test(
+      `Test Zoom to all results for layer ${layerPath}...`,
+      async (test) => {
+        const { layerController, mapController } = this.getControllersRegistry();
+        const view = this.getMapViewer().getView();
+        const fitOptions = { duration: GVAbstractTester.USE_ZOOM_ANIMATION ? undefined : 0 };
+
+        // Get a real result to build the group results from
+        const layer = layerController.getGeoviewLayerRegular(layerPath);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+        const polygon = features[0];
+        Test.assertIsDefined('polygon.extent', polygon.extent);
+        const [cx, cy] = getCenter(polygon.extent);
+
+        // Creates a result clone with the given extent and no oid field (no extent lookup)
+        const createResult = (extent: Extent | undefined, index: number): TypeFeatureInfoEntry => ({
+          ...polygon,
+          uid: `${polygon.uid}-group-${index}`,
+          fieldInfo: {},
+          extent,
+        });
+
+        // Zooms to the given results and returns whether every expected extent is in the view after the zoom
+        const zoomAndCheck = async (results: TypeFeatureInfoEntry[], expected: Extent[]): Promise<boolean> => {
+          await layerController.zoomToFeaturesGroupExtent(layerPath, results, fitOptions);
+          const viewExtent = view.calculateExtent(this.getMapViewer().map.getSize());
+          return expected.every((extent) => containsExtent(viewExtent, extent));
+        };
+
+        // Zooms far out so the bounded zoom-in policy is exercised
+        const zoomOut = (): Promise<void> =>
+          mapController.zoomToExtent([cx - 3000000, cy - 3000000, cx + 3000000, cy + 3000000], false, fitOptions);
+
+        // Five spatially distinct points
+        test.addStep('Zooming to five spatially distinct points...');
+        const pointOffsets = [
+          [0, 0],
+          [100000, 0],
+          [-100000, 50000],
+          [50000, -100000],
+          [-50000, 100000],
+        ];
+        const pointExtents: Extent[] = pointOffsets.map(([dx, dy]) => [cx + dx, cy + dy, cx + dx, cy + dy]);
+        const distinctPointsInView = await zoomAndCheck(
+          pointExtents.map((extent, index) => createResult(extent, index)),
+          pointExtents
+        );
+
+        // Coincident points, from far out
+        test.addStep('Zooming to coincident points from a zoomed out view...');
+        await zoomOut();
+        const coincident: Extent = [cx, cy, cx, cy];
+        await layerController.zoomToFeaturesGroupExtent(layerPath, [createResult(coincident, 0), createResult(coincident, 1)], fitOptions);
+        const coincidentResolution = view.getResolution();
+
+        // Tiny extent (1 map unit apart), from far out
+        test.addStep('Zooming to a tiny combined extent from a zoomed out view...');
+        await zoomOut();
+        await layerController.zoomToFeaturesGroupExtent(
+          layerPath,
+          [createResult([cx, cy, cx, cy], 0), createResult([cx + 1, cy + 1, cx + 1, cy + 1], 1)],
+          fitOptions
+        );
+        const tinyResolution = view.getResolution();
+
+        // Polygon and line
+        test.addStep('Zooming to a polygon and a line...');
+        const lineExtent: Extent = [cx + 200000, cy - 10000, cx + 400000, cy + 10000];
+        const polygonAndLineInView = await zoomAndCheck(
+          [createResult(polygon.extent, 0), createResult(lineExtent, 1)],
+          [polygon.extent, lineExtent]
+        );
+
+        // Missing and invalid extents are ignored
+        test.addStep('Zooming to results with missing and invalid extents...');
+        const validExtent: Extent = [cx + 10000, cy + 10000, cx + 20000, cy + 20000];
+        const invalidIgnoredInView = await zoomAndCheck(
+          [
+            createResult(undefined, 0),
+            createResult([NaN, NaN, NaN, NaN], 1),
+            createResult([cx + 10, cy + 10, cx - 10, cy - 10], 2),
+            createResult(validExtent, 3),
+          ],
+          [validExtent]
+        );
+
+        // Only invalid extents
+        test.addStep('Zooming to results without any valid extent...');
+        let allInvalidError: unknown;
+        try {
+          await layerController.zoomToFeaturesGroupExtent(
+            layerPath,
+            [createResult(undefined, 0), createResult([NaN, 0, NaN, 0], 1)],
+            fitOptions
+          );
+        } catch (error: unknown) {
+          allInvalidError = error;
+        }
+
+        // Pure WMS-like results: click point extent but no geometry
+        test.addStep('Verifying results without geometry (pure WMS click point extents) have no group extent...');
+        const clickPointResults = [0, 1].map((index) => ({ ...createResult([cx, cy, cx, cy], index), geometry: undefined }));
+        const noGeometryGroupExtent = LayerController.getFeaturesEmbeddedExtent(clickPointResults);
+
+        // Stale request
+        test.addStep('Zooming to a group that became stale...');
+        const centerBeforeStale = view.getCenter();
+        const staleZoomed = await layerController.zoomToFeaturesGroupExtent(
+          layerPath,
+          [createResult([cx + 900000, cy, cx + 900000, cy], 0), createResult([cx + 950000, cy, cx + 950000, cy], 1)],
+          fitOptions,
+          () => true
+        );
+
+        return {
+          distinctPointsInView,
+          coincidentResolution,
+          tinyResolution,
+          groupMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURES_GROUP_MAX_SCALE),
+          polygonAndLineInView,
+          invalidIgnoredInView,
+          allInvalidThrowsNoExtent: allInvalidError instanceof NoExtentError,
+          noGeometryGroupExtent,
+          staleZoomed,
+          staleCenterUnchanged: JSON.stringify(view.getCenter()) === JSON.stringify(centerBeforeStale),
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the five distinct points are all in view...');
+        Test.assertIsEqual(result.distinctPointsInView, true);
+
+        test.addStep('Verifying coincident points do not zoom closer than the group bound...');
+        Test.assertIsDefined('groupMinResolution', result.groupMinResolution);
+        Test.assertIsDefined('coincidentResolution', result.coincidentResolution);
+        Test.assertIsEqual(result.coincidentResolution >= result.groupMinResolution * 0.999, true);
+
+        test.addStep('Verifying a tiny extent does not zoom closer than the group bound...');
+        Test.assertIsDefined('tinyResolution', result.tinyResolution);
+        Test.assertIsEqual(result.tinyResolution >= result.groupMinResolution * 0.999, true);
+
+        test.addStep('Verifying the polygon and line are both in view...');
+        Test.assertIsEqual(result.polygonAndLineInView, true);
+
+        test.addStep('Verifying missing/invalid extents are ignored...');
+        Test.assertIsEqual(result.invalidIgnoredInView, true);
+
+        test.addStep('Verifying a group without valid extent throws NoExtentError...');
+        Test.assertIsEqual(result.allInvalidThrowsNoExtent, true);
+
+        test.addStep('Verifying results without geometry have no group extent...');
+        Test.assertIsUndefined('noGeometryGroupExtent', result.noGeometryGroupExtent);
+
+        test.addStep('Verifying a stale group does not move the map...');
+        Test.assertIsEqual(result.staleZoomed, false);
+        Test.assertIsEqual(result.staleCenterUnchanged, true);
+      }
+    );
+  }
+
+  /**
    * Tests that nameField configuration controls the feature display label.
    *
    * @returns A promise resolving when the test completes
@@ -506,6 +681,30 @@ export class DetailsTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Result type for the testZoomToResultsGroupExtent test execution. */
+export type TestZoomToResultsGroupExtent = {
+  /** Whether the five distinct points were all in view after the group zoom. */
+  distinctPointsInView: boolean;
+  /** The view resolution after zooming to coincident points. */
+  coincidentResolution: number | undefined;
+  /** The view resolution after zooming to a tiny combined extent. */
+  tinyResolution: number | undefined;
+  /** The resolution matching the closest scale a group zoom can reach. */
+  groupMinResolution: number | undefined;
+  /** Whether the polygon and the line were both in view after the group zoom. */
+  polygonAndLineInView: boolean;
+  /** Whether the valid extent was in view when mixed with missing/invalid extents. */
+  invalidIgnoredInView: boolean;
+  /** Whether a group without any valid extent threw a NoExtentError. */
+  allInvalidThrowsNoExtent: boolean;
+  /** The group extent of results without geometry (pure WMS click point extents), expected undefined. */
+  noGeometryGroupExtent: Extent | undefined;
+  /** Whether the stale group zoom reported a zoom. */
+  staleZoomed: boolean;
+  /** Whether the map center was unchanged by the stale group zoom. */
+  staleCenterUnchanged: boolean;
+};
 
 /** Result type for the testZoomToFeatureWithPanelOffset test execution. */
 export type TestZoomWithPanelOffset = {
