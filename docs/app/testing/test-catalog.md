@@ -243,6 +243,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                              | Type | Description                |
 | ----------------------------------- | ---- | -------------------------- |
 | `testStandaloneGeocoreWithAirborne` | test | Test Geocore with Airborne |
+| `testInitGeocoreEsriFeaturePreservesLayerId` | test | Test Add Layer GeoCore initialization produces the expected configuration with only the selected FeatureServer layer |
 
 #### 1.2.13 Settings Cascade
 

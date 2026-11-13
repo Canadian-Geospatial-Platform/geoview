@@ -45,7 +45,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       <b>ESRI</b> — Dynamic, Feature, Image (happy path + bad URL)<br/>
       <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL + no capabilities)<br/>
       <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (happy path + bad URL skip/error)<br/>
-      <b>GeoCore</b> — Standalone UUID resolution<br/>
+      <b>GeoCore</b> — Standalone UUID resolution; Add Layer initialization preserves the selected FeatureServer layer<br/>
       <b>Settings</b> — initialSettings cascade to sublayers`;
   }
 
@@ -55,7 +55,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 39;
+    return 40;
   }
 
   /**
@@ -196,6 +196,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
 
     // Test a Geocore
     const pGeocoreAirborne = this.#configTester.testStandaloneGeocoreWithAirborne();
+    const pGeocoreEsriFeature = this.#configTester.testInitGeocoreEsriFeaturePreservesLayerId();
 
     // Test settings cascade to sublayers
     const pSettingsCascadeToSublayers = this.#configTester.testSettingsCascadeToSublayers();
@@ -240,6 +241,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pLayerGeoTIFFVegetation,
       pGeoTIFFSkip,
       pGeocoreAirborne,
+      pGeocoreEsriFeature,
       pSettingsCascadeToSublayers,
     ]);
   }

@@ -18,7 +18,7 @@ import { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-c
 import { WkbLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
-import { ConfigApi } from 'geoview-core/api/config/config-api';
+import { ConfigApi, type ConfigFromTypeInfo } from 'geoview-core/api/config/config-api';
 import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
 import { GeoCore } from 'geoview-core/api/config/geocore';
 import { Config } from 'geoview-core/api/config/config';
@@ -1537,7 +1537,6 @@ export class ConfigTester extends GVAbstractTester {
   testStandaloneGeocoreWithAirborne(): Promise<Test<GeoCoreLayerConfigResponse>> {
     // The values
     const uuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
-    const language = 'en';
     const expectedConfig = {
       config: {
         geoviewLayerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
@@ -1557,12 +1556,44 @@ export class ConfigTester extends GVAbstractTester {
       'Test Geocore with Airborne',
       () => {
         // Create a layer config from UUID using Geocore
-        return GeoCore.createLayerConfigFromUUID(uuid, [], language, undefined, undefined);
+        return GeoCore.createLayerConfigFromUUID(uuid, [], 'en', undefined, undefined);
       },
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying expected geoview geocore config...');
         Test.assertJsonObject(result, expectedConfig);
+      }
+    );
+  }
+
+  /**
+   * Tests that Add Layer initialization produces the expected ESRI Feature configuration from a GeoCore UUID.
+   *
+   * @returns A promise that resolves with the initialized GeoCore configuration
+   */
+  testInitGeocoreEsriFeaturePreservesLayerId(): Promise<Test<ConfigFromTypeInfo>> {
+    const uuid = GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_UUID;
+    const layerName = 'Permafrost by Ecoprovince';
+    const expectedConfig = {
+      configInfo: {
+        geoviewLayerId: uuid,
+        geoviewLayerType: 'esriFeature',
+        geoviewLayerName: layerName,
+        listOfLayerEntryConfig: [{ layerId: GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_ID }],
+      },
+    };
+
+    return this.test(
+      'Test GeoCore Add Layer initialization preserves the selected FeatureServer layer...',
+      () => {
+        // Initialize from the UUID through Add Layer's entry point so the regression stays covered.
+        return ConfigApi.createInitConfigFromType('geoCore', uuid, layerName, uuid, false, 'en');
+      },
+      (test, result) => {
+        // Verify the expected config and ensure no extra service layers were included.
+        test.addStep('Verifying the expected GeoCore ESRI Feature config...');
+        Test.assertJsonObject(result, expectedConfig);
+        Test.assertIsArrayLengthEqual(result.configInfo.listOfLayerEntryConfig, 1);
       }
     );
   }
