@@ -862,6 +862,17 @@ For scale-limited visibility, `LayerController` now uses a resolution-first mode
 - Computes and stores `inVisibleRange` using `isInVisibleRange(currentResolution, currentScale, effectiveScales)`
 - `zoomToLayerVisibleScale` targets effective visible boundaries (`maxScaleZoomAt` / `minScaleZoomAt`) and animates by resolution to avoid zoom discretization artifacts
 
+#### Feature and result-group zoom
+
+Feature zooms (Details/Data Table zoom to feature, Details zoom to all results, Details previous/next follow) share these rules (#3705):
+
+- **Bounded zoom-in:** never closer than `OL_ZOOM_FEATURE_MAX_SCALE` (1:10,000) so points, coincident points and tiny lines/polygons keep context; the current resolution is kept when already closer, and the layer's effective scale range wins. Fitting a zero-size extent without this bound zooms to the map maximum.
+- **Geometry-backed extents only:** pure WMS `GetFeatureInfo` entries have no `geometry` and their `extent` is only the click point. Use `GeoUtilities.hasFeatureGeometryExtent`/`getFeaturesGeometryExtent` before treating an extent as a feature location; other entries are looked up by object id.
+- **Previous/next follow pans, never zooms in:** `panToExtentRestrictedAndOutline` fits with the current resolution as `minResolution`, so it pans when the feature fits and zooms out only when it does not.
+- **Click marker marks only the click:** feature zooms hide it (they outline the extent instead) rather than moving it to the feature center.
+- **Stale guards:** asynchronous group zooms take an `isStale` callback; the Details panel compares the selected layer and the map-click object, so a new click or layer switch cancels a pending zoom.
+- **Fit padding:** `useAppBarPanelFitOptions`/`MapFitPadding` add the measured open app-bar panel (left) and nav bar/overview map (right) widths to the fixed `OL_ZOOM_PIXEL_PADDING` (25px). A tall group extent still leaves blank left/right space; that is the extent aspect ratio, not padding.
+
 ### LayerCreatorController
 
 No domain subscriptions in `onHook()`. Instead, subscribes to individual `AbstractGeoViewLayer` events per-layer as they are created (e.g., `onLayerEntryRegisterInit`, `onLayerGVCreated`, `onLayerGroupCreated`, `onLayerMessage`). Provides the full layer lifecycle API:
