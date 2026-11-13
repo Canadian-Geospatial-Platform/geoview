@@ -46,7 +46,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
     return `Tests the Details panel feature info display and interaction:<br/>
       <b>Feature info</b> — Query GeoJSON layer at Ontario/Alberta extent<br/>
       <b>Highlight</b> — Clear all highlights after selection<br/>
-      <b>Navigation</b> — Zoom to feature from details panel<br/>
+      <b>Navigation</b> — Zoom to feature from details panel, including with the panel open over the map<br/>
       <b>Config overrides</b> — nameField as label, summary:false hides field, field alias renaming`;
   }
 
@@ -56,7 +56,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 6;
+    return 7;
   }
 
   /**
@@ -103,6 +103,9 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
     // Test zoom to feature
     await this.#detailsTester.testZoomToFeature('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+    // Test zoom to feature with an open app-bar panel (changes zoom, sequential)
+    await this.#detailsTester.testZoomToFeatureWithPanelOffset('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
     // Tests that recreate the map with custom featureInfo config (sequential)
     await this.#detailsTester.testNameFieldAsLabel();

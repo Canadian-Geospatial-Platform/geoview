@@ -13,7 +13,7 @@ must review Node patch updates separately.
 
 - **`main.yml`** — builds and publishes the `develop` preview. Manual runs from other refs build only.
 - **`build.yml`** — reusable production build; uploads the selected commit's output.
-- **`build-check.yml`** — builds a PR **only when a maintainer locks it**; does not publish.
+- **`build-check.yml`** — builds a PR **only when a maintainer locks it or applies the `abuild: Activate PR build` label**; does not publish. Re-apply the label (or lock again) to rebuild after new commits.
 - **`deploy.yml`** — publishes verified output to `gh-pages/public`.
 - **`codeql-analysis.yml`** — scans JavaScript/TypeScript on configured pushes, PRs, and the weekly schedule; no build required.
 - **`type-build.yml`** — generates declarations on Fridays or manually; default-branch runs update `new-types` → `types`.

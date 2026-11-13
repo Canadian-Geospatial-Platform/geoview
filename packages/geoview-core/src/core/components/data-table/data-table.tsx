@@ -59,6 +59,7 @@ import { useGlobalFilter } from './hooks/useGlobalFilter';
 import { useColumnVisibility } from './hooks/useColumnVisibility';
 import { getSxClasses, truncatedCellContentSx } from './data-table-style';
 import { useLightBox } from '@/core/components/common/hooks/use-light-box';
+import { useAppBarPanelFitOptions } from '@/core/components/common/hooks/use-app-bar-panel-fit-options';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import { DomHelper } from '@/core/utils/dom-helper';
 import type { DataTableProps, DataTableRow } from './data-table-types';
@@ -278,6 +279,7 @@ function DataTable({
   const vectorTimeField = useStoreLayerVectorTimeField(layerPath);
   const dataTableController = useDataTableController();
   const layerController = useLayerController();
+  const getPanelFitOptions = useAppBarPanelFitOptions();
   const uiController = useUIController();
   const { mapFilteredRecord } = datatableSettings[layerPath];
 
@@ -804,17 +806,19 @@ function DataTable({
         const shellElement = DomHelper.getShellElement(mapId);
         if (shellElement) DomHelper.scrollIfNotVisible(shellElement, 'start');
 
-        // Zoom to extent and wait for it to finish
-        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, undefined, true).catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in DataTable', error);
-        });
+        // Zoom to extent (keeping the feature out of an open app-bar panel) and wait for it to finish
+        layerController
+          .zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true, getPanelFitOptions(), true)
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in DataTable', error);
+          });
       } else {
         // Log error
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [layerPath, mapId, featureHasExtent, featureOidFieldName, layerController]
+    [layerPath, mapId, featureHasExtent, featureOidFieldName, layerController, getPanelFitOptions]
   );
 
   /**

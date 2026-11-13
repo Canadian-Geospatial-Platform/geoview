@@ -146,6 +146,8 @@ _(User-facing features added or enabled)_
 - Improved WFS GML field-type parsing so feature attributes retain the types declared by the service.
 - Time-slider filters now use a shared SQL-like predicate for instants and ranges across raster, vector, and data-table filtering, with conversion to WMS `TIME` and service-specific ESRI syntax at request time.
 
+- Details and Data Table "Zoom to feature" now keep the feature visible when their app-bar panel is open over the map: the panel overlap (measured from the actual panel and map positions, so CSS scaling is handled) is added to the left fit padding. No panel offset when no panel is open, or when the panel does not overlap the map (footer bar, very narrow map). Feature zoom (Details, Data Table) and STAC browser zoom now share one fixed 50px fit padding (`OL_ZOOM_PIXEL_PADDING`) instead of the 5% map-size padding and STAC's 100px. The overlap computation was extracted from the STAC browser into the shared core helper `MapFitPadding` (`core/utils/map-fit-padding.ts`), used by the STAC browser zoom and the new `useAppBarPanelFitOptions` hook (Details and Data Table); `StacBrowserLayoutUtils` and `StacBrowserController.ZOOM_PADDING` are removed (`zoomToLonLatBbox` now requires its `padding` argument) and `TypeStacZoomPadding` is replaced by `TypeMapFitPadding` in `core/utils/constant.ts` (#3747)
+
 ## Bug Fixes
 
 _(Fixes discovered or applied during this cycle)_

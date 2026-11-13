@@ -4,6 +4,7 @@ import type { Extent } from 'ol/extent';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
+import type { TypeMapFitPadding } from '@/core/utils/constant';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { StacLayerHelper } from '@/geo/utils/stac-layer-helper';
@@ -14,9 +15,6 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
-
-/** Map fit padding ordered as top, right, bottom, left. */
-export type TypeStacZoomPadding = [number, number, number, number];
 
 /** A visible map extent saved with its source projection. */
 export interface TypeStacMapExtentSnapshot {
@@ -56,9 +54,6 @@ export interface TypeStacPreviewAsset {
  * Preview overlays are raw OpenLayers layers: they are not part of the GeoView layer system (no legend, no store entry).
  */
 export class StacBrowserController extends AbstractMapViewerController {
-  /** Padding (in pixels) used when zooming to a STAC extent. */
-  static readonly ZOOM_PADDING: TypeStacZoomPadding = [100, 100, 100, 100];
-
   /** Preview overlays currently on the map, keyed by a caller-provided id. */
   #overlays = new Map<string, BaseLayer>();
 
@@ -152,7 +147,7 @@ export class StacBrowserController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid (propagated from `zoomToExtent()`)
    */
-  zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeStacZoomPadding = StacBrowserController.ZOOM_PADDING): Promise<void> {
+  zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeMapFitPadding): Promise<void> {
     const extent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), this.getMapViewer().getProjection(), 25);
     return this.getControllersRegistry().mapController.zoomToExtent(extent, true, {
       padding,

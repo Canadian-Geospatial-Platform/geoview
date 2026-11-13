@@ -163,7 +163,7 @@ Custom agents live in `.github/agents/` and appear in the Copilot Chat **agent p
 | `TestCreator`           | Workflow   | Create test-suite tests, find missing coverage, maintain release-testing docs                                           |
 | `DocUpdate`             | Workflow   | Audit named or branch-affected docs; say "guide" for EN/FR viewer guides or "full" for every doc                        |
 | `DepUpdate`             | Workflow   | Audit dependencies and Node.js/Rush/pnpm compatibility, plan upgrades, review vulnerabilities                           |
-| `IssueCreator`          | Workflow   | Draft a ready-to-paste GitHub issue                                                                                     |
+| `IssueCreator`          | Workflow   | Draft a ready-to-paste GitHub issue; fetches public service responses and checks duplicates through the web tool       |
 | `IssueReview`           | Workflow   | Compare a PR branch with its linked issue and capture lessons                                                           |
 | `LayerExpert`           | Specialist | Layer classes, config validation, GeoCore, WMS/ESRI/OGC metadata                                                        |
 | `MapGeoExpert`          | Specialist | MapViewer, projections, zoom/rotation, OpenLayers interactions, swiper                                                  |
