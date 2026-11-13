@@ -6,7 +6,7 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import type { Extent, TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
-import { LayerController } from 'geoview-core/core/controllers/layer-controller';
+import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { OL_ZOOM_FEATURES_GROUP_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
@@ -439,7 +439,7 @@ export class DetailsTester extends GVAbstractTester {
         // Pure WMS-like results: click point extent but no geometry
         test.addStep('Verifying results without geometry (pure WMS click point extents) have no group extent...');
         const clickPointResults = [0, 1].map((index) => ({ ...createResult([cx, cy, cx, cy], index), geometry: undefined }));
-        const noGeometryGroupExtent = LayerController.getFeaturesEmbeddedExtent(clickPointResults);
+        const noGeometryGroupExtent = GeoUtilities.getFeaturesGeometryExtent(clickPointResults);
 
         // Stale request
         test.addStep('Zooming to a group that became stale...');
