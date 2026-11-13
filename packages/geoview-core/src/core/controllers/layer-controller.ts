@@ -1,7 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { Projection as OLProjection } from 'ol/proj';
-import { getCenter, isEmpty } from 'ol/extent';
+import { getCenter } from 'ol/extent';
 
 import {
   VALID_PROJECTION_CODES,
@@ -862,7 +862,8 @@ export class LayerController extends AbstractMapViewerController {
    *   `OL_ZOOM_FEATURE_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
    * - The layer visibility-scale range always wins: the bound is relaxed to remain inside the layer's zoomed-out limit and,
    *   when the union cannot fit inside that limit, the map centers on the union at the limit (some results may be outside).
-   * - After zooming, the union is shown with a fading bounding box; the click marker and feature highlights are unchanged.
+   * - After zooming, the click marker is hidden (it only marks the map click) and the union is shown with a fading
+   *   bounding box; feature highlights are unchanged.
    *
    * @param layerPath - The layer path the features belong to
    * @param features - The feature results forming the group
@@ -893,9 +894,9 @@ export class LayerController extends AbstractMapViewerController {
       ...this.#getFeatureZoomInFitConstraints(layerPath),
     });
 
-    // Show the zoomed group extent unless the group was replaced during the animation
+    // Hide the click marker and outline the zoomed group extent unless the group was replaced during the animation
     if (isStale?.()) return false;
-    this.getControllersRegistry().mapController.highlightBBox(extent, false);
+    this.#hideClickMarkerAndOutline(extent);
     return true;
   }
 
@@ -975,7 +976,7 @@ export class LayerController extends AbstractMapViewerController {
    *
    * The zoom-in is bounded like the group zoom: it never zooms closer than `OL_ZOOM_FEATURE_MAX_SCALE` (e.g. for points),
    * unless the map is already closer, in which case the current resolution is kept; the layer's visibility-scale range wins.
-   * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
+   * After the zoom completes, hides the click marker (it only marks the map click), highlights the bounding box
    * with a fade-out effect, and sets the feature as the active highlight.
    *
    * @param layerPath - The layer path used to look up scale limits
@@ -994,26 +995,41 @@ export class LayerController extends AbstractMapViewerController {
     fitOptions?: GVFitOptions,
     isTemporaryHighlight = false
   ): Promise<void> {
-    // Get extent and center
-    const center = getCenter(extent);
-
-    // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
-    const lonlatCenter = Projection.transformToLonLat(
-      center,
-      Projection.getProjectionFromStringOrNumber(this.getMapViewer().getProjection())
-    );
-
     // Zoom to extent with the bounded feature zoom-in (e.g. points stop at OL_ZOOM_FEATURE_MAX_SCALE) and wait for it to finish
     await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
       ...(fitOptions ?? {}),
       ...this.#getFeatureZoomInFitConstraints(layerPath),
     });
 
-    // Add a click marker, a bbox extent who will disappear and remove/add higlight the zoomed feature
-    this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
-    this.getControllersRegistry().mapController.highlightBBox(extent, false);
+    // Hide the click marker, outline the extent with a fading box and remove/add higlight the zoomed feature
+    this.#hideClickMarkerAndOutline(extent);
     this.getControllersRegistry().mapController.removeHighlightedFeature('all');
     this.getControllersRegistry().mapController.addHighlightedFeature(feature, isTemporaryHighlight);
+  }
+
+  /**
+   * Brings a feature extent into view without zooming in, then outlines it (e.g. Details previous/next after a zoom to feature).
+   *
+   * Fits the whole extent with the current resolution as minimum resolution: the map only pans when the extent fits at the
+   * current resolution, and zooms out just enough when it does not. The fit padding (e.g. an open app-bar panel, map
+   * controls) and the layer's visibility-scale range are honored. Then hides the click marker (it only marks the map click)
+   * and briefly outlines the extent; feature highlights are left to the caller.
+   *
+   * @param layerPath - The layer path used to look up scale limits
+   * @param extent - The feature extent to bring into view (in map projection)
+   * @param useAnimation - Optional flag indicating if an animation should be used, default: true
+   * @param fitOptions - Optional fit options (e.g. padding) to merge the constraints into
+   * @returns A promise that resolves when the map moved and the extent is outlined
+   */
+  async panToExtentRestrictedAndOutline(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
+    // Never zoom in: keep at least the current resolution, zooming out only when the extent does not fit
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
+      ...(fitOptions ?? {}),
+      minResolution: this.getMapViewer().getView().getResolution(),
+    });
+
+    // Outline the extent like a feature zoom does
+    this.#hideClickMarkerAndOutline(extent);
   }
 
   /**
@@ -3022,7 +3038,7 @@ export class LayerController extends AbstractMapViewerController {
 
     try {
       const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIds, oidField);
-      return GeoUtilities.isValidExtent(lookedUpExtent) && !isEmpty(lookedUpExtent) ? lookedUpExtent : undefined;
+      return GeoUtilities.isValidOrderedExtent(lookedUpExtent) ? lookedUpExtent : undefined;
     } catch (error: unknown) {
       // Log and continue with the embedded extents
       logger.logWarning(`Unable to look up the missing feature extents for layer '${layerPath}'`, error);
@@ -3051,6 +3067,17 @@ export class LayerController extends AbstractMapViewerController {
     if (layerMaxResolution !== undefined) minResolution = Math.min(minResolution, layerMaxResolution);
 
     return { minResolution };
+  }
+
+  /**
+   * Hides the click marker (it only marks the map click, not the zoomed feature) and outlines an extent with a fading box.
+   *
+   * @param extent - The zoomed extent to outline
+   */
+  #hideClickMarkerAndOutline(extent: Extent): void {
+    const { mapController } = this.getControllersRegistry();
+    mapController.clickMarkerIconHide();
+    mapController.highlightBBox(extent, false);
   }
 
   // #endregion PRIVATE METHODS

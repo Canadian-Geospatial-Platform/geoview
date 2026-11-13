@@ -1929,6 +1929,18 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Checks whether an extent is valid (see `isValidExtent`) and not inverted (minimum not above maximum).
+   *
+   * Points (zero-size extents) are accepted.
+   *
+   * @param extent - The extent to check
+   * @returns True when the extent is valid and not inverted
+   */
+  static isValidOrderedExtent(extent: Extent | undefined): extent is Extent {
+    return !!extent && GeoUtilities.isValidExtent(extent) && !isEmpty(extent);
+  }
+
+  /**
    * Checks whether a feature info entry has a geometry with a valid, non-inverted extent.
    *
    * Entries without geometry (e.g. pure WMS GetFeatureInfo results) only carry the click point as extent,
@@ -1938,7 +1950,7 @@ export abstract class GeoUtilities {
    * @returns True when the entry has a geometry and a valid, non-inverted extent
    */
   static hasFeatureGeometryExtent(feature: TypeFeatureInfoEntry): feature is TypeFeatureInfoEntry & { extent: Extent } {
-    return !!feature.geometry && GeoUtilities.isValidExtent(feature.extent) && !isEmpty(feature.extent!);
+    return !!feature.geometry && GeoUtilities.isValidOrderedExtent(feature.extent);
   }
 
   /**

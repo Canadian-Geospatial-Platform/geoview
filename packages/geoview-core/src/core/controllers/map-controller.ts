@@ -4,7 +4,6 @@ import type { Coordinate } from 'ol/coordinate';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import DragPan from 'ol/interaction/DragPan';
-import { getCenter } from 'ol/extent';
 
 import {
   MAP_EXTENTS,
@@ -392,34 +391,6 @@ export class MapController extends AbstractMapViewerController {
   zoomToExtent(extent: Extent, useAnimation = true, options?: GVFitOptions): Promise<void> {
     // Redirect to the MapViewer
     return this.getMapViewer().zoomToExtent(extent, useAnimation, options);
-  }
-
-  /**
-   * Pans the map to center an extent in the visible map area, keeping the current resolution, then marks it.
-   *
-   * Fits the extent center with the current resolution as minimum resolution, so the fit padding (e.g. an open
-   * app-bar panel) is honored without zooming. Then shows the click marker at the extent center and briefly
-   * outlines the extent.
-   *
-   * @param extent - The extent to center on (in map projection)
-   * @param useAnimation - Optional flag indicating if a pan animation should be used, default: true
-   * @param fitOptions - Optional fit options (e.g. padding) for the pan
-   * @returns A promise that resolves when the pan is complete and the extent is marked
-   * @throws {InvalidExtentError} When the extent is invalid
-   */
-  async panToExtentAndMark(extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
-    const center = getCenter(extent);
-
-    // Fit the center point without going under the current resolution, so the map only pans
-    await this.zoomToExtent([center[0], center[1], center[0], center[1]], useAnimation, {
-      ...(fitOptions ?? {}),
-      minResolution: this.getMapViewer().getView().getResolution(),
-    });
-
-    // Mark the extent like a feature zoom does
-    const projection = Projection.getProjectionFromStringOrNumber(this.getMapViewer().getProjection());
-    this.clickMarkerIconShow({ lonlat: Projection.transformToLonLat(center, projection) });
-    this.highlightBBox(extent, false);
   }
 
   /**

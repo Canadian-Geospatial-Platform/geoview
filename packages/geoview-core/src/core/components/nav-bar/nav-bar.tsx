@@ -16,6 +16,8 @@ import type { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion, useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapOverviewShouldBeVisible } from '@/core/stores/states/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { translateTooltip } from '@/core/utils/utilities';
 import BasemapSelect from './buttons/basemap-select';
@@ -87,6 +89,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }, [theme]);
 
   // Store
+  const mapId = useStoreGeoViewMapId();
   const navBarComponents = useStoreUINavbarComponents();
   const navBarButtonPanelVersion = useStoreUINavBarButtonPanelVersion();
 
@@ -310,6 +313,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   return (
     <Box
+      id={DomHelper.buildNavBarId(mapId)}
       role="group"
       aria-label={t('mapnav.ariarole')}
       sx={
