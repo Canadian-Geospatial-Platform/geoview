@@ -80,6 +80,12 @@ type TypeResultsZoomContext = {
   clickCoordinates: TypeMapMouseInfo | undefined;
 };
 
+/** The last Details zoom (zoom to feature or zoom to all results) and the results context it applied to. */
+type TypeDetailsZoom = TypeResultsZoomContext & {
+  /** Whether it was a zoom to feature (previous/next then follow the selected feature) rather than a group zoom. */
+  isFeatureZoom: boolean;
+};
+
 /**
  * Checks whether a results zoom context is the same as another (same layer and same map click).
  *
@@ -145,9 +151,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     layerPath: selectedLayerPath,
     clickCoordinates: mapClickCoordinates,
   });
-  // The results context in which the user zoomed to a feature; previous/next follow the selected feature only in that
-  // context (cleared by a group zoom, implicitly ended by a new click or layer switch)
-  const featureZoomFollowContextRef = useRef<TypeResultsZoomContext | undefined>(undefined);
+  // The last Details zoom: after a zoom to feature, previous/next follow the selected feature in the same results context;
+  // after any Details zoom, the click marker is no longer shown on layer switch for that click (a new click resets both)
+  const lastDetailsZoomRef = useRef<TypeDetailsZoom | undefined>(undefined);
   // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
   const userDismissedGuideRef = useRef<boolean>(false);
   const prevButtonRef = useRef<HTMLButtonElement>(null);
@@ -605,7 +611,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const handleFeatureNavigateChange = useCallback(
     (change: -1 | 1): void => {
       const newIndex = currentFeatureIndex + change;
-      const maxIndex = (memoSelectedLayerData?.features?.length ?? 0) - 1;
+      const maxIndex = (memoSelectedLayerDataFeatures?.length ?? 0) - 1;
 
       // Don't navigate if out of bounds
       if (newIndex < 0 || newIndex > maxIndex) {
@@ -615,17 +621,21 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Let the highlight effect react to the new current feature.
       detailsController.setCurrentFeatureIndex(newIndex);
 
-      // When the user zoomed to a feature for these results, pan to the newly selected feature (keeping the resolution)
-      const nextExtent = memoSelectedLayerData?.features?.[newIndex]?.extent;
+      // When the user zoomed to a feature for these results, bring the newly selected feature into view (pan, zooming out only if needed)
+      const lastZoom = lastDetailsZoomRef.current;
+      const nextFeature = memoSelectedLayerDataFeatures?.[newIndex];
       if (
-        isSameResultsZoomContext(featureZoomFollowContextRef.current, resultsZoomContextRef.current) &&
-        nextExtent &&
-        GeoUtilities.isValidExtent(nextExtent)
+        lastZoom?.isFeatureZoom &&
+        isSameResultsZoomContext(lastZoom, resultsZoomContextRef.current) &&
+        nextFeature &&
+        GeoUtilities.hasFeatureGeometryExtent(nextFeature)
       ) {
-        mapController.panToExtentAndMark(nextExtent, true, getPanelFitOptions()).catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('panToExtentAndMark in handleFeatureNavigateChange in DetailsPanel', error);
-        });
+        layerController
+          .panToExtentRestrictedAndOutline(selectedLayerPath, nextFeature.extent, true, getPanelFitOptions())
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('panToExtentRestrictedAndOutline in handleFeatureNavigateChange in DetailsPanel', error);
+          });
       }
 
       // Restore focus to the navigation button after React completes the state update and re-render
@@ -639,15 +649,15 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         }
       });
     },
-    [currentFeatureIndex, detailsController, getPanelFitOptions, mapController, memoSelectedLayerData]
+    [currentFeatureIndex, detailsController, getPanelFitOptions, layerController, memoSelectedLayerDataFeatures, selectedLayerPath]
   );
 
   /**
    * Handles when the user zooms to the current feature.
-   * Remembers the current results context so previous/next follow the selected feature until a new click, layer switch or group zoom.
+   * Remembers it so previous/next follow the selected feature until a new click, layer switch or group zoom.
    */
   const handleFeatureZoomed = useCallback((): void => {
-    featureZoomFollowContextRef.current = { ...resultsZoomContextRef.current };
+    lastDetailsZoomRef.current = { ...resultsZoomContextRef.current, isFeatureZoom: true };
   }, []);
 
   /**
@@ -672,12 +682,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // The button is only aria-disabled, so guard here as well
     if (!memoCanZoomToResultsExtent || !memoSelectedLayerDataFeatures) return;
 
-    // A group zoom shows the results context, so previous/next stop following the selected feature
-    featureZoomFollowContextRef.current = undefined;
-
     // Capture the zoom context so a new click or layer switch during the extent lookup cancels the zoom
     const zoomContext: TypeResultsZoomContext = { layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates };
     const isStale = (): boolean => !isSameResultsZoomContext(zoomContext, resultsZoomContextRef.current);
+
+    // A group zoom shows the results context, so previous/next stop following the selected feature
+    lastDetailsZoomRef.current = { ...zoomContext, isFeatureZoom: false };
 
     layerController
       .zoomToFeaturesGroupExtent(selectedLayerPath, memoSelectedLayerDataFeatures, getPanelFitOptions(), isStale)
@@ -696,6 +706,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
   /**
    * Handles click to change the selected layer in left panel.
+   * Shows the click marker again at the map click, unless the user already used a Details zoom for this click
+   * (the marker would no longer match the zoomed view).
    *
    * @param layerEntry - The data of the newly selected layer
    */
@@ -704,8 +716,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Start on the first result in the newly selected layer.
       detailsController.setCurrentFeatureIndex(0);
       detailsController.setSelectedLayerPath(layerEntry.layerPath);
+
+      // Mark the map click again for the newly selected layer results, only while no Details zoom was used for this click
+      if (mapClickCoordinates && lastDetailsZoomRef.current?.clickCoordinates !== mapClickCoordinates) {
+        mapController.clickMarkerIconShow({ lonlat: mapClickCoordinates.lonlat });
+      }
     },
-    [detailsController]
+    [detailsController, mapClickCoordinates, mapController]
   );
   // #endregion
 

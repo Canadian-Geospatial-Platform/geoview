@@ -308,6 +308,10 @@ export class DetailsTester extends GVAbstractTester {
         return {
           basePaddingLeft: MapFitPadding.getDefaultPadding()[3],
           paddingLeft: padding[3],
+          basePaddingRight: MapFitPadding.getDefaultPadding()[1],
+          paddingRight: padding[1],
+          mapWidth: mapSize?.[0],
+          hasNavBar: !!DomHelper.getNavBar(this.getMapId()),
           centerPixelX: pixel ? pixel[0] : undefined,
         };
       },
@@ -316,10 +320,18 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying the left padding includes the panel overlap...');
         Test.assertIsEqual(result.paddingLeft > result.basePaddingLeft, true);
 
-        // Verify the feature center is outside the area covered by the panel
-        test.addStep('Verifying the feature center is in the part of the map not covered by the panel...');
+        // Verify the navigation bar was detected as overlapping the map
+        if (result.hasNavBar) {
+          test.addStep('Verifying the right padding includes the navigation bar overlap...');
+          Test.assertIsEqual(result.paddingRight > result.basePaddingRight, true);
+        }
+
+        // Verify the feature center is outside the area covered by the panel and the map controls
+        test.addStep('Verifying the feature center is in the part of the map not covered by the panel or the map controls...');
         Test.assertIsDefined('centerPixelX', result.centerPixelX);
+        Test.assertIsDefined('mapWidth', result.mapWidth);
         Test.assertIsEqual(result.centerPixelX >= result.paddingLeft, true);
+        Test.assertIsEqual(result.centerPixelX <= result.mapWidth - result.paddingRight, true);
       }
     );
   }
@@ -497,8 +509,9 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that zoom to feature does not zoom closer than the feature bound for a point, and that panning to
-   * another feature (Details previous/next after a zoom to feature) keeps the resolution and centers the feature.
+   * Tests that zoom to feature does not zoom closer than the feature bound for a point, and that bringing another
+   * feature into view (Details previous/next after a zoom to feature) only pans for a small feature, zooms out for
+   * a feature larger than the view, and never zooms back in.
    *
    * @param layerPath - The layer path of the layer
    * @param lonlat - The coordinate on the map to query
@@ -532,18 +545,35 @@ export class DetailsTester extends GVAbstractTester {
           fitOptions
         );
         const pointZoomResolution = view.getResolution();
+        const clickMarkerAfterZoom = getStoreMapClickMarker(this.getMapId());
 
-        // Pan to another feature, like previous/next does after a zoom to feature
-        test.addStep('Panning to another feature...');
+        // Pan to another small feature, like previous/next does after a zoom to feature
+        test.addStep('Bringing a small feature into view...');
         const nextExtent: Extent = [cx + 2000, cy + 1000, cx + 2200, cy + 1200];
-        await mapController.panToExtentAndMark(nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
-        const viewExtent = view.calculateExtent(this.getMapViewer().map.getSize());
+        await layerController.panToExtentRestrictedAndOutline(layerPath, nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const panResolution = view.getResolution();
+        const nextFeatureInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), nextExtent);
+
+        // Bring a feature larger than the view into view: it must zoom out to fit it
+        test.addStep('Bringing a large feature into view...');
+        const largeExtent: Extent = [cx - 50000, cy - 50000, cx + 50000, cy + 50000];
+        await layerController.panToExtentRestrictedAndOutline(layerPath, largeExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const largeResolution = view.getResolution();
+        const largeFeatureInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), largeExtent);
+
+        // Bring the small feature back: it must not zoom in again
+        test.addStep('Bringing the small feature back into view...');
+        await layerController.panToExtentRestrictedAndOutline(layerPath, nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
 
         return {
           featureMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
           pointZoomResolution,
-          panResolution: view.getResolution(),
-          nextFeatureInView: containsExtent(viewExtent, nextExtent),
+          clickMarkerAfterZoom,
+          panResolution,
+          nextFeatureInView,
+          largeResolution,
+          largeFeatureInView,
+          backToSmallResolution: view.getResolution(),
         };
       },
       (test, result) => {
@@ -552,12 +582,22 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsDefined('pointZoomResolution', result.pointZoomResolution);
         Test.assertIsEqual(result.pointZoomResolution >= result.featureMinResolution * 0.999, true);
 
-        test.addStep('Verifying the pan keeps the resolution...');
+        test.addStep('Verifying the zoom to feature hides the click marker...');
+        Test.assertIsUndefined('clickMarkerAfterZoom', result.clickMarkerAfterZoom);
+
+        test.addStep('Verifying a small feature only pans (keeps the resolution) and is in view...');
         Test.assertIsDefined('panResolution', result.panResolution);
         Test.assertIsEqual(Math.abs(result.panResolution - result.pointZoomResolution) <= result.pointZoomResolution * 0.001, true);
-
-        test.addStep('Verifying the next feature is in view after the pan...');
         Test.assertIsEqual(result.nextFeatureInView, true);
+
+        test.addStep('Verifying a large feature zooms out and is fully in view...');
+        Test.assertIsDefined('largeResolution', result.largeResolution);
+        Test.assertIsEqual(result.largeResolution > result.panResolution, true);
+        Test.assertIsEqual(result.largeFeatureInView, true);
+
+        test.addStep('Verifying going back to a small feature does not zoom in...');
+        Test.assertIsDefined('backToSmallResolution', result.backToSmallResolution);
+        Test.assertIsEqual(Math.abs(result.backToSmallResolution - result.largeResolution) <= result.largeResolution * 0.001, true);
       }
     );
   }
@@ -754,10 +794,18 @@ export type TestZoomToFeatureBoundAndPan = {
   featureMinResolution: number | undefined;
   /** The view resolution after zooming to a point feature. */
   pointZoomResolution: number | undefined;
-  /** The view resolution after panning to another feature. */
+  /** The click marker after the zoom to feature, expected hidden (undefined). */
+  clickMarkerAfterZoom: unknown;
+  /** The view resolution after bringing a small feature into view. */
   panResolution: number | undefined;
-  /** Whether the other feature was in view after the pan. */
+  /** Whether the small feature was in view after the pan. */
   nextFeatureInView: boolean;
+  /** The view resolution after bringing a feature larger than the view into view. */
+  largeResolution: number | undefined;
+  /** Whether the large feature was fully in view after the zoom out. */
+  largeFeatureInView: boolean;
+  /** The view resolution after bringing the small feature back into view. */
+  backToSmallResolution: number | undefined;
 };
 
 /** Result type for the testZoomToResultsGroupExtent test execution. */
@@ -790,6 +838,14 @@ export type TestZoomWithPanelOffset = {
   basePaddingLeft: number;
   /** The left padding, in map pixels, including the open panel overlap. */
   paddingLeft: number;
+  /** The default right padding, in map pixels, without any map controls offset. */
+  basePaddingRight: number;
+  /** The right padding, in map pixels, including the map controls (navigation bar, overview map) overlap. */
+  paddingRight: number;
+  /** The map width in map pixels. */
+  mapWidth: number | undefined;
+  /** Whether the navigation bar is shown on the map. */
+  hasNavBar: boolean;
   /** The x map pixel of the feature center after the zoom. */
   centerPixelX: number | undefined;
 };
