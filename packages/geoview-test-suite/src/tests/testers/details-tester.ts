@@ -7,7 +7,7 @@ import type { Extent, TypeFeatureInfoEntry } from 'geoview-core/api/types/map-sc
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
-import { OL_ZOOM_FEATURES_GROUP_MAX_SCALE } from 'geoview-core/core/utils/constant';
+import { OL_ZOOM_FEATURE_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
@@ -455,7 +455,7 @@ export class DetailsTester extends GVAbstractTester {
           distinctPointsInView,
           coincidentResolution,
           tinyResolution,
-          groupMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURES_GROUP_MAX_SCALE),
+          groupMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
           polygonAndLineInView,
           invalidIgnoredInView,
           allInvalidThrowsNoExtent: allInvalidError instanceof NoExtentError,
@@ -492,6 +492,72 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying a stale group does not move the map...');
         Test.assertIsEqual(result.staleZoomed, false);
         Test.assertIsEqual(result.staleCenterUnchanged, true);
+      }
+    );
+  }
+
+  /**
+   * Tests that zoom to feature does not zoom closer than the feature bound for a point, and that panning to
+   * another feature (Details previous/next after a zoom to feature) keeps the resolution and centers the feature.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat - The coordinate on the map to query
+   * @returns A promise resolving when the test completes
+   */
+  testZoomToFeatureBoundAndPan(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToFeatureBoundAndPan>> {
+    return this.test(
+      `Test Zoom to point feature bound and pan to next feature on layer ${layerPath}...`,
+      async (test) => {
+        const { layerController, mapController } = this.getControllersRegistry();
+        const view = this.getMapViewer().getView();
+        const fitOptions = { duration: GVAbstractTester.USE_ZOOM_ANIMATION ? undefined : 0 };
+
+        // Get a real result to build a point feature from
+        const layer = layerController.getGeoviewLayerRegular(layerPath);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+        Test.assertIsDefined('features[0].extent', features[0].extent);
+        const [cx, cy] = getCenter(features[0].extent);
+        const pointExtent: Extent = [cx, cy, cx, cy];
+
+        // Zoom far out, then zoom to a point feature
+        test.addStep('Zooming to a point feature from a zoomed out view...');
+        await mapController.zoomToExtent([cx - 3000000, cy - 3000000, cx + 3000000, cy + 3000000], false, fitOptions);
+        await layerController.zoomToExtentRestrictedAndHighlight(
+          layerPath,
+          { ...features[0], extent: pointExtent },
+          pointExtent,
+          GVAbstractTester.USE_ZOOM_ANIMATION,
+          fitOptions
+        );
+        const pointZoomResolution = view.getResolution();
+
+        // Pan to another feature, like previous/next does after a zoom to feature
+        test.addStep('Panning to another feature...');
+        const nextExtent: Extent = [cx + 2000, cy + 1000, cx + 2200, cy + 1200];
+        await mapController.panToExtentAndMark(nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const viewExtent = view.calculateExtent(this.getMapViewer().map.getSize());
+
+        return {
+          featureMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
+          pointZoomResolution,
+          panResolution: view.getResolution(),
+          nextFeatureInView: containsExtent(viewExtent, nextExtent),
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the point zoom stops at the feature bound...');
+        Test.assertIsDefined('featureMinResolution', result.featureMinResolution);
+        Test.assertIsDefined('pointZoomResolution', result.pointZoomResolution);
+        Test.assertIsEqual(result.pointZoomResolution >= result.featureMinResolution * 0.999, true);
+
+        test.addStep('Verifying the pan keeps the resolution...');
+        Test.assertIsDefined('panResolution', result.panResolution);
+        Test.assertIsEqual(Math.abs(result.panResolution - result.pointZoomResolution) <= result.pointZoomResolution * 0.001, true);
+
+        test.addStep('Verifying the next feature is in view after the pan...');
+        Test.assertIsEqual(result.nextFeatureInView, true);
       }
     );
   }
@@ -681,6 +747,18 @@ export class DetailsTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Result type for the testZoomToFeatureBoundAndPan test execution. */
+export type TestZoomToFeatureBoundAndPan = {
+  /** The resolution matching the closest scale a feature zoom can reach. */
+  featureMinResolution: number | undefined;
+  /** The view resolution after zooming to a point feature. */
+  pointZoomResolution: number | undefined;
+  /** The view resolution after panning to another feature. */
+  panResolution: number | undefined;
+  /** Whether the other feature was in view after the pan. */
+  nextFeatureInView: boolean;
+};
 
 /** Result type for the testZoomToResultsGroupExtent test execution. */
 export type TestZoomToResultsGroupExtent = {
