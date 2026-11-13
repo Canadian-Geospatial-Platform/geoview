@@ -45,7 +45,7 @@ import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
 import { useMapController, useUIController, useDetailsController, useLayerController } from '@/core/controllers/use-controllers';
-import { LayerController } from '@/core/controllers/layer-controller';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { useAppBarPanelFitOptions } from '@/core/components/common/hooks/use-app-bar-panel-fit-options';
 
 /** Properties for the details panel component. */
@@ -122,7 +122,10 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const previousHighlightedFeaturesRef = useRef<TypeFeatureInfoEntry[]>([]);
   const previousLayerFeaturesRef = useRef<TypeFeatureInfoEntry[] | undefined>(undefined);
   const layoutRef = useRef<LayoutExposedMethods>(null);
-  const resultsZoomContextRef = useRef({ layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates });
+  const resultsZoomContextRef = useRef<{ layerPath: string; clickCoordinates: TypeMapMouseInfo | undefined }>({
+    layerPath: selectedLayerPath,
+    clickCoordinates: mapClickCoordinates,
+  });
   // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
   const userDismissedGuideRef = useRef<boolean>(false);
   const prevButtonRef = useRef<HTMLButtonElement>(null);
@@ -384,7 +387,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoCanZoomToResultsExtent', memoSelectedLayerDataFeatures?.length);
 
-    return !!LayerController.getFeaturesEmbeddedExtent(memoSelectedLayerDataFeatures);
+    return !!GeoUtilities.getFeaturesGeometryExtent(memoSelectedLayerDataFeatures);
   }, [memoSelectedLayerDataFeatures]);
 
   /**

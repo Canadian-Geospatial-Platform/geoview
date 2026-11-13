@@ -1,7 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { Projection as OLProjection } from 'ol/proj';
-import { getCenter } from 'ol/extent';
+import { getCenter, isEmpty } from 'ol/extent';
 
 import {
   VALID_PROJECTION_CODES,
@@ -825,23 +825,20 @@ export class LayerController extends AbstractMapViewerController {
    */
   async zoomToFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<void> {
     let extent: Extent | undefined;
-    const objectIdsNeedingLookup: number[] = [];
-    let oidField: string | undefined;
+    const featuresWithoutExtent: TypeFeatureInfoEntry[] = [];
 
     features.forEach((feature) => {
-      if (feature.extent) {
-        extent = GeoUtilities.getExtentUnion(extent, feature.extent);
-        return;
-      }
-
-      // Determine the oid field once, from the first feature that has one
-      if (!oidField) oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
-      if (oidField && feature.fieldInfo[oidField]) {
-        objectIdsNeedingLookup.push(feature.fieldInfo[oidField]!.value as number);
-      }
+      if (feature.extent) extent = GeoUtilities.getExtentUnion(extent, feature.extent);
+      else featuresWithoutExtent.push(feature);
     });
 
     // Look up the extent for features that didn't already carry one
+    const oidField = GeoUtilities.getFeaturesOidFieldName(featuresWithoutExtent);
+    const objectIdsNeedingLookup = oidField
+      ? featuresWithoutExtent
+          .filter((feature) => feature.fieldInfo[oidField])
+          .map((feature) => feature.fieldInfo[oidField]!.value as number)
+      : [];
     if (objectIdsNeedingLookup.length > 0 && oidField) {
       const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIdsNeedingLookup, oidField);
       extent = GeoUtilities.getExtentUnion(extent, lookedUpExtent);
@@ -880,16 +877,15 @@ export class LayerController extends AbstractMapViewerController {
     fitOptions?: GVFitOptions,
     isStale?: () => boolean
   ): Promise<boolean> {
-    // Union the valid embedded extents, then look up the extents of features that don't carry a valid one
-    let extent = LayerController.getFeaturesEmbeddedExtent(features);
+    // Union the valid geometry extents, then look up the extents of features that don't carry a valid one
     const lookedUpExtent = await this.#lookupMissingFeaturesExtent(layerPath, features);
-    extent = GeoUtilities.getExtentUnion(extent, lookedUpExtent);
+    const extent = GeoUtilities.getExtentUnion(GeoUtilities.getFeaturesGeometryExtent(features), lookedUpExtent);
 
     // Never move the map for a group replaced while the asynchronous lookup was running
     if (isStale?.()) return false;
 
     // If no valid extent could be determined
-    if (!extent || !LayerController.#isUsableExtent(extent)) throw new NoExtentError(layerPath);
+    if (!extent) throw new NoExtentError(layerPath);
 
     // Zoom with the bounded zoom-in policy, and keep the layer's own scale constraints
     await this.zoomToExtentRestricted(layerPath, extent, true, {
@@ -3007,13 +3003,11 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise resolving with the valid looked-up extent, or undefined when none could be determined
    */
   async #lookupMissingFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<Extent | undefined> {
-    const featuresNeedingLookup = features.filter((feature) => !LayerController.#hasGeometryExtent(feature));
+    const featuresNeedingLookup = features.filter((feature) => !GeoUtilities.hasFeatureGeometryExtent(feature));
     if (featuresNeedingLookup.length === 0) return undefined;
 
     // Determine the oid field from the first feature that has one
-    const oidField = featuresNeedingLookup
-      .map((feature) => Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid'))
-      .find((field) => !!field);
+    const oidField = GeoUtilities.getFeaturesOidFieldName(featuresNeedingLookup);
     if (!oidField) return undefined;
 
     const objectIds = featuresNeedingLookup
@@ -3023,7 +3017,7 @@ export class LayerController extends AbstractMapViewerController {
 
     try {
       const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIds, oidField);
-      return LayerController.#isUsableExtent(lookedUpExtent) ? lookedUpExtent : undefined;
+      return GeoUtilities.isValidExtent(lookedUpExtent) && !isEmpty(lookedUpExtent) ? lookedUpExtent : undefined;
     } catch (error: unknown) {
       // Log and continue with the embedded extents
       logger.logWarning(`Unable to look up the missing feature extents for layer '${layerPath}'`, error);
@@ -3057,23 +3051,6 @@ export class LayerController extends AbstractMapViewerController {
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
-
-  /**
-   * Unions the valid geometry extents embedded in feature info entries.
-   *
-   * Only entries with a geometry contribute: pure WMS GetFeatureInfo entries have no geometry and their extent is
-   * only the click point, so they are ignored. Extents that are not 4 finite numbers or whose minimum exceeds
-   * their maximum are ignored as well.
-   *
-   * @param features - The feature info entries
-   * @returns The union of the valid geometry extents, or undefined when none is valid
-   */
-  static getFeaturesEmbeddedExtent(features: TypeFeatureInfoEntry[] | undefined): Extent | undefined {
-    return (features ?? []).reduce<Extent | undefined>(
-      (union, feature) => (LayerController.#hasGeometryExtent(feature) ? GeoUtilities.getExtentUnion(union, feature.extent) : union),
-      undefined
-    );
-  }
 
   /**
    * Starts bounds calculation and stores bounds as they get calculated.
@@ -3137,29 +3114,6 @@ export class LayerController extends AbstractMapViewerController {
 
     // Return the bounds on the layer we were calculating the bounds for
     return returnedBounds;
-  }
-
-  /**
-   * Checks whether an extent can be used to zoom: 4 finite numbers ordered as [minX, minY, maxX, maxY].
-   *
-   * @param extent - The extent to check
-   * @returns True when the extent is usable
-   */
-  static #isUsableExtent(extent: Extent | undefined): extent is Extent {
-    return !!extent && GeoUtilities.isValidExtent(extent) && extent[0] <= extent[2] && extent[1] <= extent[3];
-  }
-
-  /**
-   * Checks whether a feature info entry has a geometry with a usable extent.
-   *
-   * Entries without geometry (e.g. pure WMS GetFeatureInfo results) only carry the click point as extent,
-   * which does not represent the feature location.
-   *
-   * @param feature - The feature info entry to check
-   * @returns True when the entry has a geometry and a usable extent
-   */
-  static #hasGeometryExtent(feature: TypeFeatureInfoEntry): feature is TypeFeatureInfoEntry & { extent: Extent } {
-    return !!feature.geometry && LayerController.#isUsableExtent(feature.extent);
   }
 
   // #endregion STATIC METHODS
