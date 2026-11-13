@@ -404,6 +404,7 @@
   "details": {
     "title": "Détails",
     "zoomTo": "Zoom à l'élément",
+    "zoomToResultsExtent": "Zoomer sur tous les résultats de cette couche",
     "select": "Sélectionner l'élément sur la carte",
     "externalLink": "Lien externe",
     "feature": "élément",

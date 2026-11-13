@@ -6,7 +6,8 @@ import { MapFitPadding } from '@/core/utils/map-fit-padding';
 import type { GVFitOptions } from '@/core/utils/constant';
 
 /**
- * Custom hook that provides map fit options for zooming to a feature, keeping it out of the open app-bar panel.
+ * Custom hook that provides map fit options for zooming to a feature, keeping it out of the open app-bar panel
+ * and the right-side map controls (navigation bar and overview map).
  *
  * Details and Data Table can live in the app bar or the footer bar, so the open app-bar panel (if any) is read
  * from the store. The STAC browser only lives in the app bar, so it calls `MapFitPadding.getAppBarPanelPadding` directly.
@@ -20,13 +21,14 @@ export function useAppBarPanelFitOptions(): () => GVFitOptions {
   const { tabId, isOpen } = useStoreUIActiveAppBarTab();
 
   /**
-   * Gets the fit options whose padding keeps the open app-bar panel (if any) from obscuring the zoomed feature.
+   * Gets the fit options whose padding keeps the open app-bar panel (if any) and the map controls from obscuring the zoomed feature.
    *
    * @returns The fit options holding the padding in map pixels
    */
   return useCallback((): GVFitOptions => {
+    const mapSize = mapController.getMapSize();
     const padding =
-      isOpen && tabId ? MapFitPadding.getAppBarPanelPadding(mapId, tabId, mapController.getMapSize()) : MapFitPadding.getDefaultPadding();
+      isOpen && tabId ? MapFitPadding.getAppBarPanelPadding(mapId, tabId, mapSize) : MapFitPadding.getMapControlsPadding(mapId, mapSize);
     return { padding };
   }, [isOpen, tabId, mapId, mapController]);
 }

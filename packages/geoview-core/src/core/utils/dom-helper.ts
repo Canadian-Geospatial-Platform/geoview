@@ -852,6 +852,38 @@ export abstract class DomHelper {
   }
 
   /**
+   * Builds the DOM id for the map's navigation bar.
+   *
+   * @param mapId - The map identifier
+   * @returns The map-scoped navigation bar id
+   */
+  static buildNavBarId(mapId: string): string {
+    return this.buildGVElementId(mapId, 'navBar');
+  }
+
+  /**
+   * Gets the map's navigation bar element.
+   *
+   * @param mapId - The map identifier
+   * @returns The navigation bar HTML element, if found
+   */
+  static getNavBar(mapId: string): HTMLElement | undefined {
+    return this.getGVElementById(mapId, 'navBar');
+  }
+
+  /**
+   * Gets the map's overview map control elements.
+   *
+   * Several instances can briefly exist during a window resize; the duplicates are hidden by CSS.
+   *
+   * @param mapId - The map identifier
+   * @returns The overview map control HTML elements (empty when the overview map is not shown)
+   */
+  static getOverviewMapControls(mapId: string): HTMLElement[] {
+    return this.queryGVSelectorAll(mapId, '.ol-overviewmap.ol-custom-overviewmap');
+  }
+
+  /**
    * Builds the DOM id for the map's home button.
    *
    * @param mapId - The map identifier

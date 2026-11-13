@@ -16,6 +16,7 @@ Read only the linked section of each doc: search for its heading and read to the
 | Awaitable test zoom versus immediate MapViewer call                       | [Test zoom gotcha](../../docs/app/testing/test-templates.md#controllers-vs-mapviewer-for-zoom)                                                                                             |
 | Viewport boundary sampling and midpoint fitting                           | [Visible Viewport Boundary](../../docs/app/api/map-viewer-api.md#visible-viewport-boundary)                                                                                                |
 | Fullscreen enter/exit view restore, size-driven view constraints          | [Fullscreen view preservation](../../docs/programming/controller-architecture.md#fullscreen-view-preservation)                                                                             |
+| Feature/group zoom bound, WMS click-point extents, fit padding, marker    | [Feature and result-group zoom](../../docs/programming/controller-architecture.md#feature-and-result-group-zoom)                                                                           |
 
 ## Viewport boundary and midpoint fitting
 

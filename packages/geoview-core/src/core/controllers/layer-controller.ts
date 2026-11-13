@@ -101,7 +101,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, OL_ZOOM_FEATURE_MAX_SCALE, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -825,23 +825,20 @@ export class LayerController extends AbstractMapViewerController {
    */
   async zoomToFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<void> {
     let extent: Extent | undefined;
-    const objectIdsNeedingLookup: number[] = [];
-    let oidField: string | undefined;
+    const featuresWithoutExtent: TypeFeatureInfoEntry[] = [];
 
     features.forEach((feature) => {
-      if (feature.extent) {
-        extent = GeoUtilities.getExtentUnion(extent, feature.extent);
-        return;
-      }
-
-      // Determine the oid field once, from the first feature that has one
-      if (!oidField) oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
-      if (oidField && feature.fieldInfo[oidField]) {
-        objectIdsNeedingLookup.push(feature.fieldInfo[oidField]!.value as number);
-      }
+      if (feature.extent) extent = GeoUtilities.getExtentUnion(extent, feature.extent);
+      else featuresWithoutExtent.push(feature);
     });
 
     // Look up the extent for features that didn't already carry one
+    const oidField = GeoUtilities.getFeaturesOidFieldName(featuresWithoutExtent);
+    const objectIdsNeedingLookup = oidField
+      ? featuresWithoutExtent
+          .filter((feature) => feature.fieldInfo[oidField])
+          .map((feature) => feature.fieldInfo[oidField]!.value as number)
+      : [];
     if (objectIdsNeedingLookup.length > 0 && oidField) {
       const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIdsNeedingLookup, oidField);
       extent = GeoUtilities.getExtentUnion(extent, lookedUpExtent);
@@ -852,6 +849,55 @@ export class LayerController extends AbstractMapViewerController {
 
     // Zoom to it
     await this.getControllersRegistry().mapController.zoomToExtent(extent);
+  }
+
+  /**
+   * Zooms to the combined extent of a group of feature results (e.g. all results of one layer for the current map click).
+   *
+   * Group zoom policy:
+   * - Unions every valid geometry extent; invalid (non-finite or inverted) extents and entries without geometry
+   *   (e.g. pure WMS, whose extent is only the click point) are ignored.
+   * - Features without a valid geometry extent are looked up by object id when possible; lookup failures are logged and ignored.
+   * - The zoom-in is bounded so a tiny or coincident-point union never zooms closer than
+   *   `OL_ZOOM_FEATURE_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
+   * - The layer visibility-scale range always wins: the bound is relaxed to remain inside the layer's zoomed-out limit and,
+   *   when the union cannot fit inside that limit, the map centers on the union at the limit (some results may be outside).
+   * - After zooming, the click marker is hidden (it only marks the map click) and the union is shown with a fading
+   *   bounding box; feature highlights are unchanged.
+   *
+   * @param layerPath - The layer path the features belong to
+   * @param features - The feature results forming the group
+   * @param fitOptions - Optional fit options (e.g. padding) to merge the group and layer constraints into
+   * @param isStale - Optional callback telling whether the group became stale (new click or layer switch) while extents were resolved
+   * @returns A promise that resolves with true when the map was zoomed, or false when the request became stale
+   * @throws {NoExtentError} When no valid extent could be determined from the provided features
+   */
+  async zoomToFeaturesGroupExtent(
+    layerPath: string,
+    features: TypeFeatureInfoEntry[],
+    fitOptions?: GVFitOptions,
+    isStale?: () => boolean
+  ): Promise<boolean> {
+    // Union the valid geometry extents, then look up the extents of features that don't carry a valid one
+    const lookedUpExtent = await this.#lookupMissingFeaturesExtent(layerPath, features);
+    const extent = GeoUtilities.getExtentUnion(GeoUtilities.getFeaturesGeometryExtent(features), lookedUpExtent);
+
+    // Never move the map for a group replaced while the asynchronous lookup was running
+    if (isStale?.()) return false;
+
+    // If no valid extent could be determined
+    if (!extent) throw new NoExtentError(layerPath);
+
+    // Zoom with the bounded zoom-in policy, and keep the layer's own scale constraints
+    await this.zoomToExtentRestricted(layerPath, extent, true, {
+      ...(fitOptions ?? {}),
+      ...this.#getFeatureZoomInFitConstraints(layerPath),
+    });
+
+    // Hide the click marker and outline the zoomed group extent unless the group was replaced during the animation
+    if (isStale?.()) return false;
+    this.#hideClickMarkerAndOutline(extent);
+    return true;
   }
 
   /**
@@ -928,7 +974,9 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Zooms to a feature's extent clamped to the layer's visible scale range, then highlights the feature.
    *
-   * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
+   * The zoom-in is bounded like the group zoom: it never zooms closer than `OL_ZOOM_FEATURE_MAX_SCALE` (e.g. for points),
+   * unless the map is already closer, in which case the current resolution is kept; the layer's visibility-scale range wins.
+   * After the zoom completes, hides the click marker (it only marks the map click), highlights the bounding box
    * with a fade-out effect, and sets the feature as the active highlight.
    *
    * @param layerPath - The layer path used to look up scale limits
@@ -947,23 +995,41 @@ export class LayerController extends AbstractMapViewerController {
     fitOptions?: GVFitOptions,
     isTemporaryHighlight = false
   ): Promise<void> {
-    // Get extent and center
-    const center = getCenter(extent);
+    // Zoom to extent with the bounded feature zoom-in (e.g. points stop at OL_ZOOM_FEATURE_MAX_SCALE) and wait for it to finish
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
+      ...(fitOptions ?? {}),
+      ...this.#getFeatureZoomInFitConstraints(layerPath),
+    });
 
-    // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
-    const lonlatCenter = Projection.transformToLonLat(
-      center,
-      Projection.getProjectionFromStringOrNumber(this.getMapViewer().getProjection())
-    );
-
-    // Zoom to extent and wait for it to finish
-    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, fitOptions);
-
-    // Add a click marker, a bbox extent who will disappear and remove/add higlight the zoomed feature
-    this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
-    this.getControllersRegistry().mapController.highlightBBox(extent, false);
+    // Hide the click marker, outline the extent with a fading box and remove/add higlight the zoomed feature
+    this.#hideClickMarkerAndOutline(extent);
     this.getControllersRegistry().mapController.removeHighlightedFeature('all');
     this.getControllersRegistry().mapController.addHighlightedFeature(feature, isTemporaryHighlight);
+  }
+
+  /**
+   * Brings a feature extent into view without zooming in, then outlines it (e.g. Details previous/next after a zoom to feature).
+   *
+   * Fits the whole extent with the current resolution as minimum resolution: the map only pans when the extent fits at the
+   * current resolution, and zooms out just enough when it does not. The fit padding (e.g. an open app-bar panel, map
+   * controls) and the layer's visibility-scale range are honored. Then hides the click marker (it only marks the map click)
+   * and briefly outlines the extent; feature highlights are left to the caller.
+   *
+   * @param layerPath - The layer path used to look up scale limits
+   * @param extent - The feature extent to bring into view (in map projection)
+   * @param useAnimation - Optional flag indicating if an animation should be used, default: true
+   * @param fitOptions - Optional fit options (e.g. padding) to merge the constraints into
+   * @returns A promise that resolves when the map moved and the extent is outlined
+   */
+  async panToExtentRestrictedAndOutline(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
+    // Never zoom in: keep at least the current resolution, zooming out only when the extent does not fit
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
+      ...(fitOptions ?? {}),
+      minResolution: this.getMapViewer().getView().getResolution(),
+    });
+
+    // Outline the extent like a feature zoom does
+    this.#hideClickMarkerAndOutline(extent);
   }
 
   /**
@@ -2945,6 +3011,73 @@ export class LayerController extends AbstractMapViewerController {
 
     // Remove the layer from deletion
     delete this.#layersBeingDeleted[layerPath];
+  }
+
+  /**
+   * Looks up, by object id, the extent of the features that don't carry a valid extent.
+   *
+   * Lookup failures (e.g. unsupported layer type or service error) are logged and ignored, so the group
+   * zoom can still use the extents that are available.
+   *
+   * @param layerPath - The layer path
+   * @param features - The feature info entries
+   * @returns A promise resolving with the valid looked-up extent, or undefined when none could be determined
+   */
+  async #lookupMissingFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<Extent | undefined> {
+    const featuresNeedingLookup = features.filter((feature) => !GeoUtilities.hasFeatureGeometryExtent(feature));
+    if (featuresNeedingLookup.length === 0) return undefined;
+
+    // Determine the oid field from the first feature that has one
+    const oidField = GeoUtilities.getFeaturesOidFieldName(featuresNeedingLookup);
+    if (!oidField) return undefined;
+
+    const objectIds = featuresNeedingLookup
+      .map((feature) => feature.fieldInfo[oidField]?.value)
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+    if (objectIds.length === 0) return undefined;
+
+    try {
+      const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIds, oidField);
+      return GeoUtilities.isValidOrderedExtent(lookedUpExtent) ? lookedUpExtent : undefined;
+    } catch (error: unknown) {
+      // Log and continue with the embedded extents
+      logger.logWarning(`Unable to look up the missing feature extents for layer '${layerPath}'`, error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Gets the fit constraints bounding how far a feature zoom (single feature or group) can zoom in.
+   *
+   * @param layerPath - The layer path used to look up the zoomed-out limit
+   * @returns The fit options holding the minimum resolution, or empty options when it can't be determined
+   */
+  #getFeatureZoomInFitConstraints(layerPath: string): GVFitOptions {
+    const { mapController } = this.getControllersRegistry();
+    const featureMinResolution = mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE);
+    if (featureMinResolution === undefined) return {};
+
+    // Keep the current resolution when the map is already closer than the feature bound
+    const currentResolution = this.getMapViewer().getView().getResolution();
+    let minResolution = currentResolution !== undefined ? Math.min(featureMinResolution, currentResolution) : featureMinResolution;
+
+    // Relax the bound so the zoom never ends up outside the layer's zoomed-out visibility limit
+    const { minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), this.getLayerEntryConfig(layerPath));
+    const layerMaxResolution = minScaleZoomAt ? mapController.getResolutionFromScale(minScaleZoomAt) : undefined;
+    if (layerMaxResolution !== undefined) minResolution = Math.min(minResolution, layerMaxResolution);
+
+    return { minResolution };
+  }
+
+  /**
+   * Hides the click marker (it only marks the map click, not the zoomed feature) and outlines an extent with a fading box.
+   *
+   * @param extent - The zoomed extent to outline
+   */
+  #hideClickMarkerAndOutline(extent: Extent): void {
+    const { mapController } = this.getControllersRegistry();
+    mapController.clickMarkerIconHide();
+    mapController.highlightBBox(extent, false);
   }
 
   // #endregion PRIVATE METHODS
