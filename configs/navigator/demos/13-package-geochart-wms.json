@@ -1,0 +1,167 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": "Spatiotemporel",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": "Test Spatiotemporel",
+            "source": {
+              "wmsStyle": "Radar-Snow_14colors"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR2-qgis",
+        "geoviewLayerName": "CanVec",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",
+            "layerName": "Stations"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "title": "Line Chart with OGC Features",
+            "query": {
+              "type": "ogcAPIFeatures",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::seismic_reflection:seismic_reflection_imagery",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "YEAR",
+                    "valueFrom": "YEAR"
+                  }
+                ]
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "DATE_START"
+              },
+              "yAxis": {
+                "property": "YEAR"
+              }
+            },
+            "ui": {
+              "download": true
+            },
+            "datasources": [
+              {
+                "display": "1996",
+                "sourceItem": {
+                  "YEAR": 1996
+                }
+              },
+              {
+                "display": "1997",
+                "sourceItem": {
+                  "YEAR": 1997
+                }
+              },
+              {
+                "display": "1998",
+                "sourceItem": {
+                  "YEAR": 1998
+                }
+              },
+              {
+                "display": "1999",
+                "sourceItem": {
+                  "YEAR": 1999
+                }
+              },
+              {
+                "display": "2000",
+                "sourceItem": {
+                  "YEAR": 2000
+                }
+              }
+            ]
+          },
+                    {
+            "layers": [
+              {
+                "layerId": "wmsLYR2-qgis/fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "title": "Line Chart with OGC Features",
+            "query": {
+              "type": "ogcAPIFeatures",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::fpsn:fpsn_latest_90days_measure?f=json",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "YEAR",
+                    "valueFrom": "YEAR"
+                  }
+                ]
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "DATE_START"
+              },
+              "yAxis": {
+                "property": "YEAR"
+              }
+            },
+            "ui": {
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

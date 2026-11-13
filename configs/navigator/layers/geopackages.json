@@ -1,0 +1,95 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "GeoPackageLYR1",
+        "geoviewLayerName": "Class Break Test",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Test.gpkg",
+            "layerName": "Class breaks",
+            "source": {
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "GeoPackageLYR2",
+        "geoviewLayerName": "Rivers and Canals",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "QGIS Packaged Layers (D+S Canal).gpkg",
+            "layerName": "D+S Canal",
+            "source": {
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+            }
+          },
+          {
+            "layerId": "rivers.gpkg",
+            "layerName": "Rivers",
+            "source": {
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "GeoPackageLYR3",
+        "geoviewLayerName": "Natural Earth",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Natural_Earth_QGIS_layers_and_styles.gpkg",
+            "layerName": "Natural Earth",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "Lakes"
+              },
+              {
+                "layerId": "Countries",
+                "initialSettings": {
+                  "states": {
+                    "visible": false
+                  }
+                }
+              }
+            ],
+            "source": {
+              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

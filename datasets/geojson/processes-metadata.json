@@ -1,0 +1,60 @@
+{
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "execution",
+      "layerName": "Raster Drill process",
+      "source": {
+        "dataAccessPath": "https://api.weather.gc.ca/processes/raster-drill/execution",
+        "postSettings": {
+          "header": {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "data": {
+            "inputs": {
+              "layer": "CMIP5.TT.RCP26.YEAR.ANO_PCTL50",
+              "x": -114.74968888274337,
+              "y": 51.132831196692806,
+              "format": "GeoJSON"
+            }
+          }
+        },
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": "label_en",
+          "outfields": [
+            [
+              { "name": "label_en", "alias": "label_en", "type": "string", "domain": null },
+              { "name": "percentile_en", "alias": "percentile_en", "type": "string", "domain": null },
+              { "name": "period_en", "alias": "period_en", "type": "string", "domain": null },
+              { "name": "scenario_en", "alias": "scenario_en", "type": "string", "domain": null },
+              { "name": "time_begin", "alias": "time_begin", "type": "date", "domain": null },
+              { "name": "time_end", "alias": "time_end Date", "type": "date", "domain": null },
+              { "name": "time_step", "alias": "time_step", "type": "string", "domain": null },
+              { "name": "uom", "alias": "uom", "type": "string", "domain": null },
+              { "name": "value_type_en", "alias": "value_type_en", "type": "string", "domain": null },
+              { "name": "variable_en", "alias": "variable_en", "type": "string", "domain": null },
+              { "name": "values", "alias": "values", "type": "number", "domain": null }
+            ]
+          ]
+        }
+      },
+      "style": {
+        "Point": {
+          "styleType": "simple",
+          "label": "Raster Drill process",
+          "settings": {
+            "color": "rgba(128,0,0,0.25)",
+            "type": "simpleSymbol",
+            "symbol": "star",
+            "stroke": {
+              "color": "rgba(128,0,0,1)",
+              "lineStyle": "solid"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

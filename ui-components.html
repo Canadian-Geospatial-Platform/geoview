@@ -1,0 +1,179 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>UI Components - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>UI Components</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#SLIDER">1. Slider MUI Component</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Core UI components</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="SLIDER">1. Slider MUI Component</h4><a class="ref-link" href="#top">Top</a></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'historical-flood',
+                'geoviewLayerName': 'Historical Flood Events (HFE)',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              }
+            ]
+          },
+          'theme': 'geo.ca',
+          'corePackages': []
+        }"></div><p></p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UI1CS" class="panel"></pre><hr/><h4 style="padding-top: 10px; width: 90%; padding-left: 10%">Filter EsriDynamic from slider (Bug - Need to zoom the map to see the layer filtered)</h4><div id="UI1-rangeslider1" class="Panel" style="padding-top: 20px; width: 90%; padding-left: 10%"></div><hr/><div id="UI1-slider1" class="Panel" style="padding-top: 20px; width: 75%; padding-left: 25%"></div><div class="toolbar"><button type="button" id="sliderminmax">Set Slider Min/Max</button> <button type="button" id="slidervalues">Set Slider Values</button></div><hr/><div id="UI1-slider2" class="Panel" style="padding-top: 20px; width: 50%; padding-left: 25%"></div><div class="panel" style="display: block"><h3>Accessing slider value from outside of the core viewer using api event listeners</h3><div class="slider-position2"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>function createAndAddSliderComponent(domId, propsSlider) {
+        // Create the react element
+        const compSlider = cgpv.reactUtilities.react.createElement(cgpv.ui.elements.Slider, propsSlider);
+
+        // Add a slider component and link it to a map with mapId props
+        return cgpv.api.utilities.core.addUiComponent(domId, compSlider);
+      }
+
+      function createAndUpdateSliderComponent(domId, propsSlider, root) {
+        // Create the react element
+        const compSlider = cgpv.reactUtilities.react.createElement(cgpv.ui.elements.Slider, propsSlider);
+
+        // Update the component
+        // GV Ideally, we'd like to reuse the root and just do root.render(), but it is unstable, because react doesn't know if you want to actually change the state inside the Slider component or not.
+        // It'll even try to guess based on the props you've sent it originally. This can be proven with the Math.random() below.
+        // This can lead to unexpected results. So, I've ended up just unmounting and recreating from scratch to make sure all state is reset inside Slider.
+        // In any case, jumping into react behavior from pure JavaScript calls seems counter-pattern and will need careful design and consideration on how to
+        // bridge the gap between React's declarative model and imperative JavaScript code. This pattern might lead to more issues like this down the road.
+        // If we really want to do that, I'm afraid we'll need explicit callbacks provided back via props - to pretend we're in React when we're not.
+
+        // Swap between twose 2 pattern to notice how the slider behaves when clicking a button, then scrolling, then clicking button again.
+        // 1) just recreates from scratch a new component
+        // 2) works for the min/max perfectly, but for the 'value' props it's hit or miss, because of the internal state on it, depending on the value given on each update!
+        //    To test, click button, move slider, click button again.
+
+        // 1)
+        root.unmount();
+        return cgpv.api.utilities.core.addUiComponent(domId, compSlider);
+
+        // 2)
+        // root.render(compSlider);
+        // return root;
+      }
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          /**
+           * RANGE SLIDER UI SECTION START
+           */
+          // add a slider component and link it to a map with mapId props
+          cgpv.api.utilities.core.addUiComponent(
+            'UI1-rangeslider1',
+            cgpv.reactUtilities.createElement(cgpv.ui.elements.Slider, {
+              mapId: 'map1',
+              id: 'UI1-slider-flood',
+              min: 1696,
+              max: 2023,
+              value: [1696, 2023],
+              marks: [
+                { value: 1696, label: '1696' },
+                { value: 1700, label: '1700' },
+                { value: 1800, label: '1800' },
+                { value: 1900, label: '1900' },
+                { value: 2000, label: '2000' },
+                { value: 2023, label: '2023' },
+              ],
+              track: 'normal',
+              onChange: (dates) => {
+                const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTimeDimension().field;
+                mapViewer.layer.getGeoviewLayer('historical-flood/0').applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+              },
+            })
+          );
+          /**
+           * RANGE SLIDER UI SECTION END
+           */
+
+          /**
+           * SLIDER UI SECTION START
+           */
+
+          // get the slider position 2 dom element
+          const sliderPosition2 = document.getElementsByClassName('slider-position2');
+
+          // Props for slider 1
+          const propsSlider1 = {
+            mapId: 'map1',
+            id: 'UI1-slider1',
+            min: 0,
+            max: 18,
+            value: 8,
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 4, label: 'Level 4' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
+            track: false,
+            onChange: (zoomLevel) => {
+              const lat = 50;
+              const lng = -95;
+              mapViewer.getView().animate({ zoom: zoomLevel });
+            },
+          };
+
+          // Create and add the react element
+          let root1 = createAndAddSliderComponent('UI1-slider1', propsSlider1);
+
+          // set min max
+          function setSliderMinMax() {
+            // Update the react component from external call
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12 }, root1);
+          }
+          document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax);
+
+          // set values
+          function setSliderValues() {
+            // Update the react component from external call
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, value: 12 }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
+          }
+          document.getElementById('slidervalues').addEventListener('click', setSliderValues);
+
+          // Props for slider 2
+          const propsSlider2 = {
+            id: 'UI1-slider2',
+            min: 0,
+            max: 18,
+            value: [5, 10],
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 2 },
+              { value: 4, label: 'Level 4' },
+              { value: 5, label: 'Level 5' },
+              { value: 6, label: 'Level 6' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
+            onChange: (sliderValues, activeThumb) => {
+              sliderPosition2[0].innerHTML = `<p>Slider values ${sliderValues} and active thumb ${
+                activeThumb === 0 ? 'left' : 'right'
+              }</p>`;
+            },
+          };
+
+          // Create and add the react element
+          const root2 = createAndAddSliderComponent('UI1-slider2', propsSlider2);
+
+          /**
+           * SLIDER UI SECTION END
+           */
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

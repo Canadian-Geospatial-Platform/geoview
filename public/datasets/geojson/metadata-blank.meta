@@ -1,0 +1,41 @@
+{
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "blank.json",
+      "layerName": "Blank",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Red",
+          "outfields": [
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
+          ]
+        }
+      },
+      "layerStyle": {
+        "Point": {
+          "type": "simple",
+          "hasDefault": false,
+          "fields": [],
+          "info": [
+            {
+              "label": "Point label",
+              "visible": true,
+              "values": [],
+              "settings": {
+                "type": "simpleSymbol",
+                "symbol": "square"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
