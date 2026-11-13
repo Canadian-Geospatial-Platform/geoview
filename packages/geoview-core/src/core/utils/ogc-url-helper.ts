@@ -58,3 +58,30 @@ export function encodeLayersParam(url: string): string {
     return `${sep}${key}=${encodeURIComponent(value)}`;
   });
 }
+
+/**
+ * Resolves the next page URL advertised by an OGC API Features response.
+ *
+ * @param responseData - The OGC API Features response
+ * @param currentPageUrl - The unproxied current page URL used to resolve relative links
+ * @returns The absolute next page URL, or undefined when the response has no next link
+ * @throws {TypeError} When an advertised next page URL is invalid
+ */
+export function getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: string): string | undefined {
+  if (typeof responseData !== 'object' || responseData === null || !('links' in responseData) || !Array.isArray(responseData.links)) {
+    return undefined;
+  }
+
+  const nextLink = responseData.links.find((link: unknown): link is { rel: 'next'; href: string } => {
+    return (
+      typeof link === 'object' && link !== null && 'rel' in link && link.rel === 'next' && 'href' in link && typeof link.href === 'string'
+    );
+  });
+
+  if (!nextLink) return undefined;
+
+  const nextPageUrl = new URL(nextLink.href, currentPageUrl);
+  const currentPageCrs = new URL(currentPageUrl).searchParams.get('crs');
+  if (currentPageCrs && !nextPageUrl.searchParams.has('crs')) nextPageUrl.searchParams.set('crs', currentPageCrs);
+  return nextPageUrl.toString();
+}
