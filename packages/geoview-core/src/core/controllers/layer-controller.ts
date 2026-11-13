@@ -101,7 +101,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION, OL_ZOOM_FEATURES_GROUP_MAX_SCALE, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, OL_ZOOM_FEATURE_MAX_SCALE, OL_ZOOM_PERCENT_PADDING, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -859,7 +859,7 @@ export class LayerController extends AbstractMapViewerController {
    *   (e.g. pure WMS, whose extent is only the click point) are ignored.
    * - Features without a valid geometry extent are looked up by object id when possible; lookup failures are logged and ignored.
    * - The zoom-in is bounded so a tiny or coincident-point union never zooms closer than
-   *   `OL_ZOOM_FEATURES_GROUP_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
+   *   `OL_ZOOM_FEATURE_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
    * - The layer visibility-scale range always wins: the bound is relaxed to remain inside the layer's zoomed-out limit and,
    *   when the union cannot fit inside that limit, the map centers on the union at the limit (some results may be outside).
    * - After zooming, the union is shown with a fading bounding box; the click marker and feature highlights are unchanged.
@@ -890,7 +890,7 @@ export class LayerController extends AbstractMapViewerController {
     // Zoom with the bounded zoom-in policy, and keep the layer's own scale constraints
     await this.zoomToExtentRestricted(layerPath, extent, true, {
       ...(fitOptions ?? {}),
-      ...this.#getFeaturesGroupFitConstraints(layerPath),
+      ...this.#getFeatureZoomInFitConstraints(layerPath),
     });
 
     // Show the zoomed group extent unless the group was replaced during the animation
@@ -973,6 +973,8 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Zooms to a feature's extent clamped to the layer's visible scale range, then highlights the feature.
    *
+   * The zoom-in is bounded like the group zoom: it never zooms closer than `OL_ZOOM_FEATURE_MAX_SCALE` (e.g. for points),
+   * unless the map is already closer, in which case the current resolution is kept; the layer's visibility-scale range wins.
    * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
    * with a fade-out effect, and sets the feature as the active highlight.
    *
@@ -1001,8 +1003,11 @@ export class LayerController extends AbstractMapViewerController {
       Projection.getProjectionFromStringOrNumber(this.getMapViewer().getProjection())
     );
 
-    // Zoom to extent and wait for it to finish
-    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, fitOptions);
+    // Zoom to extent with the bounded feature zoom-in (e.g. points stop at OL_ZOOM_FEATURE_MAX_SCALE) and wait for it to finish
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
+      ...(fitOptions ?? {}),
+      ...this.#getFeatureZoomInFitConstraints(layerPath),
+    });
 
     // Add a click marker, a bbox extent who will disappear and remove/add higlight the zoomed feature
     this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
@@ -3026,19 +3031,19 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Gets the fit constraints bounding how far a feature group zoom can zoom in.
+   * Gets the fit constraints bounding how far a feature zoom (single feature or group) can zoom in.
    *
    * @param layerPath - The layer path used to look up the zoomed-out limit
    * @returns The fit options holding the minimum resolution, or empty options when it can't be determined
    */
-  #getFeaturesGroupFitConstraints(layerPath: string): GVFitOptions {
+  #getFeatureZoomInFitConstraints(layerPath: string): GVFitOptions {
     const { mapController } = this.getControllersRegistry();
-    const groupMinResolution = mapController.getResolutionFromScale(OL_ZOOM_FEATURES_GROUP_MAX_SCALE);
-    if (groupMinResolution === undefined) return {};
+    const featureMinResolution = mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE);
+    if (featureMinResolution === undefined) return {};
 
-    // Keep the current resolution when the map is already closer than the group bound
+    // Keep the current resolution when the map is already closer than the feature bound
     const currentResolution = this.getMapViewer().getView().getResolution();
-    let minResolution = currentResolution !== undefined ? Math.min(groupMinResolution, currentResolution) : groupMinResolution;
+    let minResolution = currentResolution !== undefined ? Math.min(featureMinResolution, currentResolution) : featureMinResolution;
 
     // Relax the bound so the zoom never ends up outside the layer's zoomed-out visibility limit
     const { minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), this.getLayerEntryConfig(layerPath));

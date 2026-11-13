@@ -32,6 +32,8 @@ interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
   /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
+  /** Optional callback when the user zooms to the feature. */
+  onFeatureZoomed?: () => void;
 }
 
 /** Properties for the FeatureHeader component. */
@@ -183,7 +185,7 @@ FeatureHeader.displayName = 'FeatureHeader';
  * @param props - Properties defined in FeatureInfoProps interface
  * @returns The feature info component, or null if no feature
  */
-export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.Element | null {
+export function FeatureInfo({ feature, containerType, onFeatureZoomed }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
@@ -307,6 +309,9 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       // Skip when there is no extent to zoom to
       if (!feature?.extent) return;
 
+      // Let the panel know the user zoomed, so previous/next can follow the selected feature
+      onFeatureZoomed?.();
+
       // Zoom to the feature extent, keeping it out of an open app-bar panel, and highlight it (skipped for geometries too complex to render)
       layerController
         .zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true, getPanelFitOptions())
@@ -315,7 +320,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
           logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
         });
     },
-    [feature, layerController, getPanelFitOptions]
+    [feature, layerController, getPanelFitOptions, onFeatureZoomed]
   );
 
   /**

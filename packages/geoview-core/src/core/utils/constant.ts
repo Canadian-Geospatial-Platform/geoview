@@ -32,10 +32,11 @@ export const OL_ZOOM_PERCENT_PADDING: [number, number] = [0.05, 0.05];
 export const OL_ZOOM_PIXEL_PADDING = 50;
 
 /**
- * Closest scale denominator (1:10,000) a feature group zoom (e.g. Details "zoom to all results") can reach.
- * Prevents tiny or coincident-point unions from zooming excessively close; the current resolution is kept when already closer.
+ * Closest scale denominator (1:10,000) a feature zoom can reach: Details and Data Table "zoom to feature"
+ * and Details "zoom to all results". Prevents points, coincident points and tiny extents from zooming excessively
+ * close; the current resolution is kept when already closer, and the layer visibility-scale range takes precedence.
  */
-export const OL_ZOOM_FEATURES_GROUP_MAX_SCALE = 10000;
+export const OL_ZOOM_FEATURE_MAX_SCALE = 10000;
 
 /** Map fit padding in map pixels ordered as top, right, bottom, left. */
 export type TypeMapFitPadding = [number, number, number, number];
