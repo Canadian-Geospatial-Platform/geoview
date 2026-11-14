@@ -77,6 +77,34 @@ export declare abstract class DomHelper {
      */
     static queryGVSelectorAll<T extends Element = HTMLElement>(mapId: string, selector: string): T[];
     /**
+     * Gets the layer list item button in the specified Layers panel.
+     *
+     * @param mapId - The map identifier
+     * @param layerPath - The full layer path
+     * @param containerType - The app bar or footer bar containing the Layers panel
+     * @returns The layer list item button element, or undefined when it is not rendered
+     */
+    static getLayerBoxInLayersPanel(mapId: string, layerPath: string, containerType: TypeContainerBox): HTMLElement | undefined;
+    /**
+     * Gets the visibility toggle button for a layer in a map's layer panel.
+     *
+     * @param mapId - The map identifier
+     * @param layerPath - The full layer path
+     * @param containerType - The app bar or footer bar containing the Layers panel
+     * @returns The visibility button, or undefined when the layer row or button is not rendered
+     */
+    static getVisibleButton(mapId: string, layerPath: string, containerType: TypeContainerBox): HTMLButtonElement | undefined;
+    /**
+     * Checks whether a layer's visibility button displays the visible eye icon.
+     *
+     * @param mapId - The map identifier
+     * @param layerPath - The full layer path
+     * @param containerType - The app bar or footer bar containing the Layers panel
+     * @returns True for the visible eye icon, or false for the hidden eye icon
+     * @throws {Error} When the visibility button is missing or its eye icon state is ambiguous
+     */
+    static getVisibleButtonVisibility(mapId: string, layerPath: string, containerType: TypeContainerBox): boolean;
+    /**
      * Returns visible tabbable elements in keyboard order within a map's focus trap.
      *
      * MUI's default list includes elements hidden by panels, which can leave Shift+Tab on the first skip link with nowhere visible to go.
@@ -209,6 +237,12 @@ export declare abstract class DomHelper {
      * @returns A promise that resolves when the browser reports an idle period
      */
     static waitForBrowserIdle(): Promise<void>;
+    /**
+     * Builds the DOM id for a map's shell container.
+     *
+     * @param mapId - The map identifier
+     * @returns The map-scoped shell container id
+     */
     static buildShellId(mapId: string): string;
     /**
      * Resolves a map's shell container element (the wrapper around the whole viewer chrome).
@@ -379,6 +413,36 @@ export declare abstract class DomHelper {
      */
     static getButtonHome(mapId: string): HTMLElement | undefined;
     /**
+     * Builds the DOM id for the map's zoom-in button.
+     *
+     * @param mapId - The map identifier
+     * @returns The map-scoped zoom-in button id
+     */
+    static buildButtonZoomInId(mapId: string): string;
+    /**
+     * Gets the map's zoom-in button.
+     *
+     * @param mapId - The map identifier
+     * @returns The zoom-in button element, or undefined when it is not present
+     * @throws {Error} When the root element is not found
+     */
+    static getButtonZoomIn(mapId: string): HTMLElement | undefined;
+    /**
+     * Builds the DOM id for the map's zoom-out button.
+     *
+     * @param mapId - The map identifier
+     * @returns The map-scoped zoom-out button id
+     */
+    static buildButtonZoomOutId(mapId: string): string;
+    /**
+     * Gets the map's zoom-out button.
+     *
+     * @param mapId - The map identifier
+     * @returns The zoom-out button element, or undefined when it is not present
+     * @throws {Error} When the root element is not found
+     */
+    static getButtonZoomOut(mapId: string): HTMLElement | undefined;
+    /**
      * Builds the DOM id for a map's measurement button.
      *
      * @param mapId - The map identifier
@@ -495,6 +559,14 @@ export declare abstract class DomHelper {
      */
     static getAppBarVersionFocusTrap(mapId: string): HTMLElement | undefined;
     /**
+     * Builds the DOM id for an app bar tab's panel button.
+     *
+     * @param mapId - The map identifier
+     * @param tabId - The app bar tab identifier
+     * @returns The map-scoped app bar panel button id
+     */
+    static buildAppBarPanelButtonId(mapId: string, tabId: string): string;
+    /**
      * Gets an app bar tab button element.
      *
      * @param mapId - The map identifier
@@ -502,6 +574,14 @@ export declare abstract class DomHelper {
      * @returns The app bar button element, if found
      */
     static getAppBarButton(mapId: string, tabId: string): HTMLElement | undefined;
+    /**
+     * Builds the DOM id for an app bar tab's panel.
+     *
+     * @param mapId - The map identifier
+     * @param tabId - The app bar tab identifier
+     * @returns The map-scoped app bar panel id
+     */
+    static buildAppBarPanelId(mapId: string, tabId: string): string;
     /**
      * Gets an app bar panel element.
      *
