@@ -39,7 +39,7 @@ import { type GVFitOptions } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import { type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from './feature-highlight';
 /**
@@ -401,10 +401,13 @@ export declare class MapViewer {
     /**
      * Simulate a map click and return promises of store update and ui update.
      *
+     * This will return the results of the query itself as a promise.
+     * Remember than the UI is batched and you should await for the batched results to propagate before verifying the results are appearing in the UI.
+     *
      * @param lonlat - The lonlat coordinates to simulate
      * @returns The simulated map click information
      */
-    simulateMapClick(lonlat: Coordinate): SimulatedMapClick;
+    simulateMapClick(lonlat: Coordinate): Promise<TypeFeatureInfoResultSet>;
     /**
      * Shows a marker on the map.
      *
@@ -1213,13 +1216,4 @@ export interface MarkerIconShowedEvent extends MapBaseEvent {
  * Delegate for the marker icon showed event handler function signature.
  */
 export type MarkerIconShowedDelegate = EventDelegateBase<MapViewer, MarkerIconShowedEvent, void>;
-/**
- * Define a return type for a map click simulation to be able to await on different promises.
- */
-export type SimulatedMapClick = {
-    /** Promise resolving when the query of the map click is complete */
-    promiseQuery: Promise<TypeFeatureInfoResultSet>;
-    /** Promise resolving when the query of the map click is complete and the UI has been updated */
-    promiseQueryBatched: Promise<void>;
-};
 //# sourceMappingURL=map-viewer.d.ts.map

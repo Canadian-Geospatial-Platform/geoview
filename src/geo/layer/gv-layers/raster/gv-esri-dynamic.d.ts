@@ -101,6 +101,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the hit tolerance of the layer.
      *
+     * The identify REST call has no notion of the rendered symbol (unlike OL's vector hit-testing). For point/icon symbols,
+     * the radius is already known from the style parsed from the service's renderer metadata, so it's used directly. For
+     * other geometries (or when no symbol radius is available), there's nothing to size the tolerance from, so it falls back
+     * to the layer type's default.
+     *
      * @returns The hit tolerance for a GV Esri Dynamic layer
      */
     getHitTolerance(): number;
@@ -136,7 +141,7 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @returns A promise that resolves with the feature info result
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, rawLonLat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
      *

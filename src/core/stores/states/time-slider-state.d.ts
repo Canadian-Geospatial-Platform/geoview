@@ -269,14 +269,14 @@ export type TimeSliderLayerSet = {
 export interface TypeTimeSliderValues {
     /** Optional layer paths of additional layers associated with this time slider. */
     additionalLayerpaths?: string[];
-    /** Animation delay in milliseconds between steps. */
-    delay: number;
     /** The initial slider handle values used as the reset target. */
     defaultValues: number[];
     /** Optional description displayed in the time slider panel. */
     description?: string;
     /** Whether the time dimension uses discrete values rather than a continuous range. */
     discreteValues: boolean;
+    /** Animation delay in milliseconds between steps. */
+    delay?: number;
     /** Optional step increment for the slider. */
     step?: number;
     /** Calendar unit used when advancing a continuous slider value. */
