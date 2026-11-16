@@ -19,12 +19,12 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
   LayerFeatureParsingError,
-  LayerTooManyEsriFeatures,
+  LayerTooManyFeatures,
 } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError, NetworkError, RequestTimeoutError, ResponseContentError, ResponseError } from '@/core/exceptions/core-exceptions';
+import { formatError, RequestTimeoutError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
 import { delay } from '@/core/utils/utilities';
@@ -206,7 +206,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features
-   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features
+   * @throws {LayerTooManyFeatures} When the layer has too many features
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -224,12 +224,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(`${url}/query?f=json&where=1=1&returnCountOnly=true`);
 
     // Check if feature count is too large
-    if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
+    if (responseDataCount.count > AbstractGeoViewVector.MAX_FEATURES) {
       // Throw
-      throw new LayerTooManyEsriFeatures(
+      throw new LayerTooManyFeatures(
         layerConfigEsriFeature.layerId,
         layerConfigEsriFeature.getLayerNameCascade(),
-        responseDataCount.count
+        responseDataCount.count,
+        AbstractGeoViewVector.MAX_FEATURES
       );
     }
 
@@ -413,8 +414,8 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Fetches features from ESRI Feature services with query and feature limits.
    *
-   * Chunk requests are throttled to a maximum concurrency and each chunk is retried with exponential backoff on
-   * transient failures (server HTTP 5xx, ESRI embedded query error, network error, timeout). Bursting every page at
+   * Chunk requests are throttled to a maximum concurrency. Fetch handles HTTP/network retries, while this loader
+   * retries ESRI embedded query errors and timeouts with exponential backoff. Bursting every page at
    * once makes the ArcGIS server return load-induced `500 | Error performing query operation` responses on large
    * layers; throttling and retrying let the layer load reliably on the first attempt instead of being dropped.
    *
@@ -473,19 +474,14 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Determines whether a chunk request error is transient and worth retrying.
    *
-   * Deliberate cancellations (aborts) are never retried; server content/HTTP errors, network errors and timeouts are
-   * treated as transient because they are typically load-induced for large geometry queries.
+   * Deliberate cancellations (aborts) are never retried. HTTP/network errors have already exhausted Fetch's retry
+   * policy; only ESRI embedded query errors and timeouts receive loader-specific retries.
    *
    * @param error - The error thrown by the chunk request
    * @returns Whether the error is transient
    */
   static #isTransientEsriError(error: unknown): boolean {
-    return (
-      error instanceof ResponseContentError ||
-      error instanceof ResponseError ||
-      error instanceof NetworkError ||
-      error instanceof RequestTimeoutError
-    );
+    return error instanceof ResponseContentError || error instanceof RequestTimeoutError;
   }
 
   // #endregion STATIC METHODS

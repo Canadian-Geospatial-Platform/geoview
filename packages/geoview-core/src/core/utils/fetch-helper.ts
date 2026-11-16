@@ -1,4 +1,4 @@
-import { delay, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
+import { delay, doTimeout, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
 import {
   ResponseEmptyError,
   ResponseError,
@@ -20,8 +20,12 @@ export interface HeadResult {
 
 /** Provides static methods for performing HTTP fetch operations with timeout and abort support. */
 export abstract class Fetch {
+  /** Maximum retries after the initial safe request fails. */
+  static readonly #MAX_RETRIES = 3;
+
   /**
    * Fetches a url for a json response.
+   * Safe requests retry transient failures up to three times within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -55,7 +59,7 @@ export abstract class Fetch {
       if (delayMs) await delay(delayMs);
 
       // Query and read
-      const response = await fetch(url, {
+      const response = await Fetch.#fetchWithRetry(url, {
         ...init,
         signal: combinedSignal,
       });
@@ -144,6 +148,7 @@ export abstract class Fetch {
 
   /**
    * Fetches a url for a text response.
+   * Inherits safe-request retries from fetchArrayBuffer.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -175,6 +180,7 @@ export abstract class Fetch {
 
   /**
    * Fetches a url for an array buffer response.
+   * Safe requests retry transient failures up to three times within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -203,7 +209,7 @@ export abstract class Fetch {
 
     try {
       // Query and read
-      const response = await fetch(url, {
+      const response = await Fetch.#fetchWithRetry(url, {
         ...init,
         signal: combinedSignal,
       });
@@ -610,6 +616,101 @@ export abstract class Fetch {
 
     // Return the result of the validation of the content
     return { valid, code, error: message, details };
+  }
+
+  /**
+   * Retries safe requests on rate limiting, transient server responses, and network failures.
+   * Parsing remains with the caller so malformed response bodies are never retried.
+   *
+   * @param url - The request URL
+   * @param init - Request options including the combined abort and timeout signal
+   * @returns The final HTTP response, including unsuccessful responses after retry exhaustion
+   * @throws {TypeError} When a network failure persists or the request is invalid
+   * @throws {RequestAbortedError} When cancelled during a retry wait
+   */
+  static async #fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+    const method = (init.method ?? 'GET').toUpperCase();
+    const canRetry = (method === 'GET' || method === 'HEAD') && !init.body;
+    for (let attempt = 0; ; attempt++) {
+      let response: Response | undefined;
+      let waitMs = 1000 * 2 ** attempt;
+      try {
+        // GV Requests are intentionally sequential, with at most #MAX_RETRIES retries.
+        // eslint-disable-next-line no-await-in-loop
+        response = await fetch(url, init);
+      } catch (error: unknown) {
+        if (!canRetry || attempt >= Fetch.#MAX_RETRIES || init.signal?.aborted || !(error instanceof TypeError)) throw error;
+        logger.logWarning(`Network request failed; retrying (${attempt + 1}/${Fetch.#MAX_RETRIES}) in ${waitMs} ms.`, error);
+      }
+
+      if (response) {
+        if (!canRetry || attempt >= Fetch.#MAX_RETRIES || ![429, 500, 502, 503, 504].includes(response.status) || init.signal?.aborted) {
+          return response;
+        }
+
+        waitMs = Fetch.#getRetryDelay(response, attempt);
+
+        // Release discarded responses before waiting or issuing another request.
+        // eslint-disable-next-line no-await-in-loop
+        await response.body?.cancel();
+        logger.logWarning(`HTTP ${response.status}; retrying request (${attempt + 1}/${Fetch.#MAX_RETRIES}) in ${waitMs} ms.`);
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await Fetch.#waitForRetry(waitMs, init.signal ?? undefined);
+    }
+  }
+
+  /**
+   * Uses Retry-After seconds or an HTTP date when readable, otherwise exponential backoff.
+   *
+   * @param response - The response requesting a retry
+   * @param attempt - The zero-based retry index
+   * @returns The delay in milliseconds (429 defaults to 5, 10, then 20 seconds) others use 2, 5 then 10 seconds
+   */
+  static #getRetryDelay(response: Response, attempt: number): number {
+    const retryAfter = response.headers.get('Retry-After')?.trim();
+    if (retryAfter) {
+      let waitMs = NaN;
+      if (/^\d+$/.test(retryAfter)) waitMs = Number(retryAfter) * 1000;
+      else if (/^[A-Za-z]/.test(retryAfter)) waitMs = Date.parse(retryAfter) - Date.now();
+      if (Number.isFinite(waitMs)) return Math.max(0, waitMs);
+    }
+    // If 429 Too Many Requests
+    if (response.status === 429) {
+      // Default retry delays for 429
+      return [5000, 10000, 20000][attempt] ?? 20000;
+    }
+
+    // Default retry delays for others
+    return [2000, 5000, 10000][attempt] ?? 10000;
+  }
+
+  /**
+   * Waits for a retry without delaying cancellation or overflowing platform timers.
+   *
+   * @param waitMs - The requested delay in milliseconds
+   * @param signal - The combined caller and timeout signal
+   * @throws {RequestAbortedError} When the signal aborts before or during the wait
+   */
+  static async #waitForRetry(waitMs: number, signal?: AbortSignal): Promise<void> {
+    let remainingMs = waitMs;
+    do {
+      if (signal?.aborted) throw new RequestAbortedError(signal);
+      const duration = Math.min(remainingMs, 2147483647);
+      const job = doTimeout(duration);
+      signal?.addEventListener('abort', job.cancel, { once: true });
+      try {
+        // GV Split only exceptionally long Retry-After values to avoid timer overflow.
+        // eslint-disable-next-line no-await-in-loop
+        await job.promise;
+        if (signal?.aborted) throw new RequestAbortedError(signal);
+      } finally {
+        signal?.removeEventListener('abort', job.cancel);
+        job.cancel();
+      }
+      remainingMs -= duration;
+    } while (remainingMs > 0);
   }
 
   /**

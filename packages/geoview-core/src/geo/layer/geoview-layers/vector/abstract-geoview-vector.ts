@@ -36,7 +36,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     .concat(this.EXCLUDED_HEADERS_GEN)
     .concat(this.EXCLUDED_HEADERS_STYLE);
 
-  static readonly MAX_ESRI_FEATURES = 200000;
+  /** Maximum feature count enforced by ESRI Feature and OGC API Features loaders. */
+  static readonly MAX_FEATURES = 200000;
+
+  /** Maximum number of pages to fetch when retrieving features in chunks. */
+  static readonly MAX_PAGE_FETCHING = 50;
 
   // #region OVERRIDES
 
@@ -55,7 +59,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features created from the underlying data source
-   * @throws {LayerTooManyEsriFeatures} When the layer has too many features
+   * @throws {LayerTooManyFeatures} When the layer has too many features
    */
   protected abstract onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,

@@ -21,7 +21,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError, LayerTooManyFeatures, LayerTooManyPages } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
@@ -242,6 +242,8 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns A promise that resolves with all pages' OpenLayers features and the interpreted source projection
    * @throws {Error} When pagination repeats an already requested page
    * @throws {LayerSourceFailedToLoadError} When any page request fails
+   * @throws {LayerTooManyFeatures} When the advertised or accumulated feature count exceeds the supported limit
+   * @throws {LayerTooManyPages} When another page remains after the maximum number of pages has been fetched
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -257,6 +259,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(url), { headers: { Accept: 'application/geo+json, application/json' } })
     );
 
+    // Reject oversized collections before converting even the first page to OpenLayers features.
+    let featureCount = OgcFeature.#checkFeatureCount(layerConfig, responseData, 0);
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(
       responseData,
       readOptions.dataProjection,
@@ -268,6 +272,11 @@ export class OgcFeature extends AbstractGeoViewVector {
     while (nextPageUrl) {
       // Reject broken paging rather than reporting a silently truncated layer as successfully loaded.
       if (requestedPageUrls.has(nextPageUrl)) throw new Error(`OGC API Features pagination repeated page '${nextPageUrl}'.`);
+
+      // Include the first page in the cap; retries of the same page do not consume additional pages.
+      if (requestedPageUrls.size >= AbstractGeoViewVector.MAX_PAGE_FETCHING) {
+        throw new LayerTooManyPages(layerConfig.layerId, layerConfig.getLayerNameCascade(), AbstractGeoViewVector.MAX_PAGE_FETCHING);
+      }
       requestedPageUrls.add(nextPageUrl);
       const pageUrl = layerConfig.getUrlWithProxyWhenNeeded(nextPageUrl);
 
@@ -276,6 +285,9 @@ export class OgcFeature extends AbstractGeoViewVector {
       const pageResponse = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
         Fetch.fetchJson(pageUrl, { headers: { Accept: 'application/geo+json, application/json' } })
       );
+
+      // Services may omit numberMatched, so also enforce the limit using actual returned features.
+      featureCount = OgcFeature.#checkFeatureCount(layerConfig, pageResponse, featureCount);
 
       // Keep the first page's interpreted projection when later pages omit CRS metadata.
       // eslint-disable-next-line no-await-in-loop
@@ -479,6 +491,41 @@ export class OgcFeature extends AbstractGeoViewVector {
   // #endregion STATIC PUBLIC METHODS
 
   // #region STATIC PRIVATE METHODS
+
+  /**
+   * Checks advertised and accumulated page counts before allocating OpenLayers features.
+   *
+   * @param layerConfig - The layer configuration used to identify an oversized collection
+   * @param responseData - The current GeoJSON page
+   * @param previousCount - The number of features returned by preceding pages
+   * @returns The accumulated number of returned features
+   * @throws {LayerTooManyFeatures} When the advertised or accumulated count exceeds the limit
+   */
+  static #checkFeatureCount(layerConfig: VectorLayerEntryConfig, responseData: unknown, previousCount: number): number {
+    let featureCount = previousCount;
+    let numberMatched: number | undefined;
+    if (typeof responseData === 'object' && responseData !== null) {
+      if ('features' in responseData && Array.isArray(responseData.features)) featureCount += responseData.features.length;
+      if (
+        'numberMatched' in responseData &&
+        typeof responseData.numberMatched === 'number' &&
+        Number.isFinite(responseData.numberMatched)
+      ) {
+        ({ numberMatched } = responseData);
+      }
+    }
+
+    const largestCount = Math.max(featureCount, numberMatched ?? 0);
+    if (largestCount > AbstractGeoViewVector.MAX_FEATURES) {
+      throw new LayerTooManyFeatures(
+        layerConfig.layerId,
+        layerConfig.getLayerNameCascade(),
+        largestCount,
+        AbstractGeoViewVector.MAX_FEATURES
+      );
+    }
+    return featureCount;
+  }
 
   /**
    * This method sets the outfields and aliasFields of the source feature info.

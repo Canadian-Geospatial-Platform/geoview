@@ -276,6 +276,8 @@ async queryLayers(location?: undefined, extent?: Extent): Promise<void> {
 - WFS 2.0 responses that report more matched than returned features are paged sequentially with `count` and `startIndex`; a detected primary key is used for stable ordering when available
 - OGC API Features vector sources follow advertised `rel="next"` links sequentially, including relative links, until no next page remains. Every page uses the layer's proxy settings; a failed page or repeated page URL fails loading rather than publishing partial results. Services must advertise next links; GeoView does not guess non-standard offset parameters.
 - Paging is not streaming: all retrieved features are still held in memory, and large GeoJSON sources have no common paging strategy
+- ESRI Feature and OGC API Features vector loading share the same 200,000-feature limit (`AbstractGeoViewVector.MAX_FEATURES`). ESRI Feature checks the service's feature count before fetching feature chunks. OGC API Features checks numeric `numberMatched` values before page conversion and also checks the accumulated returned feature count, including when the total is absent or unknown. Exceeding the shared limit fails the layer with a localized error instead of publishing partial results. Exactly 200,000 features are allowed.
+- An additional OGC API Features safeguard allows at most 50 pages, including the first page. If page 50 advertises another page, loading fails with a localized page-limit error before requesting page 51; partial results are not published. Retries do not count as additional pages. This cap complements the feature-count guard and is not a request-rate limit.
 - Query button disabling to prevent concurrent queries
 
 ---
