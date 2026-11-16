@@ -78,6 +78,14 @@ export declare const useStoreGeochartChartsConfig: () => GeoChartStoreByLayerPat
  */
 export declare const getStoreGeochartLayerDataArray: (mapId: string) => TypeGeochartResultSetEntry[];
 /**
+ * Gets the batched geochart layer data array for the given map.
+ *
+ * @param mapId - The map identifier
+ * @returns The batched geochart result set entries
+ * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized
+ */
+export declare const getStoreGeochartLayerDataArrayBatch: (mapId: string) => TypeGeochartResultSetEntry[];
+/**
  * Gets the batch layer path bypass for the given map.
  *
  * @param mapId - The map identifier.

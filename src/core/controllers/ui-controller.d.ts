@@ -66,8 +66,9 @@ export declare class UIController extends AbstractMapViewerController {
      * Sets the active footer bar tab.
      *
      * @param tab - The tab identifier to activate, or undefined to deactivate
+     * @param open - Whether the footer bar should be open after activating the tab
      */
-    setActiveFooterBarTab(tab: string | undefined): void;
+    setActiveFooterBarTab(tab: string | undefined, open?: boolean): void;
     /**
      * Adds an app-bar panel id to the store, which will make the app-bar show the corresponding panel.
      *

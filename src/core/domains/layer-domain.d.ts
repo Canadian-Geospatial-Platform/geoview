@@ -206,11 +206,13 @@ export declare class LayerDomain {
     /**
      * Waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
      *
-     * Resolves immediately if the layer is already registered; otherwise subscribes to the `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     * Resolves immediately if the layer is already registered; otherwise waits for registration and rejects if its config enters the error state.
      *
      * @param layerPath - The layer path to the layer's configuration
      * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
      * @returns A promise that resolves to a GeoView layer associated to the layer path
+     * @throws {LayerStatusErrorError} When the layer config enters the error state before registration
+     * @throws {Error} When the optional timeout expires before registration
      */
     waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer>;
     /**

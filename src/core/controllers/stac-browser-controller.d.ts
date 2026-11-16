@@ -1,11 +1,10 @@
 import type { Extent } from 'ol/extent';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { TypeMapFitPadding } from '@/core/utils/constant';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /** Bounding box in EPSG:4326 [west, south, east, north]. */
 export type TypeLonLatBbox = [number, number, number, number];
-/** Map fit padding ordered as top, right, bottom, left. */
-export type TypeStacZoomPadding = [number, number, number, number];
 /** A visible map extent saved with its source projection. */
 export interface TypeStacMapExtentSnapshot {
     /** Visible extent in the source projection. */
@@ -41,8 +40,6 @@ export interface TypeStacPreviewAsset {
  */
 export declare class StacBrowserController extends AbstractMapViewerController {
     #private;
-    /** Padding (in pixels) used when zooming to a STAC extent. */
-    static readonly ZOOM_PADDING: TypeStacZoomPadding;
     /**
      * Creates an instance of StacBrowserController.
      *
@@ -79,7 +76,7 @@ export declare class StacBrowserController extends AbstractMapViewerController {
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {InvalidExtentError} When the extent is invalid (propagated from `zoomToExtent()`)
      */
-    zoomToLonLatBbox(bbox: TypeLonLatBbox, padding?: TypeStacZoomPadding): Promise<void>;
+    zoomToLonLatBbox(bbox: TypeLonLatBbox, padding: TypeMapFitPadding): Promise<void>;
     /**
      * Captures the visible map extent without converting it through lon/lat.
      *

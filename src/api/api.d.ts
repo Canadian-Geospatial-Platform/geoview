@@ -27,17 +27,7 @@ export declare class API {
         projection: typeof Projection;
         date: typeof DateMgt;
         renderer: typeof GeoviewRenderer;
-        dom: {
-            buildGVElementId: typeof DomHelper.buildGVElementId;
-            getGVRootElement: typeof DomHelper.getGVRootElement;
-            getGVElementById: typeof DomHelper.getGVElementById;
-            getGVElementByFullId: typeof DomHelper.getGVElementByFullId;
-            getGVMapTargetElement: typeof DomHelper.getMapTargetElement;
-            getGVShellElement: typeof DomHelper.getShellElement;
-            getGVGuidebox: typeof DomHelper.getGuidebox;
-            queryGVSelector: typeof DomHelper.queryGVSelector;
-            queryGVSelectorAll: typeof DomHelper.queryGVSelectorAll;
-        };
+        dom: typeof DomHelper;
     };
     /**
      * Gets the list of all map IDs currently in the collection.
