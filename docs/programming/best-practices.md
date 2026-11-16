@@ -134,6 +134,9 @@ signal merging and typed errors. Choose `fetchJson`, `fetchEsriJson` (embedded E
 `retryCount` must be a nonnegative safe integer. Only bodyless GET/HEAD requests are retried,
 after HTTP 429, 500, 502, 503, or 504 responses or network failures.
 OGC feature pages and ESRI feature chunks explicitly opt into three retries.
+`fetchEsriJson` also retries embedded ESRI errors with codes 429, 500, 502, 503, or 504
+within that same budget; other embedded errors fail immediately. ESRI chunk loading
+does not add another retry cycle, and timeouts terminate the whole operation.
 Readable `Retry-After` headers take precedence
 (seconds or HTTP date); otherwise 429 waits are 5/10/20 seconds and other retry waits are
 2/5/10 seconds (the last delay is reused for further retries). Network failures wait
