@@ -459,7 +459,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   static async #fetchEsriChunkWithRetry(url: string, attempt = 1): Promise<unknown> {
     try {
-      return await Fetch.fetchEsriJson(url);
+      return await Fetch.fetchEsriJson(url, { retryCount: 3 });
     } catch (error) {
       // Give up when out of attempts or when the error is not a transient server/network failure
       if (attempt >= EsriFeature.#MAX_CHUNK_FETCH_ATTEMPTS || !EsriFeature.#isTransientEsriError(error)) throw error;

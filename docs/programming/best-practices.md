@@ -129,10 +129,16 @@ signal merging and typed errors. Choose `fetchJson`, `fetchEsriJson` (embedded E
 `@/core/utils/fetch-worker-helper`; importing `Fetch` into a worker breaks the build.
 
 `fetchJson`, `fetchArrayBuffer`, and helpers that delegate to them (including `fetchText` and
-`fetchEsriJson`) retry bodyless GET/HEAD requests up to three times after HTTP 429, 500, 502,
-503, or 504 responses or network failures. Readable `Retry-After` headers take precedence
+`fetchEsriJson`) default to no retries. Opt in using the named request option, for example
+`Fetch.fetchJson(url, { retryCount: 3 })`: three retries means four attempts total.
+`retryCount` must be a nonnegative safe integer. Only bodyless GET/HEAD requests are retried,
+after HTTP 429, 500, 502, 503, or 504 responses or network failures.
+OGC feature pages and ESRI feature chunks explicitly opt into three retries.
+Readable `Retry-After` headers take precedence
 (seconds or HTTP date); otherwise 429 waits are 5/10/20 seconds and other retry waits are
-2/5/10 seconds. Cross-origin services must expose `Retry-After` through CORS for it to be readable.
+2/5/10 seconds (the last delay is reused for further retries). Network failures wait
+1/2/4 seconds with exponential backoff, capped at 10 seconds. Cross-origin services must expose `Retry-After`
+through CORS for it to be readable.
 The existing timeout covers all attempts, waits, and body reading; caller cancellation also
 interrupts retry waits. Other HTTP errors, parsing failures, and non-GET/HEAD requests are not
 retried by this shared policy. This is reactive recovery, not a proactive rate limiter:

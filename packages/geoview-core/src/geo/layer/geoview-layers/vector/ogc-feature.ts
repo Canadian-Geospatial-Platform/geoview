@@ -256,7 +256,10 @@ export class OgcFeature extends AbstractGeoViewVector {
 
     // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
     const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
-      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(url), { headers: { Accept: 'application/geo+json, application/json' } })
+      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(url), {
+        headers: { Accept: 'application/geo+json, application/json' },
+        retryCount: 3,
+      })
     );
 
     // Reject oversized collections before converting even the first page to OpenLayers features.
@@ -283,7 +286,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       // GV Each request depends on the next link returned by the preceding page.
       // eslint-disable-next-line no-await-in-loop
       const pageResponse = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
-        Fetch.fetchJson(pageUrl, { headers: { Accept: 'application/geo+json, application/json' } })
+        Fetch.fetchJson(pageUrl, { headers: { Accept: 'application/geo+json, application/json' }, retryCount: 3 })
       );
 
       // Services may omit numberMatched, so also enforce the limit using actual returned features.

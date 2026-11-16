@@ -10,6 +10,12 @@ import {
 } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
+/** Request options for helpers that support opt-in retries. */
+export interface FetchRequestInit extends RequestInit {
+  /** Retries after the initial attempt; defaults to zero. Must be a nonnegative safe integer. */
+  retryCount?: number;
+}
+
 /** Result of a HEAD reachability check. */
 export interface HeadResult {
   /** The HTTP response object, or null if the server could not be reached. */
@@ -20,12 +26,9 @@ export interface HeadResult {
 
 /** Provides static methods for performing HTTP fetch operations with timeout and abort support. */
 export abstract class Fetch {
-  /** Maximum retries after the initial safe request fails. */
-  static readonly #MAX_RETRIES = 3;
-
   /**
    * Fetches a url for a json response.
-   * Safe requests retry transient failures up to three times within the original timeout.
+   * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -38,7 +41,7 @@ export abstract class Fetch {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
+  static async fetchJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -107,7 +110,7 @@ export abstract class Fetch {
    * @throws {ResponseContentError} When the response actually contains an error within it
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  static async fetchEsriJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T> {
     // Redirect
     const result = await this.fetchJson<T>(url, init, timeoutMs);
 
@@ -133,7 +136,7 @@ export abstract class Fetch {
    * @throws {ResponseTypeError} When the response from the service is not an array
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]> {
+  static async fetchJsonAsArray<T>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T[]> {
     // Redirect
     const result = await this.fetchJson<T[]>(url, init, timeoutMs);
 
@@ -160,7 +163,7 @@ export abstract class Fetch {
    * @throws {ResponseEmptyError} When the text response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
+  static async fetchText(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<string> {
     // Get the buffer array of the response
     const buffer = await Fetch.fetchArrayBuffer(url, init, timeoutMs);
 
@@ -180,7 +183,7 @@ export abstract class Fetch {
 
   /**
    * Fetches a url for an array buffer response.
-   * Safe requests retry transient failures up to three times within the original timeout.
+   * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -191,7 +194,7 @@ export abstract class Fetch {
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
+  static async fetchArrayBuffer(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -338,7 +341,7 @@ export abstract class Fetch {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T> {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
@@ -543,7 +546,7 @@ export abstract class Fetch {
    *     body: JSON.stringify({ id: 123 })
    *   }, 3000);
    */
-  static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs = 7000): Promise<T> {
+  static fetchWithTimeout<T>(url: string, init?: FetchRequestInit, timeoutMs = 7000): Promise<T> {
     // Redirect
     return Fetch.fetchJson<T>(url, init, timeoutMs);
   }
@@ -623,28 +626,33 @@ export abstract class Fetch {
    * Parsing remains with the caller so malformed response bodies are never retried.
    *
    * @param url - The request URL
-   * @param init - Request options including the combined abort and timeout signal
+   * @param options - Request options including the retry count and combined abort and timeout signal
    * @returns The final HTTP response, including unsuccessful responses after retry exhaustion
    * @throws {TypeError} When a network failure persists or the request is invalid
    * @throws {RequestAbortedError} When cancelled during a retry wait
+   * @throws {RangeError} When retryCount is not a nonnegative safe integer
    */
-  static async #fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+  static async #fetchWithRetry(url: string, options: FetchRequestInit): Promise<Response> {
+    const { retryCount = 0, ...init } = options;
+    if (!Number.isSafeInteger(retryCount) || retryCount < 0) {
+      throw new RangeError('retryCount must be a nonnegative safe integer.');
+    }
     const method = (init.method ?? 'GET').toUpperCase();
     const canRetry = (method === 'GET' || method === 'HEAD') && !init.body;
     for (let attempt = 0; ; attempt++) {
       let response: Response | undefined;
-      let waitMs = 1000 * 2 ** attempt;
+      let waitMs = Math.min(1000 * 2 ** attempt, 10000);
       try {
-        // GV Requests are intentionally sequential, with at most #MAX_RETRIES retries.
+        // GV Requests are intentionally sequential, with at most retryCount retries.
         // eslint-disable-next-line no-await-in-loop
         response = await fetch(url, init);
       } catch (error: unknown) {
-        if (!canRetry || attempt >= Fetch.#MAX_RETRIES || init.signal?.aborted || !(error instanceof TypeError)) throw error;
-        logger.logWarning(`Network request failed; retrying (${attempt + 1}/${Fetch.#MAX_RETRIES}) in ${waitMs} ms.`, error);
+        if (!canRetry || attempt >= retryCount || init.signal?.aborted || !(error instanceof TypeError)) throw error;
+        logger.logWarning(`Network request failed; retrying (${attempt + 1}/${retryCount}) in ${waitMs} ms.`, error);
       }
 
       if (response) {
-        if (!canRetry || attempt >= Fetch.#MAX_RETRIES || ![429, 500, 502, 503, 504].includes(response.status) || init.signal?.aborted) {
+        if (!canRetry || attempt >= retryCount || ![429, 500, 502, 503, 504].includes(response.status) || init.signal?.aborted) {
           return response;
         }
 
@@ -653,7 +661,7 @@ export abstract class Fetch {
         // Release discarded responses before waiting or issuing another request.
         // eslint-disable-next-line no-await-in-loop
         await response.body?.cancel();
-        logger.logWarning(`HTTP ${response.status}; retrying request (${attempt + 1}/${Fetch.#MAX_RETRIES}) in ${waitMs} ms.`);
+        logger.logWarning(`HTTP ${response.status}; retrying request (${attempt + 1}/${retryCount}) in ${waitMs} ms.`);
       }
 
       // eslint-disable-next-line no-await-in-loop
