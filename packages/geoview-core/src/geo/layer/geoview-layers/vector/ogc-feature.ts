@@ -251,12 +251,12 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
-    // Resolve links against the service URL, never against the proxy's outer URL.
-    const url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?limit=${AbstractGeoViewVector.MAX_PAGE_SIZE}`;
+    // Get the items url as specified in the metadata
+    const itemsUrl = OgcFeature.#getItemsUrl(layerConfig);
 
     // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
     const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
-      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(url), {
+      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(itemsUrl), {
         headers: { Accept: 'application/geo+json, application/json' },
         retryCount: 3,
       })
@@ -269,8 +269,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       readOptions.dataProjection,
       readOptions.featureProjection
     );
-    const requestedPageUrls = new Set([url]);
-    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, url);
+    const requestedPageUrls = new Set([itemsUrl]);
+    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, itemsUrl);
 
     while (nextPageUrl) {
       // Reject broken paging rather than reporting a silently truncated layer as successfully loaded.
@@ -522,6 +522,48 @@ export class OgcFeature extends AbstractGeoViewVector {
       throw new LayerTooManyFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), largestCount, maxRecordCount);
     }
     return featureCount;
+  }
+
+  /**
+   * Resolves the items endpoint advertised by the matching OGC API Features collection.
+   *
+   * @param layerConfig - The OGC Feature layer entry configuration
+   * @returns The absolute items URL with a default limit when one was not advertised
+   * @throws {Error} When the collection does not advertise a valid HTTP(S) items link
+   */
+  static #getItemsUrl(layerConfig: VectorLayerEntryConfig): string {
+    if (!(layerConfig instanceof OgcFeatureLayerEntryConfig)) {
+      throw new Error(`Layer '${layerConfig.layerId}' is not an OGC Feature layer entry.`);
+    }
+
+    const collection = layerConfig.getServiceMetadata()?.collections.find((metadata) => metadata.id === layerConfig.layerId);
+    if (!collection) throw new Error(`OGC API Features metadata does not contain collection '${layerConfig.layerId}'.`);
+
+    const itemsLinks =
+      collection.links?.filter(
+        (link) => link.rel === 'items' && !link.templated && typeof link.href === 'string' && link.href.trim().length > 0
+      ) ?? [];
+    const itemsLink =
+      itemsLinks.find((link) => link.type?.split(';', 1)[0].trim().toLowerCase() === 'application/geo+json') ??
+      itemsLinks.find((link) => link.type?.split(';', 1)[0].trim().toLowerCase() === 'application/json') ??
+      itemsLinks.find((link) => !link.type);
+    if (!itemsLink) throw new Error(`OGC API Features collection '${layerConfig.layerId}' does not advertise a usable items link.`);
+
+    const metadataAccessPath = layerConfig.getMetadataAccessPath(true);
+    if (!metadataAccessPath) throw new Error(`OGC API Features layer '${layerConfig.layerId}' has no metadata access path.`);
+
+    const collectionsUrl = new URL('collections?f=json', metadataAccessPath);
+    const itemsUrl = new URL(itemsLink.href, collectionsUrl);
+    if (itemsUrl.protocol !== 'http:' && itemsUrl.protocol !== 'https:') {
+      throw new Error(`OGC API Features collection '${layerConfig.layerId}' advertises a non-HTTP items link.`);
+    }
+
+    if (collectionsUrl.protocol === 'https:' && itemsUrl.protocol === 'http:' && itemsUrl.hostname === collectionsUrl.hostname) {
+      itemsUrl.protocol = 'https:';
+    }
+
+    if (!itemsUrl.searchParams.has('limit')) itemsUrl.searchParams.set('limit', `${AbstractGeoViewVector.MAX_PAGE_SIZE}`);
+    return itemsUrl.toString();
   }
 
   /**
