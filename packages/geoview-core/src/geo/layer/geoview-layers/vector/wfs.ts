@@ -323,7 +323,7 @@ export class WFS extends AbstractGeoViewVector {
       bboxExtent,
       undefined,
       undefined
-    ).then(({ features, dataProjection }) => ({ features, dataProjection }));
+    );
   }
 
   /**
