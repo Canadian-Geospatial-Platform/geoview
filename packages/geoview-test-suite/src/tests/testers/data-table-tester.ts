@@ -195,9 +195,9 @@ export class DataTableTester extends GVAbstractTester {
    * accessorFn"). GeoPackage preserves a blank-named column verbatim, so opening its data table exercises the crash
    * path. The test passes when the data table is created (its table element renders) for the layer.
    *
-   * @returns A promise that resolves with whether the table rendered when the test completes
+   * @returns Fixture failure observations and whether the table rendered
    */
-  testEmptyFieldNameDoesNotCrashDataTable(): Promise<Test<boolean>> {
+  testEmptyFieldNameDoesNotCrashDataTable(): Promise<Test<EmptyFieldNameDataTableResult>> {
     let setupLayer: AbstractBaseGVLayer | undefined;
     let fixtureLayerPath: string | undefined;
     return this.test(
@@ -212,9 +212,8 @@ export class DataTableTester extends GVAbstractTester {
             GeoPackageReader.createLayerConfigFromGeoPackage = originalReader;
           }
         })();
-        Test.assertIsEqual(typeof failingFixture.layerPath, 'string');
-        Test.assertIsNotEqual(failingFixture.layerPath, '');
-        Test.assertIsEqual(failingFixture.promiseLayer instanceof Promise, true);
+        const failureLayerPath = failingFixture.layerPath;
+        const failureIsPromise = failingFixture.promiseLayer instanceof Promise;
 
         let fixtureFailure: unknown;
         try {
@@ -222,9 +221,6 @@ export class DataTableTester extends GVAbstractTester {
         } catch (error) {
           fixtureFailure = error;
         }
-        Test.assertIsDefined('fixtureFailure', fixtureFailure);
-        Test.assertIsEqual(fixtureFailure instanceof Error, true);
-        if (fixtureFailure instanceof Error) Test.assertIsEqual(fixtureFailure.message, 'Expected fixture reader failure');
 
         // Add railways empty field layer
         const fixture = this.addGeopackageRailwaysCartoFerDebarcadere(test);
@@ -239,11 +235,21 @@ export class DataTableTester extends GVAbstractTester {
         const table = await DomHelper.DataTable.waitForDataTable(this.getMapId());
 
         // The table was created (rendered) for the layer
-        return !!table;
+        return { failureLayerPath, failureIsPromise, fixtureFailure, tableRendered: !!table };
       },
       (test, result) => {
+        test.addStep('Verifying the failed fixture exposes its cleanup path and rejects its loading promise...');
+        Test.assertIsEqual(typeof result.failureLayerPath, 'string');
+        Test.assertIsNotEqual(result.failureLayerPath, '');
+        Test.assertIsEqual(result.failureIsPromise, true);
+        Test.assertIsDefined('fixtureFailure', result.fixtureFailure);
+        Test.assertIsEqual(result.fixtureFailure instanceof Error, true);
+        if (result.fixtureFailure instanceof Error) {
+          Test.assertIsEqual(result.fixtureFailure.message, 'Expected fixture reader failure');
+        }
+
         test.addStep('Verifying the data table was created without crashing...');
-        Test.assertIsEqual(result, true);
+        Test.assertIsEqual(result.tableRendered, true);
       },
       (test) => {
         if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
@@ -920,6 +926,14 @@ export class DataTableTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Fixture rejection observations and empty-field table rendering result. */
+type EmptyFieldNameDataTableResult = {
+  failureLayerPath: string;
+  failureIsPromise: boolean;
+  fixtureFailure: unknown;
+  tableRendered: boolean;
+};
 
 /** Commemorative table state and column-filter snapshots before and after clearing. */
 type CommemorativeDataTableResult = {
