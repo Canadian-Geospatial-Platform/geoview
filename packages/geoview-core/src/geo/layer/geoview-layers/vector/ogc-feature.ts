@@ -278,7 +278,7 @@ export class OgcFeature extends AbstractGeoViewVector {
 
       // Include the first page in the cap; retries of the same page do not consume additional pages.
       if (requestedPageUrls.size >= AbstractGeoViewVector.MAX_PAGE_FETCHING) {
-        throw new LayerTooManyPages(layerConfig.layerId, layerConfig.getLayerNameCascade(), AbstractGeoViewVector.MAX_PAGE_FETCHING);
+        throw new LayerTooManyPages(layerConfig.layerId, layerConfig.getLayerNameCascade());
       }
       requestedPageUrls.add(nextPageUrl);
       const pageUrl = layerConfig.getUrlWithProxyWhenNeeded(nextPageUrl);

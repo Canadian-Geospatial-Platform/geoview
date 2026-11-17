@@ -491,7 +491,7 @@
       "unableToCreateGroupLayer": "Unable to create group layer '{{layerName}}'.",
       "vectorSourceUrlNotDefined": "Vector source URL is not defined for layer '{{layerName}}'.",
       "tooManyFeatures": "Layer '{{layerNameOrId}}' exceeds the limit of {{limit}} features ({{count}} advertised or received). Loading was stopped. Use a smaller collection or an image service such as WMS or ESRI Dynamic if available",
-      "tooManyPages": "Layer '{{layerNameOrId}}' requires more than {{limit}} pages of features. Loading was stopped. Use a smaller collection or an image service such as WMS or ESRI Dynamic if available",
+      "tooManyPages": "Layer '{{layerNameOrId}}' exceeds the limit of features. Loading was stopped. Use a smaller collection or an image service such as WMS or ESRI Dynamic if available",
       "extentParameterNotDefined": "Parameter extent is not defined in source element for layer '{{layerName}}'.",
       "projectionParameterNotDefined": "Parameter projection is not defined in source element for layer '{{layerName}}'.",
       "projectionNotSupported": "The map projection '{{mapProjection}}' isn't supported by the layer '{{layerName}}'."
