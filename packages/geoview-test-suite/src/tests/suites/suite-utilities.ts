@@ -57,7 +57,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests cgpv.api.utilities — pure function unit tests:<br/>
+    return `Tests core, date, geo, and projection utilities, including DOM/format readers and projection registration:<br/>
       <b>Core</b> — range, camelCase, equality, cloning, merging, numeric and empty-object checks,<br/>
       &nbsp;&nbsp;IDs/UUIDs, color alpha, JSON parsing, image detection, regex escaping, stringification,<br/>
       &nbsp;&nbsp;property paths, measurements, Datacube paths, HTML sanitization, accessible links, localized messages and Markdown IDs<br/>
@@ -66,7 +66,8 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
       <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union/intersection,<br/>
       &nbsp;&nbsp;longitude/latitude extent checks, bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl,<br/>
       &nbsp;&nbsp;GeoJSON/EsriJSON projection readers and embedded CRS precedence<br/>
-      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, string lookup and input dispatch`;
+      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent, string lookup and input dispatch;<br/>
+      &nbsp;&nbsp;already-available projection inputs avoid unnecessary definition-server requests`;
   }
 
   /**

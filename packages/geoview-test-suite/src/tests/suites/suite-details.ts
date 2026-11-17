@@ -43,11 +43,10 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Details panel feature info display and interaction:<br/>
-      <b>Highlight</b> — Clear all highlights after selection<br/>
-      <b>Navigation</b> — Zoom to feature from details panel, including with the panel open over the map<br/>
-      <b>Selection</b> — Manually selected layer persists across map clicks<br/>
-      <b>Config overrides</b> — nameField as label, summary:false hides field, field alias renaming`;
+    return `Tests Details panel highlights, panel-aware feature navigation, and layer selection:<br/>
+      <b>Highlights and click marker</b> — Explicitly clear highlights and hide the marker; closing the panel clears highlights and reopening restores the selected feature's highlight<br/>
+      <b>Navigation</b> — Feature zoom uses padding to keep the feature visible beside the open Details panel<br/>
+      <b>Selection</b> — Manually selected layer persists across map clicks`;
   }
 
   /**

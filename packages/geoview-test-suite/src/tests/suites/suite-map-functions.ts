@@ -42,7 +42,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests map interactions, projection, basemap, and UI tabs:<br/>
+    return `Tests runtime map navigation, projection, basemap, and UI controller operations:<br/>
       <b>Map state</b> — Initial state verification, zoom operations, extent/coordinate navigation<br/>
       <b>Projection</b> — Switch between EPSG:3978 and EPSG:3857, vector tile warning<br/>
       <b>Basemap</b> — Runtime basemap creation and activation<br/>
@@ -51,7 +51,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
       <b>Language</b> — Runtime language switch<br/>
       <b>Geometry</b> — Geometry group z-index updates<br/>
       <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction<br/>
-      <b>UI</b> — Details panel top anchor; footer-height getter for non-React consumers<br/>
+      <b>UI</b> — Details panel guide Top anchor; footer-height getter for non-React consumers<br/>
       <b>Interaction</b> — Keyboard crosshair coordinates with padding, rotation and stale mouse positions<br/>
       <b>Page scrolling</b> — Partially visible, transitioning, already visible, and oversized map sections, run with exclusive page access`;
   }

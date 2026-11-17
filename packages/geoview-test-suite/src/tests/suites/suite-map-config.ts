@@ -48,12 +48,12 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests map configuration overrides by creating fresh map instances:<br/>
+    return `Tests isolated map configuration overrides, viewport calculations, and feature-info presentation:<br/>
       <b>Footer/App bar</b> — Tab selection, default/empty configs, duplicate panels, fixed-height layout, GeoCore selected-layer resolution<br/>
       <b>Nav bar</b> — Default controls, empty array fallback<br/>
       <b>View settings</b> — Zoom constraints, initial layer extent, initialView vs homeView, home button navigation<br/>
       <b>Viewport</b> — Boundary samples, midpoint fitting, rotation, padding, resize, projection changes, antimeridian and error cases<br/>
-      <b>Feature info</b> — Ontario/Alberta queries, visibility, feature zoom, nameField, summary:false fields, and aliases<br/>
+      <b>Details and feature info</b> — Ontario/Alberta queries, visibility and feature zoom; nameField labels, summary:false field hiding, and aliases<br/>
       <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
       <b>Overlays</b> — Point markers from config<br/>
       <b>initialSettings</b> — Controls (all false, cascade and group overrides), states (visible, opacity, queryable, hoverable),<br/>
