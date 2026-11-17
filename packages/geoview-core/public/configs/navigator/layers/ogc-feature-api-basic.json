@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "OGC API Features examples using default vector styling with WMS style fetching disabled. Includes large lakes, weather and climate stations, and current and archived flood extents."
+  },
   "map": {
     "viewSettings": {
       "projection": 3857
@@ -32,6 +35,21 @@
             "layerId": "ahccd-stations",
             "wmsUrl": "https://geo.weather.gc.ca/geomet-climate",
             "wmsLayerId": "AHCCD.STATIONS"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "flood-eodms-sgdot",
+        "geoviewLayerName": "Flood EODMS-SGDOT",
+        "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
+        "geoviewLayerType": "ogcFeature",
+        "fetchStylesOnWMS": false,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "EGS_Flood_Extent_Current_en"
+          },
+          {
+            "layerId": "EGS_Flood_Extent_Archive_en"
           }
         ]
       }

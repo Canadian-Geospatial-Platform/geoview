@@ -27,9 +27,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
 
 /** Type used to define a GeoView image layer to display on the map. */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Max number of records for query. */
-  maxRecordCount?: number;
-
   /** Manual pixel offset (x, y) overriding the computed identify hit-tolerance recentering. See {@link EsriDynamicLayerEntryConfigProps.hitToleranceOffset}. */
   hitToleranceOffset?: [number, number];
 
@@ -40,7 +37,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
-    this.maxRecordCount = layerConfig.maxRecordCount;
     this.hitToleranceOffset = layerConfig.hitToleranceOffset;
   }
 
@@ -105,6 +101,24 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
+  getMaxRecordCount(): number | undefined {
+    return (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxRecordCount;
+  }
+
+  /**
+   * Initializes the service maximum record count when the layer configuration has not already set it.
+   *
+   * @param maxRecordCount - The maximum number of records reported by the service, or undefined when unavailable
+   */
+  initMaxRecordCount(maxRecordCount: number | undefined): void {
+    (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxRecordCount ??= maxRecordCount;
+  }
 
   /**
    * Finds the parent layer summary whose subLayerIds contains this layer's ID.

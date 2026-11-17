@@ -358,10 +358,9 @@ export class LayerTooManyPages extends LayerError {
    * @param layerName - The layer display name
    * @param limit - The maximum supported number of pages
    */
-  constructor(geoviewLayerId: string, layerName: string | undefined, limit: number) {
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
     super(geoviewLayerId, 'validation.layer.tooManyPages', {
       layerNameOrId: layerName || geoviewLayerId,
-      limit,
     });
     Object.setPrototypeOf(this, LayerTooManyPages.prototype);
   }

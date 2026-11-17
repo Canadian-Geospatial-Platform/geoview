@@ -491,7 +491,7 @@
       "unableToCreateGroupLayer": "Impossible de créer le groupe de couches '{{layerName}}'.",
       "vectorSourceUrlNotDefined": "L'URL de la source vectorielle n'est pas définie pour la couche '{{layerName}}'.",
       "tooManyFeatures": "La couche '{{layerNameOrId}}' dépasse la limite de {{limit}} entités ({{count}} annoncées ou reçues). Le chargement a été arrêté. Utilisez une collection plus petite ou un service d'images tel que WMS ou ESRI Dynamic si disponible",
-      "tooManyPages": "La couche '{{layerNameOrId}}' nécessite plus de {{limit}} pages d'entités. Le chargement a été arrêté. Utilisez une collection plus petite ou un service d'images tel que WMS ou ESRI Dynamic si disponible",
+      "tooManyPages": "La couche '{{layerNameOrId}}' dépasse la limite d'entités. Le chargement a été arrêté. Utilisez une collection plus petite ou un service d'images tel que WMS ou ESRI Dynamic si disponible",
       "extentParameterNotDefined": "Le paramètre extent n'est pas défini dans l'élément source pour la couche '{{layerName}}'.",
       "projectionParameterNotDefined": "Le paramètre projection n'est pas défini dans l'élément source pour la couche '{{layerName}}'.",
       "projectionNotSupported": "La projection de la carte '{{mapProjection}}' n'est pas supportée par la couche '{{layerName}}'."

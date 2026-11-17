@@ -42,9 +42,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** The maximum number of features to fetch per page when retrieving features in chunks. */
   static readonly MAX_PAGE_SIZE = 10000;
 
-  /** Maximum number of pages to fetch when retrieving features in chunks. */
-  static readonly MAX_PAGE_FETCHING = 50;
-
   // #region OVERRIDES
 
   /**

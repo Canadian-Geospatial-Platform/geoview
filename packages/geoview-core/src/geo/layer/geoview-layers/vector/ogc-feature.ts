@@ -21,7 +21,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { LayerServiceMetadataUnableToFetchError, LayerTooManyFeatures, LayerTooManyPages } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError, LayerTooManyFeatures } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
@@ -276,10 +276,6 @@ export class OgcFeature extends AbstractGeoViewVector {
       // Reject broken paging rather than reporting a silently truncated layer as successfully loaded.
       if (requestedPageUrls.has(nextPageUrl)) throw new Error(`OGC API Features pagination repeated page '${nextPageUrl}'.`);
 
-      // Include the first page in the cap; retries of the same page do not consume additional pages.
-      if (requestedPageUrls.size >= AbstractGeoViewVector.MAX_PAGE_FETCHING) {
-        throw new LayerTooManyPages(layerConfig.layerId, layerConfig.getLayerNameCascade(), AbstractGeoViewVector.MAX_PAGE_FETCHING);
-      }
       requestedPageUrls.add(nextPageUrl);
       const pageUrl = layerConfig.getUrlWithProxyWhenNeeded(nextPageUrl);
 
@@ -518,14 +514,12 @@ export class OgcFeature extends AbstractGeoViewVector {
       }
     }
 
+    // Get the max record count as defined by config or codebase
+    const maxRecordCount = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;
+
     const largestCount = Math.max(featureCount, numberMatched ?? 0);
-    if (largestCount > AbstractGeoViewVector.MAX_FEATURES) {
-      throw new LayerTooManyFeatures(
-        layerConfig.layerId,
-        layerConfig.getLayerNameCascade(),
-        largestCount,
-        AbstractGeoViewVector.MAX_FEATURES
-      );
+    if (largestCount > maxRecordCount) {
+      throw new LayerTooManyFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), largestCount, maxRecordCount);
     }
     return featureCount;
   }

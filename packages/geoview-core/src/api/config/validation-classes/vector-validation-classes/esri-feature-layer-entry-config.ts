@@ -22,7 +22,6 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    */
   constructor(layerConfig: EsriFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_FEATURE);
-    this.maxRecordCount = layerConfig.maxRecordCount;
 
     // Trim any trailing '/'
     let path = this.getDataAccessPath();

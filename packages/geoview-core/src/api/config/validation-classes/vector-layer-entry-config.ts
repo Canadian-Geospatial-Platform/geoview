@@ -15,9 +15,6 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  * Type used to define a GeoView vector layer to display on the map.
  */
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
-  /** Max number of records for query */
-  maxRecordCount?: number;
-
   /** The GetStyles full url that was used to generate the style, if any */
   // GV Attribute is duplicated in the OGC WMS entry config to keep this state off unrelated base-layer entries.
   #wmsGetStylesFullUrl?: string;
@@ -30,7 +27,6 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    */
   protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig, schemaTag: TypeGeoviewLayerType) {
     super(layerConfig, schemaTag, CONST_LAYER_ENTRY_TYPES.VECTOR);
-    this.maxRecordCount = layerConfig.maxRecordCount;
   }
 
   // #region OVERRIDES
@@ -47,6 +43,24 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
+  getMaxRecordCount(): number | undefined {
+    return (this.layerEntryProps as VectorLayerEntryConfigProps).maxRecordCount;
+  }
+
+  /**
+   * Initializes the service maximum record count when the layer configuration has not already set it.
+   *
+   * @param maxRecordCount - The maximum number of records reported by the service, or undefined when unavailable
+   */
+  initMaxRecordCount(maxRecordCount: number | undefined): void {
+    (this.layerEntryProps as VectorLayerEntryConfigProps).maxRecordCount ??= maxRecordCount;
+  }
 
   /**
    * Gets if the config has specified that we should fetch the styles from the WMS.

@@ -718,17 +718,14 @@ export class EsriUtilities {
         parentLayerConfig.initMaxScaleFromMetadata(parentLayerMetadata?.maxScale);
         parentLayerConfig.initMinScaleFromMetadata(parentLayerMetadata?.minScale);
       }
+
+      // Initialize the max record count from the metadata
+      layerConfig.initMaxRecordCount(layerMetadata?.maxRecordCount);
     }
 
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
     layerConfig.initMinScaleFromMetadata(layerMetadataEsriDynamicLayer?.minScale);
     layerConfig.initMaxScaleFromMetadata(layerMetadataEsriDynamicLayer?.maxScale);
-
-    // Set the max record count for querying
-    if ('maxRecordCount' in layerConfig) {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.maxRecordCount = layerMetadata?.maxRecordCount || 0;
-    }
 
     // If no bounds defined in the initial settings and an extent is defined in the metadata
     let bounds = layerConfig.getInitialSettingsBounds();

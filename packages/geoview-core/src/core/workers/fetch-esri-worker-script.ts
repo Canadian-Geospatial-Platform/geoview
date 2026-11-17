@@ -142,6 +142,7 @@ const processBatch = async (
  * @throws {Error} When the query fails
  */
 async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
+  // TODO: CHECK - Review the pertinance of having the hardcoded 10000 as the maximum record count limit, search id 4k2kl6j3n
   const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
   const maxConcurrentRequests = Math.min(10, navigator.hardwareConcurrency * 2);
   const baseUrl = `${params.url}/query?where=${params.where}&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;

@@ -215,14 +215,17 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Use the basic fetch
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(`${url}/query?f=json&where=1=1&returnCountOnly=true`);
 
+    // Get the max record count as defined by config or codebase
+    const maxRecordCount = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;
+
     // Check if feature count is too large
-    if (responseDataCount.count > AbstractGeoViewVector.MAX_FEATURES) {
+    if (responseDataCount.count > maxRecordCount) {
       // Throw
       throw new LayerTooManyFeatures(
         layerConfigEsriFeature.layerId,
         layerConfigEsriFeature.getLayerNameCascade(),
         responseDataCount.count,
-        AbstractGeoViewVector.MAX_FEATURES
+        maxRecordCount
       );
     }
 

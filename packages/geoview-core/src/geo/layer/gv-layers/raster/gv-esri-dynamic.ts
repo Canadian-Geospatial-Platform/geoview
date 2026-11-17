@@ -743,7 +743,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry: false,
       projection: 4326,
       maxAllowableOffset: 6,
-      maxRecordCount: layerConfig.maxRecordCount || 1000,
+      maxRecordCount: layerConfig.getMaxRecordCount() || 1000, // TODO: CHECK - Review the pertinance of having the hardcoded 1000 default as the maximum record count limit, search id 4k2kl6j3n
       where: whereClause ?? '1=1',
     };
 
@@ -783,7 +783,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry,
       projection,
       maxAllowableOffset,
-      maxRecordCount: layerConfig.maxRecordCount || 1000,
+      maxRecordCount: layerConfig.getMaxRecordCount() || 1000, // TODO: CHECK - Review the pertinance of having the hardcoded 1000 default as the maximum record count limit, search id 4k2kl6j3n
       where: whereClause ?? '1=1',
     };
 
