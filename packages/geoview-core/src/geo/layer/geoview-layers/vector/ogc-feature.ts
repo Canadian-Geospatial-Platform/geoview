@@ -252,7 +252,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
     // Resolve links against the service URL, never against the proxy's outer URL.
-    const url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items`;
+    const url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?limit=${AbstractGeoViewVector.MAX_PAGE_SIZE}`;
 
     // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
     const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>

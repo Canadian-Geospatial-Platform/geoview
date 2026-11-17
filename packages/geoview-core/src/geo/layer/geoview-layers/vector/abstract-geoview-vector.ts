@@ -39,6 +39,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** Maximum feature count enforced by ESRI Feature and OGC API Features loaders. */
   static readonly MAX_FEATURES = 200000;
 
+  /** The maximum number of features to fetch per page when retrieving features in chunks. */
+  static readonly MAX_PAGE_SIZE = 10000;
+
   /** Maximum number of pages to fetch when retrieving features in chunks. */
   static readonly MAX_PAGE_FETCHING = 50;
 
