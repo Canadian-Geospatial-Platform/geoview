@@ -41,10 +41,10 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests core framework utilities and service metadata fetching:<br/>
+    return `Tests URL reachability, service metadata fetching, and legend/style regressions:<br/>
       <b>URL validation</b> — Simple ping, XYZ tiles including unauthorized responses, invalid format, unreachable, WMS service<br/>
       <b>Service metadata</b> — WMS, WFS, WMTS GetCapabilities (happy path + bad URL)<br/>
-      <b>Proxy fallback</b> — JSON fetch with CORS proxy retry for an unreachable URL<br/>
+      <b>Proxy fallback</b> — Expected failure when JSON fetching with proxy fallback uses a bad URL<br/>
       <b>Rendering</b> — GeometryCollection and picture-fill legends; WFS SLD conversion with a text-only rule`;
   }
 

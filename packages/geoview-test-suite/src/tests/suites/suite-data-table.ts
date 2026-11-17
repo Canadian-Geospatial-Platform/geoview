@@ -42,10 +42,10 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Data Table footer panel store and DOM behavior:<br/>
+    return `Tests Data Table population, store settings, and visible filtering behavior in the footer panel:<br/>
       <b>Features</b> — GeoJSON and Commemorative data population; empty GeoPackage field name renders without crashing<br/>
       <b>Settings and filters</b> — GeoJSON column visibility, row counts, map-filter state, column/global filters and Ontario extent filtering;<br/>
-      &nbsp;&nbsp;Commemorative column filter store set/clear; Cities name and population range filters<br/>
+      &nbsp;&nbsp;Commemorative column filter store set/clear and empty-range exclusion; Cities name and population range row counts<br/>
       <b>Extent filter</b> — Toggle absence check on the ESRI Feature Forest Industry fixture<br/>
       <b>Row zoom</b> — Temporary highlight creation and expiry<br/>
       <b>Style filter</b> — showUnsymbolizedFeatures true and false table summaries`;

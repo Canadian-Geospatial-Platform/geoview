@@ -42,10 +42,10 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests layer controller functions and feature-query behavior:<br/>
+    return `Tests runtime LayerApi/controller operations, legend-store synchronization, and feature queries:<br/>
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
       <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
-      <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, parent opacity caps, legend-store limits, and restoration from transparency<br/>
+      <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
       <b>Layer naming</b> — Repeated renaming through the public LayerApi updates the runtime layer and legend store<br/>
       <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
       <b>Queryable and hoverable flags</b> — Public LayerApi setters enable, disable, repeat assignments, and re-enable each flag while synchronizing the legend store<br/>
@@ -54,7 +54,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
       <b>GeoCore visibility</b> — Group defaultVisibility=false (only when heavy tests are enabled)<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
-      <b>WMS feature queries</b> — WMS layers retrieve feature results through their associated WFS services<br/>
+      <b>WMS feature queries</b> — Cities and Airborne layers retrieve features through associated WFS services, with VPN-aware Airborne execution<br/>
       <b>ESRI queries</b> — Dynamic and Feature domain value translation; Dynamic feature geometry and OBJECTID pairing<br/>
       <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>
       <b>GeoJSON</b> — GeometryCollection layer loading; object/string source replacement, feature-info refresh, and reprojection after injection`;
