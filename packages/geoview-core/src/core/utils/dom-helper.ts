@@ -162,6 +162,20 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets the rendered primary layer name from the specified Layers panel.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @param containerType - The app bar or footer bar containing the Layers panel
+   * @returns The layer name text, or undefined when the row or label is not rendered
+   */
+  static getLayerBoxLayerName(mapId: string, layerPath: string, containerType: TypeContainerBox): string | undefined {
+    return (
+      this.getLayerBoxInLayersPanel(mapId, layerPath, containerType)?.querySelector('.MuiListItemText-primary')?.textContent ?? undefined
+    );
+  }
+
+  /**
    * Gets the visibility toggle button for a layer in a map's layer panel.
    *
    * @param mapId - The map identifier

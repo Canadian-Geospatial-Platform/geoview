@@ -2252,17 +2252,18 @@ export class LayerTester extends GVAbstractTester {
   // #endregion DOMAIN FIELDS
 
   /**
-   * Tests repeated layer renaming through the public LayerApi and synchronization with the legend store.
+   * Tests repeated layer renaming through the public LayerApi and synchronization with the legend store and Layers panel.
    *
-   * @returns A promise that resolves with the fixture layer and runtime/store name snapshots after each rename
+   * @returns A promise that resolves with runtime, store, and DOM name snapshots after each rename
    */
   testSetLayerName(): Promise<Test<LayerTestResult<(string | undefined)[]>>> {
     let fixtureLayerPath: string | undefined;
     const firstName = 'Renamed points layer';
     const secondName = 'Renamed points layer again';
+    const mapId = this.getMapId();
 
     return this.test(
-      'Test LayerApi.setLayerName updates the runtime layer and legend store...',
+      'Test LayerApi.setLayerName updates the runtime layer, legend store, and Layers panel...',
       async (test) => {
         // Add the fixture and wait for its selected layer to be ready
         const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
@@ -2272,25 +2273,36 @@ export class LayerTester extends GVAbstractTester {
         const gvLayer = await fixture.promiseLayer;
         const layerPath = gvLayer.getLayerPath();
 
-        test.addStep('Renaming the layer through LayerApi.setLayerName...');
-        this.getMapViewer().layer.setLayerName(layerPath, firstName);
+        test.addStep('Opening the Layers footer panel to observe the rendered layer name...');
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('layers');
+        await DomHelper.waitForFooterTabSelected(mapId, 'layers');
+        const snapshots: (string | undefined)[] = [];
 
-        // Snapshot both names before the second rename can overwrite the first operation's result.
-        const firstRuntimeName = gvLayer.getLayerName();
-        const firstStoreName = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.layerName;
+        for (const name of [firstName, secondName]) {
+          test.addStep(`Renaming the layer to '${name}' through LayerApi.setLayerName...`);
 
-        // A second name verifies that subsequent calls replace an existing runtime override.
-        test.addStep('Renaming the same layer again through LayerApi.setLayerName...');
-        this.getMapViewer().layer.setLayerName(layerPath, secondName);
-        const secondRuntimeName = gvLayer.getLayerName();
-        const secondStoreName = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.layerName;
+          // Observe a stable ancestor before the update because renaming can remount the layer row.
+          const domChanged = DomHelper.waitForDomChange(DomHelper.getMapContainer(mapId), undefined, 10000);
+          this.getMapViewer().layer.setLayerName(layerPath, name);
 
-        return { gvLayer, data: [firstRuntimeName, firstStoreName, secondRuntimeName, secondStoreName] };
+          // Get the store layer name
+          const storeLayerName = getStoreLayerLegendLayerByPath(mapId, layerPath)?.layerName;
+
+          // eslint-disable-next-line no-await-in-loop
+          await domChanged;
+
+          // Let React finish rendering, then snapshot the label without checking its expected value.
+          // eslint-disable-next-line no-await-in-loop
+          await DomHelper.waitForReactIdle();
+          const domName = DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR);
+          snapshots.push(gvLayer.getLayerName(), storeLayerName, domName);
+        }
+
+        return { gvLayer, data: snapshots };
       },
       (test, result) => {
-        // Each rename must propagate to the legend store as well as the runtime layer.
-        test.addStep('Verifying both renames update the runtime layer and legend store...');
-        Test.assertIsArrayEqual(result.data, [firstName, firstName, secondName, secondName]);
+        test.addStep('Verifying both renames update runtime, store, and rendered layer names...');
+        Test.assertIsArrayEqual(result.data, [firstName, firstName, firstName, secondName, secondName, secondName]);
       },
       (test) => {
         // Remove the renamed fixture even when execution or an assertion fails.
@@ -2718,9 +2730,9 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the layer and feature arrays before disabling queries, while disabled, and after re-enabling
    */
-  testNonQueryableLayerNotInDetails(): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
+  testNonQueryableLayerNotInDetails(): Promise<Test<LayerWithBeforeAfterFeature<GVGeoJSON>>> {
     const lonlat = [-88, 52];
-    let gvLayer: AbstractGVLayer | undefined;
+    let gvLayer: GVGeoJSON | undefined;
     let fixtureLayerPath: string | undefined;
     return this.test(
       'Test non-queryable layer not in details after map click',
@@ -2915,6 +2927,55 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Finalization removes the fixture whether execution or verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests WMS style assignments and ignored empty selections through the layer controller.
+   *
+   * @returns Runtime, source parameter, and legend-store style snapshots
+   */
+  testSetLayerWmsStyle(): Promise<Test<LayerTestResult<(string | undefined)[]>>> {
+    let fixtureLayerPath: string | undefined;
+    const style = GVAbstractTester.DATACUBE_MSI_THRESHOLD_STYLE;
+
+    return this.test(
+      'Test LayerController.setLayerWmsStyle synchronizes runtime, WMS source, and legend store...',
+      async (test) => {
+        const fixture = this.addLayerWMSWithDatacubeMSI(test);
+        fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
+        if (!(gvLayer instanceof GVWMS)) throw new TestError('The WMS style fixture must be a WMS layer');
+        const source = gvLayer.getOLLayer().getSource();
+        if (!source) throw new TestError('The WMS style fixture must have an OpenLayers source');
+        const layerPath = gvLayer.getLayerPath();
+        // Start from the WMS default so a no-op controller cannot pass by retaining the initial named style.
+        gvLayer.setWmsStyle('');
+        const snapshots: (string | undefined)[] = [
+          gvLayer.getWmsStyle(),
+          source.getParams().STYLES,
+          getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.wmsStyle,
+        ];
+
+        // Repeat the advertised style, then ensure empty selections preserve the active style.
+        for (const selection of [style, style, undefined, '']) {
+          test.addStep(`Setting WMS style to '${selection}' through LayerController.setLayerWmsStyle...`);
+          this.getControllersRegistry().layerController.setLayerWmsStyle(layerPath, selection);
+          const sourceStyle: unknown = source.getParams().STYLES;
+          if (typeof sourceStyle !== 'string') throw new TestError('The WMS STYLES parameter must be a string');
+          snapshots.push(gvLayer.getWmsStyle(), sourceStyle, getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.wmsStyle);
+        }
+
+        return { gvLayer, data: snapshots };
+      },
+      (test, result) => {
+        test.addStep('Verifying runtime, WMS STYLES, and legend-store values after each assignment...');
+        Test.assertIsArrayEqual(result.data, ['', '', '', ...Array<string>(12).fill(style)]);
+      },
+      (test) => {
+        // Keep cleanup available even when fixture loading or style verification fails.
         if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );

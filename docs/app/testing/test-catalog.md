@@ -605,7 +605,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 
 | Method                                     | Type | Description                                                                                      |
 | ------------------ | ---- | --------------------------------------------------------------------------------------------------- |
-| `testSetLayerName` | test | Test repeated `LayerApi.setLayerName` calls update both the runtime layer name and the legend store |
+| `testSetLayerName` | test | Test repeated `LayerApi.setLayerName` calls update runtime, legend store, and the rendered Layers panel label |
 
 #### 2.2.7 Layer Opacity (sequential)
 
@@ -633,6 +633,14 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method | Type | Description |
 | ------ | ---- | ----------- |
 | `testSetLayerTextVisibility` | test | Test controller text-visibility transitions and repeated assignments synchronize the runtime flag and legend store |
+
+#### 2.2.10 WMS Styles (sequential)
+
+[↑ Back to top](#table-of-contents)
+
+| Method | Type | Description |
+| ------ | ---- | ----------- |
+| `testSetLayerWmsStyle` | test | Test named/repeated WMS style assignments synchronize runtime, source STYLES, and legend store; undefined/empty selections preserve the active style |
 
 ## 3. Map
 
