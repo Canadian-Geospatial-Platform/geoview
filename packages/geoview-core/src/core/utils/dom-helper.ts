@@ -5,7 +5,7 @@ import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-type
 import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, OL_ZOOM_PIXEL_PADDING, TABS, type TypeMapFitPadding } from '@/core/utils/constant';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -15,6 +15,44 @@ const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex],
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
+
+/**
+ * Gets the bounding rectangle of the map target element, when the map has a usable size.
+ *
+ * @param mapTarget - The map target element, if any
+ * @param mapSize - The OpenLayers map size in pixels
+ * @returns The map target bounding rectangle, or undefined when the map or its size is unavailable
+ */
+function getUsableMapRect(mapTarget: HTMLElement | undefined, mapSize: number[] | undefined): DOMRect | undefined {
+  if (!mapSize || mapSize[0] <= 0 || mapSize[1] <= 0) return undefined;
+
+  const mapRect = mapTarget?.getBoundingClientRect();
+  return mapRect && mapRect.width > 0 ? mapRect : undefined;
+}
+
+/**
+ * Gets how far, in CSS pixels, an element covers the map from one of its sides.
+ *
+ * @param element - The element covering the map, if any
+ * @param mapRect - The map target bounding rectangle
+ * @param side - The map side the element is anchored to
+ * @returns The covered width in CSS pixels, or 0 when the element is missing, hidden or does not overlap the map
+ */
+function getMapCoveredWidth(element: HTMLElement | undefined, mapRect: DOMRect, side: 'left' | 'right'): number {
+  const rect = element?.getBoundingClientRect();
+  if (
+    !rect ||
+    rect.width <= 0 ||
+    rect.bottom <= mapRect.top ||
+    rect.top >= mapRect.bottom ||
+    rect.left >= mapRect.right ||
+    rect.right <= mapRect.left
+  ) {
+    return 0;
+  }
+
+  return Math.min(mapRect.width, side === 'left' ? rect.right - mapRect.left : mapRect.right - rect.left);
+}
 
 /**
  * Provides stateless, map-scoped DOM utilities.
@@ -971,7 +1009,7 @@ export abstract class DomHelper {
    * @param mapId - The map identifier
    * @returns The map-scoped clear measurements button id
    */
-  static buildButtonClearMeasurements(mapId: string): string {
+  static buildButtonClearMeasurementsId(mapId: string): string {
     return this.buildGVElementId(mapId, 'button-clear-measurements');
   }
 
@@ -1295,6 +1333,80 @@ export abstract class DomHelper {
   }
 
   // #endregion MAP SPECIFIC
+
+  // #region MAP DOM FUNCTIONS
+
+  /** Map-specific DOM functions (measurements and layout) built on the map element getters. */
+  static readonly Map = class Map {
+    /**
+     * Gets the default fixed fit padding shared by the feature zoom (Details, Data Table) and the STAC browser zoom.
+     *
+     * @returns Padding in map pixels ordered as top, right, bottom, left
+     */
+    static getDefaultFitPadding(): TypeMapFitPadding {
+      return [OL_ZOOM_PIXEL_PADDING, OL_ZOOM_PIXEL_PADDING, OL_ZOOM_PIXEL_PADDING, OL_ZOOM_PIXEL_PADDING];
+    }
+
+    /**
+     * Gets the default fit padding with the area covered by the right-side map controls (navigation bar and
+     * overview map) added to the right side.
+     *
+     * The overlap between the controls and the map is measured from their actual positions and converted to map pixels
+     * (so it keeps working with CSS scaling). The default padding is returned unchanged when no control is shown or
+     * when the controls leave no room for the extent.
+     *
+     * @param mapId - The map identifier
+     * @param mapSize - The OpenLayers map size in pixels
+     * @returns Padding in map pixels ordered as top, right, bottom, left
+     */
+    static getMapControlsFitPadding(mapId: string, mapSize: number[] | undefined): TypeMapFitPadding {
+      const padding = Map.getDefaultFitPadding();
+      const mapRect = getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
+      if (!mapSize || !mapRect) return padding;
+
+      // The navigation bar and the overview map are both anchored to the right edge of the map
+      const controls = [DomHelper.getNavBar(mapId), ...DomHelper.getOverviewMapControls(mapId)];
+      const overlap =
+        Math.max(0, ...controls.map((control) => getMapCoveredWidth(control, mapRect, 'right'))) * (mapSize[0] / mapRect.width);
+      if (mapSize[0] <= padding[3] + overlap + padding[1]) return padding;
+
+      padding[1] += overlap;
+      return padding;
+    }
+
+    /**
+     * Gets the map controls fit padding with the area covered by an app-bar panel added to the left side.
+     *
+     * The overlap between the panel and the map is measured from their actual positions and converted to map pixels
+     * (so it keeps working with CSS scaling). The map controls padding is returned unchanged when the panel is missing,
+     * hidden, does not overlap the map (e.g. footer-bar panel) or leaves no room for the extent.
+     *
+     * The caller is responsible for knowing the panel is the open one.
+     *
+     * @param mapId - The map identifier
+     * @param tabId - The app-bar tab identifier whose panel is measured
+     * @param mapSize - The OpenLayers map size in pixels
+     * @returns Padding in map pixels ordered as top, right, bottom, left
+     */
+    static getAppBarPanelFitPadding(mapId: string, tabId: string, mapSize: number[] | undefined): TypeMapFitPadding {
+      const padding = Map.getMapControlsFitPadding(mapId, mapSize);
+      const [top, right, bottom, left] = padding;
+      const mapRect = getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
+      if (!mapSize || !mapRect) return padding;
+
+      const panel = DomHelper.getAppBarPanel(mapId, tabId);
+      if (!panel || panel.getAttribute('aria-hidden') === 'true') return padding;
+
+      // Convert CSS overlap into map pixels, including when the host applies CSS scaling.
+      const overlap = getMapCoveredWidth(panel, mapRect, 'left') * (mapSize[0] / mapRect.width);
+      if (overlap <= 0 || mapSize[0] <= left + overlap + right || mapSize[1] <= top + bottom) return padding;
+
+      padding[3] += overlap;
+      return padding;
+    }
+  };
+
+  // #endregion MAP DOM FUNCTIONS
 
   // #region DATA-TABLE SPECIFIC
 

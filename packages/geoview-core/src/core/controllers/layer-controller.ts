@@ -1019,17 +1019,34 @@ export class LayerController extends AbstractMapViewerController {
    * @param extent - The feature extent to bring into view (in map projection)
    * @param useAnimation - Optional flag indicating if an animation should be used, default: true
    * @param fitOptions - Optional fit options (e.g. padding) to merge the constraints into
-   * @returns A promise that resolves when the map moved and the extent is outlined
+   * @returns A promise that resolves, once the map moved and the extent is outlined, with true when the map landed on the
+   * same view a zoom to the feature (`zoomToExtentRestrictedAndHighlight`) would produce, so such a zoom would have no effect
    */
-  async panToExtentRestrictedAndOutline(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
+  async panToExtentRestrictedAndOutline(
+    layerPath: string,
+    extent: Extent,
+    useAnimation = true,
+    fitOptions?: GVFitOptions
+  ): Promise<boolean> {
+    const view = this.getMapViewer().getView();
+    const resolutionBefore = view.getResolution();
+    const featureZoomMinResolution = this.#getFeatureZoomInFitConstraints(layerPath).minResolution;
+
     // Never zoom in: keep at least the current resolution, zooming out only when the extent does not fit
     await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
       ...(fitOptions ?? {}),
-      minResolution: this.getMapViewer().getView().getResolution(),
+      minResolution: resolutionBefore,
     });
 
     // Outline the extent like a feature zoom does
     this.#hideClickMarkerAndOutline(extent);
+
+    // Both fit the same extent with the same padding and layer constraints; they land on the same view when they share the
+    // minimum resolution (map already at or closer than the feature zoom bound, e.g. after a point zoom), or when the
+    // extent did not fit and the pan zoomed out to fit it (the fitted resolution then wins in both)
+    const resolutionAfter = view.getResolution();
+    if (resolutionBefore === undefined) return false;
+    return featureZoomMinResolution === resolutionBefore || (resolutionAfter !== undefined && resolutionAfter > resolutionBefore);
   }
 
   /**

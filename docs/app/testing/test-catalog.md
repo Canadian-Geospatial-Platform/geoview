@@ -834,6 +834,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | `testZoomToFeature`          | test | Test Zoom to feature on layer _{layerPath}_ ...      |
 | `testZoomToResultsGroupExtent` | test | Test Zoom to all results for layer _{layerPath}_ ... |
 | `testZoomToFeatureBoundAndPan` | test | Test Zoom to point feature bound and pan to next feature on layer _{layerPath}_ ... |
+| `testZoomToResultsButtonUnavailableUntilViewChanges` | test | Test Zoom to all results button is unavailable until the map view changes on layer _{layerPath}_ ... |
 | `testNameFieldAsLabel`       | test | Test nameField as label in query results...          |
 | `testSummaryFalseHidesField` | test | Test summary false hides field from query results... |
 | `testFieldAliasRenamesField` | test | Test field alias renames field in query results...   |

@@ -34,6 +34,10 @@ interface FeatureInfoProps {
   containerType: TypeContainerBox;
   /** Optional callback when the user zooms to the feature. */
   onFeatureZoomed?: () => void;
+  /** Optional callback once the zoom to the feature completed. */
+  onFeatureZoomCompleted?: () => void;
+  /** Whether the map still shows the last zoom to this feature (the zoom button is then unavailable). */
+  isZoomed?: boolean;
 }
 
 /** Properties for the FeatureHeader component. */
@@ -44,8 +48,8 @@ interface FeatureHeaderProps {
   name: string;
   /** Whether the feature geometry can be highlighted (present and not too complex to render). */
   canHighlight: boolean;
-  /** Whether the feature has an extent to zoom to. */
-  hasExtent: boolean;
+  /** Whether the zoom to feature is available (extent present and the map not still on the last zoom to it). */
+  canZoom: boolean;
   /** Whether the feature has a geochart. */
   hasGeochart: boolean;
   /** Whether the feature is checked. */
@@ -71,7 +75,7 @@ const FeatureHeader = memo(
     iconSrc,
     name,
     canHighlight,
-    hasExtent,
+    canZoom,
     hasGeochart,
     checked,
     onCheckChange,
@@ -165,7 +169,7 @@ const FeatureHeader = memo(
             color="primary"
             aria-label={t('details.zoomTo')}
             tooltipPlacement="top"
-            aria-disabled={!hasExtent}
+            aria-disabled={!canZoom}
             onClick={onZoomIn}
             className="buttonOutline"
             size="small"
@@ -185,7 +189,13 @@ FeatureHeader.displayName = 'FeatureHeader';
  * @param props - Properties defined in FeatureInfoProps interface
  * @returns The feature info component, or null if no feature
  */
-export function FeatureInfo({ feature, containerType, onFeatureZoomed }: FeatureInfoProps): JSX.Element | null {
+export function FeatureInfo({
+  feature,
+  containerType,
+  onFeatureZoomed,
+  onFeatureZoomCompleted,
+  isZoomed = false,
+}: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
@@ -306,8 +316,8 @@ export function FeatureInfo({ feature, containerType, onFeatureZoomed }: Feature
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
 
-      // Skip when there is no extent to zoom to
-      if (!feature?.extent) return;
+      // Skip when there is no extent to zoom to, or when the map still shows the last zoom to this feature
+      if (!feature?.extent || isZoomed) return;
 
       // Let the panel know the user zoomed, so previous/next can follow the selected feature
       onFeatureZoomed?.();
@@ -315,12 +325,13 @@ export function FeatureInfo({ feature, containerType, onFeatureZoomed }: Feature
       // Zoom to the feature extent, keeping it out of an open app-bar panel, and highlight it (skipped for geometries too complex to render)
       layerController
         .zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true, getPanelFitOptions())
+        .then(() => onFeatureZoomCompleted?.())
         .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
         });
     },
-    [feature, layerController, getPanelFitOptions, onFeatureZoomed]
+    [feature, isZoomed, layerController, getPanelFitOptions, onFeatureZoomCompleted, onFeatureZoomed]
   );
 
   /**
@@ -354,7 +365,7 @@ export function FeatureInfo({ feature, containerType, onFeatureZoomed }: Feature
         iconSrc={feature.featureIcon}
         name={memoFeatureName}
         canHighlight={featureCanHighlight}
-        hasExtent={featureHasExtent}
+        canZoom={featureHasExtent && !isZoomed}
         hasGeochart={memoHasGeochart}
         checked={checked}
         onCheckChange={handleFeatureChecked}
