@@ -55,7 +55,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 7;
+    return 3;
   }
 
   /**

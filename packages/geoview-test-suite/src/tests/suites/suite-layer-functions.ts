@@ -46,8 +46,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
       <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
       <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
-      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates the runtime layer and legend store<br/>
+      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
       <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
+      <b>WMS styles</b> — Named and repeated selections synchronize runtime, source STYLES, and legend store; empty selections preserve the active style<br/>
       <b>Queryable and hoverable flags</b> — Public LayerApi setters enable, disable, repeat assignments, and re-enable each flag while synchronizing the legend store<br/>
       <b>Details queries</b> — Disabling queryability excludes the layer's features from Details results; re-enabling restores them<br/>
       <b>Hover queries</b> — Disabling hoverability excludes the layer from hover results; re-enabling restores its hover feature<br/>
@@ -66,7 +67,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 23;
+    return 26;
   }
 
   /**
@@ -185,6 +186,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test the controller's independent text-visibility flag and store synchronization.
     await this.#layerTester.testSetLayerTextVisibility();
+
+    // Test WMS style synchronization independently of the query fixtures.
+    await this.#layerTester.testSetLayerWmsStyle();
 
     // Test ESRI Dynamic junction geometry pairs to its own OBJECTID (#3636) — changes zoom, resets to initial extent in finalize
     await this.#layerTester.testEsriDynamicJunctionGeometryPairing();
