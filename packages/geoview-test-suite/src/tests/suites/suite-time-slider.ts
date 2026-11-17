@@ -38,10 +38,10 @@ export class GVTestSuiteTimeSlider extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests Time Slider controller behavior:<br/>
-      <b>Reset</b> — Registered defaults are restored through the controller<br/>
-      <b>Overlap constraints</b> — Discrete and continuous dual handles remain separated<br/>
-      <b>Group dimension</b> — WMS group and sub-layer dimensions are flagged in the store`;
+    return `Tests Time Slider controller values and WMS group-dimension registration:<br/>
+      <b>Reset</b> — Restore registered defaults without changing the saved default values<br/>
+      <b>Overlap constraints</b> — Discrete timestamps and stepped continuous values are constrained for both active-thumb directions<br/>
+      <b>Group dimension</b> — Verify WMS group/sub-layer flags and time-slider store entries, with VPN-aware execution`;
   }
 
   /**

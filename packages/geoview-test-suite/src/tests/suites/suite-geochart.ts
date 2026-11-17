@@ -42,9 +42,9 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Geochart plugin integration:<br/>
-      <b>Interaction</b> — Query a polygon layer at a coordinate, open the panel and select its chart<br/>
-      <b>GeoCore</b> — Add layer by UUID, query and select it, and verify geochart config loading`;
+    return `Tests Geochart configuration and selection through the footer panel:<br/>
+      <b>Polygon chart</b> — Register a chart, query a polygon layer at a coordinate, and verify the selected footer tab and chart layer<br/>
+      <b>GeoCore chart</b> — Add the Airborne layer by UUID, verify its chart configuration, and query and select its chart`;
   }
 
   /**

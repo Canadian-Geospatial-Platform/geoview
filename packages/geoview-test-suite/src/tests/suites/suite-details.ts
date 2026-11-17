@@ -46,8 +46,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
     return `Tests the Details panel feature info display and interaction:<br/>
       <b>Highlight</b> — Clear all highlights after selection<br/>
       <b>Navigation</b> — Zoom to feature from details panel (bounded for points), including with the panel open over the map; zoom to all results of a layer; pan to the next feature<br/>
-      <b>Selection</b> — Manually selected layer persists across map clicks<br/>
-      <b>Config overrides</b> — nameField as label, summary:false hides field, field alias renaming`;
+      <b>Selection</b> — Manually selected layer persists across map clicks<br/>`;
+
   }
 
   /**

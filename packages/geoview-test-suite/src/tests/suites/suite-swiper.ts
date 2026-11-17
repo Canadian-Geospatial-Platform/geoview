@@ -42,10 +42,10 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Swiper plugin lifecycle and rendering isolation:<br/>
+    return `Tests Swiper layer selection, rendering isolation, and interactive settings:<br/>
       <b>Lifecycle</b> — Layer activation/deactivation, multi-layer assignment and orientation changes<br/>
       <b>Rendering isolation</b> — Per-layer render clipping is isolated to descendants of the selected layer path<br/>
-      <b>Interactive customization</b> — Per-side clipping, persistence, settings gating, progressive registration, and hover suppression`;
+      <b>Interactive customization</b> — Left/right and up/down clipping sides, exported config persistence, settings control visibility, progressive layer registration, and hover suppression over the bar/handle`;
   }
 
   /**
