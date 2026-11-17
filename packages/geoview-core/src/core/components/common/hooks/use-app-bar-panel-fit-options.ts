@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/use-controllers';
-import { MapFitPadding } from '@/core/utils/map-fit-padding';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { GVFitOptions } from '@/core/utils/constant';
 
 /**
@@ -10,7 +10,7 @@ import type { GVFitOptions } from '@/core/utils/constant';
  * and the right-side map controls (navigation bar and overview map).
  *
  * Details and Data Table can live in the app bar or the footer bar, so the open app-bar panel (if any) is read
- * from the store. The STAC browser only lives in the app bar, so it calls `MapFitPadding.getAppBarPanelPadding` directly.
+ * from the store. The STAC browser only lives in the app bar, so it calls `DomHelper.Map.getAppBarPanelFitPadding` directly.
  *
  * @returns A getter of the fit options to pass when zooming
  */
@@ -28,7 +28,7 @@ export function useAppBarPanelFitOptions(): () => GVFitOptions {
   return useCallback((): GVFitOptions => {
     const mapSize = mapController.getMapSize();
     const padding =
-      isOpen && tabId ? MapFitPadding.getAppBarPanelPadding(mapId, tabId, mapSize) : MapFitPadding.getMapControlsPadding(mapId, mapSize);
+      isOpen && tabId ? DomHelper.Map.getAppBarPanelFitPadding(mapId, tabId, mapSize) : DomHelper.Map.getMapControlsFitPadding(mapId, mapSize);
     return { padding };
   }, [isOpen, tabId, mapId, mapController]);
 }

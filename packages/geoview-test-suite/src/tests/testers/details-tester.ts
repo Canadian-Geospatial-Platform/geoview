@@ -9,7 +9,7 @@ import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { OL_ZOOM_FEATURE_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
+import { getStoreDetailsFeatures } from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
@@ -289,7 +289,7 @@ export class DetailsTester extends GVAbstractTester {
         // Compute the padding like the Details zoom button does
         test.addStep('Computing the panel-aware fit padding...');
         const mapSize = this.getControllersRegistry().mapController.getMapSize();
-        const padding = MapFitPadding.getAppBarPanelPadding(this.getMapId(), 'details', mapSize);
+        const padding = DomHelper.Map.getAppBarPanelFitPadding(this.getMapId(), 'details', mapSize);
 
         // Zoom to the feature with the computed padding
         test.addStep('Zooming to feature extent with the panel-aware padding...');
@@ -306,9 +306,9 @@ export class DetailsTester extends GVAbstractTester {
 
         // Return the test execution results
         return {
-          basePaddingLeft: MapFitPadding.getDefaultPadding()[3],
+          basePaddingLeft: DomHelper.Map.getDefaultFitPadding()[3],
           paddingLeft: padding[3],
-          basePaddingRight: MapFitPadding.getDefaultPadding()[1],
+          basePaddingRight: DomHelper.Map.getDefaultFitPadding()[1],
           paddingRight: padding[1],
           mapWidth: mapSize?.[0],
           hasNavBar: !!DomHelper.getNavBar(this.getMapId()),
@@ -550,20 +550,35 @@ export class DetailsTester extends GVAbstractTester {
         // Pan to another small feature, like previous/next does after a zoom to feature
         test.addStep('Bringing a small feature into view...');
         const nextExtent: Extent = [cx + 2000, cy + 1000, cx + 2200, cy + 1200];
-        await layerController.panToExtentRestrictedAndOutline(layerPath, nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const panIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
+          layerPath,
+          nextExtent,
+          GVAbstractTester.USE_ZOOM_ANIMATION,
+          fitOptions
+        );
         const panResolution = view.getResolution();
         const nextFeatureInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), nextExtent);
 
         // Bring a feature larger than the view into view: it must zoom out to fit it
         test.addStep('Bringing a large feature into view...');
         const largeExtent: Extent = [cx - 50000, cy - 50000, cx + 50000, cy + 50000];
-        await layerController.panToExtentRestrictedAndOutline(layerPath, largeExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const largeIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
+          layerPath,
+          largeExtent,
+          GVAbstractTester.USE_ZOOM_ANIMATION,
+          fitOptions
+        );
         const largeResolution = view.getResolution();
         const largeFeatureInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), largeExtent);
 
         // Bring the small feature back: it must not zoom in again
         test.addStep('Bringing the small feature back into view...');
-        await layerController.panToExtentRestrictedAndOutline(layerPath, nextExtent, GVAbstractTester.USE_ZOOM_ANIMATION, fitOptions);
+        const backToSmallIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
+          layerPath,
+          nextExtent,
+          GVAbstractTester.USE_ZOOM_ANIMATION,
+          fitOptions
+        );
 
         return {
           featureMinResolution: mapController.getResolutionFromScale(OL_ZOOM_FEATURE_MAX_SCALE),
@@ -574,6 +589,9 @@ export class DetailsTester extends GVAbstractTester {
           largeResolution,
           largeFeatureInView,
           backToSmallResolution: view.getResolution(),
+          panIsFeatureZoomView,
+          largeIsFeatureZoomView,
+          backToSmallIsFeatureZoomView,
         };
       },
       (test, result) => {
@@ -598,6 +616,79 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying going back to a small feature does not zoom in...');
         Test.assertIsDefined('backToSmallResolution', result.backToSmallResolution);
         Test.assertIsEqual(Math.abs(result.backToSmallResolution - result.largeResolution) <= result.largeResolution * 0.001, true);
+
+        test.addStep('Verifying when a pan already shows the zoom to feature view (zoom button would have no effect)...');
+        Test.assertIsEqual(result.panIsFeatureZoomView, true);
+        Test.assertIsEqual(result.largeIsFeatureZoomView, true);
+        Test.assertIsEqual(result.backToSmallIsFeatureZoomView, false);
+      }
+    );
+  }
+
+  /**
+   * Tests that the Details zoom to all results button becomes unavailable (aria-disabled) after its zoom, and
+   * available again once the map view changes.
+   *
+   * @param layerPath - The layer path of a layer returning several results at the coordinate
+   * @param lonlat - The coordinate on the map to click
+   * @returns A promise resolving when the test completes
+   */
+  testZoomToResultsButtonUnavailableUntilViewChanges(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomButtonState>> {
+    const BUTTON_SELECTOR = 'button[aria-label="Zoom to all results for this layer"]';
+
+    return this.test(
+      `Test Zoom to all results button is unavailable until the map view changes on layer ${layerPath}...`,
+      async (test) => {
+        const root = DomHelper.getGVRootElement(this.getMapId());
+
+        // Vector queries use a pixel hit tolerance, so the result count depends on the view: go back to the initial view
+        // (previous tests zoomed in) where the click returns several results for the layer
+        test.addStep('Zooming to the initial extent...');
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Click the map and select the layer, so the Details panel shows its results
+        await this.getControllersRegistry().layerController.waitForLayersLoaded();
+        await this.simulateMapClickWaitForBatchedQuery(test, lonlat);
+        await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
+
+        // The button only shows for several results; fail clearly instead of waiting for it
+        test.addStep('Verifying the layer returned several results...');
+        const resultCount = getStoreDetailsFeatures(this.getMapId(), layerPath)?.length ?? 0;
+        Test.assertIsEqual(resultCount > 1, true);
+
+        // Get the button
+        test.addStep('Waiting for the zoom to all results button...');
+        const button = await DomHelper.waitForDomElement(BUTTON_SELECTOR, root);
+        const disabledBefore = button.getAttribute('aria-disabled') ?? undefined;
+
+        // Click it and wait for it to become unavailable once the zoom completed
+        test.addStep('Clicking the zoom to all results button...');
+        (button as HTMLButtonElement).click();
+        const disabledAfterZoom =
+          (await DomHelper.waitForDomElement(`${BUTTON_SELECTOR}[aria-disabled="true"]`, root)).getAttribute('aria-disabled') ?? undefined;
+
+        // Change the map view and wait for the button to become available again
+        test.addStep('Changing the map view...');
+        const center = this.getMapViewer().getView().getCenter()!;
+        await this.getControllersRegistry().mapController.zoomToExtent(
+          [center[0] + 1000, center[1] + 1000, center[0] + 2000, center[1] + 2000],
+          GVAbstractTester.USE_ZOOM_ANIMATION
+        );
+        const disabledAfterViewChange =
+          (await DomHelper.waitForDomElement(`${BUTTON_SELECTOR}[aria-disabled="false"]`, root)).getAttribute('aria-disabled') ?? undefined;
+
+        return { disabledBefore, disabledAfterZoom, disabledAfterViewChange };
+      },
+      (test, result) => {
+        test.addStep('Verifying the button is available before the zoom...');
+        Test.assertIsEqual(result.disabledBefore, 'false');
+
+        test.addStep('Verifying the button is unavailable after the zoom...');
+        Test.assertIsEqual(result.disabledAfterZoom, 'true');
+
+        test.addStep('Verifying the button is available again after the map view changed...');
+        Test.assertIsEqual(result.disabledAfterViewChange, 'false');
       }
     );
   }
@@ -788,6 +879,16 @@ export class DetailsTester extends GVAbstractTester {
 
 // #region TYPES AND INTERFACES
 
+/** Result type for the testZoomToResultsButtonUnavailableUntilViewChanges test execution. */
+export type TestZoomButtonState = {
+  /** The button aria-disabled value before the zoom. */
+  disabledBefore: string | undefined;
+  /** The button aria-disabled value once the zoom completed. */
+  disabledAfterZoom: string | undefined;
+  /** The button aria-disabled value once the map view changed. */
+  disabledAfterViewChange: string | undefined;
+};
+
 /** Result type for the testZoomToFeatureBoundAndPan test execution. */
 export type TestZoomToFeatureBoundAndPan = {
   /** The resolution matching the closest scale a feature zoom can reach. */
@@ -806,6 +907,12 @@ export type TestZoomToFeatureBoundAndPan = {
   largeFeatureInView: boolean;
   /** The view resolution after bringing the small feature back into view. */
   backToSmallResolution: number | undefined;
+  /** Whether the small feature pan landed on its zoom to feature view (map at the feature zoom bound). */
+  panIsFeatureZoomView: boolean;
+  /** Whether the large feature pan landed on its zoom to feature view (pan zoomed out to fit it). */
+  largeIsFeatureZoomView: boolean;
+  /** Whether the pan back to the small feature landed on its zoom to feature view (expected not: a zoom would zoom in). */
+  backToSmallIsFeatureZoomView: boolean;
 };
 
 /** Result type for the testZoomToResultsGroupExtent test execution. */

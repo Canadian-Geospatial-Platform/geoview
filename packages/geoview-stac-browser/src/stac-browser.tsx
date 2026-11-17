@@ -3,6 +3,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import {
   useStoreAppDisplayDateMode,
@@ -38,7 +39,6 @@ import { StacCollectionList } from './stac-collection-list';
 import { StacCollectionDetail } from './stac-collection-detail';
 import { StacSearchResults } from './stac-search-results';
 import { StacItemDetail } from './stac-item-detail';
-import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 import { getSxClasses, SELECTED_FILL_OPACITY, SELECTION_COLORS } from './stac-browser-style';
 
 /** Geometry group used for the selected item footprints. */
@@ -659,7 +659,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       const bbox = StacFieldUtils.getBbox(item);
       if (!bbox) return;
       // The STAC browser only lives in the app bar and this zoom is triggered from inside its panel, so the panel is known to be open
-      const padding = MapFitPadding.getAppBarPanelPadding(mapId, 'stac-browser', mapController.getMapSize());
+      const padding = DomHelper.Map.getAppBarPanelFitPadding(mapId, 'stac-browser', mapController.getMapSize());
       stacController.zoomToLonLatBbox(bbox, padding).catch((error: unknown) => {
         logger.logError(`STAC-BROWSER - Failed to zoom to item ${item.id}`, error);
       });

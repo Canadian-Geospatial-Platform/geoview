@@ -56,7 +56,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 9;
+    return 10;
   }
 
   /**
@@ -112,6 +112,12 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
     // Test zoom to point feature bound and pan to next feature (changes zoom, sequential)
     await this.#detailsTester.testZoomToFeatureBoundAndPan('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+    // Test the zoom to all results button availability through the UI (changes zoom, sequential)
+    await this.#detailsTester.testZoomToResultsButtonUnavailableUntilViewChanges(
+      'geojsonLYR5/polygons.json',
+      GVAbstractTester.ONTARIO_CENTER_LONLAT
+    );
 
     // Tests that recreate the map with custom featureInfo config (sequential)
     await this.#detailsTester.testNameFieldAsLabel();
