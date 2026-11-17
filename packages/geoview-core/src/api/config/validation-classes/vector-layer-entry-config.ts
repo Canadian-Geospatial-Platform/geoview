@@ -40,6 +40,24 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     return super.getSource();
   }
 
+  /**
+   * Overrides the toJson of the mother class.
+   *
+   * @returns The JSON representation of the instance
+   */
+  protected override onToJson<T>(): T {
+    // Call parent
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serialized = super.onToJson<T>() as any;
+
+    // Copy values
+    serialized.maxRecordCount = this.getMaxRecordCount();
+
+    // Return it
+    return serialized;
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS

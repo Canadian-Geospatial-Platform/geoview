@@ -60,7 +60,7 @@ export function encodeLayersParam(url: string): string {
 }
 
 /**
- * Resolves the next page URL advertised by an OGC API Features response.
+ * Resolves the next page URL advertised by an OGC API Features response, preserving CRS and BBOX parameters omitted by the link.
  *
  * @param responseData - The OGC API Features response
  * @param currentPageUrl - The unproxied current page URL used to resolve relative links
@@ -81,7 +81,12 @@ export function getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: 
   if (!nextLink) return undefined;
 
   const nextPageUrl = new URL(nextLink.href, currentPageUrl);
-  const currentPageCrs = new URL(currentPageUrl).searchParams.get('crs');
-  if (currentPageCrs && !nextPageUrl.searchParams.has('crs')) nextPageUrl.searchParams.set('crs', currentPageCrs);
+  const currentUrl = new URL(currentPageUrl);
+  for (const parameter of ['crs', 'bbox', 'bbox-crs']) {
+    const currentValue = currentUrl.searchParams.get(parameter);
+    if (currentValue && !nextPageUrl.searchParams.has(parameter)) {
+      nextPageUrl.searchParams.set(parameter, currentValue);
+    }
+  }
   return nextPageUrl.toString();
 }

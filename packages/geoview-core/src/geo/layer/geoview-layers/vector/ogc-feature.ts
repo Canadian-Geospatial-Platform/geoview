@@ -21,7 +21,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { LayerServiceMetadataUnableToFetchError, LayerTooManyFeatures } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
@@ -243,20 +243,24 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @throws {Error} When pagination repeats an already requested page
    * @throws {LayerSourceFailedToLoadError} When any page request fails
    * @throws {LayerTooManyFeatures} When the advertised or accumulated feature count exceeds the supported limit
+   * @throws {LayerTooManyFeaturesInBBOX} When a BBOX query exceeds the supported feature limit
    * @throws {LayerTooManyPages} When another page remains after the maximum number of pages has been fetched
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sourceOptions: SourceOptions<Feature>,
+    _sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
     // Get the items url as specified in the metadata
-    const itemsUrl = OgcFeature.#getItemsUrl(layerConfig);
+    const itemsUrl = new URL(OgcFeature.#getItemsUrl(layerConfig));
+
+    // Apply the bbox strategy on the items url if necessary
+    OgcFeature.#applyBboxStrategy(layerConfig, readOptions, itemsUrl);
+    const itemsUrlString = itemsUrl.toString();
 
     // Fetch with proxy fallback support; surface a specific message if the source can't be loaded (e.g. unreachable/404)
     const responseData = await AbstractGeoViewVector.fetchSourceForLayer(layerConfig, () =>
-      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(itemsUrl), {
+      Fetch.fetchJson(layerConfig.getUrlWithProxyWhenNeeded(itemsUrlString), {
         headers: { Accept: 'application/geo+json, application/json' },
         retryCount: 3,
       })
@@ -269,8 +273,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       readOptions.dataProjection,
       readOptions.featureProjection
     );
-    const requestedPageUrls = new Set([itemsUrl]);
-    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, itemsUrl);
+    const requestedPageUrls = new Set([itemsUrlString]);
+    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, itemsUrlString);
 
     while (nextPageUrl) {
       // Reject broken paging rather than reporting a silently truncated layer as successfully loaded.
@@ -499,6 +503,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param previousCount - The number of features returned by preceding pages
    * @returns The accumulated number of returned features
    * @throws {LayerTooManyFeatures} When the advertised or accumulated count exceeds the limit
+   * @throws {LayerTooManyFeaturesInBBOX} When a BBOX query exceeds the limit
    */
   static #checkFeatureCount(layerConfig: VectorLayerEntryConfig, responseData: unknown, previousCount: number): number {
     let featureCount = previousCount;
@@ -514,13 +519,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       }
     }
 
-    // Get the max record count as defined by config or codebase
-    const maxRecordCount = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;
-
     const largestCount = Math.max(featureCount, numberMatched ?? 0);
-    if (largestCount > maxRecordCount) {
-      throw new LayerTooManyFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), largestCount, maxRecordCount);
-    }
+    AbstractGeoViewVector.checkFeatureCount(layerConfig, largestCount);
     return featureCount;
   }
 
@@ -564,6 +564,33 @@ export class OgcFeature extends AbstractGeoViewVector {
 
     if (!itemsUrl.searchParams.has('limit')) itemsUrl.searchParams.set('limit', `${AbstractGeoViewVector.MAX_PAGE_SIZE}`);
     return itemsUrl.toString();
+  }
+
+  /**
+   * Adds the requested extent to the items URL when the layer uses BBOX loading.
+   *
+   * @param layerConfig - The OGC Feature layer entry configuration
+   * @param readOptions - The requested map extent and its projection
+   * @param itemsUrl - The items URL to update with the transformed bbox
+   * @throws {Error} When BBOX loading lacks an extent or projection, or the transformed extent is not finite
+   */
+  static #applyBboxStrategy(layerConfig: VectorLayerEntryConfig, readOptions: ReadOptions, itemsUrl: URL): void {
+    // If using the bbox strategy to load features
+    if (layerConfig.getSource().strategy === 'bbox') {
+      if (!readOptions.extent || !readOptions.featureProjection) {
+        throw new Error(`OGC API Features layer '${layerConfig.layerId}' requires a valid extent and projection for BBOX loading.`);
+      }
+
+      const sourceProjection = Projection.getProjectionFromStringOrNumber(readOptions.featureProjection);
+      const bboxCrs = itemsUrl.searchParams.get('bbox-crs');
+      const bboxProjection = bboxCrs ? Projection.getProjectionFromStringOrNumber(bboxCrs) : Projection.getProjectionLonLat();
+      const bboxExtent = Projection.transformExtentFromProj(readOptions.extent, sourceProjection, bboxProjection, 8);
+      if (!bboxExtent.every(Number.isFinite)) {
+        throw new Error(`OGC API Features layer '${layerConfig.layerId}' could not transform the requested extent to its bbox CRS.`);
+      }
+
+      itemsUrl.searchParams.set('bbox', bboxExtent.join(','));
+    }
   }
 
   /**

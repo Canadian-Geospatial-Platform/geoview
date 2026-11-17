@@ -349,6 +349,26 @@ export class LayerTooManyFeatures extends LayerError {
   }
 }
 
+/** Indicates that the requested map extent exceeds a layer's supported vector feature limit. */
+export class LayerTooManyFeaturesInBBOX extends LayerError {
+  /**
+   * Creates an error identifying the oversized map-extent query.
+   *
+   * @param geoviewLayerId - The layer identifier
+   * @param layerName - The layer display name
+   * @param featureCount - The advertised or accumulated number of features
+   * @param limit - The maximum supported number of features
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number, limit: number) {
+    super(geoviewLayerId, 'validation.layer.tooManyFeaturesInBBOX', {
+      layerNameOrId: layerName || geoviewLayerId,
+      count: featureCount,
+      limit,
+    });
+    Object.setPrototypeOf(this, LayerTooManyFeaturesInBBOX.prototype);
+  }
+}
+
 /** Indicates that loading a layer requires more pages than supported. */
 export class LayerTooManyPages extends LayerError {
   /**

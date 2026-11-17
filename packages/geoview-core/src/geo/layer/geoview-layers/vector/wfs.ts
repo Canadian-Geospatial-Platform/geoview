@@ -3,7 +3,6 @@ import type { ReadOptions } from 'ol/format/Feature';
 import WFSFormat from 'ol/format/WFS';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
-import { bbox as vectorBbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
@@ -27,6 +26,8 @@ import {
   LayerInvalidFeatureInfoFormatWFSError,
   LayerNoCapabilitiesError,
   LayerServiceMetadataUnableToFetchError,
+  LayerTooManyFeatures,
+  LayerTooManyFeaturesInBBOX,
 } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, NetworkError, RequestTimeoutError, ResponseEmptyError, ResponseError } from '@/core/exceptions/core-exceptions';
@@ -297,7 +298,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected override onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
+    _sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
     // Cast it to proper type
@@ -305,7 +306,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // Build the bbox extent string if the strategy is bbox and the extent is valid
     let bboxExtent: string | undefined;
-    if (sourceOptions.strategy === vectorBbox && Number.isFinite(readOptions.extent?.[0])) {
+    if (layerConfig.getSource().strategy === 'bbox' && Number.isFinite(readOptions.extent?.[0])) {
       bboxExtent = `${readOptions.extent},${Projection.getProjectionFromStringOrNumber(readOptions.featureProjection)?.getCode()}`;
     }
 
@@ -596,6 +597,8 @@ export class WFS extends AbstractGeoViewVector {
    * @returns A promise that resolves with all parsed features and their source projection
    * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
    * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
+   * @throws {LayerTooManyFeatures} When an all-features request exceeds the feature limit
+   * @throws {LayerTooManyFeaturesInBBOX} When a BBOX request exceeds the feature limit
    */
   static async fetchWithFormatFallback(
     layerConfig: OgcWfsLayerEntryConfig,
@@ -666,6 +669,7 @@ export class WFS extends AbstractGeoViewVector {
           // GV Here, we do want to await in the loop, because we want to know if the fetch/parse succeeded before looping to the next format request.
           // eslint-disable-next-line no-await-in-loop
           result = await WFS.#queryWithGetOrPostFallback(candidate.queryFn, url, matchingFormats[0], postFallbackContext);
+          AbstractGeoViewVector.checkFeatureCount(layerConfig, Math.max(result.features.length, result.numberMatched ?? 0));
 
           const pageMetadata = result;
           if (
@@ -685,6 +689,7 @@ export class WFS extends AbstractGeoViewVector {
         } catch (error: unknown) {
           // Throw on abort to skip remaining format attempts
           GeoViewError.throwIfAborted(error);
+          if (error instanceof LayerTooManyFeatures || error instanceof LayerTooManyFeaturesInBBOX) throw error;
           if (error instanceof ResponseError && error.status === 414) postFallbackContext.state.lastUriTooLongError = error;
         }
       }
@@ -750,6 +755,7 @@ export class WFS extends AbstractGeoViewVector {
 
     const pages = [firstPage];
     let startIndex = pageSize;
+    let featureCount = firstPage.features.length;
 
     while (startIndex < numberMatched) {
       const pageRequest = { count: pageSize, startIndex };
@@ -757,6 +763,8 @@ export class WFS extends AbstractGeoViewVector {
       // eslint-disable-next-line no-await-in-loop
       const pageResult = await WFS.#queryWithGetOrPostFallback(queryFn, url, outputFormat, context, pageRequest);
       const pageItemCount = pageResult.features.length;
+      featureCount += pageItemCount;
+      AbstractGeoViewVector.checkFeatureCount(context.layerConfig, Math.max(featureCount, pageResult.numberMatched ?? 0));
       if (pageItemCount <= 0) throw new Error('WFS pagination returned an unsupported or empty feature response.');
 
       const pageNumberReturned = pageResult.numberReturned ?? pageItemCount;
