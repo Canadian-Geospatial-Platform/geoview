@@ -33,7 +33,7 @@
       },
       {
         "geoviewLayerId": "u2-tour-locations-error-max-record-low",
-        "geoviewLayerName": "U2 Tour Locations",
+        "geoviewLayerName": "U2 Tour Locations (small max record count)",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
