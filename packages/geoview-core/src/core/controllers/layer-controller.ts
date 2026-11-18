@@ -852,6 +852,17 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
+   * Checks whether a result group has an embedded geometry extent or supports an object-ID extent lookup.
+   *
+   * @param layerPath - The layer path the features belong to
+   * @param features - The feature results, if available
+   * @returns True when the group has a usable extent or lookup target
+   */
+  canZoomToFeaturesGroupExtent(layerPath: string, features: TypeFeatureInfoEntry[] | undefined): boolean {
+    return !!GeoUtilities.getFeaturesGeometryExtent(features) || !!this.#getFeaturesExtentLookup(layerPath, features ?? []);
+  }
+
+  /**
    * Zooms to the combined extent of a group of feature results (e.g. all results of one layer for the current map click).
    *
    * Group zoom policy:
@@ -869,7 +880,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param features - The feature results forming the group
    * @param fitOptions - Optional fit options (e.g. padding) to merge the group and layer constraints into
    * @param isStale - Optional callback telling whether the group became stale (new click or layer switch) while extents were resolved
-   * @returns A promise that resolves with true when the map was zoomed, or false when the request became stale
+   * @returns A promise that resolves with true when the map was zoomed, or false when the request became stale or was interrupted
    * @throws {NoExtentError} When no valid extent could be determined from the provided features
    */
   async zoomToFeaturesGroupExtent(
@@ -889,13 +900,16 @@ export class LayerController extends AbstractMapViewerController {
     if (!extent) throw new NoExtentError(layerPath);
 
     // Zoom with the bounded zoom-in policy, and keep the layer's own scale constraints
-    await this.zoomToExtentRestricted(layerPath, extent, true, {
-      ...(fitOptions ?? {}),
-      ...this.#getFeatureZoomInFitConstraints(layerPath),
-    });
+    const complete = await this.#zoomToExtentRestrictedIfCurrent(
+      layerPath,
+      extent,
+      true,
+      { ...(fitOptions ?? {}), ...this.#getFeatureZoomInFitConstraints(layerPath) },
+      isStale
+    );
 
     // Hide the click marker and outline the zoomed group extent unless the group was replaced during the animation
-    if (isStale?.()) return false;
+    if (!complete) return false;
     this.#hideClickMarkerAndOutline(extent);
     return true;
   }
@@ -985,7 +999,9 @@ export class LayerController extends AbstractMapViewerController {
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
    * @param fitOptions - Optional fit options to merge scale constraints into
    * @param isTemporaryHighlight - Optional flag indicating the feature highlight should expire automatically
-   * @returns A promise that resolves when the zoom and highlight are complete
+   * @param isStale - Optional callback indicating the feature zoom was superseded
+   * @returns A promise that resolves with true when the map zoomed to the feature (and highlighted it), or false when the zoom was
+   * interrupted or superseded
    */
   async zoomToExtentRestrictedAndHighlight(
     layerPath: string,
@@ -993,18 +1009,24 @@ export class LayerController extends AbstractMapViewerController {
     extent: Extent,
     useAnimation = true,
     fitOptions?: GVFitOptions,
-    isTemporaryHighlight = false
-  ): Promise<void> {
+    isTemporaryHighlight = false,
+    isStale?: () => boolean
+  ): Promise<boolean> {
     // Zoom to extent with the bounded feature zoom-in (e.g. points stop at OL_ZOOM_FEATURE_MAX_SCALE) and wait for it to finish
-    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
-      ...(fitOptions ?? {}),
-      ...this.#getFeatureZoomInFitConstraints(layerPath),
-    });
+    const complete = await this.#zoomToExtentRestrictedIfCurrent(
+      layerPath,
+      extent,
+      useAnimation,
+      { ...(fitOptions ?? {}), ...this.#getFeatureZoomInFitConstraints(layerPath) },
+      isStale
+    );
+    if (!complete) return false;
 
     // Hide the click marker, outline the extent with a fading box and remove/add higlight the zoomed feature
     this.#hideClickMarkerAndOutline(extent);
     this.getControllersRegistry().mapController.removeHighlightedFeature('all');
     this.getControllersRegistry().mapController.addHighlightedFeature(feature, isTemporaryHighlight);
+    return true;
   }
 
   /**
@@ -1019,6 +1041,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param extent - The feature extent to bring into view (in map projection)
    * @param useAnimation - Optional flag indicating if an animation should be used, default: true
    * @param fitOptions - Optional fit options (e.g. padding) to merge the constraints into
+   * @param isStale - Optional callback indicating the navigation was superseded
    * @returns A promise that resolves, once the map moved and the extent is outlined, with true when the map landed on the
    * same view a zoom to the feature (`zoomToExtentRestrictedAndHighlight`) would produce, so such a zoom would have no effect
    */
@@ -1026,17 +1049,22 @@ export class LayerController extends AbstractMapViewerController {
     layerPath: string,
     extent: Extent,
     useAnimation = true,
-    fitOptions?: GVFitOptions
+    fitOptions?: GVFitOptions,
+    isStale?: () => boolean
   ): Promise<boolean> {
     const view = this.getMapViewer().getView();
     const resolutionBefore = view.getResolution();
     const featureZoomMinResolution = this.#getFeatureZoomInFitConstraints(layerPath).minResolution;
 
     // Never zoom in: keep at least the current resolution, zooming out only when the extent does not fit
-    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
-      ...(fitOptions ?? {}),
-      minResolution: resolutionBefore,
-    });
+    const complete = await this.#zoomToExtentRestrictedIfCurrent(
+      layerPath,
+      extent,
+      useAnimation,
+      { ...(fitOptions ?? {}), minResolution: resolutionBefore },
+      isStale
+    );
+    if (!complete) return false;
 
     // Outline the extent like a feature zoom does
     this.#hideClickMarkerAndOutline(extent);
@@ -3031,6 +3059,58 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
+   * Fits an extent and reports whether the map arrived there while the operation is still current.
+   *
+   * @param layerPath - The layer path used to look up scale limits
+   * @param extent - The extent to fit
+   * @param useAnimation - Whether to animate the fit
+   * @param fitOptions - The fit options
+   * @param isStale - Optional callback indicating the operation was superseded
+   * @returns A promise that resolves with true only for a completed (not interrupted) fit that is still current
+   */
+  async #zoomToExtentRestrictedIfCurrent(
+    layerPath: string,
+    extent: Extent,
+    useAnimation: boolean,
+    fitOptions: GVFitOptions,
+    isStale?: () => boolean
+  ): Promise<boolean> {
+    if (isStale?.()) return false;
+    let isComplete = false;
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, {
+      ...fitOptions,
+      callback: (complete): void => {
+        isComplete = complete;
+      },
+    });
+    return isComplete && !isStale?.();
+  }
+
+  /**
+   * Gets the supported object-ID lookup target for results without a valid geometry extent.
+   *
+   * @param layerPath - The layer path
+   * @param features - The feature results
+   * @returns The object-ID field and values, or undefined when extent lookup is unavailable
+   */
+  #getFeaturesExtentLookup(layerPath: string, features: TypeFeatureInfoEntry[]): { oidField: string; objectIds: number[] } | undefined {
+    const missingFeatures = features.filter((feature) => !GeoUtilities.hasFeatureGeometryExtent(feature));
+    const oidField = GeoUtilities.getFeaturesOidFieldName(missingFeatures);
+    if (!oidField) return undefined;
+    const objectIds = missingFeatures
+      .map((feature) => feature.fieldInfo[oidField]?.value)
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+    if (!objectIds.length) return undefined;
+
+    const layer = this.getGeoviewLayerRegular(layerPath);
+    const supportsLookup =
+      layer instanceof AbstractGVVector ||
+      layer instanceof GVEsriDynamic ||
+      (layer instanceof GVWMS && !!layer.getLayerConfig().getWfsLayerConfig());
+    return supportsLookup ? { oidField, objectIds } : undefined;
+  }
+
+  /**
    * Looks up, by object id, the extent of the features that don't carry a valid extent.
    *
    * Lookup failures (e.g. unsupported layer type or service error) are logged and ignored, so the group
@@ -3041,20 +3121,11 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise resolving with the valid looked-up extent, or undefined when none could be determined
    */
   async #lookupMissingFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<Extent | undefined> {
-    const featuresNeedingLookup = features.filter((feature) => !GeoUtilities.hasFeatureGeometryExtent(feature));
-    if (featuresNeedingLookup.length === 0) return undefined;
-
-    // Determine the oid field from the first feature that has one
-    const oidField = GeoUtilities.getFeaturesOidFieldName(featuresNeedingLookup);
-    if (!oidField) return undefined;
-
-    const objectIds = featuresNeedingLookup
-      .map((feature) => feature.fieldInfo[oidField]?.value)
-      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
-    if (objectIds.length === 0) return undefined;
+    const lookup = this.#getFeaturesExtentLookup(layerPath, features);
+    if (!lookup) return undefined;
 
     try {
-      const lookedUpExtent = await this.getExtentFromFeatures(layerPath, objectIds, oidField);
+      const lookedUpExtent = await this.getExtentFromFeatures(layerPath, lookup.objectIds, lookup.oidField);
       return GeoUtilities.isValidOrderedExtent(lookedUpExtent) ? lookedUpExtent : undefined;
     } catch (error: unknown) {
       // Log and continue with the embedded extents

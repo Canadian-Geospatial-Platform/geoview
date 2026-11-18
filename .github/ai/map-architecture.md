@@ -43,6 +43,21 @@ Source: [`map-viewer.ts`](../../packages/geoview-core/src/geo/map/map-viewer.ts)
 
 For Swiper render clipping and drag isolation, follow [package-specific runtime routing](packages.md#swiper-runtime).
 
+## Details zoom implementation
+
+Public contract: [Feature and result-group zoom](../../docs/programming/controller-architecture.md#feature-and-result-group-zoom).
+
+- Every Details zoom (feature, group, follow pan) calls `startDetailsZoom` in `DetailsPanel`, which bumps an operation counter and returns an `isStale` check passed down to `LayerController`. A layout effect keyed on the selected layer and map click bumps the counter and ends follow mode in its **cleanup**, so every click or layer change (including A → B → A) and unmount supersede pending lookups and animations. Keep click-marker suppression (`lastDetailsZoomRef.clickCoordinates`) separate from follow validity.
+- `LayerController.#zoomToExtentRestrictedIfCurrent` captures the OpenLayers fit callback's completion flag and returns `complete && !isStale()`. The general zoom promise also fulfills after cancellation, so promise fulfillment alone must never disable a zoom button or apply feature highlights; `zoomToExtentRestrictedAndHighlight` and `zoomToFeaturesGroupExtent` return that boolean.
+- `useZoomButtonState` is called in the panel (not `FeatureInfo`, which remounts on navigation) with a string target key: the current feature (`layerPath|uid`) and the group (`layerPath|click|result count`, so late results re-enable it). It records the store extent after a successful fit and compares extent values; a layer-switch back with an unchanged view and target stays unavailable because a zoom would be a no-op.
+- `panToExtentRestrictedAndOutline` fits with the current resolution as `minResolution`. Its boolean result identifies a completed fit that shares the feature-zoom minimum resolution or zoomed out to fit; only then should navigation mark the feature zoom unavailable.
+- Group availability and missing-extent lookup share `#getFeaturesExtentLookup`. Supported implementations are vector layers, Esri Dynamic, and WMS with an associated WFS config. Re-evaluate availability when asynchronous geometry readiness changes.
+- `GeoUtilities.hasFeatureGeometryExtent`/`getFeaturesGeometryExtent` exclude pure WMS click locations. A zero-size geometry extent is valid but needs a bounded fit to avoid maximum zoom.
+
+Sources: [Details panel](../../packages/geoview-core/src/core/components/details/details-panel.tsx),
+[layer controller](../../packages/geoview-core/src/core/controllers/layer-controller.ts),
+[zoom-button hook](../../packages/geoview-core/src/core/components/common/hooks/use-zoom-button-state.ts).
+
 ## GeoJSON injection and projection objects
 
 Public contract: [GeoJSON Source Update](../../docs/app/api/layer-api.md#geojson-source-update).

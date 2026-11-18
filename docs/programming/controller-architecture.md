@@ -867,12 +867,14 @@ For scale-limited visibility, `LayerController` now uses a resolution-first mode
 Feature zooms (Details/Data Table zoom to feature, Details zoom to all results, Details previous/next follow) share these rules (#3705):
 
 - **Bounded zoom-in:** never closer than `OL_ZOOM_FEATURE_MAX_SCALE` (1:10,000) so points, coincident points and tiny lines/polygons keep context; the current resolution is kept when already closer, and the layer's effective scale range wins. Fitting a zero-size extent without this bound zooms to the map maximum.
-- **Geometry-backed extents only:** pure WMS `GetFeatureInfo` entries have no `geometry` and their `extent` is only the click point. Use `GeoUtilities.hasFeatureGeometryExtent`/`getFeaturesGeometryExtent` before treating an extent as a feature location; other entries are looked up by object id.
-- **Previous/next follow pans, never zooms in:** `panToExtentRestrictedAndOutline` fits with the current resolution as `minResolution`, so it pans when the feature fits and zooms out only when it does not.
+- **Group extent availability:** group zoom uses geometry-backed extents and looks up missing extents by object ID when the layer supports it. Pure WMS click-point extents are not feature locations; results with neither a usable extent nor supported lookup leave the control unavailable.
+- **Previous/next follow pans, never zooms in:** after an explicit feature zoom, navigation pans when the next feature fits and zooms out only when needed. A new click, layer switch or group zoom ends feature-follow, including when returning to the original layer.
 - **Click marker marks only the click:** feature zooms hide it (they outline the extent instead) rather than moving it to the feature center.
-- **No-effect clicks:** the Details zoom buttons use `useZoomButtonState`, which records the store `mapExtent` once the zoom resolves (the move end already updated it) and keeps the button `aria-disabled` while the extent value and the button target are unchanged. The hook lives in `DetailsPanel`, not the per-feature `FeatureInfo` (recreated on previous/next), so the last zoom survives feature navigation. A previous/next pan also marks the new feature as zoomed when `panToExtentRestrictedAndOutline` reports it landed on the zoom to feature view (same minimum resolution, e.g. points at the zoom bound, or the pan zoomed out to fit).
-- **Stale guards:** asynchronous group zooms take an `isStale` callback; the Details panel compares the selected layer and the map-click object, so a new click or layer switch cancels a pending zoom.
+- **No-effect clicks:** after a successful zoom, the Details zoom control remains focusable but `aria-disabled` while its target and map view are unchanged. Navigation that already reaches the feature-zoom view also makes that feature's zoom unavailable.
+- **Superseded operations:** a new click or layer switch invalidates pending extent lookups. Interrupted or superseded zooms do not record successful arrival or replace the current highlights.
 - **Fit padding:** `useAppBarPanelFitOptions`/`DomHelper.Map` fit padding add the measured open app-bar panel (left) and nav bar/overview map (right) widths to the fixed `OL_ZOOM_PIXEL_PADDING` (25px). A tall group extent still leaves blank left/right space; that is the extent aspect ratio, not padding.
+
+Source-level lifecycle and regression notes are maintained in the [map implementation reference](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/map-architecture.md#details-zoom-implementation).
 
 ### LayerCreatorController
 

@@ -523,7 +523,7 @@ When the next step depends on zoom completion, await `mapController.zoomMap`.
 
 ### Waiting for Attribute Changes
 
-`DomHelper.waitForDomElement` only re-checks when nodes are added or removed, so a selector that depends on an attribute changing on an existing element (e.g. `button[aria-disabled="true"]`) never resolves and, without a timeout, freezes the suite. Use `DomHelper.waitForAttribute(selector, attributeName, parent, timeout)` (or `waitForClass` for `class`), always with a timeout such as `GVAbstractTester.UI_STATE_TIMEOUT_MS`.
+`DomHelper.waitForDomElement` only re-checks when nodes are added or removed, so a selector that depends on an attribute changing on an existing element (e.g. `button[aria-disabled="true"]`) never resolves and, without a timeout, freezes the suite. Poll with `whenThisThen(() => root.querySelector(selector), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50)` instead (it rejects once the timeout is exceeded), or use `waitForClass` for `class` changes.
 
 Vector query results also depend on the current view (pixel hit tolerance), so reset the view (e.g. `mapController.zoomToInitialExtent`) before a click whose result count matters when earlier tests changed the zoom.
 
