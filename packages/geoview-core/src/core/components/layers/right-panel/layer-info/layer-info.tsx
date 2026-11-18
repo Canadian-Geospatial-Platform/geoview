@@ -28,6 +28,7 @@ import {
   useStoreLayerFilterClass,
   useStoreLayerMinScale,
   useStoreLayerMaxScale,
+  useStoreLayerMaxRecordCount,
   useStoreLayerOgcVersion,
   useStoreLayerQueryable,
   useStoreLayerQueryableSource,
@@ -35,6 +36,7 @@ import {
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
   useStoreLayerVectorStructureFullUrl,
+  useStoreLayerVectorStrategy,
   useStoreLayerWMSGetStylesFullUrl,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
@@ -87,6 +89,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
   const maxScale = useStoreLayerMaxScale(layerPath);
+  const maxRecordCount = useStoreLayerMaxRecordCount(layerPath);
+  const vectorStrategy = useStoreLayerVectorStrategy(layerPath);
   const layerEntryType = useStoreLayerEntryType(layerPath);
   const isLayerGroup = layerEntryType === 'group';
   const layerQueryableSource = useStoreLayerQueryableSource(layerPath);
@@ -238,6 +242,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
           {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
+          {vectorStrategy && <Box>{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
+          {maxRecordCount && <Box>{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
         </Box>
       </Box>

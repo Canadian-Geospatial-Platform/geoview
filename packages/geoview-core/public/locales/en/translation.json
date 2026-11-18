@@ -327,6 +327,8 @@
     "layerBounds4326": "Bounds (EPSG:4326)",
     "layerMaxScale": "Max Scale",
     "layerMinScale": "Min Scale",
+    "layerMaxRecordCount": "Maximum record count",
+    "layerVectorStrategy": "Vector loading strategy",
     "layerResource": "Resource: ",
     "layerMetadata": "Metadata: ",
     "layerActiveFilters": "Active filters: ",

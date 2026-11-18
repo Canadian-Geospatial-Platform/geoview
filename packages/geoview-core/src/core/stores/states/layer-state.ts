@@ -19,6 +19,7 @@ import type {
   TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicRule,
+  VectorStrategy,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayDateTimezone } from './app-state';
@@ -773,6 +774,34 @@ export const getStoreLayerMaxScale = (mapId: string, layerPath: string): number 
 
 /** Hook that returns the maximum scale denominator for a specific layer. */
 export const useStoreLayerMaxScale = createLayerSelectorHook('maxScale');
+
+/**
+ * Gets the maximum record count recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The maximum record count, or undefined when unavailable
+ */
+export const getStoreLayerMaxRecordCount = (mapId: string, layerPath: string): number | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.maxRecordCount;
+};
+
+/** Hook that returns the maximum record count for a specific layer. */
+export const useStoreLayerMaxRecordCount = createLayerSelectorHook('maxRecordCount');
+
+/**
+ * Gets the vector loading strategy recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The vector loading strategy, or undefined when unavailable
+ */
+export const getStoreLayerVectorStrategy = (mapId: string, layerPath: string): VectorStrategy | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.vectorStrategy;
+};
+
+/** Hook that returns the vector loading strategy for a specific layer. */
+export const useStoreLayerVectorStrategy = createLayerSelectorHook('vectorStrategy');
 
 /**
  * Gets the data projection code for a specific layer.
