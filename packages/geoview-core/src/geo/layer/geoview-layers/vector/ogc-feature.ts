@@ -566,7 +566,10 @@ export class OgcFeature extends AbstractGeoViewVector {
       itemsUrl.protocol = 'https:';
     }
 
-    if (!itemsUrl.searchParams.has('limit')) itemsUrl.searchParams.set('limit', `${AbstractGeoViewVector.MAX_PAGE_SIZE}`);
+    // Get the max page size or default
+    const maxPageSize = layerConfig.getMaxPageSizeOrDefault();
+
+    if (!itemsUrl.searchParams.has('limit')) itemsUrl.searchParams.set('limit', `${maxPageSize}`);
     return itemsUrl.toString();
   }
 

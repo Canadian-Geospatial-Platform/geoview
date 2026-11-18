@@ -10,14 +10,20 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-sc
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceEsriDynamicInitialConfig;
+
+  /** Max number of records per page for query */
+  maxPageSize?: number;
+
   /** Max number of records for query */
   maxRecordCount?: number;
+
   /**
    * Manual pixel offset (x, y) to apply when centering the identify hit-tolerance circle, overriding the service's
    * xoffset/yoffset (which the legacy esriPMS symbol schema can't carry for CIM-authored symbols with a non-center anchor).
@@ -110,6 +116,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     const serialized = super.onToJson<T>() as any;
 
     // Copy values
+    serialized.maxPageSize = this.getMaxPageSize();
     serialized.maxRecordCount = this.getMaxRecordCount();
 
     // Return it
@@ -125,8 +132,17 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @returns The service maximum record count, or undefined when it is not available
    */
-  getMaxRecordCount(): number | undefined {
-    return (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxRecordCount;
+  getMaxPageSize(): number | undefined {
+    return (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxPageSize;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+   *
+   * @returns The service maximum record count, or the default when it is not available
+   */
+  getMaxPageSizeOrDefault(): number {
+    return this.getMaxPageSize() ?? AbstractGeoViewVector.MAX_PAGE_SIZE;
   }
 
   /**
@@ -134,8 +150,26 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @param maxRecordCount - The maximum number of records reported by the service, or undefined when unavailable
    */
-  initMaxRecordCount(maxRecordCount: number | undefined): void {
-    (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxRecordCount ??= maxRecordCount;
+  initMaxPageSize(maxPageSize: number | undefined): void {
+    (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxPageSize ??= maxPageSize;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
+  getMaxRecordCount(): number | undefined {
+    return (this.layerEntryProps as EsriDynamicLayerEntryConfigProps).maxRecordCount;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+   *
+   * @returns The service maximum record count, or the default when it is not available
+   */
+  getMaxRecordCountOrDefault(): number {
+    return this.getMaxRecordCount() ?? AbstractGeoViewVector.MAX_FEATURES;
   }
 
   /**

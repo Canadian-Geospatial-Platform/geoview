@@ -719,8 +719,8 @@ export class EsriUtilities {
         parentLayerConfig.initMinScaleFromMetadata(parentLayerMetadata?.minScale);
       }
 
-      // Initialize the max record count from the metadata
-      layerConfig.initMaxRecordCount(layerMetadata?.maxRecordCount);
+      // Initialize the max page size count from the metadata (Esri calls it the maxRecordCount as in the "max record count per fetch call")
+      layerConfig.initMaxPageSize(layerMetadata?.maxRecordCount);
     }
 
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality

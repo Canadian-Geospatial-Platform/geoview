@@ -32,8 +32,8 @@ export interface QueryParams {
   projection: number;
   /** The maximum allowable offset for geometry simplification. */
   maxAllowableOffset: number;
-  /** The maximum number of records to return from service in one fetch. */
-  maxRecordCount: number;
+  /** The maximum number of records per page to return from service in one fetch. */
+  maxPageSize: number;
   /** The where clause for filtering features. */
   where: string;
 }
@@ -142,8 +142,7 @@ const processBatch = async (
  * @throws {Error} When the query fails
  */
 async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
-  // TODO: CHECK - Review the pertinance of having the hardcoded 10000 as the maximum record count limit, search id 4k2kl6j3n
-  const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
+  const resultRecordCount = params.maxPageSize;
   const maxConcurrentRequests = Math.min(10, navigator.hardwareConcurrency * 2);
   const baseUrl = `${params.url}/query?where=${params.where}&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
 

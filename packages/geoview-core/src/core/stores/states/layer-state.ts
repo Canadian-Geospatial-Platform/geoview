@@ -776,6 +776,20 @@ export const getStoreLayerMaxScale = (mapId: string, layerPath: string): number 
 export const useStoreLayerMaxScale = createLayerSelectorHook('maxScale');
 
 /**
+ * Gets the maximum page size recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The maximum page size, or undefined when unavailable
+ */
+export const getStoreLayerMaxPageSize = (mapId: string, layerPath: string): number | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.maxPageSize;
+};
+
+/** Hook that returns the maximum page size for a specific layer. */
+export const useStoreLayerMaxPageSize = createLayerSelectorHook('maxPageSize');
+
+/**
  * Gets the maximum record count recorded for a specific layer.
  *
  * @param mapId - The map identifier

@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "OGC API Features examples using default vector styling with WMS style fetching disabled. Includes large lakes, weather and climate stations, and current and archived flood extents. Feature endpoints are discovered from collection metadata, with same-host HTTP links upgraded to HTTPS when the service uses HTTPS."
+    "description": "OGC API Features examples using default vector styling with WMS style fetching disabled. Includes large lakes, weather and climate stations, and current and archived flood extents."
   },
   "map": {
     "viewSettings": {

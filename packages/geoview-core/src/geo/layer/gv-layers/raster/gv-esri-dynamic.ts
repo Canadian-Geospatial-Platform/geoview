@@ -30,13 +30,13 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
@@ -743,7 +743,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry: false,
       projection: 4326,
       maxAllowableOffset: 6,
-      maxRecordCount: layerConfig.getMaxRecordCount() || 1000, // TODO: CHECK - Review the pertinance of having the hardcoded 1000 default as the maximum record count limit, search id 4k2kl6j3n
+      maxPageSize: layerConfig.getMaxPageSizeOrDefault(),
       where: whereClause ?? '1=1',
     };
 
@@ -783,7 +783,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry,
       projection,
       maxAllowableOffset,
-      maxRecordCount: layerConfig.getMaxRecordCount() || 1000, // TODO: CHECK - Review the pertinance of having the hardcoded 1000 default as the maximum record count limit, search id 4k2kl6j3n
+      maxPageSize: layerConfig.getMaxPageSizeOrDefault(),
       where: whereClause ?? '1=1',
     };
 

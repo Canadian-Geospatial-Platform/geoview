@@ -557,6 +557,7 @@ export class LayerSetController extends AbstractMapViewerController {
         legendLayerEntry.hasText = !!layer.getTextOLLayer();
         legendLayerEntry.textVisible = layer.getTextVisible();
         legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
+        legendLayerEntry.maxPageSize = layer.getLayerConfig().getMaxPageSize();
         legendLayerEntry.maxRecordCount = layer.getLayerConfig().getMaxRecordCount();
         legendLayerEntry.vectorStrategy = layer.getLayerConfig().getSource().strategy ?? 'all';
         legendLayerEntry.totalRecordsCount = layer.getLayerConfig().getTotalRecordsCount();
@@ -565,6 +566,7 @@ export class LayerSetController extends AbstractMapViewerController {
 
       // If the layer is GVEsriDynamic
       if (layer instanceof GVEsriDynamic) {
+        legendLayerEntry.maxPageSize = layer.getLayerConfig().getMaxPageSize();
         legendLayerEntry.maxRecordCount = layer.getLayerConfig().getMaxRecordCount();
       }
 

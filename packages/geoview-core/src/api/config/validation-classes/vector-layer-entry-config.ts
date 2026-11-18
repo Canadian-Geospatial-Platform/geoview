@@ -5,8 +5,12 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
+  /** Max number of records per page for query */
+  maxPageSize?: number;
+
   /** Max number of records for query */
   maxRecordCount?: number;
 }
@@ -61,6 +65,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     const serialized = super.onToJson<T>() as any;
 
     // Copy values
+    serialized.maxPageSize = this.getMaxPageSize();
     serialized.maxRecordCount = this.getMaxRecordCount();
 
     // Return it
@@ -105,17 +110,35 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    *
    * @returns The service maximum record count, or undefined when it is not available
    */
+  getMaxPageSize(): number | undefined {
+    return (this.layerEntryProps as VectorLayerEntryConfigProps).maxPageSize;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+   *
+   * @returns The service maximum record count, or the default when it is not available
+   */
+  getMaxPageSizeOrDefault(): number {
+    return this.getMaxPageSize() ?? AbstractGeoViewVector.MAX_PAGE_SIZE;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
   getMaxRecordCount(): number | undefined {
     return (this.layerEntryProps as VectorLayerEntryConfigProps).maxRecordCount;
   }
 
   /**
-   * Initializes the service maximum record count when the layer configuration has not already set it.
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
    *
-   * @param maxRecordCount - The maximum number of records reported by the service, or undefined when unavailable
+   * @returns The service maximum record count, or the default when it is not available
    */
-  initMaxRecordCount(maxRecordCount: number | undefined): void {
-    (this.layerEntryProps as VectorLayerEntryConfigProps).maxRecordCount ??= maxRecordCount;
+  getMaxRecordCountOrDefault(): number {
+    return this.getMaxRecordCount() ?? AbstractGeoViewVector.MAX_FEATURES;
   }
 
   /**

@@ -219,7 +219,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Get the max record count as defined by config or codebase
-    const maxRecordCount = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;
+    const maxRecordCount = layerConfig.getMaxRecordCountOrDefault();
 
     // Check if feature count is too large
     if (responseDataCount.count > maxRecordCount) {
@@ -232,14 +232,14 @@ export class EsriFeature extends AbstractGeoViewVector {
       );
     }
 
-    // Determine the maximum number of records allowed
-    const maxRecords = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
+    // Determine the maximum number of records per page allowed
+    const maxPageSize = layerConfig.getMaxPageSizeOrDefault();
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
       `${url}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
-      maxRecords
+      maxPageSize
     );
 
     // Convert each ESRI response chunk to features and flatten the result
@@ -419,23 +419,16 @@ export class EsriFeature extends AbstractGeoViewVector {
    *
    * @param url - The base url for the service
    * @param featureCount - The number of features in the layer
-   * @param maxRecordCount - Optional max features per query from the service
-   * @param featureLimit - Optional maximum number of features to fetch per query
+   * @param maxPageSize - Max features per query from the service
    * @returns A promise that resolves to an array of the response text for the features
    * @throws {ResponseContentError} When a chunk keeps failing after all attempts (propagated from `fetchEsriJson()`)
    */
-  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
-  // TODO: Add options for featureLimit to config
-  static #fetchEsriFeaturesByChunk(url: string, featureCount: number, maxRecordCount?: number): Promise<unknown[]> {
-    // Update url
-    const featureFetchLimit =
-      maxRecordCount && maxRecordCount < AbstractGeoViewVector.MAX_PAGE_SIZE ? maxRecordCount : AbstractGeoViewVector.MAX_PAGE_SIZE;
-
+  static #fetchEsriFeaturesByChunk(url: string, featureCount: number, maxPageSize: number): Promise<unknown[]> {
     // GV: Web worker does not improve the performance of this fetching
     // Create array of url's to call, one per feature page
     const urlArray: string[] = [];
-    for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
+    for (let i = 0; i < featureCount; i += maxPageSize) {
+      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${maxPageSize}`);
     }
 
     // Cap concurrent chunk requests; firing all pages at once makes the server return transient 500s under load

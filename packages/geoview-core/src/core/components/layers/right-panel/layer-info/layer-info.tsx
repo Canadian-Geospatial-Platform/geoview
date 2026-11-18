@@ -40,6 +40,7 @@ import {
   useStoreLayerVectorStructureFullUrl,
   useStoreLayerVectorStrategy,
   useStoreLayerWMSGetStylesFullUrl,
+  useStoreLayerMaxPageSize,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -91,6 +92,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
   const maxScale = useStoreLayerMaxScale(layerPath);
+  const maxPageSize = useStoreLayerMaxPageSize(layerPath);
   const maxRecordCount = useStoreLayerMaxRecordCount(layerPath);
   const totalRecordsCount = useStoreLayerTotalRecordsCount(layerPath);
   const totalRecordsCountSource = useStoreLayerTotalRecordsCountSource(layerPath);
@@ -249,6 +251,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
           {vectorStrategy && <Box>{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
+          {maxPageSize && <Box>{`${t('layers.layerMaxPageSize')}: ${maxPageSize}`}</Box>}
           {maxRecordCount && <Box>{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
           {totalRecordsCount !== undefined && (
             <Box>

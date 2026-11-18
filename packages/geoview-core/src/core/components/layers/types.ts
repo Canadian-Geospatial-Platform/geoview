@@ -202,6 +202,9 @@ export interface TypeLegendLayer {
   /** Current map zoom level. */
   zoom?: number;
 
+  /** Maximum record count per page (when fetching) for the layer, if applicable. */
+  maxPageSize?: number;
+
   /** Maximum record count for the layer, if applicable. */
   maxRecordCount?: number;
 
