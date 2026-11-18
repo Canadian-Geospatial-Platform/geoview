@@ -217,6 +217,8 @@ See [Configuration Reference](app/config/configuration-reference.md) for complet
 
 ### Get Layer Information
 
+The Layer Info panel shows the maximum record count and vector loading strategy when available. Vector layers also show a record count labeled as provided by the service or counted from downloaded records. OGC API Features and WFS use `numberMatched` when available; Esri Feature uses its count query, and GeoJSON can use `numberMatched` when present. Other vector source loaders, including CSV, KML, and WKB, count the features returned by a successful load before local filtering. A counted value describes the downloaded dataset, not an independently verified service-wide total. Failed or interrupted loads do not publish partial counts as totals, while advertised counts remain available even when a loading limit is exceeded. With OGC API Features or WFS BBOX loading, the count applies to the requested map extent rather than the whole collection. Vector tiles do not expose a total through this mechanism.
+
 ```typescript
 // Get all layer IDs
 const layerIds = mapViewer.layer.getGeoviewLayerIds();

@@ -323,7 +323,13 @@ export class WFS extends AbstractGeoViewVector {
       undefined,
       bboxExtent,
       undefined,
-      undefined
+      undefined,
+      (page): void => {
+        if (!page) layerConfig.setTotalRecordsCount(undefined);
+        else if (page.numberMatched !== undefined && Number.isSafeInteger(page.numberMatched) && page.numberMatched >= 0) {
+          layerConfig.setTotalRecordsCount(page.numberMatched, 'numberMatched');
+        }
+      }
     );
   }
 
@@ -594,6 +600,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param outfields - Optional list of fields to return (propertyName parameter)
    * @param filter - Optional OGC XML filter string
    * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
+   * @param onPage - Optional loading observer; undefined starts a new format attempt
    * @returns A promise that resolves with all parsed features and their source projection
    * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
    * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
@@ -607,7 +614,8 @@ export class WFS extends AbstractGeoViewVector {
     outfields: TypeOutfields[] | undefined,
     bboxExtent: string | undefined,
     filter: string | undefined,
-    srsName: string | undefined
+    srsName: string | undefined,
+    onPage?: (page: TypeWFSFeaturePage | undefined) => void
   ): Promise<TypeWFSFeaturePage> {
     // Get the officially supported formats by the service
     const supportedFormats = WFS.#resolveSupportedFormats(layerConfig);
@@ -663,12 +671,15 @@ export class WFS extends AbstractGeoViewVector {
       const matchingFormats = candidate.format ? WFS.#supportedFormatsInclude(supportedFormats, candidate.format) : [''];
       if (matchingFormats.length) {
         try {
+          onPage?.(undefined);
+
           // Build the GetFeatureUrl with the candidate format and other parameters
           const url = WFS.#buildGetFeatureUrl(layerConfig, matchingFormats[0], bboxExtent, outfields, filter, srsName, sortBy);
 
           // GV Here, we do want to await in the loop, because we want to know if the fetch/parse succeeded before looping to the next format request.
           // eslint-disable-next-line no-await-in-loop
           result = await WFS.#queryWithGetOrPostFallback(candidate.queryFn, url, matchingFormats[0], postFallbackContext);
+          onPage?.(result);
           AbstractGeoViewVector.checkFeatureCount(layerConfig, Math.max(result.features.length, result.numberMatched ?? 0));
 
           const pageMetadata = result;
@@ -680,7 +691,7 @@ export class WFS extends AbstractGeoViewVector {
             if (pageMetadata.numberMatched > pageMetadata.numberReturned) {
               // GV Only page when the WFS 2 response explicitly reports more matches than it returned.
               // eslint-disable-next-line no-await-in-loop
-              result = await WFS.#fetchWFSFeaturePages(result, candidate.queryFn, url, matchingFormats[0], postFallbackContext);
+              result = await WFS.#fetchWFSFeaturePages(result, candidate.queryFn, url, matchingFormats[0], postFallbackContext, onPage);
             }
           }
 
@@ -740,6 +751,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param url - The candidate GetFeature URL
    * @param outputFormat - The requested response format
    * @param context - The request settings and retry state shared by all format candidates
+   * @param onPage - Optional observer for each additional parsed page
    * @returns The first page with all subsequent page features appended
    */
   static async #fetchWFSFeaturePages(
@@ -747,7 +759,8 @@ export class WFS extends AbstractGeoViewVector {
     queryFn: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>,
     url: string,
     outputFormat: string,
-    context: TypeWFSGetOrPostFallbackContext
+    context: TypeWFSGetOrPostFallbackContext,
+    onPage?: (page: TypeWFSFeaturePage | undefined) => void
   ): Promise<TypeWFSFeaturePage> {
     const { numberReturned: pageSize, numberMatched } = firstPage;
     if (pageSize === undefined || numberMatched === undefined || pageSize <= 0)
@@ -762,6 +775,7 @@ export class WFS extends AbstractGeoViewVector {
       // GV Keep each page sequential because the next startIndex depends on the number of features just received.
       // eslint-disable-next-line no-await-in-loop
       const pageResult = await WFS.#queryWithGetOrPostFallback(queryFn, url, outputFormat, context, pageRequest);
+      onPage?.(pageResult);
       const pageItemCount = pageResult.features.length;
       featureCount += pageItemCount;
       AbstractGeoViewVector.checkFeatureCount(context.layerConfig, Math.max(featureCount, pageResult.numberMatched ?? 0));

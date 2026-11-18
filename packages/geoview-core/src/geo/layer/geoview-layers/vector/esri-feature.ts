@@ -214,6 +214,9 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Use the basic fetch
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(`${url}/query?f=json&where=1=1&returnCountOnly=true`);
+    if (Number.isSafeInteger(responseDataCount.count) && responseDataCount.count >= 0) {
+      layerConfig.setTotalRecordsCount(responseDataCount.count, 'service');
+    }
 
     // Get the max record count as defined by config or codebase
     const maxRecordCount = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;

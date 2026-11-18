@@ -790,6 +790,34 @@ export const getStoreLayerMaxRecordCount = (mapId: string, layerPath: string): n
 export const useStoreLayerMaxRecordCount = createLayerSelectorHook('maxRecordCount');
 
 /**
+ * Gets the total matching records reported or fully counted for a layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The matching count, or undefined when unavailable
+ */
+export const getStoreLayerTotalRecordsCount = (mapId: string, layerPath: string): number | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.totalRecordsCount;
+};
+
+/** Hook that returns the total matching records reported or fully counted. */
+export const useStoreLayerTotalRecordsCount = createLayerSelectorHook('totalRecordsCount');
+
+/**
+ * Gets how the total matching record count was obtained.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The count origin, or undefined when unavailable
+ */
+export const getStoreLayerTotalRecordsCountSource = (mapId: string, layerPath: string): TypeLegendLayer['totalRecordsCountSource'] => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.totalRecordsCountSource;
+};
+
+/** Hook that returns how the total matching record count was obtained. */
+export const useStoreLayerTotalRecordsCountSource = createLayerSelectorHook('totalRecordsCountSource');
+
+/**
  * Gets the vector loading strategy recorded for a specific layer.
  *
  * @param mapId - The map identifier
@@ -1858,6 +1886,23 @@ export const setStoreLayerDisplayState = (mapId: string, displayState: TypeLayer
  */
 export const setStoreLayerStatus = (mapId: string, layerPath: string, layerStatus: TypeLayerStatus): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, layerStatus }));
+};
+
+/**
+ * Updates the matching count and its origin after a layer loading state change.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param totalRecordsCount - The matching count, or undefined when unavailable
+ * @param totalRecordsCountSource - How the count was obtained, or undefined when unavailable
+ */
+export const setStoreLayerTotalRecordsCount = (
+  mapId: string,
+  layerPath: string,
+  totalRecordsCount: number | undefined,
+  totalRecordsCountSource: TypeLegendLayer['totalRecordsCountSource']
+): void => {
+  getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, totalRecordsCount, totalRecordsCountSource }));
 };
 
 /**

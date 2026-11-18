@@ -29,6 +29,8 @@ import {
   useStoreLayerMinScale,
   useStoreLayerMaxScale,
   useStoreLayerMaxRecordCount,
+  useStoreLayerTotalRecordsCount,
+  useStoreLayerTotalRecordsCountSource,
   useStoreLayerOgcVersion,
   useStoreLayerQueryable,
   useStoreLayerQueryableSource,
@@ -90,7 +92,11 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const minScale = useStoreLayerMinScale(layerPath);
   const maxScale = useStoreLayerMaxScale(layerPath);
   const maxRecordCount = useStoreLayerMaxRecordCount(layerPath);
+  const totalRecordsCount = useStoreLayerTotalRecordsCount(layerPath);
+  const totalRecordsCountSource = useStoreLayerTotalRecordsCountSource(layerPath);
   const vectorStrategy = useStoreLayerVectorStrategy(layerPath);
+  const isExtentRecordCount =
+    vectorStrategy === 'bbox' && (schemaTag === CONST_LAYER_TYPES.OGC_FEATURE || schemaTag === CONST_LAYER_TYPES.WFS);
   const layerEntryType = useStoreLayerEntryType(layerPath);
   const isLayerGroup = layerEntryType === 'group';
   const layerQueryableSource = useStoreLayerQueryableSource(layerPath);
@@ -244,6 +250,14 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
           {vectorStrategy && <Box>{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
           {maxRecordCount && <Box>{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
+          {totalRecordsCount !== undefined && (
+            <Box>
+              {`${t(isExtentRecordCount ? 'layers.layerTotalRecordsCountInExtent' : 'layers.layerTotalRecordsCount')}: ${totalRecordsCount}`}
+              {totalRecordsCountSource === 'numberMatched' && ` (${t('layers.layerRecordsCountProvided')})`}
+              {totalRecordsCountSource === 'service' && ` (${t('layers.layerRecordsCountService')})`}
+              {totalRecordsCountSource === 'counted' && ` (${t('layers.layerRecordsCountCounted')})`}
+            </Box>
+          )}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
         </Box>
       </Box>

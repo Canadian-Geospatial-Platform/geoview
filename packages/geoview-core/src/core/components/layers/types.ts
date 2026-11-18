@@ -1,4 +1,5 @@
 import type { Extent } from 'ol/extent';
+import type { TypeRecordsCountSource } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import {
   CONST_LAYER_TYPES,
@@ -203,6 +204,12 @@ export interface TypeLegendLayer {
 
   /** Maximum record count for the layer, if applicable. */
   maxRecordCount?: number;
+
+  /** Total matching records reported or fully counted for the current request. */
+  totalRecordsCount?: number;
+
+  /** Whether the matching count was supplied by the service or counted from downloaded records. */
+  totalRecordsCountSource?: TypeRecordsCountSource;
 
   /** Fetch strategy for vector layers. */
   vectorStrategy?: VectorStrategy;

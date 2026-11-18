@@ -515,7 +515,11 @@ export class OgcFeature extends AbstractGeoViewVector {
         typeof responseData.numberMatched === 'number' &&
         Number.isFinite(responseData.numberMatched)
       ) {
-        ({ numberMatched } = responseData);
+        const { numberMatched: advertisedCount } = responseData;
+        numberMatched = advertisedCount;
+        if (Number.isSafeInteger(advertisedCount) && advertisedCount >= 0) {
+          layerConfig.setTotalRecordsCount(advertisedCount, 'numberMatched');
+        }
       }
     }
 

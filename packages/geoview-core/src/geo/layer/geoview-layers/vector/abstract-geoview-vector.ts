@@ -123,6 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         .then((): Promise<SourceFeaturesInfo> => {
           // Clear last error if any
           vectorSource.clearLoaderError();
+          layerConfig.setTotalRecordsCount(undefined);
 
           // The read options
           const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
@@ -132,6 +133,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         })
         .then((sourceFeaturesInfo): void => {
           const { features, dataProjection } = sourceFeaturesInfo;
+          if (!layerConfig.getTotalRecordsCount()) layerConfig.setTotalRecordsCount(features.length, 'counted');
 
           // Keep the read options that were used to interpret the source data
           vectorSource.setDataProjection(dataProjection);

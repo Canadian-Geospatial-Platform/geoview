@@ -11,6 +11,9 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
   maxRecordCount?: number;
 }
 
+/** How the total matching record count was obtained. */
+export type TypeRecordsCountSource = 'numberMatched' | 'service' | 'counted';
+
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
@@ -18,6 +21,12 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /** The GetStyles full url that was used to generate the style, if any */
   // GV Attribute is duplicated in the OGC WMS entry config to keep this state off unrelated base-layer entries.
   #wmsGetStylesFullUrl?: string;
+
+  /** Total matching records reported or counted for the latest source request. */
+  #totalRecordsCount?: number;
+
+  /** Origin of the total matching record count. */
+  #totalRecordsCountSource?: TypeRecordsCountSource;
 
   /**
    * Creates an instance of VectorLayerEntryConfig.
@@ -61,6 +70,35 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets the total matching records reported or counted for the source request.
+   *
+   * @returns The matching record count, or undefined when unavailable
+   */
+  getTotalRecordsCount(): number | undefined {
+    return this.#totalRecordsCount;
+  }
+
+  /**
+   * Gets how the total matching record count was obtained.
+   *
+   * @returns The count origin, or undefined when unavailable
+   */
+  getTotalRecordsCountSource(): TypeRecordsCountSource | undefined {
+    return this.#totalRecordsCountSource;
+  }
+
+  /**
+   * Records the total matching count and its origin for the current source request.
+   *
+   * @param totalRecordsCount - The matching count, or undefined to clear an earlier request's count
+   * @param source - Whether the service supplied the count or downloaded records were counted
+   */
+  setTotalRecordsCount(totalRecordsCount: number | undefined, source?: TypeRecordsCountSource): void {
+    this.#totalRecordsCount = totalRecordsCount;
+    this.#totalRecordsCountSource = totalRecordsCount === undefined ? undefined : source;
+  }
 
   /**
    * Gets the maximum number of records the service allows in a feature request for this layer.

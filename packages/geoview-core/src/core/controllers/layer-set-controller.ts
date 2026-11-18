@@ -559,6 +559,8 @@ export class LayerSetController extends AbstractMapViewerController {
         legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
         legendLayerEntry.maxRecordCount = layer.getLayerConfig().getMaxRecordCount();
         legendLayerEntry.vectorStrategy = layer.getLayerConfig().getSource().strategy ?? 'all';
+        legendLayerEntry.totalRecordsCount = layer.getLayerConfig().getTotalRecordsCount();
+        legendLayerEntry.totalRecordsCountSource = layer.getLayerConfig().getTotalRecordsCountSource();
       }
 
       // If the layer is GVEsriDynamic
