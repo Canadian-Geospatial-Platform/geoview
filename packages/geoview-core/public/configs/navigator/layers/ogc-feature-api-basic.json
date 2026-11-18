@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "OGC API Features examples using default vector styling with WMS style fetching disabled. Feature endpoints are discovered from collection metadata, with same-host HTTP links upgraded to HTTPS when the service uses HTTPS. Includes large lakes, weather and climate stations, and current and archived flood extents."
+    "description": "OGC API Features examples using default vector styling with WMS style fetching disabled. Includes large lakes, weather and climate stations, and current and archived flood extents. Feature endpoints are discovered from collection metadata, with same-host HTTP links upgraded to HTTPS when the service uses HTTPS."
   },
   "map": {
     "viewSettings": {
@@ -40,7 +40,7 @@
       },
       {
         "geoviewLayerId": "flood-eodms-sgdot",
-        "geoviewLayerName": "Flood EODMS",
+        "geoviewLayerName": "Flood",
         "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
         "geoviewLayerType": "ogcFeature",
         "fetchStylesOnWMS": false,
@@ -50,22 +50,6 @@
           },
           {
             "layerId": "EGS_Flood_Extent_Archive_en"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "flood-eodms-sgdot-bbox",
-        "geoviewLayerName": "Flood EODMS with bbox and max",
-        "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
-        "geoviewLayerType": "ogcFeature",
-        "fetchStylesOnWMS": false,
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "EGS_Flood_Extent_Archive_en",
-            "maxRecordCount": 125,
-            "source": {
-              "strategy": "bbox"
-            }
           }
         ]
       }
