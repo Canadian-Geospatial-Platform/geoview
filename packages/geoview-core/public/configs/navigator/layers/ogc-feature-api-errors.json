@@ -42,7 +42,7 @@
       },
       {
         "geoviewLayerId": "flood-eodms-sgdot",
-        "geoviewLayerName": "Flood EODMS-SGDOT",
+        "geoviewLayerName": "Flood EODMS-SGDOT (small max record count)",
         "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
         "geoviewLayerType": "ogcFeature",
         "fetchStylesOnWMS": false,

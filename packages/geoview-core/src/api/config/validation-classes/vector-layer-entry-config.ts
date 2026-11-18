@@ -115,6 +115,15 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   }
 
   /**
+   * Initializes the page size from service metadata unless explicitly configured.
+   *
+   * @param maxPageSize - The service's maximum records per request, or undefined when unavailable
+   */
+  initMaxPageSize(maxPageSize: number | undefined): void {
+    (this.layerEntryProps as VectorLayerEntryConfigProps).maxPageSize ??= maxPageSize;
+  }
+
+  /**
    * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
    *
    * @returns The service maximum record count, or the default when it is not available

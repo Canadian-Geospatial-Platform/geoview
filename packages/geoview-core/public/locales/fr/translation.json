@@ -327,6 +327,7 @@
     "layerBounds4326": "Étendu (EPSG:4326)",
     "layerMaxScale": "Échelle maximale",
     "layerMinScale": "Échelle minimale",
+    "layerMaxPageSize": "Nombre maximal d'entités par page",
     "layerMaxRecordCount": "Nombre maximal d'entités",
     "layerTotalRecordsCount": "Nombre total d'entités dans le service",
     "layerTotalRecordsCountInExtent": "Nombre total d'entités dans le service pour l'étendue de la carte",

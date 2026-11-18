@@ -718,8 +718,10 @@ export class EsriUtilities {
         parentLayerConfig.initMaxScaleFromMetadata(parentLayerMetadata?.maxScale);
         parentLayerConfig.initMinScaleFromMetadata(parentLayerMetadata?.minScale);
       }
+    }
 
-      // Initialize the max page size count from the metadata (Esri calls it the maxRecordCount as in the "max record count per fetch call")
+    // Esri's maxRecordCount describes the maximum records per request, not the total loading limit.
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
       layerConfig.initMaxPageSize(layerMetadata?.maxRecordCount);
     }
 

@@ -13,6 +13,7 @@ import type {
   TypeMetadataEsriDynamicLayer,
   TypeMetadataEsriFeature,
 } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
@@ -20,6 +21,7 @@ import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
   LayerFeatureParsingError,
   LayerTooManyFeatures,
+  LayerTooManyFeaturesInBBOX,
 } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
@@ -27,7 +29,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -199,6 +201,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features
    * @throws {LayerTooManyFeatures} When the layer has too many features
+   * @throws {LayerTooManyFeaturesInBBOX} When the requested extent has too many features
+   * @throws {Error} When BBOX loading lacks a valid extent or projection
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -211,9 +215,12 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Get the url to fetch features
     const url = `${layerConfigEsriFeature.getDataAccessPathProxiedWhenNecessary(true)}${layerConfigEsriFeature.layerId}`;
+    const spatialQuery = EsriFeature.#getBboxQuery(layerConfig, readOptions);
 
     // Use the basic fetch
-    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(`${url}/query?f=json&where=1=1&returnCountOnly=true`);
+    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
+      `${url}/query?f=json&where=1=1${spatialQuery}&returnCountOnly=true`
+    );
     if (Number.isSafeInteger(responseDataCount.count) && responseDataCount.count >= 0) {
       layerConfig.setTotalRecordsCount(responseDataCount.count, 'service');
     }
@@ -223,6 +230,15 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Check if feature count is too large
     if (responseDataCount.count > maxRecordCount) {
+      if (layerConfig.getSource().strategy === 'bbox') {
+        throw new LayerTooManyFeaturesInBBOX(
+          layerConfigEsriFeature.layerId,
+          layerConfigEsriFeature.getLayerNameCascade(),
+          responseDataCount.count,
+          maxRecordCount
+        );
+      }
+
       // Throw
       throw new LayerTooManyFeatures(
         layerConfigEsriFeature.layerId,
@@ -233,11 +249,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Determine the maximum number of records per page allowed
-    const maxPageSize = layerConfig.getMaxPageSizeOrDefault();
+    const configuredPageSize = layerConfig.getMaxPageSizeOrDefault();
+    const servicePageSize = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
+    const maxPageSize = Math.min(configuredPageSize, servicePageSize ?? configuredPageSize);
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
-      `${url}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      `${url}/query?f=json&where=1=1${spatialQuery}&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
       maxPageSize
     );
@@ -407,6 +425,37 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Process it
     return AbstractGeoViewRaster.processConfig(myLayer);
+  }
+
+  /**
+   * Builds a spatial filter shared by the count and feature queries for BBOX loading.
+   *
+   * @param layerConfig - The vector layer configuration
+   * @param readOptions - The requested extent and its map projection
+   * @returns The encoded spatial query parameters, or an empty string for all-features loading
+   * @throws {Error} When the requested extent or projection is invalid
+   */
+  static #getBboxQuery(layerConfig: VectorLayerEntryConfig, readOptions: ReadOptions): string {
+    if (layerConfig.getSource().strategy !== 'bbox') return '';
+
+    const { extent, featureProjection } = readOptions;
+    if (!extent || extent.length !== 4 || !extent.every(Number.isFinite) || !featureProjection) {
+      throw new Error(`Esri Feature layer '${layerConfig.layerId}' requires a valid extent and projection for BBOX loading.`);
+    }
+
+    const projectionCode = Projection.getProjectionFromStringOrNumber(featureProjection).getCode();
+    const wkid = /^(?:EPSG|ESRI):(\d+)$/i.exec(projectionCode)?.[1];
+    if (!wkid) {
+      throw new Error(`Esri Feature layer '${layerConfig.layerId}' requires an EPSG or ESRI projection code for BBOX loading.`);
+    }
+
+    const parameters = new URLSearchParams({
+      geometry: extent.join(','),
+      geometryType: 'esriGeometryEnvelope',
+      inSR: wkid,
+      spatialRel: 'esriSpatialRelIntersects',
+    });
+    return `&${parameters.toString()}`;
   }
 
   /**

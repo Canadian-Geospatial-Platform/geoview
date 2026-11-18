@@ -1778,9 +1778,13 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "maxPageSize": {
+          "type": "number",
+          "description": "The maximum number of features allowed per page when fetching vector data."
+        },
         "maxRecordCount": {
           "type": "number",
-          "description": "The maximum number of matching features allowed for a vector layer request."
+          "description": "The maximum total number of matching features supported for a vector layer."
         },
         "wmsUrl": {
           "type": "string",

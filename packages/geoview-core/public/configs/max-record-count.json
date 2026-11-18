@@ -19,8 +19,8 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "advanced-polling-district-boundaries-2019",
-        "geoviewLayerName": "Advance Polling District Boundaries of 2019",
+        "geoviewLayerId": "advanced-polling",
+        "geoviewLayerName": "Advance Polling",
         "geoviewLayerType": "esriFeature",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver",
         "listOfLayerEntryConfig": [
@@ -30,13 +30,37 @@
         ]
       },
       {
+        "geoviewLayerId": "advanced-polling-explicit",
+        "geoviewLayerName": "Advance Polling (Explicit Max Page Size)",
+        "geoviewLayerType": "esriFeature",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/ELECTIONS/elections_canada_2019_en/mapserver",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "maxPageSize": 500
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "completed",
-        "geoviewLayerName": "Completed",
+        "geoviewLayerName": "Completed (open the DataTable to fetch)",
         "geoviewLayerType": "esriDynamic",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "completed-explicit",
+        "geoviewLayerName": "Completed (open the DataTable to fetch) (Explicit Max Page Size)",
+        "geoviewLayerType": "esriDynamic",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_en/MapServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "maxPageSize": 1000
           }
         ]
       }

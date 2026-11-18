@@ -98,7 +98,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const totalRecordsCountSource = useStoreLayerTotalRecordsCountSource(layerPath);
   const vectorStrategy = useStoreLayerVectorStrategy(layerPath);
   const isExtentRecordCount =
-    vectorStrategy === 'bbox' && (schemaTag === CONST_LAYER_TYPES.OGC_FEATURE || schemaTag === CONST_LAYER_TYPES.WFS);
+    vectorStrategy === 'bbox' &&
+    (schemaTag === CONST_LAYER_TYPES.OGC_FEATURE || schemaTag === CONST_LAYER_TYPES.WFS || schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE);
   const layerEntryType = useStoreLayerEntryType(layerPath);
   const isLayerGroup = layerEntryType === 'group';
   const layerQueryableSource = useStoreLayerQueryableSource(layerPath);
