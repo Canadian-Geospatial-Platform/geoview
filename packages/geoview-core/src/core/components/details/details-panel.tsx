@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -73,30 +73,13 @@ type LayerListStructureEntry = {
   layerUniqueId: string;
 };
 
-/** The Details results context (selected layer and map click) a zoom applies to. */
-type TypeResultsZoomContext = {
-  /** The selected layer path. */
-  layerPath: string;
-  /** The map click that produced the results. */
+/** The last Details zoom (zoom to feature or zoom to all results) and the map click it applied to. */
+type TypeDetailsZoom = {
+  /** The map click that produced the zoomed results. */
   clickCoordinates: TypeMapMouseInfo | undefined;
-};
-
-/** The last Details zoom (zoom to feature or zoom to all results) and the results context it applied to. */
-type TypeDetailsZoom = TypeResultsZoomContext & {
   /** Whether it was a zoom to feature (previous/next then follow the selected feature) rather than a group zoom. */
   isFeatureZoom: boolean;
 };
-
-/**
- * Checks whether a results zoom context is the same as another (same layer and same map click).
- *
- * @param context - The context to compare, possibly undefined
- * @param otherContext - The context to compare against
- * @returns True when both contexts target the same layer and map click
- */
-function isSameResultsZoomContext(context: TypeResultsZoomContext | undefined, otherContext: TypeResultsZoomContext): boolean {
-  return context?.layerPath === otherContext.layerPath && context.clickCoordinates === otherContext.clickCoordinates;
-}
 
 /**
  * Gets the key identifying a feature as a zoom to feature target.
@@ -151,10 +134,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const layerController = useLayerController();
   const getPanelFitOptions = useAppBarPanelFitOptions();
 
-  // The current-click results of the selected layer are the group zoom target; the button is unavailable until the map view changes
-  const resultsZoomTargetKey = `${selectedLayerPath}|${mapClickCoordinates?.lonlat.join(',') ?? ''}`;
-  const { isZoomed: isResultsExtentZoomed, markZoomed: markResultsExtentZoomed } = useZoomButtonState(resultsZoomTargetKey);
-
   // States
   const currentFeatureIndex = useStoreDetailsCurrentFeatureIndex();
   const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
@@ -162,11 +141,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const previousHighlightedFeaturesRef = useRef<TypeFeatureInfoEntry[]>([]);
   const previousLayerFeaturesRef = useRef<TypeFeatureInfoEntry[] | undefined>(undefined);
   const layoutRef = useRef<LayoutExposedMethods>(null);
-  const resultsZoomContextRef = useRef<TypeResultsZoomContext>({
-    layerPath: selectedLayerPath,
-    clickCoordinates: mapClickCoordinates,
-  });
-  // The last Details zoom: after a zoom to feature, previous/next follow the selected feature in the same results context;
+  // Identifies the current Details zoom operation: a new zoom, a new map click or a layer switch supersedes the pending ones
+  const zoomOperationRef = useRef<number>(0);
+  // The last Details zoom: after a zoom to feature, previous/next follow the selected feature until a new click, layer switch or group zoom;
   // after any Details zoom, the click marker is no longer shown on layer switch for that click (a new click resets both)
   const lastDetailsZoomRef = useRef<TypeDetailsZoom | undefined>(undefined);
   // Tracks that the user explicitly closed the panel so the no-features guide isn't force-reopened underneath them
@@ -427,15 +404,23 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const featureZoomTargetKey = getFeatureZoomTargetKey(memoCurrentFeature);
   const { isZoomed: isFeatureZoomed, markZoomed: markFeatureZoomed } = useZoomButtonState(featureZoomTargetKey);
 
+  // The current-click results of the selected layer are the group zoom target; late results change the target
+  const resultsZoomTargetKey = `${selectedLayerPath}|${mapClickCoordinates?.lonlat.join(',') ?? ''}|${memoSelectedLayerDataFeatures?.length ?? 0}`;
+  const { isZoomed: isResultsExtentZoomed, markZoomed: markResultsExtentZoomed } = useZoomButtonState(resultsZoomTargetKey);
+
   /**
    * Memoizes whether the selected layer's current-click results have a combined (union) extent to zoom to.
    */
   const memoCanZoomToResultsExtent = useMemo((): boolean => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoCanZoomToResultsExtent', memoSelectedLayerDataFeatures?.length);
+    logger.logTraceUseMemo(
+      'DETAILS-PANEL - memoCanZoomToResultsExtent',
+      memoSelectedLayerDataFeatures?.length,
+      memoSelectedLayerData?.featuresHaveGeometry
+    );
 
-    return !!GeoUtilities.getFeaturesGeometryExtent(memoSelectedLayerDataFeatures);
-  }, [memoSelectedLayerDataFeatures]);
+    return layerController.canZoomToFeaturesGroupExtent(selectedLayerPath, memoSelectedLayerDataFeatures);
+  }, [layerController, selectedLayerPath, memoSelectedLayerDataFeatures, memoSelectedLayerData?.featuresHaveGeometry]);
 
   /**
    * Memoizes the current feature has geometry.
@@ -479,12 +464,27 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     previousFeatureSelectionRef.current = { layerPath: selectedLayerPath, featureCount };
   }, [detailsController, selectedLayerPath, memoSelectedLayerDataFeatures?.length]);
 
-  /** Replaces the results zoom context on a new map click or layer switch so pending group zooms become stale. */
-  useEffect(() => {
-    logger.logTraceUseEffect('DETAILS-PANEL - update results zoom context', selectedLayerPath, mapClickCoordinates);
+  /** Supersedes the pending Details zooms and ends following the selected feature when the map click or the selected layer changes. */
+  useLayoutEffect(() => {
+    logger.logTraceUseEffect('DETAILS-PANEL - supersede Details zooms', selectedLayerPath, mapClickCoordinates);
 
-    resultsZoomContextRef.current = { layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates };
+    // The cleanup runs on every change of the dependencies and on unmount, so a return to a previous layer is a new context too
+    return (): void => {
+      zoomOperationRef.current += 1;
+      if (lastDetailsZoomRef.current) lastDetailsZoomRef.current.isFeatureZoom = false;
+    };
   }, [selectedLayerPath, mapClickCoordinates]);
+
+  /**
+   * Starts a Details zoom, superseding any pending one.
+   *
+   * @returns A function that tells whether this zoom has since been superseded
+   */
+  const startDetailsZoom = useCallback((): (() => boolean) => {
+    zoomOperationRef.current += 1;
+    const operation = zoomOperationRef.current;
+    return (): boolean => operation !== zoomOperationRef.current;
+  }, []);
 
   /**
    * Effect used when the structural layers list changes.
@@ -641,16 +641,10 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       detailsController.setCurrentFeatureIndex(newIndex);
 
       // When the user zoomed to a feature for these results, bring the newly selected feature into view (pan, zooming out only if needed)
-      const lastZoom = lastDetailsZoomRef.current;
       const nextFeature = memoSelectedLayerDataFeatures?.[newIndex];
-      if (
-        lastZoom?.isFeatureZoom &&
-        isSameResultsZoomContext(lastZoom, resultsZoomContextRef.current) &&
-        nextFeature &&
-        GeoUtilities.hasFeatureGeometryExtent(nextFeature)
-      ) {
+      if (lastDetailsZoomRef.current?.isFeatureZoom && nextFeature && GeoUtilities.hasFeatureGeometryExtent(nextFeature)) {
         layerController
-          .panToExtentRestrictedAndOutline(selectedLayerPath, nextFeature.extent, true, getPanelFitOptions())
+          .panToExtentRestrictedAndOutline(selectedLayerPath, nextFeature.extent, true, getPanelFitOptions(), startDetailsZoom())
           .then((isFeatureZoomView) => {
             // The pan already shows what a zoom to this feature would, so its zoom button would have no effect
             if (isFeatureZoomView) markFeatureZoomed(getFeatureZoomTargetKey(nextFeature));
@@ -680,6 +674,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       markFeatureZoomed,
       memoSelectedLayerDataFeatures,
       selectedLayerPath,
+      startDetailsZoom,
     ]
   );
 
@@ -688,16 +683,38 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Remembers it so previous/next follow the selected feature until a new click, layer switch or group zoom.
    */
   const handleFeatureZoomed = useCallback((): void => {
-    lastDetailsZoomRef.current = { ...resultsZoomContextRef.current, isFeatureZoom: true };
-  }, []);
+    if (!memoCurrentFeature?.extent || isFeatureZoomed) return;
+    lastDetailsZoomRef.current = { clickCoordinates: mapClickCoordinates, isFeatureZoom: true };
 
-  /**
-   * Handles when the zoom to the current feature completed.
-   * Makes its zoom button unavailable until the map view changes; kept here so it survives navigating between features.
-   */
-  const handleFeatureZoomCompleted = useCallback((): void => {
-    markFeatureZoomed(featureZoomTargetKey);
-  }, [featureZoomTargetKey, markFeatureZoomed]);
+    layerController
+      .zoomToExtentRestrictedAndHighlight(
+        selectedLayerPath,
+        memoCurrentFeature,
+        memoCurrentFeature.extent,
+        true,
+        getPanelFitOptions(),
+        false,
+        startDetailsZoom()
+      )
+      .then((isZoomed) => {
+        // Make the button unavailable until the map view changes, unless the zoom was interrupted or superseded
+        if (isZoomed) markFeatureZoomed(featureZoomTargetKey);
+      })
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleFeatureZoomed in DetailsPanel', error);
+      });
+  }, [
+    featureZoomTargetKey,
+    getPanelFitOptions,
+    isFeatureZoomed,
+    layerController,
+    mapClickCoordinates,
+    markFeatureZoomed,
+    memoCurrentFeature,
+    selectedLayerPath,
+    startDetailsZoom,
+  ]);
 
   /**
    * Handles a click on the previous feature navigation button.
@@ -721,17 +738,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // The button is only aria-disabled, so guard here as well
     if (!memoCanZoomToResultsExtent || isResultsExtentZoomed || !memoSelectedLayerDataFeatures) return;
 
-    // Capture the zoom context so a new click or layer switch during the extent lookup cancels the zoom
-    const zoomContext: TypeResultsZoomContext = { layerPath: selectedLayerPath, clickCoordinates: mapClickCoordinates };
-    const isStale = (): boolean => !isSameResultsZoomContext(zoomContext, resultsZoomContextRef.current);
-
-    // A group zoom shows the results context, so previous/next stop following the selected feature
-    lastDetailsZoomRef.current = { ...zoomContext, isFeatureZoom: false };
+    // A group zoom shows the results, so previous/next stop following the selected feature
+    lastDetailsZoomRef.current = { clickCoordinates: mapClickCoordinates, isFeatureZoom: false };
 
     layerController
-      .zoomToFeaturesGroupExtent(selectedLayerPath, memoSelectedLayerDataFeatures, getPanelFitOptions(), isStale)
+      .zoomToFeaturesGroupExtent(selectedLayerPath, memoSelectedLayerDataFeatures, getPanelFitOptions(), startDetailsZoom())
       .then((isZoomed) => {
-        // Make the button unavailable until the map view changes, unless the group became stale during the zoom
+        // Make the button unavailable until the map view changes, unless the zoom was interrupted or superseded
         if (isZoomed) markResultsExtentZoomed(resultsZoomTargetKey);
       })
       .catch((error: unknown) => {
@@ -748,6 +761,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     memoSelectedLayerDataFeatures,
     resultsZoomTargetKey,
     selectedLayerPath,
+    startDetailsZoom,
   ]);
 
   /**
@@ -1020,7 +1034,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             feature={memoCurrentFeature}
             containerType={containerType}
             onFeatureZoomed={handleFeatureZoomed}
-            onFeatureZoomCompleted={handleFeatureZoomCompleted}
             isZoomed={isFeatureZoomed}
           />
         </Box>

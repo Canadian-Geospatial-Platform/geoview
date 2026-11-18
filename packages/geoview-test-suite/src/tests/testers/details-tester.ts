@@ -1,5 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 import { containsExtent, getCenter } from 'ol/extent';
+import { unByKey } from 'ol/Observable';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -9,10 +10,12 @@ import { NoExtentError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { OL_ZOOM_FEATURE_MAX_SCALE } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
+import { whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreDetailsFeatures } from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import { AbstractGVVector } from 'geoview-core/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 /**
  * Main Map testing class.
@@ -347,6 +350,8 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving when the test completes
    */
   testZoomToResultsGroupExtent(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToResultsGroupExtent>> {
+    let cleanupLookup: (() => void) | undefined;
+    let cleanupCancellation: (() => void) | undefined;
     return this.test(
       `Test Zoom to all results for layer ${layerPath}...`,
       async (test) => {
@@ -462,6 +467,45 @@ export class DetailsTester extends GVAbstractTester {
           fitOptions,
           () => true
         );
+        const staleCenterUnchanged = JSON.stringify(view.getCenter()) === JSON.stringify(centerBeforeStale);
+
+        test.addStep('Looking up a group whose embedded extents are all missing...');
+        if (!(layer instanceof AbstractGVVector) || !polygon.feature) throw new Error('Expected a vector feature lookup fixture');
+        const source = layer.getOLLayer().getSource();
+        if (!source) throw new Error('Expected a vector source for extent lookup');
+        const lookupFeature = polygon.feature.clone();
+        const lookupId =
+          Math.max(
+            0,
+            ...source
+              .getFeatures()
+              .map((feature) => Number(feature.getId()))
+              .filter(Number.isFinite)
+          ) + 1;
+        lookupFeature.setId(lookupId);
+        source.addFeature(lookupFeature);
+        cleanupLookup = (): void => source.removeFeature(lookupFeature);
+        const lookupResults: TypeFeatureInfoEntry[] = [
+          {
+            ...polygon,
+            extent: undefined,
+            geometry: undefined,
+            fieldInfo: { id: { fieldKey: 0, value: lookupId, dataType: 'oid', alias: 'id' } },
+          },
+        ];
+        const missingExtentsAvailable = layerController.canZoomToFeaturesGroupExtent(layerPath, lookupResults);
+        const lookedUpZoomed = await layerController.zoomToFeaturesGroupExtent(layerPath, lookupResults, fitOptions);
+        const lookedUpExtentInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), polygon.extent);
+
+        test.addStep('Interrupting a group zoom before it reaches its destination...');
+        const cancelListener = this.getMapViewer().map.once('movestart', (): void => view.cancelAnimations());
+        cleanupCancellation = (): void => unByKey(cancelListener);
+        const cancelledZoomed = await layerController.zoomToFeaturesGroupExtent(
+          layerPath,
+          [createResult([cx + 900000, cy, cx + 950000, cy + 50000], 0)],
+          fitOptions
+        );
+        unByKey(cancelListener);
 
         return {
           distinctPointsInView,
@@ -473,7 +517,11 @@ export class DetailsTester extends GVAbstractTester {
           allInvalidThrowsNoExtent: allInvalidError instanceof NoExtentError,
           noGeometryGroupExtent,
           staleZoomed,
-          staleCenterUnchanged: JSON.stringify(view.getCenter()) === JSON.stringify(centerBeforeStale),
+          staleCenterUnchanged,
+          missingExtentsAvailable,
+          lookedUpZoomed,
+          lookedUpExtentInView,
+          cancelledZoomed,
         };
       },
       (test, result) => {
@@ -504,6 +552,15 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying a stale group does not move the map...');
         Test.assertIsEqual(result.staleZoomed, false);
         Test.assertIsEqual(result.staleCenterUnchanged, true);
+        test.addStep('Verifying lookup-only results can zoom and interrupted fits do not report completion...');
+        Test.assertIsEqual(result.missingExtentsAvailable, true);
+        Test.assertIsEqual(result.lookedUpZoomed, true);
+        Test.assertIsEqual(result.lookedUpExtentInView, true);
+        Test.assertIsEqual(result.cancelledZoomed, false);
+      },
+      () => {
+        cleanupLookup?.();
+        cleanupCancellation?.();
       }
     );
   }
@@ -659,21 +716,19 @@ export class DetailsTester extends GVAbstractTester {
 
         // Get the button
         test.addStep('Waiting for the zoom to all results button...');
-        const button = await DomHelper.waitForDomElement(BUTTON_SELECTOR, root);
+        const waitForElement = async (selector: string): Promise<Element> => {
+          const element = await whenThisThen(() => root.querySelector(selector), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50);
+          if (!element) throw new Error(`Element not found: ${selector}`);
+          return element;
+        };
+        const button = await waitForElement(BUTTON_SELECTOR);
         const disabledBefore = button.getAttribute('aria-disabled') ?? undefined;
 
         // Click it and wait for it to become unavailable once the zoom completed
         test.addStep('Clicking the zoom to all results button...');
         (button as HTMLButtonElement).click();
         const disabledAfterZoom =
-          (
-            await DomHelper.waitForAttribute(
-              `${BUTTON_SELECTOR}[aria-disabled="true"]`,
-              'aria-disabled',
-              root,
-              GVAbstractTester.UI_STATE_TIMEOUT_MS
-            )
-          ).getAttribute('aria-disabled') ?? undefined;
+          (await waitForElement(`${BUTTON_SELECTOR}[aria-disabled="true"]`)).getAttribute('aria-disabled') ?? undefined;
 
         // Change the map view and wait for the button to become available again
         test.addStep('Changing the map view...');
@@ -683,16 +738,27 @@ export class DetailsTester extends GVAbstractTester {
           GVAbstractTester.USE_ZOOM_ANIMATION
         );
         const disabledAfterViewChange =
-          (
-            await DomHelper.waitForAttribute(
-              `${BUTTON_SELECTOR}[aria-disabled="false"]`,
-              'aria-disabled',
-              root,
-              GVAbstractTester.UI_STATE_TIMEOUT_MS
-            )
-          ).getAttribute('aria-disabled') ?? undefined;
+          (await waitForElement(`${BUTTON_SELECTOR}[aria-disabled="false"]`)).getAttribute('aria-disabled') ?? undefined;
 
-        return { disabledBefore, disabledAfterZoom, disabledAfterViewChange };
+        // Zoom to the feature, then leave the layer and come back: the next feature must not be followed anymore
+        test.addStep('Zooming to a feature, then switching away and back to the layer...');
+        const featureButton = await waitForElement('button[aria-label="Zoom to feature"]');
+        (featureButton as HTMLButtonElement).click();
+        await waitForElement('button[aria-label="Zoom to feature"][aria-disabled="true"]');
+        const { detailsController } = this.getControllersRegistry();
+        detailsController.setSelectedLayerPath('');
+        await DomHelper.waitForReactIdle();
+        detailsController.setSelectedLayerPath(layerPath);
+        await DomHelper.waitForReactIdle();
+        const centerBeforeNavigation = [...this.getMapViewer().getView().getCenter()!];
+        const nextButton = await waitForElement('button[aria-label="Next feature"]');
+        (nextButton as HTMLButtonElement).click();
+        await DomHelper.waitForReactIdle();
+        const followsAfterLayerSwitch =
+          this.getMapViewer().getView().getAnimating() ||
+          JSON.stringify(centerBeforeNavigation) !== JSON.stringify(this.getMapViewer().getView().getCenter());
+
+        return { disabledBefore, disabledAfterZoom, disabledAfterViewChange, followsAfterLayerSwitch };
       },
       (test, result) => {
         test.addStep('Verifying the button is available before the zoom...');
@@ -703,6 +769,9 @@ export class DetailsTester extends GVAbstractTester {
 
         test.addStep('Verifying the button is available again after the map view changed...');
         Test.assertIsEqual(result.disabledAfterViewChange, 'false');
+
+        test.addStep('Verifying returning to a layer does not restore feature-follow...');
+        Test.assertIsEqual(result.followsAfterLayerSwitch, false);
       }
     );
   }
@@ -895,6 +964,8 @@ export class DetailsTester extends GVAbstractTester {
 
 /** Result type for the testZoomToResultsButtonUnavailableUntilViewChanges test execution. */
 export type TestZoomButtonState = {
+  /** Whether feature navigation incorrectly resumed following after switching layers. */
+  followsAfterLayerSwitch: boolean;
   /** The button aria-disabled value before the zoom. */
   disabledBefore: string | undefined;
   /** The button aria-disabled value once the zoom completed. */
@@ -931,6 +1002,14 @@ export type TestZoomToFeatureBoundAndPan = {
 
 /** Result type for the testZoomToResultsGroupExtent test execution. */
 export type TestZoomToResultsGroupExtent = {
+  /** Whether results with only lookup-capable IDs enable group zoom. */
+  missingExtentsAvailable: boolean;
+  /** Whether a group with no embedded extents zoomed after object-ID lookup. */
+  lookedUpZoomed: boolean;
+  /** Whether the looked-up geometry extent was fitted. */
+  lookedUpExtentInView: boolean;
+  /** Whether an interrupted animation incorrectly reported success. */
+  cancelledZoomed: boolean;
   /** Whether the five distinct points were all in view after the group zoom. */
   distinctPointsInView: boolean;
   /** The view resolution after zooming to coincident points. */
