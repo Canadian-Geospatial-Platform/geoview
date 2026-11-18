@@ -521,6 +521,12 @@ Controllers are the preferred path for map operations. MapViewer provides low-le
 Use `setMapZoomLevel()` only for an immediate non-awaited change.
 When the next step depends on zoom completion, await `mapController.zoomMap`.
 
+### Waiting for Attribute Changes
+
+`DomHelper.waitForDomElement` only re-checks when nodes are added or removed, so a selector that depends on an attribute changing on an existing element (e.g. `button[aria-disabled="true"]`) never resolves and, without a timeout, freezes the suite. Use `DomHelper.waitForAttribute(selector, attributeName, parent, timeout)` (or `waitForClass` for `class`), always with a timeout such as `GVAbstractTester.UI_STATE_TIMEOUT_MS`.
+
+Vector query results also depend on the current view (pixel hit tolerance), so reset the view (e.g. `mapController.zoomToInitialExtent`) before a click whose result count matters when earlier tests changed the zoom.
+
 ### `queryLayerFeatures()` Visibility Guards
 
 Before querying, `queryLayerFeatures()` checks:

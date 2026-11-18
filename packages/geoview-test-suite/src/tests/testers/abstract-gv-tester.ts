@@ -42,6 +42,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Maximum time for browser scrolling and UI layout to settle. */
   static readonly UI_SCROLL_TIMEOUT_MS = 5000;
 
+  /** Maximum time for a UI control state (e.g. aria-disabled) to reflect a completed map operation. */
+  static readonly UI_STATE_TIMEOUT_MS = 10000;
+
   /** Stable interval covering delayed footer scrolling and layout transitions. */
   static readonly UI_SCROLL_SETTLE_MS = 500;
 

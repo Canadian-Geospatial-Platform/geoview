@@ -556,6 +556,53 @@ export abstract class DomHelper {
   }
 
   /**
+   * Returns a promise that resolves when an element matching the given selector exists, re-checking on changes
+   * of the given attribute (e.g. `aria-disabled`) or on child additions/removals.
+   *
+   * Use it when the selector depends on an attribute value, since `waitForDomElement` only observes child changes.
+   *
+   * @param selector - The CSS selector to query for, typically including the attribute value (e.g. `button[aria-disabled="true"]`)
+   * @param attributeName - The attribute whose changes trigger a new check
+   * @param parent - Optional parent element to observe (defaults to `document.body`)
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+   * @returns A promise that resolves with the matched element
+   */
+  static waitForAttribute(selector: string, attributeName: string, parent?: Element, timeout?: number): Promise<Element> {
+    const root = parent ?? document.body;
+    const existing = root.querySelector(selector);
+    if (existing) return Promise.resolve(existing);
+
+    return new Promise<Element>((resolve, reject) => {
+      const state = { resolved: false };
+      const timeoutJob = timeout === undefined ? undefined : doTimeout(timeout);
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        const element = root.querySelector(selector);
+        if (!element) return;
+
+        state.resolved = true;
+        observer.disconnect();
+        timeoutJob?.cancel();
+        resolve(element);
+      });
+      timeoutJob?.promise
+        .then((result) => {
+          if (result !== 'timeout' || state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForAttribute timed out after ${timeout}ms waiting for "${selector}"`));
+        })
+        .catch((error: unknown) => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(error);
+        });
+      observer.observe(root, { attributes: true, attributeFilter: [attributeName], childList: true, subtree: true });
+    });
+  }
+
+  /**
    * Returns a promise that resolves when a DOM mutation is observed on the given element.
    *
    * When a filter is provided, the observer keeps listening until the filter returns true.

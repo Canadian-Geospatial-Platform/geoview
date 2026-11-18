@@ -666,7 +666,14 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Clicking the zoom to all results button...');
         (button as HTMLButtonElement).click();
         const disabledAfterZoom =
-          (await DomHelper.waitForDomElement(`${BUTTON_SELECTOR}[aria-disabled="true"]`, root)).getAttribute('aria-disabled') ?? undefined;
+          (
+            await DomHelper.waitForAttribute(
+              `${BUTTON_SELECTOR}[aria-disabled="true"]`,
+              'aria-disabled',
+              root,
+              GVAbstractTester.UI_STATE_TIMEOUT_MS
+            )
+          ).getAttribute('aria-disabled') ?? undefined;
 
         // Change the map view and wait for the button to become available again
         test.addStep('Changing the map view...');
@@ -676,7 +683,14 @@ export class DetailsTester extends GVAbstractTester {
           GVAbstractTester.USE_ZOOM_ANIMATION
         );
         const disabledAfterViewChange =
-          (await DomHelper.waitForDomElement(`${BUTTON_SELECTOR}[aria-disabled="false"]`, root)).getAttribute('aria-disabled') ?? undefined;
+          (
+            await DomHelper.waitForAttribute(
+              `${BUTTON_SELECTOR}[aria-disabled="false"]`,
+              'aria-disabled',
+              root,
+              GVAbstractTester.UI_STATE_TIMEOUT_MS
+            )
+          ).getAttribute('aria-disabled') ?? undefined;
 
         return { disabledBefore, disabledAfterZoom, disabledAfterViewChange };
       },
