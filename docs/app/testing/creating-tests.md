@@ -75,6 +75,7 @@ Every test is split into three sections, and **each section has exactly one job*
 
 **Rule:** The operation being tested — the "act" — must run in the **execution** callback and be **returned** as `result`. The **assertion** callback receives that `result` as its second parameter and verifies it. **Never execute the function under test inside the assertion callback.**
 
+- Put `Test.assert*` checks on the test result in `callbackAssert`, never in the execution `callback`. If a required observation prevents the remaining execution, return it early so `callbackAssert` can report the failure.
 - If the subject of the test is a **function's return value**, call that function in the execution callback and `return` it, then assert on the `result` parameter — do not re-call it in the assertion callback.
 - Read-only getters used purely to **navigate to a value** for an assertion may live in the assertion callback. The line is: navigating to a property is fine; executing the behavior under test is not.
 

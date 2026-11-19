@@ -25,7 +25,7 @@ Read only the linked section of each doc: search for its heading and read to the
 
 ## Enforcement reminders
 
-- Keep execution/result, assertion-only verification and cleanup separate; `Test<T>` matches the returned subject.
+- Put `Test.assert*` calls in `callbackAssert`, never in the execution `callback`; return observations for assertion, use `callbackFinalize` for cleanup, and match `Test<T>` to the result.
 - Use `test.addStep`, generated IDs, shared constants, instance helpers and `testError` for expected errors.
 - Map-state-changing tests run sequentially after independent parallel tests.
 - Keep each changed suite's `getTestsTotalFinal()` aligned with its full-pipeline calls; include heavy-gated

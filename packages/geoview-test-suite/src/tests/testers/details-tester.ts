@@ -1,6 +1,5 @@
 import type { Coordinate } from 'ol/coordinate';
 import { containsExtent, getCenter } from 'ol/extent';
-import { unByKey } from 'ol/Observable';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -351,13 +350,12 @@ export class DetailsTester extends GVAbstractTester {
    */
   testZoomToResultsGroupExtent(layerPath: string, lonlat: Coordinate): Promise<Test<TestZoomToResultsGroupExtent>> {
     let cleanupLookup: (() => void) | undefined;
-    let cleanupCancellation: (() => void) | undefined;
     return this.test(
       `Test Zoom to all results for layer ${layerPath}...`,
       async (test) => {
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = { duration: GVAbstractTester.USE_ZOOM_ANIMATION ? undefined : 0 };
+        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build the group results from
         const layer = layerController.getGeoviewLayerRegular(layerPath);
@@ -497,15 +495,17 @@ export class DetailsTester extends GVAbstractTester {
         const lookedUpZoomed = await layerController.zoomToFeaturesGroupExtent(layerPath, lookupResults, fitOptions);
         const lookedUpExtentInView = containsExtent(view.calculateExtent(this.getMapViewer().map.getSize()), polygon.extent);
 
+        // An instant fit completes before it can be interrupted: use a long animation and cancel it as soon as it starts,
+        // so the map stays in place (the next test queries by pixel at the current view)
         test.addStep('Interrupting a group zoom before it reaches its destination...');
-        const cancelListener = this.getMapViewer().map.once('movestart', (): void => view.cancelAnimations());
-        cleanupCancellation = (): void => unByKey(cancelListener);
-        const cancelledZoomed = await layerController.zoomToFeaturesGroupExtent(
+        const interruptedZoom = layerController.zoomToFeaturesGroupExtent(
           layerPath,
           [createResult([cx + 900000, cy, cx + 950000, cy + 50000], 0)],
-          fitOptions
+          { ...fitOptions, duration: 60000 }
         );
-        unByKey(cancelListener);
+        await whenThisThen(() => view.getAnimating(), GVAbstractTester.UI_STATE_TIMEOUT_MS, 10);
+        view.cancelAnimations();
+        const cancelledZoomed = await interruptedZoom;
 
         return {
           distinctPointsInView,
@@ -552,6 +552,7 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Verifying a stale group does not move the map...');
         Test.assertIsEqual(result.staleZoomed, false);
         Test.assertIsEqual(result.staleCenterUnchanged, true);
+
         test.addStep('Verifying lookup-only results can zoom and interrupted fits do not report completion...');
         Test.assertIsEqual(result.missingExtentsAvailable, true);
         Test.assertIsEqual(result.lookedUpZoomed, true);
@@ -560,7 +561,6 @@ export class DetailsTester extends GVAbstractTester {
       },
       () => {
         cleanupLookup?.();
-        cleanupCancellation?.();
       }
     );
   }
@@ -580,7 +580,7 @@ export class DetailsTester extends GVAbstractTester {
       async (test) => {
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = { duration: GVAbstractTester.USE_ZOOM_ANIMATION ? undefined : 0 };
+        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build a point feature from
         const layer = layerController.getGeoviewLayerRegular(layerPath);
@@ -709,10 +709,10 @@ export class DetailsTester extends GVAbstractTester {
         await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
         this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
 
-        // The button only shows for several results; fail clearly instead of waiting for it
-        test.addStep('Verifying the layer returned several results...');
+        // The button only shows for several results; return early so the assertion can report a missing prerequisite
+        test.addStep('Getting the number of layer results...');
         const resultCount = getStoreDetailsFeatures(this.getMapId(), layerPath)?.length ?? 0;
-        Test.assertIsEqual(resultCount > 1, true);
+        if (resultCount <= 1) return { resultCount };
 
         // Get the button
         test.addStep('Waiting for the zoom to all results button...');
@@ -758,9 +758,12 @@ export class DetailsTester extends GVAbstractTester {
           this.getMapViewer().getView().getAnimating() ||
           JSON.stringify(centerBeforeNavigation) !== JSON.stringify(this.getMapViewer().getView().getCenter());
 
-        return { disabledBefore, disabledAfterZoom, disabledAfterViewChange, followsAfterLayerSwitch };
+        return { resultCount, disabledBefore, disabledAfterZoom, disabledAfterViewChange, followsAfterLayerSwitch };
       },
       (test, result) => {
+        test.addStep('Verifying the layer returned several results...');
+        Test.assertIsEqual(result.resultCount > 1, true);
+
         test.addStep('Verifying the button is available before the zoom...');
         Test.assertIsEqual(result.disabledBefore, 'false');
 
@@ -962,16 +965,18 @@ export class DetailsTester extends GVAbstractTester {
 
 // #region TYPES AND INTERFACES
 
-/** Result type for the testZoomToResultsButtonUnavailableUntilViewChanges test execution. */
+/** Result of the button state test; button observations are absent when fewer than two results are returned. */
 export type TestZoomButtonState = {
+  /** The number of features returned for the layer. */
+  resultCount: number;
   /** Whether feature navigation incorrectly resumed following after switching layers. */
-  followsAfterLayerSwitch: boolean;
+  followsAfterLayerSwitch?: boolean;
   /** The button aria-disabled value before the zoom. */
-  disabledBefore: string | undefined;
+  disabledBefore?: string;
   /** The button aria-disabled value once the zoom completed. */
-  disabledAfterZoom: string | undefined;
+  disabledAfterZoom?: string;
   /** The button aria-disabled value once the map view changed. */
-  disabledAfterViewChange: string | undefined;
+  disabledAfterViewChange?: string;
 };
 
 /** Result type for the testZoomToFeatureBoundAndPan test execution. */
