@@ -31,6 +31,16 @@ Keep that section canonical for callers; this section records source-level imple
 
 Source: [`map-viewer.ts`](../../packages/geoview-core/src/geo/map/map-viewer.ts), especially `getViewportBoundaryLonLat()`, `fitViewportToMidpointsLonLat()`, and `#getViewportMidpointRotation()`.
 
+## OpenLayers font redraw and layer disposal
+
+- `MapViewer.createMap` installs its font-redraw handler before `setTarget` creates the OpenLayers renderer.
+  The renderer captures the method when registering its global `checkedFonts` listener; replacing it after attachment is too late.
+- Track the public `postrender` frame state and skip disposed (`null`) layer entries when notifying renderers.
+  Layer disposal mutates the layer state shared with the last frame, which can remain stale while another map runs or a tab is hidden.
+- Do not catch and suppress renderer errors. Surviving layers must still receive `handleFontsChanged`.
+
+Source: [`MapViewer.createMap`](../../packages/geoview-core/src/geo/map/map-viewer.ts).
+
 ## Source navigation and guardrails
 
 - Register init/ready listeners before `cgpv.init`; init can fire before layer loading finishes.
