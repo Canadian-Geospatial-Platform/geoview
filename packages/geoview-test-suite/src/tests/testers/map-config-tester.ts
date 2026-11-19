@@ -1,9 +1,19 @@
-import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
-import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import type { Coordinate } from 'ol/coordinate';
+
 import { Test } from '../core/test';
+import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeViewportBoundaryLonLat } from 'geoview-core/api/types/map-schema-types';
+import {
+  MAP_CENTER,
+  MAP_ZOOM_LEVEL,
+  type TypeFeatureInfoEntry,
+  type TypeInteraction,
+  type TypeValidMapProjectionCodes,
+} from 'geoview-core/api/types/map-schema-types';
+import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
+import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
@@ -31,6 +41,8 @@ import {
   getStoreMapStateJson,
   getStoreMapNorthArrow,
 } from 'geoview-core/core/stores/states/map-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 
 /** Fixed map height used by map config layout tests. */
@@ -1163,7 +1175,7 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #region View Settings Tests
+  // #region VIEW SETTINGS
 
   /**
    * Tests that initialView sets the initial zoom and zoomToInitialExtent navigates to homeView zoom.
@@ -1266,7 +1278,7 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion VIEW SETTINGS
 
   /**
    * Tests that nameField configuration controls the feature display label.
@@ -1396,7 +1408,7 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #region Initial Settings Controls Tests
+  // #region INITIAL SETTINGS CONTROLS
 
   /**
    * Tests that setting all controls to false is reflected in the store.
@@ -1553,9 +1565,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS
 
-  // #region Initial Settings Opacity Cascading Tests
+  // #region INITIAL SETTINGS OPACITY CASCADING
 
   /**
    * Tests that a child layer's opacity is capped by its parent group's opacity when child opacity exceeds the parent.
@@ -1763,9 +1775,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS OPACITY CASCADING
 
-  // #region Initial Settings Controls + States Combo Tests
+  // #region INITIAL SETTINGS CONTROLS + STATES COMBO
 
   /**
    * Tests that controls.query = true with states.queryable = false shows the query UI toggle but makes the layer not queryable at runtime.
@@ -1866,9 +1878,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS + STATES COMBO
 
-  // #region Initial Settings Legend Collapsed Tests
+  // #region INITIAL SETTINGS LEGEND COLLAPSED
 
   /**
    * Tests that setting states.legendCollapsed to true on a group layer results in the legend being collapsed in the store.
@@ -1896,9 +1908,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS LEGEND COLLAPSED
 
-  // #region Initial Settings Controls Cascading Tests
+  // #region INITIAL SETTINGS CONTROLS CASCADING
 
   /**
    * Tests that controls set on the parent group cascade to all descendants (subgroup and child leaf).
@@ -2002,9 +2014,9 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL SETTINGS CONTROLS CASCADING
 
-  // #region Initial Filters Tests
+  // #region INITIAL FILTERS
 
   /**
    * Tests that a GeoJSON layer with a layerFilter config property has the filter stored and accessible at runtime.
@@ -2259,7 +2271,396 @@ export class MapConfigTester extends GVAbstractTester {
     );
   }
 
-  // #endregion
+  // #endregion INITIAL FILTERS
+
+  // #region VIEWPORT BOUNDARY
+
+  /**
+   * Tests fitting midpoint coordinates in the map-config suite's existing container.
+   *
+   * @param projection - Source projection
+   * @param rotation - Optional rotation in radians
+   * @param interaction - Optional interaction mode
+   * @param change - Optional change to viewport aspect ratio or projection before fitting
+   * @param useAnimation - Optional animation flag
+   * @param center - Optional source center in longitude/latitude
+   * @param useRotation - Whether the fit should restore the source rotation or preserve the changed rotation
+   * @returns A promise that resolves with the fit outcome
+   */
+  testFitViewportToMidpointsLonLat(
+    projection: TypeValidMapProjectionCodes,
+    rotation = 0,
+    interaction: TypeInteraction = 'dynamic',
+    change: 'none' | 'resize' | 'projection' = 'none',
+    useAnimation = false,
+    center: Coordinate = MAP_CENTER[projection],
+    useRotation = true
+  ): Promise<Test<TypeViewportMidpointFitResult>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      `Test fitting viewport midpoints EPSG:${projection}, rotation ${rotation}, ${interaction}, ${change}, animated ${useAnimation}, align ${useRotation}`,
+      async (test): Promise<TypeViewportMidpointFitResult> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
+        viewer.getView().padding = interaction === 'dynamic' ? [15, 25, 60, 35] : [0, 0, 0, 0];
+        viewer.map.renderSync();
+        const before = MapConfigTester.#captureViewportBoundary(viewer);
+        const input = before.boundary.midpointWSENCoords;
+        const original = input.map((coordinate) => [...coordinate]);
+        test.addStep('Changing the view before fitting the captured WSEN coordinates...');
+        if (change === 'resize') {
+          gvRootElement.style.width = '540px';
+          viewer.map.updateSize();
+        }
+        if (change === 'projection') {
+          viewer.setView({ projection: 3857, initialView: { zoomAndCenter: [5, MAP_CENTER[3857]] }, rotation });
+        }
+        const view = viewer.getView();
+        view.setRotation(rotation + 0.7);
+        view.setZoom(view.getZoom()! + 2);
+        const currentCenter = view.getCenter()!;
+        view.setCenter([currentCenter[0] + view.getResolution()! * 100, currentCenter[1]]);
+        viewer.map.renderSync();
+        test.addStep('Fitting the captured coordinates through the public viewer API...');
+        await viewer.fitViewportToMidpointsLonLat(input, useRotation, useAnimation);
+        return {
+          snapshot: MapConfigTester.#captureViewportBoundary(viewer),
+          original,
+          input,
+          pixels: original.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
+          originalPixels: [before.expectedPixels[7], before.expectedPixels[6], before.expectedPixels[5], before.expectedPixels[4]],
+          rotation,
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying containment, rotation, input preservation, and exact compatible-view round trip...');
+        Test.assertIsArrayEqualJsons(result.input, result.original);
+        if (!useRotation) Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation + 0.7, 1e-9);
+        else if (change !== 'projection') Test.assertIsEqualWithinTolerance(result.snapshot.rotation, result.rotation, 1e-9);
+        else {
+          const [west, south, east, north] = result.pixels;
+          Test.assertIsDefined('west', west);
+          Test.assertIsDefined('south', south);
+          Test.assertIsDefined('east', east);
+          Test.assertIsDefined('north', north);
+          const eastAngle = Math.atan2(-(east[1] - west[1]), east[0] - west[0]);
+          const northAngle = Math.atan2(-(north[1] - south[1]), north[0] - south[0]) - Math.PI / 2;
+          Test.assertIsEqualWithinTolerance(eastAngle + northAngle, 0, 1e-6);
+        }
+        const [left, top] = result.snapshot.expectedPixels[0];
+        const [right, bottom] = result.snapshot.expectedPixels[2];
+        result.pixels.forEach((pixel, index): void => {
+          Test.assertIsDefined('pixel', pixel);
+          Test.assertIsEqual(pixel[0] >= left - 0.5 && pixel[0] <= right + 0.5, true);
+          Test.assertIsEqual(pixel[1] >= top - 0.5 && pixel[1] <= bottom + 0.5, true);
+          if (change === 'none' && useRotation)
+            pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, result.originalPixels[index][axis], 0.5));
+        });
+        const pixels = result.pixels.filter((pixel) => pixel !== null);
+        const minX = Math.min(...pixels.map((pixel) => pixel[0]));
+        const maxX = Math.max(...pixels.map((pixel) => pixel[0]));
+        const minY = Math.min(...pixels.map((pixel) => pixel[1]));
+        const maxY = Math.max(...pixels.map((pixel) => pixel[1]));
+        Test.assertIsEqual(
+          (Math.abs(minX - left) < 0.5 && Math.abs(maxX - right) < 0.5) || (Math.abs(minY - top) < 0.5 && Math.abs(maxY - bottom) < 0.5),
+          true
+        );
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that invalid midpoint input rejects without modifying the view.
+   *
+   * @returns A promise that resolves with errors and unchanged boundaries for each invalid input
+   */
+  testInvalidViewportMidpoints(): Promise<
+    Test<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]>
+  > {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    let original: TypeViewportBoundaryLonLat | undefined;
+    return this.test(
+      'Test invalid viewport midpoint inputs without recreating the map',
+      async (test): Promise<{ error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        original = viewer.getViewportBoundaryLonLat();
+        const results: { error: InvalidViewportMidpointsError | undefined; boundary: TypeViewportBoundaryLonLat }[] = [];
+        for (const condition of ['count', 'nonfinite', 'latitude', 'coincident', 'orientation']) {
+          const input = original.midpointWSENCoords.map((coordinate) => [...coordinate]);
+          test.addStep(`Passing invalid midpoint coordinates (${condition})...`);
+          if (condition === 'count') input.pop();
+          else if (condition === 'nonfinite') input[0][0] = Number.NaN;
+          else if (condition === 'latitude') input[0][1] = 91;
+          else if (condition === 'orientation') [input[1], input[3]] = [input[3], input[1]];
+          else input.fill(input[0]);
+          let error: InvalidViewportMidpointsError | undefined;
+          try {
+            // eslint-disable-next-line no-await-in-loop -- Verify each rejection and unchanged view before reusing the fixture.
+            await viewer.fitViewportToMidpointsLonLat(input, true, false);
+          } catch (caught: unknown) {
+            if (!(caught instanceof InvalidViewportMidpointsError)) throw caught;
+            error = caught;
+          }
+          results.push({ error, boundary: viewer.getViewportBoundaryLonLat() });
+        }
+        return results;
+      },
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((result): void => {
+          Test.assertIsInstance(result.error, InvalidViewportMidpointsError);
+          Test.assertJsonObject(result.boundary, original);
+        });
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that an interrupted animation rejects instead of reporting a completed fit.
+   *
+   * @returns A promise that resolves with the expected cancellation error
+   */
+  testErrorFitViewportMidpointsCancelled(): Promise<Test<CancelledError>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.testError(
+      'Test viewport midpoint fit interrupted by another interaction',
+      CancelledError,
+      async (test): Promise<void> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
+        viewer.getView().setZoom(8);
+        viewer.getView().setRotation(1);
+        viewer.map.renderSync();
+        test.addStep('Starting and immediately cancelling the animated fit...');
+        const fitting = viewer.fitViewportToMidpointsLonLat(input);
+        viewer.getView().cancelAnimations();
+        await fitting;
+      },
+      undefined,
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests padded viewport samples in a fresh, network-independent map.
+   *
+   * @param projection - Projection to test
+   * @param rotation - Optional view rotation in radians
+   * @param interaction - Optional interaction mode
+   * @param center - Optional center in longitude/latitude
+   * @returns A promise that resolves with the boundary test
+   */
+  testViewportBoundaryLonLat(
+    projection: TypeValidMapProjectionCodes,
+    rotation = 0,
+    interaction: TypeInteraction = 'dynamic',
+    center: Coordinate = MAP_CENTER[projection]
+  ): Promise<Test<TypeViewportBoundarySnapshot>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      `Test viewport boundary EPSG:${projection}, rotation ${rotation}, ${interaction}, center ${center}`,
+      async (test): Promise<TypeViewportBoundarySnapshot> => {
+        test.addStep('Replacing the suite map and sampling the public viewer API...');
+        const viewer = await this.#createViewportFixture(test, gvRootElement, projection, interaction, center, rotation);
+        return MapConfigTester.#captureViewportBoundary(viewer);
+      },
+      (test, result): void => {
+        test.addStep('Checking eight samples against independent view geometry and CSS pixels...');
+        MapConfigTester.#assertViewportBoundary(result);
+        Test.assertIsEqualWithinTolerance(result.bottomPadding, result.infoHeight, 0.5);
+        Test.assertIsEqualWithinTolerance(result.rotation, rotation, 1e-9);
+        Test.assertIsArrayEqual(result.center, center, 6);
+        if (rotation !== 0) Test.assertIsEqual(Math.abs(result.boundary.midpoints.s[1] - result.extentSouth[1]) > 0.1, true);
+        if (projection === 3978 && rotation === 0 && center === MAP_CENTER[3978]) {
+          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.sw[1] > 0.1, true);
+          Test.assertIsEqual(result.boundary.midpoints.s[1] - result.boundary.corners.se[1] > 0.1, true);
+        }
+        if (projection === 3857 && rotation === 0) {
+          const { corners, midpoints } = result.boundary;
+          Test.assertIsEqualWithinTolerance(midpoints.w[0], corners.nw[0], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.e[0], corners.se[0], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.n[1], corners.ne[1], 1e-6);
+          Test.assertIsEqualWithinTolerance(midpoints.s[1], corners.sw[1], 1e-6);
+          if (center === GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT) Test.assertIsEqual(midpoints.e[0] > 180, true);
+        }
+        if (interaction === 'dynamic') Test.assertIsNotEqual(result.boundary.midpoints.s[1], result.canvasSouth[1]);
+        else Test.assertIsArrayEqual(result.boundary.midpoints.s, result.canvasSouth, 6);
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests map-info height changes, asymmetric padding, and viewport resizing.
+   *
+   * @returns A promise that resolves with the boundary snapshots before and after each change
+   */
+  testViewportBoundaryPaddingAndResize(): Promise<Test<TypeViewportBoundarySnapshot[]>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      'Test viewport boundary after map-info height, padding, and size changes',
+      async (test): Promise<TypeViewportBoundarySnapshot[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const snapshots = [MapConfigTester.#captureViewportBoundary(viewer)];
+        test.addStep('Increasing map-info bar height and updating view padding...');
+        const info = DomHelper.getMapInfo(viewer.mapId);
+        if (!info) throw new TestError('Viewport fixture has no map-info bar');
+        info.style.height = `${info.offsetHeight + 30}px`;
+        viewer.updateViewPadding();
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        test.addStep('Applying padding on all four sides...');
+        viewer.getView().padding = [20, 30, 70, 40];
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        test.addStep('Resizing the host and resampling...');
+        gvRootElement.style.width = '640px';
+        viewer.map.updateSize();
+        viewer.map.renderSync();
+        snapshots.push(MapConfigTester.#captureViewportBoundary(viewer));
+        return snapshots;
+      },
+      (test, result): void => {
+        test.addStep('Verifying fresh geometry after each layout change...');
+        result.forEach(MapConfigTester.#assertViewportBoundary);
+        Test.assertIsEqualWithinTolerance(result[1].bottomPadding, result[1].infoHeight, 0.5);
+        Test.assertIsEqual(result[1].bottomPadding > result[0].bottomPadding, true);
+        Test.assertIsNotEqual(result[2].expectedPixels[1][0], result[3].expectedPixels[1][0]);
+        Test.assertIsNotEqual(result[2].boundary.midpoints.e[0], result[3].boundary.midpoints.e[0]);
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests unavailable viewport conditions using one fixture, restoring it after every condition.
+   *
+   * @returns A promise that resolves with the captured typed errors
+   */
+  testViewportBoundaryUnavailable(): Promise<Test<(MapViewportUnavailableError | undefined)[]>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.test(
+      'Test unavailable viewport conditions without recreating the map',
+      async (test): Promise<(MapViewportUnavailableError | undefined)[]> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const results: (MapViewportUnavailableError | undefined)[] = [];
+        for (const condition of ['size', 'padding', 'nonfinite', 'negative-padding', 'unrendered']) {
+          viewer.getViewportBoundaryLonLat();
+          test.addStep(`Making viewport unavailable (${condition}) and sampling...`);
+          let error: MapViewportUnavailableError | undefined;
+          try {
+            if (condition === 'size') viewer.map.setSize([0, 0]);
+            else if (condition === 'padding') viewer.getView().padding = [0, 0, viewer.map.getSize()![1], 0];
+            else if (condition === 'nonfinite') viewer.map.setSize([Number.NaN, 600]);
+            else if (condition === 'negative-padding') viewer.getView().padding = [0, 0, -10, 0];
+            else viewer.map.setTarget(undefined);
+            viewer.getViewportBoundaryLonLat();
+          } catch (caught: unknown) {
+            if (!(caught instanceof MapViewportUnavailableError)) throw caught;
+            error = caught;
+          } finally {
+            this.#resetViewportFixture(gvRootElement, '800px');
+          }
+          results.push(error);
+        }
+        return results;
+      },
+      (_test, results): void => {
+        Test.assertIsArrayLengthEqual(results, 5);
+        results.forEach((error): void => Test.assertIsInstance(error, MapViewportUnavailableError));
+      },
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  /**
+   * Tests that fitting propagates an unavailable viewport error.
+   *
+   * @returns A promise that resolves with the expected typed error
+   */
+  testErrorFitViewportUnavailable(): Promise<Test<MapViewportUnavailableError>> {
+    const gvRootElement = DomHelper.getGVRootElement(this.getMapId());
+    const originalWidth = gvRootElement.style.width;
+    return this.testError(
+      'Test fitting an unavailable viewport',
+      MapViewportUnavailableError,
+      async (test): Promise<void> => {
+        const viewer = await this.#createViewportFixture(test, gvRootElement, 3978, 'dynamic', MAP_CENTER[3978], 0);
+        const input = viewer.getViewportBoundaryLonLat().midpointWSENCoords;
+        test.addStep('Removing the usable viewport size and fitting...');
+        viewer.map.setSize([0, 0]);
+        await viewer.fitViewportToMidpointsLonLat(input, true, false);
+      },
+      undefined,
+      (): void => {
+        this.#resetViewportFixture(gvRootElement, originalWidth);
+      }
+    );
+  }
+
+  // #endregion VIEWPORT BOUNDARY
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Destroys the current map and creates a new one from the given config.
+   *
+   * Deletes the existing map viewer, creates a fresh instance via `createMapFromConfigFast`,
+   * reassigns the tester's internal references, and waits for all layers to finish loading.
+   *
+   * @param test - The test instance used to log each step
+   * @param mapId - The map identifier to destroy and recreate
+   * @param mapConfig - The map configuration object (will be JSON-stringified)
+   * @param divHeight - Optional height for the map container div
+   * @returns A promise that resolves with the newly created MapViewer
+   */
+  protected async replaceMap(test: Test, mapId: string, mapConfig: unknown, divHeight?: number): Promise<MapViewer> {
+    // Delete current map
+    test.addStep('Deleting current map...');
+    await this.getApi().deleteMapViewer(mapId, false);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Creating the map from config...');
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), divHeight);
+
+    // Replace the map viewer and the controller registry in the tester with the new one created from config
+    this.assignMapViewerAndControllers(mapViewer);
+
+    // Waiting for layers to get loaded even when map is in a background tab
+    test.addStep('Waiting for layers to get loaded even when map is in a background tab...');
+    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoadedForcingRenders();
+    test.addStep(`Layers loaded (${loadedLayersCount})`);
+
+    // Force a final synchronous render so OL populates frameState_ (required for getPixelFromCoordinate to work in hidden tabs)
+    test.addStep('Waiting for map render...');
+    await mapViewer.waitForRender();
+
+    // Return the map viewer
+    return mapViewer;
+  }
+
+  // #endregion PROTECTED METHODS
+
+  // #region PRIVATE METHODS
 
   /**
    * Helper to create a map config with initialSettings on the GeoJSON layer.
@@ -2509,6 +2910,152 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Replaces the suite map with a fixed-size, layer-free map using the standard config-test lifecycle.
+   *
+   * @param test - Test instance used to record lifecycle steps
+   * @param host - The suite's existing map root
+   * @param projection - View projection
+   * @param interaction - Interaction mode
+   * @param center - Initial longitude/latitude center
+   * @param rotation - View rotation in radians
+   * @returns A promise that resolves with the rendered fixture
+   */
+  async #createViewportFixture(
+    test: Test,
+    host: HTMLElement,
+    projection: TypeValidMapProjectionCodes,
+    interaction: TypeInteraction,
+    center: Coordinate,
+    rotation: number
+  ): Promise<MapViewer> {
+    host.style.setProperty('width', '800px');
+    // Keep the near-pole round-trip fixture below the projection singularity.
+    const zoom = center === GVAbstractTester.VIEWPORT_POLAR_LONLAT ? 8 : MAP_ZOOM_LEVEL[projection];
+    const viewer = await this.replaceMap(test, host.id, {
+      map: {
+        interaction,
+        viewSettings: {
+          projection,
+          initialView: { zoomAndCenter: [zoom, center] },
+        },
+        basemapOptions: { basemapId: 'nogeom', shaded: false, labeled: false },
+        listOfGeoviewLayerConfig: [],
+      },
+      components: [],
+      navBar: [],
+      appBar: { tabs: { core: [] } },
+      footerBar: { tabs: { core: [] } },
+    });
+
+    // Remove extent constraints so edge/polar fixtures test the requested center rather than a clamped Canada view.
+    viewer.setView({
+      projection,
+      initialView: { zoomAndCenter: [zoom, [center[0], center[1]]] },
+      rotation,
+    });
+
+    viewer.map.updateSize();
+    viewer.updateViewPadding();
+    await viewer.waitForRender();
+    return viewer;
+  }
+
+  /**
+   * Restores layout and a usable viewport after a test, including detached and invalid-size cases.
+   *
+   * @param host - The suite's existing map root
+   * @param originalWidth - Inline width before the test
+   */
+  #resetViewportFixture(host: HTMLElement, originalWidth: string): void {
+    host.style.setProperty('width', originalWidth);
+    const viewer = this.getMapViewer();
+    viewer.map.setTarget(DomHelper.getMapTargetElement(this.getMapId()));
+    DomHelper.getMapInfo(this.getMapId())?.style.removeProperty('height');
+    viewer.setView({ projection: 3978, initialView: { zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]] } });
+    viewer.map.updateSize();
+    viewer.updateViewPadding();
+    viewer.map.renderSync();
+  }
+
+  /**
+   * Captures actual samples and an independent affine view-geometry oracle.
+   *
+   * @param viewer - Rendered fixture
+   * @returns Snapshot used exclusively for assertions
+   */
+  static #captureViewportBoundary(viewer: MapViewer): TypeViewportBoundarySnapshot {
+    const boundary = viewer.getViewportBoundaryLonLat();
+    const repeatedBoundary = viewer.getViewportBoundaryLonLat();
+    const view = viewer.getView();
+    const [width, height] = viewer.map.getSize()!;
+    const [top, padRight, padBottom, left] = view.padding ?? [0, 0, 0, 0];
+    const right = width - padRight;
+    const bottom = height - padBottom;
+    const x = (left + right) / 2;
+    const y = (top + bottom) / 2;
+    const expectedPixels = [
+      [left, top],
+      [right, top],
+      [right, bottom],
+      [left, bottom],
+      [x, top],
+      [right, y],
+      [x, bottom],
+      [left, y],
+    ];
+    const center = view.getCenter()!;
+    const resolution = view.getResolution()!;
+    const cos = Math.cos(view.getRotation());
+    const sin = Math.sin(view.getRotation());
+    const expected = expectedPixels.map(([px, py]): Coordinate =>
+      viewer.convertCoordinateMapProjToLonLat([
+        center[0] + resolution * ((px - x) * cos + (py - y) * sin),
+        center[1] + resolution * ((px - x) * sin - (py - y) * cos),
+      ])
+    );
+    const coordinates = [...Object.values(boundary.corners), ...Object.values(boundary.midpoints)];
+    const extent = view.calculateExtent();
+    return {
+      boundary,
+      repeatedBoundary,
+      expected,
+      pixels: coordinates.map((coordinate) => viewer.map.getPixelFromCoordinate(viewer.convertCoordinateLonLatToMapProj(coordinate))),
+      expectedPixels,
+      bottomPadding: padBottom,
+      infoHeight: viewer.mapFeaturesConfig.map.interaction === 'static' ? 0 : DomHelper.getMapInfoOffsetHeight(viewer.mapId),
+      canvasSouth: viewer.convertCoordinateMapProjToLonLat(viewer.map.getCoordinateFromPixel([x, height])),
+      freshObjects: boundary !== repeatedBoundary && boundary.corners.nw !== repeatedBoundary.corners.nw,
+      rotation: view.getRotation(),
+      center: viewer.convertCoordinateMapProjToLonLat(center),
+      extentSouth: viewer.convertCoordinateMapProjToLonLat([(extent[0] + extent[2]) / 2, extent[1]]),
+    };
+  }
+
+  /**
+   * Verifies exact output shape, finite coordinates, and boundary positions.
+   *
+   * @param snapshot - Captured API result and independent expectations
+   */
+  static #assertViewportBoundary(snapshot: TypeViewportBoundarySnapshot): void {
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary), ['corners', 'midpoints', 'midpointWSENCoords']);
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.corners), ['nw', 'ne', 'se', 'sw']);
+    Test.assertIsArrayEqual(Object.keys(snapshot.boundary.midpoints), ['n', 'e', 's', 'w']);
+    Test.assertJsonObject(snapshot.boundary, snapshot.repeatedBoundary);
+    Test.assertIsEqual(snapshot.freshObjects, true);
+    const { w, s, e, n } = snapshot.boundary.midpoints;
+    Test.assertIsArrayEqualJsons(snapshot.boundary.midpointWSENCoords, [w, s, e, n]);
+    const coordinates = [...Object.values(snapshot.boundary.corners), ...Object.values(snapshot.boundary.midpoints)];
+    coordinates.forEach((coordinate, index): void => {
+      Test.assertIsArrayLengthEqual(coordinate, 2);
+      Test.assertIsEqual(coordinate.every(Number.isFinite), true);
+      coordinate.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expected[index][axis], 1e-6));
+      const pixel = snapshot.pixels[index];
+      Test.assertIsDefined('pixel', pixel);
+      pixel.forEach((value, axis): void => Test.assertIsEqualWithinTolerance(value, snapshot.expectedPixels[index][axis], 0.5));
+    });
+  }
+
+  /**
    * Measures fixed-height map layout elements.
    *
    * @param mapId - The map identifier
@@ -2525,6 +3072,8 @@ export class MapConfigTester extends GVAbstractTester {
       footerChromeHeight: tabsContainer ? Math.round(tabsContainer.getBoundingClientRect().height) : 0,
     };
   }
+
+  // #endregion PRIVATE METHODS
 }
 
 // #region TYPES AND INTERFACES
@@ -2565,5 +3114,49 @@ type TypeMapHeightMeasurements = {
   /** Height of the rendered collapsed footer chrome. */
   footerChromeHeight: number;
 };
+
+/** Captured boundary samples and independent pixel/coordinate expectations. */
+interface TypeViewportBoundarySnapshot {
+  /** Public viewer result. */
+  boundary: TypeViewportBoundaryLonLat;
+  /** Second snapshot from the same rendered frame. */
+  repeatedBoundary: TypeViewportBoundaryLonLat;
+  /** Samples calculated from view center, resolution, rotation, and padding. */
+  expected: Coordinate[];
+  /** Returned coordinates projected back to viewport pixels. */
+  pixels: (number[] | null)[];
+  /** Expected screen positions. */
+  expectedPixels: number[][];
+  /** Bottom padding at sampling time. */
+  bottomPadding: number;
+  /** Actual map-info bar overlay height (zero for static maps). */
+  infoHeight: number;
+  /** Southern sample calculated at the full canvas bottom. */
+  canvasSouth: Coordinate;
+  /** Indicates independent objects were returned by consecutive calls. */
+  freshObjects: boolean;
+  /** Rendered view rotation in radians. */
+  rotation: number;
+  /** Rendered logical center in longitude/latitude. */
+  center: Coordinate;
+  /** Southern midpoint derived from the axis-aligned extent rather than the viewport. */
+  extentSouth: Coordinate;
+}
+
+/** Fit outcome captured before assertion so operations stay in the execution phase. */
+interface TypeViewportMidpointFitResult {
+  /** Rendered geometry after fitting. */
+  snapshot: TypeViewportBoundarySnapshot;
+  /** Original coordinates copied before fitting. */
+  original: Coordinate[];
+  /** Caller-owned array after fitting. */
+  input: Coordinate[];
+  /** Original coordinates projected to pixels after fitting. */
+  pixels: (number[] | null)[];
+  /** Original pixel positions before the view was changed. */
+  originalPixels: number[][];
+  /** Source rotation to restore when the projection is unchanged. */
+  rotation: number;
+}
 
 // #endregion TYPES AND INTERFACES

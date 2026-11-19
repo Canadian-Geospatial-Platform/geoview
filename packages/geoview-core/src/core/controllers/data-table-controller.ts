@@ -48,8 +48,8 @@ export class DataTableController extends AbstractMapViewerController {
    * If the layer already has a filtered record, the provided filter strings are applied;
    * otherwise the filter is cleared.
    *
-   * @param filterStrings - The filter expression to apply
    * @param layerPath - The owning table's layer path; defaults to the current selection
+   * @param filterStrings - The filter expression to apply
    */
   applyMapFilters(layerPath: string | undefined, filterStrings: string): void {
     if (!layerPath) return;

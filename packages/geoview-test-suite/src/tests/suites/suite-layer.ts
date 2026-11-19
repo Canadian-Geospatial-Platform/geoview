@@ -56,7 +56,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 44;
+    return 45;
   }
 
   /**
@@ -103,6 +103,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
     // Test adding layer
     const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
+
+    // Test adding layer
+    const pLayerEsriImageUSA = this.#layerTester.testAddEsriImageWithUSA();
 
     // Test true negative
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
@@ -225,6 +228,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerEsriFeatureBadUrl,
       playerEsriFeatureInvalidGeometry,
       pLayerEsriImageElevation,
+      pLayerEsriImageUSA,
       pLayerEsriImageBadUrl,
       pLayerWMSOWSMundialis,
       pLayerWMSDatacubeOWSMSI,

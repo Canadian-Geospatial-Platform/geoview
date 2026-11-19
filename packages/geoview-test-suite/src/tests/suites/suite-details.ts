@@ -96,9 +96,6 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
     // Test clear all highlights
     await this.#detailsTester.testClearAllHighlights();
 
-    // Test zoom to feature with an open app-bar panel (changes zoom, sequential)
-    await this.#detailsTester.testZoomToFeatureWithPanelOffset(GVAbstractTester.ONTARIO_CENTER_LONLAT);
-
     // Test zoom to all results of a layer (changes zoom, sequential)
     await this.#detailsTester.testZoomToResultsGroupExtent('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
@@ -113,6 +110,9 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
     // Test the selection persistence across map clicks
     await this.#detailsTester.testLayerSelectionPersistence();
+
+    // Test zoom to feature with an open app-bar panel
+    await this.#detailsTester.testZoomToFeatureWithPanelOffset(GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
     // Resolve when all done
     return;

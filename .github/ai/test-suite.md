@@ -45,7 +45,8 @@ Read only the linked section of each doc: search for its heading and read to the
   scope while `promiseLayer` still resolves to the actual selected child. Root-scope cleanup removes
   the entries beneath that root.
 - Fixture authoring follows the linked helper contract: normal synchronous configuration setup and
-  `then()` chains, not async IIFEs or deferred whole-body wrappers. Synchronous setup errors propagate
+  `addLayerOnMapAndWait()` for the common add/load/legend sequence. Keep specialized GeoCore and metadata-selection
+  chains, not async IIFEs or deferred whole-body wrappers. Synchronous setup errors propagate
   directly; async read/add/readiness failures reject `promiseLayer`, preserving the captured cleanup
   path. Keep sibling waits serial and metadata-path discovery after addition.
 

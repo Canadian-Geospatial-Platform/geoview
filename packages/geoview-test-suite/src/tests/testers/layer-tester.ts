@@ -373,82 +373,6 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests the behavior of initializing a Geocore layer pointing to an Esri Dynamic layer containing Raster Layers.
-   *
-   * @returns A promise that resolves with the test result
-   */
-  testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractBaseGVLayer>> {
-    let fixtureLayerPath: string | undefined;
-    // Test
-    return this.test(
-      `Test Adding Esri Dynamic with Raster Layers via Geocore...`,
-      (test) => {
-        // Add the fixture and wait for its selected layer to be ready
-        const fixture = this.addLayerEsriDynamicWithRasterLayersViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        return fixture.promiseLayer;
-      },
-      (test, result) => {
-        const rootId = result.getGeoviewLayerId();
-        const layerPathPetroleum = `${rootId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM}`;
-        const layerPathMinerals = `${rootId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS}`;
-        const layerPathForestry = `${rootId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY}`;
-        const layerPathFisheries = `${rootId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES}`;
-        const layerPathAgriculture = `${rootId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE}`;
-
-        // Perform assertions
-        // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          layerPathPetroleum,
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM_ICON_LIST
-        );
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          layerPathMinerals,
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS_ICON_LIST
-        );
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          layerPathForestry,
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY_ICON_LIST
-        );
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          layerPathFisheries,
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES_ICON_LIST
-        );
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          layerPathAgriculture,
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE_ICON_LIST
-        );
-        LayerTester.assertCheckLayerExistsInStore(
-          test,
-          this.getMapId(),
-          result.getLayerPath(),
-          undefined,
-          GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE_ICON_LIST
-        );
-      },
-      (test) => {
-        // Redirect to helper to clean up and assert
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-      }
-    );
-  }
-
-  /**
    * Tests a case-sensitive ESRI export service through its GeoCore record and actual image loader.
    *
    * @returns A promise that resolves with the loaded layer, export parameters, and requested/returned image dimensions
@@ -505,7 +429,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -581,7 +505,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -712,7 +636,7 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -993,7 +917,7 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1146,7 +1070,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1215,7 +1139,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1275,7 +1199,7 @@ export class LayerTester extends GVAbstractTester {
       LayerEntryNotSupportingProjectionError,
       async (test) => {
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1313,7 +1237,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1384,7 +1308,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1421,7 +1345,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1526,7 +1450,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
 
         // Find the layer and wait until its ready
         await this.waitLayerAtLayerPath(test, layerPath);
@@ -1601,7 +1525,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
 
         // Find the layer and wait until its ready
         await this.waitLayerAtLayerPath(test, layerPath);
@@ -1682,7 +1606,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
 
         // Find the layer and wait until its ready
         await this.waitLayerAtLayerPath(test, layerPath);
@@ -1761,7 +1685,7 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1831,10 +1755,7 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
-
-        // Find the layer and wait until its ready, see GV note above
-        await this.waitLayerAtLayerPath(test, layerPath, true);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
       },
       undefined,
       (test) => {
@@ -1904,7 +1825,7 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
 
         // Find the layer and wait until its ready
         await this.waitLayerAtLayerPath(test, layerPath);
@@ -2271,7 +2192,7 @@ export class LayerTester extends GVAbstractTester {
         // Capture the cleanup path before loading so finalization can remove even a partially loaded fixture.
         fixtureLayerPath = fixture.layerPath;
         const gvLayer = await fixture.promiseLayer;
-        const layerPath = gvLayer.getLayerPath();
+        const layerPathPoints = gvLayer.getLayerPath();
 
         test.addStep('Opening the Layers footer panel to observe the rendered layer name...');
         this.getControllersRegistry().uiController.setActiveFooterBarTab('layers');
@@ -2283,10 +2204,10 @@ export class LayerTester extends GVAbstractTester {
 
           // Observe a stable ancestor before the update because renaming can remount the layer row.
           const domChanged = DomHelper.waitForDomChange(DomHelper.getMapContainer(mapId), undefined, 10000);
-          this.getMapViewer().layer.setLayerName(layerPath, name);
+          this.getMapViewer().layer.setLayerName(layerPathPoints, name);
 
           // Get the store layer name
-          const storeLayerName = getStoreLayerLegendLayerByPath(mapId, layerPath)?.layerName;
+          const storeLayerName = getStoreLayerLegendLayerByPath(mapId, layerPathPoints)?.layerName;
 
           // eslint-disable-next-line no-await-in-loop
           await domChanged;
@@ -2294,7 +2215,7 @@ export class LayerTester extends GVAbstractTester {
           // Let React finish rendering, then snapshot the label without checking its expected value.
           // eslint-disable-next-line no-await-in-loop
           await DomHelper.waitForReactIdle();
-          const domName = DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR);
+          const domName = DomHelper.getLayerBoxLayerName(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR);
           snapshots.push(gvLayer.getLayerName(), storeLayerName, domName);
         }
 
@@ -2402,7 +2323,7 @@ export class LayerTester extends GVAbstractTester {
         layerApi.setOrToggleLayerVisibility(layerPathPoints, false);
 
         // Wait until the UI visibility updates
-        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
+        await DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
         const visibilityState1 = getStoreLayerVisible(mapId, layerPathPoints);
 
         // Explicit true must restore visibility after the preceding hide operation.
@@ -2410,7 +2331,7 @@ export class LayerTester extends GVAbstractTester {
         layerApi.setOrToggleLayerVisibility(layerPathPoints, true);
 
         // Wait until the UI visibility updates
-        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
+        await DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
         const visibilityState2 = getStoreLayerVisible(mapId, layerPathPoints);
 
         // Omitting the visibility argument exercises the toggle branch from visible to hidden.
@@ -2418,7 +2339,7 @@ export class LayerTester extends GVAbstractTester {
         layerApi.setOrToggleLayerVisibility(layerPathPoints);
 
         // Wait until the UI visibility updates
-        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
+        await DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, false);
         const visibilityState3 = getStoreLayerVisible(mapId, layerPathPoints);
 
         // Repeat the implicit toggle from the opposite state to cover both transition directions.
@@ -2426,7 +2347,7 @@ export class LayerTester extends GVAbstractTester {
         layerApi.setOrToggleLayerVisibility(layerPathPoints);
 
         // Wait until the UI visibility updates
-        DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
+        await DomHelper.waitVisibleButtonVisibility(mapId, layerPathPoints, CONTAINER_TYPE.FOOTER_BAR, true);
         const visibilityState4 = getStoreLayerVisible(mapId, layerPathPoints);
 
         // Keep snapshots in operation order so assertions consume observations without repeating API calls.
@@ -2474,21 +2395,19 @@ export class LayerTester extends GVAbstractTester {
         const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
         fixtureLayerPath = fixture.layerPath;
         const gvLayer = await fixture.promiseLayer;
-        const childPath = gvLayer.getLayerPath();
+        const layerPathPoints = gvLayer.getLayerPath();
         const parent = gvLayer.getParentRoot();
-        Test.assertIsDefined('parent', parent);
-        const groupPath = parent.getLayerPath();
+        const groupPath = parent?.getLayerPath();
 
         const { layerController } = this.getControllersRegistry();
-        const groupLayer = layerController.getGeoviewLayerIfExists(groupPath);
-        const childLayer = layerController.getGeoviewLayerIfExists(childPath);
-        Test.assertIsDefined('groupLayer', groupLayer);
-        Test.assertIsDefined('childLayer', childLayer);
+        const groupLayer = groupPath ? layerController.getGeoviewLayerIfExists(groupPath) : undefined;
+        const childLayer = layerController.getGeoviewLayerIfExists(layerPathPoints);
+        if (!parent || !groupPath || !groupLayer || !childLayer) return { gvLayer, parent, groupLayer, childLayer };
 
         // Make sure both start visible
         test.addStep('Ensuring the group and child start visible...');
         layerController.setOrToggleLayerVisibility(groupPath, true);
-        layerController.setOrToggleLayerVisibility(childPath, true);
+        layerController.setOrToggleLayerVisibility(layerPathPoints, true);
 
         // Hide the parent group only (the child keeps its own visibility but is masked by the hidden group)
         test.addStep('Hiding the parent group...');
@@ -2498,23 +2417,30 @@ export class LayerTester extends GVAbstractTester {
           groupVisible: groupLayer.getVisible(),
           childOwnVisible: childLayer.getVisible(),
           childEffectiveVisible: childLayer.getVisibleIncludingParents(),
-          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), childPath),
-          childInRange: getStoreLayerInVisibleRangeLayerPaths(this.getMapId()).includes(childPath),
+          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), layerPathPoints),
+          childInRange: getStoreLayerInVisibleRangeLayerPaths(this.getMapId()).includes(layerPathPoints),
         };
 
         // Walk the parent chain to make the hidden child visible again (what the inline eye toggle does)
         test.addStep('Calling setLayerVisibleIncludingParents on the hidden child...');
-        layerController.setLayerVisibleIncludingParents(childPath);
+        layerController.setLayerVisibleIncludingParents(layerPathPoints);
 
         const afterShow = {
           groupVisible: groupLayer.getVisible(),
           childEffectiveVisible: childLayer.getVisibleIncludingParents(),
-          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), childPath),
+          childHidden: getStoreLayerIsHiddenOnMap(this.getMapId(), layerPathPoints),
         };
 
-        return { gvLayer, afterHide, afterShow };
+        return { gvLayer, parent, groupLayer, childLayer, afterHide, afterShow };
       },
       (test, result) => {
+        test.addStep('Verifying the parent group and child layers exist...');
+        Test.assertIsDefined('parent', result.parent);
+        Test.assertIsDefined('groupLayer', result.groupLayer);
+        Test.assertIsDefined('childLayer', result.childLayer);
+        Test.assertIsDefined('afterHide', result.afterHide);
+        Test.assertIsDefined('afterShow', result.afterShow);
+
         // While the parent group is hidden, the child is masked but keeps its own visibility (it would show in the
         // "Hidden layers" section) and stays in scale range (so it is NOT filtered out as out-of-range)
         test.addStep('Verifying the child is hidden by its parent while staying in range...');
@@ -2900,11 +2826,11 @@ export class LayerTester extends GVAbstractTester {
     return this.test(
       'Test LayerController.setLayerTextVisibility updates runtime and store flags...',
       async (test) => {
+        // Add layer and retain the cleanup scope even if loading fails before the vector layer is available.
         const fixture = this.addLayerGeoJSONPointsSettingsUnderGroup(test);
-
-        // Retain the cleanup scope even if loading fails before the vector layer is available.
         fixtureLayerPath = fixture.layerPath;
         const gvLayer = await fixture.promiseLayer;
+
         if (!(gvLayer instanceof AbstractGVVector)) throw new TestError('The text visibility fixture must be a vector layer');
         const layerPath = gvLayer.getLayerPath();
         const snapshots: (boolean | undefined)[] = [];
@@ -3161,7 +3087,7 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig);
+        await this.addLayerOnMap(test, gvConfig, layerPath);
 
         // Call zoom to layer extent, it should throw a NoBoundsError
         await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
@@ -3751,8 +3677,17 @@ type ParentCrawlVisibilityResult = {
   /** Point child used to exercise visibility through its parent group. */
   gvLayer: AbstractBaseGVLayer;
 
+  /** Root parent observed before exercising visibility. */
+  parent: GVGroupLayer | undefined;
+
+  /** Registered parent group observed before exercising visibility. */
+  groupLayer: AbstractBaseGVLayer | undefined;
+
+  /** Registered child observed before exercising visibility. */
+  childLayer: AbstractBaseGVLayer | undefined;
+
   /** State snapshot taken after the parent group has been hidden. */
-  afterHide: {
+  afterHide?: {
     groupVisible: boolean;
     childOwnVisible: boolean;
     childEffectiveVisible: boolean;
@@ -3761,7 +3696,7 @@ type ParentCrawlVisibilityResult = {
   };
 
   /** State snapshot taken after setLayerVisibleIncludingParents walked the parents. */
-  afterShow: {
+  afterShow?: {
     groupVisible: boolean;
     childEffectiveVisible: boolean;
     childHidden: boolean;

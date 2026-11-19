@@ -57,7 +57,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 7;
+    return 8;
   }
 
   /**
@@ -85,9 +85,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    // await this.#dataTableTester.testLayerDataIsFiltered();
-    await this.#dataTableTester.testCitiesNameFilterCount();
-    await this.#dataTableTester.testAddGeoJsonCheckDataTablePopulated();
+    await this.#dataTableTester.testFilterByExtentAvailableForVector();
 
     // Resolve
     return;
@@ -105,6 +103,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testEmptyFieldNameDoesNotCrashDataTable();
     await this.#dataTableTester.testCitiesNameFilterCount();
     await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic();
+    await this.#dataTableTester.testFilterByExtentAvailableForVector();
     await this.#dataTableTester.testShowUnsymbolizedFeaturesTrue();
     await this.#dataTableTester.testShowUnsymbolizedFeaturesFalse();
 

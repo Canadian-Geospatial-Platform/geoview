@@ -281,7 +281,8 @@ class TestSuitePlugin extends AbstractPlugin {
     // For each Test Suite
     return this.testSuites
       .map(
-        (suite) => `<div class="test-suite-description"><div><b>[${suite.getName()}]</b><br/></div>${suite.getDescriptionAsHtml()}</div>`
+        (suite) =>
+          `<div class="test-suite-description"><div class="test-suite-desc-title"><b>[${suite.getName()}]</b><br/></div>${suite.getDescriptionAsHtml()}</div>`
       )
       .join('');
   }

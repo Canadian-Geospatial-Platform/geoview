@@ -571,31 +571,6 @@ export class CoreTester extends GVAbstractTester {
   // #region GEO UTILITIES - FETCH WITH PROXY FALLBACK
 
   /**
-   * Tests fetchJsonWithProxyFallback with a JSON endpoint that requires proxy due to CORS.
-   *
-   * Asserts that the proxy fallback is triggered and a valid JSON response is returned.
-   *
-   * @returns A promise that resolves when the test completes
-   */
-  testFetchJsonWithProxyFallback(): Promise<Test<FetchWithProxyResult<unknown>>> {
-    return this.test(
-      `Test GeoUtilities.fetchJsonWithProxyFallback with JSON endpoint...`,
-      (test) => {
-        const url = GVAbstractTester.PUBLIC_JSON_URL_CORS;
-        test.addStep(`Fetching JSON metadata from: ${url}...`);
-        return GeoUtilities.fetchJsonWithProxyFallback(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
-      },
-      (test, result) => {
-        test.addStep('Verifying the request indeed required a proxy');
-        Test.assertIsDefined('proxyUsed', result.proxyUsed);
-
-        test.addStep('Verifying response metadata...');
-        Test.assertIsDefined('data', result.data);
-      }
-    );
-  }
-
-  /**
    * Tests fetchJsonWithProxyFallback with an unreachable URL.
    *
    * Asserts that a ResponseError is thrown when the endpoint cannot be reached even through the proxy.

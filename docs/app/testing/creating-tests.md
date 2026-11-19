@@ -162,10 +162,10 @@ Each helper immediately returns `{ layerPath, promiseLayer }`: capture `layerPat
 then await `promiseLayer` for the selected layer after loading and legend resolution.
 
 When writing a fixture helper, create its configuration with normal synchronous setup code and
-chain addition and readiness with `then()`, rather than an async IIFE:
+reuse `addLayerOnMapAndWait()` for addition, loading, and legend readiness:
 
 ```typescript
-addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult {
+addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult<GVEsriFeature> {
   const gvLayerId = generateId();
   const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
   test.addStep('Creating the Top Projects Esri Feature configuration...');
@@ -176,10 +176,8 @@ addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult {
     false,
     [{ id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID }]
   );
-  const promiseLayer = this.addLayerOnMap(test, gvConfig).then(
-    (): Promise<AbstractGVLayer> => this.waitLayerAtLayerPath(test, layerPath)
-  );
-  return { layerPath, promiseLayer };
+  const promiseLayer = this.addLayerOnMapAndWait<T, GVEsriFeature>(test, gvConfig, layerPath);
+  return { layerPath, selectedLayerPath: layerPath, promiseLayer };
 }
 ```
 
@@ -188,6 +186,8 @@ failures reject `promiseLayer` without hiding the error, so callers can retain t
 path before awaiting it. Start genuinely asynchronous setup (such as reading a GeoPackage) with its
 own promise, then chain configuration selection, addition, and readiness. Chain required sibling
 waits in order rather than running them concurrently.
+Pass `true` as the fourth argument to `addLayerOnMapAndWait()` when empty or no-data legends are
+valid. Fixtures with GeoCore or metadata-dependent selection retain their specialized setup chains.
 
 Fixture helpers own ID generation. Use the resolved layer's `getLayerPath()` for assertions and
 layer-specific operations. Retain the immediate `layerPath` for finalizer cleanup before awaiting

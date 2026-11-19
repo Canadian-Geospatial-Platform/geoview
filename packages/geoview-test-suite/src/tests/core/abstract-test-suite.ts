@@ -72,6 +72,15 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   abstract getTestsTotalFinal(): number;
 
   /**
+   * Initializes suite context after the running guard and before eligibility checks.
+   */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onInitializeLaunchTestSuite(): void {
+    // No initialization is required by default.
+  }
+
+  /**
    * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
    *
    * @returns A promise that resolves to true if the test suite can execute on the given map
@@ -284,6 +293,15 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   }
 
   /**
+   * Gets the testers registered with this suite.
+   *
+   * @returns The registered testers as a read-only collection
+   */
+  protected getTesters(): readonly TTester[] {
+    return this.#testers;
+  }
+
+  /**
    * Initializes a tester as part of the Test Suite.
    *
    * @param tester - The tester to initialize
@@ -343,6 +361,9 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
     // Validates the Test Suite isn't already running tests
     if (this.#suiteStatus === 'running' || this.getTestsRunning() > 0)
       throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+
+    // Call overridable method to initialize the launch of the test suite
+    this.onInitializeLaunchTestSuite();
 
     // Validates the Test Suite can execute
     if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();

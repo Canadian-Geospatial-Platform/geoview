@@ -46,9 +46,6 @@ export class DetailsTester extends GVAbstractTester {
         fixtureLayerPath = fixture.layerPath;
         await fixture.promiseLayer;
 
-        // Wait for the layers to be loaded
-        await this.getControllersRegistry().layerController.waitForLayersLoaded();
-
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
         await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
@@ -145,12 +142,13 @@ export class DetailsTester extends GVAbstractTester {
 
   /**
    * Tests that zoom-to-feature keeps the feature visible next to an open app-bar panel.
+   * Restores the pre-test map extent during finalization, even if fixture removal fails.
    *
-   * @param layerPath - The layer path of the layer
    * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
   testZoomToFeatureWithPanelOffset(lonlat: Coordinate): Promise<Test<TestZoomWithPanelOffset>> {
+    const initialExtent = this.getMapViewer().getView().calculateExtent();
     let fixtureLayerPath: string | undefined;
 
     return this.test(
@@ -159,17 +157,13 @@ export class DetailsTester extends GVAbstractTester {
         // Add the GeoJson Polygons layer
         const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
         fixtureLayerPath = fixture.layerPath;
+        const gvLayer = await fixture.promiseLayer;
 
         // Get the layer and query the coordinate to get features
-        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(fixtureLayerPath);
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, lonlat);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, lonlat);
 
-        // Verify we have features with extent
-        test.addStep('Verifying feature has extent for zoom...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
-        const feature = features[0];
-        Test.assertIsDefined('feature.extent', feature.extent);
+        const feature = features?.[0];
+        if (!feature?.extent) return { features };
 
         // Make sure the details panel is open over the map and settled
         await this.toggleAppbarTab(test, 'details', true);
@@ -205,9 +199,15 @@ export class DetailsTester extends GVAbstractTester {
         };
       },
       (test, result) => {
+        test.addStep('Verifying feature has extent for zoom...');
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsDefined('feature.extent', result.features[0].extent);
+        Test.assertIsDefined('zoom', result.zoom);
+
         // Verify the open panel was detected as overlapping the map
         test.addStep('Verifying the left padding includes the panel overlap...');
-        Test.assertIsEqual(result.paddingLeft > result.basePaddingLeft, true);
+        Test.assertIsEqual(result.zoom.paddingLeft > result.zoom.basePaddingLeft, true);
 
         // Verify the navigation bar was detected as overlapping the map
         if (result.hasNavBar) {
@@ -222,9 +222,14 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(result.centerPixelX >= result.paddingLeft, true);
         Test.assertIsEqual(result.centerPixelX <= result.mapWidth - result.paddingRight, true);
       },
-      (test) => {
-        // Cleanup the map
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      async (test) => {
+        try {
+          // Cleanup the map
+          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        } finally {
+          test.addStep('Restoring the pre-test map extent...');
+          await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
+        }
       }
     );
   }
