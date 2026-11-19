@@ -33,6 +33,9 @@ export function useZoomButtonState(targetKey: string): TypeZoomButtonState {
   // State
   const [zoomedView, setZoomedView] = useState<{ targetKey: string; extent: Extent | undefined }>();
 
+  const isZoomed =
+    zoomedView?.targetKey === targetKey && !!zoomedView.extent && !!mapExtent && equals(zoomedView.extent, mapExtent);
+
   /**
    * Records the view the zoom ended on; the store getter is used because the move end already updated the store
    * when the zoom promise resolves, before this component re-renders with the new extent.
@@ -44,7 +47,5 @@ export function useZoomButtonState(targetKey: string): TypeZoomButtonState {
     [mapId]
   );
 
-  const isZoomed =
-    zoomedView?.targetKey === targetKey && !!zoomedView.extent && !!mapExtent && equals(zoomedView.extent, mapExtent);
   return { isZoomed, markZoomed };
 }
