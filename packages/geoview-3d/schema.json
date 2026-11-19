@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView 3D Tiles Schema",
+  "type": "object",
+  "version": "1.0",
+  "comments": "Configuration for the GeoView 3D Tiles (deck.gl) package.",
+  "additionalProperties": false,
+  "properties": {
+    "isOpen": {
+      "description": "Specifies whether the 3D panel is initially open or closed",
+      "type": "boolean",
+      "default": false
+    },
+    "tilesetUrl": {
+      "description": "URL of the 3D Tiles 1.1 tileset.json to render. Use REPLACE_ME as a placeholder until a real tileset is provided.",
+      "type": "string",
+      "default": "REPLACE_ME"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  }
+}
