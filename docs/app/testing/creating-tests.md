@@ -267,6 +267,19 @@ automated release checklist tracks pass status without test totals. Update catal
 methods are added, removed, or renamed; update checklist rows only when the suite list or execution
 variants change. There are no documentation totals to reconcile.
 
+For work performed by a suite outside an individual test, call `this.addStep(message, level, color)`.
+Suite steps appear as separate rows among the test rows in the order they are reported, in both the map
+and Run All tables. They are cleared when the suite is reset and do not count as tests. For example:
+
+```typescript
+this.addStep('Waiting for exclusive page access', 'major');
+const exclusive = await this.waitForPageExclusivity();
+this.addStep(exclusive ? 'Exclusive access acquired' : 'Timed out; continuing without exclusivity');
+```
+
+Listeners can subscribe to `onSuiteUpdated` on the suite or the test-suite plugin; the plugin event
+includes the originating `suite`. The event also fires for suite launch status changes.
+
 ### Conditional Execution
 
 If the suite requires a specific plugin/feature, override `onCanExecuteTestSuite()`:
