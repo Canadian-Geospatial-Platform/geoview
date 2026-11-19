@@ -1,4 +1,105 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Share Function Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>Share Function Demo</h4><p>This page demonstrates the share functionality using URL parameters with data-shared present on the map div.</p><div style="background-color: #f5f5f5; padding: 15px; margin-top: 15px; border-left: 4px solid #2196f3"><h5 style="margin-top: 0">How It Works:</h5><ul style="margin-bottom: 0"><li><strong>Configuration Merging:</strong> The map uses the base configuration defined in <strong>data-config</strong> OR <strong>data-config-url</strong> on the map div. URL parameters selectively update specific properties without replacing the entire config.</li><li><strong>Share Button:</strong> The Share button appears automatically because <strong>data-shared</strong> attribute is present on the map div.</li><li><strong>URL Parameters:</strong> When applying a share URL, the following properties are updated:<ul><li><strong>p</strong> - Projection (e.g., 3857, 3978)</li><li><strong>z</strong> - Zoom level</li><li><strong>c</strong> - Center coordinates (lon,lat in EPSG:4326)</li><li><strong>b</strong> - Basemap options (basemapId, shaded, labeled)</li><li><strong>keys</strong> - Layer UUIDs to add (comma-separated)</li></ul></li><li><strong>Layer Behavior:</strong> Layers from URL parameters (<strong>keys</strong>) are <strong>appended</strong> to existing layers defined in <strong>data-config</strong> OR <strong>data-config-url</strong>. Base config layers are preserved, not replaced.</li><li><strong>Example:</strong> If the base config has layer A, and the URL has keys=B,C, the final map will display layers A, B, and C.</li></ul></div></div><div class="demo-section"><h5>Static Demo Share URL</h5><textarea id="static-url-input" readonly="readonly" rows="6" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical"></textarea><div class="toolbar"><button class="btn btn-primary" id="apply-static-share-btn">Apply Static Share URL</button></div></div><div class="demo-section"><h5>Clipboard Share URL</h5><textarea id="clipboard-url-input" rows="6" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical" placeholder="No URL in clipboard yet..."></textarea><div class="toolbar"><button class="btn btn-primary" id="apply-clipboard-btn">Apply Clipboard URL</button></div></div><div class="demo-section"><div class="toolbar"><button class="btn btn-secondary" id="clear-url-btn">Clear URL Parameters</button></div></div></div><div id="Map1" class="geoview-map" data-lang="en" data-shared data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Share Function Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Share Function Demo</h4>
+        <p>This page demonstrates the share functionality using URL parameters with data-shared present on the map div.</p>
+
+        <div style="background-color: #f5f5f5; padding: 15px; margin-top: 15px; border-left: 4px solid #2196f3">
+          <h5 style="margin-top: 0">How It Works:</h5>
+          <ul style="margin-bottom: 0">
+            <li>
+              <strong>Configuration Merging:</strong> The map uses the base configuration defined in <strong>data-config</strong> OR
+              <strong>data-config-url</strong> on the map div. URL parameters selectively update specific properties without replacing the
+              entire config.
+            </li>
+            <li>
+              <strong>Share Button:</strong> The Share button appears automatically because <strong>data-shared</strong> attribute is
+              present on the map div.
+            </li>
+            <li>
+              <strong>URL Parameters:</strong> When applying a share URL, the following properties are updated:
+              <ul>
+                <li><strong>p</strong> - Projection (e.g., 3857, 3978)</li>
+                <li><strong>z</strong> - Zoom level</li>
+                <li><strong>c</strong> - Center coordinates (lon,lat in EPSG:4326)</li>
+                <li><strong>b</strong> - Basemap options (basemapId, shaded, labeled)</li>
+                <li><strong>keys</strong> - Layer UUIDs to add (comma-separated)</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Layer Behavior:</strong> Layers from URL parameters (<strong>keys</strong>) are <strong>appended</strong> to existing
+              layers defined in <strong>data-config</strong> OR <strong>data-config-url</strong>. Base config layers are preserved, not
+              replaced.
+            </li>
+            <li>
+              <strong>Example:</strong> If the base config has layer A, and the URL has keys=B,C, the final map will display layers A, B,
+              and C.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h5>Static Demo Share URL</h5>
+        <textarea
+          id="static-url-input"
+          readonly
+          rows="6"
+          style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical"
+        ></textarea>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="apply-static-share-btn">Apply Static Share URL</button>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h5>Clipboard Share URL</h5>
+        <textarea
+          id="clipboard-url-input"
+          rows="6"
+          style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical"
+          placeholder="No URL in clipboard yet..."
+        ></textarea>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="apply-clipboard-btn">Apply Clipboard URL</button>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <div class="toolbar">
+          <button class="btn btn-secondary" id="clear-url-btn">Clear URL Parameters</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="Map1"
+      class="geoview-map"
+      data-lang="en"
+      data-shared
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -31,7 +132,14 @@
         },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="Map1CS" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="Map1CS" class="panel"></pre>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       /**
        * Example share URL with all supported parameters:
@@ -197,4 +305,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

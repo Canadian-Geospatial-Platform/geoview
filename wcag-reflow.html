@@ -1,6 +1,38 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>AppBar Reflow Tests - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>.map-section { margin-bottom: 40px; }
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AppBar Reflow Tests - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .map-section { margin-bottom: 40px; }
       .map-section > h3 { margin-bottom: 10px; font-size: 18px; }
-      .map-section > p { margin-bottom: 10px; color: #666; }</style><script src="cgpv-main.js"></script></head><body><div id="page-header">AppBar Reflow Tests</div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="map-section"><h3>1. Short Map Height, Full navBar</h3><p>200px height forces scrollbar with moderate button count</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+      .map-section > p { margin-bottom: 10px; color: #666; }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header">AppBar Reflow Tests</div>
+    <div class="back-to-main">
+      <a href="./index.html?tab=demos">← Back to Main</a>
+    </div>
+
+    <!-- Test 1: Short Height -->
+    <div class="map-section">
+      <h3>1. Short Map Height, Full navBar</h3>
+      <p>200px height forces scrollbar with moderate button count</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -14,7 +46,20 @@
           },
           'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'measurement', 'projection', 'drawer'],
           'theme': 'geo.ca'
-        }" style="height: 200px;"></div></div><div class="map-section"><h3>2. Minimal AppBar (No Scrolling)</h3><p>Just 2 buttons - no scrolling needed</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+        style="height: 200px;"
+      ></div>
+    </div>
+
+    <!-- Test 2: Minimal appBar, full NavBar, static mapInfo -->
+    <div class="map-section">
+      <h3>2. Minimal AppBar (No Scrolling)</h3>
+      <p>Just 2 buttons - no scrolling needed</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'static',
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
@@ -29,7 +74,20 @@
           },
           'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'measurement', 'projection', 'drawer'],
           'theme': 'geo.ca'
-        }" style="height: 600px;"></div></div><div class="map-section"><h3>3. Maximum AppBar (Tests Scrolling)</h3><p>All tabs enabled - scrollbar should appear</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+        style="height: 600px;"
+      ></div>
+    </div>
+
+    <!-- Test 3: Maximum AppBar -->
+    <div class="map-section">
+      <h3>3. Maximum AppBar (Tests Scrolling)</h3>
+      <p>All tabs enabled - scrollbar should appear</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -43,7 +101,20 @@
           },
           'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'measurement', 'projection', 'drawer'],
           'theme': 'geo.ca'
-        }" style="height: 360px;"></div></div><div class="map-section"><h3>4. Empty AppBar</h3><p>No panel buttons - only export, notifications, version</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        }"
+        style="height: 360px;"
+      ></div>
+    </div>
+
+    <!-- Test 4: Empty AppBar -->
+    <div class="map-section">
+      <h3>4. Empty AppBar</h3>
+      <p>No panel buttons - only export, notifications, version</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -56,7 +127,20 @@
           'overviewMap': {
             'hideOnZoom': 3
           }
-        }" style="height: 600px;"></div></div><div class="map-section"><h3>5. Everything</h3><p>All panels and buttons enabled</p><div id="map5" class="geoview-map" data-lang="en" data-config="{
+        }"
+        style="height: 600px;"
+      ></div>
+    </div>
+
+    <!-- Test 5: Everything -->
+    <div class="map-section">
+      <h3>5. Everything</h3>
+      <p>All panels and buttons enabled</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -184,7 +268,20 @@
             }
           ],
           'theme': 'geo.ca'
-        }" style="height: 600px;"></div></div><div class="map-section"><h3>6. Everything Narrow</h3><p>All panels and buttons enabled. 400px wide.</p><div id="map6" class="geoview-map" data-lang="en" data-config="{
+        }"
+        style="height: 600px;"
+      ></div>
+    </div>
+
+    <!-- Test 6: Everything Narrow -->
+    <div class="map-section">
+      <h3>6. Everything Narrow</h3>
+      <p>All panels and buttons enabled. 400px wide.</p>
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -312,7 +409,17 @@
             }
           ],
           'theme': 'geo.ca'
-        }" style="height: 600px; width: 400px"></div></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+        style="height: 600px; width: 400px"
+      ></div>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       // initialize cgpv
-      cgpv.init();</script></body></html>
+      cgpv.init();
+    </script>
+  </body>
+</html>

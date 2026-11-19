@@ -1,4 +1,56 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-01 Global - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>01 — Global Tests</h4><p>Cross-cutting tests: full screen, panel shortcuts, geolocator search, share URL, notifications, footer bar resize, language switching, and two-map targeting.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/01-global.md" target="_blank">01-global.md</a></p></div><h5>Map 1 — Full-featured (EN, shared)</h5><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><strong>Language:</strong> <button onclick="switchLang('map1', 'fr')">French</button> <button onclick="switchLang('map1', 'en')">English</button> <strong style="margin-left: 16px;">Message (snackbar + notification):</strong> <button onclick="showMsg('map1', 'success')">Success</button> <button onclick="showMsg('map1', 'info')">Info</button> <button onclick="showMsg('map1', 'warning')">Warning</button> <button onclick="showMsg('map1', 'error')">Error</button> <strong style="margin-left: 16px;">Notification only (no snackbar):</strong> <button onclick="addNotif('map1', 'success')">Success</button> <button onclick="addNotif('map1', 'info')">Info</button> <button onclick="addNotif('map1', 'warning')">Warning</button> <button onclick="addNotif('map1', 'error')">Error</button></div><div id="map1" class="geoview-map" data-lang="en" data-shared data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-01 Global - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>01 — Global Tests</h4>
+        <p>
+          Cross-cutting tests: full screen, panel shortcuts, geolocator search, share URL, notifications, footer bar resize, language switching, and two-map targeting.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/01-global.md" target="_blank">01-global.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Main test map (EN, shared, all panels) -->
+      <h5>Map 1 — Full-featured (EN, shared)</h5>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+        <strong>Language:</strong>
+        <button onclick="switchLang('map1', 'fr')">French</button>
+        <button onclick="switchLang('map1', 'en')">English</button>
+        <strong style="margin-left: 16px;">Message (snackbar + notification):</strong>
+        <button onclick="showMsg('map1', 'success')">Success</button>
+        <button onclick="showMsg('map1', 'info')">Info</button>
+        <button onclick="showMsg('map1', 'warning')">Warning</button>
+        <button onclick="showMsg('map1', 'error')">Error</button>
+        <strong style="margin-left: 16px;">Notification only (no snackbar):</strong>
+        <button onclick="addNotif('map1', 'success')">Success</button>
+        <button onclick="addNotif('map1', 'info')">Info</button>
+        <button onclick="addNotif('map1', 'warning')">Warning</button>
+        <button onclick="addNotif('map1', 'error')">Error</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-shared
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -25,7 +77,23 @@
           'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'details', 'export'] } },
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table', 'time-slider', 'geochart'] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Second map (FR, no share)</h5><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><strong>Snackbar + Notification:</strong> <button onclick="showMsg('map2', 'success')">Success</button> <button onclick="showMsg('map2', 'error')">Error</button></div><div id="map2" class="geoview-map" data-lang="fr" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: Second map for two-map shortcut tests -->
+      <h5>Map 2 — Second map (FR, no share)</h5>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+        <strong>Snackbar + Notification:</strong>
+        <button onclick="showMsg('map2', 'success')">Success</button>
+        <button onclick="showMsg('map2', 'error')">Error</button>
+      </div>
+
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="fr"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [3, [-75, 45]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -39,7 +107,18 @@
           'navBar': ['zoom', 'fullscreen', 'home'],
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       function switchLang(mapId, lang) {
         cgpv.api.getMapViewer(mapId).setLanguage(lang);
@@ -69,4 +148,7 @@
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

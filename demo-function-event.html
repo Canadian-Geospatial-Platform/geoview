@@ -1,4 +1,20 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>API Functions & Events - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><style>.filters {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>API Functions & Events - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .filters {
         display: flex;
         gap: 1rem;
         align-items: flex-start;
@@ -12,7 +28,350 @@
       .filter textarea {
         width: 200px;   /* adjust as needed */
         height: 100px;
-      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>API Functions and Events</h4><p>This page is used to test functions and events.</p></div></div><button class="collapsible">Layers Status</button><pre id="HMap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/function-event.json"></div><hr/><div class="demo-section"><span>Showing active filters for layer path: <input id="filter-input" list="filterLayerPaths" class="form-control" style="width: 400px" placeholder="Select or enter a layer path" value="geojsonLYR1/base-group/polygons.json"/><datalist id="filterLayerPaths"><option value="geojsonLYR1/base-group/polygons.json"></option><option value="historical-flood-dynamic/0"></option><option value="uniqueValueId/1"></option><option value="f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/0"></option></datalist></span><div class="filters"><div class="filter"><label for="filter-initial">Initial filter</label> <textarea id="filter-initial"></textarea></div><div class="filter"><label for="filter-class">Class filter</label> <textarea id="filter-class"></textarea></div><div class="filter"><label for="filter-data">Data filter</label> <textarea id="filter-data"></textarea></div><div class="filter"><label for="filter-time">Time filter</label> <textarea id="filter-time"></textarea></div><div class="filter"><label for="filter-all">All filters</label> <textarea id="filter-all"></textarea></div></div></div><div class="demo-section"><h4>API Functions:</h4><ul class="demo-function-list"><li><button class="btn btn-primary" id="Add-layer">Add WMS layer</button><br/><code>cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(config)</code></li><li><button class="btn btn-primary" id="Remove-layer">Remove GeoJSON layer</button><br/><code>cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath('geojsonLYR1/base-group')</code></li><li><button class="btn btn-primary" id="Remove-all-layers">Remove All layers</button><br/><code>cgpv.api.getMapViewer('map1').layer.removeAllGeoviewLayers()</code></li><li><button class="btn btn-primary" id="Toggle-visibility">Toggle Top 100 visibility</button><br/><code>cgpv.api.getMapViewer('map1').layer.setOrToggleLayerVisibility('esriFeatureLYR5/0')</code></li><li><button class="btn btn-primary" id="Set-all-visible">Set all layers visible</button><br/><code>cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(true)</code></li><li><button class="btn btn-primary" id="Set-all-not-visible">Set all layers not visible</button><br/><code>cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(false)</code></li><li><button class="btn btn-primary" id="Set-visible-including-parents">Set layer visible including parents</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerVisibleIncludingParents('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1')</code></li><li><button class="btn btn-primary" id="Set-visible-including-parents-gvlayer">Set layer visible including parents (GV layer)</button><br/><code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1').setVisibleIncludingParents()</code></li><li><button class="btn btn-primary" id="Rename-layer">Rename Water Quantity layer</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerName('uniqueValueId/1', 'Water Quantity')</code></li><li><button class="btn btn-primary" id="Place-marker">Place a marker on map</button><br/><code>cgpv.api.getMapViewer('map1').clickMarkerIconShow({lonlat: [-90, 60]})</code></li><li><button class="btn btn-primary" id="Zoom-extent">Zoom to an extent</button><br/><code>cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])</code></li><li><button class="btn btn-primary" id="Zoom-coordinate">Zoom to a coordinate</button><br/><code>cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60])</code></li><li><button class="btn btn-primary" id="Set-home-view">Set home view</button><br/><code>cgpv.api.getMapViewer('map1').setHomeButtonView({ zoomAndCenter: [8, [-71.26, 46.8]]})</code></li><li><button class="btn btn-primary" id="Extent-to-polygon">Convert an extent to a polygon (result in console)</button><br/><code>cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.83335497555107])</code></li><li><button class="btn btn-primary" id="Polygon-to-extent">Convert a polygon to an extent (result in console)</button><br/><code>cgpv.api.utilities.geo.polygonToExtent(polygon)</code></li><li><button class="btn btn-primary" id="Redefine-alias-fields">Redefine alias fields for polygons layer</button><br/><code>cgpv.api.getMapViewer('map1').layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', 'Province,DateCreated,Images', 'alias')</code></li><li><button class="btn btn-primary" id="Open-details">Open details tab in footer</button><br/><code>cgpv.api.getMapViewer('map1').footerBarApi.selectTab('details')</code></li><li><button class="btn btn-primary" id="Open-geolocator">Open geolocator in app bar</button><br/><code>cgpv.api.getMapViewer('map1').appBarApi.selectTab('geolocator')</code></li><li><button class="btn btn-primary" id="Disable-hover">Disable hover query for Top 100</button> <button class="btn btn-primary" id="Enable-hover">Enable hover query for Top 100</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', false)</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', true)</code></li><li><button class="btn btn-primary" id="Disable-feature-info">Disable feature query for Top 100</button> <button class="btn btn-primary" id="Enable-feature-info">Enable feature query for Top 100</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', false)</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', true)</code></li><li><button class="btn btn-primary" id="Show-collapsed-state">Show collapsed legend state for IAAC</button><br/><code>cgpv.api.getMapViewer('map1').stateApi.getLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group');</code></li><li><button class="btn btn-primary" id="Toggle-collapse">Toggle legend collapsed state for IAAC</button><br/><code>cgpv.api.getMapViewer('map1').stateApi.setLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group', !cgpv.api.getMapViewer('map1').stateApi.getLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group'));</code></li><li><button class="btn btn-primary" id="Show-layer-info">Show layer info</button><br/><code>cgpv.api.getMapViewer('map1').getMapLayerOrderInfo()</code></li><li><button class="btn btn-primary" id="Language-en">Change language to English</button><button class="btn btn-primary" id="Language-fr">Change language to French</button><br/><code>cgpv.api.getMapViewer('map1').setLanguage('en')</code> <code>cgpv.api.getMapViewer('map1').setLanguage('fr')</code></li><li><button class="btn btn-primary" id="Change-basemap">Change basemap</button><br/><code>const basemap = await cgpv.api.getMapViewer('map1').basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'})</code> <code>cgpv.api.getMapViewer('map1').basemap.setBasemap(basemap)</code></li><li><button class="btn btn-primary" id="Set-layer">Set selected layer in layers panel to Nonmetal mines</button><br/><code>cgpv.api.getMapViewer('map1').stateApi.setSelectedLayersTabLayer('nonmetalmines/5')</code></li><li><button class="btn btn-primary" id="Swiper-add">Add Nonmetal mines to swiper</button><button class="btn btn-primary" id="Swiper-remove">Remove Nonmetal mines from swiper</button><br/><code>cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer('nonmetalmines/5')</code> <code>cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer('nonmetalmines/5')</code></li><li><button class="btn btn-primary" id="Calc-dist">Calculate distance</button> <input class="form-control" id="Dist-geom" placeholder="Enter coordinates" value="[[-75.6792, 45.3540],[-73.6659, 45.5762],[-71.3000, 46.7693]]"/> <select name="Projection" id="Dist-proj" class="form-select"><option value="EPSG:3978">LCC</option><option value="EPSG:3857">Web Mercator</option></select><br/><code>cgpv.api.utilities.geo.calculateDistance(coordinates[], 'EPSG:4326', outProj)</code></li><li><button class="btn btn-primary" id="Get-config">Get config with current state (in console)</button><br/><code>cgpv.api.getMapViewer('map1').createMapConfigFromMapState()</code></li><li><button class="btn btn-primary" id="Reload-map">Reload map with current state</button><br/><code>cgpv.api.reloadWithCurrentState('map1')</code></li><li><button class="btn btn-primary" id="Add-marker">Add markers to map</button><button class="btn btn-primary" id="Remove-marker">Remove markers from map</button><br/><code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)</code> <code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');</code></li><li><button class="btn btn-primary" id="Zoom-to-markers">Zoom to markers 1 and 3</button><br/><code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);</code></li><li><button class="btn btn-primary" id="Zoom-to-marker-group">Zoom to marker group</button><br/><code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');</code></li><li><button class="btn btn-primary" id="Create-footer-tab">Create a custom tab in footer</button><br/><code>cgpv.api.getMapViewer('map1').footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content: '&lt;br&gt;&lt;div&gt;&lt;ul&gt;&lt;li&gt;How to export map coordinate data to: GeoJSON, or CSV.&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;'});</code></li><li><button class="btn btn-primary" id="Get-Current-Filters">Get the current filters</button><br/><code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters();</code> <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getInitialFilter();</code> <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getClassFilter();</code> <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getDataFilter();</code> <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getTimeFilter();</code> <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getFilterEquation();</code></li><li><button class="btn btn-primary" id="changeDisplayDateTimezoneUTC">Set Display Date Timezone UTC</button> <button class="btn btn-primary" id="changeDisplayDateTimezoneLocal">Set Display Date Timezone local</button> <button class="btn btn-primary" id="changeDisplayDateTimezoneEdmonton">Set Display Date Timezone America/Edmonton</button><br/><code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('UTC');</code> <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('local');</code> <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('America/Edmonton');</code></li><li><button class="btn btn-primary" id="changeDisplayDateFormatLong">Set Display Date Format to Long</button> <button class="btn btn-primary" id="changeDisplayDateFormatNoTime">Set Display Date Format to long no time</button> <button class="btn btn-primary" id="changeDisplayDateFormatToYMDTime">Set Display Date Format to YYYY-MM-DD @ HH:mm</button> <button class="btn btn-primary" id="changeDisplayDateFormatShortToYOnly">Set Display Date Format to YYYY</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM, YYYY @ HH:mm'});</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY', fr: 'D MMM, YYYY'});</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', 'YYYY-MM-DD @ HH:mm');</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormatShort('geojsonLYR1/base-group/polygons.json', 'YYYY');</code></li><li><button class="btn btn-primary" id="changeDisplayDateTemporalInstant">Set Display Date Temporal mode to instant</button> <button class="btn btn-primary" id="changeDisplayDateTemporalCalendar">Set Display Date Temporal mode to calendar</button><br/><code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'instant');</code> <code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'calendar');</code></li><li><button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatLong">Set Time Slider Date Display Format to Long</button> <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatIsoWithTime">Set Time Slider Date Display Format to ISO with Time</button> <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoDate">Set Time Slider Date Display Format Short to ISO Date</button> <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoYearOnly">Set Time Slider Date Display Format Short to ISO Year Only</button><br/><code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM YYYY @ HH:mm'});</code> <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', 'YYYY-MM-DD @ HH:mm');</code> <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY-MM-DD');</code> <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY');</code></li><li><button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneUTC">Set Time Slider Date Display Timezone to UTC</button> <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneEdmonton">Set Time Slider Date Display Timezone to Edmonton</button> <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneLocal">Set Time Slider Date Display Timezone to local</button><br/><span style="font-size: small;font-style: italic;">* In calendar temporal mode, this will have no effect</span><br/><code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'UTC');</code> <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'America/Edmonton');</code> <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'local');</code></li></ul></div><div class="demo-section"><h4>Events that will generate notifications:</h4><ul class="demo-function-list"><li>mapViewer.onMapLanguageChanged</li><li>mapViewer.onMapMoveEnd</li><li>mapViewer.onMapResolutionChanged</li><li>mapViewer.onMapProjectionChanged</li><li>mapViewer.basemap.onBasemapChanged</li><li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li><li>mapViewer.layer.onLayerConfigRemoved when a layer config has been removed</li><li>mapViewer.layer.onLayerConfigError when a layer config has an error</li><li>mapViewer.layer.onLayerCreated when a gv layer has been created</li><li>mapViewer.layer.onLayerFirstLoaded one time per layer on their first load</li><li>mapViewer.layer.onLayerLoading when a gv layer is loading on the map (this happens on every render)</li><li>mapViewer.layer.onLayerLoaded when a gv layer is loaded on the map (this can happen on every render)</li><li>mapViewer.layer.onLayerError when a gv layer has an error on the map (this can happen on every render)</li><li>mapViewer.layer.onLayerAllLoaded each time all layers are loaded/error (done loading) on the map (this happens on every render)</li><li>mapViewer.layer.onLayerVisibilityToggled</li><li>mapViewer.layer.onLayerItemVisibilityToggled</li><li>mapViewer.stateApi.onLayersReordered</li><li>layerEntryConfig.onLayerStatusChanged for Water Quantity</li><li>layer.onLayerFirstLoaded one time for Airborne quality</li><li>layer.onLayerLoaded each time Airborne quality layer goes in loaded state</li><li>layer.onLayerError each time Airborne quality layer goes in error state</li><li>layer.onVisibleChanged for Nonmetal mines</li><li>layer.onVisibleChanged for Water Quantity</li><li>layer.onLayerOpacityChanged for Water Quantity</li><li>layer.onLayerFilterApplied for Water Quantity</li><li>mapViewer.controllers.mapController.onGeolocatorSearch when a geolocator result is selected and zoomed to</li></ul></div><br/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+      }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>API Functions and Events</h4>
+        <p>This page is used to test functions and events.</p>
+      </div>
+    </div>
+
+    <button class="collapsible">Layers Status</button>
+    <pre id="HMap1-state" class="panel map-title-holder"></pre>
+    <hr />
+    <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/function-event.json"></div>
+
+    <hr />
+    <div class="demo-section">
+      <span>Showing active filters for layer path:
+        <input
+          id="filter-input"
+          list="filterLayerPaths"
+          class="form-control"
+          style="width: 400px"
+          placeholder="Select or enter a layer path"
+          value="geojsonLYR1/base-group/polygons.json"
+        />
+        <datalist id="filterLayerPaths">
+          <option value="geojsonLYR1/base-group/polygons.json"></option>
+          <option value="historical-flood-dynamic/0"></option>
+          <option value="uniqueValueId/1"></option>
+          <option value="f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/0"></option>
+        </datalist>
+      </span>
+      <div class="filters">
+        <div class="filter">
+          <label for="filter-initial">Initial filter</label>
+          <textarea id="filter-initial"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-class">Class filter</label>
+          <textarea id="filter-class"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-data">Data filter</label>
+          <textarea id="filter-data"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-time">Time filter</label>
+          <textarea id="filter-time"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-all">All filters</label>
+          <textarea id="filter-all"></textarea>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="demo-section">
+      <h4>API Functions:</h4>
+      <ul class="demo-function-list">
+        <li>
+          <button class="btn btn-primary" id="Add-layer">Add WMS layer</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(config)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Remove-layer">Remove GeoJSON layer</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath('geojsonLYR1/base-group')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Remove-all-layers">Remove All layers</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.removeAllGeoviewLayers()</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Toggle-visibility">Toggle Top 100 visibility</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setOrToggleLayerVisibility('esriFeatureLYR5/0')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-all-visible">Set all layers visible</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(true)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-all-not-visible">Set all layers not visible</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setAllLayersVisibility(false)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-visible-including-parents">Set layer visible including parents</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerVisibleIncludingParents('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-visible-including-parents-gvlayer">Set layer visible including parents (GV layer)</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/1').setVisibleIncludingParents()</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Rename-layer">Rename Water Quantity layer</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerName('uniqueValueId/1', 'Water Quantity')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Place-marker">Place a marker on map</button><br />
+          <code>cgpv.api.getMapViewer('map1').clickMarkerIconShow({lonlat: [-90, 60]})</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Zoom-extent">Zoom to an extent</button><br />
+          <code
+            >cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842,
+            53.833354975551075])</code
+          >
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Zoom-coordinate">Zoom to a coordinate</button><br />
+          <code>cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60])</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-home-view">Set home view</button><br />
+          <code>cgpv.api.getMapViewer('map1').setHomeButtonView({ zoomAndCenter: [8, [-71.26, 46.8]]})</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Extent-to-polygon">Convert an extent to a polygon (result in console)</button><br />
+          <code
+            >cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.83335497555107])</code
+          >
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Polygon-to-extent">Convert a polygon to an extent (result in console)</button><br />
+          <code>cgpv.api.utilities.geo.polygonToExtent(polygon)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Redefine-alias-fields">Redefine alias fields for polygons layer</button><br />
+          <code
+            >cgpv.api.getMapViewer('map1').layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json',
+            'Province,DateCreated,Images', 'alias')</code
+          >
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Open-details">Open details tab in footer</button><br />
+          <code>cgpv.api.getMapViewer('map1').footerBarApi.selectTab('details')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Open-geolocator">Open geolocator in app bar</button><br />
+          <code>cgpv.api.getMapViewer('map1').appBarApi.selectTab('geolocator')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Disable-hover">Disable hover query for Top 100</button>
+          <button class="btn btn-primary" id="Enable-hover">Enable hover query for Top 100</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', false)</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', true)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Disable-feature-info">Disable feature query for Top 100</button>
+          <button class="btn btn-primary" id="Enable-feature-info">Enable feature query for Top 100</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', false)</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', true)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Show-collapsed-state">Show collapsed legend state for IAAC</button><br />
+          <code>cgpv.api.getMapViewer('map1').stateApi.getLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Toggle-collapse">Toggle legend collapsed state for IAAC</button><br />
+          <code>cgpv.api.getMapViewer('map1').stateApi.setLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group',
+            !cgpv.api.getMapViewer('map1').stateApi.getLegendCollapsedState('f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group'));</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Show-layer-info">Show layer info</button><br />
+          <code>cgpv.api.getMapViewer('map1').getMapLayerOrderInfo()</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Language-en">Change language to English</button
+          ><button class="btn btn-primary" id="Language-fr">Change language to French</button><br />
+          <code>cgpv.api.getMapViewer('map1').setLanguage('en')</code>
+          <code>cgpv.api.getMapViewer('map1').setLanguage('fr')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Change-basemap">Change basemap</button><br />
+          <code>const basemap = await cgpv.api.getMapViewer('map1').basemap.createCoreBasemap(basemapOptions = {basemapId: 'simple'})</code>
+          <code>cgpv.api.getMapViewer('map1').basemap.setBasemap(basemap)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Set-layer">Set selected layer in layers panel to Nonmetal mines</button><br />
+          <code>cgpv.api.getMapViewer('map1').stateApi.setSelectedLayersTabLayer('nonmetalmines/5')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Swiper-add">Add Nonmetal mines to swiper</button
+          ><button class="btn btn-primary" id="Swiper-remove">Remove Nonmetal mines from swiper</button><br />
+          <code>cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer('nonmetalmines/5')</code>
+          <code>cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer('nonmetalmines/5')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Calc-dist">Calculate distance</button>
+          <input
+            type="text"
+            class="form-control"
+            id="Dist-geom"
+            placeholder="Enter coordinates"
+            value="[[-75.6792, 45.3540],[-73.6659, 45.5762],[-71.3000, 46.7693]]"
+          />
+          <select name="Projection" id="Dist-proj" class="form-select">
+            <option value="EPSG:3978">LCC</option>
+            <option value="EPSG:3857">Web Mercator</option></select
+          ><br />
+          <code>cgpv.api.utilities.geo.calculateDistance(coordinates[], 'EPSG:4326', outProj)</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Get-config">Get config with current state (in console)</button><br />
+          <code>cgpv.api.getMapViewer('map1').createMapConfigFromMapState()</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Reload-map">Reload map with current state</button><br />
+          <code>cgpv.api.reloadWithCurrentState('map1')</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Add-marker">Add markers to map</button
+          ><button class="btn btn-primary" id="Remove-marker">Remove markers from map</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers)</code>
+          <code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Zoom-to-markers">Zoom to markers 1 and 3</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Zoom-to-marker-group">Zoom to marker group</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Create-footer-tab">Create a custom tab in footer</button><br />
+          <code
+            >cgpv.api.getMapViewer('map1').footerBarApi.createTab({id: 'test', label: 'My Custom Tab', content:
+            '&lt;br&gt;&lt;div&gt;&lt;ul&gt;&lt;li&gt;How to export map coordinate data to: GeoJSON, or
+            CSV.&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;'});</code
+          >
+        </li>
+        <li>
+          <button class="btn btn-primary" id="Get-Current-Filters">Get the current filters</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getInitialFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getClassFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getDataFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getTimeFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getFilterEquation();</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneUTC">Set Display Date Timezone UTC</button>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneLocal">Set Display Date Timezone local</button>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneEdmonton">Set Display Date Timezone America/Edmonton</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('UTC');</code>
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('local');</code>
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('America/Edmonton');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateFormatLong">Set Display Date Format to Long</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatNoTime">Set Display Date Format to long no time</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatToYMDTime">Set Display Date Format to YYYY-MM-DD @ HH:mm</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatShortToYOnly">Set Display Date Format to YYYY</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM, YYYY  @ HH:mm'});</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY', fr: 'D MMM, YYYY'});</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', 'YYYY-MM-DD @ HH:mm');</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormatShort('geojsonLYR1/base-group/polygons.json', 'YYYY');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateTemporalInstant">Set Display Date Temporal mode to instant</button>
+          <button class="btn btn-primary" id="changeDisplayDateTemporalCalendar">Set Display Date Temporal mode to calendar</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'instant');</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'calendar');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatLong">Set Time Slider Date Display Format to Long</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatIsoWithTime">Set Time Slider Date Display Format to ISO with Time</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoDate">Set Time Slider Date Display Format Short to ISO Date</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoYearOnly">Set Time Slider Date Display Format Short to ISO Year Only</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM YYYY @ HH:mm'});</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', 'YYYY-MM-DD @ HH:mm');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY-MM-DD');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneUTC">Set Time Slider Date Display Timezone to UTC</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneEdmonton">Set Time Slider Date Display Timezone to Edmonton</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneLocal">Set Time Slider Date Display Timezone to local</button>
+          <br />
+          <span style="font-size: small;font-style: italic;">* In calendar temporal mode, this will have no effect</span>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'UTC');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'America/Edmonton');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'local');</code>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-section">
+      <h4>Events that will generate notifications:</h4>
+      <ul class="demo-function-list">
+        <li>mapViewer.onMapLanguageChanged</li>
+        <li>mapViewer.onMapMoveEnd</li>
+        <li>mapViewer.onMapResolutionChanged</li>
+        <li>mapViewer.onMapProjectionChanged</li>
+        <li>mapViewer.basemap.onBasemapChanged</li>
+        <li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li>
+        <li>mapViewer.layer.onLayerConfigRemoved when a layer config has been removed</li>
+        <li>mapViewer.layer.onLayerConfigError when a layer config has an error</li>
+        <li>mapViewer.layer.onLayerCreated when a gv layer has been created</li>
+        <li>mapViewer.layer.onLayerFirstLoaded one time per layer on their first load</li>
+        <li>mapViewer.layer.onLayerLoading when a gv layer is loading on the map (this happens on every render)</li>
+        <li>mapViewer.layer.onLayerLoaded when a gv layer is loaded on the map (this can happen on every render)</li>
+        <li>mapViewer.layer.onLayerError when a gv layer has an error on the map (this can happen on every render)</li>
+        <li>
+          mapViewer.layer.onLayerAllLoaded each time all layers are loaded/error (done loading) on the map (this happens on every render)
+        </li>
+        <li>mapViewer.layer.onLayerVisibilityToggled</li>
+        <li>mapViewer.layer.onLayerItemVisibilityToggled</li>
+        <li>mapViewer.stateApi.onLayersReordered</li>
+        <li>layerEntryConfig.onLayerStatusChanged for Water Quantity</li>
+        <li>layer.onLayerFirstLoaded one time for Airborne quality</li>
+        <li>layer.onLayerLoaded each time Airborne quality layer goes in loaded state</li>
+        <li>layer.onLayerError each time Airborne quality layer goes in error state</li>
+        <li>layer.onVisibleChanged for Nonmetal mines</li>
+        <li>layer.onVisibleChanged for Water Quantity</li>
+        <li>layer.onLayerOpacityChanged for Water Quantity</li>
+        <li>layer.onLayerFilterApplied for Water Quantity</li>
+        <li>mapViewer.controllers.mapController.onGeolocatorSearch when a geolocator result is selected and zoomed to</li>
+      </ul>
+    </div>
+    <br />
+
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       const mapId = 'map1';
       const LYR_PATH_UNIQUE = 'uniqueValueId/1';
@@ -703,4 +1062,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

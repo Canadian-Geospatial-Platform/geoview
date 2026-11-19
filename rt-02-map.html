@@ -1,4 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-02 Map - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>02 — Map Tests</h4><p>Projections, north pole, north arrow, rotation, map interaction, and static map.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/02-map.md" target="_blank">02-map.md</a></p></div><h5>Map 1 — LCC (EPSG:3978) with projection switch + rotation</h5><p>Zoom out fully to see north pole icon. Zoom in to see north arrow. Use rotation control. Switch projection to WM.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-02 Map - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>02 — Map Tests</h4>
+        <p>
+          Projections, north pole, north arrow, rotation, map interaction, and static map.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/02-map.md" target="_blank">02-map.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: LCC with projection switch, rotation, layers -->
+      <h5>Map 1 — LCC (EPSG:3978) with projection switch + rotation</h5>
+      <p>Zoom out fully to see north pole icon. Zoom in to see north arrow. Use rotation control. Switch projection to WM.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -14,7 +49,17 @@
           'appBar': { 'tabs': { 'core': ['legend'] } },
           'footerBar': { 'tabs': { 'core': ['layers'] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Web Mercator (EPSG:3857)</h5><p>North pole is never visible in WM. North arrow points up without rotation. Rotate to verify arrow follows.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: Web Mercator -->
+      <h5>Map 2 — Web Mercator (EPSG:3857)</h5>
+      <p>North pole is never visible in WM. North arrow points up without rotation. Rotate to verify arrow follows.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [3, [-90, 55]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -25,7 +70,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 3 — North Pole LAEA (EPSG:3573)</h5><p>Pole is center of projection. North arrow component is configured but should auto-hide since the pole is at the center.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 3: Circumpolar (EPSG:3573) -->
+      <h5>Map 3 — North Pole LAEA (EPSG:3573)</h5>
+      <p>Pole is center of projection. North arrow component is configured but should auto-hide since the pole is at the center.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3573, 'initialView': { 'zoomAndCenter': [3, [-110, 80]] } },
             'basemapOptions': { 'basemapId': 'nogeom', 'shaded': false, 'labeled': false },
@@ -53,7 +108,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 4 — Static map (no interaction)</h5><p>Try panning and zooming — should be blocked.</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 4: Static map -->
+      <h5>Map 4 — Static map (no interaction)</h5>
+      <p>Try panning and zooming — should be blocked.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'static',
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
@@ -66,11 +131,30 @@
             ]
           },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 — Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 — Configuration Snippet</button><pre id="map4CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>
+

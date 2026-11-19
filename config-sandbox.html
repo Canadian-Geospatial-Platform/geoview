@@ -1,4 +1,25 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Sandbox Configuration - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/codemirror/codemirror.min.css"/><link rel="stylesheet" href="css/codemirror/liquibyte.css"/><script src="js/codemirror/codemirror.min.js"></script><script src="js/codemirror/perl.min.js"></script><script src="js/codemirror/xml.min.js"></script><style>.section {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sandbox Configuration - Canadian Geospatial Platform Viewer</title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <link rel="stylesheet" href="css/codemirror/codemirror.min.css"/>
+  <link rel="stylesheet" href="css/codemirror/liquibyte.css"/>
+  <script language="javascript" type="text/javascript" src="js/codemirror/codemirror.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/codemirror/perl.min.js"></script>
+  <script language="javascript" type="text/javascript" src="js/codemirror/xml.min.js"></script>
+
+  <style>
+    .section {
       margin: 5px;
     }
     .select {
@@ -28,7 +49,83 @@
     }
     .loading-overlay img {
       width: 100px;
-    }</style><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./index.html?tab=sandbox">← Back to Main</a></div><div class="demo-section"><h4>Configuration Sandbox</h4><p>Test the ConfigApi with different layer types and configurations. Initialize layers from URLs and process their configurations to see the generated layer metadata.</p></div><div class="demo-section"><h4>Layer Configuration</h4><div class="section sandbox-option-flex"><div class="navigator-option-group"><label for="language" class="navigator-label">Language:</label> <select id="language" class="select navigator-select"><option value="en">English</option><option value="fr">French</option></select></div><div><label for="urls" class="navigator-label">Layer type:</label> <select id="urls" class="select navigator-select-full"></select></div></div><div class="section navigator-option-group"><label for="txtUrl" class="navigator-label">URL:</label> <input id="txtUrl" class="text-input sandbox-input-full"/></div><div id="section-layer-id" class="section sandbox-section-spacing" style="display: none"><label for="txtLayerId" class="sandbox-label-block">Layer ID:</label> <input id="txtLayerId" class="text-input sandbox-input-full"/></div><div class="section sandbox-section-spacing"><button id="btnInitialize" type="button" class="btn btn-primary">Initialize</button></div><div class="section sandbox-info-box"><p id="txtProcessInfoVector" class="sandbox-info-text"><strong>ℹ️ Note:</strong> When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map).</p></div><div class="section sandbox-min-height"><span id="txtError" class="text-error sandbox-error-text"></span></div><div class="section result sandbox-section-spacing"><div id="loadingOverlayInit" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif"/></div><textarea id="textResultInit" name="textResultInit" class="sandbox-textarea"></textarea></div></div><div class="demo-section"><h4>Process Layers</h4><div class="section sandbox-section-spacing"><label for="txtLayers" class="sandbox-label-block">Layers:</label> <input id="txtLayers" class="text-input sandbox-input-full"/></div><div class="section sandbox-section-spacing"><button id="btnProcess" type="button" class="btn btn-success">Process</button></div><div class="section result sandbox-section-spacing"><div id="loadingOverlayProcess" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif"/></div><textarea id="textResultProcess" name="textResultProcess" class="sandbox-textarea"></textarea></div></div></div><script src="codedoc.js"></script><script>insertPageHeader();
+    }
+  </style>
+<script src="cgpv-main.js"></script></head>
+
+<body>
+  <div>
+    <div id="page-header"></div>
+
+    <div class="back-to-main">
+      <a href="./index.html?tab=sandbox">← Back to Main</a>
+    </div>
+
+    <div class="demo-section">
+      <h4>Configuration Sandbox</h4>
+      <p>
+        Test the ConfigApi with different layer types and configurations. Initialize layers from URLs and process their configurations to see the generated layer metadata.
+      </p>
+    </div>
+    <div class="demo-section">
+      <h4>Layer Configuration</h4>
+      <div class="section sandbox-option-flex">
+        <div class="navigator-option-group">
+          <label for="language" class="navigator-label">Language:</label>
+          <select id="language" class="select navigator-select">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+          </select>
+        </div>
+        <div>
+          <label for="urls" class="navigator-label">Layer type:</label>
+          <select id="urls" class="select navigator-select-full"></select>
+        </div>
+      </div>
+      <div class="section navigator-option-group">
+        <label for="txtUrl" class="navigator-label">URL:</label>
+        <input id="txtUrl" type="text" class="text-input sandbox-input-full" />
+      </div>
+      <div id="section-layer-id" class="section sandbox-section-spacing" style="display: none">
+        <label for="txtLayerId" class="sandbox-label-block">Layer ID:</label>
+        <input id="txtLayerId" type="text" class="text-input sandbox-input-full" />
+      </div>
+      <div class="section sandbox-section-spacing">
+        <button id="btnInitialize" type="button" class="btn btn-primary">Initialize</button>
+      </div>
+      <div class="section sandbox-info-box">
+        <p id="txtProcessInfoVector" class="sandbox-info-text">
+          <strong>ℹ️ Note:</strong> When working with a vector layer, some source information is only retrieved when the layer is actually added on a map, as to not download the features twice (once in the config processing and once when the layer is added to a map).
+        </p>
+      </div>
+      <div class="section sandbox-min-height">
+        <span id="txtError" class="text-error sandbox-error-text"></span>
+      </div>
+      <div class="section result sandbox-section-spacing">
+        <div id="loadingOverlayInit" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultInit" name="textResultInit" class="sandbox-textarea"></textarea>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Process Layers</h4>
+      <div class="section sandbox-section-spacing">
+        <label for="txtLayers" class="sandbox-label-block">Layers:</label>
+        <input id="txtLayers" type="text" class="text-input sandbox-input-full" />
+      </div>
+      <div class="section sandbox-section-spacing">
+        <button id="btnProcess" type="button" class="btn btn-success">Process</button>
+      </div>
+      <div class="section result sandbox-section-spacing">
+        <div id="loadingOverlayProcess" class="loading-overlay"><img src="https://discuss.wxpython.org/uploads/default/original/2X/6/6d0ec30d8b8f77ab999f765edd8866e8a97d59a3.gif" /></div>
+        <textarea id="textResultProcess" name="textResultProcess" class="sandbox-textarea"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script src="codedoc.js"></script>
+  <script>
+    insertPageHeader();
 
     // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
     const URLS = {
@@ -365,4 +462,7 @@
         cgpv.logger.logError(error);
         txtError.innerHTML = error.message;
       }
-    });</script></body></html>
+    });
+  </script>
+</body>
+</html>

@@ -1,4 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-12 View Settings - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>12 — View Settings Tests</h4><p>Zoom constraints, extent overrides, initial view modes, home view, rotation, and initial click coordinate.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/12-view-settings.md" target="_blank">12-view-settings.md</a></p></div><h5>Map 1 — Restricted Zoom (min: 6, max: 8)</h5><p>Try zooming beyond level 8 (in) or below level 6 (out) — should be clamped.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;"><strong>Current zoom:</strong> <span id="currentZoom" style="font-weight: bold; min-width: 30px;">7</span> <strong style="margin-left: 16px;">Set zoom:</strong> <input id="zoomInput" type="number" min="0" max="20" step="0.1" value="7" style="width: 60px; padding: 4px;"/> <button onclick="setZoom()">Apply</button></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-12 View Settings - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>12 — View Settings Tests</h4>
+        <p>
+          Zoom constraints, extent overrides, initial view modes, home view, rotation, and initial click coordinate.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/12-view-settings.md" target="_blank">12-view-settings.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Restricted zoom (minZoom: 6, maxZoom: 8) -->
+      <h5>Map 1 — Restricted Zoom (min: 6, max: 8)</h5>
+      <p>Try zooming beyond level 8 (in) or below level 6 (out) — should be clamped.</p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <strong>Current zoom:</strong>
+        <span id="currentZoom" style="font-weight: bold; min-width: 30px;">7</span>
+        <strong style="margin-left: 16px;">Set zoom:</strong>
+        <input id="zoomInput" type="number" min="0" max="20" step="0.1" value="7" style="width: 60px; padding: 4px;" />
+        <button onclick="setZoom()">Apply</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978,
@@ -13,7 +57,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Max Extent Override (world bounds)</h5><p>Max extent set to [-180, -50, 180, 85]. Zoom out fully — extent is larger than default. Pan should be constrained.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: Max extent override -->
+      <h5>Map 2 — Max Extent Override (world bounds)</h5>
+      <p>Max extent set to [-180, -50, 180, 85]. Zoom out fully — extent is larger than default. Pan should be constrained.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857,
@@ -27,7 +81,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 3 — Rotation + Home View (initialView ≠ homeView)</h5><p>Loads at zoom 7 Ottawa with 45° rotation. Home button navigates to zoom 4 Canada — different from initial.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 3: Initial view with zoomAndCenter + homeView different -->
+      <h5>Map 3 — Rotation + Home View (initialView ≠ homeView)</h5>
+      <p>Loads at zoom 7 Ottawa with 45° rotation. Home button navigates to zoom 4 Canada — different from initial.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857,
@@ -42,7 +106,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 4 — Initial View by Extent</h5><p>Map loads fitted to the bounding box [-100, 40, -60, 60].</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 4: Initial view with extent -->
+      <h5>Map 4 — Initial View by Extent</h5>
+      <p>Map loads fitted to the bounding box [-100, 40, -60, 60].</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978,
@@ -55,7 +129,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 5 — Initial Click Coordinate</h5><p>Map loads with a click marker and the Details panel opens with query results at the coordinate.</p><div id="map5" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 5: Initial click coordinate -->
+      <h5>Map 5 — Initial Click Coordinate</h5>
+      <p>Map loads with a click marker and the Details panel opens with query results at the coordinate.</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978,
@@ -75,7 +159,17 @@
           'appBar': { 'tabs': { 'core': ['details'] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 6 — Rotation Disabled (enableRotation: false)</h5><p>Rotation is disabled via viewSettings. Rotation button should not render even though listed in navBar. Shift+drag should not rotate.</p><div id="map6" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 6: Rotation Disabled -->
+      <h5>Map 6 — Rotation Disabled (enableRotation: false)</h5>
+      <p>Rotation is disabled via viewSettings. Rotation button should not render even though listed in navBar. Shift+drag should not rotate.</p>
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] }, 'enableRotation': false },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -90,7 +184,26 @@
           'appBar': { 'tabs': { 'core': ['legend'] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 - Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 - Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 - Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 - Configuration Snippet</button><pre id="map4CS" class="panel"></pre><button type="button" class="collapsible">Map 5 - Configuration Snippet</button><pre id="map5CS" class="panel"></pre><button type="button" class="collapsible">Map 6 - Configuration Snippet</button><pre id="map6CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 - Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 - Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 - Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 - Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 5 - Configuration Snippet</button>
+      <pre id="map5CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 6 - Configuration Snippet</button>
+      <pre id="map6CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       function setZoom() {
         const zoom = parseFloat(document.getElementById('zoomInput').value);
@@ -113,4 +226,7 @@
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

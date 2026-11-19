@@ -1,4 +1,25 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>ESRI Renderer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/codemirror/codemirror.min.css"/><link rel="stylesheet" href="css/codemirror/liquibyte.css"/><script src="js/codemirror/codemirror.min.js"></script><script src="js/codemirror/perl.min.js"></script><style>.CodeMirror {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESRI Renderer - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+
+
+    <link rel="stylesheet" href="css/codemirror/codemirror.min.css"/>
+    <link rel="stylesheet" href="css/codemirror/liquibyte.css"/>
+    <script language="javascript" type="text/javascript" src="js/codemirror/codemirror.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/codemirror/perl.min.js"></script>
+
+    <style>
+      .CodeMirror {
         height: 700px; /* Height of the text area */
         width: 100%;           /* make CM fill its cell */
         box-sizing: border-box;
@@ -13,7 +34,47 @@
         position: absolute;
         overflow: hidden;
         resize: none;
-      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>ESRI Renderer Style Configuration Demo</h4><p>This page is used to create a valid GeoView style config from an ESRI Renderer.</p></div></div><div class="demo-section"><h4>Configuration Options</h4><div style="margin-bottom: 15px"><label for="renderer">Input ESRI Renderer examples:</label> <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px"><option value="simple">Simple</option><option value="uniqueValue">Unique Value</option><option value="classBreak">Class Break</option></select></div></div><div class="demo-section"><h4>Input ESRI Renderer:</h4><textarea id="inputTextArea" cols="110"> </textarea></div><button class="btn btn-primary" id="executeButton">Execute</button><div class="demo-section"><h4>Geoview Output Style Configuration:</h4><textarea id="outputTextArea" cols="110"> </textarea></div><div class="demo-section"><h4>Usage Example</h4><p>The resulting configuration can be used to set a layer's "layerStyle" property.</p><pre><code>'listOfGeoviewLayerConfig': [{
+      }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>ESRI Renderer Style Configuration Demo</h4>
+        <p>This page is used to create a valid GeoView style config from an ESRI Renderer.</p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Configuration Options</h4>
+      <div style="margin-bottom: 15px">
+        <label for="renderer">Input ESRI Renderer examples:</label>
+        <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
+          <option value="simple">Simple</option>
+          <option value="uniqueValue">Unique Value</option>
+          <option value="classBreak">Class Break</option>
+        </select>
+      </div>
+    </div>
+    <div class="demo-section">
+      <h4>Input ESRI Renderer:</h4>
+      <textarea id="inputTextArea" cols="110"> </textarea>
+    </div>
+    <button class="btn btn-primary" id="executeButton">Execute</button>
+    <div class="demo-section">
+      <h4>Geoview Output Style Configuration:</h4>
+      <textarea id="outputTextArea" cols="110"> </textarea>
+    </div>
+    <div class="demo-section">
+      <h4>Usage Example</h4>
+      <p>The resulting configuration can be used to set a layer's "layerStyle" property.</p>
+      <pre><code>'listOfGeoviewLayerConfig': [{
   'geoviewLayerId': 'M6QU5DFK9PY3U',
   "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer",
   "geoviewLayerType": "esriFeature",
@@ -21,7 +82,12 @@
     "layerId": 0,
     "layerStyle": {<strong>OUTPUT STYLE CONFIG HERE</strong>}
   }]
-}]</code></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+}]</code></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       const initialValue = {
         simple: {
@@ -282,4 +348,7 @@
       executeButton.addEventListener('click', async (e) => {
         const geoViewRenderer = cgpv.api.config.getStyleFromESRIRenderer(editorInputProcess.getValue());
         editorOutputProcess.setValue(JSON.stringify(geoViewRenderer, undefined, 2));
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

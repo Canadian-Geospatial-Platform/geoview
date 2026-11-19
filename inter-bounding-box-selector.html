@@ -1,4 +1,60 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Bounding Box Selector - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Bounding Box Selector</h4><p>This page demonstrates how the modify and translate interactions can be used to create an advanced bounding box selector. This can be useful for assigning coordinates to spatial filters while perfoming geographic queries.</p></div></div><div class="demo-section"><h4>Bounding Box Selector</h4></div><div>Modify the bounding box by entering coordinates below or adjusting it directly on the map. Click and drag the box to move it, or drag its vertices to resize it.</div><div><label for="north">North:</label> <input class="form-control" type="number" id="north" name="north" min="-90" max="90" step="any" value="70"/> <label for="east">East:</label> <input class="form-control" type="number" id="east" name="east" min="-180" max="180" step="any" value="-70"/> <label for="south">South:</label> <input class="form-control" type="number" id="south" name="south" min="-90" max="90" step="any" value="60"/> <label for="west">West:</label> <input class="form-control" type="number" id="west" name="west" min="-90" max="90" step="any" value="-100"/></div><div style="position: relative"><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bounding Box Selector - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="codedoc.js"></script>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Bounding Box Selector</h4>
+        <p>
+          This page demonstrates how the modify and translate interactions can be used to create an advanced bounding box selector. This can
+          be useful for assigning coordinates to spatial filters while perfoming geographic queries.
+        </p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Bounding Box Selector</h4>
+    </div>
+    <div>
+      Modify the bounding box by entering coordinates below or adjusting it directly on the map. Click and drag the box to move it, or drag
+      its vertices to resize it.
+    </div>
+
+    <div>
+      <label for="north">North:</label>
+      <input class="form-control" type="number" id="north" name="north" min="-90" max="90" step="any" value="70" />
+      <label for="east">East:</label>
+      <input class="form-control" type="number" id="east" name="east" min="-180" max="180" step="any" value="-70" />
+      <label for="south">South:</label>
+      <input class="form-control" type="number" id="south" name="south" min="-90" max="90" step="any" value="60" />
+      <label for="west">West:</label>
+      <input class="form-control" type="number" id="west" name="west" min="-90" max="90" step="any" value="-100" />
+    </div>
+
+    <div style="position: relative">
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
             'map': {
               'viewSettings': {
                 'projection': 3857
@@ -21,7 +77,15 @@
             },
             'corePackages': [],
             'theme': 'geo.ca'
-          }"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>insertPageHeader();
+          }"
+      ></div>
+    </div>
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+
+    <script>
+      insertPageHeader();
 
       let map1;
       function initMap1(map) {
@@ -267,4 +331,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

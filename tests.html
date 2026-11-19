@@ -1,4 +1,20 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Functional Testing - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><style>.btnLaunchTests, .btnLaunchTestsAll {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Functional Testing - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="codedoc.js"></script>
+
+    <style>
+      .btnLaunchTests, .btnLaunchTestsAll {
         width: 100%;
         padding: 5px 0px;
       }
@@ -181,7 +197,238 @@
       .toggle-status.on {
         background-color: #e8eaf6;
         color: #515ba5;
-      }</style><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./index.html?tab=testing">← Back to Main</a> &nbsp;|&nbsp; <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/app/testing/test-catalog.md" target="_blank">Test Catalog</a></div></div><div class="tabs" id="options-nav" style="padding: 8px 12px; align-items: center;"><span style="font-weight: bold; font-size: 13px; color: #515ba5; margin-right: 12px;">Options:</span> <label class="toggle-switch"><input type="checkbox" id="vpnToggle" onchange="toggleVPN(this.checked)"/> <span class="toggle-slider"></span> <span class="toggle-label">VPN</span> <span id="vpnStatus" class="toggle-status off">OFF</span></label> <label class="toggle-switch"><input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)"/> <span class="toggle-slider"></span> <span class="toggle-label">Heavy tests</span> <span id="heavyTestsStatus" class="toggle-status off">OFF</span></label></div><div class="tabs" id="group-nav"><button class="tab-button active" onclick="openGroup(event, 'run-all')">Run All Tests</button> <button class="tab-button" onclick="openGroup(event, 'group1')">1 - Core / Utility</button> <button class="tab-button" onclick="openGroup(event, 'group2')">2 - Layers</button> <button class="tab-button" onclick="openGroup(event, 'group3')">3 - Map</button> <button class="tab-button" onclick="openGroup(event, 'group4')">4 - Components</button> <button class="tab-button" onclick="openGroup(event, 'group5')">5 - Packages</button></div><div id="group1-tabs" class="tabs group-tabs"><button class="tab-button" onclick="openTab(event, 'map0-test')">Core / Utilities / Config Validation</button></div><div id="group2-tabs" class="tabs group-tabs"><button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3857)</button> <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3978)</button> <button class="tab-button" onclick="openTab(event, 'map3F-test')">Layer Functions</button></div><div id="group3-tabs" class="tabs group-tabs"><button class="tab-button" onclick="openTab(event, 'map4-test')">Map Functions</button> <button class="tab-button" onclick="openTab(event, 'map6-test')">Map Config</button></div><div id="group4-tabs" class="tabs group-tabs"><button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button> <button class="tab-button" onclick="openTab(event, 'map11-test')">Data Table</button></div><div id="group5-tabs" class="tabs group-tabs"><button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button> <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button> <button class="tab-button" onclick="openTab(event, 'map12-test')">Time Slider</button></div><div id="run-all" class="tab-content active"><h3>Overall Test Summary</h3><div style="text-align: right"><span id="allSuitesCheck"></span></div><div style="text-align: right">Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span></div><div style="text-align: right">Running: <span id="allSuitesTestsRunning">0</span> | Success: <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> | Skipped: <span id="allSuitesTestsDoneSkipped" style="color: orange">0</span> | Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> | Progress: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span><progress id="allSuitesTestsProgress" aria-label="Overall test progress" value="0" max="1" style="width: 160px; max-width: 100%; vertical-align: middle; margin-left: 8px"></progress></div><div style="text-align: right">Duration: <span id="allSuitesTotalDuration">0</span></div><button id="btnLaunchTestsAll" class="btnLaunchTestsAll" onclick="launchTestsAll()" disabled="true">LAUNCH TESTS ALL MAPS!</button><h3 style="margin-top: 30px">Test Results by Group</h3><div class="group-header">Group 1 - Core / Utility</div><button id="collapsible-map0" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 0 - Tests Core / Utilities / Config</span> <span id="stats-map0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map0-results"></div></div><div class="group-header">Group 2 - Layers</div><button id="collapsible-map2" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3857)</span> <span id="stats-map2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map2-results"></div></div><button id="collapsible-map3" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3978)</span> <span id="stats-map3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map3-results"></div></div><button id="collapsible-map3F" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 3F - Layer Functions</span> <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map3F-results"></div></div><div class="group-header">Group 3 - Map</div><button id="collapsible-map4" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 4 - Map Functions Tests</span> <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map4-results"></div></div><button id="collapsible-map6" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 6 - Map Config Tests</span> <span id="stats-map6" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map6-results"></div></div><div class="group-header">Group 4 - Components</div><button id="collapsible-map8" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 8 - Details Tests</span> <span id="stats-map8" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map8-results"></div></div><div class="group-header">Group 5 - Packages</div><button id="collapsible-map5" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 5 - Geochart Tests</span> <span id="stats-map5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map5-results"></div></div><button id="collapsible-map10" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 10 - Swiper Tests</span> <span id="stats-map10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map10-results"></div></div><button id="collapsible-map11" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 11 - Data Table Tests</span> <span id="stats-map11" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map11-results"></div></div><button id="collapsible-map12" class="collapsible" onclick="toggleCollapsible(this)"><span style="font-weight: bold">Map 12 - Time Slider Tests</span> <span id="stats-map12" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span></button><div class="panel"><div id="runAll-map12-results"></div></div></div><div id="map0-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT1">0. Tests on map 0</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map0"></div><br/><div id="map0" class="geoview-map" data-lang="en" data-config="{
+      }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div>
+      <div id="page-header"></div>
+
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+        &nbsp;|&nbsp;
+        <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/app/testing/test-catalog.md" target="_blank"
+          >Test Catalog</a
+        >
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="tabs" id="options-nav" style="padding: 8px 12px; align-items: center;">
+      <span style="font-weight: bold; font-size: 13px; color: #515ba5; margin-right: 12px;">Options:</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="vpnToggle" onchange="toggleVPN(this.checked)" />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">VPN</span>
+        <span id="vpnStatus" class="toggle-status off">OFF</span>
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="heavyTestsToggle" onchange="toggleHeavyTests(this.checked)" />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">Heavy tests</span>
+        <span id="heavyTestsStatus" class="toggle-status off">OFF</span>
+      </label>
+    </div>
+
+    <!-- Group Navigation -->
+    <div class="tabs" id="group-nav">
+      <button class="tab-button active" onclick="openGroup(event, 'run-all')">Run All Tests</button>
+      <button class="tab-button" onclick="openGroup(event, 'group1')">1 - Core / Utility</button>
+      <button class="tab-button" onclick="openGroup(event, 'group2')">2 - Layers</button>
+      <button class="tab-button" onclick="openGroup(event, 'group3')">3 - Map</button>
+      <button class="tab-button" onclick="openGroup(event, 'group4')">4 - Components</button>
+      <button class="tab-button" onclick="openGroup(event, 'group5')">5 - Packages</button>
+    </div>
+
+    <!-- Group 1: Core / Utility -->
+    <div id="group1-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core / Utilities / Config Validation</button>
+    </div>
+
+    <!-- Group 2: Layers -->
+    <div id="group2-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3F-test')">Layer Functions</button>
+    </div>
+
+    <!-- Group 3: Map -->
+    <div id="group3-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map4-test')">Map Functions</button>
+      <button class="tab-button" onclick="openTab(event, 'map6-test')">Map Config</button>
+    </div>
+
+    <!-- Group 4: Components -->
+    <div id="group4-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
+      <button class="tab-button" onclick="openTab(event, 'map11-test')">Data Table</button>
+    </div>
+
+    <!-- Group 5: Packages -->
+    <div id="group5-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
+      <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button>
+      <button class="tab-button" onclick="openTab(event, 'map12-test')">Time Slider</button>
+    </div>
+
+    <!-- Run All Tests Tab -->
+    <div id="run-all" class="tab-content active">
+      <h3>Overall Test Summary</h3>
+      <div style="text-align: right">
+        <span id="allSuitesCheck"></span>
+      </div>
+      <div style="text-align: right">Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span></div>
+      <div style="text-align: right">
+        Running: <span id="allSuitesTestsRunning">0</span> |
+        Success: <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> |
+        Skipped: <span id="allSuitesTestsDoneSkipped" style="color: orange">0</span> |
+        Failed: <span id="allSuitesTestsDoneFailed" style="color: red">0</span> |
+        Progress: <span id="allSuitesTestsDone">0</span>/<span id="allSuitesTestsTotal">0</span>/<span id="allSuitesTestsTotalFinal">0</span>
+        <progress
+          id="allSuitesTestsProgress"
+          aria-label="Overall test progress"
+          value="0"
+          max="1"
+          style="width: 160px; max-width: 100%; vertical-align: middle; margin-left: 8px"
+        ></progress>
+      </div>
+      <div style="text-align: right">
+        Duration: <span id="allSuitesTotalDuration">0</span>
+      </div>
+      <button id="btnLaunchTestsAll" class="btnLaunchTestsAll" onclick="launchTestsAll()" disabled="true">LAUNCH TESTS ALL MAPS!</button>
+
+      <h3 style="margin-top: 30px">Test Results by Group</h3>
+
+      <!-- Group 1: Core / Utility -->
+      <div class="group-header">Group 1 - Core / Utility</div>
+
+      <!-- Map 0 Results -->
+      <button id="collapsible-map0" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 0 - Tests Core / Utilities / Config</span>
+        <span id="stats-map0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map0-results"></div>
+      </div>
+
+      <!-- Group 2: Layers -->
+      <div class="group-header">Group 2 - Layers</div>
+
+      <!-- Map 2 Results -->
+      <button id="collapsible-map2" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3857)</span>
+        <span id="stats-map2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map2-results"></div>
+      </div>
+
+      <!-- Map 3 Results -->
+      <button id="collapsible-map3" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3978)</span>
+        <span id="stats-map3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map3-results"></div>
+      </div>
+
+      <!-- Map 3F Results -->
+      <button id="collapsible-map3F" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 3F - Layer Functions</span>
+        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map3F-results"></div>
+      </div>
+
+      <!-- Group 3: Map -->
+      <div class="group-header">Group 3 - Map</div>
+
+      <!-- Map 4 Results -->
+      <button id="collapsible-map4" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 4 - Map Functions Tests</span>
+        <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map4-results"></div>
+      </div>
+
+      <!-- Map 6 Results -->
+      <button id="collapsible-map6" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 6 - Map Config Tests</span>
+        <span id="stats-map6" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map6-results"></div>
+      </div>
+
+      <!-- Group 4: Components -->
+      <div class="group-header">Group 4 - Components</div>
+
+      <!-- Map 8 Results -->
+      <button id="collapsible-map8" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 8 - Details Tests</span>
+        <span id="stats-map8" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map8-results"></div>
+      </div>
+
+      <!-- Group 5: Plugins -->
+      <div class="group-header">Group 5 - Packages</div>
+
+      <!-- Map 5 Results -->
+      <button id="collapsible-map5" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 5 - Geochart Tests</span>
+        <span id="stats-map5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map5-results"></div>
+      </div>
+
+      <!-- Map 10 Results -->
+      <button id="collapsible-map10" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 10 - Swiper Tests</span>
+        <span id="stats-map10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map10-results"></div>
+      </div>
+
+      <!-- Map 11 Results -->
+      <button id="collapsible-map11" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 11 - Data Table Tests</span>
+        <span id="stats-map11" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map11-results"></div>
+      </div>
+
+      <!-- Map 12 Results -->
+      <button id="collapsible-map12" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 12 - Time Slider Tests</span>
+        <span id="stats-map12" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map12-results"></div>
+      </div>
+    </div>
+
+    <!-- Map 0 Tab -->
+    <div id="map0-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT1">0. Tests on map 0</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map0"></div>
+      <br />
+      <div
+        id="map0"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978
@@ -210,7 +457,24 @@
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"></div></div><div id="map2-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3857)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map2"></div><br/><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 2 Tab -->
+    <div id="map2-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3857)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map2"></div>
+      <br />
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857
@@ -241,7 +505,24 @@
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"></div></div><div id="map3-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3978)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map3"></div><br/><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 3 Tab -->
+    <div id="map3-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3978)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map3"></div>
+      <br />
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978
@@ -272,7 +553,24 @@
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"></div></div><div id="map3F-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT3F">2. Tests on map 3F (EPSG: 3857)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map3F"></div><br/><div id="map3F" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 3F -->
+    <div id="map3F-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT3F">2. Tests on map 3F (EPSG: 3857)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map3F"></div>
+      <br />
+      <div
+        id="map3F"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857
@@ -303,7 +601,25 @@
           'serviceUrls': {
             'proxyUrl': 'https://proxy.app-dev.geo.ca'
           }
-        }"></div></div><div id="map4-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT4">4. Tests on map functions</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map4"></div><br/><div id="map4" style="width: 1000px; margin: auto" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 4 Tab -->
+    <div id="map4-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT4">4. Tests on map functions</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map4"></div>
+      <br />
+      <div
+        id="map4"
+        style="width: 1000px; margin: auto"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978
@@ -356,7 +672,24 @@
               'test-suite': { 'suites': ['suite-map'] }
             }
           ]
-        }"></div></div><div id="map5-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT5">5. Tests on map 5</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map5"></div><br/><div id="map5" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 5 Tab -->
+    <div id="map5-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT5">5. Tests on map 5</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map5"></div>
+      <br />
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978
@@ -463,7 +796,24 @@
               'test-suite': { 'suites': ['suite-geochart'] }
             }
           ]
-        }"></div></div><div id="map6-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT6">6. Tests on map config</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map6"></div><br/><div id="map6" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 6 Tab -->
+    <div id="map6-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT6">6. Tests on map config</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map6"></div>
+      <br />
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -489,7 +839,25 @@
             'test-suite': { 'suites': ['suite-map-config'] }
           }
         ]
-      }"></div></div><div id="map8-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT8">8. Tests on map 8</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map8"></div><br/><div id="map8" class="geoview-map" data-lang="en" data-config="{
+      }"
+      ></div>
+    </div>
+
+    <!-- Map 7 Tab -->
+    <!-- Map 8 Tab -->
+    <div id="map8-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT8">8. Tests on map 8</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map8"></div>
+      <br />
+      <div
+        id="map8"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978
@@ -534,7 +902,24 @@
               'test-suite': { 'suites': ['suite-details'] }
             }
           ]
-        }"></div></div><div id="map10-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT10">10. Tests on map 10 (Swiper)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map10"></div><br/><div id="map10" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 10 Tab -->
+    <div id="map10-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT10">10. Tests on map 10 (Swiper)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map10"></div>
+      <br />
+      <div
+        id="map10"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857
@@ -589,7 +974,24 @@
               'test-suite': { 'suites': ['suite-swiper'] }
             }
           ]
-        }"></div></div><div id="map11-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT11">11. Tests on map 11 (Data Table)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map11"></div><br/><div id="map11" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 11 Tab -->
+    <div id="map11-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT11">11. Tests on map 11 (Data Table)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map11"></div>
+      <br />
+      <div
+        id="map11"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978,
@@ -680,7 +1082,24 @@
               'test-suite': { 'suites': ['suite-data-table'] }
             }
           ]
-        }"></div></div><div id="map12-test" class="tab-content"><div class="map-title-holder"><h4 id="HEVNT12">12. Tests on map 12 (Time Slider)</h4><a class="ref-link" href="#top">Top</a></div><div id="testSuiteTable-map12"></div><br/><div id="map12" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 12 Tab -->
+    <div id="map12-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT12">12. Tests on map 12 (Time Slider)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map12"></div>
+      <br />
+      <div
+        id="map12"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3978,
@@ -725,7 +1144,12 @@
               'test-suite': { 'suites': ['suite-time-slider'] }
             }
           ]
-        }"></div></div><script>insertPageHeader();
+        }"
+      ></div>
+    </div>
+
+    <script>
+      insertPageHeader();
 
       let mapsInitialized = false;
 
@@ -796,7 +1220,11 @@
         } else {
           panel.style.display = 'block';
         }
-      }</script><script>// The test suites plugins (1 plugin per map)
+      }
+    </script>
+
+    <script>
+      // The test suites plugins (1 plugin per map)
       const testSuitesPlugins = {};
 
       // Register a handler when a map viewer is initialized
@@ -1045,4 +1473,7 @@
           // Alert
           throw new Error('Tests are already running, please wait.');
         }
-      }</script></body></html>
+      }
+    </script>
+  </body>
+</html>

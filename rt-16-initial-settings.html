@@ -1,4 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-16 Initial Settings - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>16 — Initial Settings Tests</h4><p>Initial controls, states, cascading behavior. Tests use dedicated configs that exercise all 8 control types and 5 state types.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/16-initial-settings.md" target="_blank">16-initial-settings.md</a></p></div><h5>Map 1 — Selected Tab & Layer</h5><p>Footer bar opens to "layers" tab. App bar opens to "legend" tab. A specific layer is pre-selected.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-16 Initial Settings - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>16 — Initial Settings Tests</h4>
+        <p>
+          Initial controls, states, cascading behavior. Tests use dedicated configs that exercise all 8 control types and 5 state types.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/16-initial-settings.md" target="_blank">16-initial-settings.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Selected tab & layer -->
+      <h5>Map 1 — Selected Tab & Layer</h5>
+      <p>Footer bar opens to "layers" tab. App bar opens to "legend" tab. A specific layer is pre-selected.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -17,7 +52,17 @@
           'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'details', 'export'] }, 'selectedTab': 'legend' },
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] }, 'selectedTab': 'layers', 'selectedLayersLayerPath': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c' },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — All Controls Disabled</h5><p>Layer has all 8 controls set to false. No UI buttons/sliders should render for it.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: Controls all false (WFS-like layer with all controls disabled) -->
+      <h5>Map 2 — All Controls Disabled</h5>
+      <p>Layer has all 8 controls set to false. No UI buttons/sliders should render for it.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -44,7 +89,18 @@
           'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 3 — Default controls vs Explicit controls (query/hover toggle test)</h5><p>First layer: no controls specified → no query/hover toggles in settings (defaults to false).<br>Second layer: controls.query/hover = true, states.queryable/hoverable = false → toggles appear but OFF. Toggle ON to verify.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 3: Two layers — one with default controls (no query/hover toggles), one with explicit controls.query/hover = true -->
+      <h5>Map 3 — Default controls vs Explicit controls (query/hover toggle test)</h5>
+      <p>First layer: no controls specified → no query/hover toggles in settings (defaults to false).<br>
+         Second layer: controls.query/hover = true, states.queryable/hoverable = false → toggles appear but OFF. Toggle ON to verify.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -76,7 +132,17 @@
           'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 4 — Deep Nesting Cascading (4 Levels)</h5><p>Group → subgroup → child with cascading initialSettings. Parent visible=false, child opacity override, controls.remove=false cascading.</p><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 4: Deep Nesting Cascading -->
+      <h5>Map 4 — Deep Nesting Cascading (4 Levels)</h5>
+      <p>Group → subgroup → child with cascading initialSettings. Parent visible=false, child opacity override, controls.remove=false cascading.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [10, [-75.370748, 45.001058]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -113,11 +179,31 @@
           'appBar': { 'tabs': { 'core': ['legend'] } },
           'footerBar': { 'tabs': { 'core': ['layers'] } },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 — Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 — Configuration Snippet</button><pre id="map4CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>
+
+

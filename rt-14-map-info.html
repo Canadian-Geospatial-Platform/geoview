@@ -1,4 +1,37 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-14 Map Info Bar - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>14 — Map Info Bar Tests</h4><p>Scale bar, mouse position coordinates, attribution, rotation indicator, and expand mode.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/14-map-info.md" target="_blank">14-map-info.md</a></p></div><h5>Map 1 — Dynamic Map Info Bar</h5><p>Dynamic map with layers. Map info bar at bottom shows scale, coordinates, attribution, rotation. Click scale/coordinates to cycle formats. Click expand button for full view.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-14 Map Info Bar - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>14 — Map Info Bar Tests</h4>
+        <p>Scale bar, mouse position coordinates, attribution, rotation indicator, and expand mode.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/14-map-info.md" target="_blank">14-map-info.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Dynamic map with layers (full map info bar) -->
+      <h5>Map 1 — Dynamic Map Info Bar</h5>
+      <p>Dynamic map with layers. Map info bar at bottom shows scale, coordinates, attribution, rotation. Click scale/coordinates to cycle formats. Click expand button for full view.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] }, 'enableRotation': true },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -13,7 +46,17 @@
           'appBar': { 'tabs': { 'core': ['legend'] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Static Map Info Bar</h5><p>Static interaction mode. Map info bar is simplified: no expand, no mouse position, no rotation indicator. Only attribution and scale.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: Static map (simplified map info bar) -->
+      <h5>Map 2 — Static Map Info Bar</h5>
+      <p>Static interaction mode. Map info bar is simplified: no expand, no mouse position, no rotation indicator. Only attribution and scale.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'static',
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
@@ -26,11 +69,25 @@
             ]
           },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

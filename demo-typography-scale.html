@@ -1,4 +1,16 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Calibrated Typography Scale - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><style>.typography-controls {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Calibrated Typography Scale - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .typography-controls {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
@@ -38,7 +50,74 @@
       .browser-font-help ol {
         margin: 8px 0 0;
         padding-left: 20px;
-      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header">Calibrated Typography Scale Demo</div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>GeoView typography scale</h4><p>The samples use the map's GeoView theme and show the computed browser size for every typography variant. The design sizes are calibrated to the browser's default font size, rather than the host page's root size.</p><p>Choose a host root size below to compare 10px, 16px, 20px, and 32px roots. Each choice reloads the page so GeoView measures the root before creating its theme. The browser default remains controlled by your browser's font settings.</p><div class="typography-controls"><label for="rootSize">Host root size for this load:</label> <select id="rootSize"><option value="">Use page default</option><option value="10">10px</option><option value="16">16px</option><option value="20">20px</option><option value="32">32px</option></select></div><div id="typographyReadout" class="typography-readout" aria-live="polite"></div><details class="browser-font-help"><summary>How to change the default font size in Chrome</summary><ol><li>Open <code>chrome://settings/fonts</code> in the address bar, or go to Chrome's menu (⋮) → Settings → Appearance → "Customize fonts".</li><li>Adjust the "Font size" slider. This value is the browser default ("medium") font size that this demo measures — it is separate from the "Host root size" selector above.</li><li>Reload this page afterward; the "Browser default" value in the readout above will reflect the new setting.</li></ol></details><p>Switch the theme or language below to compare the typography scale across GeoView's display themes and languages.</p><div class="typography-controls"><label for="themeSwitch">Theme:</label> <select id="themeSwitch"><option value="geo.ca">Geo.ca</option><option value="canada.ca">Canada.ca</option><option value="light">Light</option><option value="dark">Dark</option></select> <label for="langSwitch">Language:</label> <select id="langSwitch"><option value="en">English</option><option value="fr">French</option></select></div></div><div class="demo-section"><h4>Rendered scale samples</h4><p>Explore the app-bar panels and the footer-bar layers, legend, and data table. Sample GeoJSON areas, routes, and locations are loaded on the map. Open the Typography Scale panel from the app bar to compare actual GeoView Typography variants and their computed sizes.</p></div><div id="map1" class="geoview-map typography-map" data-lang="en" data-config="{
+      }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header">Calibrated Typography Scale Demo</div>
+    <div class="back-to-main">
+      <a href="./index.html?tab=demos">← Back to Main</a>
+    </div>
+
+    <div class="demo-section">
+      <h4>GeoView typography scale</h4>
+      <p>
+        The samples use the map's GeoView theme and show the computed browser size for every typography variant. The design sizes are
+        calibrated to the browser's default font size, rather than the host page's root size.
+      </p>
+      <p>
+        Choose a host root size below to compare 10px, 16px, 20px, and 32px roots. Each choice reloads the page so GeoView measures the root before
+        creating its theme. The browser default remains controlled by your browser's font settings.
+      </p>
+      <div class="typography-controls">
+        <label for="rootSize">Host root size for this load:</label>
+        <select id="rootSize">
+          <option value="">Use page default</option>
+          <option value="10">10px</option>
+          <option value="16">16px</option>
+          <option value="20">20px</option>
+          <option value="32">32px</option>
+        </select>
+      </div>
+      <div id="typographyReadout" class="typography-readout" aria-live="polite"></div>
+      <details class="browser-font-help">
+        <summary>How to change the default font size in Chrome</summary>
+        <ol>
+          <li>Open <code>chrome://settings/fonts</code> in the address bar, or go to Chrome's menu (⋮) → Settings → Appearance → "Customize fonts".</li>
+          <li>Adjust the "Font size" slider. This value is the browser default ("medium") font size that this demo measures — it is separate from the "Host root size" selector above.</li>
+          <li>Reload this page afterward; the "Browser default" value in the readout above will reflect the new setting.</li>
+        </ol>
+      </details>
+      <p>Switch the theme or language below to compare the typography scale across GeoView's display themes and languages.</p>
+      <div class="typography-controls">
+        <label for="themeSwitch">Theme:</label>
+        <select id="themeSwitch">
+          <option value="geo.ca">Geo.ca</option>
+          <option value="canada.ca">Canada.ca</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <label for="langSwitch">Language:</label>
+        <select id="langSwitch">
+          <option value="en">English</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Rendered scale samples</h4>
+      <p>
+        Explore the app-bar panels and the footer-bar layers, legend, and data table. Sample GeoJSON areas, routes, and locations are loaded on
+        the map. Open the Typography Scale panel from the app bar to compare actual GeoView Typography variants and their computed sizes.
+      </p>
+    </div>
+    <div
+      id="map1"
+      class="geoview-map typography-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'viewSettings': { 'projection': 3857 },
           'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
@@ -71,7 +150,12 @@
         'components': ['north-arrow', 'overview-map'],
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><script src="codedoc.js"></script><script>insertPageHeader();
+      }"
+    ></div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       const rootSizeSelect = document.getElementById('rootSize');
       const rootSizeParam = new URLSearchParams(window.location.search).get('root');
@@ -210,4 +294,7 @@
         mapViewer.appBarApi.selectTab(panelId);
       });
 
-      cgpv.init();</script></body></html>
+      cgpv.init();
+    </script>
+  </body>
+</html>

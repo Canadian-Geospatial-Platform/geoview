@@ -1,4 +1,40 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-15 Export - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>15 — Export Tests</h4><p>Map export: PNG, JPEG, PDF formats. Title, DPI, JPEG quality. Legend column layout.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/15-export.md" target="_blank">15-export.md</a></p><p><strong>Navigator config</strong> (for large legend export): <code>demos/20-export-map-large-legend.json</code></p></div><h5>Map 1 — Export with Multiple Layers</h5><p>Export button in app bar. Click to open the export modal. Test PNG, JPEG (quality slider), PDF formats and DPI options.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-15 Export - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>15 — Export Tests</h4>
+        <p>Map export: PNG, JPEG, PDF formats. Title, DPI, JPEG quality. Legend column layout.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/15-export.md" target="_blank">15-export.md</a>
+        </p>
+        <p>
+          <strong>Navigator config</strong> (for large legend export): <code>demos/20-export-map-large-legend.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: Export with multiple layers -->
+      <h5>Map 1 — Export with Multiple Layers</h5>
+      <p>Export button in app bar. Click to open the export modal. Test PNG, JPEG (quality slider), PDF formats and DPI options.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -24,11 +60,47 @@
           'appBar': { 'tabs': { 'core': ['legend', 'export'] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Large Legend Export</h5><p>Many layers with large legend entries. Tests legend column layout and pagination in exported image/PDF.</p><div id="map2" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/20-export-map-large-legend.json"></div><h5>Map 3 — Bad/Edge-Case Legend Export</h5><p>Layers with missing or broken legend entries. Verifies export handles edge cases without crashing.</p><div id="map3" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/21-export-map-bad-legend.json"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 — Configuration Snippet</button><pre id="map3CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <!-- Map 2: Large Legend Export -->
+      <h5>Map 2 — Large Legend Export</h5>
+      <p>Many layers with large legend entries. Tests legend column layout and pagination in exported image/PDF.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/20-export-map-large-legend.json"
+      ></div>
+
+      <!-- Map 3: Bad Legend Export -->
+      <h5>Map 3 — Bad/Edge-Case Legend Export</h5>
+      <p>Layers with missing or broken legend entries. Verifies export handles edge cases without crashing.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/21-export-map-bad-legend.json"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

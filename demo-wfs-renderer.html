@@ -1,4 +1,27 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>WFS Renderer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/codemirror/codemirror.min.css"/><link rel="stylesheet" href="css/codemirror/liquibyte.css"/><script src="js/codemirror/codemirror.min.js"></script><script src="js/codemirror/perl.min.js"></script><script src="js/codemirror/xml.min.js"></script><style>label {
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WFS Renderer - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+
+
+    <link rel="stylesheet" href="css/codemirror/codemirror.min.css"/>
+    <link rel="stylesheet" href="css/codemirror/liquibyte.css"/>
+    <script language="javascript" type="text/javascript" src="js/codemirror/codemirror.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/codemirror/perl.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/codemirror/xml.min.js"></script>
+
+
+    <style>
+      label {
         font-size: 14px;
         font-style: italic;
       }
@@ -25,7 +48,69 @@
         position: absolute;
         overflow: hidden;
         resize: none;
-      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>WFS Renderer Style Configuration Demo</h4><p>This page is used to create a valid GeoView style config from a WMS service to use them for a WFS service.</p></div></div><div class="demo-section"><h4>Configuration Options</h4><div style="margin-bottom: 15px"><label for="renderer">Input WMS/WFS Renderer examples:</label> <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px"><option value='{"url":"https://demo.mapserver.org/cgi-bin/wms","layers":"cities"}'>Cities (Point classBreaks)</option><option value='{"url":"https://ws.mapserver.transports.gouv.qc.ca/swtq","layers":"bgr_v_sous_route_res_sup_act"}'>Road network (LineString uniqueValue)</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en","layers":"AIRB_RAD"}'>Airborne (Point simple) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/critical_minerals_en","layers":"mines"}'>Mines (Point simple) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/oam_en","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/earthquakes_en","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en","layers":"completed"}'>Assessment Completed (Point uniqueValue) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!)) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/charging_corridor_en","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en","layers":"DMF"}'>Surficial Geology (Polygon simple) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/phys_reg_en","layers":"regions"}'>Regions (Polygon uniqueValue) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete)) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en","layers":"mpi-point"}'>Major Projects (styles with functions!) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/fpsn_station_en","layers":"fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4"}'>FPSN Station (Point complex) - VPN</option><option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all) - VPN</option></select></div></div><div class="demo-section"><span>WMS associated with the WFS to read the styles from</span> <input id="stylesUrl" style="width:100%;"/><br/><span>The layers</span> <input id="layers" style="width:100%;"/><div><button class="btn btn-primary" id="executeFetch" style="margin: 10px 0px;">Fetch XML</button></div><h4>The GetStyles response from the WMS which will be used to create the Geoview style:</h4><textarea id="inputTextArea"></textarea><div><button class="btn btn-primary" id="executeButton" style="margin: 10px 0px;">Execute</button></div><h4>Geoview Output Style Configuration:</h4><textarea id="outputTextArea"></textarea><div><p>The resulting configuration can be used to set a layer's "layerStyle" property.<br><i>Example:</i><pre>
+      }
+    </style>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>WFS Renderer Style Configuration Demo</h4>
+        <p>This page is used to create a valid GeoView style config from a WMS service to use them for a WFS service.</p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Configuration Options</h4>
+      <div style="margin-bottom: 15px">
+        <label for="renderer">Input WMS/WFS Renderer examples:</label>
+        <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
+          <option value='{"url":"https://demo.mapserver.org/cgi-bin/wms","layers":"cities"}'>Cities (Point classBreaks)</option>
+          <option value='{"url":"https://ws.mapserver.transports.gouv.qc.ca/swtq","layers":"bgr_v_sous_route_res_sup_act"}'>Road network (LineString uniqueValue)</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en","layers":"AIRB_RAD"}'>Airborne (Point simple) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/critical_minerals_en","layers":"mines"}'>Mines (Point simple) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/oam_en","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/earthquakes_en","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/iaac/assessment_inventory_en","layers":"completed"}'>Assessment Completed (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!)) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/charging_corridor_en","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en","layers":"DMF"}'>Surficial Geology (Polygon simple) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/phys_reg_en","layers":"regions"}'>Regions (Polygon uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete)) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en","layers":"mpi-point"}'>Major Projects (styles with functions!) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/fpsn_station_en","layers":"fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4"}'>FPSN Station (Point complex) - VPN</option>
+          <option value='{"url":"https://qgis-tst.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all) - VPN</option>
+        </select>
+      </div>
+    </div>
+    <div class="demo-section">
+      <span>WMS associated with the WFS to read the styles from</span>
+      <input id="stylesUrl" type="text" style="width:100%;" />
+      <br/>
+      <span>The layers</span>
+      <input id="layers" type="text" style="width:100%;" />
+      <div>
+        <button class="btn btn-primary" id="executeFetch" style="margin: 10px 0px;">Fetch XML</button>
+      </div>
+      <h4>The GetStyles response from the WMS which will be used to create the Geoview style:</h4>
+      <textarea id="inputTextArea" ></textarea>
+      <div>
+        <button class="btn btn-primary" id="executeButton" style="margin: 10px 0px;">Execute</button>
+      </div>
+      <h4>Geoview Output Style Configuration:</h4>
+      <textarea id="outputTextArea"></textarea>
+      <div>
+        <p>
+              The resulting configuration can be used to set a layer's "layerStyle" property. <br>
+              <i>Example:</i>
+              <pre>
                 <code>
 'listOfGeoviewLayerConfig': [{
   'geoviewLayerId': 'M6QU5DFK9PY3U',
@@ -37,7 +122,17 @@
   }]
 }]
                 </code>
-              </pre></p></div><h4>Preview of the SVGs:</h4><button class="btn btn-primary" id="createPreview" style="margin: 0 0 10px 0;">Create preview</button><div id="previewSVGs"></div></div><script src="codedoc.js"></script><script>insertPageHeader();
+              </pre>
+            </p>
+      </div>
+      <h4>Preview of the SVGs:</h4>
+      <button class="btn btn-primary" id="createPreview" style="margin: 0 0 10px 0;">Create preview</button>
+      <div id="previewSVGs"></div>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       // The elements
       const rendererDropdown = document.getElementById('renderer');
@@ -194,4 +289,7 @@
 
       document.getElementById('createPreview').addEventListener('click', (e) => {
         generatePreview();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

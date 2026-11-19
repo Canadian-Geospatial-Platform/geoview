@@ -1,4 +1,43 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-09 Styles - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>09 — Styles Tests</h4><p>Style rendering, visual variables, classifications, symbol shapes, fill patterns, and feature labels.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/09-styles.md" target="_blank">09-styles.md</a></p><p><strong>Navigator configs</strong> (for detailed visual tests): <code>layers/geojson.json</code>, <code>demos/25-feature-visual-variables.json</code>, <code>demos/26-complex-classifications.json</code>, <code>demos/28-symbol-shapes-fill-patterns.json</code>, <code>demos/24-configured-feature-labels.json</code></p></div><h5>Map 1 — Polygon Styles & Style Classes</h5><p>GeoJSON polygons (Ontario) + ESRI Feature layer with classBreaks for style verification.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-09 Styles - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>09 — Styles Tests</h4>
+        <p>Style rendering, visual variables, classifications, symbol shapes, fill patterns, and feature labels.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/09-styles.md" target="_blank">09-styles.md</a>
+        </p>
+        <p>
+          <strong>Navigator configs</strong> (for detailed visual tests):
+          <code>layers/geojson.json</code>, <code>demos/25-feature-visual-variables.json</code>,
+          <code>demos/26-complex-classifications.json</code>, <code>demos/28-symbol-shapes-fill-patterns.json</code>,
+          <code>demos/24-configured-feature-labels.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: GeoJSON polygons + ESRI Feature with classBreaks -->
+      <h5>Map 1 — Polygon Styles & Style Classes</h5>
+      <p>GeoJSON polygons (Ontario) + ESRI Feature layer with classBreaks for style verification.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-75, 45]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -27,11 +66,71 @@
           'appBar': { 'tabs': { 'core': ['legend', 'layers'] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — Feature Visual Variables</h5><p>Tests visual variables: rotation, size variation, color ramps applied to feature attributes.</p><div id="map2" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/25-feature-visual-variables.json"></div><h5>Map 3 — Complex Classifications</h5><p>Multi-field uniqueValue, nested classBreaks, and combined style types on the same layer.</p><div id="map3" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/26-complex-classifications.json"></div><h5>Map 4 — Symbol Shapes & Fill Patterns</h5><p>All symbol shapes (circle, square, diamond, triangle, cross, star, X) and polygon fill patterns.</p><div id="map4" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/28-symbol-shapes-fill-patterns.json"></div><h5>Map 5 — Configured Feature Labels</h5><p>Text labels on features with configured font, halo, declutter, and zoom-dependent visibility.</p><div id="map5" class="geoview-map" data-lang="en" data-config-url="./../../configs/navigator/demos/24-configured-feature-labels.json"></div><button type="button" class="collapsible">Map 1 — Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 — Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 — Configuration Snippet</button><pre id="map3CS" class="panel"></pre><button type="button" class="collapsible">Map 4 — Configuration Snippet</button><pre id="map4CS" class="panel"></pre><button type="button" class="collapsible">Map 5 — Configuration Snippet</button><pre id="map5CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+
+      <!-- Map 2: Visual Variables -->
+      <h5>Map 2 — Feature Visual Variables</h5>
+      <p>Tests visual variables: rotation, size variation, color ramps applied to feature attributes.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/25-feature-visual-variables.json"
+      ></div>
+
+      <!-- Map 3: Complex Classifications -->
+      <h5>Map 3 — Complex Classifications</h5>
+      <p>Multi-field uniqueValue, nested classBreaks, and combined style types on the same layer.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/26-complex-classifications.json"
+      ></div>
+
+      <!-- Map 4: Symbol Shapes & Fill Patterns -->
+      <h5>Map 4 — Symbol Shapes & Fill Patterns</h5>
+      <p>All symbol shapes (circle, square, diamond, triangle, cross, star, X) and polygon fill patterns.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/28-symbol-shapes-fill-patterns.json"
+      ></div>
+
+      <!-- Map 5: Feature Labels -->
+      <h5>Map 5 — Configured Feature Labels</h5>
+      <p>Text labels on features with configured font, halo, declutter, and zoom-dependent visibility.</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/24-configured-feature-labels.json"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 5 — Configuration Snippet</button>
+      <pre id="map5CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

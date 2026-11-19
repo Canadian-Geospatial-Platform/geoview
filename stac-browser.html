@@ -1,4 +1,43 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Package - STAC Browser (beta) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Package - STAC Browser (beta)</h4><p>This page is used to showcase the "STAC Browser" package for browsing and filtering STAC API catalogs.</p><ul class="demo-list" style="display: flex; flex-direction: column"><li><a href="#HLCONF1">1. Stac browser for datacube</a></li><li><a href="#HLCONF2">2. Stac browser for NAPL</a></li><li><a href="#HLCONF3">3. Stac browser for EODMS Sentinel collections</a></li></ul></div></div><div class="demo-section"><h4 id="HLCONF1">1. Stac browser for datacube</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Package - STAC Browser (beta) - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Package - STAC Browser (beta)</h4>
+        <p>This page is used to showcase the "STAC Browser" package for browsing and filtering STAC API catalogs.</p>
+        <ul class="demo-list" style="display: flex; flex-direction: column">
+          <li><a href="#HLCONF1">1. Stac browser for datacube</a></li>
+          <li><a href="#HLCONF2">2. Stac browser for NAPL</a></li>
+          <li><a href="#HLCONF3">3. Stac browser for EODMS Sentinel collections</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4 id="HLCONF1">1. Stac browser for datacube</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="mapSTAC"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -38,7 +77,20 @@
             'isOpen': true
           }
         }]
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTACCS" class="panel"></pre><div class="demo-section"><h4 id="HLCONF2">2. Stac browser for NAPL</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC2" class="geoview-map" data-lang="en" data-config="{
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapSTACCS" class="panel"></pre>
+
+     <div class="demo-section">
+      <h4 id="HLCONF2">2. Stac browser for NAPL</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="mapSTAC2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -110,7 +162,20 @@
             'isOpen': true
           }
         }]
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTAC2CS" class="panel"></pre><div class="demo-section"><h4 id="HLCONF3">3. Stac browser for EODMS Sentinel collections</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC3" class="geoview-map" data-lang="en" data-config="{
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapSTAC2CS" class="panel"></pre>
+
+    <div class="demo-section">
+      <h4 id="HLCONF3">3. Stac browser for EODMS Sentinel collections</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="mapSTAC3"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -153,9 +218,20 @@
             'isOpen': true
           }
         }]
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTAC3CS" class="panel"></pre><script src="./js/page-header.js"></script><script src="codedoc.js"></script><script>cgpv.init();
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="mapSTAC3CS" class="panel"></pre>
+
+    <script src="./js/page-header.js"></script>
+    <script src="codedoc.js"></script>
+    <script>
+      cgpv.init();
 
       // Create configuration snippets for all demos.
       window.addEventListener('load', () => {
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

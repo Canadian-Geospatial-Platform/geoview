@@ -1,4 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-06 Overview Map - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>06 — Overview Map Tests</h4><p>Overview map presence, hide on zoom, and projection switch. Overview map is only available for LCC (3978) and WM (3857).</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/06-overview-map.md" target="_blank">06-overview-map.md</a></p></div><h5>Map 1 — LCC with overview map (hideOnZoom: 7)</h5><p>Overview map visible above zoom 7. Zoom out past 7 to see it hide. Switch projection to WM.</p><div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;"><strong>Current zoom:</strong> <span id="currentZoom" style="font-weight: bold; min-width: 30px;">8</span> <strong style="margin-left: 16px;">Set zoom:</strong> <input id="zoomInput" type="number" min="0" max="20" step="0.1" value="8" style="width: 60px; padding: 4px;"/> <button onclick="setZoom()">Apply</button></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-06 Overview Map - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>06 — Overview Map Tests</h4>
+        <p>
+          Overview map presence, hide on zoom, and projection switch. Overview map is only available for LCC (3978) and WM (3857).
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/06-overview-map.md" target="_blank">06-overview-map.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: LCC with overview map + hideOnZoom -->
+      <h5>Map 1 — LCC with overview map (hideOnZoom: 7)</h5>
+      <p>Overview map visible above zoom 7. Zoom out past 7 to see it hide. Switch projection to WM.</p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <strong>Current zoom:</strong>
+        <span id="currentZoom" style="font-weight: bold; min-width: 30px;">8</span>
+        <strong style="margin-left: 16px;">Set zoom:</strong>
+        <input id="zoomInput" type="number" min="0" max="20" step="0.1" value="8" style="width: 60px; padding: 4px;" />
+        <button onclick="setZoom()">Apply</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [8, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -10,7 +54,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — No overview map (components omits overview-map)</h5><p>Verify overview map is absent.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: No overview map -->
+      <h5>Map 2 — No overview map (components omits overview-map)</h5>
+      <p>Verify overview map is absent.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -21,7 +75,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 - Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 - Configuration Snippet</button><pre id="map2CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+      <button type="button" class="collapsible">Map 1 - Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 - Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       function setZoom() {
         const zoom = parseFloat(document.getElementById('zoomInput').value);
@@ -44,4 +108,7 @@
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

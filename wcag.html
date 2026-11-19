@@ -1,4 +1,59 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>WCAG Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=testing">← Back to Main</a></div><div class="demo-section"><h4>WCAG Demo - Bilingual Maps</h4><p>Accessibility-focused demo showing English and French maps. Edit the JSON configuration below and click "Reload Maps" to see your changes applied to both maps.</p></div></div><div class="demo-section"><h4>Map Viewers</h4></div><div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div><div id="mapSectionEN"></div><div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div><div id="mapSectionFR"></div><div class="demo-section"><h4>Map Configuration</h4><p>Edit the JSON configuration below to customize both map viewers and click "Create Maps" to apply changes.</p></div><div class="navigator-toolbar"><button id="validateConfig" class="btn btn-success btn-large">Validate</button> <button id="reloadMaps" class="btn btn-primary btn-large">Create Maps</button> <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span></div><div class="editor"><div class="line-numbers"></div><textarea id="mapConfig" name="configuration" rows="15" cols="150">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WCAG Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>WCAG Demo - Bilingual Maps</h4>
+        <p>
+          Accessibility-focused demo showing English and French maps. Edit the JSON configuration below and click "Reload Maps" to see your
+          changes applied to both maps.
+        </p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Map Viewers</h4>
+    </div>
+
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div>
+    <div id="mapSectionEN"></div>
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div>
+    <div id="mapSectionFR"></div>
+
+    <div class="demo-section">
+      <h4>Map Configuration</h4>
+      <p>Edit the JSON configuration below to customize both map viewers and click "Create Maps" to apply changes.</p>
+    </div>
+
+    <div class="navigator-toolbar">
+      <button id="validateConfig" class="btn btn-success btn-large">Validate</button>
+      <button id="reloadMaps" class="btn btn-primary btn-large">Create Maps</button>
+      <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span>
+    </div>
+
+    <div class="editor">
+      <div class="line-numbers"></div>
+      <textarea id="mapConfig" name="configuration" rows="15" cols="150">
 {
   "map": {
     "viewSettings": {
@@ -77,7 +132,13 @@
       }
     }
   ]
-}</textarea></div><script src="codedoc.js"></script><script>insertPageHeader();
+}</textarea
+      >
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       const mapConfigTextarea = document.getElementById('mapConfig');
       const reloadMapsBtn = document.getElementById('reloadMaps');
@@ -153,4 +214,7 @@
       // Reload maps button handler
       reloadMapsBtn.addEventListener('click', async function (e) {
         await createMaps();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

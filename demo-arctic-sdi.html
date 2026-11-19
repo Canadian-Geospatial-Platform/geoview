@@ -1,4 +1,51 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Arctic SDI Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>Arctic SDI Demo</h4><p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p></div><div class="demo-section"><h4>Arctic SDI Demo</h4><p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p><ul class="demo-list"><li><a href="#HLYR1">1. Wetlands</a></li><li><a href="#HLYR2">2. Sea Ice Extent (1979-2016)</a></li></ul></div></div><div class="demo-section"><h4 id="HLYR1">1. Wetlands</h4><a class="ref-link" href="#top">Top</a></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Arctic SDI Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Arctic SDI Demo</h4>
+        <p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p>
+      </div>
+      <div class="demo-section">
+        <h4>Arctic SDI Demo</h4>
+        <p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p>
+        <ul class="demo-list">
+          <li><a href="#HLYR1">1. Wetlands</a></li>
+          <li><a href="#HLYR2">2. Sea Ice Extent (1979-2016)</a></li>
+        </ul>
+      </div>
+    </div>
+    </div>
+
+    <div class="demo-section">
+      <h4 id="HLYR1">1. Wetlands</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -52,7 +99,20 @@
         },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="map1CS" class="panel"></pre><div class="demo-section"><h4 id="HLYR2">2. Sea Ice Extent (1979-2016)</h4><a class="ref-link" href="#top">Top</a></div><div id="map2" class="geoview-map" data-lang="en" data-config="{
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="map1CS" class="panel"></pre>
+
+    <div class="demo-section">
+      <h4 id="HLYR2">2. Sea Ice Extent (1979-2016)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="map2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -167,7 +227,14 @@
             }
           }
         ]
-      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="map2CS" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+      }"
+    ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="map2CS" class="panel"></pre>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       // initialize cgpv
       cgpv.init();
@@ -176,4 +243,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

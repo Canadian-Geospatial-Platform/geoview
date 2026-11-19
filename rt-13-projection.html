@@ -1,4 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>RT-13 Projection - Release Testing</title><link rel="shortcut icon" href="./favicon.ico"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./release-testing.html">← Back to Release Testing</a></div><div class="demo-section"><h4>13 — Projection Cross-Feature Tests</h4><p>Cross-feature interactions between projection switches and geometry, data tables, north pole, extent, and vector tiles.</p><p><strong>Test plan:</strong> <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/13-projection.md" target="_blank">13-projection.md</a></p></div><h5>Map 1 — LCC with drawer, vector layer, data table, projection switch</h5><p>Draw geometry, open data table, then switch projection. Verify geometry reprojects and table survives.</p><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-13 Projection - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>13 — Projection Cross-Feature Tests</h4>
+        <p>
+          Cross-feature interactions between projection switches and geometry, data tables, north pole, extent, and vector tiles.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/13-projection.md" target="_blank">13-projection.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: LCC with drawer + vector layer + data table + projection switch -->
+      <h5>Map 1 — LCC with drawer, vector layer, data table, projection switch</h5>
+      <p>Draw geometry, open data table, then switch projection. Verify geometry reprojects and table survives.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -14,7 +49,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 2 — WM with max extent override + projection switch</h5><p>Max extent [-180, 0, 100, 80]. Verify constraint applies after switching to LCC and back to WM.</p><div id="map2" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 2: WM with max extent override + projection switch -->
+      <h5>Map 2 — WM with max extent override + projection switch</h5>
+      <p>Max extent [-180, 0, 100, 80]. Verify constraint applies after switching to LCC and back to WM.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': {
               'projection': 3857,
@@ -29,7 +74,17 @@
           'appBar': { 'tabs': { 'core': [] } },
           'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
-        }"></div><h5>Map 3 — WM with vector tile layer</h5><p>Switch projection to LCC — vector tile should show incompatibility warning.</p><div id="map3" class="geoview-map" data-lang="en" data-config="{
+        }"
+      ></div>
+
+      <!-- Map 3: WM with vector tile layer (for incompatible VT warning test) -->
+      <h5>Map 3 — WM with vector tile layer</h5>
+      <p>Switch projection to LCC — vector tile should show incompatibility warning.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [4, [-90, 55]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
@@ -47,11 +102,26 @@
           'appBar': { 'tabs': { 'core': ['legend'] } },
           'footerBar': { 'tabs': { 'core': ['layers'] } },
           'theme': 'geo.ca'
-        }"></div><button type="button" class="collapsible">Map 1 - Configuration Snippet</button><pre id="map1CS" class="panel"></pre><button type="button" class="collapsible">Map 2 - Configuration Snippet</button><pre id="map2CS" class="panel"></pre><button type="button" class="collapsible">Map 3 - Configuration Snippet</button><pre id="map3CS" class="panel"></pre></div><script src="codedoc.js"></script><script>insertPageHeader();
+        }"
+      ></div>
+      <button type="button" class="collapsible">Map 1 - Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 - Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 - Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
         createConfigModals();
         createMapNavigation();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

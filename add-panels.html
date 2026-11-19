@@ -1,4 +1,42 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Add Panels - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Add Panels</h4><p>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</p></div></div><div class="toolbar"><button class="btn btn-primary add-appbar-panel-btn">Add Appbar Panel</button> <button class="btn btn-primary add-navbar-panel-btn">Add Navbar Panel</button> <button class="btn btn-primary add-navbar-button-btn">Add Navbar Button</button> <input class="form-control" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1"/></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Panels - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Add Panels</h4>
+        <p>This page is used to showcase adding panels to the app-bar and adding panels and buttons to the navbar.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-primary add-appbar-panel-btn">Add Appbar Panel</button>
+      <button class="btn btn-primary add-navbar-panel-btn">Add Navbar Panel</button>
+      <button class="btn btn-primary add-navbar-button-btn">Add Navbar Button</button>
+      <input class="form-control" type="text" id="navbar-button-group-name" placeholder="Enter group name" value="groupName1" />
+    </div>
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -19,7 +57,15 @@
         },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+      }"
+    ></div>
+
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
@@ -116,4 +162,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

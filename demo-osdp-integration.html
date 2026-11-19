@@ -1,4 +1,44 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>OSDP Integration - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>OSDP Integration</h4><p>Open Science Data Portal integration with GeoView.</p></div></div><div class="map-title-holder"><h4 id="HMap1">OSDP Integration</h4></div><div id="mapSection" style="display: grid; min-height: 700px"><div id="Map1" class="geoview-map" style="height: 100%" data-lang="fr" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>OSDP Integration - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>OSDP Integration</h4>
+        <p>Open Science Data Portal integration with GeoView.</p>
+      </div>
+    </div>
+
+    <div class="map-title-holder">
+      <h4 id="HMap1">OSDP Integration</h4>
+    </div>
+
+    <div id="mapSection" style="display: grid; min-height: 700px">
+      <div
+        id="Map1"
+        class="geoview-map"
+        style="height: 100%"
+        data-lang="fr"
+        data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -44,7 +84,34 @@
             }
           }
         ]
-      }"></div></div><div class="demo-section"><h4>Changes to map div</h4><div style="display: flex; gap: 20px; align-items: flex-start"><div><button class="btn btn-primary" id="deleteMap" title="Deletes map div if it exists (deleting and unmounting the MapViewer in the process).">Delete map div</button><details><summary>Code</summary><pre>document.getElementById('Map1').remove();</pre></details></div><div><button class="btn btn-primary" id="createMap" title="Creates a new div for the map, if the original div has been deleted">Create map div</button><details><summary>Code</summary><pre>
+      }"
+      ></div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Changes to map div</h4>
+      <div style="display: flex; gap: 20px; align-items: flex-start">
+        <div>
+          <button
+            class="btn btn-primary"
+            id="deleteMap"
+            title="Deletes map div if it exists (deleting and unmounting the MapViewer in the process)."
+          >
+            Delete map div
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>document.getElementById('Map1').remove();</pre>
+          </details>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" id="createMap" title="Creates a new div for the map, if the original div has been deleted">
+            Create map div
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>
 if (!document.getElementById('Map1')) {
   const newDiv = document.createElement('div');
   const id = document.createAttribute('id');
@@ -55,14 +122,55 @@ if (!document.getElementById('Map1')) {
   newDiv.setAttributeNode(dataLang);
   document.getElementById('mapSection').appendChild(newDiv);
 }
-          </pre></details></div><div><button class="btn btn-primary" id="changeLanguage" title="Changes the div language setting from french to english or english to french.">Change <code>data-lang</code> Attribute</button><p>Currently: <i id="dataLang">fr</i></p><p>Note: Will not effect the map until reloaded.</p><details><summary>Code</summary><pre>
+          </pre
+            >
+          </details>
+        </div>
+
+        <div>
+          <button
+            class="btn btn-primary"
+            id="changeLanguage"
+            title="Changes the div language setting from french to english or english to french."
+          >
+            Change <code>data-lang</code> Attribute
+          </button>
+          <p>Currently: <i id="dataLang">fr</i></p>
+          <p>Note: Will not effect the map until reloaded.</p>
+          <details>
+            <summary>Code</summary>
+            <pre>
 lang = lang === 'fr' ? 'en' : 'fr';
 const mapDiv = document.getElementById('Map1');
 if (mapDiv) {
   mapDiv.setAttribute('data-lang', lang);
             }
-          </pre></details></div></div></div><br/><br/><div class="demo-section"><h4>Add Layers</h4><div style="display: flex; gap: 20px; align-items: flex-start"><div><textarea id="layerUuids" cols="40" rows="5">
-21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326,16ec36d1-b320-4dcd-b71f-94670a59095a</textarea><br/><button class="btn btn-primary" id="addLayers" title="Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line">Add Layers</button><details><summary>Code</summary><pre>
+          </pre
+            >
+          </details>
+        </div>
+      </div>
+    </div>
+    <br /><br />
+
+    <div class="demo-section">
+      <h4>Add Layers</h4>
+      <div style="display: flex; gap: 20px; align-items: flex-start">
+        <div>
+          <textarea id="layerUuids" cols="40" rows="5">
+21b821cf-0f1c-40ee-8925-eab12d357668,ccc75c12-5acc-4a6a-959f-ef6f621147b9,0fca08b5-e9d0-414b-a3c4-092ff9c5e326,16ec36d1-b320-4dcd-b71f-94670a59095a</textarea
+          >
+          <br />
+          <button
+            class="btn btn-primary"
+            id="addLayers"
+            title="Add entered Geocore UUID's to the map. Can be separated with commas or each on a new line"
+          >
+            Add Layers
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>
 if (document.getElementById('Map1')) {
   const layerUuids = document.getElementById('layerUuids').value;
   const uuidList = layerUuids.split('\n').join(',').split(',');
@@ -74,7 +182,56 @@ function addLayers(layers) {
     cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(layer);
   });
 }
-            </pre></details></div><div style="display: flex; flex-direction: column; gap: 10px"><div class="selector"><select name="Select custom config" id="switchCustom" class="form-select"><option value="Airborne Radioactivity">Airborne Radioactivity</option><option value="IAAC">IAAC</option><option value="CESI">CESI</option><option value="DFO">DFO</option><option value="landCover">Land Cover 2010</option></select> <input id="layerUuidCustom" class="form-control"/></div><div><textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea></div><div><button class="btn btn-primary" id="addLayersCustom" title="Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)">Add Layers With Custom Config</button><details><summary>Code</summary><pre>cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);</pre></details></div></div></div></div><br/><br/><div class="demo-section"><h4>Current Stored Config</h4><div style="display: flex; gap: 20px; align-items: flex-start"><div><button class="btn btn-primary" id="refreshMap" title="Recreates the map using the config below, creating a new div if it has been deleted">Refresh map</button><details><summary>Code</summary><pre>
+            </pre>
+          </details>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="selector">
+            <select name="Select custom config" id="switchCustom" class="form-select">
+              <option value="Airborne Radioactivity">Airborne Radioactivity</option>
+              <option value="IAAC">IAAC</option>
+              <option value="CESI">CESI</option>
+              <option value="DFO">DFO</option>
+              <option value="landCover">Land Cover 2010</option>
+            </select>
+            <input id="layerUuidCustom" class="form-control" />
+          </div>
+
+          <div>
+            <textarea id="layerUuidCustomEntries" cols="80" rows="25"></textarea>
+          </div>
+          <div>
+            <button
+              class="btn btn-primary"
+              id="addLayersCustom"
+              title="Add entered Geocore UUID's to the map with a custom configuration (List of layer entries)"
+            >
+              Add Layers With Custom Config
+            </button>
+            <details>
+              <summary>Code</summary>
+              <pre>cgpv.api.getMapViewer('Map1').layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);</pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br /><br />
+
+    <div class="demo-section">
+      <h4>Current Stored Config</h4>
+      <div style="display: flex; gap: 20px; align-items: flex-start">
+        <div>
+          <button
+            class="btn btn-primary"
+            id="refreshMap"
+            title="Recreates the map using the config below, creating a new div if it has been deleted"
+          >
+            Refresh map
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>
             async function refreshMap() {
               try {
                 // Remove the map
@@ -104,18 +261,100 @@ function addLayers(layers) {
                   await cgpv.api.deleteMapViewer(mapId, false);
               }
             }
-          </pre></details></div><div><button class="btn btn-primary" id="updateState" title="Updates the stored config with the current map state">Update Config With Current Map State</button><div class="selector"><label for="keepNames">Override Geocore Service Names:</label> <select name="keepNames" id="keepNames" class="form-select"><option value="true">true</option><option value="false">false</option><option value="hybrid">hybrid</option></select></div><details><summary>Modes</summary><pre>
+          </pre
+            >
+          </details>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="updateState" title="Updates the stored config with the current map state">
+            Update Config With Current Map State
+          </button>
+          <div class="selector">
+            <label for="keepNames">Override Geocore Service Names:</label>
+            <select name="keepNames" id="keepNames" class="form-select">
+              <option value="true">true</option>
+              <option value="false">false</option>
+              <option value="hybrid">hybrid</option>
+            </select>
+          </div>
+          <details>
+            <summary>Modes</summary>
+            <pre>
 true - All names are kept as they appear on the map
 false - All geocore names are set to undefined, to be reapplied by the service
 hybrid - Geocore layer names are kept, style to be reapplied by the service
-          </pre></details><details><summary>Code</summary><pre>mapConfig = cgpv.api.getMapViewer('Map1').createMapConfigFromMapState(overrideGeocoreServiceNames);</pre></details></div></div></div><br/><div><textarea id="configTextArea" cols="100" rows="50" readonly="readonly"> </textarea></div><div class="demo-section"><h4>Change the layer names in the config</h4><p>The examples provided below are for the default three layers in the add layers box above. To see this work, click the "Add Layers" button with the default layers, click "Update With Map State" once the layers are loaded, and then click "Change Names". The names in the config will be updated.</p><p>To try it yourself, add any layer to the map, update the config, and then copy the layer name you would like to change. Put it in square brackets in the box below, followed by a comma, and then the name you would like to replace it with - [name to change, new name]. Note that the order of the names in the pair, and the order of the pairs do not matter, [Radioactivité de l'air, Radioactivity] and [Radioactivity, Radioactivité de l'air] will function the same - any provided layer name will be replaced with its pair, so the same call can be used to switch a name and switch it back.</p><textarea id="layerNames" cols="100" rows="4">
-[Radioactivité de l'air, Radioactivity], [Périmètre de localisation des stations, Perimeter], [Carte commémorative du Canada, Commemorative Map]</textarea><br/><div style="display: flex; gap: 20px; align-items: flex-start"><div><button class="btn btn-primary" id="changeNames" title="Replaces listed layer names with thei provided pair in the config">Change Names</button><details><summary>Code</summary><pre>
+          </pre
+            >
+          </details>
+          <details>
+            <summary>Code</summary>
+            <pre>mapConfig = cgpv.api.getMapViewer('Map1').createMapConfigFromMapState(overrideGeocoreServiceNames);</pre>
+          </details>
+        </div>
+      </div>
+    </div>
+    <br />
+
+    <div>
+      <textarea id="configTextArea" cols="100" rows="50" readonly> </textarea>
+    </div>
+
+    <div class="demo-section">
+      <h4>Change the layer names in the config</h4>
+      <p>
+        The examples provided below are for the default three layers in the add layers box above. To see this work, click the "Add Layers"
+        button with the default layers, click "Update With Map State" once the layers are loaded, and then click "Change Names". The names
+        in the config will be updated.
+      </p>
+      <p>
+        To try it yourself, add any layer to the map, update the config, and then copy the layer name you would like to change. Put it in
+        square brackets in the box below, followed by a comma, and then the name you would like to replace it with - [name to change, new
+        name]. Note that the order of the names in the pair, and the order of the pairs do not matter, [Radioactivité de l'air,
+        Radioactivity] and [Radioactivity, Radioactivité de l'air] will function the same - any provided layer name will be replaced with
+        its pair, so the same call can be used to switch a name and switch it back.
+      </p>
+      <textarea id="layerNames" cols="100" rows="4">
+[Radioactivité de l'air, Radioactivity], [Périmètre de localisation des stations, Perimeter], [Carte commémorative du Canada, Commemorative Map]</textarea
+      >
+      <br />
+      <div style="display: flex; gap: 20px; align-items: flex-start">
+        <div>
+          <button class="btn btn-primary" id="changeNames" title="Replaces listed layer names with thei provided pair in the config">
+            Change Names
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>
 const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
 cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig);
-        </pre></details></div><div><button class="btn btn-primary" id="changeNamesAndRemove" title="Replaces listed layer names with thei provided pair in the config, and removes any names that aren't listed">Change Names and Remove Unlisted</button><details><summary>Code</summary><pre>
+        </pre
+            >
+          </details>
+        </div>
+        <div>
+          <button
+            class="btn btn-primary"
+            id="changeNamesAndRemove"
+            title="Replaces listed layer names with thei provided pair in the config, and removes any names that aren't listed"
+          >
+            Change Names and Remove Unlisted
+          </button>
+          <details>
+            <summary>Code</summary>
+            <pre>
 const pairs = [["Radioactivité de l'air", 'Radioactivity'], ['Périmètre de localisation des stations', 'Perimeter'], ['Carte commémorative du Canada', 'Commemorative Map']];
 cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true);
-        </pre></details></div></div></div><br/><br/><script src="codedoc.js"></script><script>insertPageHeader();
+        </pre
+            >
+          </details>
+        </div>
+      </div>
+    </div>
+    <br /><br />
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       // Empty map config
       let mapConfig = {
@@ -497,4 +736,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
       });
 
       // initialize cgpv
-      cgpv.init();</script></body></html>
+      cgpv.init();
+    </script>
+  </body>
+</html>

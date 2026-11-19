@@ -1,4 +1,165 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Interactions - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Interactions</h4><p>This page is used to showcase different Interactions functionalities, In this example, select a shape to draw in a specific group, draw the shape, adjust modifying capabilities on the group, adjust snapping capabilities on the group.</p></div></div><div class="draw-menu"><div class="draw-menu-item"><span>Select + Translate mode?</span> <input class="form-check-input" id="chkTranslate" type="checkbox" onchange="chkTranslate()"/> <span style="font-size: smaller; margin-left: 8px">(enable to click a shape to select it, then drag to move it to a new position)</span></div><div class="draw-menu-item"><span>Extent mode?</span> <input class="form-check-input" id="chkExtent" type="checkbox" onchange="chkExtent()"/> <span style="font-size: smaller; margin-left: 8px">(Shift-Drag to draw an extent, Shift-Drag corners/edges to resize, Shift-Click outside to remove)</span></div></div><div class="draw-menu" style="margin-top: 15px"><div id="geomGroupA" style="color: blue"><div class="draw-menu-item">GROUP A:</div><div class="draw-menu-item"><span>Select shape:</span> <select class="form-select" name="Draw switcher" id="switchDrawA" onchange="selDrawChanged('geomGroupA')"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button class="btn btn-primary" onclick="btnDrawStop('switchDrawA')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input class="form-check-input" id="chkModifA" type="checkbox" onchange="chkModif('geomGroupA')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input class="form-check-input" id="chkSnapA" type="checkbox" onchange="chkSnap('geomGroupA')"/></div><div class="draw-menu-item"><button class="btn btn-primary" onclick="btnClearGroup('geomGroupA')">Clear group</button></div></div><div id="geomGroupB" style="color: green"><div class="draw-menu-item">GROUP B:</div><div class="draw-menu-item"><span>Select shape:</span> <select class="form-select" name="Draw switcher" id="switchDrawB" onchange="selDrawChanged('geomGroupB')"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button class="btn btn-primary" onclick="btnDrawStop('switchDrawB')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input class="form-check-input" id="chkModifB" type="checkbox" onchange="chkModif('geomGroupB')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input class="form-check-input" id="chkSnapB" type="checkbox" onchange="chkSnap('geomGroupB')"/></div><div class="draw-menu-item"><button class="btn btn-primary" onclick="btnClearGroup('geomGroupB')">Clear group</button></div></div><div id="geomGroupC" style="color: red"><div class="draw-menu-item">GROUP C:</div><div class="draw-menu-item"><span>Select shape:</span> <select class="form-select" name="Draw switcher" id="switchDrawC" onchange="selDrawChanged('geomGroupC')"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button class="btn btn-primary" onclick="btnDrawStop('switchDrawC')">Stop drawing</button></div><div class="draw-menu-item"><span>Modify shapes?</span> <input class="form-check-input" id="chkModifC" type="checkbox" onchange="chkModif('geomGroupC')"/></div><div class="draw-menu-item"><span>Snap on shapes?</span> <input class="form-check-input" id="chkSnapC" type="checkbox" onchange="chkSnap('geomGroupC')"/></div><div class="draw-menu-item"><button class="btn btn-primary" onclick="btnClearGroup('geomGroupC')">Clear group</button></div></div></div><div style="position: relative; font-size: smaller">From the doc: The snap interaction must be added after the Modify and Draw interactions in order for its map browser event handlers to be fired first. Its handlers are responsible of doing the snapping.</div><div style="position: relative"><div class="logs-container"><div class="logs-container-title">API EVENTS LOGS</div><div class="logs-container-sub-title">(see console for more)</div><div id="LOGS1"></div></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactions - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="codedoc.js"></script>
+  <script src="cgpv-main.js"></script></head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Interactions</h4>
+        <p>
+          This page is used to showcase different Interactions functionalities, In this example, select a shape to draw in a specific group,
+          draw the shape, adjust modifying capabilities on the group, adjust snapping capabilities on the group.
+        </p>
+      </div>
+    </div>
+
+    <div class="draw-menu">
+      <div class="draw-menu-item">
+        <span>Select + Translate mode?</span>
+        <input class="form-check-input" id="chkTranslate" type="checkbox" onchange="chkTranslate()" />
+        <span style="font-size: smaller; margin-left: 8px"
+          >(enable to click a shape to select it, then drag to move it to a new position)</span
+        >
+      </div>
+      <div class="draw-menu-item">
+        <span>Extent mode?</span>
+        <input class="form-check-input" id="chkExtent" type="checkbox" onchange="chkExtent()" />
+        <span style="font-size: smaller; margin-left: 8px"
+          >(Shift-Drag to draw an extent, Shift-Drag corners/edges to resize, Shift-Click outside to remove)</span
+        >
+      </div>
+    </div>
+
+    <div class="draw-menu" style="margin-top: 15px">
+      <!-- GROUP A -->
+      <div id="geomGroupA" style="color: blue">
+        <div class="draw-menu-item">GROUP A:</div>
+
+        <div class="draw-menu-item">
+          <span>Select shape:</span>
+          <select class="form-select" name="Draw switcher" id="switchDrawA" onchange="selDrawChanged('geomGroupA')">
+            <option value="None" selected>None</option>
+            <option value="Point">Points</option>
+            <option value="LineString">Lines</option>
+            <option value="Circle">Circles</option>
+            <option value="Polygon">Polygons</option>
+          </select>
+          <button class="btn btn-primary" onclick="btnDrawStop('switchDrawA')">Stop drawing</button>
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Modify shapes?</span>
+          <input class="form-check-input" id="chkModifA" type="checkbox" onchange="chkModif('geomGroupA')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Snap on shapes?</span>
+          <input class="form-check-input" id="chkSnapA" type="checkbox" onchange="chkSnap('geomGroupA')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <button class="btn btn-primary" onclick="btnClearGroup('geomGroupA')">Clear group</button>
+        </div>
+      </div>
+      <!-- /GROUP A -->
+
+      <!-- GROUP B -->
+      <div id="geomGroupB" style="color: green">
+        <div class="draw-menu-item">GROUP B:</div>
+
+        <div class="draw-menu-item">
+          <span>Select shape:</span>
+          <select class="form-select" name="Draw switcher" id="switchDrawB" onchange="selDrawChanged('geomGroupB')">
+            <option value="None" selected>None</option>
+            <option value="Point">Points</option>
+            <option value="LineString">Lines</option>
+            <option value="Circle">Circles</option>
+            <option value="Polygon">Polygons</option>
+          </select>
+          <button class="btn btn-primary" onclick="btnDrawStop('switchDrawB')">Stop drawing</button>
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Modify shapes?</span>
+          <input class="form-check-input" id="chkModifB" type="checkbox" onchange="chkModif('geomGroupB')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Snap on shapes?</span>
+          <input class="form-check-input" id="chkSnapB" type="checkbox" onchange="chkSnap('geomGroupB')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <button class="btn btn-primary" onclick="btnClearGroup('geomGroupB')">Clear group</button>
+        </div>
+      </div>
+      <!-- /GROUP B -->
+
+      <!-- GROUP C -->
+      <div id="geomGroupC" style="color: red">
+        <div class="draw-menu-item">GROUP C:</div>
+
+        <div class="draw-menu-item">
+          <span>Select shape:</span>
+          <select class="form-select" name="Draw switcher" id="switchDrawC" onchange="selDrawChanged('geomGroupC')">
+            <option value="None" selected>None</option>
+            <option value="Point">Points</option>
+            <option value="LineString">Lines</option>
+            <option value="Circle">Circles</option>
+            <option value="Polygon">Polygons</option>
+          </select>
+          <button class="btn btn-primary" onclick="btnDrawStop('switchDrawC')">Stop drawing</button>
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Modify shapes?</span>
+          <input class="form-check-input" id="chkModifC" type="checkbox" onchange="chkModif('geomGroupC')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <span>Snap on shapes?</span>
+          <input class="form-check-input" id="chkSnapC" type="checkbox" onchange="chkSnap('geomGroupC')" />
+        </div>
+
+        <div class="draw-menu-item">
+          <button class="btn btn-primary" onclick="btnClearGroup('geomGroupC')">Clear group</button>
+        </div>
+      </div>
+      <!-- /GROUP C -->
+    </div>
+
+    <div style="position: relative; font-size: smaller">
+      From the doc: The snap interaction must be added after the Modify and Draw interactions in order for its map browser event handlers to
+      be fired first. Its handlers are responsible of doing the snapping.
+    </div>
+    <div style="position: relative">
+      <div class="logs-container">
+        <div class="logs-container-title">API EVENTS LOGS</div>
+        <div class="logs-container-sub-title">(see console for more)</div>
+        <div id="LOGS1"></div>
+      </div>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
             'map': {
               'viewSettings': {
                 'minZoom': 2,
@@ -23,7 +184,18 @@
             },
             'corePackages': [],
             'theme': 'geo.ca'
-          }"></div></div><hr/><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>insertPageHeader();
+          }"
+      ></div>
+    </div>
+    <hr />
+
+    <hr />
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
+    <!-- /ALL -->
+
+    <script>
+      insertPageHeader();
 
       let groupInteractions = {
         geomGroupA: {},
@@ -247,4 +419,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>

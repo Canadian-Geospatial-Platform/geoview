@@ -1,4 +1,83 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Release Navigator - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/></head><body><div id="page-header"></div><div><div class="back-to-main back-to-main-flex"><a href="./index.html?tab=testing" class="btn btn-primary">← Back to Main</a></div><div class="demo-section"><h4>Release Navigator</h4><p>Interactive navigator to explore and test different GeoView release configurations.</p></div></div><div class="demo-section"><h4>Select Release</h4><div class="selector-container navigator-selector-row"><label for="configLoader" class="navigator-label-nowrap">Release to load:</label> <select id="configLoader" class="navigator-select"><option value="">--select--</option></select></div></div><div class="demo-section"><h4>Display Options</h4><div class="selector-container navigator-selector-wrap"><div class="navigator-option-group"><label for="switchLang" class="navigator-label">Language:</label> <select id="switchLang" class="navigator-select"><option value="en">English</option><option value="fr">French</option></select></div><div class="navigator-option-group"><label for="switchProjection" class="navigator-label">Projection:</label> <select id="switchProjection" class="navigator-select"><option value="3978">LCC (3978)</option><option value="3857">Web Mercator (3857)</option><option value="unsupported">Not Supported</option></select></div></div></div><div class="demo-section"><h4>Map Viewer</h4></div><div id="mapSection" class="navigator-map-section"><div id="map1" style="height: 800px"></div></div><div class="demo-section"><h4>Map Configuration</h4><p>Edit the JSON configuration below to customize the map viewer and click "Apply Configuration" to reload the map.</p></div><div class="navigator-toolbar"><button id="validateConfig" class="btn btn-success btn-large">Validate</button> <button id="applyConfig" class="btn btn-primary btn-large">Apply Configuration</button> <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span></div><div class="editor"><div class="line-numbers"></div><textarea id="mapConfig" name="configuration" rows="15" cols="150">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Release Navigator - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main back-to-main-flex">
+        <a href="./index.html?tab=testing" class="btn btn-primary">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Release Navigator</h4>
+        <p>Interactive navigator to explore and test different GeoView release configurations.</p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Select Release</h4>
+      <div class="selector-container navigator-selector-row">
+        <label for="configLoader" class="navigator-label-nowrap">Release to load:</label>
+        <select id="configLoader" class="navigator-select">
+          <option value="">--select--</option>
+          <!-- Options will be populated dynamically from script below -->
+        </select>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Display Options</h4>
+      <div class="selector-container navigator-selector-wrap">
+        <div class="navigator-option-group">
+          <label for="switchLang" class="navigator-label">Language:</label>
+          <select id="switchLang" class="navigator-select">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+          </select>
+        </div>
+        <div class="navigator-option-group">
+          <label for="switchProjection" class="navigator-label">Projection:</label>
+          <select id="switchProjection" class="navigator-select">
+            <option value="3978">LCC (3978)</option>
+            <option value="3857">Web Mercator (3857)</option>
+            <option value="unsupported">Not Supported</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Map Viewer</h4>
+    </div>
+
+    <div id="mapSection" class="navigator-map-section">
+      <div id="map1" style="height: 800px"></div>
+    </div>
+
+    <div class="demo-section">
+      <h4>Map Configuration</h4>
+      <p>Edit the JSON configuration below to customize the map viewer and click "Apply Configuration" to reload the map.</p>
+    </div>
+    <div class="navigator-toolbar">
+      <button id="validateConfig" class="btn btn-success btn-large">Validate</button>
+      <button id="applyConfig" class="btn btn-primary btn-large">Apply Configuration</button>
+      <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span>
+    </div>
+    <div class="editor">
+      <div class="line-numbers"></div>
+      <textarea id="mapConfig" name="configuration" rows="15" cols="150">
 {
   "map": {
     "viewSettings": {
@@ -26,7 +105,13 @@
   "components": ["north-arrow", "overview-map"],
   "theme": "geo.ca",
   "corePackages": []
-}</textarea></div><script src="codedoc.js"></script><script>insertPageHeader();
+}</textarea
+      >
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
 
       const configLoader = document.getElementById('configLoader');
       const switchLang = document.getElementById('switchLang');
@@ -258,4 +343,7 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
-      });</script></body></html>
+      });
+    </script>
+  </body>
+</html>
