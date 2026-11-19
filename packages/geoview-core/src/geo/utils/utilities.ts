@@ -7,7 +7,7 @@ import { Style, Stroke, Fill, Circle } from 'ol/style';
 import type { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
 import type { Extent } from 'ol/extent';
-import { containsCoordinate, buffer } from 'ol/extent';
+import { containsCoordinate, buffer, isEmpty } from 'ol/extent';
 import type { OSM, VectorTile } from 'ol/source';
 import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
@@ -18,6 +18,7 @@ import GML3 from 'ol/format/GML3';
 import { CONST_LAYER_TYPES, MIME_TYPE_FORMAT_APP_XML, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import {
   CONFIG_PROXY_URL,
+  type TypeFeatureInfoEntry,
   type TypeMapMouseInfo,
   type TypeOutfields,
   type TypeStyleGeometry,
@@ -1925,6 +1926,58 @@ export abstract class GeoUtilities {
    */
   static isValidExtent(extent: Extent | undefined): boolean {
     return (extent && extent.length === 4 && extent.every((coordinate) => Number.isFinite(coordinate))) ?? false;
+  }
+
+  /**
+   * Checks whether an extent is valid (see `isValidExtent`) and not inverted (minimum not above maximum).
+   *
+   * Points (zero-size extents) are accepted.
+   *
+   * @param extent - The extent to check
+   * @returns True when the extent is valid and not inverted
+   */
+  static isValidOrderedExtent(extent: Extent | undefined): extent is Extent {
+    return !!extent && GeoUtilities.isValidExtent(extent) && !isEmpty(extent);
+  }
+
+  /**
+   * Checks whether a feature info entry has a geometry with a valid, non-inverted extent.
+   *
+   * Entries without geometry (e.g. pure WMS GetFeatureInfo results) only carry the click point as extent,
+   * which does not represent the feature location.
+   *
+   * @param feature - The feature info entry to check
+   * @returns True when the entry has a geometry and a valid, non-inverted extent
+   */
+  static hasFeatureGeometryExtent(feature: TypeFeatureInfoEntry): feature is TypeFeatureInfoEntry & { extent: Extent } {
+    return !!feature.geometry && GeoUtilities.isValidOrderedExtent(feature.extent);
+  }
+
+  /**
+   * Unions the geometry extents of feature info entries, ignoring entries rejected by `hasFeatureGeometryExtent`.
+   *
+   * @param features - The feature info entries
+   * @returns The union of the geometry extents, or undefined when no entry has a valid geometry extent
+   */
+  static getFeaturesGeometryExtent(features: TypeFeatureInfoEntry[] | undefined): Extent | undefined {
+    return (features ?? []).reduce<Extent | undefined>(
+      (union, feature) => (GeoUtilities.hasFeatureGeometryExtent(feature) ? GeoUtilities.getExtentUnion(union, feature.extent) : union),
+      undefined
+    );
+  }
+
+  /**
+   * Gets the name of the object id field of feature info entries, from the first entry that has one.
+   *
+   * @param features - The feature info entries
+   * @returns The object id field name, or undefined when no entry has an object id field
+   */
+  static getFeaturesOidFieldName(features: TypeFeatureInfoEntry[]): string | undefined {
+    for (const feature of features) {
+      const oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      if (oidField) return oidField;
+    }
+    return undefined;
   }
 
   /**

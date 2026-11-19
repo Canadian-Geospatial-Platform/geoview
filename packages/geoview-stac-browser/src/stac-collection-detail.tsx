@@ -3,6 +3,7 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { ArrowBackIcon, ArrowForwardIcon } from 'geoview-core/ui/icons';
 import { logger } from 'geoview-core/core/utils/logger';
+import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { useMapController, useStacBrowserController } from 'geoview-core/core/controllers/use-controllers';
@@ -22,7 +23,6 @@ import { StacConfigUtils } from './stac-config-utils';
 import { StacItemList } from './stac-item-list';
 import { StacFieldUtils } from './stac-field-utils';
 import { getSxClasses } from './stac-browser-style';
-import { MapFitPadding } from 'geoview-core/core/utils/map-fit-padding';
 
 /** Geometry group used for the collection and its items footprints. */
 const FOOTPRINT_GROUP = 'stac-collection-footprints';
@@ -210,7 +210,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const handleZoomToExtent = useCallback((): void => {
     if (!memoUnionExtent) return;
     // The STAC browser only lives in the app bar and this zoom is triggered from inside its panel, so the panel is known to be open
-    const padding = MapFitPadding.getAppBarPanelPadding(mapId, 'stac-browser', mapController.getMapSize());
+    const padding = DomHelper.Map.getAppBarPanelFitPadding(mapId, 'stac-browser', mapController.getMapSize());
     stacController.zoomToLonLatBbox(memoUnionExtent, padding).catch((error: unknown) => {
       logger.logError('STAC-COLLECTION-DETAIL - Failed to zoom to collection extent', error);
     });

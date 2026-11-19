@@ -270,31 +270,50 @@ static loadImage(src: string): Promise<HTMLImageElement | null> {
 
 ## 8- How we order code at the beginning of a component
 
-We should follow a standard order when we create a component so it is easy to find the needed piece of code
+Use the following declaration order in **function components and custom hooks**. Keep each group together and omit groups that are not needed:
 
-- Props assignement
-- Get context
-- Translation
-- Theme and style
-- Store
-- Internal state
+1. **Props** — destructure component props.
+2. **Context** — read React context.
+3. **Translation** — initialize translation helpers.
+4. **Theme and style** — read the theme and build styles.
+5. **Store** — read store selectors and controller hooks.
+6. **Constants** — group local constants and values derived from the inputs above.
+7. **State and refs** — group `useState` and `useRef` declarations, followed by values derived from that state.
+8. **Functions and callbacks** — local helper functions, event handlers, and grouped `useCallback` declarations.
+9. **Effects** — group `useEffect` and `useLayoutEffect` declarations after the callbacks they use.
+10. **Rendering and return** — rendering helpers, then the final JSX return or the custom hook's returned value.
+
+**Dependencies take precedence:** a derived constant must come after the state, ref, or other value it reads, but before callbacks and effects when possible. For example, `hasChanged` derived from `count` belongs immediately after the state declarations, not below an unrelated `useCallback`. Keep component-independent constants outside the component or hook.
+
+The `const` keyword alone does not determine the group: `const [value, setValue] = useState(...)` belongs in **state**, while `const handleClick = useCallback(...)` belongs in **callbacks**. Keep the hooks shown here unconditional and preserve their call order across renders.
+
+This custom hook illustrates the order after input setup:
 
 ```ts
-const { myScale } = ...props
+function useCounter(
+  initialCount: number,
+  onCountChange: (count: number) => void
+): { count: number; hasChanged: boolean; increment: () => void } {
+  // Constants
+  const startingCount = Math.max(0, initialCount);
 
-const mapId = useGeoViewMapId();
+  // State and state-derived values
+  const [count, setCount] = useState(startingCount);
+  const hasChanged = count !== startingCount;
 
-const { t } = useTranslation<string>();
+  // Callbacks
+  const increment = useCallback((): void => {
+    setCount((previousCount): number => previousCount + 1);
+  }, []);
 
-const theme = useTheme();
-const sxClasses = getSxClasses(theme);
+  // Effects
+  useEffect((): void => {
+    onCountChange(count);
+  }, [count, onCountChange]);
 
-// get the values from store
-const expanded = useUIMapInfoExpanded();
-const scale = useMapScale();
-
-// internal component state
-const [scaleMode, setScaleMode] = useState<number>(0);
+  // Rendering or custom hook result
+  return { count, hasChanged, increment };
+}
 ```
 
 ## 9- How we format JSDOC
@@ -437,12 +456,7 @@ Skip the blank line when the comment:
 
 ## 10- How we order functions in component
 
-In components, functions should be ordered in the following way:
-
-- Core functions that are reusable without dependencies;
-- Event handlers functions that may change the states and raise events/callbacks;
-- Hooks section where we have the useEffect, useCallback methods grouped together (as the other those are defined is actually important - best to group them)
-- Rendering methods used for rendering the JSX
+Follow the [complete component and custom-hook order in section 8](#8--how-we-order-code-at-the-beginning-of-a-component). Within the functions and callbacks group, place core helper functions before event handlers and keep `useCallback` declarations together. Effects follow callbacks; rendering helpers and the final return come last.
 
 ## 11- How we order functions in classes
 

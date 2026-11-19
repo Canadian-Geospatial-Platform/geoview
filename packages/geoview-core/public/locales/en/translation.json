@@ -412,6 +412,7 @@
   "details": {
     "title": "Details",
     "zoomTo": "Zoom to feature",
+    "zoomToResultsExtent": "Zoom to all results for this layer",
     "select": "Highlight feature on map",
     "externalLink": "External Link",
     "feature": "feature",
