@@ -22,6 +22,7 @@ Read only the linked section of each doc: search for its heading and read to the
 - Preserve GeoCore suffixes through both return branches and ordered paths; strip only for API/UUID validation.
 - Rewrite configured bare-UUID selection at resolution, not map-ready runtime lookup.
 - A working child makes a partially loaded group valid; don't disable all siblings for one error.
+- GeoCore may split `/FeatureServer/6` into a service-root URL and entry `6`. `ConfigApi.createInitConfigFromType` restores the single entry id before URL-based ESRI Feature initialization; do not loosen direct URL validation. See [resolution behavior](../../docs/app/config/configuration-reference.md#error-handling).
 
 ## Source navigation and implementation gotchas
 

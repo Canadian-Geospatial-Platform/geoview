@@ -217,6 +217,12 @@ See [Configuration Reference](app/config/configuration-reference.md) for complet
 
 ### Get Layer Information
 
+The Layer Info panel shows the maximum record count and vector loading strategy when available. Vector layers also show a record count labeled as provided by the service or counted from downloaded records. OGC API Features and WFS use `numberMatched` when available; Esri Feature uses its count query. Other vector source loaders, including CSV, KML, and WKB, count the features returned by a successful load before local filtering. A counted value describes the downloaded dataset, not an independently verified service-wide total. Failed or interrupted loads do not publish partial counts as totals, while advertised counts remain available even when a loading limit is exceeded. With OGC API Features, WFS, or Esri Feature BBOX loading, the count applies to the requested map extent rather than the whole collection. Vector tiles do not expose a total through this mechanism.
+
+Esri Feature supports `source.strategy: 'bbox'` by applying the same intersecting-envelope filter to its count query and every feature page. The map extent is sent in its native projection, with its EPSG or ESRI identifier supplied as `inSR`, without changing the feature response projection. The configured record limit applies to matching features in that extent; exceeding it prompts users to zoom in or pan to an area with fewer features.
+
+For Esri Feature, the requested page size and pagination offset increments are capped by the layer metadata's `maxRecordCount`, when provided. Smaller configured page sizes are preserved. During metadata processing, both Esri Feature and Esri Dynamic initialize an unspecified `maxPageSize` from this service value, making it available to configuration getters and the Layer Info panel without replacing explicitly configured values. This service per-request cap is distinct from GeoView's total-loading `maxRecordCount`.
+
 ```typescript
 // Get all layer IDs
 const layerIds = mapViewer.layer.getGeoviewLayerIds();

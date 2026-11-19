@@ -1778,6 +1778,14 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
+        "maxPageSize": {
+          "type": "number",
+          "description": "The maximum number of features allowed per page when fetching vector data."
+        },
+        "maxRecordCount": {
+          "type": "number",
+          "description": "The maximum total number of matching features supported for a vector layer."
+        },
         "wmsUrl": {
           "type": "string",
           "description": "The WMS service URL associated with this vector layer. GeoView uses it to request the WMS GetStyles definition and style WFS or OGC API Features records like their WMS counterpart. If omitted, the vector layer's data access path is used and GeoView attempts to derive the WMS endpoint when the URL follows a known WFS service pattern. Style retrieval is enabled by default and is best-effort, so failure to retrieve a style does not prevent the vector layer from loading."

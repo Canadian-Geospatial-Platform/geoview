@@ -472,12 +472,19 @@ export class ConfigApi {
       // Get the layer entries that GeoCore has configured
       const layerIdsFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);
 
+      // GeoCore separates a FeatureServer layer URL into a service root and a single selected entry.
+      // Restore that entry in the URL because ESRI Feature initialization requires a layer endpoint.
+      let layerURLFromGeocore = layerConfigFromGeocore.metadataAccessPath!;
+      if (layerConfigFromGeocore.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE && layerIdsFromGeocoreEntries.length === 1) {
+        layerURLFromGeocore = layerURLFromGeocore.replace(/((?:Feature|Map)Server)\/?(?=[?#]|$)/i, `$1/${layerIdsFromGeocoreEntries[0]}`);
+      }
+
       // Loop back to create the correct config based on the type
       const layerConfigForGeoview = await ConfigApi.createInitConfigFromType(
         layerConfigFromGeocore.geoviewLayerType,
         layerConfigFromGeocore.geoviewLayerId,
         layerConfigFromGeocore.geoviewLayerName!,
-        layerConfigFromGeocore.metadataAccessPath!,
+        layerURLFromGeocore,
         layerConfigFromGeocore.isTimeAware,
         language,
         mapId,

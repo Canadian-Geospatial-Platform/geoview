@@ -10,36 +10,50 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "FeatureServerLyr1",
+        "geoviewLayerId": "toronto-neighbourhoods",
+        "geoviewLayerName": "Error metadata",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServerERROR/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "Error metadata"
+            "layerId": "0"
           }
         ]
       },
       {
-        "geoviewLayerId": "FeatureServerLyr2",
+        "geoviewLayerId": "u2-tour-locations-error-lyrid",
+        "geoviewLayerName": "Error layerId",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ERROR",
-            "layerName": "Error layerId"
+            "layerId": "ERROR"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "u2-tour-locations-error-max-record-low",
+        "geoviewLayerName": "U2 Tour Locations (small max record count)",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "source": {
+              "strategy": "bbox"
+            },
+            "maxRecordCount": 100
           }
         ]
       },
       {
         "geoviewLayerId": "classBreaksId",
-        "geoviewLayerName": "classBreaks",
+        "geoviewLayerName": "Error query filter",
         "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "8",
-            "layerName": "Error query filter",
             "layerFilter": "Total_CSO_VolumeERROR > 5000000",
             "layerStyle": {
               "Point": {

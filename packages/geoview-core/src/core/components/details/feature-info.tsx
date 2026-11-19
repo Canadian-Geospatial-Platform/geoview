@@ -9,7 +9,6 @@ import { Typography } from '@/ui/typography/typography';
 import { useStoreDetailsCheckedFeatures } from '@/core/stores/states/feature-info-state';
 import { useStoreGeochartChartsConfig, useStoreGeochartLayerDataArrayBatch } from '@/core/stores/states/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
-import { useAppBarPanelFitOptions } from '@/core/components/common/hooks/use-app-bar-panel-fit-options';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -22,7 +21,7 @@ import {
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateTimezone,
 } from '@/core/stores/states/layer-state';
-import { useDetailsController, useGeoChartControllerIfExists, useLayerController } from '@/core/controllers/use-controllers';
+import { useDetailsController, useGeoChartControllerIfExists } from '@/core/controllers/use-controllers';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
@@ -32,6 +31,10 @@ interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
   /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
+  /** Requests a feature zoom from the owning Details panel. */
+  onFeatureZoomed: () => void;
+  /** Whether the map still shows the last zoom to this feature (the zoom button is then unavailable). */
+  isZoomed?: boolean;
 }
 
 /** Properties for the FeatureHeader component. */
@@ -42,8 +45,8 @@ interface FeatureHeaderProps {
   name: string;
   /** Whether the feature geometry can be highlighted (present and not too complex to render). */
   canHighlight: boolean;
-  /** Whether the feature has an extent to zoom to. */
-  hasExtent: boolean;
+  /** Whether the zoom to feature is available (extent present and the map not still on the last zoom to it). */
+  canZoom: boolean;
   /** Whether the feature has a geochart. */
   hasGeochart: boolean;
   /** Whether the feature is checked. */
@@ -69,7 +72,7 @@ const FeatureHeader = memo(
     iconSrc,
     name,
     canHighlight,
-    hasExtent,
+    canZoom,
     hasGeochart,
     checked,
     onCheckChange,
@@ -163,7 +166,7 @@ const FeatureHeader = memo(
             color="primary"
             aria-label={t('details.zoomTo')}
             tooltipPlacement="top"
-            aria-disabled={!hasExtent}
+            aria-disabled={!canZoom}
             onClick={onZoomIn}
             className="buttonOutline"
             size="small"
@@ -183,7 +186,7 @@ FeatureHeader.displayName = 'FeatureHeader';
  * @param props - Properties defined in FeatureInfoProps interface
  * @returns The feature info component, or null if no feature
  */
-export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.Element | null {
+export function FeatureInfo({ feature, containerType, onFeatureZoomed, isZoomed = false }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
@@ -208,8 +211,6 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const layerDateTemporalMode = useStoreLayerDateTemporalMode(feature.layerPath);
   const displayDateFormat = useStoreLayerDisplayDateFormat(feature.layerPath);
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(feature.layerPath);
-  const layerController = useLayerController();
-  const getPanelFitOptions = useAppBarPanelFitOptions();
   const detailsController = useDetailsController();
   const geoChartController = useGeoChartControllerIfExists();
 
@@ -304,18 +305,13 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
 
-      // Skip when there is no extent to zoom to
-      if (!feature?.extent) return;
+      // Skip when there is no extent to zoom to, or when the map still shows the last zoom to this feature
+      if (!feature?.extent || isZoomed) return;
 
-      // Zoom to the feature extent, keeping it out of an open app-bar panel, and highlight it (skipped for geometries too complex to render)
-      layerController
-        .zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true, getPanelFitOptions())
-        .catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
-        });
+      // The panel owns the zoom operation so context changes invalidate its completion
+      onFeatureZoomed();
     },
-    [feature, layerController, getPanelFitOptions]
+    [feature, isZoomed, onFeatureZoomed]
   );
 
   /**
@@ -349,7 +345,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
         iconSrc={feature.featureIcon}
         name={memoFeatureName}
         canHighlight={featureCanHighlight}
-        hasExtent={featureHasExtent}
+        canZoom={featureHasExtent && !isZoomed}
         hasGeochart={memoHasGeochart}
         checked={checked}
         onCheckChange={handleFeatureChecked}

@@ -1,0 +1,80 @@
+{
+  "configMeta": {
+    "description": "WFS BBOX loading example using the USGS Mineral Resources Data System (MRDS) layer. Features are requested for the current map extent; zoom or pan to load data for another area."
+  },
+  "map": {
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          10,
+          [
+            -75.370748,
+            45.001058
+          ]
+        ]
+      },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wfsLYR4",
+        "geoviewLayerName": "USGS mrds bbox",
+        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?version=1.1.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mrds",
+            "source": {
+              "strategy": "bbox"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

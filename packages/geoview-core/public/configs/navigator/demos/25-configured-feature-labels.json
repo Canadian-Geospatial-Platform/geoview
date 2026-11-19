@@ -13,13 +13,13 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "AllTextOptions",
+        "geoviewLayerId": "toronto-neighbourhoods",
+        "geoviewLayerName": "Toronto Neighbourhoods",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Toronto Neighbourhoods",
             "source": {
               "featureInfo": {
                 "queryable": true,
@@ -69,13 +69,13 @@
         ]
       },
       {
-        "geoviewLayerId": "FeatureServerLyr2",
+        "geoviewLayerId": "u2-tour-locations",
+        "geoviewLayerName": "U2 Tour Locations",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "U2 Tour Locations",
             "source": {
               "featureInfo": {
                 "queryable": true,

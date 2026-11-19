@@ -42,6 +42,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Maximum time for browser scrolling and UI layout to settle. */
   static readonly UI_SCROLL_TIMEOUT_MS = 5000;
 
+  /** Maximum time for a UI control state (e.g. aria-disabled) to reflect a completed map operation. */
+  static readonly UI_STATE_TIMEOUT_MS = 10000;
+
   /** Stable interval covering delayed footer scrolling and layout transitions. */
   static readonly UI_SCROLL_SETTLE_MS = 500;
 
@@ -95,6 +98,17 @@ export abstract class GVAbstractTester extends AbstractTester {
    * The Esri proxy is special in the sense that it returns a non-typical 200 with an error written inside the content.
    */
   static FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
+
+  /** Quebec invasive species service whose export endpoint requires case-sensitive parameter names. */
+  // TODO: ALEX - CHECK FOR DUPLICATION UPON REBASE OF THE MORE TESTS REFACTOR
+  static readonly ESRI_DYNAMIC_CASE_SENSITIVE_EXPORT_UUID = '31f841b6-a544-47f9-93fb-b111a46fc654';
+
+  /** Permafrost GeoCore record whose RCS FeatureServer URL selects layer 6. */
+  // TODO: ALEX - CHECK FOR DUPLICATION UPON REBASE OF THE MORE TESTS REFACTOR
+  static readonly GEOCORE_PERMAFROST_ECOPROVINCE_UUID = '4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8';
+
+  /** Selected FeatureServer layer id in the Permafrost GeoCore record. */
+  static readonly GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_ID = '6';
 
   /** Airborne Radioactivity uuid */
   static AIRBORNE_RADIOACTIVITY_UUID = '21b821cf-0f1c-40ee-8925-eab12d357668';

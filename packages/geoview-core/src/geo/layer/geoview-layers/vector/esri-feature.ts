@@ -13,23 +13,23 @@ import type {
   TypeMetadataEsriDynamicLayer,
   TypeMetadataEsriFeature,
 } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
   LayerFeatureParsingError,
-  LayerTooManyEsriFeatures,
+  LayerTooManyFeatures,
+  LayerTooManyFeaturesInBBOX,
 } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError, NetworkError, RequestTimeoutError, ResponseContentError, ResponseError } from '@/core/exceptions/core-exceptions';
+import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { AsyncSemaphore } from '@/core/utils/async-semaphore';
-import { delay } from '@/core/utils/utilities';
-import { logger } from '@/core/utils/logger';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -42,12 +42,6 @@ export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
 export class EsriFeature extends AbstractGeoViewVector {
   /** Maximum number of paged chunk requests fetched concurrently (mirrors the ESRI worker concurrency cap). */
   static readonly #MAX_CONCURRENT_CHUNK_REQUESTS = Math.min(10, (navigator.hardwareConcurrency || 4) * 2);
-
-  /** Maximum number of attempts (initial try plus retries) for a single chunk request. */
-  static readonly #MAX_CHUNK_FETCH_ATTEMPTS = 4;
-
-  /** Base backoff delay in milliseconds between chunk retries, doubled on each attempt. */
-  static readonly #CHUNK_RETRY_BASE_DELAY_MS = 1000;
 
   /**
    * Constructs an EsriFeature Layer configuration processor.
@@ -206,7 +200,9 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features
-   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features
+   * @throws {LayerTooManyFeatures} When the layer has too many features
+   * @throws {LayerTooManyFeaturesInBBOX} When the requested extent has too many features
+   * @throws {Error} When BBOX loading lacks a valid extent or projection
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -219,28 +215,49 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Get the url to fetch features
     const url = `${layerConfigEsriFeature.getDataAccessPathProxiedWhenNecessary(true)}${layerConfigEsriFeature.layerId}`;
+    const spatialQuery = EsriFeature.#getBboxQuery(layerConfig, readOptions);
 
     // Use the basic fetch
-    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(`${url}/query?f=json&where=1=1&returnCountOnly=true`);
+    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
+      `${url}/query?f=json&where=1=1${spatialQuery}&returnCountOnly=true`
+    );
+    if (Number.isSafeInteger(responseDataCount.count) && responseDataCount.count >= 0) {
+      layerConfig.setTotalRecordsCount(responseDataCount.count, 'service');
+    }
+
+    // Get the max record count as defined by config or codebase
+    const maxRecordCount = layerConfig.getMaxRecordCountOrDefault();
 
     // Check if feature count is too large
-    if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
+    if (responseDataCount.count > maxRecordCount) {
+      if (layerConfig.getSource().strategy === 'bbox') {
+        throw new LayerTooManyFeaturesInBBOX(
+          layerConfigEsriFeature.layerId,
+          layerConfigEsriFeature.getLayerNameCascade(),
+          responseDataCount.count,
+          maxRecordCount
+        );
+      }
+
       // Throw
-      throw new LayerTooManyEsriFeatures(
+      throw new LayerTooManyFeatures(
         layerConfigEsriFeature.layerId,
         layerConfigEsriFeature.getLayerNameCascade(),
-        responseDataCount.count
+        responseDataCount.count,
+        maxRecordCount
       );
     }
 
-    // Determine the maximum number of records allowed
-    const maxRecords = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
+    // Determine the maximum number of records per page allowed
+    const configuredPageSize = layerConfig.getMaxPageSizeOrDefault();
+    const servicePageSize = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
+    const maxPageSize = Math.min(configuredPageSize, servicePageSize ?? configuredPageSize);
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
-      `${url}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      `${url}/query?f=json&where=1=1${spatialQuery}&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
-      maxRecords
+      maxPageSize
     );
 
     // Convert each ESRI response chunk to features and flatten the result
@@ -411,81 +428,66 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
+   * Builds a spatial filter shared by the count and feature queries for BBOX loading.
+   *
+   * @param layerConfig - The vector layer configuration
+   * @param readOptions - The requested extent and its map projection
+   * @returns The encoded spatial query parameters, or an empty string for all-features loading
+   * @throws {Error} When the requested extent or projection is invalid
+   */
+  static #getBboxQuery(layerConfig: VectorLayerEntryConfig, readOptions: ReadOptions): string {
+    if (layerConfig.getSource().strategy !== 'bbox') return '';
+
+    const { extent, featureProjection } = readOptions;
+    if (!extent || extent.length !== 4 || !extent.every(Number.isFinite) || !featureProjection) {
+      throw new Error(`Esri Feature layer '${layerConfig.layerId}' requires a valid extent and projection for BBOX loading.`);
+    }
+
+    const projectionCode = Projection.getProjectionFromStringOrNumber(featureProjection).getCode();
+    const wkid = /^(?:EPSG|ESRI):(\d+)$/i.exec(projectionCode)?.[1];
+    if (!wkid) {
+      throw new Error(`Esri Feature layer '${layerConfig.layerId}' requires an EPSG or ESRI projection code for BBOX loading.`);
+    }
+
+    const parameters = new URLSearchParams({
+      geometry: extent.join(','),
+      geometryType: 'esriGeometryEnvelope',
+      inSR: wkid,
+      spatialRel: 'esriSpatialRelIntersects',
+    });
+    return `&${parameters.toString()}`;
+  }
+
+  /**
    * Fetches features from ESRI Feature services with query and feature limits.
    *
-   * Chunk requests are throttled to a maximum concurrency and each chunk is retried with exponential backoff on
-   * transient failures (server HTTP 5xx, ESRI embedded query error, network error, timeout). Bursting every page at
+   * Chunk requests are throttled to a maximum concurrency. Fetch uses one retry budget for HTTP/network failures
+   * and transient embedded ESRI errors. Bursting every page at
    * once makes the ArcGIS server return load-induced `500 | Error performing query operation` responses on large
    * layers; throttling and retrying let the layer load reliably on the first attempt instead of being dropped.
    *
    * @param url - The base url for the service
    * @param featureCount - The number of features in the layer
-   * @param maxRecordCount - Optional max features per query from the service
-   * @param featureLimit - Optional maximum number of features to fetch per query
+   * @param maxPageSize - Max features per query from the service
    * @returns A promise that resolves to an array of the response text for the features
    * @throws {ResponseContentError} When a chunk keeps failing after all attempts (propagated from `fetchEsriJson()`)
    */
-  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
-  // TODO: Add options for featureLimit to config
-  static #fetchEsriFeaturesByChunk(url: string, featureCount: number, maxRecordCount?: number, featureLimit = 1000): Promise<unknown[]> {
-    // Update url
-    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
-
+  static #fetchEsriFeaturesByChunk(url: string, featureCount: number, maxPageSize: number): Promise<unknown[]> {
     // GV: Web worker does not improve the performance of this fetching
     // Create array of url's to call, one per feature page
     const urlArray: string[] = [];
-    for (let i = 0; i < featureCount; i += featureFetchLimit) {
-      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
+    for (let i = 0; i < featureCount; i += maxPageSize) {
+      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${maxPageSize}`);
     }
 
     // Cap concurrent chunk requests; firing all pages at once makes the server return transient 500s under load
     const semaphore = new AsyncSemaphore(EsriFeature.#MAX_CONCURRENT_CHUNK_REQUESTS);
 
     // Fetch each chunk under the concurrency cap, retrying transient failures with backoff
-    const promises = urlArray.map((featureUrl) => semaphore.withLock(() => EsriFeature.#fetchEsriChunkWithRetry(featureUrl)));
+    const promises = urlArray.map((featureUrl) => semaphore.withLock(() => Fetch.fetchEsriJson(featureUrl, { retryCount: 3 })));
 
     // Return the all promise
     return Promise.all(promises);
-  }
-
-  /**
-   * Fetches a single ESRI feature chunk, retrying transient failures with exponential backoff.
-   *
-   * @param url - The chunk query url
-   * @param attempt - The current attempt number (1-based)
-   * @returns A promise that resolves to the chunk response
-   * @throws {ResponseContentError} When the chunk keeps failing after all attempts (propagated from `fetchEsriJson()`)
-   */
-  static async #fetchEsriChunkWithRetry(url: string, attempt = 1): Promise<unknown> {
-    try {
-      return await Fetch.fetchEsriJson(url);
-    } catch (error) {
-      // Give up when out of attempts or when the error is not a transient server/network failure
-      if (attempt >= EsriFeature.#MAX_CHUNK_FETCH_ATTEMPTS || !EsriFeature.#isTransientEsriError(error)) throw error;
-
-      // Back off (1s, 2s, 4s, …) to let the server recover / warm its cache before retrying
-      logger.logWarning(`ESRI feature chunk request failed (attempt ${attempt}), retrying...`, error);
-      await delay(EsriFeature.#CHUNK_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
-      return EsriFeature.#fetchEsriChunkWithRetry(url, attempt + 1);
-    }
-  }
-
-  /**
-   * Determines whether a chunk request error is transient and worth retrying.
-   *
-   * Deliberate cancellations (aborts) are never retried; server content/HTTP errors, network errors and timeouts are
-   * treated as transient because they are typically load-induced for large geometry queries.
-   *
-   * @param error - The error thrown by the chunk request
-   * @returns Whether the error is transient
-   */
-  static #isTransientEsriError(error: unknown): boolean {
-    return (
-      error instanceof ResponseContentError ||
-      error instanceof ResponseError ||
-      error instanceof NetworkError ||
-      error instanceof RequestTimeoutError
-    );
   }
 
   // #endregion STATIC METHODS

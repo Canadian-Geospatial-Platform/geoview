@@ -38,6 +38,7 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 import type { TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
@@ -556,6 +557,17 @@ export class LayerSetController extends AbstractMapViewerController {
         legendLayerEntry.hasText = !!layer.getTextOLLayer();
         legendLayerEntry.textVisible = layer.getTextVisible();
         legendLayerEntry.wmsGetStylesFullUrl = layer.getLayerConfig().getWmsGetStylesFullUrl();
+        legendLayerEntry.maxPageSize = layer.getLayerConfig().getMaxPageSize();
+        legendLayerEntry.maxRecordCount = layer.getLayerConfig().getMaxRecordCount();
+        legendLayerEntry.vectorStrategy = layer.getLayerConfig().getSource().strategy ?? 'all';
+        legendLayerEntry.totalRecordsCount = layer.getLayerConfig().getTotalRecordsCount();
+        legendLayerEntry.totalRecordsCountSource = layer.getLayerConfig().getTotalRecordsCountSource();
+      }
+
+      // If the layer is GVEsriDynamic
+      if (layer instanceof GVEsriDynamic) {
+        legendLayerEntry.maxPageSize = layer.getLayerConfig().getMaxPageSize();
+        legendLayerEntry.maxRecordCount = layer.getLayerConfig().getMaxRecordCount();
       }
 
       // If the layer is GVEsriImage

@@ -21,6 +21,7 @@ import {
   getStoreLayerStyleConfig,
   setStoreLayerName,
   setStoreLayerStatus,
+  setStoreLayerTotalRecordsCount,
   setStoreLegendQueryStatus,
 } from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
@@ -371,6 +372,14 @@ export class LegendsLayerSet extends AbstractLayerSet {
     try {
       // Save to the store
       setStoreLayerStatus(this.getMapId(), sender.layerPath, layerStatusEvent.layerStatus);
+      if (sender instanceof VectorLayerEntryConfig) {
+        setStoreLayerTotalRecordsCount(
+          this.getMapId(),
+          sender.layerPath,
+          sender.getTotalRecordsCount(),
+          sender.getTotalRecordsCountSource()
+        );
+      }
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', sender.layerPath, error);

@@ -4,7 +4,7 @@ import type { i18n } from 'i18next';
 
 import { Overlay, type MapBrowserEvent, type MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
-import OLMap from 'ol/Map';
+import OLMap, { type FrameState } from 'ol/Map';
 import type { ViewOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
@@ -421,8 +421,8 @@ export class MapViewer {
     // will update the padding dynamically when it mounts or changes height.
     const mapInfoInitialHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : parseInt(MAP_INFO_HEIGHT_COLLAPSED);
 
+    // Defer the target until redrawText is patched; attaching it creates the renderer and binds the font-change callback.
     const initialMap = new OLMap({
-      target: mapElement,
       layers: [GeoUtilities.createEmptyBasemap()],
       view: new View({
         projection,
@@ -450,14 +450,15 @@ export class MapViewer {
 
     // GV Patch: guard against OpenLayers race condition known issue where redrawText iterates stale layerStatesArray
     // GV entries with null layers during layer removal or projection changes (font-load event timing).
-    const originalRedrawText = this.map.redrawText.bind(this.map);
-    this.map.redrawText = (): void => {
-      try {
-        originalRedrawText();
-      } catch (e) {
-        // Suppress stale frameState race condition during layer removal
-        logger.logDebug('Suppressed OL redrawText race condition', e);
-      }
+    // TODO: Recheck upstream redrawText on the next OpenLayers dependency update; remove this patch once disposed layers are handled.
+    let frameState: FrameState | undefined;
+    initialMap.on('postrender', (event): void => {
+      frameState = event.frameState ?? undefined;
+    });
+    initialMap.redrawText = (): void => {
+      frameState?.layerStatesArray.forEach(({ layer }): void => {
+        if (layer?.hasRenderer()) layer.getRenderer()!.handleFontsChanged();
+      });
     };
 
     // GV Register a handler when the map will postrender before pursuing map initialization
@@ -475,6 +476,9 @@ export class MapViewer {
         logger.logPromiseFailed('initMap in createMap in MapViewer', error);
       });
     });
+
+    // OpenLayers binds the font listener when the target creates its renderer.
+    initialMap.setTarget(mapElement);
 
     // Return the OLMap that is still being initialized..
     return initialMap;

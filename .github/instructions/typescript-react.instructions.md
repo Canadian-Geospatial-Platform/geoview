@@ -5,10 +5,12 @@ applyTo: "packages/**/*.{ts,tsx}"
 
 Canonical sections in [best-practices.md](../../docs/programming/best-practices.md) (search the named heading and read only that section):
 **1- Clearly identify the types of data you are using.**, **14- React Performance Patterns**,
-**11- How we order functions in classes**, and **18- Map-scoped DOM access (no direct `document.*`)**.
+**8- How we order code at the beginning of a component**, **11- How we order functions in classes**,
+and **18- Map-scoped DOM access (no direct `document.*`)**.
 Helper/error routing: [typescript-react.md](../ai/typescript-react.md) → **Source navigation**.
 
 - No unexplained any; explicit returns include callbacks/memos. Respect DOM versus mutable refs.
+- After props/context/theme/store setup, group constants, state/refs and state-derived values, functions/`useCallback`, effects, then rendering/return. Respect declaration dependencies and keep hooks unconditional (see section 8).
 - Memo values use memo prefix; dependencies reflect actual use; memoization needs concrete benefit.
 - Use existing Fetch/timing helpers and narrow catches; do not duplicate shared logic. Keep DOM access at the UI/browser-integration boundary: prefer existing refs/context (such as `useShellContainer()` for the shell), use `DomHelper` for required map-scoped root/descendant lookups, and have controllers request semantic UI actions or values instead. Follow [map-scoped DOM access](../../docs/programming/best-practices.md#dom-access).
 - For fire-and-forget promise chains, attach a terminal rejection-handling `.catch()`; `void` is not a substitute. If the catch handler can reject, handle that rejection too. Follow [best-practices.md](../../docs/programming/best-practices.md#shared-helpers-and-error-boundaries).

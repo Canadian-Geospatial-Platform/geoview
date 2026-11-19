@@ -5,22 +5,32 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
+  /** Max number of records per page for query */
+  maxPageSize?: number;
+
   /** Max number of records for query */
   maxRecordCount?: number;
 }
+
+/** How the total matching record count was obtained. */
+export type TypeRecordsCountSource = 'numberMatched' | 'service' | 'counted';
 
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
-  /** Max number of records for query */
-  maxRecordCount?: number;
-
   /** The GetStyles full url that was used to generate the style, if any */
   // GV Attribute is duplicated in the OGC WMS entry config to keep this state off unrelated base-layer entries.
   #wmsGetStylesFullUrl?: string;
+
+  /** Total matching records reported or counted for the latest source request. */
+  #totalRecordsCount?: number;
+
+  /** Origin of the total matching record count. */
+  #totalRecordsCountSource?: TypeRecordsCountSource;
 
   /**
    * Creates an instance of VectorLayerEntryConfig.
@@ -30,7 +40,6 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    */
   protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig, schemaTag: TypeGeoviewLayerType) {
     super(layerConfig, schemaTag, CONST_LAYER_ENTRY_TYPES.VECTOR);
-    this.maxRecordCount = layerConfig.maxRecordCount;
   }
 
   // #region OVERRIDES
@@ -44,9 +53,102 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     return super.getSource();
   }
 
+  /**
+   * Overrides the toJson of the mother class.
+   *
+   * @returns The JSON representation of the instance
+   */
+  protected override onToJson<T>(): T {
+    // Call parent
+    // GV Can be any object so disable eslint and proceed with caution
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serialized = super.onToJson<T>() as any;
+
+    // Copy values
+    serialized.maxPageSize = this.getMaxPageSize();
+    serialized.maxRecordCount = this.getMaxRecordCount();
+
+    // Return it
+    return serialized;
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets the total matching records reported or counted for the source request.
+   *
+   * @returns The matching record count, or undefined when unavailable
+   */
+  getTotalRecordsCount(): number | undefined {
+    return this.#totalRecordsCount;
+  }
+
+  /**
+   * Gets how the total matching record count was obtained.
+   *
+   * @returns The count origin, or undefined when unavailable
+   */
+  getTotalRecordsCountSource(): TypeRecordsCountSource | undefined {
+    return this.#totalRecordsCountSource;
+  }
+
+  /**
+   * Records the total matching count and its origin for the current source request.
+   *
+   * @param totalRecordsCount - The matching count, or undefined to clear an earlier request's count
+   * @param source - Whether the service supplied the count or downloaded records were counted
+   */
+  setTotalRecordsCount(totalRecordsCount: number | undefined, source?: TypeRecordsCountSource): void {
+    this.#totalRecordsCount = totalRecordsCount;
+    this.#totalRecordsCountSource = totalRecordsCount === undefined ? undefined : source;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
+  getMaxPageSize(): number | undefined {
+    return (this.layerEntryProps as VectorLayerEntryConfigProps).maxPageSize;
+  }
+
+  /**
+   * Initializes the page size from service metadata unless explicitly configured.
+   *
+   * @param maxPageSize - The service's maximum records per request, or undefined when unavailable
+   */
+  initMaxPageSize(maxPageSize: number | undefined): void {
+    (this.layerEntryProps as VectorLayerEntryConfigProps).maxPageSize ??= maxPageSize;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+   *
+   * @returns The service maximum record count, or the default when it is not available
+   */
+  getMaxPageSizeOrDefault(): number {
+    return this.getMaxPageSize() ?? AbstractGeoViewVector.MAX_PAGE_SIZE;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer.
+   *
+   * @returns The service maximum record count, or undefined when it is not available
+   */
+  getMaxRecordCount(): number | undefined {
+    return (this.layerEntryProps as VectorLayerEntryConfigProps).maxRecordCount;
+  }
+
+  /**
+   * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+   *
+   * @returns The service maximum record count, or the default when it is not available
+   */
+  getMaxRecordCountOrDefault(): number {
+    return this.getMaxRecordCount() ?? AbstractGeoViewVector.MAX_FEATURES;
+  }
 
   /**
    * Gets if the config has specified that we should fetch the styles from the WMS.

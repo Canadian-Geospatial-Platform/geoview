@@ -243,6 +243,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                              | Type | Description                |
 | ----------------------------------- | ---- | -------------------------- |
 | `testStandaloneGeocoreWithAirborne` | test | Test Geocore with Airborne |
+| `testInitGeocoreEsriFeaturePreservesLayerId` | test | Test Add Layer GeoCore initialization produces the expected configuration with only the selected FeatureServer layer |
 
 #### 1.2.13 Settings Cascade
 
@@ -375,6 +376,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                                         | Type      | Description                                                                                   |
 | ---------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
 | `testAddEsriDynamicHistoFloodEvents`           | test      | Test Adding Esri Dynamic Histo Flood Events on map...                                         |
+| `testAddEsriDynamicCaseSensitiveExport` | test | Test GeoCore UUID `31f841b6-a544-47f9-93fb-b111a46fc654` exports with canonical bbox/size keys and returns the requested image dimensions |
 | `testAddEsriDynamicWithRasterLayersViaGeocore` | test      | Test Adding Esri Dynamic with Raster Layers via Geocore...                                    |
 | `testAddEsriDynamicBadUrl`                     | testError | Test Adding Esri Dynamic with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
@@ -830,6 +832,9 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | `testDetailsOnLayer`         | test | Test Details on layer _{layerPath}_ ...              |
 | `testClearAllHighlights`     | test | Test Clear all highlights on layer _{layerPath}_ ... |
 | `testZoomToFeature`          | test | Test Zoom to feature on layer _{layerPath}_ ...      |
+| `testZoomToResultsGroupExtent` | test | Test Zoom to all results for layer _{layerPath}_ ... |
+| `testZoomToFeatureBoundAndPan` | test | Test Zoom to point feature bound and pan to next feature on layer _{layerPath}_ ... |
+| `testZoomToResultsButtonUnavailableUntilViewChanges` | test | Test Zoom to all results button is unavailable until the map view changes on layer _{layerPath}_ ... |
 | `testNameFieldAsLabel`       | test | Test nameField as label in query results...          |
 | `testSummaryFalseHidesField` | test | Test summary false hides field from query results... |
 | `testFieldAliasRenamesField` | test | Test field alias renames field in query results...   |

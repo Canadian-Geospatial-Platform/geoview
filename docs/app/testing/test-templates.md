@@ -521,6 +521,14 @@ Controllers are the preferred path for map operations. MapViewer provides low-le
 Use `setMapZoomLevel()` only for an immediate non-awaited change.
 When the next step depends on zoom completion, await `mapController.zoomMap`.
 
+An instant fit (`duration: 0` or no animation) completes synchronously, so it cannot be interrupted. To test an interrupted zoom, start it with a long explicit `duration`, wait for `view.getAnimating()` with `whenThisThen`, then call `view.cancelAnimations()`. Do not cancel from `movestart`: map rendering needs `requestAnimationFrame`, which hidden tabs pause. Omit `duration` to keep the default animation; an explicit `duration: undefined` overrides the default and makes the fit instant.
+
+### Waiting for Attribute Changes
+
+`DomHelper.waitForDomElement` only re-checks when nodes are added or removed, so a selector that depends on an attribute changing on an existing element (e.g. `button[aria-disabled="true"]`) never resolves and, without a timeout, freezes the suite. Poll with `whenThisThen(() => root.querySelector(selector), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50)` instead (it rejects once the timeout is exceeded), or use `waitForClass` for `class` changes.
+
+Vector queries are pixel-based, so their results depend on the current view: the result count varies with zoom (pixel hit tolerance), and a coordinate outside the view returns no result. Reset the view (e.g. `mapController.zoomToInitialExtent`) before a query that depends on it when earlier tests moved the map.
+
 ### `queryLayerFeatures()` Visibility Guards
 
 Before querying, `queryLayerFeatures()` checks:

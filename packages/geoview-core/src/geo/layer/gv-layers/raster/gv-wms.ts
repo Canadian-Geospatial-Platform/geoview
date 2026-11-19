@@ -48,7 +48,7 @@ import {
   NoPrimaryKeyFieldError,
 } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
+import { encodeLayersParam, getNextOgcFeaturePageUrl } from '@/core/utils/ogc-url-helper';
 import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -63,17 +63,11 @@ import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
  * Manages a WMS layer.
  */
 export class GVWMS extends AbstractGVRaster {
-  /** The max feature count returned by the GetFeatureInfo */
-  static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
-
   /**
    * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
    * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)
    */
   static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number = 20;
-
-  /** The Get Feature Info feature count to use */
-  #getFeatureInfoFeatureCount: number = GVWMS.DEFAULT_MAX_FEATURE_COUNT;
 
   /** The Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
   #getFeatureInfoTolerance: number = GVWMS.DEFAULT_GET_FEATURE_INFO_TOLERANCE;
@@ -652,24 +646,6 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Gets the feature count used for GetFeatureInfo requests.
-   *
-   * @returns The current GetFeatureInfo feature count
-   */
-  getGetFeatureInfoFeatureCount(): number {
-    return this.#getFeatureInfoFeatureCount;
-  }
-
-  /**
-   * Sets the feature count used for GetFeatureInfo requests.
-   *
-   * @param value - The new GetFeatureInfo feature count
-   */
-  setGetFeatureInfoFeatureCount(value: number): void {
-    this.#getFeatureInfoFeatureCount = value;
-  }
-
-  /**
    * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
    *
    * @returns The current GetFeatureInfo pixel tolerance
@@ -877,7 +853,6 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoTolerance(),
           projectionCode,
           MIME_TYPE_FORMAT_GEOJSON,
-          this.getGetFeatureInfoFeatureCount(),
           abortController
         );
 
@@ -901,7 +876,6 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoTolerance(),
           projectionCode,
           MIME_TYPE_FORMAT_JSON,
-          this.getGetFeatureInfoFeatureCount(),
           abortController
         );
 
@@ -924,7 +898,6 @@ export class GVWMS extends AbstractGVRaster {
           viewResolution,
           this.getGetFeatureInfoTolerance(),
           projectionCode,
-          this.getGetFeatureInfoFeatureCount(),
           abortController
         );
 
@@ -1078,7 +1051,7 @@ export class GVWMS extends AbstractGVRaster {
     const inputProjection = supportedCrs ? projectionCode : undefined;
     const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, inputProjection, projectionCode);
     const requestedPageUrls = new Set([url]);
-    let nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(responseData, url);
+    let nextPageUrl = getNextOgcFeaturePageUrl(responseData, url);
 
     while (nextPageUrl && !requestedPageUrls.has(nextPageUrl)) {
       requestedPageUrls.add(nextPageUrl);
@@ -1093,7 +1066,7 @@ export class GVWMS extends AbstractGVRaster {
       // eslint-disable-next-line no-await-in-loop
       const nextPageFeatures = await GeoUtilities.readFeaturesFromGeoJSON(nextPageResponse, inputProjection, projectionCode);
       sourceFeaturesInfo.features.push(...nextPageFeatures.features);
-      nextPageUrl = GVWMS.#getNextOgcFeaturePageUrl(nextPageResponse, nextPageUrl);
+      nextPageUrl = getNextOgcFeaturePageUrl(nextPageResponse, nextPageUrl);
     }
 
     // Done fetching the features, time to apply the filters if any
@@ -1278,7 +1251,6 @@ export class GVWMS extends AbstractGVRaster {
     qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     infoFormat: 'application/json' | 'application/geojson',
-    maxFeatures: number | undefined,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>[]> {
     // Try to get the information using xml format
@@ -1290,7 +1262,7 @@ export class GVWMS extends AbstractGVRaster {
       qgisServerTolerance,
       projectionCode,
       infoFormat,
-      maxFeatures,
+      undefined,
       abortController
     );
 
@@ -1356,7 +1328,6 @@ export class GVWMS extends AbstractGVRaster {
     viewResolution: number,
     qgisServerTolerance: number,
     projectionCode: ProjectionLike,
-    maxFeatures: number | undefined,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>[]> {
     // Try to get the information using GML format
@@ -1368,7 +1339,7 @@ export class GVWMS extends AbstractGVRaster {
       qgisServerTolerance,
       projectionCode,
       MIME_TYPE_FORMAT_GML,
-      maxFeatures,
+      undefined,
       abortController
     );
 
@@ -1955,32 +1926,6 @@ export class GVWMS extends AbstractGVRaster {
     // If we have a style, we want to make sure to only get the features for which we have a style
     // If we have no style, we do our best to include any/all features
     return !layerStyle;
-  }
-
-  /**
-   * Resolves the next page URL from an OGC API Features response.
-   *
-   * @param responseData - The OGC API Features response
-   * @param currentPageUrl - The URL of the current page, used to resolve relative links
-   * @returns The absolute next page URL, or undefined when the response has no next link
-   */
-  static #getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: string): string | undefined {
-    if (typeof responseData !== 'object' || responseData === null || !('links' in responseData) || !Array.isArray(responseData.links)) {
-      return undefined;
-    }
-
-    const nextLink = responseData.links.find((link: unknown): link is { rel: 'next'; href: string } => {
-      return (
-        typeof link === 'object' && link !== null && 'rel' in link && link.rel === 'next' && 'href' in link && typeof link.href === 'string'
-      );
-    });
-
-    if (!nextLink) return undefined;
-
-    const nextPageUrl = new URL(nextLink.href, currentPageUrl);
-    const currentPageCrs = new URL(currentPageUrl).searchParams.get('crs');
-    if (currentPageCrs && !nextPageUrl.searchParams.has('crs')) nextPageUrl.searchParams.set('crs', currentPageCrs);
-    return nextPageUrl.toString();
   }
 
   // #endregion STATIC PRIVATE METHODS

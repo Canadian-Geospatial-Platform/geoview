@@ -153,6 +153,21 @@ export class Test<T = unknown> {
   }
 
   /**
+   * Gets the display color associated with the test's current status.
+   *
+   * @returns Red for failed tests, green for successful tests, orange for skipped tests, or black for all other statuses
+   */
+  getColorBasedOnStatus(): string {
+    // Determine the color based on status
+    const status = this.getStatus();
+    let color = 'black';
+    if (status === 'failed') color = 'red';
+    else if (status === 'success') color = 'green';
+    else if (status === 'skipped') color = 'orange';
+    return color;
+  }
+
+  /**
    * Gets the steps processed so far.
    *
    * @returns The steps processed so far

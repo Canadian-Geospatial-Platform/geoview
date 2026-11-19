@@ -28,6 +28,9 @@ import {
   useStoreLayerFilterClass,
   useStoreLayerMinScale,
   useStoreLayerMaxScale,
+  useStoreLayerMaxRecordCount,
+  useStoreLayerTotalRecordsCount,
+  useStoreLayerTotalRecordsCountSource,
   useStoreLayerOgcVersion,
   useStoreLayerQueryable,
   useStoreLayerQueryableSource,
@@ -35,7 +38,9 @@ import {
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
   useStoreLayerVectorStructureFullUrl,
+  useStoreLayerVectorStrategy,
   useStoreLayerWMSGetStylesFullUrl,
+  useStoreLayerMaxPageSize,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
@@ -87,6 +92,14 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
   const maxScale = useStoreLayerMaxScale(layerPath);
+  const maxPageSize = useStoreLayerMaxPageSize(layerPath);
+  const maxRecordCount = useStoreLayerMaxRecordCount(layerPath);
+  const totalRecordsCount = useStoreLayerTotalRecordsCount(layerPath);
+  const totalRecordsCountSource = useStoreLayerTotalRecordsCountSource(layerPath);
+  const vectorStrategy = useStoreLayerVectorStrategy(layerPath);
+  const isExtentRecordCount =
+    vectorStrategy === 'bbox' &&
+    (schemaTag === CONST_LAYER_TYPES.OGC_FEATURE || schemaTag === CONST_LAYER_TYPES.WFS || schemaTag === CONST_LAYER_TYPES.ESRI_FEATURE);
   const layerEntryType = useStoreLayerEntryType(layerPath);
   const isLayerGroup = layerEntryType === 'group';
   const layerQueryableSource = useStoreLayerQueryableSource(layerPath);
@@ -238,6 +251,17 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
           {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
+          {vectorStrategy && <Box>{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
+          {maxPageSize && <Box>{`${t('layers.layerMaxPageSize')}: ${maxPageSize}`}</Box>}
+          {maxRecordCount && <Box>{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
+          {totalRecordsCount !== undefined && (
+            <Box>
+              {`${t(isExtentRecordCount ? 'layers.layerTotalRecordsCountInExtent' : 'layers.layerTotalRecordsCount')}: ${totalRecordsCount}`}
+              {totalRecordsCountSource === 'numberMatched' && ` (${t('layers.layerRecordsCountProvided')})`}
+              {totalRecordsCountSource === 'service' && ` (${t('layers.layerRecordsCountService')})`}
+              {totalRecordsCountSource === 'counted' && ` (${t('layers.layerRecordsCountCounted')})`}
+            </Box>
+          )}
           {!isLayerGroup && <Box>{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
         </Box>
       </Box>
