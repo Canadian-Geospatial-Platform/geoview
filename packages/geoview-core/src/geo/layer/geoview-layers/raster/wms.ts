@@ -43,7 +43,7 @@ import {
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GetStylesNotSupportedError } from '@/core/exceptions/wfs-renderer-exceptions';
-import { generateId, normalizeDatacubeAccessPath, toArray } from '@/core/utils/utilities';
+import { generateId, toArray } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -482,8 +482,8 @@ export class WMS extends AbstractGeoViewRaster {
         trueServiceUrl = trueServiceUrl.slice(0, -1);
       }
 
-      // Normalize the endpoint
-      const trueServiceUrlNormalized = normalizeDatacubeAccessPath(trueServiceUrl);
+      // Check url for datacube paths
+      const trueServiceUrlNormalized = ServicesManagement.checkUrlDatacube(trueServiceUrl);
 
       // Process
       this.#processMetadataInheritance(fetchResult.data.Capability.Layer);
