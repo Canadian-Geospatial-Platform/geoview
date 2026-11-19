@@ -1,4 +1,4 @@
-import { delay, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
+import { delay, doTimeout, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
 import {
   ResponseEmptyError,
   ResponseError,
@@ -9,6 +9,12 @@ import {
   NetworkError,
 } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
+
+/** Request options for helpers that support opt-in retries. */
+export interface FetchRequestInit extends RequestInit {
+  /** Retries after the initial attempt; defaults to zero. Must be a nonnegative safe integer. */
+  retryCount?: number;
+}
 
 /** Result of a HEAD reachability check. */
 export interface HeadResult {
@@ -22,6 +28,7 @@ export interface HeadResult {
 export abstract class Fetch {
   /**
    * Fetches a url for a json response.
+   * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -34,66 +41,21 @@ export abstract class Fetch {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
-    // The original signal if any
-    const originalSignal = init?.signal || undefined;
-
-    // If we want to use a timeout controller
-    let timeoutSignal: AbortSignal | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    if (timeoutMs) {
-      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
-      timeoutSignal = timeoutController.controller.signal;
-      ({ timeoutId } = timeoutController);
-    }
-
-    // Merge the abort signals to support the optional original abort controller and the optional timeout one
-    const combinedSignal = Fetch.#mergeAbortSignals([originalSignal, timeoutSignal]);
-
-    try {
-      // If there's a delay before doing the actual fetch
-      if (delayMs) await delay(delayMs);
-
-      // Query and read
-      const response = await fetch(url, {
-        ...init,
-        signal: combinedSignal,
-      });
-
-      // Validate response
-      if (!response.ok) throw new ResponseError(response);
-
-      // Get the json body of the response
-      const responseJson = await response.json();
-
-      // Check if the response is an object with no properties (if it's an empty array, then, that's fine for the purposes here)
-      if (responseJson === null || (responseJson.constructor === Object && Object.keys(responseJson).length === 0)) {
-        // Throw empty response error
-        throw new ResponseEmptyError();
-      }
-
-      // Return the value as Object
-      return responseJson;
-    } catch (error: unknown) {
-      // Throw the exceptions that we know
-      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
-
-      // Throw anything else
-      throw error;
-    } finally {
-      // Clear the timeout, if any. We're done
-      clearTimeout(timeoutId);
-    }
+  static fetchJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
+    return Fetch.#fetchJson<T>(url, init, timeoutMs, delayMs);
   }
 
   /**
    * Fetches a url for a json response in the form of an object (not an array) and validates the response doesn't actually contain an error.
    *
    * This is useful when a service (e.g. ArcGIS Server) returns a 200 with a response error embedded within it.
+   * Retryable embedded codes (429, 500, 502, 503, 504) share init.retryCount with HTTP/network failures.
+   * Timeouts and cancellation terminate the entire operation without starting another retry cycle.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
    * @param timeoutMs - Optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError
+   * @param delayMs - Optional delay before performing the actual fetch command (mostly for testing purposes)
    * @returns A promise that resolves with the fetched json response
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -103,16 +65,8 @@ export abstract class Fetch {
    * @throws {ResponseContentError} When the response actually contains an error within it
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
-    // Redirect
-    const result = await this.fetchJson<T>(url, init, timeoutMs);
-
-    // Check and throw exception if the content actually contains an embedded error
-    // (ArcGIS Server returns 200 even an error happened)
-    this.throwIfResponseHasEmbeddedError(result);
-
-    // Return the validated object
-    return result;
+  static fetchEsriJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
+    return Fetch.#fetchJson<T>(url, init, timeoutMs, delayMs, true);
   }
 
   /**
@@ -129,9 +83,9 @@ export abstract class Fetch {
    * @throws {ResponseTypeError} When the response from the service is not an array
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]> {
+  static async fetchJsonAsArray<T>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T[]> {
     // Redirect
-    const result = await this.fetchJson<T[]>(url, init, timeoutMs);
+    const result = await this.#fetchJson<T[]>(url, init, timeoutMs);
 
     // Validate the result of the fetch is indeed a Json array and not a Json object
     if (!Array.isArray(result)) {
@@ -144,6 +98,7 @@ export abstract class Fetch {
 
   /**
    * Fetches a url for a text response.
+   * Inherits safe-request retries from fetchArrayBuffer.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -155,7 +110,7 @@ export abstract class Fetch {
    * @throws {ResponseEmptyError} When the text response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
+  static async fetchText(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<string> {
     // Get the buffer array of the response
     const buffer = await Fetch.fetchArrayBuffer(url, init, timeoutMs);
 
@@ -175,6 +130,7 @@ export abstract class Fetch {
 
   /**
    * Fetches a url for an array buffer response.
+   * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
    *
    * @param url - The url to fetch
    * @param init - Optional initialization parameters for the fetch
@@ -185,7 +141,7 @@ export abstract class Fetch {
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
+  static async fetchArrayBuffer(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
     // The original signal if any
     const originalSignal = init?.signal || undefined;
 
@@ -203,16 +159,7 @@ export abstract class Fetch {
 
     try {
       // Query and read
-      const response = await fetch(url, {
-        ...init,
-        signal: combinedSignal,
-      });
-
-      // Validate response
-      if (!response.ok) throw new ResponseError(response);
-
-      // Get the blob of the response
-      return await response.arrayBuffer();
+      return await Fetch.#fetchWithRetry(url, { ...init, signal: combinedSignal }, Fetch.#readArrayBufferResponse);
     } catch (error: unknown) {
       // Throw the exceptions that we know
       Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
@@ -332,7 +279,7 @@ export abstract class Fetch {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+  static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T> {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
@@ -537,7 +484,7 @@ export abstract class Fetch {
    *     body: JSON.stringify({ id: 123 })
    *   }, 3000);
    */
-  static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs = 7000): Promise<T> {
+  static fetchWithTimeout<T>(url: string, init?: FetchRequestInit, timeoutMs = 7000): Promise<T> {
     // Redirect
     return Fetch.fetchJson<T>(url, init, timeoutMs);
   }
@@ -610,6 +557,194 @@ export abstract class Fetch {
 
     // Return the result of the validation of the content
     return { valid, code, error: message, details };
+  }
+
+  /**
+   * Loads JSON with one timeout and retry budget, optionally validating embedded ESRI errors.
+   *
+   * @param url - The request URL
+   * @param init - Request and retry options
+   * @param timeoutMs - Deadline covering all attempts and body reading
+   * @param delayMs - Optional initial delay used by tests
+   * @param validateEsri - Whether to validate embedded ESRI errors
+   * @returns The parsed and validated JSON
+   */
+  static async #fetchJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number, validateEsri = false): Promise<T> {
+    // The original signal if any
+    const originalSignal = init?.signal || undefined;
+
+    // If we want to use a timeout controller
+    let timeoutSignal: AbortSignal | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (timeoutMs) {
+      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
+      timeoutSignal = timeoutController.controller.signal;
+      ({ timeoutId } = timeoutController);
+    }
+
+    // Merge the abort signals to support the optional original abort controller and the optional timeout one
+    const combinedSignal = Fetch.#mergeAbortSignals([originalSignal, timeoutSignal]);
+
+    try {
+      // If there's a delay before doing the actual fetch
+      if (delayMs) await delay(delayMs);
+
+      // Query and read
+      return await Fetch.#fetchWithRetry<T>(url, { ...init, signal: combinedSignal }, Fetch.#readJsonResponse<T>, validateEsri);
+    } catch (error: unknown) {
+      // Throw the exceptions that we know
+      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
+
+      // Throw anything else
+      throw error;
+    } finally {
+      // Clear the timeout, if any. We're done
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Retries safe requests on rate limiting, transient server responses, and network failures.
+   * Malformed response bodies are never retried. Embedded ESRI errors use the same retry budget when enabled.
+   *
+   * @param url - The request URL
+   * @param options - Request options including the retry count and combined abort and timeout signal
+   * @param readResponse - Reads a successful response body
+   * @param validateEsri - Whether to check for embedded ESRI errors
+   * @returns The parsed successful response
+   * @throws {TypeError} When a network failure persists or the request is invalid
+   * @throws {RequestAbortedError} When cancelled during a retry wait
+   * @throws {RangeError} When retryCount is not a nonnegative safe integer
+   */
+  static async #fetchWithRetry<T>(
+    url: string,
+    options: FetchRequestInit,
+    readResponse: (response: Response) => Promise<T>,
+    validateEsri = false
+  ): Promise<T> {
+    const { retryCount = 0, ...init } = options;
+    if (!Number.isSafeInteger(retryCount) || retryCount < 0) {
+      throw new RangeError('retryCount must be a nonnegative safe integer.');
+    }
+    const method = (init.method ?? 'GET').toUpperCase();
+    const canRetry = (method === 'GET' || method === 'HEAD') && !init.body;
+    for (let attempt = 0; ; attempt++) {
+      let response: Response | undefined;
+      let waitMs = Math.min(1000 * 2 ** attempt, 10000);
+      try {
+        // GV Requests are intentionally sequential, with at most retryCount retries.
+        // eslint-disable-next-line no-await-in-loop
+        response = await fetch(url, init);
+      } catch (error: unknown) {
+        if (!canRetry || attempt >= retryCount || init.signal?.aborted || !(error instanceof TypeError)) throw error;
+        logger.logWarning(`Network request failed; retrying (${attempt + 1}/${retryCount}) in ${waitMs} ms.`, error);
+      }
+
+      if (response) {
+        const mayRetry = canRetry && attempt < retryCount && !init.signal?.aborted;
+        if (response.ok) {
+          // Body parsing is outside the network catch: malformed JSON must fail immediately.
+          // eslint-disable-next-line no-await-in-loop
+          const result = await readResponse(response);
+          if (!validateEsri) return result;
+
+          const checked = Fetch.checkResponseForEmbeddedErrors(result);
+          if (checked.valid) return result;
+          if (!mayRetry || ![429, 500, 502, 503, 504].includes(checked.code ?? 0)) {
+            throw new ResponseContentError(`${checked.code} | ${checked.error} | ${checked.details}`);
+          }
+          waitMs = Fetch.#getRetryDelay(response, attempt, checked.code);
+          logger.logWarning(`ESRI error ${checked.code}; retrying request (${attempt + 1}/${retryCount}) in ${waitMs} ms.`);
+        } else {
+          if (!mayRetry || ![429, 500, 502, 503, 504].includes(response.status)) throw new ResponseError(response);
+          waitMs = Fetch.#getRetryDelay(response, attempt);
+
+          // Release discarded responses before waiting or issuing another request.
+          // eslint-disable-next-line no-await-in-loop
+          await response.body?.cancel();
+          logger.logWarning(`HTTP ${response.status}; retrying request (${attempt + 1}/${retryCount}) in ${waitMs} ms.`);
+        }
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await Fetch.#waitForRetry(waitMs, init.signal ?? undefined);
+    }
+  }
+
+  /**
+   * Reads JSON and rejects empty objects or null responses, while allowing empty arrays.
+   *
+   * @param response - The successful HTTP response
+   * @returns The parsed JSON
+   * @throws {ResponseEmptyError} When the JSON is empty
+   */
+  static async #readJsonResponse<T>(response: Response): Promise<T> {
+    const result = await response.json();
+    if (result === null || (result.constructor === Object && Object.keys(result).length === 0)) throw new ResponseEmptyError();
+    return result;
+  }
+
+  /**
+   * Reads a successful response as binary data.
+   *
+   * @param response - The successful HTTP response
+   * @returns The response body
+   */
+  static #readArrayBufferResponse(response: Response): Promise<ArrayBuffer> {
+    return response.arrayBuffer();
+  }
+
+  /**
+   * Uses Retry-After seconds or an HTTP date when readable, otherwise exponential backoff.
+   *
+   * @param response - The response requesting a retry
+   * @param attempt - The zero-based retry index
+   * @param status - The HTTP or embedded ESRI status code
+   * @returns The delay in milliseconds (429 defaults to 5, 10, then 20 seconds) others use 2, 5 then 10 seconds
+   */
+  static #getRetryDelay(response: Response, attempt: number, status = response.status): number {
+    const retryAfter = response.headers.get('Retry-After')?.trim();
+    if (retryAfter) {
+      let waitMs = NaN;
+      if (/^\d+$/.test(retryAfter)) waitMs = Number(retryAfter) * 1000;
+      else if (/^[A-Za-z]/.test(retryAfter)) waitMs = Date.parse(retryAfter) - Date.now();
+      if (Number.isFinite(waitMs)) return Math.max(0, waitMs);
+    }
+    // If 429 Too Many Requests
+    if (status === 429) {
+      // Default retry delays for 429
+      return [5000, 10000, 20000][attempt] ?? 20000;
+    }
+
+    // Default retry delays for others
+    return [2000, 5000, 10000][attempt] ?? 10000;
+  }
+
+  /**
+   * Waits for a retry without delaying cancellation or overflowing platform timers.
+   *
+   * @param waitMs - The requested delay in milliseconds
+   * @param signal - The combined caller and timeout signal
+   * @throws {RequestAbortedError} When the signal aborts before or during the wait
+   */
+  static async #waitForRetry(waitMs: number, signal?: AbortSignal): Promise<void> {
+    let remainingMs = waitMs;
+    do {
+      if (signal?.aborted) throw new RequestAbortedError(signal);
+      const duration = Math.min(remainingMs, 2147483647);
+      const job = doTimeout(duration);
+      signal?.addEventListener('abort', job.cancel, { once: true });
+      try {
+        // GV Split only exceptionally long Retry-After values to avoid timer overflow.
+        // eslint-disable-next-line no-await-in-loop
+        await job.promise;
+        if (signal?.aborted) throw new RequestAbortedError(signal);
+      } finally {
+        signal?.removeEventListener('abort', job.cancel);
+        job.cancel();
+      }
+      remainingMs -= duration;
+    } while (remainingMs > 0);
   }
 
   /**

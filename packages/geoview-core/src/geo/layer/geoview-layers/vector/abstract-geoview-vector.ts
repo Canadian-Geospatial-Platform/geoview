@@ -3,6 +3,7 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import { all, bbox as vectorBbox } from 'ol/loadingstrategy';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
+import { equals as equalsExtent } from 'ol/extent';
 import { getUid } from 'ol/util';
 import type { ReadOptions } from 'ol/format/Feature';
 
@@ -13,7 +14,7 @@ import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError, InvalidDateError } from '@/core/exceptions/core-exceptions';
-import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
+import { LayerSourceFailedToLoadError, LayerTooManyFeatures, LayerTooManyFeaturesInBBOX } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -36,7 +37,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     .concat(this.EXCLUDED_HEADERS_GEN)
     .concat(this.EXCLUDED_HEADERS_STYLE);
 
-  static readonly MAX_ESRI_FEATURES = 200000;
+  /** Maximum feature count enforced by ESRI Feature, WFS, and OGC API Features loaders. */
+  static readonly MAX_FEATURES = 200000;
+
+  /** The maximum number of features to fetch per page when retrieving features in chunks. */
+  static readonly MAX_PAGE_SIZE = 10000;
 
   // #region OVERRIDES
 
@@ -55,7 +60,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features created from the underlying data source
-   * @throws {LayerTooManyEsriFeatures} When the layer has too many features
+   * @throws {LayerTooManyFeatures} When the layer has too many features
    */
   protected abstract onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -91,10 +96,23 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Prepare the sourceOptions
     // eslint-disable-next-line prefer-const
     let vectorSource: GVVectorSource;
+    const isBboxStrategy = layerConfig.getSource().strategy === 'bbox';
+    const failedExtents = new Set<Extent>();
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? vectorBbox : all;
+    sourceOptions.strategy = isBboxStrategy
+      ? (extent, resolution, _projection): Extent[] => {
+          // Keep failures cached until the requested extent changes to avoid render-triggered retry loops.
+          for (const failedExtent of failedExtents) {
+            if (!equalsExtent(extent, failedExtent)) {
+              vectorSource.removeLoadedExtent(failedExtent);
+              failedExtents.delete(failedExtent);
+            }
+          }
+          return vectorBbox(extent, resolution);
+        }
+      : all;
 
     // eslint-disable-next-line no-param-reassign
     sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
@@ -105,6 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         .then((): Promise<SourceFeaturesInfo> => {
           // Clear last error if any
           vectorSource.clearLoaderError();
+          layerConfig.setTotalRecordsCount(undefined);
 
           // The read options
           const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
@@ -114,6 +133,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         })
         .then((sourceFeaturesInfo): void => {
           const { features, dataProjection } = sourceFeaturesInfo;
+          if (!layerConfig.getTotalRecordsCount()) layerConfig.setTotalRecordsCount(features.length, 'counted');
 
           // Keep the read options that were used to interpret the source data
           vectorSource.setDataProjection(dataProjection);
@@ -130,7 +150,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           AbstractGeoViewVector.#normalizeDateFields(featuresFiltered, layerConfig);
 
           // If the strategy is 'bbox'
-          if (sourceOptions.strategy === vectorBbox) {
+          if (isBboxStrategy) {
             // Clear the previously fetched features or they'll get stacked up.
             // GV Do this right before readding features so that the features flicker as less as possible on the map
             vectorSource.clear(true);
@@ -144,11 +164,20 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           successCallback?.(featuresFiltered);
         })
         .catch((error: unknown): void => {
+          // Clear any previously loaded features
+          // If the strategy is 'bbox'
+          if (isBboxStrategy) {
+            failedExtents.add(extent.slice());
+
+            // Clear the previously fetched features so they don't remain on the map
+            vectorSource.clear(true);
+          }
+
           // Set the error
           vectorSource.setLoaderError(formatError(error));
 
           // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
-          // and this will remove the failed extent so that OpenLayers may retry loading it later.
+          // BBOX failures stay cached until the strategy receives a different requested extent.
           failureCallback?.();
         })
         .catch((error: unknown): void => {
@@ -185,6 +214,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // #endregion PUBLIC METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Enforces the vector feature limit using an error appropriate for the loading strategy.
+   *
+   * @param layerConfig - The layer entry configuration
+   * @param featureCount - The advertised or accumulated feature count
+   * @throws {LayerTooManyFeatures} When an all-features request exceeds the limit
+   * @throws {LayerTooManyFeaturesInBBOX} When a BBOX request exceeds the limit
+   */
+  protected static checkFeatureCount(layerConfig: VectorLayerEntryConfig, featureCount: number): void {
+    const limit = layerConfig.getMaxRecordCount() || AbstractGeoViewVector.MAX_FEATURES;
+    if (featureCount > limit) {
+      if (layerConfig.getSource().strategy === 'bbox') {
+        throw new LayerTooManyFeaturesInBBOX(layerConfig.layerId, layerConfig.getLayerNameCascade(), featureCount, limit);
+      }
+      throw new LayerTooManyFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), featureCount, limit);
+    }
+  }
 
   /**
    * Fetches json data from the given URL using settings defined in the vector source configuration.

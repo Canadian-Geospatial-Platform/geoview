@@ -43,7 +43,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests adding layers to the map, verifying load status and legend icons:<br/>
-      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields)<br/>
+      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields); case-sensitive export bbox/size and returned image dimensions<br/>
       <b>OGC</b> — WMS (multiple services + CORS proxy), WFS, WMTS (+ bad URLs)<br/>
       <b>File-based</b> — GeoJSON, CSV, OGC Feature, WKB, KML, GeoTIFF (+ bad URLs)<br/>
       <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
@@ -58,7 +58,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 49;
+    return 50;
   }
 
   /**
@@ -68,13 +68,11 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the debug tests are completed
    */
-  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    const pDevTest0 = this.#layerTester.testAddWMSZpegtGroupWithSiblingLayer();
-    const pDevTest1 = this.#layerTester.testAddWMSZpegtGroupWithGeoviewLayerName();
-    const pDevTest2 = this.#layerTester.testAddWMSZpegtGroupWithoutGeoviewLayerName();
+  protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    await this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
 
-    // Resolve when all
-    return Promise.all([pDevTest0, pDevTest1, pDevTest2]);
+    // Resolve
+    return;
   }
 
   /**
@@ -85,6 +83,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test adding layer
     const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
+
+    // Test canonical export parameters against the case-sensitive Quebec service.
+    const pLayerEsriDynamicCaseSensitive = this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
 
     // Test adding layer EsriDynamic with Raster Layer inside, via Geocore UUID
     // GV Commented out for now, because the layer uuid has changed and the NRCan catalog is broken to go find the new uuid for this test
@@ -219,6 +220,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Resolve when all parallel tests are done
     await Promise.all([
       pLayerEsriDynamicHistoFloods,
+      pLayerEsriDynamicCaseSensitive,
       // pLayerEsriDynamicWithRasterLayersViaGeocore,
       pLayerEsriDynamicBadUrl,
       pLayerEsriFeatureForestIndustry,

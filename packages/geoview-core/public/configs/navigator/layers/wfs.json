@@ -4,15 +4,6 @@
   },
   "map": {
     "viewSettings": {
-      "initialView": {
-        "zoomAndCenter": [
-          10,
-          [
-            -75.370748,
-            45.001058
-          ]
-        ]
-      },
       "projection": 3857
     },
     "basemapOptions": {
@@ -40,20 +31,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ec-msc:CURRENT_CONDITIONS"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "wfsLYR4",
-        "geoviewLayerName": "USGS mrds bbox",
-        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?version=1.1.0",
-        "geoviewLayerType": "ogcWfs",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "mrds",
-            "source": {
-              "strategy": "bbox"
-            }
           }
         ]
       },

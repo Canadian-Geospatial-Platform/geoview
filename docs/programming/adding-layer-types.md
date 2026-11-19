@@ -72,6 +72,10 @@ that OL constructor options bypassed, without construction-time events.
 the ancestor chain. Hiding a parent preserves child flags. Turning a child back on requires
 `LayerController.setLayerVisibleIncludingParents`, not just setting its own flag.
 
+**ESRI Dynamic exports:** Some ArcGIS gateways treat export parameter names as case-sensitive.
+`GVEsriDynamic` normalizes OpenLayers' export keys to Esri casing (`bbox`, `size`, `bboxSR`,
+`imageSR`, etc.) before proxy wrapping. Parameter values and unknown keys are preserved unchanged.
+
 **Scale:** `MapViewer.getMapScaleFromZoom` rounds denominators. `computeEffectiveLayerScales`
 combines config and zoom-derived limits using maximum maxScale and minimum minScale.
 Round effective values; `EFFECTIVE_SCALE_VISIBILITY_BUFFER` (currently 0.11) generates

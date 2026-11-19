@@ -128,6 +128,25 @@ signal merging and typed errors. Choose `fetchJson`, `fetchEsriJson` (embedded E
 `fetchWithTimeout` is a legacy JSON alias. Workers instead use `fetchWithTimeout` from
 `@/core/utils/fetch-worker-helper`; importing `Fetch` into a worker breaks the build.
 
+`fetchJson`, `fetchArrayBuffer`, and helpers that delegate to them (including `fetchText` and
+`fetchEsriJson`) default to no retries. Opt in using the named request option, for example
+`Fetch.fetchJson(url, { retryCount: 3 })`: three retries means four attempts total.
+`retryCount` must be a nonnegative safe integer. Only bodyless GET/HEAD requests are retried,
+after HTTP 429, 500, 502, 503, or 504 responses or network failures.
+OGC feature pages and ESRI feature chunks explicitly opt into three retries.
+`fetchEsriJson` also retries embedded ESRI errors with codes 429, 500, 502, 503, or 504
+within that same budget; other embedded errors fail immediately. ESRI chunk loading
+does not add another retry cycle, and timeouts terminate the whole operation.
+Readable `Retry-After` headers take precedence
+(seconds or HTTP date); otherwise 429 waits are 5/10/20 seconds and other retry waits are
+2/5/10 seconds (the last delay is reused for further retries). Network failures wait
+1/2/4 seconds with exponential backoff, capped at 10 seconds. Cross-origin services must expose `Retry-After`
+through CORS for it to be readable.
+The existing timeout covers all attempts, waits, and body reading; caller cancellation also
+interrupts retry waits. Other HTTP errors, parsing failures, and non-GET/HEAD requests are not
+retried by this shared policy. This is reactive recovery, not a proactive rate limiter:
+OGC pagination still follows next links sequentially, and exhausted retries still fail the load.
+
 Use `delay(ms)`, cancellable `doTimeout(ms)` and event-driven `waitFor*` methods instead of raw `setTimeout`
 or polling. React timer refs cleaned up with `clearTimeout` are the callback-style exception.
 Use `whenThisThen` only when no suitable event exists.

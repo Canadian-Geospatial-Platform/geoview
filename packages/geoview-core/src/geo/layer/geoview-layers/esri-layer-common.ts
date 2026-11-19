@@ -720,15 +720,14 @@ export class EsriUtilities {
       }
     }
 
+    // Esri's maxRecordCount describes the maximum records per request, not the total loading limit.
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      layerConfig.initMaxPageSize(layerMetadata?.maxRecordCount);
+    }
+
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
     layerConfig.initMinScaleFromMetadata(layerMetadataEsriDynamicLayer?.minScale);
     layerConfig.initMaxScaleFromMetadata(layerMetadataEsriDynamicLayer?.maxScale);
-
-    // Set the max record count for querying
-    if ('maxRecordCount' in layerConfig) {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.maxRecordCount = layerMetadata?.maxRecordCount || 0;
-    }
 
     // If no bounds defined in the initial settings and an extent is defined in the metadata
     let bounds = layerConfig.getInitialSettingsBounds();

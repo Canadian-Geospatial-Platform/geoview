@@ -30,13 +30,13 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoExtentError, NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
@@ -82,8 +82,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Hook a custom function to the ImageLoadFunction of the source object to apply proxy when needed
     olSource.setImageLoadFunction((image, src) => {
-      // Tweak url with the proxy if necessary
-      const theUrl = layerConfig.getUrlWithProxyWhenNeeded(src);
+      // Some gateways require canonical Esri parameter casing rather than OpenLayers' uppercase names.
+      const normalizedSrc = GVEsriDynamic.normalizeExportParamNames(src);
+      const theUrl = layerConfig.getUrlWithProxyWhenNeeded(normalizedSrc);
 
       // Assign the src to the image
       // eslint-disable-next-line no-param-reassign
@@ -742,7 +743,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry: false,
       projection: 4326,
       maxAllowableOffset: 6,
-      maxRecordCount: layerConfig.maxRecordCount || 1000,
+      maxPageSize: layerConfig.getMaxPageSizeOrDefault(),
       where: whereClause ?? '1=1',
     };
 
@@ -782,7 +783,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       queryGeometry,
       projection,
       maxAllowableOffset,
-      maxRecordCount: layerConfig.maxRecordCount || 1000,
+      maxPageSize: layerConfig.getMaxPageSizeOrDefault(),
       where: whereClause ?? '1=1',
     };
 
@@ -832,6 +833,38 @@ export class GVEsriDynamic extends AbstractGVRaster {
   // #endregion PRIVATE METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Normalizes known export parameter names for case-sensitive ArcGIS servers without re-encoding values.
+   *
+   * @param url - The unproxied export request URL
+   * @returns The URL with canonical Esri parameter names and unchanged values, unknown keys, and fragment
+   */
+  static normalizeExportParamNames(url: string): string {
+    const canonicalNames: Record<string, string> = {
+      f: 'f',
+      format: 'format',
+      transparent: 'transparent',
+      size: 'size',
+      bbox: 'bbox',
+      bboxsr: 'bboxSR',
+      imagesr: 'imageSR',
+      dpi: 'dpi',
+      layers: 'layers',
+      layerdefs: 'layerDefs',
+    };
+    const queryStart = url.indexOf('?');
+    const fragmentStart = url.indexOf('#');
+    if (queryStart < 0 || (fragmentStart >= 0 && fragmentStart < queryStart)) return url;
+
+    // Rewrite only query keys; parsing and serializing the URL could change encoded filters or signed tokens.
+    const queryEnd = fragmentStart >= 0 ? fragmentStart : url.length;
+    const query = url.slice(queryStart, queryEnd).replace(/([?&])([^=&]+)(?==|&|$)/g, (match, separator: string, key: string): string => {
+      const lowerKey = key.toLowerCase();
+      return Object.hasOwn(canonicalNames, lowerKey) ? `${separator}${canonicalNames[lowerKey]}` : match;
+    });
+    return `${url.slice(0, queryStart)}${query}${url.slice(queryEnd)}`;
+  }
 
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.

@@ -243,6 +243,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                              | Type | Description                |
 | ----------------------------------- | ---- | -------------------------- |
 | `testStandaloneGeocoreWithAirborne` | test | Test Geocore with Airborne |
+| `testInitGeocoreEsriFeaturePreservesLayerId` | test | Test Add Layer GeoCore initialization produces the expected configuration with only the selected FeatureServer layer |
 
 #### 1.2.13 Settings Cascade
 
@@ -375,6 +376,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                                         | Type      | Description                                                                                   |
 | ---------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
 | `testAddEsriDynamicHistoFloodEvents`           | test      | Test Adding Esri Dynamic Histo Flood Events on map...                                         |
+| `testAddEsriDynamicCaseSensitiveExport` | test | Test GeoCore UUID `31f841b6-a544-47f9-93fb-b111a46fc654` exports with canonical bbox/size keys and returns the requested image dimensions |
 | `testAddEsriDynamicWithRasterLayersViaGeocore` | test      | Test Adding Esri Dynamic with Raster Layers via Geocore...                                    |
 | `testAddEsriDynamicBadUrl`                     | testError | Test Adding Esri Dynamic with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
