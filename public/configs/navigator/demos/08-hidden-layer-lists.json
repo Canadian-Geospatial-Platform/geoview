@@ -1,0 +1,210 @@
+{
+  "configMeta": {
+    "description": "Shared RT-08 Map 11 config for Available/Hidden DOM lists: the four-layer slider from 12-package-time-slider-custom.json and the Airborne chart from 13-package-geochart.json, nested in an explicit parent group."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857,
+      "initialView": {
+        "zoomAndCenter": [4, [-90, 60]]
+      }
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "airborne_radioactivity",
+        "geoviewLayerName": "Airborne Radioactivity",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "airborne-group",
+            "layerName": "Airborne chart group",
+            "initialSettings": {
+              "states": { "visible": true }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "1",
+                "layerName": "Airborne stations",
+                "initialSettings": {
+                  "states": { "visible": true }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Historical Flood Events (HFE)",
+            "initialSettings": {
+              "states": { "visible": true }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "fire_progression",
+        "geoviewLayerName": "fire_progression_20230915",
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "fire_progression_20230915",
+            "initialSettings": {
+              "states": { "visible": true }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "fire_perimeters",
+        "geoviewLayerName": "fire_perimeters_20230915",
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "fire_perimeters_20230915",
+            "initialSettings": {
+              "states": { "visible": true }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "floods_canada",
+        "geoviewLayerName": "Floods in Canada",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "Floods in Canada",
+            "initialSettings": {
+              "states": { "visible": true }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "navBar": ["zoom", "home"],
+  "appBar": {
+    "tabs": {
+      "core": ["legend", "details"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "details", "data-table", "geochart", "time-slider"]
+    },
+    "selectedTab": "layers"
+  },
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": ["fire_progression/0", "fire_perimeters/1", "floods_canada/1", "historical-flood/0"],
+            "title": "Progression and Perimeters of Fires and Floods",
+            "delay": 5000,
+            "filtering": false,
+            "timeDimension": {
+              "field": "DATE_",
+              "default": ["2023-04-19T00:00:00Z", "2027-07-15T00:00:00Z"],
+              "nearestValues": "continuous",
+              "displayDateFormat": {
+                "en": "YYYY-MM-DD",
+                "fr": "YYYY-MM-DD"
+              },
+              "rangeItems": {
+                "type": "",
+                "range": ["2023-04-19T00:00:00+00:00", "2027-07-15T00:00:00+00:00"]
+              },
+              "singleHandle": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "airborne_radioactivity/airborne-group/1",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "Location_Emplacement",
+                    "prefix": "'",
+                    "valueFrom": "Location_Emplacement",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "CollectionStart_DebutPrelevement"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "grid": { "drawOnChartArea": false },
+                "property": "CollectionStart_DebutPrelevement",
+                "label": "Collected date",
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                }
+              },
+              "yAxis": {
+                "type": "linear",
+                "grid": { "drawOnChartArea": false },
+                "property": "Activity_Activite_mBqm3",
+                "label": "Activity (mBqm3)",
+                "tooltipSuffix": "mBqm3"
+              },
+              "borderWidth": 1
+            },
+            "category": {
+              "property": "Radionuclide_Radionucleide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": { "display": true },
+              "ySlider": { "display": true },
+              "stepsSwitcher": true,
+              "scalesSwitcher": ["linear", "logarithmic"],
+              "description": "Airborne stations inside a parent group for hidden-layer list testing.",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

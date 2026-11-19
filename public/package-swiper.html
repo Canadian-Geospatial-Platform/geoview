@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Package - Swiper (interactive) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Package - Swiper (interactive)</h4><p>This page is used to showcase loading "Swiper" package with different configuration.</p><h5>How to use</h5><p>The swiper draws a draggable divider on the map and clips the selected layers to one side of it, letting you compare layers. Drag the handle (or focus it and use the arrow keys) to move the divider. The swiper follows map resizing automatically.</p><ul><li><strong>Configuration (static):</strong> the swiper reads its <code>orientation</code> and its <code>layers</code> from the package config. Each layer entry is an object <code>{ "layerPath": "&hellip;", "side": "left" | "right" | "up" | "down" }</code>. The <code>side</code> is the <em>visible</em> side of the divider for that layer (use left/right with a vertical bar and up/down with a horizontal bar).</li><li><strong>Interactive mode:</strong> when the config sets <code>"interactive": true</code>, open a layer's right panel and click the settings gear. A <strong>Swiper</strong> section lets you toggle the layer in/out of the swiper and pick its visible side. The side options match the current orientation. This demo is loaded with <code>interactive</code> enabled.</li><li><strong>Programmatic control:</strong> use the buttons below (or the console API) to add/remove layers and toggle orientation at runtime.</li></ul><p>Console API examples:</p><pre><code>const swiper = cgpv.api.getMapViewer('map1').plugins['swiper'];
+swiper.activateForLayer('swipe6/lakes', 'right');
+swiper.setLayerSide('swipe6/lakes', 'left');
+swiper.deActivateForLayer('swipe6/lakes');
+swiper.deActivateAll();
+swiper.setOrientation('horizontal');
+
+// Bulk layer updates and interactive-mode state use the controller:
+const { swiperController } = cgpv.api.getMapViewer('map1').controllers;
+swiperController.setLayers([{ layerPath: 'swipe6/lakes', side: 'right' }]);
+swiperController.setInteractive(true);</code></pre></div></div><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div><p>Configuration with supported layers type (WMS, XYZ, WFS, GeoJSON, OGC Feature API and GeoCore)</p><input class="form-control" id="mapWM3Input" placeholder="Type a layer path"/> <button class="btn btn-primary" onclick="addSwiper()">Add swiper functionality</button> <button class="btn btn-primary" onclick="removeSwiper()">Remove swiper functionality</button> <button class="btn btn-primary" onclick="removeSwiperAll()">Remove all swiper functionalities</button> <button class="btn btn-primary" onclick="toggleOrinataion()">Toggle orientation</button><ul><li>swipe0/0</li><li>swipe1/msi-94-or-more</li><li>swipe4/polygons.json</li><li>swipe5/ec-msc:CURRENT_CONDITIONS</li><li>swipe6/lakes</li><li>ccc75c12-5acc-4a6a-959f-ef6f621147b9/0</li></ul><hr/><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // initialize cgpv
+      cgpv.init();
+
+      function addSwiper() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiper() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiperAll() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateAll();
+      }
+
+      let orientation = 'vertical';
+      function toggleOrinataion() {
+        const newOrientation = orientation === 'horizontal' ? 'vertical' : 'horizontal';
+        cgpv.api.getMapViewer('map1').plugins['swiper'].setOrientation(newOrientation);
+        orientation = newOrientation;
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

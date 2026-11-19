@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>World of Maps - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>World of Maps - NTS Search Demo</strong></h1></td></tr><tr><td><a href="./demos.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td><p>Demonstration of World of Maps - NTS Search</p></td></tr></tbody></table></div><a href="https://www.worldofmaps.com/topo.cfm">Original RAMP NTS Search</a><br/><div class="map-title-holder"><h4 id="Hmap1">NTS</h4></div><button class="collapsible active">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'LYR1',
+              'geoviewLayerName': 'NTS',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/NTS_SNRC/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '3',
+                  'layerName': 'NTS - 50K',
+                  'source': {
+                    'featureInfo': {
+                      'queryable': true,
+                      'nameField': 'IDENTIF',
+                      'outfields': [
+                        {
+                          'name': 'IDENTIF',
+                          'alias': 'Identification',
+                          'type': 'string',
+                          'domain': null
+                        },
+                        {
+                          'name': 'NAME',
+                          'alias': 'Name',
+                          'type': 'string',
+                          'domain': null
+                        },
+                        {
+                          'name': 'OBJECTID',
+                          'alias': 'Id',
+                          'type': 'oid',
+                          'domain': null
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  'layerId': '2',
+                  'layerName': 'NTS - 250K',
+                  'source': {
+                    'featureInfo': {
+                      'queryable': true,
+                      'nameField': 'IDENTIF',
+                      'outfields': [
+                        {
+                          'name': 'IDENTIF',
+                          'alias': 'Identification',
+                          'type': 'string',
+                          'domain': null
+                        },
+                        {
+                          'name': 'NAME',
+                          'alias': 'Name',
+                          'type': 'string',
+                          'domain': null
+                        },
+                        {
+                          'name': 'OBJECTID',
+                          'alias': 'Id',
+                          'type': 'oid',
+                          'domain': null
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  'layerId': '0',
+                  'layerName': 'NTS -1M',
+                  'source': {
+                    'featureInfo': {
+                      'queryable': false
+                    }
+                  }
+                },
+                {
+                  'layerId': '1',
+                  'layerName': 'NTS - 1M',
+                  'source': {
+                    'featureInfo': {
+                      'queryable': false
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'overviewMap': {'hideOnZoom': 6},
+        'navBar': ['zoom', 'fullscreen', 'home', 'location'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator' ]
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+        }"></div><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

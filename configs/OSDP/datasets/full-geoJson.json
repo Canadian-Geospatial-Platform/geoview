@@ -1,0 +1,24 @@
+{
+  "id": "rcs.900921.[Signal: en]",
+  "name": "Coverage: 1:50000 surficial geology map series - Island of Newfoundland: Ramea, Burgeo, Peter Snout, White Bear River, Trout River",
+  "layerType": "esriFeature",
+  "fileType": "geojson",
+  "customRenderer": {
+    "type": "simple",
+    "label": "Publications",
+    "description": "This is custom",
+    "symbol": {
+      "type": "esriSFS",
+      "style": "esriSFSSolid",
+      "color": [ 0, 112, 192, 51 ],
+      "outline": {
+        "type": "esriSLS",
+        "style": "esriSLSSolid",
+        "color": [ 0, 112, 192, 255 ],
+        "width": 3
+      }
+    }
+  },
+  "controls": [ "remove", "visibility", "refresh", "reload", "boundaryZoom" ],
+  "url": "https://en-fr-test.r2.osdp.aws.nrcan-rncan.cloud/GeoJson/NRCAN-GEOSCAN-1-129009_en.json"
+}

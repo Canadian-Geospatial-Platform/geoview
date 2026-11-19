@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier ESRI Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./outliers.html">← Back to Outliers</a></div><div class="demo-section"><h4>Outlier Layers with Performance Issues</h4><p>This page is used to showcase layers with bad performance with different original server projections.</p></div></div><button class="collapsible">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><select name="projections" id="projections" class="navigator-select"><option value="3857">Web Mercator (3857)</option><option value="3978">LCC (3978)</option></select> <button type="button" class="btn btn-primary" onclick="reloadMap()">Set Projection</button><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/performance.json"></div><hr/><div class="demo-section"><h4>Outlier Layers</h4><ul class="demo-list"><li><strong>Fieldnotes 2020-2021: Pacific Science Field Operations</strong> - 14 sub layer, identify of northern polygon crash the layer.</li><li><strong>Protected and conserved area</strong> - Heavy layer in 3879.</li><li><strong>Canada Nature Fund for Aquatic Species at Risk (CNFASAR)</strong> - Heavy layer in 3857, plus no field define for uniqueValue symbology.</li></ul></div><hr/><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      function reloadMap() {
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

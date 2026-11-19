@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Geocore Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Geocore Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show Geocore layer types</p></td></tr><tr><td><a href="#HLYR1">1. Many Geocore Layers</a><br/><a href="#HLYR2">2. Geocore Layers - with footer bar</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Many GeoCore Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre style="overflow-y: scroll" id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'initialView': {
+                'layerIds': []
+              },
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
+              }
+            ]
+          },
+          'components': ['overview-map'],
+          'footerBar': {
+            'tabs': {
+              'core': ['legend', 'layers', 'details', 'data-table']
+            }
+          },
+          'corePackages': [],
+          'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><div class="map-title-holder"><h4 id="HLYR2">2. GeoCore Layers - with footer bar</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre style="overflow-y: scroll" id="HLYR2-state" class="panel map-title-holder"></pre><div id="LYR2" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': '21b821cf-0f1c-40ee-8925-eab12d357668'
+            },
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+            },
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
+            },
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'LYR1') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
+        });
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+      } else if (mapId === 'LYR2') {
+        listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+      }
+    }, (mapId) => {
+      if (mapId === 'LYR1') {
+        // Layers are loaded
+        createTableOfFilter('LYR1');
+      }
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>
