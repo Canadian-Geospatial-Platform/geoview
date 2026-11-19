@@ -1908,19 +1908,6 @@ export function formatArea(area: number, displayLanguage: TypeDisplayLanguage): 
   return `${formatMeasurementValue(value, displayLanguage)} m<sup>2</sup>`;
 }
 
-/**
- * Normalizes a WMS accesspath if it is from datacube.
- *
- * Left as 'datacube' to check for both datacube.services.geo.ca and datacube-prod-data-public.s3.ca-central-1.amazonaws.com/
- *
- * @param path - The original access path
- * @returns The normalized access path
- */
-export function normalizeDatacubeAccessPath(path: string): string {
-  //TODO: ALEX - extract to list of exceptions / normalizations (use services-manager class)
-  return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
-}
-
 /** Job returned by the doWhen function */
 export type DelayJob = {
   /** The promise representing the delay job */

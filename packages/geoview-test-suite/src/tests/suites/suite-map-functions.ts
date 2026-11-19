@@ -143,7 +143,6 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     await this.#mapTester.testControllerGetFooterHeight();
 
     // Page-scrolling fixtures must not run alongside other UI/map mutations, including other maps under "Run all".
-    // TODO: ALEX - Fix the promise returns here in next PR
     // TODO: It'd be great it we could know in the UI that the suite is waiting on something here (there's not test to write a step here.. we need a 'suite-step' logic too)
     await this.waitForPageExclusivity();
     await this.#mapTester.testMapSectionScroll('partial');
