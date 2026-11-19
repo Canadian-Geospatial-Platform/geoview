@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { LayerTester } from '../testers/layer-tester';
 
 /**
@@ -127,7 +126,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     await this.#layerTester.testZoomExtentWithoutFeaturesWithConfiguredExtent();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.zoomToInitialExtent();
 
     // Test feature query behavior when no geometry field in outfields
     await this.#layerTester.testFeatureHasGeometryWhenOutfieldsHasNoGeometryField();
@@ -154,7 +153,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
     await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.zoomToInitialExtent();
 
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     await this.#layerTester.testAddGeoJSONWithGeometryCollection();
