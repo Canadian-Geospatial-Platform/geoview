@@ -421,6 +421,7 @@ export class MapViewer {
     // will update the padding dynamically when it mounts or changes height.
     const mapInfoInitialHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : parseInt(MAP_INFO_HEIGHT_COLLAPSED);
 
+    // Defer the target until redrawText is patched; attaching it creates the renderer and binds the font-change callback.
     const initialMap = new OLMap({
       layers: [GeoUtilities.createEmptyBasemap()],
       view: new View({
@@ -449,6 +450,7 @@ export class MapViewer {
 
     // GV Patch: guard against OpenLayers race condition known issue where redrawText iterates stale layerStatesArray
     // GV entries with null layers during layer removal or projection changes (font-load event timing).
+    // TODO: Recheck upstream redrawText on the next OpenLayers dependency update; remove this patch once disposed layers are handled.
     let frameState: FrameState | undefined;
     initialMap.on('postrender', (event): void => {
       frameState = event.frameState ?? undefined;
