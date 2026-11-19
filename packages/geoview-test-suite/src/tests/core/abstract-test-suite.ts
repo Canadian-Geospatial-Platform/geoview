@@ -1,9 +1,9 @@
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { formatDuration, whenThisThen } from 'geoview-core/core/utils/utilities';
-import { logger } from 'geoview-core/core/utils/logger';
 import type { AbstractTester, FailureEvent, SkippedEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
 import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions';
+import { TestStep } from './test-step';
 
 /**
  * Abstract base class for creating suite of tests.
@@ -27,6 +27,15 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   /** Callback delegates for the test skipped event */
   #onTestersTestSkippedHandlers: TesterSkippedDelegate<TTester>[] = [];
 
+  /** Steps recorded by this suite during its current launch. */
+  #steps: TestStep[] = [];
+
+  /** Status of the current suite launch. */
+  #suiteStatus: SuiteStatus = 'new';
+
+  /** Callback delegates for suite progress updates. */
+  #onSuiteUpdatedHandlers: SuiteUpdatedDelegate<TTester>[] = [];
+
   /** Indicates whether the plugin is running on a VPN */
   #isRunningOnVPN = false;
 
@@ -44,9 +53,6 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
 
   /** Number of test suite launches currently in progress across every map on the page. */
   static #activeLaunchesOnPage = 0;
-
-  /** Default maximum wait for other test suites on the page to finish before running page-level tests. */
-  static readonly PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS = 10 * 60 * 1000;
 
   // #region OVERRIDES
 
@@ -295,6 +301,35 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   }
 
   /**
+   * Gets the steps recorded by the current suite launch.
+   *
+   * @returns The suite's recorded steps
+   */
+  getSteps(): readonly TestStep[] {
+    return this.#steps;
+  }
+
+  /**
+   * Gets the current suite launch status.
+   *
+   * @returns The suite status
+   */
+  getSuiteStatus(): SuiteStatus {
+    return this.#suiteStatus;
+  }
+
+  /**
+   * Adds a suite-level step and notifies listeners.
+   *
+   * @param message - The step message
+   */
+  addStep(message: string): void {
+    const step = new TestStep(message, 'major', undefined);
+    this.#steps.push(step);
+    this.#emitSuiteUpdated({ step });
+  }
+
+  /**
    * Launches the test suite.
    *
    * When `DEBUG_RUN_ONLY_DEBUG_FUNCTION` is `true` and the environment is localhost,
@@ -306,7 +341,8 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
    */
   async launchTestSuite(): Promise<unknown> {
     // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+    if (this.#suiteStatus === 'running' || this.getTestsRunning() > 0)
+      throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
 
     // Validates the Test Suite can execute
     if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();
@@ -315,8 +351,12 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
     this.#launchStartedAt = new Date();
     this.#launchEndedAt = undefined;
     AbstractTestSuite.#activeLaunchesOnPage++;
+    this.#suiteStatus = 'running';
 
     try {
+      // Emit that the suite has updated/started in fact
+      this.#emitSuiteUpdated({});
+
       // Prepare to launch the test suite
       await this.onPrepareLaunchTestSuite();
 
@@ -328,11 +368,33 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
 
       // Launching full test suite
       return await this.onLaunchTestSuite();
+    } catch (error: unknown) {
+      // Flag the suite status to failed
+      this.#suiteStatus = 'failed';
+      throw error;
     } finally {
       // Record the end time whether launch succeeded or failed.
       this.#launchEndedAt = new Date();
       AbstractTestSuite.#activeLaunchesOnPage--;
+      if (this.#suiteStatus === 'running') this.#suiteStatus = 'success';
+
+      // Emit that the suite has udpdated/terminated in fact
+      this.#emitSuiteUpdated({});
     }
+  }
+
+  /**
+   * Resets all the testers in the suite.
+   */
+  resetTestSuite(): void {
+    // Validates the Test Suite isn't already running tests
+    if (this.#suiteStatus === 'running' || this.getTestsRunning() > 0)
+      throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
+
+    // Resets tests in all testers
+    this.#testers.forEach((tester) => tester.resetTests());
+    this.#steps = [];
+    this.#suiteStatus = 'new';
   }
 
   /**
@@ -344,26 +406,9 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
    * @param timeoutMs - Optional maximum wait in milliseconds (defaults to PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS)
    * @returns A promise resolving to true when the page became exclusive, or false when the timeout elapsed first
    */
-  protected async waitForPageExclusivity(timeoutMs = AbstractTestSuite.PAGE_EXCLUSIVE_WAIT_TIMEOUT_MS): Promise<boolean> {
-    try {
-      await whenThisThen((): boolean => AbstractTestSuite.#activeLaunchesOnPage <= 1, timeoutMs, 500);
-      return true;
-    } catch (error: unknown) {
-      // Proceed anyway; page-level tests may then be disturbed by the remaining concurrent suites
-      logger.logWarning(`Test suite '${this.getName()}' did not get exclusive page access before the timeout`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Resets all the testers in the suite.
-   */
-  resetTestSuite(): void {
-    // Validates the Test Suite isn't already running tests
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is running, please wait to prevent errors.');
-
-    // Resets tests in all testers
-    this.#testers.forEach((tester) => tester.resetTests());
+  waitForPageExclusivity(): Promise<boolean> {
+    this.addStep('Waiting for exclusive page access before continuing tests...');
+    return whenThisThen((): boolean => AbstractTestSuite.#activeLaunchesOnPage <= 1, undefined, 500);
   }
 
   // #endregion PUBLIC METHODS
@@ -436,6 +481,33 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   // #endregion PRIVATE METHODS
 
   // #region EVENTS
+
+  /**
+   * Emits a suite status or step update.
+   *
+   * @param event - The suite update
+   */
+  #emitSuiteUpdated(event: SuiteUpdatedEvent): void {
+    EventHelper.emitEvent(this, this.#onSuiteUpdatedHandlers, event);
+  }
+
+  /**
+   * Registers a suite progress handler.
+   *
+   * @param callback - The handler to register
+   */
+  onSuiteUpdated(callback: SuiteUpdatedDelegate<TTester>): void {
+    EventHelper.onEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a suite progress handler.
+   *
+   * @param callback - The handler to remove
+   */
+  offSuiteUpdated(callback: SuiteUpdatedDelegate<TTester>): void {
+    EventHelper.offEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
 
   /**
    * Emits an event to all handlers.
@@ -589,6 +661,21 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
 
   // #endregion EVENTS
 }
+
+/** Status of a suite launch. */
+export type SuiteStatus = 'new' | 'running' | 'success' | 'failed';
+
+/** A suite progress update, optionally containing a newly added step. */
+export interface SuiteUpdatedEvent {
+  step?: TestStep;
+}
+
+/** A handler for suite progress updates. */
+export type SuiteUpdatedDelegate<TTester extends AbstractTester = AbstractTester> = EventDelegateBase<
+  AbstractTestSuite<TTester>,
+  SuiteUpdatedEvent,
+  void
+>;
 
 /** Define an event for the delegate. */
 export interface TesterTestEvent<TTester extends AbstractTester = AbstractTester> extends TestEvent {
