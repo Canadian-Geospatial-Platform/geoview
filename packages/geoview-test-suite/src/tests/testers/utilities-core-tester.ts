@@ -23,7 +23,6 @@ import {
   formatMeasurementValue,
   formatLength,
   formatArea,
-  normalizeDatacubeAccessPath,
   sanitizeHtmlContent,
   enhanceLinksAccessibility,
   getLocalizedMessage,
@@ -817,9 +816,9 @@ export class UtilitiesCoreTester extends GVAbstractTester {
       (test) => {
         test.addStep('Normalizing datacube paths...');
         return [
-          normalizeDatacubeAccessPath('https://example.com/datacube/wrapper/ramp/ogc/layer'),
-          normalizeDatacubeAccessPath('https://example.com/datacube/ows/service'),
-          normalizeDatacubeAccessPath('https://example.com/regular/path'),
+          ServicesManagement.checkUrlDatacube('https://example.com/datacube/wrapper/ramp/ogc/layer'),
+          ServicesManagement.checkUrlDatacube('https://example.com/datacube/ows/service'),
+          ServicesManagement.checkUrlDatacube('https://example.com/regular/path'),
         ];
       },
       (test, results) => {

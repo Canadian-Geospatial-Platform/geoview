@@ -16,7 +16,7 @@ import type { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
-import { normalizeDatacubeAccessPath, sortArrayByNameDefaultFirst } from '@/core/utils/utilities';
+import { sortArrayByNameDefaultFirst } from '@/core/utils/utilities';
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
@@ -705,7 +705,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig impleme
     let metadataAccessPath = this.getMetadataAccessPath()!;
 
     // Normalize it - datacube specific normalization
-    metadataAccessPath = normalizeDatacubeAccessPath(metadataAccessPath);
+    metadataAccessPath = ServicesManagement.checkUrlDatacube(metadataAccessPath);
 
     // Set the normalized url in the metadata access path
     this.setMetadataAccessPath(metadataAccessPath);
@@ -716,7 +716,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig impleme
     // If any, normalize it as well in case the provided one also needed to be normalized
     if (dataAccessPath) {
       // Normalize it - datacube specific normalization
-      dataAccessPath = normalizeDatacubeAccessPath(dataAccessPath);
+      dataAccessPath = ServicesManagement.checkUrlDatacube(dataAccessPath);
     } else {
       // No data access path was provided, use the newly normalized metadata access path
       dataAccessPath = metadataAccessPath;

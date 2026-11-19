@@ -22,6 +22,18 @@ export class ServicesManagement {
   }
 
   /**
+   * Normalizes known Datacube service URL paths; other URLs are returned unchanged.
+   *
+   * @param path - The service URL to check
+   * @returns The URL with Datacube wrapper and OWS paths normalized when applicable
+   */
+  static checkUrlDatacube(path: string): string {
+    return path.toLowerCase().includes('datacube')
+      ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/')
+      : path;
+  }
+
+  /**
    * Converts a WMS service URL to its WFS equivalent by replacing the CGI-bin path segment.
    *
    * @param url - The WMS service URL to convert
