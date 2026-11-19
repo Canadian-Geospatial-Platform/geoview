@@ -1,8 +1,19 @@
 {
+  "configMeta": {
+    "version": "1.0",
+    "description": "Tests the forceServiceProjection flag to compare performance and rendering between OpenLayers reproject-on-the-fly and server-side reprojection."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
-      "initialView": { "zoomAndCenter": [5, [-90, 50]] },
+      "initialView": {
+        "zoomAndCenter": [
+          5,
+          [
+            -90,
+            50
+          ]
+        ]
+      },
       "projection": 3857
     },
     "basemapOptions": {
@@ -38,11 +49,11 @@
       },
       {
         "geoviewLayerId": "unemployed-ol",
-        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/CNFASAR/CNFASAR_PriorityPlace/MapServer/",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1",
+            "layerId": "0",
             "layerName": "(OL) Canada Nat.",
             "source": {
               "forceServiceProjection": true
@@ -52,11 +63,11 @@
       },
       {
         "geoviewLayerId": "unemployed-server",
-        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/CNFASAR/CNFASAR_PriorityPlace/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "1",
+            "layerId": "0",
             "layerName": "(Server) Canada Nat. 3857"
           }
         ]
@@ -85,6 +96,26 @@
             "layerName": "(Server) Protected. 3978"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "watermains-custom-srid",
+        "geoviewLayerName": "Illinois Custom SRID",
+        "metadataAccessPath":"https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "6"
+          },
+          {
+            "layerId": "9"
+          },
+          {
+            "layerId": "11"
+          },
+          {
+            "layerId": "16"
+          }
+        ]
       }
     ]
   },
@@ -92,21 +123,40 @@
     "overview-map",
     "north-arrow"
   ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "data-table"
       ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

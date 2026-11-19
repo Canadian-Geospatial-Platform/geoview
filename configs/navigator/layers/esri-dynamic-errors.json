@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -24,22 +23,11 @@
       {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Error layerId",
-        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ERROR",
-            "initialSettings": {
-              "controls": {
-                "query": true,
-                "hover": true
-              },
-              "states": {
-                "queryable": false,
-                "hoverable": false
-              }
-            }
+            "layerId": "ERROR"
           }
         ]
       }
@@ -49,21 +37,40 @@
     "overview-map",
     "north-arrow"
   ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "data-table"
       ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

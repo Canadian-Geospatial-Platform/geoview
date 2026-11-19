@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "Esri Dynamic layer examples covering simple, uniqueValue and classBreaks renderers, annotation sub-layers and geoCore. The 'offset-icon' layer tests the automatic and manual (hitToleranceOffset) identify hit-tolerance recentering for offset point symbols. The 'uniqueValueId' layer combines a manual layerFilter with layerStyle entries defaulted to 'visible: false', to show that hiding a class in the legend sends a server-side exclusion filter (via layerDefs), not just a client-side/legend-only change."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -10,25 +12,48 @@
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
+       {
+        "geoviewLayerId": "permafrost-atlas",
+        "geoviewLayerName": "Permafrost Atlas",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/permafrost_atlas_of_canada_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "annotation",
+        "geoviewLayerName": "Test Annotation",
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/TE/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "offset-icon",
+        "geoviewLayerName": "Administrative Area / Région administrative",
+        "metadataAccessPath": "https://geonb.snb.ca/arcgis/rest/services/GeoNB_NRCan_PlaceNames/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "hitToleranceOffset": [0, 7]
+          }
+        ]
+      },
       {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
-        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "initialSettings": {
-              "controls": {
-                "query": true,
-                "hover": true
-              },
-              "states": {
-                "queryable": false,
-                "hoverable": false
-              }
-            }
+            "layerId": "0"
           }
         ]
       },
@@ -48,7 +73,7 @@
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
-                "hasDefault": true,
+                "hasDefault": false,
                 "fields": [
                   "E_Regulated",
                   "E_SampleType",
@@ -278,7 +303,11 @@
                   {
                     "visible": true,
                     "label": "Regulated, Yearly, Normal",
-                    "values": [],
+                    "values": [
+                      "Regulated",
+                      "Yearly",
+                      "Normal"
+                    ],
                     "settings": {
                       "mimeType": "image/png",
                       "offset": [
@@ -324,21 +353,44 @@
     "overview-map",
     "north-arrow"
   ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     }
   },
   "corePackages": [],
+  "globalSettings": {
+    "coordinateInfoEnabled": false
+  },
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

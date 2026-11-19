@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -11,46 +10,107 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "xyzTilesLYR1",
-        "geoviewLayerName": "World_Topo_Map",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "xyzTilesLYR2",
-        "geoviewLayerName": "GNOSIS_Blue_Marble",
+        "geoviewLayerId": "xyzTilesBlue",
+        "geoviewLayerName": "GNOSIS Blue Marble",
         "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
             "layerId": "blueMarble",
-            "layerName": "GNOSIS Blue Marble",
             "source": {
               "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
             }
           }
         ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesOpenStreetMap",
+        "geoviewLayerName": "Open Street Map",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "openStreetMap",
+            "source": {
+              "dataAccessPath": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesWikimedia",
+        "geoviewLayerName": "Wikimedia (localhost only)",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "wikimedia",
+            "source": {
+              "dataAccessPath": "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesUsgsTopo",
+        "geoviewLayerName": "USGS Topo",
+        "metadataAccessPath": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesWorldTopo",
+        "geoviewLayerName": "World Topo Map",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

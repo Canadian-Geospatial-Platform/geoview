@@ -1,8 +1,7 @@
 {
   "map": {
-    "interaction": "static",
     "viewSettings": {
-      "projection": 3857
+      "projection": 3978
     },
     "basemapOptions": {
       "basemapId": "transport",
@@ -11,10 +10,27 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
-    "hideOnZoom": 6
+    "hideOnZoom": 7
+  },
+  "navBar": ["zoom"],
+  "appBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": []
+    }
   },
   "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca"
 }

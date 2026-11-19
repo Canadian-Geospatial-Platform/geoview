@@ -1,12 +1,6 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
-      "initialView": {
-        "layerIds": [
-          "geojsonLYR1/blank.json"
-        ]
-      },
       "projection": 3978
     },
     "basemapOptions": {
@@ -18,7 +12,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata_genericBlank_featureInfo5_20250217.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata_genericBlank_featureInfo5_20250217.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -32,37 +26,39 @@
     "overview-map"
   ],
   "overviewMap": {
-    "hideOnZoom": 5
+    "hideOnZoom": 7
   },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "basemap-select",
+    "drawer"
+  ],
   "appBar": {
     "tabs": {
       "core": [
         "geolocator",
         "export",
-        "layers",
         "legend",
-        "details",
-        "guide"
+        "details"
       ]
     }
   },
-  "navBar": [
-    "zoom",
-    "fullscreen",
-    "home"
-  ],
   "footerBar": {
     "tabs": {
       "core": [
+        "layers",
         "data-table"
       ],
-      "custom": [{
-        "id": "download-map-data",
-        "label": "How to download map data", 
-        "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
-      }]
-    },
-    "collapsed": true
+      "custom": [
+        {
+          "id": "download-map-data",
+          "label": "How to download map data",
+          "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
+        }
+      ]
+    }
   },
   "corePackages": [],
   "theme": "geo.ca"

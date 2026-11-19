@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -19,7 +18,7 @@
             "layerId": "Test.gpkg",
             "layerName": "Class breaks",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]
@@ -33,14 +32,14 @@
             "layerId": "QGIS Packaged Layers (D+S Canal).gpkg",
             "layerName": "D+S Canal",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           },
           {
             "layerId": "rivers.gpkg",
             "layerName": "Rivers",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]
@@ -58,16 +57,11 @@
                 "layerId": "Lakes"
               },
               {
-                "layerId": "Countries",
-                "initialSettings": {
-                  "states": {
-                    "visible": false
-                  }
-                }
+                "layerId": "Countries"
               }
             ],
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]
@@ -75,17 +69,36 @@
     ]
   },
   "components": [
-    "overview-map"
+    "overview-map",
+    "north-arrow"
   ],
   "overviewMap": {
     "hideOnZoom": 7
   },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "data-table"
       ]
     }

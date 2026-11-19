@@ -1,6 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Events - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Events</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HLNG1">1. Snackbar Notification</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how emit and listen to events from the API works</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HEVNT1">1. Snackbar Notification</h4><a class="ref-link" href="#top">Top</a></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Events - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Events</h4><p>This page is used to showcase how emit and listen to events from the API works</p></div></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
           'map': {
-            'interaction': 'dynamic',
             'viewSettings': {
               'projection': 3978
             },
@@ -11,9 +10,21 @@
             }
           },
           'components': [],
+          'appBar': {
+            'tabs': {
+               'core': []
+             }
+           },
+           'footerBar': {
+             'tabs': {
+               'core': []
+             }
+          },
           'corePackages': [],
           'theme': 'geo.ca'
-        }"></div><div><button id="success-notif-but">Success Notification</button> <button id="info-notif-but">Info Notification</button> <button id="error-notif-but">Error Notification</button> <button id="warning-notif-but">Warning Notification</button></div><p>This script tag will trigger a basic notification on load and another with a custom function every 10 seconds.</p><p>Accessing map center from outside of the core viewer on Map MOVE event using api event listeners:</p><pre class="maps-position"><p>Map EVNT1 move end</p></pre><p>Accessing map rotation from outside of the core viewer on Map ROTATION event using api event listeners:</p><pre class="maps-rotation"><p>Map EVNT1 rotation 0</p></pre><button type="button" class="collapsible">Configuration Snippet</button><pre id="EVNT1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+        }"></div><div><button class="btn btn-primary" id="success-notif-but">Success Notification</button> <button class="btn btn-primary" id="info-notif-but">Info Notification</button> <button class="btn btn-primary" id="error-notif-but">Error Notification</button> <button class="btn btn-primary" id="warning-notif-but">Warning Notification</button></div><p>This script tag will trigger a basic notification on load and another with a custom function every 10 seconds.</p><p>Accessing map center from outside of the core viewer on Map MOVE event using api event listeners:</p><pre class="maps-position"><p>Map EVNT1 move end</p></pre><p>Accessing map rotation from outside of the core viewer on Map ROTATION event using api event listeners:</p><pre class="maps-rotation"><p>Map EVNT1 rotation 0</p></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         if (mapViewer.mapId === 'map1') {
           //get map position panel
@@ -48,15 +59,10 @@
           });
 
           // snackbar notification
-          mapViewer.notifications.showWarning('templates.firstSnackbar');
+          mapViewer.notifications.showWarning('This is my first snackbar!');
 
           setInterval(() => {
-            mapViewer.notifications.showMessage('templates.canApplyFunction', [], false, {
-              label: 'Click me!',
-              action: () => {
-                alert('You clicked me!');
-              },
-            });
+            mapViewer.notifications.showMessage('Still hungry for a snack!');
 
             mapViewer.notifications.addNotificationSuccess('this is a success notification title');
           }, 10000);

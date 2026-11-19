@@ -1,5 +1,4 @@
 {
-  "schemaVersionUsed": "1,0",
   "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
   "listOfLayerEntryConfig": [
     {
@@ -10,9 +9,9 @@
           "queryable": true,
           "nameField": "Province",
           "outfields": [
-            { "name": "Province", "alias": "Province", "type": "string", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null },
-            { "name": "myImages", "alias": "My Images", "type": "string", "domain": null }
+            { "name": "Province", "alias": "Province", "type": "string" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" },
+            { "name": "myImages", "alias": "My Images", "type": "string" }
           ]
         }
       },
@@ -29,8 +28,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,128,128,0.5)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(128,128,0,1)",
@@ -45,8 +44,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(255,0,255,0.5)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(128,0,128,1)",
@@ -61,8 +60,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,0,255,0.5)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(128,0,0,1)",
@@ -82,8 +81,8 @@
           "queryable": true,
           "nameField": "Province",
           "outfields": [
-            { "name": "Province", "alias": "Province", "type": "string", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "number", "domain": null }
+            { "name": "Province", "alias": "Province", "type": "string" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -100,8 +99,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,0,255,0.5)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(128,0,0,1)",
@@ -121,9 +120,9 @@
           "queryable": false,
           "nameField": "Road_Number",
           "outfields": [
-            { "name": "Road_Number", "alias": "Road Number", "type": "number", "domain": null },
-            { "name": "Province", "alias": "Province", "type": "string", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Road_Number", "alias": "Road Number", "type": "number" },
+            { "name": "Province", "alias": "Province", "type": "string" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -157,9 +156,9 @@
           "queryable": true,
           "nameField": "data",
           "outfields": [
-            { "name": "data", "alias": "data", "type": "string", "domain": null },
-            { "name": "label", "alias": "label", "type": "string", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "number", "domain": null }
+            { "name": "data", "alias": "data", "type": "string" },
+            { "name": "label", "alias": "label", "type": "string" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -192,12 +191,12 @@
           "queryable": false,
           "nameField": "Red",
           "outfields": [
-            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
-            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
-            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
-            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
-            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -228,12 +227,12 @@
           "queryable": true,
           "nameField": "Red",
           "outfields": [
-            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
-            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
-            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
-            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
-            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -264,12 +263,12 @@
           "queryable": true,
           "nameField": "Red",
           "outfields": [
-            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
-            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
-            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
-            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
-            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -300,12 +299,12 @@
           "queryable": false,
           "nameField": "Red",
           "outfields": [
-            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
-            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
-            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
-            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
-            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },

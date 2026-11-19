@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "Per-layer zoom and scale limits via minScale, initialSettings minZoom and maxZoom at group and child levels."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
@@ -32,6 +34,10 @@
             "layerName": "Limited by Service - BC Ministry of Transportation Culverts"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "ae385105-e48c-4b54-bd0f-dfb7303301cb",
+        "geoviewLayerType": "geoCore"
       },
       {
         "geoviewLayerId": "uniqueValueId",
@@ -66,10 +72,26 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "initialView.layerIds to zoom to layer extents on load and highlightColor red instead of default."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "layerIds": [
@@ -20,8 +22,9 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -67,34 +70,34 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": [
-        "geolocator",
-        "export"
-      ]
-    }
-  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "navBar": [
     "zoom",
     "fullscreen",
     "home",
     "location"
   ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
         "data-table"
       ]
     }
   },
-  "components": [
-    "north-arrow"
-  ],
   "corePackages": [],
-  "externalPackages": []
+  "theme": "geo.ca"
 }

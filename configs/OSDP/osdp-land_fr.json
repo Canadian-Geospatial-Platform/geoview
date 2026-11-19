@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [
@@ -22,12 +21,39 @@
       {
         "geoviewLayerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf",
         "geoviewLayerName": "Récits du territoire : noms de lieux autochtones au Canada",
-        "metadataAccessPath": "",
-        "geoviewLayerType": "geoCore",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/indigenous_place_names_fr/MapServer",
+        "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Noms de lieux autochtones"
+            "layerName": "Noms de lieux autochtones",
+            "layerText": {
+              "field": "off_name_fr",
+              "fontSize": 12,
+              "placement": "point",
+              "textBaseline": "bottom",
+              "offsetY": -12,
+              "fill": "#000000",
+              "haloColor": "rgba(255, 255, 255, 0.7)",
+              "haloWidth": 4,
+              "declutterMode": "declutter",
+              "minZoomLevel": 5
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ee1580ab-a23d-4f86-a09b-79763677eb47",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2020",
+            "layerName": "Couverture des terres du Canada 2020",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true
+              }
+            }
           }
         ]
       },
@@ -39,22 +65,6 @@
           {
             "layerId": "landcover-2015",
             "layerName": "Couverture des terres du Canada 2015"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "c688b87f-e85f-4842-b0e1-a8f79ebf1133",
-        "geoviewLayerType": "geoCore",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "landcover-2010",
-            "layerName": "Couverture des terres du Canada 2010",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": true,
-                "visible": false
-              }
-            }
           }
         ]
       }
@@ -69,7 +79,8 @@
     "fullscreen",
     "home",
     "location",
-    "basemap-select"
+    "basemap-select",
+    "measurement"
   ],
   "appBar": {
     "tabs": {
@@ -92,6 +103,9 @@
   "corePackages": [
     "swiper"
   ],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca",
   "corePackagesConfig": [
     {
@@ -99,7 +113,7 @@
         "orientation": "vertical",
         "keyboardOffset": 10,
         "layers": [
-          "4e615eae-b90c-420b-adee-2ca35896caf6"
+          { "layerPath": "ee1580ab-a23d-4f86-a09b-79763677eb47", "side": "left" }
         ]
       }
     }

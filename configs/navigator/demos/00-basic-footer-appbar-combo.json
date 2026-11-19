@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "FooterBar and appBar combo with multiple layer types, overlay markers, uniqueValue styles, and canRemoveSublayers disabled."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
@@ -37,13 +39,17 @@
             "layerStyle": {
               "Polygon": {
                 "type": "uniqueValue",
-                "fields": ["STATE_NAME"],
+                "fields": [
+                  "STATE_NAME"
+                ],
                 "hasDefault": true,
                 "info": [
                   {
                     "label": "Alabama",
                     "visible": true,
-                    "values": ["Alabama"],
+                    "values": [
+                      "Alabama"
+                    ],
                     "settings": {
                       "type": "filledPolygon",
                       "color": "rgba(237,81,81,1)",
@@ -58,7 +64,9 @@
                   {
                     "label": "California",
                     "visible": true,
-                    "values": ["California"],
+                    "values": [
+                      "California"
+                    ],
                     "settings": {
                       "type": "filledPolygon",
                       "color": "rgba(252,146,31,1)",
@@ -94,8 +102,9 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -106,7 +115,7 @@
       {
         "geoviewLayerId": "csvLYR1",
         "geoviewLayerName": "NPRI",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/",
+        "metadataAccessPath": "./datasets/csv-files/",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {
@@ -118,13 +127,17 @@
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
-                "fields": ["Province | Province"],
+                "fields": [
+                  "Province | Province"
+                ],
                 "hasDefault": true,
                 "info": [
                   {
                     "label": "NL",
                     "visible": true,
-                    "values": ["NL"],
+                    "values": [
+                      "NL"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -136,13 +149,18 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
                     "label": "NB",
                     "visible": true,
-                    "values": ["NB"],
+                    "values": [
+                      "NB"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -154,7 +172,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
@@ -172,7 +193,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   }
                 ]
@@ -192,13 +216,17 @@
             "layerStyle": {
               "Polygon": {
                 "type": "uniqueValue",
-                "fields": ["name"],
+                "fields": [
+                  "name"
+                ],
                 "hasDefault": true,
                 "info": [
                   {
                     "label": "Lake Superior",
                     "visible": true,
-                    "values": ["Lake Superior"],
+                    "values": [
+                      "Lake Superior"
+                    ],
                     "settings": {
                       "type": "filledPolygon",
                       "color": "rgba(237,81,81,1)",
@@ -213,7 +241,9 @@
                   {
                     "label": "L. Ontario",
                     "visible": true,
-                    "values": ["L. Ontario"],
+                    "values": [
+                      "L. Ontario"
+                    ],
                     "settings": {
                       "type": "filledPolygon",
                       "color": "rgba(252,146,31,1)",
@@ -248,21 +278,37 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "footerBar": {
-    "tabs": {
-      "core": ["layers", "data-table"]
-    },
-    "collapsed": true
-  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["legend", "details"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     },
     "selectedTab": "legend"
   },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
-  "components": ["north-arrow", "overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
   "corePackages": [],
-  "externalPackages": []
+  "theme": "geo.ca"
 }

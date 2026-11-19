@@ -1,15 +1,26 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
-            "projection": 3978,
-			"initialView": {
-            "zoomAndCenter": [3.5, [-90, 60]]
-            },
-            "homeView": {
-              "zoomAndCenter": [3.5, [-90, 60]]
-            }
-          },
+      "projection": 3978,
+      "initialView": {
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
+      },
+      "homeView": {
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
+      }
+    },
     "basemapOptions": {
       "basemapId": "transport",
       "shaded": false,
@@ -17,8 +28,18 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": ["north-arrow", "overview-map"],
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select",
+    "measurement"
+  ],
   "appBar": {
     "tabs": {
       "core": [
@@ -33,10 +54,15 @@
     "tabs": {
       "core": [
         "layers",
-        "data-table"
+        "data-table",
+        "time-slider",
+        "geochart"
       ]
     }
   },
   "corePackages": [],
+  "globalSettings": {
+    "canRemoveSublayers": false
+  },
   "theme": "geo.ca"
 }

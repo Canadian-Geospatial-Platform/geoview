@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
@@ -13,7 +12,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "Error metadata",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadataERROR",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -31,8 +30,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": "Icons",
-                "initialSettings": { "states": { "visible": false } }
+                "layerName": "Icons"
               },
               {
                 "layerId": "points.json",
@@ -45,7 +43,7 @@
       {
         "geoviewLayerId": "geojsonLYR2",
         "geoviewLayerName": "Error layerId",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata",
+        "metadataAccessPath": "./datasets/geojson/metadata",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -61,7 +59,7 @@
       {
         "geoviewLayerId": "geojsonLYR3",
         "geoviewLayerName": "Error metadata (skipped .meta)",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadataERROR.meta",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -79,8 +77,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": "Icons",
-                "initialSettings": { "states": { "visible": false } }
+                "layerName": "Icons"
               },
               {
                 "layerId": "points.json",
@@ -92,18 +89,41 @@
       }
     ]
   },
-  "components": ["overview-map"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
-  }
+  "theme": "geo.ca"
 }

@@ -1,0 +1,90 @@
+{
+  "configMeta": {
+    "description": "OGC API Features examples using BBOX loading to fetch features within the map extent: archived flood extents with a 125-feature limit, and RADARSAT Constellation Mission imagery footprints with a 5000-feature limit. RADARSAT Constellation Mission fetching is very slow because the service caps each page at 100 records, requiring 100 sequential fetch requests to download 10,000 features. RADARSAT Constellation Mission does not report the total number of matching features in the JSON response's numberMatched property, whereas Flood EODMS does."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857,
+      "initialView": {
+        "zoomAndCenter": [ 7.39, [ -73.6800, 45.8830 ] ]
+      }
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "flood-eodms-sgdot-bbox",
+        "geoviewLayerName": "Flood with bbox and small maxRecordCount",
+        "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "EGS_Flood_Extent_Archive_en",
+            "maxRecordCount": 125,
+            "source": {
+              "strategy": "bbox"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "radarsat",
+        "geoviewLayerName": "RADARSAT Constellation Mission",
+        "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/search",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "rcm-ard",
+            "maxRecordCount": 5000,
+            "source": {
+              "strategy": "bbox"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

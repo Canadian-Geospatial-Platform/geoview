@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -10,19 +9,6 @@
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
-      {
-        "geoviewLayerId": "xyzTilesLYR1",
-        "geoviewLayerName": "Error metadata",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
-          }
-        ]
-      },
       {
         "geoviewLayerId": "xyzTilesLYR2",
         "geoviewLayerName": "Error layerId",
@@ -37,20 +23,69 @@
             }
           }
         ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesNatEarth",
+        "geoviewLayerName": "Natural Earth",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "natEarth",
+            "source": {
+              "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "World Topo Map"
+          }
+        ]
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
-  }
+  "theme": "geo.ca"
 }

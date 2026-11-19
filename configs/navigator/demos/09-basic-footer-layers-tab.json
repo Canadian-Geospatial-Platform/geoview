@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "FooterBar with layers tab, overlay point markers, intentional bad URL layer, and canRemoveSublayers disabled."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -91,8 +93,9 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -119,7 +122,9 @@
                 "layerId": "points_1.json",
                 "layerName": "Points 1",
                 "initialSettings": {
-                  "controls": { "remove": true }
+                  "controls": {
+                    "remove": true
+                  }
                 }
               },
               {
@@ -136,23 +141,22 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "components": [],
-  "footerBar": {
-    "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
-    },
-    "selectedTab": "layers",
-    "selectedLayersLayerPath": "airborne_radioactivity/1"
-  },
-  "corePackages": [],
-  "externalPackages": [],
+  "components": ["north-arrow", "overview-map"],
   "appBar": {
     "tabs": {
       "core": ["geolocator", "export"]
     }
   },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "details", "layers", "data-table"]
+    },
+    "selectedTab": "layers",
+    "selectedLayersLayerPath": "airborne_radioactivity/1"
+  },
+  "corePackages": [],
   "globalSettings": {
     "canRemoveSublayers": false
-  }
+  },
+  "theme": "geo.ca"
 }

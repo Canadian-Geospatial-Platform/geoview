@@ -1,8 +1,15 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
-      "initialView": { "zoomAndCenter": [10, [-75.370748, 45.001058]] },
+      "initialView": {
+        "zoomAndCenter": [
+          10,
+          [
+            -75.370748,
+            45.001058
+          ]
+        ]
+      },
       "projection": 3857
     },
     "basemapOptions": {
@@ -37,17 +44,44 @@
       }
     ]
   },
-  "components": ["overview-map"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

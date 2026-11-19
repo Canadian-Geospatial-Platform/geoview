@@ -1,5 +1,4 @@
 {
-  "schemaVersionUsed": "1,0",
   "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
   "listOfLayerEntryConfig": [
     {
@@ -10,18 +9,18 @@
           "queryable": true,
           "nameField": "Project",
           "outfields": [
-            { "name": "program", "alias": "Program", "type": "string", "domain": null },
-            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
-            { "name": "geom_type", "alias": "Geometry type", "type": "string", "domain": null },
-            { "name": "geom_area", "alias": "Geometry area", "type": "string", "domain": null },
-            { "name": "SRID", "alias": "SRID", "type": "string", "domain": null }
+            { "name": "program", "alias": "Program", "type": "string" },
+            { "name": "project_id", "alias": "Project ID", "type": "string" },
+            { "name": "geom_type", "alias": "Geometry type", "type": "string" },
+            { "name": "geom_area", "alias": "Geometry area", "type": "string" },
+            { "name": "SRID", "alias": "SRID", "type": "string" }
           ]
         }
       },
       "layerStyle": {
         "Point": {
           "type": "uniqueValue",
-          "fields": ["Program"],
+          "fields": ["program"],
           "hasDefault": true,
           "info": [
             {
@@ -59,15 +58,15 @@
         "Polygon": {
           "type": "uniqueValue",
           "hasDefault": true,
-          "fields": ["Program"],
+          "fields": ["program"],
           "info": [
             {
               "label": "EGP",
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(255,0,0,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(255,0,0,1)",
@@ -82,8 +81,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,128,128,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(0,128,128,1)",
@@ -98,8 +97,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(255,0,255,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(255,0,255,1)",
@@ -114,8 +113,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,0,255,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(0,0,255,1)",
@@ -127,6 +126,13 @@
             }
           ]
         }
+      },
+      "layerText": {
+        "field": "project_id",
+        "haloColor": "#ffffff",
+        "haloWidth": 3,
+        "wrap": true,
+        "declutterMode": "declutter"
       }
     }
   ]

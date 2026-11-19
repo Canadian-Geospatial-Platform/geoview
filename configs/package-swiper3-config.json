@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -17,29 +16,16 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "msi-94-or-more",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "band-0-pixel-value",
-                "outfields": [
-                  {
-                    "name": "band-0-pixel-value",
-                    "alias": "Pixel value",
-                    "type": "number",
-                    "domain": null
-                  }
-                ]
-              }
-            }
+            "layerId": "msi-94-or-more"
           }
         ]
       },
       {
         "geoviewLayerId": "swipe4",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json"
@@ -49,7 +35,7 @@
       {
         "geoviewLayerId": "swipe5",
         "geoviewLayerName": "Airport data",
-        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
@@ -79,18 +65,18 @@
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "initialSettings": {
-              "minZoom": 3,
-              "maxZoom": 8
-            }
+            "layerId": "0"
           }
         ]
       }
     ]
   },
-  "theme": "light",
-  "components": ["north-arrow", "overview-map"],
-  "corePackages": ["swiper"],
-  "externalPackages": []
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "corePackages": [
+    "swiper"
+  ],
+  "theme": "light"
 }

@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "Esri Feature layer examples covering simple, uniqueValue and classBreaks renderers. The 'offset-icon' layer mainly demonstrates using layerStyle's icon offset so a pin-style symbol's bottom point, rather than its center, lands on the geometry (icons otherwise render centered on the point)."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },
@@ -11,43 +13,24 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "FeatureServerLyr1",
+        "geoviewLayerId": "toronto-neighbourhoods",
+        "geoviewLayerName": "Toronto Neighbourhoods",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "Toronto Neighbourhoods",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "AREA_NA7"
-              }
-            }
+            "layerId": "0"
           }
         ]
       },
       {
-        "geoviewLayerId": "FeatureServerLyr2",
+        "geoviewLayerId": "u2-tour-locations",
+        "geoviewLayerName": "U2 Tour Locations",
         "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "U2 Tour Locations",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "Venue",
-                "outfields": [
-                  { "name": "Venue", "alias": "Venue", "type": "string", "domain": null },
-                  { "name": "Event", "alias": "Event", "type": "string", "domain": null },
-                  { "name": "Tour", "alias": "Tour", "type": "string", "domain": null },
-                  { "name": "City", "alias": "City", "type": "string", "domain": null },
-                  { "name": "Date", "alias": "Date", "type": "date", "domain": null }
-                ]
-              }
-            }
+            "layerId": "0"
           }
         ]
       },
@@ -63,14 +46,35 @@
         ]
       },
       {
+        "geoviewLayerId": "offset-icon",
+        "geoviewLayerName": "Informations sur le parc ou la place",
+        "metadataAccessPath": "https://services1.arcgis.com/4GCvRJNX6LNyFVQ0/arcgis/rest/services/CI_LOISIRS_SPORTS/FeatureServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
-        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "permafrost-atlas",
+        "geoviewLayerName": "Permafrost Atlas",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/permafrost_atlas_of_canada_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
           }
         ]
       },
@@ -340,21 +344,41 @@
     "overview-map",
     "north-arrow"
   ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
       "core": [
-        "legend",
         "layers",
-        "details",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
   }
 }

@@ -1,7 +1,9 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Empty GeoJson Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Empty GeoJSON Layer</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr><tr><td><p>This page is used to show injecting geojson features into an existing layers</p></td></tr></tbody></table></div><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/geojson-inject.json"></div><hr/><div><h3>API Functions:</h3><ul><li><button id="Add-points1">Place points set 1</button><br/>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</li><li><button id="Add-points2">Place points set 2</button><br/>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</li><li><button id="Add-points3">Place points set 3</button><br/>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</li><li><button id="Replace-outfields">Replace feature outfields</button><br/>cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);</li></ul></div><script>// initialize cgpv
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Empty GeoJson Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>Empty GeoJSON Layer Demo</h4><p>This page demonstrates injecting GeoJSON features into existing layers</p></div></div><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/geojson-inject.json"></div><div class="demo-section"><h4>API Functions:</h4><ul class="demo-function-list"><li><button class="btn btn-primary" id="Add-points1">Place points set 1</button><br/><code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</code></li><li><button class="btn btn-primary" id="Add-points2">Place points set 2</button><br/><code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</code></li><li><button class="btn btn-primary" id="Add-points3">Place points set 3</button><br/><code>await cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</code></li><li><button class="btn btn-primary" id="Replace-outfields">Replace feature outfields</button><br/><code>cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);</code></li></ul></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // initialize cgpv
       cgpv.init();
 
-      // Add points 1 button ====================================================================================
+      // #region Add points 1 button
       // find the button element by ID
       var addPoints1Button = document.getElementById('Add-points1');
 
@@ -14,7 +16,8 @@
               program: 'GEP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -30,7 +33,8 @@
               program: 'GGN',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -46,7 +50,8 @@
               program: 'GGP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -60,10 +65,17 @@
       };
       // add an event listener when a button is clicked
       addPoints1Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points1)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 1 in GeoJSON injection demo', error);
+          });
       });
 
-      // Add points 2 button ====================================================================================
+      // #endregion Add points 1 button
+
+      // #region Add points 2 button
       // find the button element by ID
       var addPoints2Button = document.getElementById('Add-points2');
 
@@ -72,10 +84,16 @@
 
       // add an event listener when a button is clicked
       addPoints2Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points2)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 2 in GeoJSON injection demo', error);
+          });
       });
+      // #endregion Add points 2 button
 
-      // Add points 3 button ====================================================================================
+      // #region Add points 3 button
       // find the button element by ID
       var addPoints3Button = document.getElementById('Add-points3');
 
@@ -88,7 +106,8 @@
               program: 'CMGD',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -104,7 +123,8 @@
               program: 'EGP',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -120,7 +140,8 @@
               program: 'EGP2024',
               project_id:
                 '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
-              title_en: '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               project_leader:
                 '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
               geo_scope: '????',
@@ -134,13 +155,28 @@
       };
       // add an event listener when a button is clicked
       addPoints3Button.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.setGeojsonSource('geojsonLYR1/blank.json', points3)
+          .catch((error) => {
+            cgpv.logger.logPromiseFailed('Place points set 3 in GeoJSON injection demo', error);
+          });
       });
-      // Add replace fields button ====================================================================================
+      // #endregion Add points 3 button
+
+      // #region Add replace fields button
       // find the button element by ID
       var replaceFieldsButton = document.getElementById('Replace-outfields');
 
       // add an event listener when a button is clicked
       replaceFieldsButton.addEventListener('click', () => {
-        cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);
-      });</script></body></html>
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.replaceFeatureOutfields(
+            'geojsonLYR1/blank.json',
+            ['string', 'string', 'string'],
+            ['program', 'title_en', 'project_id'],
+            ['Program', 'Title', 'ID']
+          );
+      });
+      // #endregion Add replace fields button</script></body></html>

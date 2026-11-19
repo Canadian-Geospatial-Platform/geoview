@@ -1,0 +1,56 @@
+{
+  "configMeta": {
+    "description": "All overlapping panels (legend, layers, details, data-table, guide) declared in BOTH appBar and footerBar. Config validation keeps the app bar occurrence and drops the duplicates from the footer bar, showing a warning notification."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9",
+        "geoviewLayerType": "geoCore"
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "guide"
+      ]
+    },
+    "selectedTab": "legend"
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table",
+        "guide"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

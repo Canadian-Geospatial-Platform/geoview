@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Metadata Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Outlier layers with metadata issues</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase layers with unusual or missing metadata</p></td></tr><tr><td><a href="#Hmap1">1. Metadata Issue Layers</a><br/><a href="#Hmap2">2. ESRI service Issue Layers</a><br/><a href="#Hmap3">3. Metadata Extent Issue Layers</a><br/><a href="#Hmap4">4. Feature Layer with old metadata, no 'Feature Layer' in type property, must by on VPN</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hmap1">1. Metadata Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config="{
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Metadata Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./outliers.html">← Back to Outliers</a></div><div class="demo-section"><h4>Outlier Layers with Metadata Issues</h4><p>This page showcases layers with unusual or missing metadata that have been identified and tracked.</p><ul class="demo-list"><li><a href="#Hmap1">1. Metadata Issue Layers</a></li><li><a href="#Hmap2">2. ESRI Service Issue Layers</a></li><li><a href="#Hmap3">3. Metadata Extent Issue Layers</a></li><li><a href="#Hmap4">4. Feature Layer with Old Metadata (VPN Required)</a></li></ul></div></div><div class="map-title-holder"><h4 id="Hmap1">1. Metadata Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -11,6 +11,10 @@
           },
           'listOfGeoviewLayerConfig': [
             {
+              'geoviewLayerId': 'b0079f0f-7448-dca1-8141-a6aad90294f4',
+              'geoviewLayerType': 'geoCore'
+            },
+            {
               'geoviewLayerId': 'mpmo',
               'geoviewLayerName': 'MPMO - Major Project',
               'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/MPMO_Major_Projects/MapServer/',
@@ -18,12 +22,7 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': 'MPMO - Major Project',
-                  'initialSettings': {
-                    'states': {
-                      'visible': true
-                    }
-                  }
+                  'layerName': 'MPMO - Major Project'
                 }
               ]
             },
@@ -57,25 +56,110 @@
             {
               'geoviewLayerId': 'permafrost-by-ecoprovince',
               'geoviewLayerName': 'Permafrost by Ecoprovince',
-              'metadataAccessPath': 'https://agriculture.canada.ca/atlas/rest/services/mapservices/aafc_national_ecological_framework_of_canada/MapServer',
-              'geoviewLayerType': 'esriDynamic',
+              'metadataAccessPath': 'https://services.arcgis.com/lGOekm0RsNxYnT3j/ArcGIS/rest/services/National_ecological_framework_of_Canada_ecozones/FeatureServer',
+              'geoviewLayerType': 'esriFeature',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': '33'
+                  'layerId': '6'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'nonna',
+              'geoviewLayerName': 'Nonna w/ space in id',
+              'metadataAccessPath': 'https://nonna-geoserver.data.chs-shc.ca/geoserver/wms',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                { 'layerId': 'nonna:NONNA 10' }
+              ]
+            },
+            {
+              'geoviewLayerId': 'nonna-missing-layerid',
+              'geoviewLayerName': 'Nonna w/o layerid',
+              'metadataAccessPath': 'https://nonna-geoserver.data.chs-shc.ca/geoserver/wms',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': []
+            },
+            {
+              'geoviewLayerId':'canimage_dupid',
+              'geoviewLayerName':'Can Image',
+              'metadataAccessPath':'https://maps.geogratis.gc.ca/wms/canimage_en',
+              'geoviewLayerType':'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                    'layerId':'canimage'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'nfi-group-with-slash',
+              'geoviewLayerName': 'Nfi Plot Test Slash',
+              'metadataAccessPath': 'https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'photo/plot/with/slash',
+                  'layerName': 'Photo/Plot/Group',
+                  'entryType': 'group',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'ca_nfiphotoplot_lc_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_lu_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_ow_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_ps_a_en'
+                    }
+                  ]
+                },
+                {
+                  'layerId': 'ca_nfigroundplot_cartographic_a'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'u2-with-nameField-date',
+              'metadataAccessPath': 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'U2 with date nameField',
+                  'source': {
+                    'featureInfo': {
+                      'nameField': 'Date',
+                      'outfields': [
+                        { 'name': 'Venue', 'alias': 'Venue Set', 'type': 'string'},
+                        { 'name': 'Event', 'alias': 'Event Set', 'type': 'string'},
+                        { 'name': 'Tour', 'alias': 'Tour Set', 'type': 'string'},
+                        { 'name': 'City', 'alias': 'City Set', 'type': 'string'},
+                        { 'name': 'Date', 'alias': 'Date Set', 'type': 'date'}
+                      ]
+                    }
+                  }
                 }
               ]
             }
           ]
         },
         'components': ['overview-map'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'export']
+          }
+        },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><hr/><div>Outlier Layers:<ul><li>Permafrost - Metadata has no geometry field - Issue #2212</li><li>Major Project - esri feature layer does not load because of null field value - Issue #2208</li><li>Floods in Canada - layers are missing time extent - Issue #2251</li></ul></div><hr/><div class="map-title-holder"></div><h4 id="Hmap2">2. ESRI Service Issue Layers</h4><a class="ref-link" href="#top">Top</a><button class="collapsible active">Layers Status</button><pre id="Hmap2-state" class="panel map-title-holder"></pre><hr/><div id="map2" class="geoview-map" data-lang="en" data-config="{
+      }"></div><hr/><div class="demo-section"><h4>Outlier Layers:</h4><ul class="demo-list"><li><strong>Permafrost</strong> - Metadata has no geometry field - Issue #2212</li><li><strong>Major Project</strong> - esri feature layer does not load because of null field value - Issue #2208</li><li><strong>Floods in Canada</strong> - layers are missing time extent - Issue #2251</li><li><strong>Boundaries</strong> - layers projection and extent projection from metadata are different for three layers (Block Land Transfer, Municipal Boundary, and Watershed Boundaries)</li><li><strong>Nfi Plot Test Slash</strong> - WMS layer with slashes in layerId path, testing group entries with slash-separated IDs</li><li><strong>Can Image</strong> - WMS layer with potential duplicate `<name>` at different nesting levels - Issue #3521</name></li></ul></div><hr/><div class="map-title-holder"></div><h4 id="Hmap2">2. ESRI Service Issue Layers</h4><a class="ref-link" href="#top">Top</a><button class="collapsible">Layers Status</button><pre id="Hmap2-state" class="panel map-title-holder"></pre><hr/><div id="map2" class="geoview-map" data-lang="en" data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -94,14 +178,19 @@
           ]
         },
         'components': ['overview-map'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'export']
+          }
+        },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],
         'theme': 'geo.ca'
-      }"></div><hr/><div>Outlier Service:<ul><li>Sewer Overflow - Service has inexistant layer index (https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/)</li></ul></div><div class="map-title-holder"><h4 id="Hmap3">3. Metadata Extent Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap3-state" class="panel map-title-holder"></pre><hr/><div id="map3" class="geoview-map" data-lang="en" data-config="{
+      }"></div><hr/><div class="demo-section"><h4>Outlier Service:</h4><ul class="demo-list"><li><strong>Sewer Overflow</strong> - Service has inexistant layer index <a href="https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/" target="_blank">View Service</a></li></ul></div><div class="map-title-holder"><h4 id="Hmap3">3. Metadata Extent Issue Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible">Layers Status</button><pre id="Hmap3-state" class="panel map-title-holder"></pre><hr/><div id="map3" class="geoview-map" data-lang="en" data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -140,21 +229,21 @@
           ]
         },
         'components': ['north-arrow', 'overview-map'],
-        'overviewMap': {'hideOnZoom': 6},
+        'overviewMap': {'hideOnZoom': 7},
         'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
         'appBar': {
           'tabs': {
-            'core': ['geolocator', 'export']
+            'core': ['legend', 'details', 'export']
           }
         },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],
         'theme': 'geo.ca'
-        }"></div><hr/><div>Outlier Service:<ul><li>Water Quality and Reported releases - Services have extent metadata not covering the entirety of the actual data (https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/ and https://maps-cartes.ec.gc.ca/arcgis/rest/services/NPRI_INRP/NPRI_INRP/MapServer/)</li></ul></div><div class="map-title-holder"><h4 id="Hmap4">4. Feature Layer with old metadata, no 'Feature Layer' in type property, must by on VPN</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap4-state" class="panel map-title-holder"></pre><hr/><div id="map4" class="geoview-map" data-lang="en" data-config="{
+        }"></div><hr/><div class="demo-section"><h4>Outlier Service:</h4><ul class="demo-list"><li><strong>Water Quality and Reported releases</strong> - Services have extent metadata not covering the entirety of the actual data <a href="https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/" target="_blank">CESI Service</a> <a href="https://maps-cartes.ec.gc.ca/arcgis/rest/services/NPRI_INRP/NPRI_INRP/MapServer/" target="_blank">NPRI Service</a></li></ul></div><div class="map-title-holder"><h4 id="Hmap4">4. Feature Layer with old metadata, no 'Feature Layer' in type property, must by on VPN</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible">Layers Status</button><pre id="Hmap4-state" class="panel map-title-holder"></pre><hr/><div id="map4" class="geoview-map" data-lang="en" data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -181,7 +270,7 @@
           ]
         },
         'components': ['north-arrow', 'overview-map'],
-        'overviewMap': {'hideOnZoom': 6},
+        'overviewMap': {'hideOnZoom': 7},
         'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
         'appBar': {
           'tabs': {
@@ -195,7 +284,9 @@
         },
         'corePackages': [],
         'theme': 'geo.ca'
-        }"></div><hr/><div>Outlier Service:<ul><li>Service is old and doesn't have a 'Feature Layer' as part of its 'type' property in its metadata (https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer?f=json)</li></ul></div><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+        }"></div><hr/><div class="demo-section"><h4>Known Outlier Metadata Layers</h4><ul class="demo-list"><li><strong>FireCreepPerimeter Service</strong> - Service is old and doesn't have a 'Feature Layer' as part of its 'type' property in its metadata <a href="https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer?f=json" target="_blank">View Metadata</a></li></ul></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
       });

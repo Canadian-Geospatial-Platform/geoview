@@ -1,6 +1,8 @@
 {
+  "configMeta": {
+    "description": "AOI panel plugin in appBar with 2 areas of interest."
+  },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
@@ -10,12 +12,10 @@
       "labeled": true
     }
   },
-  "theme": "geo.ca",
   "components": [
     "north-arrow",
     "overview-map"
   ],
-  "corePackages": [],
   "appBar": {
     "tabs": {
       "core": [
@@ -23,6 +23,8 @@
       ]
     }
   },
+  "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "aoi-panel": {
