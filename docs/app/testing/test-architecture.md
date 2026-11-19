@@ -70,6 +70,10 @@ Each test follows this lifecycle:
 
 ## Execution Flow
 
+The base suite's `launchTestSuite()` rejects launches while the suite is running before invoking
+`onInitializeLaunchTestSuite()`. This hook initializes context before `onCanExecuteTestSuite()` checks
+eligibility. GeoView suites use it to bind the current map and controllers to the suite and its testers.
+
 ```
 1. Plugin reads config: "suites": ["suite-layer", "suite-config"]
 2. Plugin creates suite instances via if/else-if chain in onAdd()

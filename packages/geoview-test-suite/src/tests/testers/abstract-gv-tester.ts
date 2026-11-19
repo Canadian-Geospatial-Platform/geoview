@@ -2456,44 +2456,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   // #region UI INTERACTION METHODS
 
   /**
-   * Destroys the current map and creates a new one from the given config.
-   *
-   * Deletes the existing map viewer, creates a fresh instance via `createMapFromConfigFast`,
-   * reassigns the tester's internal references, and waits for all layers to finish loading.
-   *
-   * @param test - The test instance used to log each step
-   * @param mapId - The map identifier to destroy and recreate
-   * @param mapConfig - The map configuration object (will be JSON-stringified)
-   * @param divHeight - Optional height for the map container div
-   * @returns A promise that resolves with the newly created MapViewer
-   */
-  async replaceMap(test: Test, mapId: string, mapConfig: unknown, divHeight?: number): Promise<MapViewer> {
-    // Delete current map
-    test.addStep('Deleting current map...');
-    await this.getApi().deleteMapViewer(mapId, false);
-
-    // Wait for layer to load and data table to initialize
-    test.addStep('Creating the map from config...');
-    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), divHeight);
-
-    // Replace the map viewer and the controller registry in the tester with the new one created from config
-    this.assignMapViewerAndControllers(mapViewer);
-    this.#emitMapReplaced(mapViewer);
-
-    // Waiting for layers to get loaded even when map is in a background tab
-    test.addStep('Waiting for layers to get loaded even when map is in a background tab...');
-    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoadedForcingRenders();
-    test.addStep(`Layers loaded (${loadedLayersCount})`);
-
-    // Force a final synchronous render so OL populates frameState_ (required for getPixelFromCoordinate to work in hidden tabs)
-    test.addStep('Waiting for map render...');
-    await mapViewer.waitForRender();
-
-    // Return the map viewer
-    return mapViewer;
-  }
-
-  /**
    * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
    * and sets up the details UI with that layer. Steps are logged to the provided test instance.
    *
@@ -2618,7 +2580,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    *
    * @param mapViewer - The newly created map viewer
    */
-  #emitMapReplaced(mapViewer: MapViewer): void {
+  protected emitMapReplaced(mapViewer: MapViewer): void {
     EventHelper.emitEvent(this, this.#mapReplacedHandlers, { mapViewer });
   }
 
