@@ -9,6 +9,7 @@ import type {
   TesterSuccessEvent,
   TesterTestEvent,
   TesterTestUpdatedEvent,
+  SuiteUpdatedEvent,
 } from './tests/core/abstract-test-suite';
 import { TestSuiteRunningError } from './tests/core/exceptions';
 import type { GVAbstractTestSuite } from './tests/suites/abstract-gv-test-suite';
@@ -35,11 +36,17 @@ class TestSuitePlugin extends AbstractPlugin {
   /** Indicates the number of suites that completed their tests (the suites are run synchronously) */
   #suitesCompleted = 0;
 
+  /** Whether a plugin launch is in progress, including between tests. */
+  #isLaunching = false;
+
   /** Callback delegates for the test started event */
   #onSuiteTestersTestStartedHandlers: SuiteTesterTestDelegate[] = [];
 
   /** Callback delegates for the test updated event */
   #onSuiteTestersTestUpdatedHandlers: SuiteTesterTestUpdatedDelegate[] = [];
+
+  /** Callback delegates for suite progress updates. */
+  #onSuiteUpdatedHandlers: PluginSuiteUpdatedDelegate[] = [];
 
   /** Callback delegates for the test success event */
   #onSuiteTestersTestSuccessHandlers: SuiteTesterSuccessDelegate[] = [];
@@ -159,6 +166,11 @@ class TestSuitePlugin extends AbstractPlugin {
   addTestSuite(testSuite: GVAbstractTestSuite): void {
     this.testSuites.push(testSuite);
 
+    // Register handlers when a suite has updated
+    testSuite.onSuiteUpdated((sender, event) => {
+      this.#emitSuiteUpdated({ ...event, suite: sender as GVAbstractTestSuite });
+    });
+
     // Register handlers when the a test has started
     testSuite.onTestStarted((sender, event) => {
       // Re-emit
@@ -199,30 +211,44 @@ class TestSuitePlugin extends AbstractPlugin {
    */
   async launchTestSuites(): Promise<unknown[]> {
     // Make sure no test suite is currently running
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError();
+    if (this.#isLaunching || this.getTestsRunning() > 0) throw new TestSuiteRunningError();
 
     // Reset the test suites
     this.resetTestSuites();
 
-    // Launch each suite in order because they share the same map viewer.
-    const launchResults: unknown[] = [];
-    for (const testSuite of this.testSuites) {
-      // Launch the test suite and wait
-      // eslint-disable-next-line no-await-in-loop
-      const suiteResult = await testSuite.launchTestSuite();
-      launchResults.push(suiteResult);
+    this.#isLaunching = true;
+    try {
+      // Launch each suite in order because they share the same map viewer.
+      const launchResults: unknown[] = [];
+      for (const testSuite of this.testSuites) {
+        // Launch the test suite and wait
+        // eslint-disable-next-line no-await-in-loop
+        const suiteResult = await testSuite.launchTestSuite();
+        launchResults.push(suiteResult);
 
-      // Increment the completed suites for each successful launch.
-      this.#suitesCompleted++;
+        // Increment the completed suites for each successful launch.
+        this.#suitesCompleted++;
+      }
+
+      // Emit once all test suites have completed launching.
+      this.#emitTestSuitesCompleted({
+        testSuites: this.testSuites,
+      });
+
+      // Return the promise
+      return launchResults;
+    } finally {
+      this.#isLaunching = false;
     }
+  }
 
-    // Emit once all test suites have completed launching.
-    this.#emitTestSuitesCompleted({
-      testSuites: this.testSuites,
-    });
-
-    // Return the promise
-    return launchResults;
+  /**
+   * Checks whether a suite launch is in progress, including suite-level waits.
+   *
+   * @returns True while the plugin is executing its suites
+   */
+  getIsLaunching(): boolean {
+    return this.#isLaunching;
   }
 
   /**
@@ -231,7 +257,7 @@ class TestSuitePlugin extends AbstractPlugin {
    */
   resetTestSuites(): void {
     // Make sure no test suite is currently running
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError();
+    if (this.#isLaunching || this.getTestsRunning() > 0) throw new TestSuiteRunningError();
 
     // Reset the completed suites
     this.#suitesCompleted = 0;
@@ -474,6 +500,33 @@ class TestSuitePlugin extends AbstractPlugin {
   // #region EVENTS
 
   /**
+   * Emits a suite progress update.
+   *
+   * @param event - The suite progress event
+   */
+  #emitSuiteUpdated(event: PluginSuiteUpdatedEvent): void {
+    EventHelper.emitEvent(this, this.#onSuiteUpdatedHandlers, event);
+  }
+
+  /**
+   * Registers a suite progress handler.
+   *
+   * @param callback - The handler to register
+   */
+  onSuiteUpdated(callback: PluginSuiteUpdatedDelegate): void {
+    EventHelper.onEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a suite progress handler.
+   *
+   * @param callback - The handler to remove
+   */
+  offSuiteUpdated(callback: PluginSuiteUpdatedDelegate): void {
+    EventHelper.offEvent(this.#onSuiteUpdatedHandlers, callback);
+  }
+
+  /**
    * Emits an event to all handlers.
    *
    * @param event - The event to emit
@@ -659,6 +712,14 @@ class TestSuitePlugin extends AbstractPlugin {
 /**
  * Define an event for the delegate
  */
+export interface PluginSuiteUpdatedEvent extends SuiteUpdatedEvent {
+  suite: GVAbstractTestSuite;
+}
+
+/** A handler for suite progress forwarded by the plugin. */
+export type PluginSuiteUpdatedDelegate = EventDelegateBase<TestSuitePlugin, PluginSuiteUpdatedEvent, void>;
+
+/** Define an event for the delegate. */
 export interface SuiteTesterTestEvent extends TesterTestEvent {
   suite: GVAbstractTestSuite;
 }

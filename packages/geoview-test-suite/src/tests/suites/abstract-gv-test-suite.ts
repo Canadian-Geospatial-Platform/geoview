@@ -56,7 +56,8 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite<GVAbstractTe
    * @throws {TestSuiteRunningError} When tests are already running
    */
   override launchTestSuite(): Promise<unknown> {
-    if (this.getTestsRunning() > 0) throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
+    if (this.getSuiteStatus() === 'running' || this.getTestsRunning() > 0)
+      throw new TestSuiteRunningError('The Test Suite is already running, please wait to prevent errors.');
     this.#assignMapViewerAndControllers(this.#api.getMapViewer(this.#mapViewer.mapId));
     return super.launchTestSuite();
   }

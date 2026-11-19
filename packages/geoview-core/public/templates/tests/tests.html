@@ -53,6 +53,15 @@
         width: inherit;
       }
 
+      .tableResults .suite-row {
+        background-color: #e7eaf6;
+      }
+
+      .tableResults .suite-row td:first-child,
+      .tableResults .suite-step-row td:first-child {
+        color: #a42fdd;
+      }
+
       .tableResults .test-title {
         font-weight: bold;
         cursor: pointer;
@@ -1035,6 +1044,16 @@
           toggleHeavyTests(true);
         }
 
+        // Keep suite progress visible independently of test updates in both tables.
+        plugin.onSuiteUpdated((sender, event) => {
+          testSuiteAddOrUpdateSuiteRow(plugin, event.suite);
+          testSuiteAddOrUpdateSuiteRow(plugin, event.suite, 'runAll');
+          testSuiteUpdateTotals(plugin);
+          testSuiteUpdateTotals(plugin, 'runAll');
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
+          updateGlobalStats();
+        });
+
         // Hook the test update to update BOTH tables
         plugin.onTestUpdated((sender, event) => {
           // Add a row to the INDIVIDUAL map tab table
@@ -1054,6 +1073,11 @@
 
         // Hook the test suites completed to update the total time it took
         plugin.onTestSuitesCompleted((sender, event) => {
+          testSuiteUpdateTotals(plugin);
+          testSuiteUpdateTotals(plugin, 'runAll');
+          testSuiteUpdateGrandTotal(testSuitesPlugins);
+          updateGlobalStats();
+
           // Stop live duration timers and apply the final duration value.
           testSuiteStopLiveDuration(plugin);
           testSuiteUpdateTotalsDurations(plugin, '');
@@ -1067,15 +1091,8 @@
       cgpv.onMapReady((mapViewer) => {
         // Activate the test button for the map in question
         const btn = document.getElementById('btnLaunchTest-' + mapViewer.mapId);
-        if (btn) btn.disabled = false;
-
-        // If all buttons are disabled
-        const allEnabled = Array.from(document.getElementsByClassName('btnLaunchTests')).every((button) => !button.disabled);
-        if (allEnabled) {
-          // Activate the test button for all maps
-          const btn = document.getElementById('btnLaunchTestsAll');
-          if (btn) btn.disabled = false;
-        }
+        if (btn) btn.dataset.mapReady = 'true';
+        updateButtonStates();
       });
 
       // Function to update the global statistics in "Run All Tests" tab
@@ -1117,7 +1134,7 @@
       setInterval(() => {
         const anyTestsRunning = Object.keys(testSuitesPlugins).some((mapId) => {
           const plugin = testSuitesPlugins[mapId];
-          return plugin?.getTestsRunning() > 0;
+          return plugin?.getIsLaunching() || plugin?.getTestsRunning() > 0;
         });
 
         if (anyTestsRunning) {
@@ -1132,26 +1149,29 @@
 
         Object.keys(testSuitesPlugins).forEach((mapId) => {
           const plugin = testSuitesPlugins[mapId];
-          if (plugin.getTestsRunning() > 0) {
+          if (plugin.getIsLaunching() || plugin.getTestsRunning() > 0) {
             anyTestsRunning = true;
           }
         });
 
-        // Disable "Launch All Tests" button if any test is running
-        const launchAllButton = document.getElementById('btnLaunchTestsAll')
+        const mapButtons = Array.from(document.getElementsByClassName('btnLaunchTests'));
+        const allMapsReady = mapButtons.length > 0 && mapButtons.every((button) => button.dataset.mapReady === 'true');
+
+        // Disable "Launch All Tests" button if any test is running or a map is not ready
+        const launchAllButton = document.getElementById('btnLaunchTestsAll');
         if (launchAllButton) {
-          launchAllButton.disabled = anyTestsRunning;
-          launchAllButton.style.opacity = anyTestsRunning ? '0.5' : '1';
-          launchAllButton.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+          launchAllButton.disabled = anyTestsRunning || !allMapsReady;
+          launchAllButton.style.opacity = launchAllButton.disabled ? '0.5' : '1';
+          launchAllButton.style.cursor = launchAllButton.disabled ? 'not-allowed' : 'pointer';
         }
 
         // Disable individual map buttons if any test is running
         Object.keys(testSuitesPlugins).forEach((mapId) => {
           const button = document.getElementById('btnLaunchTest-' + mapId);
           if (button) {
-            button.disabled = anyTestsRunning;
-            button.style.opacity = anyTestsRunning ? '0.5' : '1';
-            button.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+            button.disabled = anyTestsRunning || button.dataset.mapReady !== 'true';
+            button.style.opacity = button.disabled ? '0.5' : '1';
+            button.style.cursor = button.disabled ? 'not-allowed' : 'pointer';
           }
         });
       }
@@ -1203,7 +1223,7 @@
         const plugin = testSuitesPlugins[mapId];
 
         // Launch the test suite if no tests are running
-        if (plugin.getTestsRunning() === 0) {
+        if (!plugin.getIsLaunching() && plugin.getTestsRunning() === 0) {
           // Empty the html table
           testSuiteEmptyTestResults(plugin);
           testSuiteEmptyTestResults(plugin, 'runAll');
@@ -1212,19 +1232,21 @@
           testSuiteStartLiveDuration(plugin);
           testSuiteStartLiveDuration(plugin, 'runAll');
 
-          // Launch the test suites
-          plugin
-            .launchTestSuites()
-            .catch((error) => {
-              // Stop timers if launch failed before completion event can be emitted.
-              testSuiteStopLiveDuration(plugin);
-              testSuiteStopLiveDuration(plugin, 'runAll');
-              console.error('Failed to launch test suites', error);
-            });
-
-          // Update
-          testSuiteUpdateTotals(plugin);
-          testSuiteUpdateGrandTotal(testSuitesPlugins);
+          try {
+            const launch = plugin.launchTestSuites();
+            updateButtonStates();
+            await launch;
+          } catch (error) {
+            // Stop timers if launch failed before completion event can be emitted.
+            testSuiteStopLiveDuration(plugin);
+            testSuiteStopLiveDuration(plugin, 'runAll');
+            console.error('Failed to launch test suites', error);
+          } finally {
+            testSuiteUpdateTotals(plugin);
+            testSuiteUpdateTotals(plugin, 'runAll');
+            testSuiteUpdateGrandTotal(testSuitesPlugins);
+            updateGlobalStats();
+          }
         } else {
           // Alert
           throw new Error('Tests are already running, please wait.');
