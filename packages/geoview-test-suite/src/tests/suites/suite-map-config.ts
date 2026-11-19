@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { MapConfigTester } from '../testers/map-config-tester';
-import { MapTester } from '../testers/map-tester';
 import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
@@ -12,9 +11,6 @@ import { GVAbstractTester } from '../testers/abstract-gv-tester';
 export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
   /** The Map Config Tester used in this Test Suite */
   #mapConfigTester: MapConfigTester;
-
-  /** Viewport API tester using the same replace-map lifecycle as the config tests. */
-  #mapTester: MapTester;
 
   /**
    * Constructs the Test Suite.
@@ -29,8 +25,6 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Create the Map Config tester
     this.#mapConfigTester = new MapConfigTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#mapConfigTester);
-    this.#mapTester = new MapTester(api, mapViewer, controllerRegistry);
-    this.addTester(this.#mapTester);
   }
 
   /**
@@ -92,24 +86,6 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
-    await this.#mapTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testInvalidViewportMidpoints();
-    await this.#mapTester.testErrorFitViewportMidpointsCancelled();
-    await this.#mapTester.testErrorFitViewportUnavailable();
-    await this.#mapTester.testViewportBoundaryLonLat(3978);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
-    await this.#mapTester.testViewportBoundaryLonLat(3857);
-    await this.#mapTester.testViewportBoundaryLonLat(3978, 0, 'static');
-    await this.#mapTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
-    await this.#mapTester.testViewportBoundaryPaddingAndResize();
-    await this.#mapTester.testViewportBoundaryUnavailable();
-
     // Test fixed-height map layout without footer bar
     await this.#mapConfigTester.testFixedHeightWithoutFooterBar();
 
@@ -234,6 +210,31 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     await this.#mapConfigTester.testNameFieldAsLabel();
     await this.#mapConfigTester.testSummaryFalseHidesField();
     await this.#mapConfigTester.testFieldAliasRenamesField();
+
+    // Viewport tests replace this suite's map, never the map-functions suite's configured layers.
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'none', false, undefined, false);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3857, 0, 'dynamic', 'none', true, undefined, false);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4);
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'resize');
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(3978, Math.PI / 4, 'dynamic', 'projection');
+    await this.#mapConfigTester.testFitViewportToMidpointsLonLat(
+      3857,
+      0,
+      'dynamic',
+      'none',
+      true,
+      GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT
+    );
+    await this.#mapConfigTester.testInvalidViewportMidpoints();
+    await this.#mapConfigTester.testErrorFitViewportMidpointsCancelled();
+    await this.#mapConfigTester.testErrorFitViewportUnavailable();
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3857);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3978, 0, 'static');
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
+    await this.#mapConfigTester.testViewportBoundaryPaddingAndResize();
+    await this.#mapConfigTester.testViewportBoundaryUnavailable();
 
     return;
   }

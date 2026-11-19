@@ -539,7 +539,7 @@ export class Test<T = unknown> {
    */
   waitForFun(period = 5000): Promise<void> {
     // Wait for the React UI to actually pick up on the store update
-    this.addStep(`Waiting for ${period / 1000} seconds for a human to look hypothetically at the UI...`);
+    this.addStep(`Waiting for ${period / 1000} seconds for fun...`);
     return delay(period);
   }
 

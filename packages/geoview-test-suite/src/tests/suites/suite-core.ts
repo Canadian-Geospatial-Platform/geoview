@@ -107,7 +107,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
 
     const pWmtsMetadataBadUrl = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
 
-    // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
 
     // Resolve when all parallel tests are done

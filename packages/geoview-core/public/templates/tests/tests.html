@@ -128,6 +128,12 @@
         background-color: #e8eaf6;
       }
 
+      .test-suite-desc-title {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: larger;
+      }
+
       .group-header {
         margin: 15px 0 5px 0;
         padding: 5px 10px;
@@ -345,8 +351,7 @@
       <!-- Map 3F Results -->
       <button id="collapsible-map3F" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 3F - Layer Functions</span>
-        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px"
-          >Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span
+        <span id="stats-map3F" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span
         >
       </button>
       <div class="panel">
@@ -359,8 +364,7 @@
       <!-- Map 4 Results -->
       <button id="collapsible-map4" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 4 - Map Functions</span>
-        <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px"
-          >Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span
+        <span id="stats-map4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span
         >
       </button>
       <div class="panel">
@@ -667,7 +671,6 @@
         data-lang="en"
         data-config="{
         'map': {
-          'interaction': 'dynamic',
           'viewSettings': {
             'projection': 3978
           },
