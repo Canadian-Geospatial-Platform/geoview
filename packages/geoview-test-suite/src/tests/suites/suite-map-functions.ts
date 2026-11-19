@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { MapTester } from '../testers/map-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 
 /**
@@ -110,7 +109,7 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     await this.#mapTester.testVectorTileProjectionWarning();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.zoomToInitialExtent();
 
     // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
@@ -130,8 +129,8 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
     // Test footer bar create tab
     await this.#mapTester.testFooterBarCreateTab();
 
-    // Make sure the map is in its initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    // Make sure the map is reset in its initial extent after the zooms
+    await this.zoomToInitialExtent();
 
     // Test fullscreen view restoration and interaction preservation
     await this.#mapTester.testFullscreenViewRestoration();
