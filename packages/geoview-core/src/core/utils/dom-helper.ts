@@ -17,44 +17,6 @@ const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex],
 const observers: Record<string, MutationObserver> = {};
 
 /**
- * Gets the bounding rectangle of the map target element, when the map has a usable size.
- *
- * @param mapTarget - The map target element, if any
- * @param mapSize - The OpenLayers map size in pixels
- * @returns The map target bounding rectangle, or undefined when the map or its size is unavailable
- */
-function getUsableMapRect(mapTarget: HTMLElement | undefined, mapSize: number[] | undefined): DOMRect | undefined {
-  if (!mapSize || mapSize[0] <= 0 || mapSize[1] <= 0) return undefined;
-
-  const mapRect = mapTarget?.getBoundingClientRect();
-  return mapRect && mapRect.width > 0 ? mapRect : undefined;
-}
-
-/**
- * Gets how far, in CSS pixels, an element covers the map from one of its sides.
- *
- * @param element - The element covering the map, if any
- * @param mapRect - The map target bounding rectangle
- * @param side - The map side the element is anchored to
- * @returns The covered width in CSS pixels, or 0 when the element is missing, hidden or does not overlap the map
- */
-function getMapCoveredWidth(element: HTMLElement | undefined, mapRect: DOMRect, side: 'left' | 'right'): number {
-  const rect = element?.getBoundingClientRect();
-  if (
-    !rect ||
-    rect.width <= 0 ||
-    rect.bottom <= mapRect.top ||
-    rect.top >= mapRect.bottom ||
-    rect.left >= mapRect.right ||
-    rect.right <= mapRect.left
-  ) {
-    return 0;
-  }
-
-  return Math.min(mapRect.width, side === 'left' ? rect.right - mapRect.left : mapRect.right - rect.left);
-}
-
-/**
  * Provides stateless, map-scoped DOM utilities.
  */
 export abstract class DomHelper {
@@ -1348,6 +1310,44 @@ export abstract class DomHelper {
     }
 
     /**
+     * Gets the bounding rectangle of the map target element, when the map has a usable size.
+     *
+     * @param mapTarget - The map target element, if any
+     * @param mapSize - The OpenLayers map size in pixels
+     * @returns The map target bounding rectangle, or undefined when the map or its size is unavailable
+     */
+    static getUsableMapRect(mapTarget: HTMLElement | undefined, mapSize: number[] | undefined): DOMRect | undefined {
+      if (!mapSize || mapSize[0] <= 0 || mapSize[1] <= 0) return undefined;
+
+      const mapRect = mapTarget?.getBoundingClientRect();
+      return mapRect && mapRect.width > 0 ? mapRect : undefined;
+    }
+
+    /**
+     * Gets how far, in CSS pixels, an element covers the map from one of its sides.
+     *
+     * @param element - The element covering the map, if any
+     * @param mapRect - The map target bounding rectangle
+     * @param side - The map side the element is anchored to
+     * @returns The covered width in CSS pixels, or 0 when the element is missing, hidden or does not overlap the map
+     */
+    static getMapCoveredWidth(element: HTMLElement | undefined, mapRect: DOMRect, side: 'left' | 'right'): number {
+      const rect = element?.getBoundingClientRect();
+      if (
+        !rect ||
+        rect.width <= 0 ||
+        rect.bottom <= mapRect.top ||
+        rect.top >= mapRect.bottom ||
+        rect.left >= mapRect.right ||
+        rect.right <= mapRect.left
+      ) {
+        return 0;
+      }
+
+      return Math.min(mapRect.width, side === 'left' ? rect.right - mapRect.left : mapRect.right - rect.left);
+    }
+
+    /**
      * Gets the default fit padding with the area covered by the right-side map controls (navigation bar and
      * overview map) added to the right side.
      *
@@ -1361,13 +1361,13 @@ export abstract class DomHelper {
      */
     static getMapControlsFitPadding(mapId: string, mapSize: number[] | undefined): TypeMapFitPadding {
       const padding = Map.getDefaultFitPadding();
-      const mapRect = getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
+      const mapRect = Map.getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
       if (!mapSize || !mapRect) return padding;
 
       // The navigation bar and the overview map are both anchored to the right edge of the map
       const controls = [DomHelper.getNavBar(mapId), ...DomHelper.getOverviewMapControls(mapId)];
       const overlap =
-        Math.max(0, ...controls.map((control) => getMapCoveredWidth(control, mapRect, 'right'))) * (mapSize[0] / mapRect.width);
+        Math.max(0, ...controls.map((control) => Map.getMapCoveredWidth(control, mapRect, 'right'))) * (mapSize[0] / mapRect.width);
       if (mapSize[0] <= padding[3] + overlap + padding[1]) return padding;
 
       padding[1] += overlap;
@@ -1391,14 +1391,14 @@ export abstract class DomHelper {
     static getAppBarPanelFitPadding(mapId: string, tabId: string, mapSize: number[] | undefined): TypeMapFitPadding {
       const padding = Map.getMapControlsFitPadding(mapId, mapSize);
       const [top, right, bottom, left] = padding;
-      const mapRect = getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
+      const mapRect = Map.getUsableMapRect(DomHelper.getMapTargetElement(mapId), mapSize);
       if (!mapSize || !mapRect) return padding;
 
       const panel = DomHelper.getAppBarPanel(mapId, tabId);
       if (!panel || panel.getAttribute('aria-hidden') === 'true') return padding;
 
       // Convert CSS overlap into map pixels, including when the host applies CSS scaling.
-      const overlap = getMapCoveredWidth(panel, mapRect, 'left') * (mapSize[0] / mapRect.width);
+      const overlap = Map.getMapCoveredWidth(panel, mapRect, 'left') * (mapSize[0] / mapRect.width);
       if (overlap <= 0 || mapSize[0] <= left + overlap + right || mapSize[1] <= top + bottom) return padding;
 
       padding[3] += overlap;
