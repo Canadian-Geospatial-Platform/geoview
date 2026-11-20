@@ -6,7 +6,6 @@ import {
 } from '@/core/stores/states/ui-state';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
-import { delay as delayFromUtilities } from '@/core/utils/utilities';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -61,12 +60,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
           }
 
           // Let selection scrolling finish first, then scroll the page like a footer-bar click
-          delayFromUtilities(TIMEOUT.tabsContainerResize).then(
-            () => {
-              DomHelper.scrollFooterIntoView(mapId);
-            },
-            (error: unknown) => logger.logPromiseFailed('Delay failed in useNavigateToTab footer scroll', error)
-          );
+          DomHelper.scrollFooterIntoViewAfterResize(mapId);
         }, delay);
       } else if (hasAppBarTab) {
         // Open appBar tab

@@ -631,6 +631,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                   |
 | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                     |
 | `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction |
+| `testPageScrollLock` TO ADD BAKC       | test | Test overlapping page scroll locks in both release orders, repeated-release safety, and original overflow restoration |
 | `testGuideDetailsPanelTopAnchor`       | test | Test selecting the Details panel and verifying the guide’s Top anchor behavior               |
 | `testControllerGetFooterHeight`        | test | Test `UIController.getFooterHeight()` from a non-React consumer                              |
 | `testCrosshairCoordinates`             | test | Test SVG artwork center alignment, stale pointer reset, and Enter/Space drawing with padding, panning, and rotation |

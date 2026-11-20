@@ -20,7 +20,7 @@ import {
 } from 'geoview-core/api/types/map-schema-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
-import { MAP_SECTION_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
+import { PAGE_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreDetailsFeatures,
@@ -1643,6 +1643,52 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
+   * Tests overlapping page scroll locks, including repeated releases.
+   *
+   * @param releaseNewestFirst - Whether to release the newer lock before the older lock
+   * @returns A promise that resolves with the observed overflow styles
+   */
+  testPageScrollLock(releaseNewestFirst: boolean): Promise<Test<TypePageScrollLockResult>> {
+    const { documentElement, body } = document;
+    const originalHtmlOverflow = documentElement.style.overflow;
+    const originalBodyOverflow = body.style.overflow;
+    const releases: (() => void)[] = [];
+
+    return this.test(
+      `Test overlapping page scroll locks - release ${releaseNewestFirst ? 'newest' : 'oldest'} first`,
+      (test): Promise<TypePageScrollLockResult> => {
+        test.addStep('Acquiring two locks over distinct original overflow styles...');
+        documentElement.style.overflow = 'scroll';
+        body.style.overflow = 'auto';
+        releases.push(DomHelper.lockPageScroll(), DomHelper.lockPageScroll());
+        const firstRelease = releases[releaseNewestFirst ? 1 : 0];
+        const lastRelease = releases[releaseNewestFirst ? 0 : 1];
+        const lockedStyles = [[documentElement.style.overflow, body.style.overflow]];
+
+        test.addStep('Releasing one lock twice while the other remains active...');
+        firstRelease();
+        lockedStyles.push([documentElement.style.overflow, body.style.overflow]);
+        firstRelease();
+        lockedStyles.push([documentElement.style.overflow, body.style.overflow]);
+
+        test.addStep('Releasing the final lock...');
+        lastRelease();
+        return Promise.resolve({ lockedStyles, restoredStyles: [documentElement.style.overflow, body.style.overflow] });
+      },
+      (test, result): void => {
+        test.addStep('Verifying the page stays locked until the last release, then restores the original styles...');
+        result.lockedStyles.forEach((styles): void => Test.assertIsArrayEqual(styles, ['hidden', 'hidden']));
+        Test.assertIsArrayEqual(result.restoredStyles, ['scroll', 'auto']);
+      },
+      (): void => {
+        releases.forEach((release): void => release());
+        documentElement.style.overflow = originalHtmlOverflow;
+        body.style.overflow = originalBodyOverflow;
+      }
+    );
+  }
+
+  /**
    * Exercises delegated scrolling through real controls in an isolated, scrollable viewer.
    *
    * @param scenario - The viewport regression to exercise
@@ -1915,7 +1961,7 @@ export class MapTester extends GVAbstractTester {
   static async #activateFooterTab(context: TypeScrollContext): Promise<void> {
     const { test, mapId, section, footer, preconditions } = context;
     // The footer header click uses the same gap as the map section top gap
-    const helperOffset = MAP_SECTION_SCROLL_GAP_PX;
+    const helperOffset = PAGE_SCROLL_GAP_PX;
 
     // Keep the footer control visible but inside the helper's top clearance
     await MapTester.#positionSection(context, helperOffset / 2 - section.getBoundingClientRect().height);
@@ -2051,7 +2097,7 @@ export class MapTester extends GVAbstractTester {
    */
   static #assertScrollMeasurement(scenario: TypeScrollScenario, measurement: TypeScrollMeasurement, viewportHeight: number): void {
     const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
-    const gap = MAP_SECTION_SCROLL_GAP_PX;
+    const gap = PAGE_SCROLL_GAP_PX;
 
     // A section taller than the viewport cannot fit, so it is aligned with its top at the standard gap and nothing else applies
     if (scenario === 'oversized') {
@@ -2404,6 +2450,14 @@ type LayerDetails = {
 
 /** Isolated viewer scrolling regressions, scheduled sequentially by the UI suite. */
 type TypeScrollScenario = 'partial' | 'transitions' | 'visible' | 'oversized';
+
+/** Overflow styles observed while locks overlap and after the final release. */
+type TypePageScrollLockResult = {
+  /** Styles after acquisition, one release and a repeated release. */
+  lockedStyles: string[][];
+  /** Styles after releasing both locks. */
+  restoredStyles: string[];
+};
 
 /** Browser geometry captured after a real control activation. */
 type TypeScrollMeasurement = { top: number; bottom: number; infoTop: number; infoBottom: number; scrollY: number };

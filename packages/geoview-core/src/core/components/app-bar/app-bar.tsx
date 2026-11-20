@@ -235,8 +235,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   /**
    * Keeps popover interactions from triggering the app-bar's delegated page scroll.
-   *
-   * @param event - The click bubbling from the popover button or its content
    */
   const handlePopoverClick = useCallback((event: React.MouseEvent): void => {
     event.stopPropagation();

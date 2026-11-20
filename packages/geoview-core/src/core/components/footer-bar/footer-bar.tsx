@@ -30,9 +30,8 @@ import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
-import { camelCase, delay } from '@/core/utils/utilities';
+import { camelCase } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT } from '@/core/utils/constant';
 import { Guide } from '@/core/components/guide/guide';
 import type { FooterBarApi } from './footer-bar-api';
 
@@ -110,15 +109,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * Handles when the user clicks the footer header to scroll it into view.
    */
   const handleHeaderClick = useCallback((): void => {
-    // Need delay to allow tabs container to resize on expand/collapse
-    delay(TIMEOUT.tabsContainerResize).then(
-      () => {
-        if (tabsContainerRef.current) {
-          DomHelper.scrollFooterIntoView(mapId);
-        }
-      },
-      (error: unknown) => logger.logPromiseFailed('Delay failed in handleHeaderClick', error)
-    );
+    DomHelper.scrollFooterIntoViewAfterResize(mapId);
   }, [mapId]);
 
   // #endregion HANDLERS

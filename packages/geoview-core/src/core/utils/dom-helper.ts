@@ -2,10 +2,10 @@
 // GV This file is meant to hold a complex abstract class with nested-classes to separate DOM-related utilities for GeoView maps.
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-types';
-import { doTimeout, whenThisThen } from '@/core/utils/utilities';
+import { delay, doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, OL_ZOOM_PIXEL_PADDING, TABS, type TypeMapFitPadding } from '@/core/utils/constant';
+import { CONTAINER_TYPE, PAGE_SCROLL_GAP_PX, OL_ZOOM_PIXEL_PADDING, TABS, TIMEOUT, type TypeMapFitPadding } from '@/core/utils/constant';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -17,9 +17,16 @@ const TABBABLE_SELECTOR = 'input, select, textarea, a[href], button, [tabindex],
 const observers: Record<string, MutationObserver> = {};
 
 /**
- * Provides stateless, map-scoped DOM utilities.
+ * Provides map-scoped DOM utilities and shared page scroll locking.
  */
 export abstract class DomHelper {
+  // Multiple map viewers can activate fullscreen fallback independently; keep the page locked until all release it.
+  /** Number of active page scroll locks. */
+  static #pageScrollLockCount = 0;
+
+  /** Restores the page state captured before the first active scroll lock. */
+  static #restorePageScroll?: () => void;
+
   // #region GENERIC - PUBLIC
 
   /**
@@ -270,29 +277,44 @@ export abstract class DomHelper {
   /**
    * Locks the page scrolling while a viewer fills the browser viewport (fullscreen fallback).
    *
-   * Saves the page scroll position, the document overflow styles and the focused element.
+   * Saves the page state on the first lock and restores it only after the last lock is released.
    *
-   * @returns A function restoring the overflow styles and scroll position, and the saved focus when focus was lost on the way
+   * @returns An idempotent release function restoring overflow, scroll position and lost focus after the last lock
    */
   static lockPageScroll(): () => void {
-    const { documentElement, body } = document;
-    const { scrollX, scrollY } = window;
-    const previousHtmlOverflow = documentElement.style.overflow;
-    const previousBodyOverflow = body.style.overflow;
-    const previousFocus = this.getActiveElement();
+    if (this.#pageScrollLockCount === 0) {
+      const { documentElement, body } = document;
+      const { scrollX, scrollY } = window;
+      const previousHtmlOverflow = documentElement.style.overflow;
+      const previousBodyOverflow = body.style.overflow;
+      const previousFocus = this.getActiveElement();
 
-    documentElement.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
+      documentElement.style.overflow = 'hidden';
+      body.style.overflow = 'hidden';
 
+      this.#restorePageScroll = (): void => {
+        documentElement.style.overflow = previousHtmlOverflow;
+        body.style.overflow = previousBodyOverflow;
+        window.scrollTo(scrollX, scrollY);
+
+        // The control used to exit (e.g. the fallback exit button) may have been removed, leaving focus on the body
+        const activeElement = this.getActiveElement();
+        if ((!activeElement || activeElement === body) && previousFocus instanceof window.HTMLElement && previousFocus.isConnected) {
+          previousFocus.focus({ preventScroll: true });
+        }
+      };
+    }
+
+    this.#pageScrollLockCount += 1;
+    let released = false;
     return (): void => {
-      documentElement.style.overflow = previousHtmlOverflow;
-      body.style.overflow = previousBodyOverflow;
-      window.scrollTo(scrollX, scrollY);
-
-      // The control used to exit (e.g. the fallback exit button) may have been removed, leaving focus on the body
-      const activeElement = this.getActiveElement();
-      if ((!activeElement || activeElement === body) && previousFocus instanceof window.HTMLElement && previousFocus.isConnected) {
-        previousFocus.focus({ preventScroll: true });
+      if (released) return;
+      released = true;
+      this.#pageScrollLockCount -= 1;
+      if (this.#pageScrollLockCount === 0) {
+        const restore = this.#restorePageScroll;
+        this.#restorePageScroll = undefined;
+        restore?.();
       }
     };
   }
@@ -352,7 +374,7 @@ export abstract class DomHelper {
   /**
    * Reveals the complete map section (app bar, map, nav bar and map info) of a map.
    *
-   * Leaves up to MAP_SECTION_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
+   * Leaves up to PAGE_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
    * Shared by the app bar, map info and the zoom-to-feature actions so they all align the map the same way.
    *
    * @param mapId - The map identifier
@@ -361,12 +383,7 @@ export abstract class DomHelper {
     const mapSection = this.getGVElementById(mapId, 'map');
     if (!mapSection) return;
 
-    const { top, height } = mapSection.getBoundingClientRect();
-    const isOversized = height > window.innerHeight;
-    const offset = isOversized ? MAP_SECTION_SCROLL_GAP_PX : Math.min(MAP_SECTION_SCROLL_GAP_PX, window.innerHeight - height);
-    if (isOversized && Math.abs(top - offset) <= 1) return;
-
-    this.scrollIfNotVisible(mapSection, 'start', offset);
+    this.#scrollSectionIntoView(mapSection, 'start');
   }
 
   /**
@@ -378,15 +395,23 @@ export abstract class DomHelper {
     const footer = this.getTabsContainer(mapId);
     if (!footer) return;
 
-    const { top, height } = footer.getBoundingClientRect();
-    const isOversized = height > window.innerHeight;
-    if (isOversized) {
-      if (Math.abs(top - MAP_SECTION_SCROLL_GAP_PX) <= 1) return;
-      this.scrollIfNotVisible(footer, 'start', MAP_SECTION_SCROLL_GAP_PX);
-      return;
-    }
+    this.#scrollSectionIntoView(footer, 'end');
+  }
 
-    this.scrollIfNotVisible(footer, 'end', MAP_SECTION_SCROLL_GAP_PX);
+  /**
+   * Schedules footer scrolling after layout and focus updates, unless the footer has been removed.
+   *
+   * @param mapId - The map identifier
+   */
+  static scrollFooterIntoViewAfterResize(mapId: string): void {
+    const footer = this.getTabsContainer(mapId);
+    if (!footer) return;
+
+    delay(TIMEOUT.tabsContainerResize)
+      .then((): void => {
+        if (footer.isConnected) this.#scrollSectionIntoView(footer, 'end');
+      })
+      .catch((error: unknown): void => logger.logPromiseFailed('Failed to scroll footer after resize', error));
   }
 
   /**
@@ -667,6 +692,21 @@ export abstract class DomHelper {
   // #endregion GENERIC - PUBLIC
 
   // #region GENERIC - PRIVATE
+
+  /**
+   * Applies the shared page gap and stable oversized alignment to a section.
+   *
+   * @param element - The section to reveal
+   * @param blockValue - The alignment when the section fits in the viewport
+   */
+  static #scrollSectionIntoView(element: HTMLElement, blockValue: 'start' | 'end'): void {
+    const { top, height } = element.getBoundingClientRect();
+    const isOversized = height > window.innerHeight;
+    if (isOversized && Math.abs(top - PAGE_SCROLL_GAP_PX) <= 1) return;
+
+    const offset = !isOversized && blockValue === 'start' ? Math.min(PAGE_SCROLL_GAP_PX, window.innerHeight - height) : PAGE_SCROLL_GAP_PX;
+    this.scrollIfNotVisible(element, isOversized ? 'start' : blockValue, offset);
+  }
 
   /**
    * Formats an ISO calendar date for a date-picker input, leaving other values unchanged.
