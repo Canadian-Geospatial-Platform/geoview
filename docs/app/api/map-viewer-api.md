@@ -8,9 +8,10 @@ The `MapViewer` class represents a single map instance. It provides methods for 
 
 ## Map interactions
 
-On a dynamic map, drag panning does not require the map to be focused first; mouse-wheel zoom remains
-focus-dependent so scrolling over an unfocused map can scroll the page. Keyboard navigation still
-uses the focusable map target. Static maps disable map interactions.
+On a dynamic map, drag panning (including a one-finger touch drag) does not require the map to be
+focused first. Mouse-wheel zoom requires map focus, but the map takes focus when the mouse pointer
+enters it, so the wheel zooms whenever the pointer is over the map. Keyboard navigation still uses
+the focusable map target. Static maps disable map interactions.
 
 ## Accessing the MapViewer
 
