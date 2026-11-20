@@ -127,10 +127,15 @@ Implementation notes:
   This excludes both the trigger buttons and their portalled popover contents from the app-bar scroll
   listener; React portal events still bubble through their component ancestors.
 - `DomHelper.scrollMapSectionIntoView(mapId)` measures the `{mapId}-map` section, not a positional shell child:
-  status wrappers precede the map section (#3708). The app bar, map info and data-table zoom-to-feature all
-  call it so the top gap matches. The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
-  (`core/utils/constant.ts`), also read by the UI tests. Oversized sections skip scrolling within 1px of
-  the gap. `DomHelper.scrollFooterIntoView(mapId)` aligns fitting footers at the bottom gap and oversized footers at the top gap; the footer header, footer shortcuts, and footer list selections share this helper. Footer list selections wait for layout and focus updates before scrolling, so the selected content remains visible.
+  status wrappers precede the map section (#3708). Its callers are Shell and Data Table zoom-to-feature.
+  Both section helpers use `DomHelper.#scrollSectionIntoView` and the shared `PAGE_SCROLL_GAP_PX`
+  (`core/utils/constant.ts`), also read by the UI tests.
+- Footer header, shortcut and list-selection callers use `DomHelper.scrollFooterIntoViewAfterResize`.
+  It captures the footer before the delay, checks `isConnected` afterwards to avoid looking up a deleted
+  viewer, and logs failures with a terminal catch (#3742).
+- `DomHelper.lockPageScroll` counts active locks and saves the original page state only on the first
+  acquisition. Each release is idempotent; only the last release restores the snapshot, regardless of
+  release order. Keep the overlapping-lock regressions in `MapTester.testPageScrollLock` (#3742).
 - `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
   (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
   and runs its scenarios sequentially.

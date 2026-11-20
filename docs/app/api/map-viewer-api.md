@@ -6,6 +6,12 @@
 
 The `MapViewer` class represents a single map instance. It provides methods for controlling map state, handling events, coordinate transformations, and managing interactions.
 
+## Map interactions
+
+On a dynamic map, drag panning does not require the map to be focused first; mouse-wheel zoom remains
+focus-dependent so scrolling over an unfocused map can scroll the page. Keyboard navigation still
+uses the focusable map target. Static maps disable map interactions.
+
 ## Accessing the MapViewer
 
 ```typescript

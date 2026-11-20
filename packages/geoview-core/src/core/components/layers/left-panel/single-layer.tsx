@@ -45,7 +45,6 @@ import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { CONTAINER_TYPE, TIMEOUT, TABS } from '@/core/utils/constant';
-import { delay } from '@/core/utils/utilities';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useLayerController, useLayerCreatorController } from '@/core/controllers/use-controllers';
@@ -279,10 +278,7 @@ export function SingleLayer({
     showLayerDetailsPanel?.(layerId || '');
 
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      delay(TIMEOUT.tabsContainerResize).then(
-        () => DomHelper.scrollFooterIntoView(mapId),
-        (error: unknown) => logger.logPromiseFailed('Delay failed in SingleLayer.handleLayerClick footer scroll', error)
-      );
+      DomHelper.scrollFooterIntoViewAfterResize(mapId);
     }
   }, [layerController, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons, containerType, mapId]);
 

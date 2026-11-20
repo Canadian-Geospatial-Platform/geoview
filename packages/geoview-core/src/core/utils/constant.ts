@@ -101,7 +101,7 @@ export const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 700;
 export const OVERVIEW_MAP_MIN_CONTAINER_HEIGHT = 361;
 
 /** Gap (in pixels) above the map section or below the footer when scrolling into view. */
-export const MAP_SECTION_SCROLL_GAP_PX = 25;
+export const PAGE_SCROLL_GAP_PX = 25;
 
 /** Layer lifecycle status values. */
 export const LAYER_STATUS = {

@@ -277,8 +277,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       /**
        * Sets the isFullscreenActive and isFullscreenFallback states.
        *
-       * @param isFullscreenActive - The new state.
-       * @param isFallback - Whether fullscreen fills the browser viewport instead of using the native API (ignored when inactive).
+       * @param isFullscreenActive - The new state
+       * @param isFallback - Whether fullscreen fills the browser viewport instead of using the native API (ignored when inactive)
        */
       setFullScreenActive: (isFullscreenActive: boolean, isFallback = false): void => {
         set({
@@ -475,8 +475,8 @@ export const useStoreAppIsFullscreenActive = (): boolean => useStore(useGeoViewS
 /**
  * Gets whether the active fullscreen mode is the viewport-filling fallback for the given map.
  *
- * @param mapId - The map identifier.
- * @returns True if the fullscreen fallback is active.
+ * @param mapId - The map identifier
+ * @returns True if the fullscreen fallback is active
  */
 export const getStoreAppIsFullscreenFallback = (mapId: string): boolean => getStoreAppState(mapId).isFullscreenFallback;
 
