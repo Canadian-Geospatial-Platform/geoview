@@ -2176,7 +2176,8 @@ export class MapViewer {
    *
    * OpenLayers enables `onFocusOnly` by default for a focusable (tabindex) target. Touch gestures do not focus the target
    * before they start, so the first one-finger drag scrolled the page instead of panning the map. Drag-pan accepts the gesture
-   * without focus (and stops the page scrolling), while mouse wheel zoom stays focus-only so it does not hijack the page scroll.
+   * without focus (and stops the page scrolling). Mouse wheel zoom stays focus-only; the `mouseenter` handler in
+   * `#registerMapHandlers` focuses the map, so the wheel zooms under the pointer.
    *
    * @returns The default interactions collection
    */
