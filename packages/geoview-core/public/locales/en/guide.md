@@ -68,7 +68,7 @@ _Note: The map must be focused for key binding to work._
 
 ## Overview Map
 
-Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map.
+Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map. The overview map is hidden when the map is small, for example on phones or in a small browser window.
 
 <img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Overview map displayed in the upper-right corner of the main map" />
 
