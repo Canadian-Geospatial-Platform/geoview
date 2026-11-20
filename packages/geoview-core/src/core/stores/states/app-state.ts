@@ -81,6 +81,9 @@ export interface IAppState {
   /** Whether the viewer is currently in fullscreen mode. */
   isFullscreenActive: boolean;
 
+  /** Whether the active fullscreen mode fills the browser viewport because native fullscreen is unavailable. */
+  isFullscreenFallback: boolean;
+
   /** The list of active notification messages shown to the user. */
   notifications: Array<NotificationDetailsType>;
 
@@ -107,7 +110,7 @@ export interface IAppState {
     setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
     setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
-    setFullScreenActive: (active: boolean) => void;
+    setFullScreenActive: (active: boolean, isFallback?: boolean) => void;
     setHeight: (height: number) => void;
     setGuide: (guide: TypeGuideObject) => void;
     setNotifications: (notifications: NotificationDetailsType[]) => void;
@@ -144,6 +147,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     drawingHint: undefined,
     isFullscreenActive: false,
+    isFullscreenFallback: false,
     notifications: [],
     showUnsymbolizedFeatures: true, // default: true to always have features by default, some WMS will not expose the GetStyles for their WFS equivalent
     showLayerHighlightLayerBbox: true,
@@ -271,15 +275,17 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
       },
 
       /**
-       * Sets the isFullscreenActive state.
+       * Sets the isFullscreenActive and isFullscreenFallback states.
        *
        * @param isFullscreenActive - The new state.
+       * @param isFallback - Whether fullscreen fills the browser viewport instead of using the native API (ignored when inactive).
        */
-      setFullScreenActive: (isFullscreenActive: boolean): void => {
+      setFullScreenActive: (isFullscreenActive: boolean, isFallback = false): void => {
         set({
           appState: {
             ...get().appState,
             isFullscreenActive,
+            isFullscreenFallback: isFullscreenActive && isFallback,
           },
         });
       },
@@ -467,6 +473,17 @@ export const getStoreAppIsFullscreenActive = (mapId: string): boolean => getStor
 export const useStoreAppIsFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 
 /**
+ * Gets whether the active fullscreen mode is the viewport-filling fallback for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns True if the fullscreen fallback is active.
+ */
+export const getStoreAppIsFullscreenFallback = (mapId: string): boolean => getStoreAppState(mapId).isFullscreenFallback;
+
+/** Hook that returns whether the active fullscreen mode is the viewport-filling fallback. */
+export const useStoreAppIsFullscreenFallback = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenFallback);
+
+/**
  * Gets the geolocator service URL for the given map.
  *
  * @param mapId - The map identifier.
@@ -648,9 +665,10 @@ export const setStoreAppDrawingHint = (mapId: string, drawingHint: TypeDrawingHi
  *
  * @param mapId - The map identifier
  * @param active - Whether fullscreen mode is active
+ * @param isFallback - Whether fullscreen fills the browser viewport instead of using the native API
  */
-export const setStoreAppFullScreenActive = (mapId: string, active: boolean): void => {
-  getStoreAppState(mapId).actions.setFullScreenActive(active);
+export const setStoreAppFullScreenActive = (mapId: string, active: boolean, isFallback = false): void => {
+  getStoreAppState(mapId).actions.setFullScreenActive(active, isFallback);
 };
 
 /**

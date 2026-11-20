@@ -28,6 +28,12 @@ const RESIZE_VALUES = [35, 50, 100];
 /** Snap threshold: values within this distance of a mark snap to it. */
 const SNAP_THRESHOLD = 5;
 
+/** Minimum gap in pixels kept between the popper and the viewport edges (Popper.js option, not CSS). */
+const POPPER_VIEWPORT_GAP_PX = 8;
+
+/** Popper modifiers keeping the popper inside the viewport on both axes. */
+const POPPER_MODIFIERS = [{ name: 'preventOverflow', options: { altAxis: true, padding: POPPER_VIEWPORT_GAP_PX } }];
+
 /**
  * Creates the popper to resize the map container and footer panel.
  *
@@ -257,6 +263,8 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           anchorEl={anchorEl}
           placement="top-start"
           strategy="fixed"
+          // altAxis lets the popper shift vertically into view when neither above nor below the button has room (phone landscape)
+          modifiers={POPPER_MODIFIERS}
           container={shellContainer}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}

@@ -5,7 +5,7 @@ import type { TypeContainerBox, TypeHTMLElement } from '@/core/types/global-type
 import { doTimeout, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { CONTAINER_TYPE, OL_ZOOM_PIXEL_PADDING, TABS, type TypeMapFitPadding } from '@/core/utils/constant';
+import { CONTAINER_TYPE, MAP_SECTION_SCROLL_GAP_PX, OL_ZOOM_PIXEL_PADDING, TABS, type TypeMapFitPadding } from '@/core/utils/constant';
 
 // GV DomHelper should only be referenced by application-level code
 // GV DomHelper itself should definitely not import Controllers or Zustand Store States.
@@ -268,6 +268,36 @@ export abstract class DomHelper {
   }
 
   /**
+   * Locks the page scrolling while a viewer fills the browser viewport (fullscreen fallback).
+   *
+   * Saves the page scroll position, the document overflow styles and the focused element.
+   *
+   * @returns A function restoring the overflow styles and scroll position, and the saved focus when focus was lost on the way
+   */
+  static lockPageScroll(): () => void {
+    const { documentElement, body } = document;
+    const { scrollX, scrollY } = window;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousFocus = this.getActiveElement();
+
+    documentElement.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+
+    return (): void => {
+      documentElement.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      window.scrollTo(scrollX, scrollY);
+
+      // The control used to exit (e.g. the fallback exit button) may have been removed, leaving focus on the body
+      const activeElement = this.getActiveElement();
+      if ((!activeElement || activeElement === body) && previousFocus instanceof window.HTMLElement && previousFocus.isConnected) {
+        previousFocus.focus({ preventScroll: true });
+      }
+    };
+  }
+
+  /**
    * Checks whether an element is fully visible in the viewport.
    *
    * @param element - The element to check
@@ -317,6 +347,46 @@ export abstract class DomHelper {
         });
       }
     }
+  }
+
+  /**
+   * Reveals the complete map section (app bar, map, nav bar and map info) of a map.
+   *
+   * Leaves up to MAP_SECTION_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
+   * Shared by the app bar, map info and the zoom-to-feature actions so they all align the map the same way.
+   *
+   * @param mapId - The map identifier
+   */
+  static scrollMapSectionIntoView(mapId: string): void {
+    const mapSection = this.getGVElementById(mapId, 'map');
+    if (!mapSection) return;
+
+    const { top, height } = mapSection.getBoundingClientRect();
+    const isOversized = height > window.innerHeight;
+    const offset = isOversized ? MAP_SECTION_SCROLL_GAP_PX : Math.min(MAP_SECTION_SCROLL_GAP_PX, window.innerHeight - height);
+    if (isOversized && Math.abs(top - offset) <= 1) return;
+
+    this.scrollIfNotVisible(mapSection, 'start', offset);
+  }
+
+  /**
+   * Scrolls the footer into view, aligning its bottom when it fits or its top when it is taller than the viewport.
+   *
+   * @param mapId - The map identifier
+   */
+  static scrollFooterIntoView(mapId: string): void {
+    const footer = this.getTabsContainer(mapId);
+    if (!footer) return;
+
+    const { top, height } = footer.getBoundingClientRect();
+    const isOversized = height > window.innerHeight;
+    if (isOversized) {
+      if (Math.abs(top - MAP_SECTION_SCROLL_GAP_PX) <= 1) return;
+      this.scrollIfNotVisible(footer, 'start', MAP_SECTION_SCROLL_GAP_PX);
+      return;
+    }
+
+    this.scrollIfNotVisible(footer, 'end', MAP_SECTION_SCROLL_GAP_PX);
   }
 
   /**

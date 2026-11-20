@@ -803,8 +803,7 @@ function DataTable({
       // If the extent was found
       if (extent) {
         // Bring the map into view, like the map info bar and app bar do
-        const shellElement = DomHelper.getShellElement(mapId);
-        if (shellElement) DomHelper.scrollIfNotVisible(shellElement, 'start');
+        DomHelper.scrollMapSectionIntoView(mapId);
 
         // Zoom to extent (keeping the feature out of an open app-bar panel) and wait for it to finish
         layerController

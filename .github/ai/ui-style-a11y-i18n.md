@@ -123,10 +123,14 @@ The behavioural contract (offset, oversized alignment, map-info buttons) lives i
 [delegated-listener section](../../docs/app/accessibility.md#2-use-semantic-elements-for-interactions--high-priority).
 Implementation notes:
 
-- `Shell.handleScrollShellIntoView` measures `mapShellContainerRef`, not a positional shell child:
-  status wrappers precede the map section (#3708). The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
+- `AppBar.handlePopoverClick` stops bubbling on the About/Version and Notifications list-item wrappers.
+  This excludes both the trigger buttons and their portalled popover contents from the app-bar scroll
+  listener; React portal events still bubble through their component ancestors.
+- `DomHelper.scrollMapSectionIntoView(mapId)` measures the `{mapId}-map` section, not a positional shell child:
+  status wrappers precede the map section (#3708). The app bar, map info and data-table zoom-to-feature all
+  call it so the top gap matches. The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
   (`core/utils/constant.ts`), also read by the UI tests. Oversized sections skip scrolling within 1px of
-  the gap. Leave the shared `scrollIfNotVisible` footer offset unchanged.
+  the gap. `DomHelper.scrollFooterIntoView(mapId)` aligns fitting footers at the bottom gap and oversized footers at the top gap; the footer header, footer shortcuts, and footer list selections share this helper. Footer list selections wait for layout and focus updates before scrolling, so the selected content remains visible.
 - `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
   (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
   and runs its scenarios sequentially.

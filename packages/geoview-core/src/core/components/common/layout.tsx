@@ -10,8 +10,9 @@ import { LayerList } from './layer-list';
 import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { ResponsiveGridLayout } from './responsive-grid-layout';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { delay } from '@/core/utils/utilities';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -127,8 +128,15 @@ const Layout = forwardRef(
 
         // Focus is deferred inside setRightPanelFocus with requestAnimationFrame
         responsiveLayoutRef.current?.setRightPanelFocus();
+
+        if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+          delay(TIMEOUT.tabsContainerResize).then(
+            () => DomHelper.scrollFooterIntoView(mapId),
+            (error: unknown) => logger.logPromiseFailed('Delay failed in Layout.handleLayerChange footer scroll', error)
+          );
+        }
       },
-      [onLayerListClicked]
+      [onLayerListClicked, containerType, mapId]
     );
 
     // #endregion Handlers

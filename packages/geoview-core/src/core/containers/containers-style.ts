@@ -84,6 +84,27 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     zIndex: 0,
     height: '100%',
   },
+  shellFullscreenFallback: {
+    // Fills the browser viewport when native fullscreen is unavailable (e.g. iPhone); browser chrome may remain visible
+    position: 'fixed',
+    inset: 0,
+    width: 'auto',
+    height: 'auto',
+    zIndex: theme.zIndex.modal,
+    overscrollBehavior: 'contain',
+    backgroundColor: theme.palette.background.default,
+  },
+  fullscreenFallbackExitButton: {
+    position: 'absolute',
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+    zIndex: theme.zIndex.appBar,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: 2,
+    '&:hover': {
+      backgroundColor: theme.palette.background.paper,
+    },
+  },
   mapShellContainer: {
     boxSizing: 'border-box',
     display: 'flex',

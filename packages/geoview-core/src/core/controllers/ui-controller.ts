@@ -52,7 +52,7 @@ import type { TimeIANA } from '@/core/utils/date-mgt';
 import { DomHelper } from '@/core/utils/dom-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { createGuideObject, exitFullscreen, getFullscreenElement, requestFullscreen } from '@/core/utils/utilities';
+import { createGuideObject, exitFullscreen, getFullscreenElement, isFullscreenSupported, requestFullscreen } from '@/core/utils/utilities';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type {
@@ -99,6 +99,9 @@ export class UIController extends AbstractMapViewerController {
 
   /** The element currently in fullscreen for this map, undefined when fullscreen is not active. */
   #fullscreenElement?: TypeHTMLElement;
+
+  /** Whether the active fullscreen fills the browser viewport because native fullscreen is unavailable or was rejected. */
+  #fullscreenFallback = false;
 
   /** The view state saved when entering fullscreen. */
   #fullscreenSavedView?: TypeFullscreenSavedView;
@@ -524,10 +527,12 @@ export class UIController extends AbstractMapViewerController {
   /**
    * Toggles the fullscreen state.
    *
-   * When entering fullscreen, saves the current view (center, resolution, rotation) and requests fullscreen on the provided element.
-   * When exiting, only asks the browser to leave fullscreen; the view is handled once the browser reports the exit
-   * (same path for the fullscreen button, the `Esc` key and this API). If the user did not change the view while in fullscreen,
-   * the saved view is restored exactly; otherwise the current center and resolution are kept.
+   * When entering fullscreen, saves the current view (center, resolution, rotation) and requests native fullscreen on the provided element.
+   * When native fullscreen is unavailable (e.g. iPhone, or an iframe without fullscreen permission) or the request is rejected,
+   * the viewer fills the browser viewport instead (fallback mode); browser chrome may remain visible.
+   * When exiting, only asks the browser to leave native fullscreen; the view is handled once the browser reports the exit
+   * (same path for the fullscreen button, the `Esc` key and this API). The fallback mode exits immediately. If the user did not
+   * change the view while in fullscreen, the saved view is restored exactly; otherwise the current center and resolution are kept.
    * Calls that do not change the state (entering while active, exiting while inactive) are ignored.
    *
    * @param status - Whether to enter or exit fullscreen
@@ -547,28 +552,34 @@ export class UIController extends AbstractMapViewerController {
       this.#fullscreenSettledState = viewState;
       this.#fullscreenViewChanged = false;
       this.#fullscreenElement = element;
+      this.#fullscreenFallback = !isFullscreenSupported(element);
 
       // Track view changes and size changes, and listen for the browser leaving fullscreen
       this.#addFullscreenListeners();
 
-      // Request full screen on the element
-      void requestFullscreen(element).catch((): void => {
-        if (this.#fullscreenElement === element && getFullscreenElement() !== element) this.#handleFullscreenExited();
-      });
+      if (!this.#fullscreenFallback) {
+        // Request full screen on the element, fill the viewport instead if the browser rejects it
+        requestFullscreen(element).catch((): void => {
+          if (this.#fullscreenElement === element && !this.#fullscreenFallback && getFullscreenElement() !== element) {
+            this.#fullscreenFallback = true;
+            setStoreAppFullScreenActive(this.getMapId(), true, true);
+          }
+        });
+      }
 
       // Save in store
-      setStoreAppFullScreenActive(this.getMapId(), true);
+      setStoreAppFullScreenActive(this.getMapId(), true, this.#fullscreenFallback);
       return;
     }
 
     // Exiting fullscreen, if not active, nothing to do
     if (!this.#fullscreenElement) return;
 
-    if (getFullscreenElement() === this.#fullscreenElement) {
+    if (!this.#fullscreenFallback && getFullscreenElement() === this.#fullscreenElement) {
       // Ask the browser to exit, the 'fullscreenchange' handler finishes the exit
       exitFullscreen();
     } else {
-      // The browser is not in fullscreen on this map (e.g. request rejected), finish the exit now
+      // Fallback mode, or the browser is not in fullscreen on this map, finish the exit now
       this.#handleFullscreenExited();
     }
   }
@@ -753,10 +764,11 @@ export class UIController extends AbstractMapViewerController {
    * Handles the browser fullscreen change events while this map is in fullscreen.
    *
    * Finishes the exit when the browser is no longer in fullscreen on this map's element (fullscreen button, `Esc` key or API).
+   * Ignored in fallback mode, which never enters native fullscreen (another element's change must not exit it).
    */
   #handleFullscreenChanged(): void {
-    // If still in fullscreen on this map's element (e.g. the 'enter' event), nothing to do
-    if (!this.#fullscreenElement || getFullscreenElement() === this.#fullscreenElement) return;
+    // If still in fullscreen on this map's element (e.g. the 'enter' event), or in fallback mode, nothing to do
+    if (!this.#fullscreenElement || this.#fullscreenFallback || getFullscreenElement() === this.#fullscreenElement) return;
 
     this.#handleFullscreenExited();
   }
@@ -797,6 +809,7 @@ export class UIController extends AbstractMapViewerController {
     const settledState = this.#fullscreenSettledState;
     const viewChanged = this.#fullscreenViewChanged;
     this.#fullscreenElement = undefined;
+    this.#fullscreenFallback = false;
     this.#fullscreenSavedView = undefined;
     this.#fullscreenSettledState = undefined;
     this.#fullscreenViewChanged = false;
