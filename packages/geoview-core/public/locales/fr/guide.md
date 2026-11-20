@@ -68,7 +68,7 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 
 ## Carte d’aperçu
 
-Selon la configuration de la visionneuse, la carte peut fournir une carte d'aperçu, une représentation générique de la carte principale à une taille réduite. Elle est située dans le coin supérieur droit de la carte.
+Selon la configuration de la visionneuse, la carte peut fournir une carte d'aperçu, une représentation générique de la carte principale à une taille réduite. Elle est située dans le coin supérieur droit de la carte. La carte d'aperçu est masquée lorsque la carte est petite, par exemple sur un téléphone ou dans une petite fenêtre de navigateur.
 
 <img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Carte d'aperçu affichée dans le coin supérieur droit de la carte principale"/>
 
