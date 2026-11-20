@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, Fragment, useMemo, useRef } from 'rea
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material/styles';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
 
 import { Map } from '@/core/components/map/map';
@@ -9,9 +10,11 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
-import { MAP_SECTION_SCROLL_GAP_PX, TIMEOUT } from '@/core/utils/constant';
+import { TIMEOUT } from '@/core/utils/constant';
 
 import { Box, Link } from '@/ui/layout';
+import { IconButton } from '@/ui/icon-button/icon-button';
+import { FullscreenExitIcon } from '@/ui/icons';
 import { CircularProgress } from '@/ui/circular-progress/circular-progress';
 import { Modal, type TypeModalProps } from '@/ui/modal/modal';
 import type { ModalApi, ModalEvent } from '@/ui/modal/modal-api';
@@ -20,13 +23,19 @@ import { Typography } from '@/ui/typography/typography';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
-import { useStoreAppIsCircularProgressActive, useStoreAppIsFullscreenActive, useStoreAppHeight } from '@/core/stores/states/app-state';
+import {
+  useStoreAppIsCircularProgressActive,
+  useStoreAppIsFullscreenActive,
+  useStoreAppIsFullscreenFallback,
+  useStoreAppHeight,
+} from '@/core/stores/states/app-state';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIFocusRestoreRequest,
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
+  useStoreUINavbarComponents,
 } from '@/core/stores/states/ui-state';
 import { ExportModal } from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
@@ -100,11 +109,16 @@ export function Shell(props: ShellProps): JSX.Element {
   const focusItem = useStoreUIActiveFocusItem();
   const focusRestoreRequest = useStoreUIFocusRestoreRequest();
   const isMapFullScreen = useStoreAppIsFullscreenActive();
+  const isFullscreenFallback = useStoreAppIsFullscreenFallback();
+  const navBarComponents = useStoreUINavbarComponents();
   const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const { isOpen } = useStoreUIActiveFooterBarTab();
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
   const isFooterBar = !!geoviewConfig?.footerBar && interaction === 'dynamic';
+
+  // The navbar fullscreen button already toggles the fallback off; otherwise the fallback renders its own exit button
+  const showFullscreenFallbackExit = isFullscreenFallback && !(interaction === 'dynamic' && navBarComponents.includes('fullscreen'));
 
   // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
   // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
@@ -265,19 +279,10 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Reveals the complete map section on app-bar or map-info activation.
-   * Leaves up to MAP_SECTION_SCROLL_GAP_PX above fitting sections; oversized sections keep a stable gap of that size.
    */
   const handleScrollShellIntoView = useCallback((): void => {
-    const mapSection = mapShellContainerRef.current;
-    if (!mapSection) return;
-
-    const { top, height } = mapSection.getBoundingClientRect();
-    const isOversized = height > window.innerHeight;
-    const offset = isOversized ? MAP_SECTION_SCROLL_GAP_PX : Math.min(MAP_SECTION_SCROLL_GAP_PX, window.innerHeight - height);
-    if (isOversized && Math.abs(top - offset) <= 1) return;
-
-    DomHelper.scrollIfNotVisible(mapSection, 'start', offset);
-  }, [mapShellContainerRef]);
+    DomHelper.scrollMapSectionIntoView(mapId);
+  }, [mapId]);
 
   /**
    * Handles the skip to main content by focusing the map container element and activating the crosshair.
@@ -326,6 +331,13 @@ export function Shell(props: ShellProps): JSX.Element {
     [uiController]
   );
 
+  /**
+   * Handles the fullscreen fallback exit button.
+   */
+  const handleExitFullscreenFallback = useCallback((): void => {
+    uiController.setFullScreen(false);
+  }, [uiController]);
+
   // #endregion HANDLERS
 
   // Keep the viewer height in sync when an external layout resizes the host (e.g. 100% height in a resizable parent)
@@ -336,6 +348,16 @@ export function Shell(props: ShellProps): JSX.Element {
     hostOriginalHeightRef,
     onHostHeightChange: handleHostHeightChange,
   });
+
+  /**
+   * Locks the page scrolling while the fullscreen fallback fills the viewport, then restores scroll and focus.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SHELL - fullscreen fallback page scroll lock', isFullscreenFallback);
+
+    if (!isFullscreenFallback) return undefined;
+    return DomHelper.lockPageScroll();
+  }, [isFullscreenFallback]);
 
   /**
    * Registers map viewer event listeners on mount and cleans up on unmount.
@@ -494,7 +516,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <Box
           ref={setShellElementRef}
           id={DomHelper.buildShellId(mapViewer.mapId)}
-          sx={memoSxClasses.shell}
+          sx={[memoSxClasses.shell, isFullscreenFallback && memoSxClasses.shellFullscreenFallback] as SxProps}
           // geoview-keyboard-active scopes keyboard-only focus outlines (form controls) to GeoView's keyboard-navigation mode
           className={`geoview-shell${activeTrapGeoView ? ' geoview-keyboard-active' : ' geoview-keyboard-inactive'}`}
           tabIndex={-1}
@@ -536,6 +558,17 @@ export function Shell(props: ShellProps): JSX.Element {
                 <Map viewer={mapViewer} />
               </Box>
               {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
+              {showFullscreenFallbackExit && (
+                <IconButton
+                  id={`${mapId}-button-fullscreen-fallback-exit`}
+                  aria-label={t('general.closeFullscreen')}
+                  tooltipPlacement="left"
+                  onClick={handleExitFullscreenFallback}
+                  sx={memoSxClasses.fullscreenFallbackExitButton}
+                >
+                  <FullscreenExitIcon />
+                </IconButton>
+              )}
               <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
               <Snackbar
                 snackBarId={`${mapViewer.mapId}-snackbar`}

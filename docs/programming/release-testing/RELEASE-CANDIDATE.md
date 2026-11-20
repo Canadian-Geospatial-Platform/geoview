@@ -153,6 +153,9 @@ _(User-facing features added or enabled)_
 
 _(Fixes discovered or applied during this cycle)_
 
+- Updated dynamic-map drag panning to work without prior focus (wheel zoom is unchanged); added viewport-filling fullscreen fallback when native fullscreen is unavailable or rejected, and constrained the demo editor at mobile widths. Fullscreen layout and the footer resize popper were also adjusted for short landscape viewports. Overlapping fallback scroll locks restore the original page state only after the final release ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742)).
+- Aligned map-section and footer page scrolling around a shared 25px gap, including footer shortcuts and layer selection; About and Notifications popovers no longer trigger app-bar page scrolling. The map-section logic from #3708 moved from `Shell.handleScrollShellIntoView` to `DomHelper.scrollMapSectionIntoView`, also used by Data Table zoom-to-feature. Review follow-up: renamed the gap to `PAGE_SCROLL_GAP_PX`, shared section alignment, and centralized deferred footer scrolling in `DomHelper.scrollFooterIntoViewAfterResize`, skipping removed footers and logging failures ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742)).
+- Kept Data Table content reachable on short panels by allowing its toolbar and table to scroll together when the toolbar wraps ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742)).
 - Data-table toolbar zoom now exposes `aria-disabled` and skips zoom when the final filtered row model is empty, while retaining focusability (#3704).
 - Data-table extent filtering now reports the final row count against a pre-extent, symbol-aware baseline and refreshes the summary as the filtered feature array changes (#3700).
 - Data-table row zoom now uses a temporary feature highlight that expires with the shared highlight timeout; newer highlight changes and map deletion cancel its timer. Row zoom also scrolls the viewer into view (#3709).
@@ -241,7 +244,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed swiper layers not being clipped until every configured layer had loaded — the resolution effect used `Promise.all`, so no clip handlers attached until the slowest layer registered, leaving already-loaded layers rendered in full. Layers are now attached to the swiper **incrementally** (each `waitForLayerRegistered` appends its layer to state as soon as it resolves, with a reconcile that drops de-selected layers without wiping the rest), so each layer is clipped the moment it loads instead of after the whole set (#3625)
 - Fixed the map not returning to its original center and zoom after entering and exiting fullscreen without interaction (most visible on small/square viewers), and the fullscreen button and `Esc` giving different results. Exiting used to refit the fullscreen extent into the smaller viewer (zooming out) and ran twice for the button. `UIController.setFullScreen` now saves the view (center, resolution, rotation) on enter and finishes the exit through a single controller-owned `fullscreenchange` path scoped to the map's own element (button, `Esc` and `mapViewer.setFullscreen` behave the same; other maps on the page are no longer affected). If the view did not change in fullscreen except through resize-driven constraint adjustments, the saved view is restored exactly; otherwise the current center and resolution are kept (no refit). `exitFullscreen()` no longer calls `document.exitFullscreen()` when nothing is fullscreen (#3674)
 - Fixed drawer Ctrl+Z being swallowed while drawing when the active sketch had no vertex to undo; the shortcut now falls through to the normal drawer history and is consumed only when an undo succeeds (`ea56a64897`).
-- Fixed app-bar and map-info-bar activation scrolling only part of the map into view: `Shell.handleScrollShellIntoView` now measures the complete map section (map-info included) instead of a positional shell child, leaves a top gap (reduced when needed to fit; `MAP_SECTION_SCROLL_GAP_PX` in `core/utils/constant.ts`), and keeps taller-than-viewport sections stable. Also cancelled the guide close-button focus `requestAnimationFrame` on effect cleanup in `ResponsiveGridLayout`, which threw "Root element not found" after a viewer was deleted (#3708)
+- Fixed app-bar and map-info-bar activation scrolling only part of the map into view: the handler measures the complete map section (map-info included) instead of a positional shell child, leaves a top gap (reduced when needed to fit; see the #3742 follow-up above for the shared helper and constant), and keeps taller-than-viewport sections stable. Also cancelled the guide close-button focus `requestAnimationFrame` on effect cleanup in `ResponsiveGridLayout`, which threw "Root element not found" after a viewer was deleted (#3708)
 
 ## Build & Dependencies
 
@@ -361,11 +364,13 @@ _(Doc updates, demo cleanup, code organization)_
 - Documented the "Hidden layers" section + inline eye toggle in the guide (en/fr) across the Details, Data Table, Time Slider, and Chart panels; added a "Hidden Layers in Component Panel Lists" subsection to copilot-instructions.md capturing the composite `layerHiddenSet` vs `inVisibleRangeSet` split, `setLayerVisibleIncludingParents`, clear-selection-on-hide, and the two-list/remount focus patterns (#3635)
 - Updated all swiper documentation for the new interactive/per-side feature: the `geoview-swiper` README (config table + example), `configuration-reference.md` (structured `layers` schema, `interactive` flag, `side` semantics, version `1.1`), `geoview-core-packages.md` (features + config example + controller methods), and `controllers.md` (swiper controller snippet). Added a "How to use" section to the `package-swiper.html` demo (draggable divider, static vs interactive config, resize behavior, console/controller API), migrated all in-repo swiper configs/demos to the structured `{ layerPath, side }` shape (`14-package-swiper.json`, `geocore-duplicates.json`, `osdp-land_en/fr.json`, `package-swiper3-config-swiper.json`, `wcag.html`, `demo-arctic-sdi.html`, `rt-17c-swiper.html` — the release-test page now loads `interactive: true`), and moved the settings-section inline `sx` into `layer-details-style.ts`. Fixed a pre-existing copy-paste JSDoc bug on `getStoreSwiperOrientation` (#3625)
 - Documented the map-section scroll contract in `docs/app/accessibility.md`, with linked implementation notes in the AI UI reference. Added a documentation ownership/duplication check (item 16) to the `BranchReview` agent, the `review-branch` skill and `using-ai.md` (#3708)
+- Documented focus-free drag panning in the new "Map interactions" section of `map-viewer-api.md`, the fullscreen fallback in `controller-architecture.md`, `accessibility.md` and the guide (en/fr), and the extended page-scroll contract (footer, Data Table zoom-to-feature, popovers) in `accessibility.md` ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742))
 
 ## Test Plan Changes
 
 _(Tests added, moved, removed, or reorganized)_
 
+- Added manual checks for unfocused touch panning, fullscreen fallback and short Data Table panels; adjusted the existing footer-scroll test to use the shared gap. Review follow-up: synchronized the release index to 950 checks (63 automated, 169 candidates, 718 manual) and audited all suite counts. The overlapping page-scroll-lock regression test is a TODO in the test catalog, pending the testing refactor. The full device/browser matrix remains unverified ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742)).
 - Added `suite-layer-functions` coverage for public `LayerApi.setOrToggleLayerVisibility`, checking explicit values, no-argument toggles, return values, and resulting layer state.
 - Merged the two UI tests into the sequential `suite-map` flow and removed the separate Map 7 runner page.
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path.
@@ -435,10 +440,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 925   |
-| Automated (A) | 60     | 68    |
+| Total tests   | 901    | 950   |
+| Automated (A) | 60     | 63    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 690   |
+| Manual (M)    | 672    | 718   |
 
 ## Notes for Release Notes Author
 

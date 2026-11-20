@@ -43,6 +43,12 @@ interface TypeDocument extends Document {
   msFullscreenElement?: Element | null;
   /** Firefox vendor-prefixed current fullscreen element. */
   mozFullScreenElement?: Element | null;
+  /** Safari vendor-prefixed fullscreen availability. */
+  webkitFullscreenEnabled?: boolean;
+  /** IE11 vendor-prefixed fullscreen availability. */
+  msFullscreenEnabled?: boolean;
+  /** Firefox vendor-prefixed fullscreen availability. */
+  mozFullScreenEnabled?: boolean;
 }
 
 /** Result of a URL reachability ping check. */
@@ -1107,6 +1113,24 @@ export function linkifyAndSanitizeHtml(content: string, announcementText: string
     ...options,
   });
   return sanitizeHtmlContent(enhanceLinksAccessibility(linkified, announcementText));
+}
+
+/**
+ * Indicates whether the browser can display the given element in native fullscreen mode.
+ *
+ * Checks the standard and vendor-prefixed availability flags (false on iPhone, or in an iframe without fullscreen permission)
+ * and the presence of a request method, instead of relying on browser-name detection.
+ *
+ * @param element - The element to display in fullscreen mode
+ * @returns True when a native fullscreen request can be made for the element
+ */
+export function isFullscreenSupported(element: TypeHTMLElement): boolean {
+  const doc = document as Omit<TypeDocument, 'fullscreenEnabled'> & { fullscreenEnabled?: boolean };
+  const isEnabled = doc.fullscreenEnabled ?? doc.webkitFullscreenEnabled ?? doc.msFullscreenEnabled ?? doc.mozFullScreenEnabled ?? false;
+  const canRequest =
+    typeof (element.requestFullscreen ?? element.webkitRequestFullscreen ?? element.msRequestFullscreen ?? element.mozRequestFullScreen) ===
+    'function';
+  return isEnabled && canRequest;
 }
 
 /**

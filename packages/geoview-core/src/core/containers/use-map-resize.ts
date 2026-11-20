@@ -79,14 +79,14 @@ export const useMapResize = ({
         // regardless of sibling elements (skip links, CircularProgress, etc.)
         containerHeight = 'auto';
         containerFlex = '1';
+      } else if (footerPanelResizeValue === 100) {
+        visibility = 'hidden';
+        containerHeight = '0';
       } else {
-        containerHeight = `${100 - footerPanelResizeValue}%`;
-
-        // footerPanelResizeValue is 100
-        if (footerPanelResizeValue === 100) {
-          visibility = 'hidden';
-          containerHeight = '0';
-        }
+        // Share the shell height with the footer by ratio; the footer never shrinks below its header, so on short
+        // screens (e.g. phone landscape) the map shrinks instead of the footer header overflowing the shell
+        containerHeight = '0';
+        containerFlex = `${100 - footerPanelResizeValue} 1 0%`;
       }
     }
 

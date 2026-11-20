@@ -4,7 +4,7 @@ import type { TypeMapMouseInfo } from '@/api/types/map-schema-types';
 import { AbstractController } from './abstract-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
-import { getStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
+import { getStoreAppIsFullscreenActive, getStoreAppIsFullscreenFallback } from '@/core/stores/states/app-state';
 import { DomHelper } from '@/core/utils/dom-helper';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -156,10 +156,11 @@ export class AbstractMapViewerController extends AbstractController {
    * Checks whether focus can return from the map to a tool button.
    *
    * @param mapId - The map identifier
-   * @returns True when the map target has focus and fullscreen mode is inactive
+   * @returns True when the map target has focus and native fullscreen (where the browser reserves Escape) is inactive
    */
   protected static isToolButtonFocusable(mapId: string): boolean {
-    return !(getStoreAppIsFullscreenActive(mapId) || document.activeElement !== DomHelper.getMapTargetElement(mapId));
+    const isNativeFullscreen = getStoreAppIsFullscreenActive(mapId) && !getStoreAppIsFullscreenFallback(mapId);
+    return !(isNativeFullscreen || document.activeElement !== DomHelper.getMapTargetElement(mapId));
   }
 
   // #endregion STATIC METHODS

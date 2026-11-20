@@ -127,8 +127,12 @@ const Layout = forwardRef(
 
         // Focus is deferred inside setRightPanelFocus with requestAnimationFrame
         responsiveLayoutRef.current?.setRightPanelFocus();
+
+        if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+          DomHelper.scrollFooterIntoViewAfterResize(mapId);
+        }
       },
-      [onLayerListClicked]
+      [onLayerListClicked, containerType, mapId]
     );
 
     // #endregion Handlers

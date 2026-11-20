@@ -223,6 +223,8 @@ table.state {
 
 .editor {
   display: inline-flex;
+  box-sizing: border-box;
+  max-width: 100%;
   gap: 10px;
   font-family: monospace;
   line-height: 21px;
@@ -558,9 +560,15 @@ table.state {
   .selector {
     padding: 8px;
   }
+  .editor {
+    display: flex;
+    width: 100%;
+  }
+  /* The textarea cols attribute sets a wide intrinsic width, let it shrink to the editor width */
   .editor textarea {
-    min-width: 96%;
-    max-width: 96%;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
   }
 }
 

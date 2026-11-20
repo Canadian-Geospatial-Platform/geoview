@@ -123,10 +123,20 @@ The behavioural contract (offset, oversized alignment, map-info buttons) lives i
 [delegated-listener section](../../docs/app/accessibility.md#2-use-semantic-elements-for-interactions--high-priority).
 Implementation notes:
 
-- `Shell.handleScrollShellIntoView` measures `mapShellContainerRef`, not a positional shell child:
-  status wrappers precede the map section (#3708). The gap is the shared `MAP_SECTION_SCROLL_GAP_PX`
-  (`core/utils/constant.ts`), also read by the UI tests. Oversized sections skip scrolling within 1px of
-  the gap. Leave the shared `scrollIfNotVisible` footer offset unchanged.
+- `AppBar.handlePopoverClick` stops bubbling on the About/Version and Notifications list-item wrappers.
+  This excludes both the trigger buttons and their portalled popover contents from the app-bar scroll
+  listener; React portal events still bubble through their component ancestors.
+- `DomHelper.scrollMapSectionIntoView(mapId)` measures the `{mapId}-map` section, not a positional shell child:
+  status wrappers precede the map section (#3708). Its callers are Shell and Data Table zoom-to-feature.
+  Both section helpers use `DomHelper.#scrollSectionIntoView` and the shared `PAGE_SCROLL_GAP_PX`
+  (`core/utils/constant.ts`), also read by the UI tests.
+- Footer header, shortcut and list-selection callers use `DomHelper.scrollFooterIntoViewAfterResize`.
+  It captures the footer before the delay, checks `isConnected` afterwards to avoid looking up a deleted
+  viewer, and logs failures with a terminal catch (#3742).
+- `DomHelper.lockPageScroll` counts active locks and saves the original page state only on the first
+  acquisition. Each release is idempotent; only the last release restores the snapshot, regardless of
+  release order. TODO: restore the overlapping-lock regression `MapTester.testPageScrollLock`, which is
+  pending the testing refactor (see the [test catalog](../../docs/app/testing/test-catalog.md#31-map-functions), #3742).
 - `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
   (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
   and runs its scenarios sequentially.
