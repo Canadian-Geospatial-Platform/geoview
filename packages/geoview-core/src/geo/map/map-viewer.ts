@@ -17,6 +17,11 @@ import type { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
+import { defaults as defaultInteractions } from 'ol/interaction/defaults';
+import DragPan from 'ol/interaction/DragPan';
+import type Interaction from 'ol/interaction/Interaction';
+import Kinetic from 'ol/Kinetic';
+import type Collection from 'ol/Collection';
 import ScaleLine from 'ol/control/ScaleLine';
 
 import queryString from 'query-string';
@@ -442,6 +447,7 @@ export class MapViewer {
         padding: [0, 0, mapInfoInitialHeight, 0],
       }),
       controls: [],
+      interactions: MapViewer.#createDefaultInteractions(),
       keyboardEventTarget: keyboardTarget,
     });
 
@@ -2163,6 +2169,24 @@ export class MapViewer {
     view.on('change:center', this.#handleViewCenterChanged.bind(this));
     view.on('change:resolution', this.#handleViewResolutionChanged.bind(this));
     view.on('change:rotation', this.#handleViewRotationChanged.bind(this));
+  }
+
+  /**
+   * Creates the default OpenLayers interactions, with drag-pan not limited to a focused map.
+   *
+   * OpenLayers enables `onFocusOnly` by default for a focusable (tabindex) target. Touch gestures do not focus the target
+   * before they start, so the first one-finger drag scrolled the page instead of panning the map. Drag-pan accepts the gesture
+   * without focus (and stops the page scrolling), while mouse wheel zoom stays focus-only so it does not hijack the page scroll.
+   *
+   * @returns The default interactions collection
+   */
+  static #createDefaultInteractions(): Collection<Interaction> {
+    const interactions = defaultInteractions({ onFocusOnly: true });
+    const dragPanIndex = interactions.getArray().findIndex((interaction) => interaction instanceof DragPan);
+
+    // Same kinetic settings as the OpenLayers defaults
+    if (dragPanIndex !== -1) interactions.setAt(dragPanIndex, new DragPan({ kinetic: new Kinetic(-0.005, 0.05, 100) }));
+    return interactions;
   }
 
   /**

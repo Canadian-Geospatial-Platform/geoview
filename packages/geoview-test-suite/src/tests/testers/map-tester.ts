@@ -1914,7 +1914,8 @@ export class MapTester extends GVAbstractTester {
    */
   static async #activateFooterTab(context: TypeScrollContext): Promise<void> {
     const { test, mapId, section, footer, preconditions } = context;
-    const helperOffset = GVAbstractTester.UI_SCROLL_HELPER_OFFSET_PX;
+    // The footer header click uses the same gap as the map section top gap
+    const helperOffset = MAP_SECTION_SCROLL_GAP_PX;
 
     // Keep the footer control visible but inside the helper's top clearance
     await MapTester.#positionSection(context, helperOffset / 2 - section.getBoundingClientRect().height);

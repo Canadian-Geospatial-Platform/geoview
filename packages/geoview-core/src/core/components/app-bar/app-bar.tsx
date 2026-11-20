@@ -234,6 +234,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // #region Handlers
 
   /**
+   * Keeps popover interactions from triggering the app-bar's delegated page scroll.
+   *
+   * @param event - The click bubbling from the popover button or its content
+   */
+  const handlePopoverClick = useCallback((event: React.MouseEvent): void => {
+    event.stopPropagation();
+  }, []);
+
+  /**
    * Handles when an app-bar button is clicked.
    *
    * @param buttonId - The id of the clicked button
@@ -600,20 +609,24 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     // 4. Notifications (with separator)
     items.push(
-      <ListItem key="notifications" sx={sxClasses.appBarSeparator}>
+      // Delegated event boundary, not a control; activation remains on the child buttons.
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+      <ListItem key="notifications" sx={sxClasses.appBarSeparator} onClick={handlePopoverClick}>
         <Notifications />
       </ListItem>
     );
 
     // 5. Version
     items.push(
-      <ListItem key="version">
+      // Delegated event boundary, not a control; activation remains on the child buttons.
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+      <ListItem key="version" onClick={handlePopoverClick}>
         <Version />
       </ListItem>
     );
 
     return items;
-  }, [memoBottomItems, showExportButton, showShareButton, mapId, activeModalId, sxClasses]);
+  }, [memoBottomItems, showExportButton, showShareButton, mapId, activeModalId, sxClasses, handlePopoverClick]);
 
   /**
    * Applies marginTop: auto to the first bottom item to push all items to the bottom.
@@ -637,7 +650,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [memoBottomListItems, sxClasses]);
 
   return (
-    // Delegated listener (not a control): any click inside (mainly bubbled from child buttons, incl. keyboard activation) scrolls the shell into view
+    // Delegated listener (not a control): bubbled clicks scroll the shell into view, except About and Notifications popover interactions
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box

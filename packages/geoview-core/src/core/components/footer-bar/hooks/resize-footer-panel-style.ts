@@ -33,7 +33,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     color: theme.palette.text.primary,
   },
   sliderWrapper: {
-    height: '300px',
+    // Shrinks on short viewports (e.g. phone landscape) so the whole popper fits on screen; the header and padding use about 140px
+    height: 'min(300px, calc(100dvh - 140px))',
+    minHeight: '120px',
     padding: theme.spacing(3, 1, 3, 7),
     '& .MuiSlider-markLabel': {
       left: '33px',

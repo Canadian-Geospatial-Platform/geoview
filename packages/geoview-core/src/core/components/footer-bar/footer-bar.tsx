@@ -114,12 +114,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     delay(TIMEOUT.tabsContainerResize).then(
       () => {
         if (tabsContainerRef.current) {
-          DomHelper.scrollIfNotVisible(tabsContainerRef.current, 'end');
+          DomHelper.scrollFooterIntoView(mapId);
         }
       },
       (error: unknown) => logger.logPromiseFailed('Delay failed in handleHeaderClick', error)
     );
-  }, []);
+  }, [mapId]);
 
   // #endregion HANDLERS
 
@@ -248,13 +248,17 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     // default values as set by the height of the div
     let footerHeight = 'fit-content';
+    let footerFlex = '';
 
-    // adjust values from px to % to accomodate fullscreen plus page zoom
+    // In fullscreen, share the shell height with the map by ratio (see useMapResize). Height stays auto so the
+    // footer's minimum size is its header and the resize control stays visible on short screens
     if (isMapFullScreen && activeFooterBarTab.isOpen) {
-      footerHeight = `${footerPanelResizeValue}%`;
+      footerHeight = 'auto';
+      footerFlex = `${footerPanelResizeValue} 1 0%`;
     }
 
     tabsContainerRef.current.style.height = footerHeight;
+    tabsContainerRef.current.style.flex = footerFlex;
   }, [tabsContainerRef, activeFooterBarTab.isOpen, isMapFullScreen, footerPanelResizeValue]);
 
   /**
