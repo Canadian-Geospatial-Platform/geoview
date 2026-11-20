@@ -135,7 +135,8 @@ Implementation notes:
   viewer, and logs failures with a terminal catch (#3742).
 - `DomHelper.lockPageScroll` counts active locks and saves the original page state only on the first
   acquisition. Each release is idempotent; only the last release restores the snapshot, regardless of
-  release order. Keep the overlapping-lock regressions in `MapTester.testPageScrollLock` (#3742).
+  release order. TODO: restore the overlapping-lock regression `MapTester.testPageScrollLock`, which is
+  pending the testing refactor (see the [test catalog](../../docs/app/testing/test-catalog.md#31-map-functions), #3742).
 - `UITester.testMapSectionScroll` mutates page scroll, so the UI suite waits for page exclusivity
   (see [Sequential vs Parallel Execution](../../docs/app/testing/test-templates.md#sequential-vs-parallel-execution))
   and runs its scenarios sequentially.

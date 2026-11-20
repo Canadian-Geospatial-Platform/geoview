@@ -631,10 +631,11 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks                                   |
 | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch                                     |
 | `testFullscreenViewRestoration`        | test | Test exact view restoration without interaction and current view retention after interaction |
-| `testPageScrollLock` TO ADD BAKC       | test | Test overlapping page scroll locks in both release orders, repeated-release safety, and original overflow restoration |
 | `testGuideDetailsPanelTopAnchor`       | test | Test selecting the Details panel and verifying the guide’s Top anchor behavior               |
 | `testControllerGetFooterHeight`        | test | Test `UIController.getFooterHeight()` from a non-React consumer                              |
 | `testCrosshairCoordinates`             | test | Test SVG artwork center alignment, stale pointer reset, and Enter/Space drawing with padding, panning, and rotation |
+
+> **TODO:** Add back `testPageScrollLock` (two cases, release newest/oldest first) in `MapTester` and register it in this suite (then update `getTestsTotalFinal()`). It checks that overlapping `DomHelper.lockPageScroll` locks keep the page locked until the last release, that repeated releases are harmless, and that the original overflow styles are restored. It was removed to avoid conflicts with the ongoing testing refactor; the implementation is in commit `a65be1b9ea` (#3742).
 
 ---
 
