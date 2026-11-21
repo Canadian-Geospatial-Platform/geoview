@@ -1,3 +1,8 @@
+/** Request options for helpers that support opt-in retries. */
+export interface FetchRequestInit extends RequestInit {
+    /** Retries after the initial attempt; defaults to zero. Must be a nonnegative safe integer. */
+    retryCount?: number;
+}
 /** Result of a HEAD reachability check. */
 export interface HeadResult {
     /** The HTTP response object, or null if the server could not be reached. */
@@ -10,6 +15,7 @@ export declare abstract class Fetch {
     #private;
     /**
      * Fetches a url for a json response.
+     * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
      *
      * @param url - The url to fetch
      * @param init - Optional initialization parameters for the fetch
@@ -22,15 +28,18 @@ export declare abstract class Fetch {
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T>;
+    static fetchJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number): Promise<T>;
     /**
      * Fetches a url for a json response in the form of an object (not an array) and validates the response doesn't actually contain an error.
      *
      * This is useful when a service (e.g. ArcGIS Server) returns a 200 with a response error embedded within it.
+     * Retryable embedded codes (429, 500, 502, 503, 504) share init.retryCount with HTTP/network failures.
+     * Timeouts and cancellation terminate the entire operation without starting another retry cycle.
      *
      * @param url - The url to fetch
      * @param init - Optional initialization parameters for the fetch
      * @param timeoutMs - Optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError
+     * @param delayMs - Optional delay before performing the actual fetch command (mostly for testing purposes)
      * @returns A promise that resolves with the fetched json response
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -40,7 +49,7 @@ export declare abstract class Fetch {
      * @throws {ResponseContentError} When the response actually contains an error within it
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    static fetchEsriJson<T>(url: string, init?: FetchRequestInit, timeoutMs?: number, delayMs?: number): Promise<T>;
     /**
      * Fetches a url for a json response in the form of an array (not an object).
      *
@@ -55,9 +64,10 @@ export declare abstract class Fetch {
      * @throws {ResponseTypeError} When the response from the service is not an array
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]>;
+    static fetchJsonAsArray<T>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T[]>;
     /**
      * Fetches a url for a text response.
+     * Inherits safe-request retries from fetchArrayBuffer.
      *
      * @param url - The url to fetch
      * @param init - Optional initialization parameters for the fetch
@@ -69,9 +79,10 @@ export declare abstract class Fetch {
      * @throws {ResponseEmptyError} When the text response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
+    static fetchText(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<string>;
     /**
      * Fetches a url for an array buffer response.
+     * Safe requests retry transient failures only when init.retryCount is provided, within the original timeout.
      *
      * @param url - The url to fetch
      * @param init - Optional initialization parameters for the fetch
@@ -82,7 +93,7 @@ export declare abstract class Fetch {
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer>;
+    static fetchArrayBuffer(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<ArrayBuffer>;
     /**
      * Fetches a blob from the given URL and attempts to read it as an image.
      *
@@ -126,7 +137,7 @@ export declare abstract class Fetch {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    static fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T>;
     /**
      * Fetches a URL and returns the response text regardless of the HTTP status code.
      *
@@ -189,7 +200,7 @@ export declare abstract class Fetch {
      *     body: JSON.stringify({ id: 123 })
      *   }, 3000);
      */
-    static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    static fetchWithTimeout<T>(url: string, init?: FetchRequestInit, timeoutMs?: number): Promise<T>;
     /**
      * Throws an error if the provided response content contains an embedded error.
      *

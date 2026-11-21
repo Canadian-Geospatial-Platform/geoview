@@ -163,6 +163,13 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]>;
     /**
+     * Normalizes known export parameter names for case-sensitive ArcGIS servers without re-encoding values.
+     *
+     * @param url - The unproxied export request URL
+     * @returns The URL with canonical Esri parameter names and unchanged values, unknown keys, and fragment
+     */
+    static normalizeExportParamNames(url: string): string;
+    /**
      * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
      *
      * This function is responsible for generating the appropriate filter expression based on the layer configuration,

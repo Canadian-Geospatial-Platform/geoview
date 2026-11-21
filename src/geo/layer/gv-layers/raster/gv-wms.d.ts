@@ -17,8 +17,6 @@ import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
  */
 export declare class GVWMS extends AbstractGVRaster {
     #private;
-    /** The max feature count returned by the GetFeatureInfo */
-    static readonly DEFAULT_MAX_FEATURE_COUNT: number;
     /**
      * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
      * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)
@@ -162,18 +160,6 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param value - The CRS Override properties or undefined
      */
     setOverrideCRS(value: CRSOverride | undefined): void;
-    /**
-     * Gets the feature count used for GetFeatureInfo requests.
-     *
-     * @returns The current GetFeatureInfo feature count
-     */
-    getGetFeatureInfoFeatureCount(): number;
-    /**
-     * Sets the feature count used for GetFeatureInfo requests.
-     *
-     * @param value - The new GetFeatureInfo feature count
-     */
-    setGetFeatureInfoFeatureCount(value: number): void;
     /**
      * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
      *
