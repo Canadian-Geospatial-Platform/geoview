@@ -18,7 +18,10 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     static readonly EXCLUDED_HEADERS_GEN: string[];
     static readonly EXCLUDED_HEADERS_STYLE: string[];
     static readonly EXCLUDED_HEADERS: string[];
-    static readonly MAX_ESRI_FEATURES = 200000;
+    /** Maximum feature count enforced by ESRI Feature, WFS, and OGC API Features loaders. */
+    static readonly MAX_FEATURES = 200000;
+    /** The maximum number of features to fetch per page when retrieving features in chunks. */
+    static readonly MAX_PAGE_SIZE = 10000;
     /**
      * Mustoverride function to load vector features for a layer during vector source creation.
      *
@@ -34,7 +37,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param sourceOptions - The OpenLayers vector source options associated with the layer
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features created from the underlying data source
-     * @throws {LayerTooManyEsriFeatures} When the layer has too many features
+     * @throws {LayerTooManyFeatures} When the layer has too many features
      */
     protected abstract onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
@@ -59,6 +62,15 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns An initialized VectorSource ready for use in a layer
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource;
+    /**
+     * Enforces the vector feature limit using an error appropriate for the loading strategy.
+     *
+     * @param layerConfig - The layer entry configuration
+     * @param featureCount - The advertised or accumulated feature count
+     * @throws {LayerTooManyFeatures} When an all-features request exceeds the limit
+     * @throws {LayerTooManyFeaturesInBBOX} When a BBOX request exceeds the limit
+     */
+    protected static checkFeatureCount(layerConfig: VectorLayerEntryConfig, featureCount: number): void;
     /**
      * Fetches json data from the given URL using settings defined in the vector source configuration.
      *

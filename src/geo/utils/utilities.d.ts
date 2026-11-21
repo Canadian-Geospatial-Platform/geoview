@@ -10,7 +10,7 @@ import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
-import { type TypeMapMouseInfo, type TypeOutfields, type TypeStyleGeometry, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import { type TypeFeatureInfoEntry, type TypeMapMouseInfo, type TypeOutfields, type TypeStyleGeometry, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWFS, TypeMetadataWFSCapabilities, TypeMetadataWMS, TypeMetadataWMSCapabilities, TypeMetadataWMTS, TypeMetadataWMTSCapabilities, TypeOGCService, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -513,6 +513,41 @@ export declare abstract class GeoUtilities {
      * @returns `true` when the extent is valid; otherwise, `false`
      */
     static isValidExtent(extent: Extent | undefined): boolean;
+    /**
+     * Checks whether an extent is valid (see `isValidExtent`) and not inverted (minimum not above maximum).
+     *
+     * Points (zero-size extents) are accepted.
+     *
+     * @param extent - The extent to check
+     * @returns True when the extent is valid and not inverted
+     */
+    static isValidOrderedExtent(extent: Extent | undefined): extent is Extent;
+    /**
+     * Checks whether a feature info entry has a geometry with a valid, non-inverted extent.
+     *
+     * Entries without geometry (e.g. pure WMS GetFeatureInfo results) only carry the click point as extent,
+     * which does not represent the feature location.
+     *
+     * @param feature - The feature info entry to check
+     * @returns True when the entry has a geometry and a valid, non-inverted extent
+     */
+    static hasFeatureGeometryExtent(feature: TypeFeatureInfoEntry): feature is TypeFeatureInfoEntry & {
+        extent: Extent;
+    };
+    /**
+     * Unions the geometry extents of feature info entries, ignoring entries rejected by `hasFeatureGeometryExtent`.
+     *
+     * @param features - The feature info entries
+     * @returns The union of the geometry extents, or undefined when no entry has a valid geometry extent
+     */
+    static getFeaturesGeometryExtent(features: TypeFeatureInfoEntry[] | undefined): Extent | undefined;
+    /**
+     * Gets the name of the object id field of feature info entries, from the first entry that has one.
+     *
+     * @param features - The feature info entries
+     * @returns The object id field name, or undefined when no entry has an object id field
+     */
+    static getFeaturesOidFieldName(features: TypeFeatureInfoEntry[]): string | undefined;
     /**
      * Checks validity of lat long, LCC, or Web Mercator extent and updates values if invalid.
      *

@@ -272,6 +272,36 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     zoomToFeaturesExtent(layerPath: string, features: TypeFeatureInfoEntry[]): Promise<void>;
     /**
+     * Checks whether a result group has an embedded geometry extent or supports an object-ID extent lookup.
+     *
+     * @param layerPath - The layer path the features belong to
+     * @param features - The feature results, if available
+     * @returns True when the group has a usable extent or lookup target
+     */
+    canZoomToFeaturesGroupExtent(layerPath: string, features: TypeFeatureInfoEntry[] | undefined): boolean;
+    /**
+     * Zooms to the combined extent of a group of feature results (e.g. all results of one layer for the current map click).
+     *
+     * Group zoom policy:
+     * - Unions every valid geometry extent; invalid (non-finite or inverted) extents and entries without geometry
+     *   (e.g. pure WMS, whose extent is only the click point) are ignored.
+     * - Features without a valid geometry extent are looked up by object id when possible; lookup failures are logged and ignored.
+     * - The zoom-in is bounded so a tiny or coincident-point union never zooms closer than
+     *   `OL_ZOOM_FEATURE_MAX_SCALE`, unless the map is already closer, in which case the current resolution is kept.
+     * - The layer visibility-scale range always wins: the bound is relaxed to remain inside the layer's zoomed-out limit and,
+     *   when the union cannot fit inside that limit, the map centers on the union at the limit (some results may be outside).
+     * - After zooming, the click marker is hidden (it only marks the map click) and the union is shown with a fading
+     *   bounding box; feature highlights are unchanged.
+     *
+     * @param layerPath - The layer path the features belong to
+     * @param features - The feature results forming the group
+     * @param fitOptions - Optional fit options (e.g. padding) to merge the group and layer constraints into
+     * @param isStale - Optional callback telling whether the group became stale (new click or layer switch) while extents were resolved
+     * @returns A promise that resolves with true when the map was zoomed, or false when the request became stale or was interrupted
+     * @throws {NoExtentError} When no valid extent could be determined from the provided features
+     */
+    zoomToFeaturesGroupExtent(layerPath: string, features: TypeFeatureInfoEntry[], fitOptions?: GVFitOptions, isStale?: () => boolean): Promise<boolean>;
+    /**
      * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
      *
      * Uses the layer's buffered effective scale boundaries so the resulting zoom remains inside
@@ -287,7 +317,9 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Zooms to a feature's extent clamped to the layer's visible scale range, then highlights the feature.
      *
-     * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
+     * The zoom-in is bounded like the group zoom: it never zooms closer than `OL_ZOOM_FEATURE_MAX_SCALE` (e.g. for points),
+     * unless the map is already closer, in which case the current resolution is kept; the layer's visibility-scale range wins.
+     * After the zoom completes, hides the click marker (it only marks the map click), highlights the bounding box
      * with a fade-out effect, and sets the feature as the active highlight.
      *
      * @param layerPath - The layer path used to look up scale limits
@@ -296,9 +328,28 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param useAnimation - Optional flag indicating if a zoom animation should be used
      * @param fitOptions - Optional fit options to merge scale constraints into
      * @param isTemporaryHighlight - Optional flag indicating the feature highlight should expire automatically
-     * @returns A promise that resolves when the zoom and highlight are complete
+     * @param isStale - Optional callback indicating the feature zoom was superseded
+     * @returns A promise that resolves with true when the map zoomed to the feature (and highlighted it), or false when the zoom was
+     * interrupted or superseded
      */
-    zoomToExtentRestrictedAndHighlight(layerPath: string, feature: TypeFeatureInfoEntry, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions, isTemporaryHighlight?: boolean): Promise<void>;
+    zoomToExtentRestrictedAndHighlight(layerPath: string, feature: TypeFeatureInfoEntry, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions, isTemporaryHighlight?: boolean, isStale?: () => boolean): Promise<boolean>;
+    /**
+     * Brings a feature extent into view without zooming in, then outlines it (e.g. Details previous/next after a zoom to feature).
+     *
+     * Fits the whole extent with the current resolution as minimum resolution: the map only pans when the extent fits at the
+     * current resolution, and zooms out just enough when it does not. The fit padding (e.g. an open app-bar panel, map
+     * controls) and the layer's visibility-scale range are honored. Then hides the click marker (it only marks the map click)
+     * and briefly outlines the extent; feature highlights are left to the caller.
+     *
+     * @param layerPath - The layer path used to look up scale limits
+     * @param extent - The feature extent to bring into view (in map projection)
+     * @param useAnimation - Optional flag indicating if an animation should be used, default: true
+     * @param fitOptions - Optional fit options (e.g. padding) to merge the constraints into
+     * @param isStale - Optional callback indicating the navigation was superseded
+     * @returns A promise that resolves, once the map moved and the extent is outlined, with true when the map landed on the
+     * same view a zoom to the feature (`zoomToExtentRestrictedAndHighlight`) would produce, so such a zoom would have no effect
+     */
+    panToExtentRestrictedAndOutline(layerPath: string, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions, isStale?: () => boolean): Promise<boolean>;
     /**
      * Gets the raster function previews for the ESRI image layer.
      *

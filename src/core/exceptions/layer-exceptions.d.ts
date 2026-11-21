@@ -216,20 +216,40 @@ export declare class LayerEntryConfigFieldsNotFoundError extends LayerError {
      */
     constructor(geoviewLayerId: string, layerName: string | undefined);
 }
-/**
- * Custom error class thrown when the ESRI feature layer has too many features.
- */
-export declare class LayerTooManyEsriFeatures extends LayerError {
+/** Indicates that a layer exceeds its supported vector feature limit. */
+export declare class LayerTooManyFeatures extends LayerError {
     /**
-     * Creates an instance of LayerTooManyEsriFeatures.
+     * Creates an error identifying the oversized layer.
      *
-     * This error is thrown when the ESRI feature layer has more than 200 000 features.
-     *
-     * @param geoviewLayerId - The ID of the GeoView layer
-     * @param layerName - The layer name
-     * @param featureCount - The number of features that exceeded the limit
+     * @param geoviewLayerId - The layer identifier
+     * @param layerName - The layer display name
+     * @param featureCount - The advertised or accumulated number of features
+     * @param limit - The maximum supported number of features
      */
-    constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number);
+    constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number, limit: number);
+}
+/** Indicates that the requested map extent exceeds a layer's supported vector feature limit. */
+export declare class LayerTooManyFeaturesInBBOX extends LayerError {
+    /**
+     * Creates an error identifying the oversized map-extent query.
+     *
+     * @param geoviewLayerId - The layer identifier
+     * @param layerName - The layer display name
+     * @param featureCount - The advertised or accumulated number of features
+     * @param limit - The maximum supported number of features
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined, featureCount: number, limit: number);
+}
+/** Indicates that loading a layer requires more pages than supported. */
+export declare class LayerTooManyPages extends LayerError {
+    /**
+     * Creates an error identifying the layer whose pagination was stopped.
+     *
+     * @param geoviewLayerId - The layer identifier
+     * @param layerName - The layer display name
+     * @param limit - The maximum supported number of pages
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined);
 }
 /**
  * Custom error class thrown when the MetadataAccessPath is missing for a layer configuration.

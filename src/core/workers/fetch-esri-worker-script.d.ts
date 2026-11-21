@@ -20,8 +20,8 @@ export interface QueryParams {
     projection: number;
     /** The maximum allowable offset for geometry simplification. */
     maxAllowableOffset: number;
-    /** The maximum number of records to return from service in one fetch. */
-    maxRecordCount: number;
+    /** The maximum number of records per page to return from service in one fetch. */
+    maxPageSize: number;
     /** The where clause for filtering features. */
     where: string;
 }

@@ -1,6 +1,7 @@
 import type { Extent } from 'ol/extent';
+import type { TypeRecordsCountSource } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import { type TypeGeoviewLayerType, type TypeLayerControls, type TypeLayerEntryType, type TypeLayerStatus, type TypeMetadataEsriRasterFunctionInfos, type TypeMetadataWMSCapabilityLayerStyle, type TypeMosaicMethod, type TypeMosaicRule } from '@/api/types/layer-schema-types';
+import { type TypeGeoviewLayerType, type TypeLayerControls, type TypeLayerEntryType, type TypeLayerStatus, type TypeMetadataEsriRasterFunctionInfos, type TypeMetadataWMSCapabilityLayerStyle, type TypeMosaicMethod, type TypeMosaicRule, type VectorStrategy } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Represents the layer panel display state. */
@@ -133,6 +134,16 @@ export interface TypeLegendLayer {
     opacityMaxFromParent?: number;
     /** Current map zoom level. */
     zoom?: number;
+    /** Maximum record count per page (when fetching) for the layer, if applicable. */
+    maxPageSize?: number;
+    /** Maximum record count for the layer, if applicable. */
+    maxRecordCount?: number;
+    /** Total matching records reported or fully counted for the current request. */
+    totalRecordsCount?: number;
+    /** Whether the matching count was supplied by the service or counted from downloaded records. */
+    totalRecordsCountSource?: TypeRecordsCountSource;
+    /** Fetch strategy for vector layers. */
+    vectorStrategy?: VectorStrategy;
 }
 /**
  * Checks whether a layer has class-based legend items (i.e. uniqueValue or classBreaks style entries) to render.

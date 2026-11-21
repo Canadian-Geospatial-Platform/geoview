@@ -4,7 +4,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus, TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus, TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule, VectorStrategy } from '@/api/types/layer-schema-types';
 /**
  * Represents the layer Zustand store slice.
  *
@@ -221,6 +221,56 @@ export declare const useStoreLayerMinScale: (layerPath: string) => number | unde
 export declare const getStoreLayerMaxScale: (mapId: string, layerPath: string) => number | undefined;
 /** Hook that returns the maximum scale denominator for a specific layer. */
 export declare const useStoreLayerMaxScale: (layerPath: string) => number | undefined;
+/**
+ * Gets the maximum page size recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The maximum page size, or undefined when unavailable
+ */
+export declare const getStoreLayerMaxPageSize: (mapId: string, layerPath: string) => number | undefined;
+/** Hook that returns the maximum page size for a specific layer. */
+export declare const useStoreLayerMaxPageSize: (layerPath: string) => number | undefined;
+/**
+ * Gets the maximum record count recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The maximum record count, or undefined when unavailable
+ */
+export declare const getStoreLayerMaxRecordCount: (mapId: string, layerPath: string) => number | undefined;
+/** Hook that returns the maximum record count for a specific layer. */
+export declare const useStoreLayerMaxRecordCount: (layerPath: string) => number | undefined;
+/**
+ * Gets the total matching records reported or fully counted for a layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The matching count, or undefined when unavailable
+ */
+export declare const getStoreLayerTotalRecordsCount: (mapId: string, layerPath: string) => number | undefined;
+/** Hook that returns the total matching records reported or fully counted. */
+export declare const useStoreLayerTotalRecordsCount: (layerPath: string) => number | undefined;
+/**
+ * Gets how the total matching record count was obtained.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The count origin, or undefined when unavailable
+ */
+export declare const getStoreLayerTotalRecordsCountSource: (mapId: string, layerPath: string) => TypeLegendLayer["totalRecordsCountSource"];
+/** Hook that returns how the total matching record count was obtained. */
+export declare const useStoreLayerTotalRecordsCountSource: (layerPath: string) => import("../../../api/config/validation-classes/vector-layer-entry-config").TypeRecordsCountSource | undefined;
+/**
+ * Gets the vector loading strategy recorded for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The vector loading strategy, or undefined when unavailable
+ */
+export declare const getStoreLayerVectorStrategy: (mapId: string, layerPath: string) => VectorStrategy | undefined;
+/** Hook that returns the vector loading strategy for a specific layer. */
+export declare const useStoreLayerVectorStrategy: (layerPath: string) => VectorStrategy | undefined;
 /**
  * Gets the data projection code for a specific layer.
  *
@@ -795,6 +845,15 @@ export declare const setStoreLayerDisplayState: (mapId: string, displayState: Ty
  * @param layerStatus - The new layer status
  */
 export declare const setStoreLayerStatus: (mapId: string, layerPath: string, layerStatus: TypeLayerStatus) => void;
+/**
+ * Updates the matching count and its origin after a layer loading state change.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param totalRecordsCount - The matching count, or undefined when unavailable
+ * @param totalRecordsCountSource - How the count was obtained, or undefined when unavailable
+ */
+export declare const setStoreLayerTotalRecordsCount: (mapId: string, layerPath: string, totalRecordsCount: number | undefined, totalRecordsCountSource: TypeLegendLayer["totalRecordsCountSource"]) => void;
 /**
  * Sets the layer name of the layer and its children in the store.
  *

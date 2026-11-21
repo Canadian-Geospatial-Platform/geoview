@@ -90,7 +90,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features
      */
-    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, _sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the creation of the GV Layer.
      *
@@ -207,11 +207,14 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param outfields - Optional list of fields to return (propertyName parameter)
      * @param filter - Optional OGC XML filter string
      * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
+     * @param onPage - Optional loading observer; undefined starts a new format attempt
      * @returns A promise that resolves with all parsed features and their source projection
      * @throws {ResponseError} When GetFeature requests remain too long and no POST fallback succeeds
      * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
+     * @throws {LayerTooManyFeatures} When an all-features request exceeds the feature limit
+     * @throws {LayerTooManyFeaturesInBBOX} When a BBOX request exceeds the feature limit
      */
-    static fetchWithFormatFallback(layerConfig: OgcWfsLayerEntryConfig, queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, outfields: TypeOutfields[] | undefined, bboxExtent: string | undefined, filter: string | undefined, srsName: string | undefined): Promise<TypeWFSFeaturePage>;
+    static fetchWithFormatFallback(layerConfig: OgcWfsLayerEntryConfig, queryFnJSON: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, queryFnFallback: (url: string, requestInit?: RequestInit) => Promise<TypeWFSFeaturePage>, outfields: TypeOutfields[] | undefined, bboxExtent: string | undefined, filter: string | undefined, srsName: string | undefined, onPage?: (page: TypeWFSFeaturePage | undefined) => void): Promise<TypeWFSFeaturePage>;
     /**
      * Reads WFS result paging counts from a JSON or XML feature collection.
      *
