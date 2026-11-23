@@ -2105,20 +2105,35 @@ export class MapViewer {
     // If map isn't static
     this.registerMapPointerHandlers(map);
 
-    // Register mouse interaction events. Hover-driven focus is disabled while keyboard navigation is active.
+    // Register mouse interaction events. Hover focus lets the OpenLayers keyboard pan/zoom work without a click; wheel zoom and
+    // drag pan do not need it (onFocusOnly: false). Hover-driven focus is disabled while keyboard navigation is active.
+    // Boundary events also fire when content mounts, unmounts or scrolls under a stationary pointer, so while keyboard-placed
+    // focus (:focus-visible) is held, hover focus waits for genuine pointer movement instead of taking focus on mouseenter.
     const mapHTMLElement = map.getTargetElement();
+    let isHoverFocusPending = false;
+    const focusOnHover = (): void => {
+      isHoverFocusPending = false;
+
+      // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
+      // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
+      if (!getStoreUIActiveTrapGeoView(this.mapId)) mapHTMLElement.focus({ preventScroll: true });
+    };
+
     mapHTMLElement.addEventListener('mouseenter', () => {
-      if (!getStoreUIActiveTrapGeoView(this.mapId)) {
-        // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
-        // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
-        mapHTMLElement.focus({ preventScroll: true });
-      }
+      isHoverFocusPending = true;
+      if (!DomHelper.getActiveElement()?.matches(':focus-visible')) focusOnHover();
 
       // Emit to the outside
       this.#emitMapMouseEnter({});
     });
 
+    mapHTMLElement.addEventListener('mousemove', (event: MouseEvent) => {
+      if (!isHoverFocusPending || (event.movementX === 0 && event.movementY === 0)) return;
+      focusOnHover();
+    });
+
     mapHTMLElement.addEventListener('mouseleave', () => {
+      isHoverFocusPending = false;
       if (!getStoreUIActiveTrapGeoView(this.mapId)) mapHTMLElement.blur();
 
       // Emit to the outside

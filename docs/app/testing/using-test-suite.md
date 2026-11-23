@@ -35,8 +35,13 @@ Add the test-suite package to your GeoView map configuration:
 | `suite-utilities`  | Utility function tests (core, date, geo, projection) |
 | `suite-swiper`     | Swiper plugin tests (requires swiper)                |
 | `suite-time-slider` | Time Slider plugin tests (requires time-slider)       |
+| `suite-a11y-ux`    | Keyboard accessibility and cross-panel UX (requires Details in the app bar) |
 
 ### HTML Configuration
+
+The test page's **6 - A11Y and UX** section uses a dedicated map with the local polygon fixture.
+Keep the browser page in the foreground when running keyboard-focus tests.
+Run Group 6 on its own with the page in front, the pointer off the maps, and a real click on Launch to cover navBar fullscreen.
 
 Tests are triggered from HTML pages. Each map div specifies which suites to run:
 

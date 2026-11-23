@@ -15,6 +15,8 @@ import {
   clearStoreUIFocusRestoreRequest,
   disableStoreUIFocusTrap,
   enableStoreUIFocusTrap,
+  getStoreUIFocusItem,
+  getStoreUIActiveAppBarTab,
   hideStoreUITabButton,
   removeStoreUIAppBarPanelId,
   removeStoreUIFooterTab,
@@ -22,6 +24,7 @@ import {
   setStoreUIActiveFooterBarTab,
   setStoreUIActiveTrapGeoView,
   setStoreUIFooterBarIsOpen,
+  setStoreUIFocusEscapeReturn,
   setStoreUIFooterPanelResizeValue,
   setStoreUIMapInfoExpanded,
   showStoreUITabButton,
@@ -112,7 +115,7 @@ export class UIController extends AbstractMapViewerController {
   /** Whether the view was changed (user or programmatic) while in fullscreen, sticky until exit. */
   #fullscreenViewChanged = false;
 
-  /** Pending map-focus restoration after the browser finishes leaving fullscreen. */
+  /** Pending focus restoration after the browser finishes leaving fullscreen. */
   #fullscreenFocusFrame?: number;
 
   /** The bounded reference to the browser fullscreen change handler. */
@@ -294,6 +297,8 @@ export class UIController extends AbstractMapViewerController {
    * @param isFocusTrapped - Whether focus should be trapped in the panel
    */
   setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {
+    if (!isOpen || tab !== getStoreUIActiveAppBarTab(this.getMapId()).tabId) this.setFocusEscapeReturn(undefined);
+
     // Save in the store
     setStoreUIActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
   }
@@ -318,6 +323,29 @@ export class UIController extends AbstractMapViewerController {
   bumpNavBarButtonPanelVersion(): void {
     // Save in the store
     bumpStoreUINavBarButtonPanelVersion(this.getMapId());
+  }
+
+  /**
+   * Sets or cancels the scoped Escape return target on the existing focus item.
+   *
+   * @param escapeReturn - The scoped return target, or undefined to cancel it
+   */
+  setFocusEscapeReturn(escapeReturn: FocusItemProps['escapeReturn']): void {
+    setStoreUIFocusEscapeReturn(this.getMapId(), escapeReturn);
+  }
+
+  /**
+   * Releases focus ownership and requests restoration when the originating container closes via Escape.
+   *
+   * @param containerId - The container being dismissed
+   * @returns Whether this dismissal consumed a scoped Escape return target
+   */
+  restoreFocusOnEscape(containerId: string): boolean {
+    const { escapeReturn } = getStoreUIFocusItem(this.getMapId());
+    if (escapeReturn?.containerId !== containerId) return false;
+    this.setFocusEscapeReturn(undefined);
+    disableStoreUIFocusTrap(this.getMapId(), escapeReturn.elementId, true);
+    return true;
   }
 
   /**
@@ -471,6 +499,14 @@ export class UIController extends AbstractMapViewerController {
   closeMapPopovers(): void {
     this.disableFocusTrap('no-focus');
     closeStoreUIMapPopovers(this.getMapId());
+  }
+
+  /**
+   * Closes app-bar panels and map popovers without restoring their triggers or changing footer panels.
+   */
+  closeMapControls(): void {
+    this.setActiveAppBarTab(undefined, false, false);
+    this.closeMapPopovers();
   }
 
   /**
@@ -829,15 +865,23 @@ export class UIController extends AbstractMapViewerController {
     setStoreAppFullScreenActive(this.getMapId(), false);
 
     const mapId = this.getMapId();
-    if (this.#hasActiveKeyboardTool()) {
-      // The browser can restore focus to the fullscreen caller after fullscreenchange.
-      this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
-        this.#fullscreenFocusFrame = undefined;
-        if (!getFullscreenElement() && this.#hasActiveKeyboardTool()) {
-          DomHelper.getMapTargetElement(mapId)?.focus({ preventScroll: true });
-        }
-      });
-    }
+
+    // Let fullscreen-only controls unmount and browser focus restoration finish before checking for lost focus.
+    this.#fullscreenFocusFrame = requestAnimationFrame((): void => {
+      this.#fullscreenFocusFrame = undefined;
+      if (getFullscreenElement()) return;
+
+      if (this.#hasActiveKeyboardTool()) {
+        DomHelper.getMapTargetElement(mapId)?.focus({ preventScroll: true });
+        return;
+      }
+
+      const focusedElement = DomHelper.getActiveElement();
+      const hasLostFocus = !focusedElement?.isConnected || focusedElement === focusedElement.ownerDocument.body;
+      if (hasLostFocus) {
+        DomHelper.getGVElementById(mapId, 'button-fullscreen')?.focus({ preventScroll: true });
+      }
+    });
   }
 
   /**
@@ -855,7 +899,7 @@ export class UIController extends AbstractMapViewerController {
   }
 
   /**
-   * Cancels a pending map-focus restoration scheduled after leaving fullscreen.
+   * Cancels a pending focus restoration scheduled after leaving fullscreen.
    */
   #cancelFullscreenFocusRestore(): void {
     if (this.#fullscreenFocusFrame !== undefined) cancelAnimationFrame(this.#fullscreenFocusFrame);

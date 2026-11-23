@@ -46,17 +46,17 @@ If you are building an application with GeoView's API (`cgpv.api`), test your in
 
 ### Step 4 — Test Keyboard Navigation (WCAG) Mode
 
-In keyboard navigation (WCAG) mode, mouse movement or placement can cause unexpected behaviour that is difficult to reproduce. For example:
+Use **Settings → Keyboard navigation** to confirm the mode is enabled. Mouse movement does not disable
+it, and you do not need to move the pointer away before entering the viewer or fullscreen.
 
-- Some buttons may become unresponsive.
-- Pressing certain buttons may not trigger the expected action.
-- Focus traps, which intentionally restrict where you can tab to, may not function as intended.
+- A deliberate click may move focus outside a non-modal panel; keyboard input continues from that control.
+- After a crosshair query, Esc returns to the crosshair only while its Details return remains valid.
+  Leaving Details, clicking, or switching windows cancels that return; mouse movement alone does not.
+- If focus is inside the feature sub-panel, Esc closes that level before the main Details panel.
 
-To avoid these issues:
-
-- Before tabbing into the viewer to enter WCAG mode, move your mouse away from the browser window.
-- Avoid moving your mouse after entering WCAG mode.
-- Before entering the viewer's fullscreen mode, move your mouse away from where the viewer will appear, so it doesn't overlap with the mouse as the viewer expands to fill the screen. Placing the mouse in one of your display's corners should help avoid any issues.
+See [keyboard navigation and panel focus](../accessibility.md#focus-traps-for-enhanced-navigation)
+for the expected shortcuts and dismissal behavior. Report unexpected focus movement rather than
+working around it by keeping the mouse outside the viewer.
 
 ### Step 5 — Contact the GeoView Team
 

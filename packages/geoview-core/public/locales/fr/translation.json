@@ -463,7 +463,8 @@
     "skipToFooter": "Aller au bouton Supprimer tout",
     "focusdialog": {
       "title": "Navigation clavier",
-      "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "main": "<span>Si activé, le focus clavier reste dans cette carte. Pour quitter, appuyez sur <strong>Ctrl+Q</strong> ou utilisez Paramètres.</span>",
+      "mainStatic": "<span>Si activé, le focus clavier reste dans cette carte. Pour quitter, appuyez sur <strong>Ctrl+Q</strong>.</span>",
       "button": {
         "enable": "Activer",
         "skip": "Sauter"

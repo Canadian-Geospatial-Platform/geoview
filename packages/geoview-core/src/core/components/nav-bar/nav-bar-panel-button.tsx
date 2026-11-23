@@ -17,6 +17,7 @@ import type { SxStyles } from '@/ui/style/types';
 
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { logger } from '@/core/utils/logger';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { translateTooltip } from '@/core/utils/utilities';
@@ -92,7 +93,7 @@ export default function NavbarPanelButton({
   const previousOpen = useRef(open);
   const previousOwnerOpen = useRef(open);
   const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
-  const focusTrapId = `${mapId}-${buttonPanel.button.id}-navbar-focus-trap`;
+  const focusTrapId = DomHelper.buildGVElementId(mapId, `${buttonPanel.button.id}-navbar-focus-trap`);
 
   /**
    * Synchronizes externally requested panel visibility.

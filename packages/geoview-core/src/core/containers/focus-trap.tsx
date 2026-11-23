@@ -21,6 +21,8 @@ import { useShellContainer } from './shell-container-context';
 interface FocusTrapProps {
   /** The map identifier. */
   mapId: string;
+  /** Whether the viewer supports dynamic interactions and Settings. */
+  isDynamic: boolean;
   /** Registers the coordinated keyboard-navigation mode lifecycle with the viewer shell. */
   registerModeAction: (action: (active: boolean) => void) => () => void;
 }
@@ -39,7 +41,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   logger.logTraceRender('containers/focus-trap/focus-trap');
 
   // Read from props
-  const { mapId, registerModeAction } = props;
+  const { mapId, isDynamic, registerModeAction } = props;
 
   // Hooks
   const { t } = useTranslation<string>();
@@ -101,7 +103,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     const handleTabNavigation = (evt: KeyboardEvent): void => {
       // Only intercept Tab key
-      if (evt.key !== 'Tab' || activeTrapGeoView || hasBeenPromptedRef.current) {
+      if (evt.key !== 'Tab' || activeTrapGeoView || hasBeenPromptedRef.current || DomHelper.hasOpenModal(mapId)) {
         return;
       }
 
@@ -172,9 +174,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * Schedules a focus request after the entry dialog updates, unless focus has moved elsewhere.
    *
    * @param getTarget - Resolves the map-scoped destination after rendering
+   * @param preventScroll - Whether to keep the page from scrolling the destination into view
    */
   const requestFocus = useCallback(
-    (getTarget: () => HTMLElement | undefined): void => {
+    (getTarget: () => HTMLElement | undefined, preventScroll: boolean): void => {
       focusJobRef.current?.cancel();
       const focusedElement = DomHelper.getActiveElement();
       const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-root');
@@ -193,7 +196,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           ) {
             return;
           }
-          getTarget()?.focus({ preventScroll: true, focusVisible: true });
+          getTarget()?.focus({ preventScroll, focusVisible: true });
         })
         .catch((error) => {
           logger.logError('FocusTrapDialog focus delay rejected unexpectedly:', error);
@@ -217,6 +220,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   const handleExit = useCallback(
     (evt: KeyboardEvent): void => {
+      if (DomHelper.hasOpenModal(mapId)) return;
+
       if (mapTargetElement && !ARROW_KEY_CODES.includes(evt.code)) mapTargetElement.style.border = 'unset';
 
       if (evt.code === 'KeyQ' && evt.ctrlKey) {
@@ -225,7 +230,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         exitFocus();
       }
     },
-    [exitFocus, mapTargetElement]
+    [exitFocus, mapId, mapTargetElement]
   );
 
   /**
@@ -255,70 +260,55 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [activeTrapGeoView, gvRootElement, handleExit, handleScrolling, registerModeAction, setKeyboardNavigationMode]);
 
   /**
-   * Activates keyboard navigation and focuses the main-content skip link.
+   * Activates keyboard navigation and focuses the dynamic map's skip link or the static viewer's shell.
    */
   const handleEnable = useCallback((): void => {
     setOpen(false);
     setKeyboardNavigationMode(true);
-    requestFocus(() => DomHelper.getWCAGLinkToMap(mapId));
-  }, [mapId, requestFocus, setKeyboardNavigationMode]);
+    // The static shell can be taller than the viewport, where native focus scrolling would jump the page.
+    requestFocus(() => (isDynamic ? DomHelper.getWCAGLinkToMap(mapId) : DomHelper.getShellElement(mapId)), !isDynamic);
+  }, [isDynamic, mapId, requestFocus, setKeyboardNavigationMode]);
 
   /**
    * Closes the entry prompt and focuses the skip link selected by the user.
    */
   const handleSkip = useCallback((): void => {
     setOpen(false);
-    requestFocus(() => DomHelper.getGVElementById(mapId, navigationLinkRef.current));
+    requestFocus(() => DomHelper.getGVElementById(mapId, navigationLinkRef.current), false);
   }, [mapId, requestFocus]);
 
   /**
    * Manages skip top and bottom link navigation.
    */
-  const manageLinks = useCallback((event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
-    // If not Tab, skip to the right link (handle the ref of the link)
-    if (!(event instanceof KeyboardEvent) || event.key !== 'Tab') {
-      return;
-    }
+  const manageLinks = useCallback(
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
+      // If not Tab, skip to the right link (handle the ref of the link)
+      if (!(event instanceof KeyboardEvent) || event.key !== 'Tab' || DomHelper.hasOpenModal(mapId)) {
+        return;
+      }
 
-    // If Tab from topLink or shift+Tab from bottomLink, focus the map element
-    const targetId = (event.target as HTMLElement).id;
-    let linkId = '';
-    if (targetId.endsWith('-wcag-toplink')) linkId = 'toplink';
-    else if (targetId.endsWith('-wcag-bottomlink')) linkId = 'bottomlink';
-    if (
-      (event.code === 'Tab' && !event.shiftKey && linkId === 'toplink') ||
-      (event.code === 'Tab' && event.shiftKey && linkId === 'bottomlink')
-    ) {
-      // prevent the event to tab to inner map
-      event.preventDefault();
-      event.stopPropagation();
-      navigationLinkRef.current = linkId === 'toplink' ? 'bottomlink' : 'toplink';
+      // If Tab from topLink or shift+Tab from bottomLink, focus the map element
+      const targetId = (event.target as HTMLElement).id;
+      let linkId = '';
+      if (targetId.endsWith('-wcag-toplink')) linkId = 'toplink';
+      else if (targetId.endsWith('-wcag-bottomlink')) linkId = 'bottomlink';
+      if (
+        (event.code === 'Tab' && !event.shiftKey && linkId === 'toplink') ||
+        (event.code === 'Tab' && event.shiftKey && linkId === 'bottomlink')
+      ) {
+        // prevent the event to tab to inner map
+        event.preventDefault();
+        event.stopPropagation();
+        navigationLinkRef.current = linkId === 'toplink' ? 'wcag-bottomlink' : 'wcag-toplink';
 
-      setOpen(true);
-      // Show the entry prompt at the viewer's keyboard-navigation boundary.
-    }
-  }, []);
+        setOpen(true);
+        // Show the entry prompt at the viewer's keyboard-navigation boundary.
+      }
+    },
+    [mapId]
+  );
   useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getWCAGBottomLink(mapId));
   useEventListener<HTMLElement>('keydown', manageLinks, DomHelper.getWCAGTopLink(mapId));
-
-  /**
-   * Dismisses the inactive entry prompt after real pointer movement outside the dialog.
-   */
-  useEffect(() => {
-    logger.logTraceUseEffect('FOCUS-TRAP - dismiss entry prompt on pointer movement', open, activeTrapGeoView);
-    if (!open || activeTrapGeoView) return undefined;
-
-    const handleMouseMove = (event: MouseEvent): void => {
-      if (event.movementX === 0 && event.movementY === 0) return;
-      const promptElement = DomHelper.getGVElementById(mapId, 'wcag-dialog-title')?.closest('.MuiDialog-root');
-      if (event.target instanceof Node && promptElement?.contains(event.target)) return;
-      setOpen(false);
-      focusJobRef.current?.cancel();
-    };
-
-    gvRootElement.addEventListener('mousemove', handleMouseMove);
-    return (): void => gvRootElement.removeEventListener('mousemove', handleMouseMove);
-  }, [activeTrapGeoView, gvRootElement, mapId, open]);
 
   /**
    * Focuses the enable button when the modal opens.
@@ -334,7 +324,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         const currentFocus = DomHelper.getActiveElement();
         if (
           result === 'timeout' &&
-          (currentFocus === initialFocus || currentFocus?.tagName === 'BODY' || currentFocus?.id === `${mapId}-enable-focus`)
+          (currentFocus === initialFocus ||
+            currentFocus?.tagName === 'BODY' ||
+            currentFocus?.id === DomHelper.buildGVElementId(mapId, 'enable-focus'))
         ) {
           DomHelper.getGVElementById(mapId, 'enable-focus')?.focus();
         }
@@ -379,12 +371,15 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       aria-labelledby={`${mapId}-wcag-dialog-title`}
       aria-describedby={`${mapId}-wcag-dialog-description`}
       fullScreen={fullScreen}
+      width={fullScreen ? '100%' : '32rem'}
       disableRestoreFocus
       sx={memoSxClasses.trap}
       titleId={`${mapId}-wcag-dialog-title`}
       title={t('keyboardnav.focusdialog.title')}
       contentTextId={`${mapId}-wcag-dialog-description`}
-      contentModal={<UseHtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
+      contentModal={
+        <UseHtmlToReact htmlContent={t(isDynamic ? 'keyboardnav.focusdialog.main' : 'keyboardnav.focusdialog.mainStatic')} omitWrappers />
+      }
       actions={
         <>
           <Button id={`${mapId}-enable-focus`} autoFocus onClick={handleEnable} type="text" sx={memoSxClasses.modalButton}>

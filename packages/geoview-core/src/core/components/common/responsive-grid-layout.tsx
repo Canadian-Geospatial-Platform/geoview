@@ -55,6 +55,10 @@ interface ResponsiveGridLayoutProps {
   containerType: TypeContainerBox;
   titleFullscreen: string;
   toggleMode?: boolean;
+  /** Allows the owning panel to move focus outside the right sub-panel. */
+  disableEnforceFocus?: boolean;
+  /** Allows automatically opened content to take focus without affecting explicit user navigation. */
+  focusOnEntry?: boolean;
 }
 
 /** Methods exposed by the ResponsiveGridLayout component via ref. */
@@ -104,6 +108,8 @@ const ResponsiveGridLayout = forwardRef(
       containerType,
       titleFullscreen,
       toggleMode = false,
+      disableEnforceFocus = false,
+      focusOnEntry = true,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
   ): JSX.Element => {
@@ -126,6 +132,10 @@ const ResponsiveGridLayout = forwardRef(
     const closeBtnRef = useRef<HTMLButtonElement>(null);
     /** Tracks whether the guide was auto-opened (vs explicitly toggled by user). */
     const wasAutoOpenedRef = useRef(false);
+
+    /** Ownership changes update focus permission without acting as another panel opening. */
+    const focusOnEntryRef = useRef(focusOnEntry);
+    focusOnEntryRef.current = focusOnEntry;
 
     // Store
     const mapId = useStoreGeoViewMapId();
@@ -330,10 +340,12 @@ const ResponsiveGridLayout = forwardRef(
       // Log
       logger.logTraceUseEffect('LAYOUT - focus on close button when guide is open in WCAG');
 
-      if (!isGuideOpen) return undefined;
+      if (!isGuideOpen || (!focusOnEntryRef.current && wasAutoOpenedRef.current)) return undefined;
 
       // Use RAF for next frame; cancel on cleanup so an unmounted map root is never queried
       const frame = requestAnimationFrame(() => {
+        if (!focusOnEntryRef.current && wasAutoOpenedRef.current) return;
+
         // Focus on the close button for the container type
         DomHelper.getGuideCloseButton(mapId, containerType)?.focus();
       });
@@ -365,11 +377,15 @@ const ResponsiveGridLayout = forwardRef(
      */
     useEffect(() => {
       logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - focus close button when right panel visible', isRightPanelVisible, hasContent);
-      if (isRightPanelVisible && hasContent && !isGuideOpen && !isCrosshairsActive && closeBtnRef.current) {
-        requestAnimationFrame(() => {
-          closeBtnRef.current?.focus();
+      if (focusOnEntryRef.current && isRightPanelVisible && hasContent && !isGuideOpen && !isCrosshairsActive && closeBtnRef.current) {
+        const frame = requestAnimationFrame(() => {
+          if (focusOnEntryRef.current) closeBtnRef.current?.focus();
         });
+        return (): void => {
+          cancelAnimationFrame(frame);
+        };
       }
+      return undefined;
     }, [isRightPanelVisible, hasContent, isGuideOpen, isCrosshairsActive]);
 
     /**
@@ -678,7 +694,7 @@ const ResponsiveGridLayout = forwardRef(
       // Wrap the content box in FocusTrap - control activation via 'open' prop
       // disableAutoFocus is used to prevent modals fighting for focus when opened
       const wrappedMainContent = (
-        <FocusTrap open={shouldTrapFocus} disableAutoFocus>
+        <FocusTrap open={shouldTrapFocus} disableAutoFocus disableEnforceFocus={disableEnforceFocus}>
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused

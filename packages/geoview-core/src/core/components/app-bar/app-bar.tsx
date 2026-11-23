@@ -300,10 +300,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
         // eslint-disable-next-line no-restricted-syntax
         const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
         if (isLightboxOpen) return;
+
+        if (uiController.restoreFocusOnEscape(DomHelper.buildAppBarPanelId(mapId, buttonId))) {
+          uiController.setActiveAppBarTab(undefined, false, false);
+          return;
+        }
       }
       handleEscapeKey(event.key, () => handleGeneralCloseClicked(buttonId));
     },
-    [handleGeneralCloseClicked]
+    [handleGeneralCloseClicked, mapId, uiController]
   );
 
   /**

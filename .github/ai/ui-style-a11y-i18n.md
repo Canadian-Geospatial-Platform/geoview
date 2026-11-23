@@ -118,6 +118,7 @@ selectors, run `npm run lint` from `packages/` and check both flagged literals a
 Size selectors follow value containers (responsive objects/arrays, conditional branches and JSX
 expressions), not helper-call arguments, lookup keys or condition tests. Preserve both positive and
 negative cases when changing these selectors.
+
 ## Shell scrolling
 
 The behavioural contract (offset, oversized alignment, map-info buttons) lives in the
@@ -170,13 +171,32 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
 - The `.geoview-map` wrapper contains the shell and focusable controls; `#{mapId}-mapTargetElement`
   is the OpenLayers canvas container. [Map](../../packages/geoview-core/src/core/components/map/map.tsx)
   assigns `tabIndex=0` for dynamic maps and `-1` for static maps. Its Ctrl/Cmd+M handler requires
-  focus inside that viewer and non-static interaction; it activates rather than toggles the crosshair.
-  Flush map-control popover closure (navbar, About/Version, Notifications) before focusing the map
-  so MUI focus restoration cannot reclaim focus; clear the registered focus item without restoring caller focus.
+  focus inside that viewer; it activates rather than toggles the crosshair. Once focus is confirmed inside
+  the viewer, call `preventDefault()` before any branch (modal, static, or acting): macOS Chrome maps
+  Ctrl+M to Return, which otherwise activates the focused control, such as a dialog's close button.
+  Only dynamic maps act on the shortcut.
+  Use `DomHelper.hasOpenModal` before redirecting Tab to the entry links, opening the entry prompt,
+  processing Ctrl+Q, forwarding map keyboard events, or handling separate draw/measure shortcuts.
+  This checks the viewer root for `[role="dialog"][aria-modal="true"]` even if focus escaped and
+  still matches during exit transitions. Share renders outside the viewer root; focus in Share
+  does not reach handlers scoped to the viewer. Fullscreen Dialog keeps MUI focus enforcement;
+  its transition callback focuses Close on entry and restores the trigger on exit. Read-only Legend
+  also excludes its class toggles and image buttons from tab order through `showControls`: MUI's
+  backward wrap does not filter out inert descendants on its own.
+  Flush app-bar panel and map-popover closure (navbar, About/Version, Notifications) before focusing
+  the map so MUI focus restoration cannot reclaim focus; clear the registered focus item without
+  restoring caller focus. Leave footer panels and remembered Details sub-panel state unchanged.
   Derive panel openness from the close-request version during render; closing through a passive
   effect schedules a second render whose focus-trap cleanup can run after map focus. New map-control
   popovers use the `useMapPopover` hook, which owns that derivation, rather than re-implementing it.
   Keep the animated Popper wrapper at module scope: creating it during render remounts its focus trap.
+  Popper owns guarded opener restoration when its focus-managed content closes: restore only if focus
+  remains inside or fell to the document body on unmount. Do not re-enable unconditional MUI restoration,
+  which can override a caller's explicit map/panel destination. Keep restoration in the open-lifetime
+  effect (`[open]`), separate from selector/transition-dependent entry focus, and preserve the original
+  opener across those updates. Resize relies on this shared behavior for Close; its slider Enter handler
+  separately restores after layout changes. Native browser fullscreen Escape is not a synthetic popup-close
+  test path; the fullscreen regression covers Close and click-away (#3694).
   Crosshair coordinate checks must measure the SVG artwork center, not just its element box;
   off-center artwork can leave a visible offset even when viewport coordinates are correct.
   Compare tolerances in the unit being measured: layout snaps to 1/64 px, which is meters at low zoom,
@@ -197,8 +217,9 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and keep its viewer-level Tab boundary.
   The dynamic-map Settings switch and entry prompt must invoke the same mode lifecycle through the
   Shell callback; never add a config flag or a separate mode state. Settings stays mounted in the app bar
-  below Notifications on dynamic maps only. After Enable closes the prompt, focus
-  `DomHelper.getMainMap(mapId)`: the main-content skip link for dynamic maps, or the static map container.
+  below Notifications on dynamic maps only. After Enable closes the prompt, explicitly focus
+  `DomHelper.getWCAGLinkToMap(mapId)` for dynamic maps or `DomHelper.getShellElement(mapId)` for static maps.
+  Static maps omit the inner skip link; the shell has `tabIndex=-1` and accepts programmatic focus without FocusTrap autofocus.
   Do not focus the OpenLayers target or activate the crosshair on entry; the skip link owns that action.
   The inactive entry prompt may be dismissed by real pointer movement outside the prompt, but movement
   must not disable an already-enabled mode. Ignore zero movement and cancel any pending focus job when
@@ -212,8 +233,10 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   click-away or supersede focus after a genuine modal opens. Non-modal shell, panel, and Popper traps
   may disable enforcement while retaining their Tab boundaries; never relax containment for actual
   modal dialogs. Remove `aria-modal` from non-modal panels.
-  App-bar panel Escape dismissal must use the same close handler as the header Close button:
-  Details returns focus to the map while the crosshair is active, not to the Details toolbar button.
+  App-bar Escape first calls `UIController.restoreFocusOnEscape(containerId)`; a matching
+  `focusItem.escapeReturn` is consumed into the existing one-shot focus restoration request with
+  `reactivateCrosshair`. Otherwise it uses the ordinary header Close handler. Close itself does not
+  consume the crosshair return.
   Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
   a newer modal or panel.
   About, Notifications, and navbar popovers read the current store owner in their coordination effects.
@@ -224,6 +247,23 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   in a passive effect.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
   also checks toggle/mobile mode, content, and right-panel visibility.
+- [DetailsPanel](../../packages/geoview-core/src/core/components/details/details-panel.tsx) records
+  `focusItem.escapeReturn` (app-bar Details container and map target IDs from `DomHelper`) before
+  showing its right panel and focusing the main Close button for a crosshair query. Keep this on
+  the existing focus item, not a parallel query-origin flag. Shell preserves the link through internal
+  focus moves and keyboard-generated clicks, including sub-panel Escape back to the layer item;
+  document focus leaving the container, pointerdown, a real mouse click, or window blur cancels it.
+  Mouse movement does not. Only main-panel Escape consumes it.
+  Pass `focusOnEntry` through Layout to suppress automatic feature/guide focus during this handoff:
+  map blur deactivates the crosshair and otherwise enables a competing sub-panel animation-frame focus.
+  ResponsiveGridLayout reads the latest permission through a ref, not an opening-effect dependency;
+  re-enabling permission when the link clears must not steal focus back. Cancel pending autofocus
+  frames on cleanup and preserve explicit layer/Guide navigation.
+  Enable `disableEnforceFocus` only for app-bar Details: main Close is outside the inner feature trap,
+  and leaving Details must stay effective rather than being pulled back. Tab/Shift+Tab still wrap;
+  other ResponsiveGridLayout consumers keep default enforcement. Do not add `disableRestoreFocus`.
+  Do not reset the right panel on outer dismissal: reopening via app-bar, Close, Esc, or Ctrl+M must
+  retain its existing sub-panel/feature selection.
 - Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. It takes the
   remaining flex height below the panel controls. Preserve its keyboard focusability and vertical scroll
   containment (#3697).

@@ -30,6 +30,7 @@ import {
   useStoreAppHeight,
 } from '@/core/stores/states/app-state';
 import {
+  getStoreUIFocusItem,
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIFocusRestoreRequest,
@@ -158,13 +159,54 @@ export function Shell(props: ShellProps): JSX.Element {
     if (!focusRestoreRequest) return undefined;
 
     const requestId = requestAnimationFrame(() => {
-      DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId)?.focus({ focusVisible: true });
+      const target = DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId);
+      target?.focus({ focusVisible: true });
+      if (focusRestoreRequest.reactivateCrosshair && target && DomHelper.getActiveElement() === target) {
+        uiController.setCrosshairActive(true);
+      }
       uiController.completeFocusRestore(focusRestoreRequest.requestId);
     });
     return (): void => {
       cancelAnimationFrame(requestId);
     };
   }, [focusRestoreRequest, mapId, uiController]);
+
+  /**
+   * Cancels scoped Escape restoration when focus leaves its container or pointer input takes over.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SHELL - scoped Escape return', focusItem.escapeReturn, mapId);
+    if (!focusItem.escapeReturn) return undefined;
+
+    /** Keeps internal focus transitions, including a sub-panel returning to its parent, within the same scope. */
+    const handleFocusChange = (): void => {
+      const { escapeReturn } = getStoreUIFocusItem(mapId);
+      if (!escapeReturn) return;
+      const container = DomHelper.getGVElementByFullId(mapId, escapeReturn.containerId);
+      const activeElement = DomHelper.getActiveElement();
+      if (!activeElement || !container?.contains(activeElement)) uiController.setFocusEscapeReturn(undefined);
+    };
+
+    /** Cancels keyboard-origin restoration before pointer handlers can close or move focus within the panel. */
+    const handlePointerDown = (): void => uiController.setFocusEscapeReturn(undefined);
+
+    /** Handles mouse clicks while preserving keyboard-generated button clicks. */
+    const handleClick = (event: MouseEvent): void => {
+      if (event.detail > 0) uiController.setFocusEscapeReturn(undefined);
+    };
+
+    handleFocusChange();
+    document.addEventListener('focusin', handleFocusChange);
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('click', handleClick, true);
+    window.addEventListener('blur', handlePointerDown);
+    return (): void => {
+      document.removeEventListener('focusin', handleFocusChange);
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('click', handleClick, true);
+      window.removeEventListener('blur', handlePointerDown);
+    };
+  }, [focusItem.escapeReturn, mapId, uiController]);
 
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
@@ -618,7 +660,7 @@ export function Shell(props: ShellProps): JSX.Element {
               <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
             ))}
             {/* modal section start */}
-            <FocusTrapDialog mapId={mapViewer.mapId} registerModeAction={registerModeAction} />
+            <FocusTrapDialog mapId={mapViewer.mapId} isDynamic={interaction === 'dynamic'} registerModeAction={registerModeAction} />
             {mapLoaded && <ExportModal />}
             {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
             {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}
