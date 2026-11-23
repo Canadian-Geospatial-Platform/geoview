@@ -73,7 +73,7 @@ labels: ["testing", "release"]
 
 ## 04 — Basemap
 
-- [ ] [Basemap Selector](../docs/programming/release-testing/04-basemap.md#basemap-selector) (2 tests)
+- [ ] [Basemap Selector](../docs/programming/release-testing/04-basemap.md#basemap-selector) (3 tests)
 - [ ] [Labels & Shaded Relief](../docs/programming/release-testing/04-basemap.md#labels--shaded-relief) (5 tests)
 - [ ] [Basemap with Projection Switch](../docs/programming/release-testing/04-basemap.md#basemap-with-projection-switch) (1 test)
 - [ ] [useAsBasemap Layer Property](../docs/programming/release-testing/04-basemap.md#useasbasemap-layer-property) (1 test)

@@ -144,7 +144,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications                  | 25 min       | 60 (1/15/44)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation                        | 15 min       | 21 (2/7/12)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers                      | 15 min       | 25 (7/16/2)          |
-| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                               | 5 min        | 9 (0/6/3)            |
+| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                               | 5 min        | 10 (0/6/4)           |
 | 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer                             | 15 min       | 29 (0/9/20)          |
 | 6   | [06-overview-map.md](06-overview-map.md)                       | Overview map, hide on zoom, projection switch                         | 5 min        | 8 (5/0/3)            |
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen                              | 15 min       | 31 (0/12/19)         |

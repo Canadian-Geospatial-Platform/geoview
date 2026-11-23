@@ -38,7 +38,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
- * can be filtered by projection (currently only WM and LCC projections are listed,
+ * can be filtered by projection (currently only WM, LCC, and North Pole LAEA projections are listed,
  * in case other projections needed, they need to be added to the list).
  */
 export class BasemapApi {
@@ -267,9 +267,9 @@ export class BasemapApi {
    * @returns A promise that resolves when the overview map basemap has been created and set
    */
   async setOverviewMap(): Promise<void> {
-    // Only create overview map for supported projections (3857 and 3978)
+    // Only create overview map for supported projections (3857, 3978, 3573)
     const projectionCode = this.#mapViewer.getProjectionNumber();
-    if (projectionCode !== 3857 && projectionCode !== 3978 && projectionCode !== 3573) return;
+    if (!this.basemapsList[projectionCode]) return;
 
     try {
       // Create the Core Basemap

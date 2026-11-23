@@ -57,9 +57,9 @@ Default navbar (when `navBar` is omitted from config): `["zoom", "rotation", "fu
 
 > Detailed projection tests are in [02 — Map](02-map.md#projections) and [13 — Projection](13-projection.md).
 
-| Test              | Description                 | Steps                                                                              | Expected Result                                                | Auto |
-| ----------------- | --------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------- | ---- |
-| Projection button | Switches between LCC and WM | 1. On Map 1, verify the projection button appears<br>2. Click to switch projection | Projection switches between LCC (EPSG:3978) and WM (EPSG:3857) | C    |
+| Test              | Description                                  | Steps                                                                              | Expected Result                                                                             | Auto |
+| ----------------- | -------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---- |
+| Projection button | Switches between LCC, WM and North Pole LAEA | 1. On Map 1, verify the projection button appears<br>2. Click to switch projection | Projection switches between LCC (EPSG:3978), WM (EPSG:3857) and North Pole LAEA (EPSG:3573) | C    |
 
 ## Measurement Tool
 
