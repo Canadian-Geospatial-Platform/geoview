@@ -368,7 +368,8 @@ export default function Measurement(): JSX.Element {
       if (
         !DomHelper.getActiveElement() ||
         !DomHelper.getActiveElementWithinMap(mapId) ||
-        DomHelper.isActiveElementInputOrContentEditableElement()
+        DomHelper.isActiveElementInputOrContentEditableElement() ||
+        DomHelper.hasOpenModal(mapId)
       )
         return;
 

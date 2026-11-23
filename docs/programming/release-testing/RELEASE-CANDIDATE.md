@@ -296,7 +296,8 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
-- Added a persistent Settings button on dynamic maps with an EN/FR Keyboard navigation switch that controls the existing keyboard-navigation mode (#3694).
+- Added a persistent Settings button on dynamic maps with an EN/FR Keyboard navigation switch that controls the existing keyboard-navigation mode; mouse movement no longer turns the mode off (#3694).
+- Ctrl/Cmd+M closes app-bar panels and map popovers, preserves footer panels, and is ignored in fullscreen, legend fullscreen, lightbox, Export, data table and feature detail dialogs. Share remains outside the viewer's keyboard scope. Crosshair queries focus the main Details Close button, and Esc returns to the crosshair unless focus leaves Details or the user clicks or switches windows (#3694, PR #3751).
 - Added shared EN/FR on-map guidance for measurement, drawer geometries, and editing (mouse wording, or keyboard wording starting with Ctrl+M when keyboard navigation is on); measurement vertex undo via Ctrl+Z/Backspace; Enter/Space at the mouse pointer while measuring or drawing; corrected crosshair artwork/coordinate alignment; and improved Ctrl+M popover closure, Escape returning focus to the Measure/Toggle Drawing/Toggle editing button, and fullscreen-exit map focus. Measurement and drawer drawing/editing now exclude each other, and drawer mode transitions keep Details queries suppressed ([Canadian-Geospatial-Platform/geoview#3712](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3712), commit `9de43e4d9f`). This records implemented behavior, not completion of the issue's full WCAG/embedded/fullscreen validation.
 - Standardized border-radius values with named MUI theme shape tokens across core and plugins, replacing inconsistent radii and documenting/enforcing the shared token system (#3681)
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
@@ -367,6 +368,7 @@ _(Doc updates, demo cleanup, code organization)_
 
 _(Tests added, moved, removed, or reorganized)_
 
+- Expanded WCAG checks for Ctrl+M panel/popover closure, modal/overlay and dropdown guards (fullscreen, legend fullscreen, lightbox, Export, data table, feature detail and Share isolation), stable Details query focus, nested Esc, return cancellation, Tab wrapping, and remembered sub-panel selection; linked map13 coverage and synchronized EN/FR guidance (#3694, PR #3751). Added a map14 companion for unattended Group 6 regressions covering per-viewer prompt actions, Settings, shortcuts, and focus destinations. Kept native entry and wrapping in the manual checklist. The WCAG plan now has 92 rows (11 A / 0 C / 81 M), retaining the manual visual crosshair-centering check. The full manual plan has 965 rows (74 A / 169 C / 722 M).
 - Added `suite-layer-functions` coverage for public `LayerApi.setOrToggleLayerVisibility`, checking explicit values, no-argument toggles, return values, and resulting layer state.
 - Merged the two UI tests into the sequential `suite-map` flow and removed the separate Map 7 runner page.
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path.
@@ -436,10 +438,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 925   |
-| Automated (A) | 60     | 68    |
+| Total tests   | 901    | 965   |
+| Automated (A) | 60     | 74    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 690   |
+| Manual (M)    | 672    | 722   |
 
 ## Notes for Release Notes Author
 

@@ -38,6 +38,7 @@ interface CollapsibleContentProps {
 
 interface WMSLegendImageProps {
   imgSrc: string;
+  showControls: boolean;
   title?: string;
   initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   legendExpanded: boolean;
@@ -55,6 +56,7 @@ interface WMSLegendImageProps {
 const WMSLegendImage = memo(
   ({
     imgSrc,
+    showControls,
     initLightBox,
     legendExpanded,
     sxClasses,
@@ -84,6 +86,7 @@ const WMSLegendImage = memo(
           type="icon"
           sx={sxClasses.imageButton}
           id={buttonId}
+          tabIndex={showControls ? undefined : -1}
           onClick={handleClick}
           tooltip={t('general.enlargeImage')}
           tooltipPlacement="top"
@@ -158,7 +161,7 @@ export const CollapsibleContent = memo(
               ))}
             </List>
           )}
-          <ItemsList items={layerItems || []} layerPath={layerPath} />
+          <ItemsList items={layerItems || []} layerPath={layerPath} showControls={showControls} />
         </Collapse>
       );
     }
@@ -167,6 +170,7 @@ export const CollapsibleContent = memo(
       return (
         <WMSLegendImage
           imgSrc={layerIcons![0].iconImage!}
+          showControls={showControls}
           initLightBox={initLightBox}
           legendExpanded={!isCollapsed}
           sxClasses={memoSxClasses}

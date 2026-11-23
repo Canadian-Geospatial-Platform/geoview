@@ -41,6 +41,7 @@ import {
 } from '@/core/stores/states/ui-state';
 import { useMapPopover } from '@/core/components/common/hooks/use-map-popover';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
+import { DomHelper } from '@/core/utils/dom-helper';
 import { logger } from '@/core/utils/logger';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { getSxClasses } from './notifications-style';
@@ -321,7 +322,7 @@ const Notifications = memo((): JSX.Element => {
   const closeButtonId = `${mapId}-notification-close-button`;
   const bellButtonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`;
   const removeAllButtonId = `${mapId}-notification-remove-all-button`;
-  const focusTrapId = `${mapId}-notification-focus-trap`;
+  const focusTrapId = DomHelper.buildGVElementId(mapId, 'notification-focus-trap');
 
   // Animation
   const shakeAnimation = useShake();

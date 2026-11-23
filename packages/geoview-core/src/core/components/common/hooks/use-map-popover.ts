@@ -42,6 +42,7 @@ export function useMapPopover(): MapPopoverState {
    * Closes other popovers on the same map, then opens this one anchored to the given element.
    *
    * @param element - The element to anchor the popover to
+   * @returns The focus owner that was active before opening
    */
   const openAt = useCallback(
     (element: HTMLElement): FocusItemProps => {

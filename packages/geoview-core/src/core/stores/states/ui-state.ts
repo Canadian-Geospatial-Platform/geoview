@@ -87,8 +87,11 @@ export interface IUIState {
     /** Enables the focus trap on a specific UI element. */
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
 
+    /** Updates the current focus item's scoped Escape return target. */
+    setFocusEscapeReturn: (escapeReturn: FocusItemProps['escapeReturn']) => void;
+
     /** Disables the focus trap and publishes an optional focus restoration request. */
-    disableFocusTrap: (callbackElementId?: string) => void;
+    disableFocusTrap: (callbackElementId?: string, reactivateCrosshair?: boolean) => void;
 
     /** Clears a focus restoration request after the UI shell handles it. */
     clearFocusRestoreRequest: (requestId: number) => void;
@@ -213,8 +216,24 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...uiState,
-            focusItem: { ...uiFocus },
+            focusItem: { ...uiFocus, escapeReturn: uiState.focusItem.escapeReturn },
             focusRestoreRequest: undefined,
+          },
+        });
+      },
+
+      /**
+       * Updates the Escape return target without changing the active focus trap.
+       *
+       * @param escapeReturn - The scoped return target, or undefined to cancel it
+       */
+      setFocusEscapeReturn: (escapeReturn: FocusItemProps['escapeReturn']): void => {
+        const { uiState } = get();
+        if (uiState.focusItem.escapeReturn === escapeReturn) return;
+        set({
+          uiState: {
+            ...uiState,
+            focusItem: { ...uiState.focusItem, escapeReturn },
           },
         });
       },
@@ -223,17 +242,18 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        * Disables the focus trap and requests focus restoration from the UI shell.
        *
        * @param callBackElementId - The element ID to restore focus to
+       * @param reactivateCrosshair - Whether to reactivate the crosshair after restoring map focus
        */
-      disableFocusTrap: (callBackElementId?: string): void => {
+      disableFocusTrap: (callBackElementId?: string, reactivateCrosshair = false): void => {
         const { uiState } = get();
         const elementId = callBackElementId ?? uiState.focusItem.callbackElementId;
         const requestId = uiState.focusRestoreSequence + 1;
         set({
           uiState: {
             ...uiState,
-            focusItem: { activeElementId: false, callbackElementId: false },
+            focusItem: { activeElementId: false, callbackElementId: false, escapeReturn: uiState.focusItem.escapeReturn },
             focusRestoreSequence: requestId,
-            focusRestoreRequest: elementId && elementId !== 'no-focus' ? { requestId, elementId } : undefined,
+            focusRestoreRequest: elementId && elementId !== 'no-focus' ? { requestId, elementId, reactivateCrosshair } : undefined,
           },
         });
       },
@@ -693,15 +713,26 @@ export const enableStoreUIFocusTrap = (mapId: string, uiFocus: FocusItemProps): 
 };
 
 /**
+ * Updates the focus item's scoped Escape return target.
+ *
+ * @param mapId - The map identifier
+ * @param escapeReturn - The scoped return target, or undefined to cancel it
+ */
+export const setStoreUIFocusEscapeReturn = (mapId: string, escapeReturn: FocusItemProps['escapeReturn']): void => {
+  getStoreUIState(mapId).actions.setFocusEscapeReturn(escapeReturn);
+};
+
+/**
  * Disables the focus trap and restores focus to a callback element.
  *
  * Uses requestAnimationFrame to ensure DOM updates complete before focus restoration.
  *
  * @param mapId - The map identifier
  * @param callbackElementId - Optional element identifier to restore focus to. If 'no-focus' is passed, focus is not restored
+ * @param reactivateCrosshair - Whether to reactivate the crosshair after restoring map focus
  */
-export const disableStoreUIFocusTrap = (mapId: string, callbackElementId?: string): void => {
-  getStoreUIState(mapId).actions.disableFocusTrap(callbackElementId);
+export const disableStoreUIFocusTrap = (mapId: string, callbackElementId?: string, reactivateCrosshair = false): void => {
+  getStoreUIState(mapId).actions.disableFocusTrap(callbackElementId, reactivateCrosshair);
 };
 
 /** Clears a focus restoration request after the UI shell handles it.
@@ -847,6 +878,14 @@ export type FocusItemProps = {
 
   /** Whether acquiring this focus owner should move focus to its Exit control. */
   focusOnEntry?: boolean;
+
+  /** Escape restores this target only while focus remains within the originating container. */
+  escapeReturn?: {
+    /** The container whose Escape dismissal may restore focus. */
+    containerId: string;
+    /** The element to focus after that container closes. */
+    elementId: string;
+  };
 };
 
 /** A one-shot request for the UI shell to restore focus after a focus trap closes. */
@@ -856,6 +895,9 @@ export type TypeFocusRestoreRequest = {
 
   /** Map-scoped element id to receive focus. */
   elementId: string;
+
+  /** Whether this request should reactivate the crosshair after restoring map focus. */
+  reactivateCrosshair?: boolean;
 };
 
 /** Describes the active app-bar tab state. */

@@ -5,6 +5,7 @@ import type { Type as OLGeomType } from 'ol/geom/Geometry';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import { DomHelper } from '@/core/utils/dom-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -75,7 +76,7 @@ export class Draw extends Interaction {
 
     // Create and store the keyboard handler
     this.#keyboardHandler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && this.#olDraw.getActive()) {
+      if (event.key === 'Escape' && this.#olDraw.getActive() && !DomHelper.hasOpenModal(this.mapViewer.mapId)) {
         this.#olDraw.abortDrawing();
       }
     };

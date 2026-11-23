@@ -17,8 +17,15 @@ about/notification controls and attribution/scale.
 With focus inside a dynamic viewer, Ctrl+M (or Cmd+M on macOS) focuses the map element
 and **activates**, not toggles, the crosshair. Ctrl+Q exits keyboard navigation mode and
 deactivates the crosshair. Tabbing to another control within the viewer also deactivates it.
-Ctrl+M closes open navigation, About/Version, and Notifications popovers before transferring focus, so Enter acts on the map
-rather than reopening the previous panel.
+Ctrl+M closes open app-bar panels (including both levels of Details) and map popovers before transferring focus,
+without returning focus to their buttons. Footer panels are unaffected. While a modal dialog is open in the viewer,
+the keyboard-entry prompt and viewer shortcuts (including Ctrl+M, Ctrl+Q, and drawing and measurement shortcuts)
+are suspended. The viewer does not forward map keyboard events while its dialog is open. Tab and Shift+Tab stay
+in the dialog, and Escape still dismisses it. Close the dialog before
+pressing Ctrl+Q to exit keyboard navigation mode. Ctrl+M is also ignored while focus is in the Share dialog,
+which renders outside the viewer. With focus inside the viewer, Ctrl+M always cancels the
+browser's default action, including when it is ignored or the map is static, so macOS cannot turn Ctrl+M into Return
+and activate the focused control.
 Escape is not a general crosshair-exit shortcut; drawer editing can use it to cancel a grabbed transform.
 Drawing hints show mouse wording by default. With keyboard navigation on or the crosshair active they show keyboard wording, preceded by "Press Ctrl+M to focus the map." until the map is focused.
 While measuring or drawing, Enter/Space and Shift+Enter/Space also act at the mouse pointer. This is documented in the guide, not in the hints.
@@ -33,6 +40,7 @@ This remains true after panning, rotating, or expanding/collapsing the map info 
 Activating the keyboard crosshair replaces any stale mouse pointer position.
 
 On first tab into the viewer, users are prompted to enable keyboard navigation mode or skip the viewer. Enabling the mode activates a focus trap and, for dynamic maps, focuses the top "Skip to main content - Map" link. Activating that link focuses the map and activates crosshair-based interaction.
+For static maps, Enable focuses the viewer shell so Tab moves through its available controls without activating the crosshair.
 
 - Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
 - Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.
@@ -57,10 +65,20 @@ for developer guidance.
 In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a keyboard boundary within that panel. Only one inner panel owns that boundary at a time; opening Settings temporarily suspends the previous owner. Normal panels are non-modal, so deliberate pointer interaction outside them is permitted without changing the mode. Auto-opened panels may remain outside the active boundary.
 
 - This speeds up navigation by preventing focus from cycling through the entire map
-- Close the active panel or selection by pressing **Esc** — focus returns to the associated button
+- Close the innermost panel or selection containing focus by pressing **Esc** — focus normally returns to the associated button
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
-With the crosshair active, pressing Enter on a feature opens Details and focuses the panel-header Close button. Focus remains there as the feature attributes load. Pressing Enter on Close or pressing Esc closes Details and returns focus to the map for another crosshair query.
+With the crosshair active, pressing Enter opens app-bar Details with its feature sub-panel showing
+(or its guide when there are no features). Focus lands on the **main panel's Close button**, not the
+sub-panel's, and remains there as results load. One **Esc** closes Details, focuses the map, and
+reactivates the crosshair for another query.
+
+If focus moves into the feature sub-panel, the first Esc closes only that sub-panel and focuses its
+layer item in the Details layer list. A second Esc closes Details and returns to the crosshair.
+Tabbing, arrow-key navigation, switching results, and mouse movement preserve this return.
+Focus leaving Details, a mouse click (even inside Details), or the viewer window losing focus cancels it.
+Only Esc uses this return: the **Close** button and mouse-opened Details retain their usual behavior.
+Closing and reopening Details remembers its feature sub-panel and selection unless the sub-panel itself was closed.
 
 Sub-panels provide similar functionality.
 Scrollable right-panel content is also a keyboard stop; focus it and use the arrow keys to scroll
@@ -70,10 +88,12 @@ the panel independently of the page. Scrolling stays within the panel at its top
 
 The Esc key intelligently handles different scenarios:
 
-- Closes the active panel and restores focus to the triggering button, or
+- Closes the innermost active panel and restores focus to its associated control, with the crosshair-query exception above, or
 - Closes modal dialogs (lightbox, export, etc.) and restores focus to the triggering button
 
 Nested content, time-slider deferred closing, and browser fullscreen can affect which action happens first. See [intentional interaction patterns](#002-intentional-interaction-patterns) and [fullscreen constraints](#fullscreen-api-and-esc-key-priority).
+
+Closing a floating control panel returns focus to its opening button unless focus has already moved to another control.
 
 ### 2. For Screen Reader Users
 
@@ -561,6 +581,10 @@ GeoView is built to meet WCAG 2.1 Level AA. Some requirements are limited by the
 When the Fullscreen API is active, browsers commonly use Esc to exit fullscreen before the application receives the key. GeoView cannot override the browser's exit mechanism.
 
 **Implication for UI design:** If browser fullscreen and a panel are both open, users may need two Esc presses: one to exit browser fullscreen and another to close the panel. The exact behavior depends on the browser and operating system.
+
+When browser fullscreen ends, an active keyboard drawing or measurement keeps map focus. Otherwise, focus stays on a connected, visible control. If focus is lost, for example when Resize and its button disappear, focus returns to the navBar fullscreen button.
+
+In browser fullscreen, Tab can move from the viewer into the browser's own controls, which are hidden in fullscreen; keep pressing Tab to return to the page, or press Esc to exit fullscreen.
 
 **Note:** This constraint applies only to browser fullscreen via the Fullscreen API, not panel "fullscreen views".
 

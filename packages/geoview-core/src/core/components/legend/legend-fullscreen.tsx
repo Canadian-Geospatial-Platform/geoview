@@ -263,7 +263,6 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         buttonRef.current?.focus();
       }}
       container={shellContainer}
-      disableEnforceFocus={true}
     >
       <Box
         sx={memoSxClasses.fullscreenContainer}

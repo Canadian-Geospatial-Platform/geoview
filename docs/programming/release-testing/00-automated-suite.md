@@ -46,6 +46,7 @@ The checklist has one row for each suite execution. `suite-layer` appears twice 
 | `suite-geochart`                         | [ ] Pass |
 | `suite-swiper`                           | [ ] Pass |
 | `suite-time-slider`                      | [ ] Pass |
+| `suite-a11y-ux`                          | [ ] Pass |
 
 ## What to Do if a Suite Fails
 

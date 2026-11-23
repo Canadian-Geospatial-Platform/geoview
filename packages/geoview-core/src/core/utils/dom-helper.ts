@@ -121,6 +121,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Checks whether a modal in this viewer owns keyboard input, including during its exit transition.
+   *
+   * @param mapId - The map identifier
+   * @returns Whether this viewer contains a mounted modal dialog
+   */
+  static hasOpenModal(mapId: string): boolean {
+    return this.getGVRootElement(mapId).querySelector('[role="dialog"][aria-modal="true"]') !== null;
+  }
+
+  /**
    * Runs a CSS selector scoped inside a map's root element and returns all matches.
    *
    * When the root is not mounted yet, it falls back to a global `document.querySelectorAll` and logs a

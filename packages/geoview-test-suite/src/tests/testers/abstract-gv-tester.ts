@@ -48,6 +48,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Stable interval covering delayed footer scrolling and layout transitions. */
   static readonly UI_SCROLL_SETTLE_MS = 500;
 
+  /** Maximum wait for keyboard focus transitions and their feature queries. */
+  static readonly KEYBOARD_QUERY_TIMEOUT_MS = 10000;
+
   /** Pixel tolerance for viewport geometry and scroll stability. */
   static readonly UI_SCROLL_TOLERANCE_PX = 2;
 

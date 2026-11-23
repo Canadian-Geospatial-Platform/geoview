@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from '@/ui/switch/switch-style';
 import { logger } from '@/core/utils/logger';
+import type { SxStyles } from '@/ui/style/types';
 
 // Extend SwitchProps to include some FormControlLabel Props
 interface ExtendedSwitchProps extends SwitchProps {
@@ -41,10 +42,10 @@ function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
   const { label, id: providedId, ...otherProps } = props;
 
   // Hooks
-  const generatedSwitchId = useId();
+  const generatedSwitchId = useId(); // WCAG - Unique ID to associate label with switch
   const switchId = providedId ?? generatedSwitchId;
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('SWITCH - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);

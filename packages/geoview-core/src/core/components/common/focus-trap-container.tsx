@@ -187,7 +187,7 @@ export const FocusTrapContainer = memo(({
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem.activeElementId, focusItem.focusOnEntry);
 
     // Create cancellable delay job to force the rendering before focusing
     let delayJob: ReturnType<typeof doTimeout> | undefined;
@@ -211,7 +211,7 @@ export const FocusTrapContainer = memo(({
     return () => {
       delayJob?.cancel();
     };
-  }, [focusItem, focusTrapContainerId, exitBtnId, mapId]);
+  }, [focusItem.activeElementId, focusItem.focusOnEntry, focusTrapContainerId, exitBtnId, mapId]);
 
   /**
    * Auto-activates the focus trap when a footer panel transitions to open.
