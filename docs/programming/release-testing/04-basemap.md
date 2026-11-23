@@ -6,7 +6,7 @@
 
 Basemap selector and basemap options.
 
-Both LCC (EPSG:3978) and WM (EPSG:3857) share the same set of basemap options (transport, simple, imagery, osm, nogeom) — they use different tile URLs per projection but the selector buttons are the same. EPSG:3573 has no default basemaps; the circumpolar demo uses a WMTS layer with `useAsBasemap: true` as a workaround.
+LCC (EPSG:3978), WM (EPSG:3857), and NPLC (EPSG:3573) share the same set of basemap options (transport, simple, imagery, osm, nogeom) — they use different tile URLs per projection but the selector buttons are the same.
 
 ## Basemap Selector
 

@@ -423,21 +423,21 @@ export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 
 export const BASEMAP_ID: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
   3857: VALID_BASEMAP_ID,
   3978: VALID_BASEMAP_ID,
-  3573: ['nogeom'] as TypeBasemapId[], // Only nogeom basemap is available for 3573 projection
+  3573: ['transport', 'osm', 'shaded', 'nogeom', 'imagery', 'labeled'] as TypeBasemapId[], // Only simple currently missing
 };
 
 /** Valid shaded basemap values for each supported projection. */
 export const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
-  3573: [false], // Only nogeom basemap is available for 3573 projection
+  3573: [true, false], // Only simple currently missing
 };
 
 /** Valid labeled basemap values for each supported projection. */
 export const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
-  3573: [false], // Only nogeom basemap is available for 3573 projection
+  3573: [true, false], // Only simple currently missing
 };
 
 /** Valid latitude and longitude center ranges for each supported projection. */

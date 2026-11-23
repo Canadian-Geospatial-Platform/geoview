@@ -4,7 +4,7 @@
 >
 > **Test page**: [rt-06-overview-map.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-06-overview-map.html) — Map 1 (LCC with overview map, hideOnZoom: 7, projection switch), Map 2 (no overview map).
 
-Overview map behavior, hide on zoom, and projection switch. The overview map is only available for LCC (EPSG:3978) and WM (EPSG:3857) — it is not created for EPSG:3573.
+Overview map behavior, hide on zoom, and projection switch. The overview map is only available for LCC (EPSG:3978), WM (EPSG:3857), and North Pole LAEA Canada (EPSG:3573).
 
 ## Presence
 

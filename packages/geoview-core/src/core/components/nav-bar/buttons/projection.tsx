@@ -29,6 +29,7 @@ const projectionChoiceOptions: {
 } = {
   '3857': { code: 3857, name: 'Web Mercator' },
   '3978': { code: 3978, name: 'LCC' },
+  '3573': { code: 3573, name: 'North Pole LAEA Canada' },
 };
 
 /**
