@@ -78,14 +78,19 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching OGC Feature data and converting it
-     * into OpenLayers {@link Feature} feature instances.
+     * into OpenLayers {@link Feature} feature instances, following advertised next-page links until exhausted.
      *
      * @param layerConfig - The configuration object for the vector layer, containing source and data access information
      * @param sourceOptions - The OpenLayers vector source options associated with the layer
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
-     * @returns A promise that resolves to an array of OpenLayers features
+     * @returns A promise that resolves with all pages' OpenLayers features and the interpreted source projection
+     * @throws {Error} When pagination repeats an already requested page
+     * @throws {LayerSourceFailedToLoadError} When any page request fails
+     * @throws {LayerTooManyFeatures} When the advertised or accumulated feature count exceeds the supported limit
+     * @throws {LayerTooManyFeaturesInBBOX} When a BBOX query exceeds the supported feature limit
+     * @throws {LayerTooManyPages} When another page remains after the maximum number of pages has been fetched
      */
-    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, _sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the creation of the GV Layer.
      *

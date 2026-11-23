@@ -1115,6 +1115,23 @@ export type TypeMetadataOGCFeatureCollection = {
     crs?: string[];
     /** The collection extent */
     extent: TypeMetadataOGCFeatureCollectionExtent;
+    /** Links advertised for this collection */
+    links?: TypeMetadataOGCFeatureLink[];
+};
+/** Describes a link advertised by an OGC API Features service. */
+export type TypeMetadataOGCFeatureLink = {
+    /** Link relation */
+    rel: string;
+    /** Link target */
+    href: string;
+    /** Link media type */
+    type?: string;
+    /** Link title */
+    title?: string;
+    /** Link language */
+    hreflang?: string;
+    /** Indicates whether the link target is a URI template */
+    templated?: boolean;
 };
 export type TypeMetadataOGCFeatureCollectionExtent = {
     spatial: TypeMetadataOGCFeatureCollectionExtentSpatial;

@@ -3,16 +3,18 @@ import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { WmsGetStylesUrlAware } from '@/api/config/validation-classes/wms-get-styles-url-aware';
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
+    /** Max number of records per page for query */
+    maxPageSize?: number;
     /** Max number of records for query */
     maxRecordCount?: number;
 }
+/** How the total matching record count was obtained. */
+export type TypeRecordsCountSource = 'numberMatched' | 'service' | 'counted';
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
 export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig implements WmsGetStylesUrlAware {
     #private;
-    /** Max number of records for query */
-    maxRecordCount?: number;
     /**
      * Creates an instance of VectorLayerEntryConfig.
      *
@@ -26,6 +28,61 @@ export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEn
      * @returns The strongly-typed source configuration specific to this layer entry config
      */
     getSource(): TypeBaseVectorSourceInitialConfig;
+    /**
+     * Overrides the toJson of the mother class.
+     *
+     * @returns The JSON representation of the instance
+     */
+    protected onToJson<T>(): T;
+    /**
+     * Gets the total matching records reported or counted for the source request.
+     *
+     * @returns The matching record count, or undefined when unavailable
+     */
+    getTotalRecordsCount(): number | undefined;
+    /**
+     * Gets how the total matching record count was obtained.
+     *
+     * @returns The count origin, or undefined when unavailable
+     */
+    getTotalRecordsCountSource(): TypeRecordsCountSource | undefined;
+    /**
+     * Records the total matching count and its origin for the current source request.
+     *
+     * @param totalRecordsCount - The matching count, or undefined to clear an earlier request's count
+     * @param source - Whether the service supplied the count or downloaded records were counted
+     */
+    setTotalRecordsCount(totalRecordsCount: number | undefined, source?: TypeRecordsCountSource): void;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer.
+     *
+     * @returns The service maximum record count, or undefined when it is not available
+     */
+    getMaxPageSize(): number | undefined;
+    /**
+     * Initializes the page size from service metadata unless explicitly configured.
+     *
+     * @param maxPageSize - The service's maximum records per request, or undefined when unavailable
+     */
+    initMaxPageSize(maxPageSize: number | undefined): void;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+     *
+     * @returns The service maximum record count, or the default when it is not available
+     */
+    getMaxPageSizeOrDefault(): number;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer.
+     *
+     * @returns The service maximum record count, or undefined when it is not available
+     */
+    getMaxRecordCount(): number | undefined;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+     *
+     * @returns The service maximum record count, or the default when it is not available
+     */
+    getMaxRecordCountOrDefault(): number;
     /**
      * Gets if the config has specified that we should fetch the styles from the WMS.
      *

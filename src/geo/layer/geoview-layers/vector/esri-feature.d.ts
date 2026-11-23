@@ -7,10 +7,10 @@ import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstrac
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeGeoviewLayerConfig, TypeMetadataEsriDynamic, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
     listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
@@ -95,7 +95,9 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param sourceOptions - The OpenLayers vector source options associated with the layer
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features
-     * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features
+     * @throws {LayerTooManyFeatures} When the layer has too many features
+     * @throws {LayerTooManyFeaturesInBBOX} When the requested extent has too many features
+     * @throws {Error} When BBOX loading lacks a valid extent or projection
      */
     protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**

@@ -19,7 +19,13 @@ export declare const OL_ZOOM_DURATION = 500;
 /** OpenLayers zoom padding values as percentage of the map size dimensions [width, height] (both sides!). */
 export declare const OL_ZOOM_PERCENT_PADDING: [number, number];
 /** Fixed padding in pixels, on each side, used when zooming to a feature or a STAC extent. */
-export declare const OL_ZOOM_PIXEL_PADDING = 50;
+export declare const OL_ZOOM_PIXEL_PADDING = 25;
+/**
+ * Closest scale denominator (1:10,000) a feature zoom can reach: Details and Data Table "zoom to feature"
+ * and Details "zoom to all results". Prevents points, coincident points and tiny extents from zooming excessively
+ * close; the current resolution is kept when already closer, and the layer visibility-scale range takes precedence.
+ */
+export declare const OL_ZOOM_FEATURE_MAX_SCALE = 10000;
 /** Map fit padding in map pixels ordered as top, right, bottom, left. */
 export type TypeMapFitPadding = [number, number, number, number];
 /** The extended FitOptions for Geoview. */

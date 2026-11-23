@@ -25,4 +25,13 @@ export declare function ensureServiceRequestUrl(url: string, service: string, re
  * @returns The URL with the `LAYERS`/`LAYER` parameter value(s) percent-encoded, or the original URL if no such parameter exists.
  */
 export declare function encodeLayersParam(url: string): string;
+/**
+ * Resolves the next page URL advertised by an OGC API Features response, preserving CRS and BBOX parameters omitted by the link.
+ *
+ * @param responseData - The OGC API Features response
+ * @param currentPageUrl - The unproxied current page URL used to resolve relative links
+ * @returns The absolute next page URL, or undefined when the response has no next link
+ * @throws {TypeError} When an advertised next page URL is invalid
+ */
+export declare function getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: string): string | undefined;
 //# sourceMappingURL=ogc-url-helper.d.ts.map

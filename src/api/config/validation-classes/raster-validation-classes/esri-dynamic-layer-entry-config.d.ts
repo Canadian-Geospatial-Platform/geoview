@@ -6,6 +6,8 @@ import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceEsriDynamicInitialConfig;
+    /** Max number of records per page for query */
+    maxPageSize?: number;
     /** Max number of records for query */
     maxRecordCount?: number;
     /**
@@ -16,8 +18,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
 }
 /** Type used to define a GeoView image layer to display on the map. */
 export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    /** Max number of records for query. */
-    maxRecordCount?: number;
     /** Manual pixel offset (x, y) overriding the computed identify hit-tolerance recentering. See {@link EsriDynamicLayerEntryConfigProps.hitToleranceOffset}. */
     hitToleranceOffset?: [number, number];
     /**
@@ -57,6 +57,42 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
+    /**
+     * Overrides the toJson of the mother class.
+     *
+     * @returns The JSON representation of the instance
+     */
+    protected onToJson<T>(): T;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer.
+     *
+     * @returns The service maximum record count, or undefined when it is not available
+     */
+    getMaxPageSize(): number | undefined;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+     *
+     * @returns The service maximum record count, or the default when it is not available
+     */
+    getMaxPageSizeOrDefault(): number;
+    /**
+     * Initializes the service maximum record count when the layer configuration has not already set it.
+     *
+     * @param maxRecordCount - The maximum number of records reported by the service, or undefined when unavailable
+     */
+    initMaxPageSize(maxPageSize: number | undefined): void;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer.
+     *
+     * @returns The service maximum record count, or undefined when it is not available
+     */
+    getMaxRecordCount(): number | undefined;
+    /**
+     * Gets the maximum number of records the service allows in a feature request for this layer, or the default if not specified.
+     *
+     * @returns The service maximum record count, or the default when it is not available
+     */
+    getMaxRecordCountOrDefault(): number;
     /**
      * Finds the parent layer summary whose subLayerIds contains this layer's ID.
      *
