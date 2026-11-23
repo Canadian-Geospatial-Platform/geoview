@@ -8,11 +8,11 @@ Map rendering, projections, north pole, and north arrow.
 
 ## Projections
 
-| Test                         | Description                          | Steps                                                                | Expected Result                                                                                                   | Auto |
-| ---------------------------- | ------------------------------------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---- |
-| 3 projections supported      | Each projection renders correctly    | 1. Check Map 1 (LCC), Map 2 (WM), Map 3 (LAEA)                       | Map renders correctly in all three projections                                                                    | C    |
-| Projection switch            | Switching projections re-renders map | 1. On Map 1, switch between LCC and WM using the projection selector | Map re-renders correctly;                      | A    |
-| Layer rendering after switch | Layers survive projection switch     | 1. On Map 1, switch projection                                       | Layer re-renders correctly; see also [08 — Layers](08-layers.md#layer-type-edge-cases) for type-specific behavior | M    |
+| Test                         | Description                          | Steps                                                                                             | Expected Result                                                                                                   | Auto |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---- |
+| 3 projections supported      | Each projection renders correctly    | 1. Check Map 1 (LCC), Map 2 (WM), Map 3 (LAEA)                                                    | Map renders correctly in all three projections                                                                    | C    |
+| Projection switch            | Switching projections re-renders map | 1. On Map 1, switch between LCC, WM and North Pole LAEA (EPSG:3573) using the projection selector | Map re-renders correctly in each projection                                                                       | A    |
+| Layer rendering after switch | Layers survive projection switch     | 1. On Map 1, switch projection                                                                    | Layer re-renders correctly; see also [08 — Layers](08-layers.md#layer-type-edge-cases) for type-specific behavior | M    |
 
 ## North Pole & North Arrow
 
