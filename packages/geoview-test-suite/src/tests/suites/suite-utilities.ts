@@ -74,7 +74,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 57;
+    return 58;
   }
 
   /**
@@ -84,6 +84,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Core tester tests
+    const pEnsureHttpsOnSecurePage = this.#coreTester.testEnsureHttpsOnSecurePage();
     const pRange = this.#coreTester.testRange();
     const pCamelCase = this.#coreTester.testCamelCase();
     const pDeepEqual = this.#coreTester.testDeepEqual();
@@ -149,6 +150,7 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
       this.#geoTester.testReadFeaturesFromGeoJSONEmbeddedCRSPrecedence(),
       this.#geoTester.testReadFeaturesFromEsriJSONProjectionObject(),
       // Core
+      pEnsureHttpsOnSecurePage,
       pRange,
       pCamelCase,
       pDeepEqual,

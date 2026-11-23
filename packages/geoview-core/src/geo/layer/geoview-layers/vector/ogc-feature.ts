@@ -16,6 +16,7 @@ import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vect
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { getNextOgcFeaturePageUrl } from '@/core/utils/ogc-url-helper';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
@@ -562,15 +563,11 @@ export class OgcFeature extends AbstractGeoViewVector {
       throw new Error(`OGC API Features collection '${layerConfig.layerId}' advertises a non-HTTP items link.`);
     }
 
-    if (collectionsUrl.protocol === 'https:' && itemsUrl.protocol === 'http:' && itemsUrl.hostname === collectionsUrl.hostname) {
-      itemsUrl.protocol = 'https:';
-    }
-
     // Get the max page size or default
     const maxPageSize = layerConfig.getMaxPageSizeOrDefault();
 
     if (!itemsUrl.searchParams.has('limit')) itemsUrl.searchParams.set('limit', `${maxPageSize}`);
-    return itemsUrl.toString();
+    return ServicesManagement.ensureHttpsOnSecurePage(itemsUrl.toString());
   }
 
   /**

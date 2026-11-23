@@ -331,7 +331,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig impleme
     }
 
     // Look for a legend URL in the selected style, preferring PNG format
-    return selectedStyle?.LegendURL?.find((url) => url.Format === 'image/png')?.OnlineResource?.['@attributes']?.['xlink:href'];
+    const legendUrl = selectedStyle?.LegendURL?.find((url) => url.Format === 'image/png')?.OnlineResource?.['@attributes']?.['xlink:href'];
+    return legendUrl ? ServicesManagement.ensureHttpsOnSecurePage(legendUrl) : undefined;
   }
 
   /**

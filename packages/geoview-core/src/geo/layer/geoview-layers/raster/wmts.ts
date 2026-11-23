@@ -5,7 +5,7 @@ import { getTopLeft, getWidth } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
-import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type {
   TypeSourceTileInitialConfig,
   TypeGeoviewLayerConfig,
@@ -16,18 +16,19 @@ import type {
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { GeoUtilities, type FetchWithProxyResult } from '@/geo/utils/utilities';
 import { toArray } from '@/core/utils/utilities';
+import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { GeoUtilities, type FetchWithProxyResult } from '@/geo/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import {
   LayerNoCapabilitiesError,
   LayerServiceMetadataUnableToFetchError,
   LayerWMTSMetadataError,
 } from '@/core/exceptions/layer-exceptions';
 import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
-import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
@@ -568,7 +569,7 @@ export class WMTS extends AbstractGeoViewRaster {
       throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `KVP GetTile`);
     }
 
-    layerConfig.setDataAccessPath(tileLink);
+    layerConfig.setDataAccessPath(ServicesManagement.ensureHttpsOnSecurePage(tileLink));
   }
 
   /**

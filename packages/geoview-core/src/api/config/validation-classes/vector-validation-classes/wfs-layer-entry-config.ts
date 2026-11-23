@@ -15,6 +15,7 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
 import { toArray } from '@/core/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 
@@ -412,7 +413,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
       const onlineResourceAttributes = OgcWfsLayerEntryConfig.#asRecord(onlineResource?.['@attributes']);
       const href =
         attributes?.['xlink:href'] ?? attributes?.href ?? onlineResourceAttributes?.['xlink:href'] ?? onlineResourceAttributes?.href;
-      if (typeof href === 'string' && href.length > 0) return href;
+      if (typeof href === 'string' && href.length > 0) return ServicesManagement.ensureHttpsOnSecurePage(href);
     }
     return undefined;
   }

@@ -11,6 +11,7 @@ import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerSourceFailedToLoadError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { getGeotiffPaletteStyle } from '@/core/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -139,7 +140,7 @@ export class GVGeoTIFF extends AbstractGVTile {
       const metadata = layerConfig.getServiceMetadata();
       // If there is a thumbnail asset in the metadata, use it as legend
       if (metadata?.assets?.thumbnail?.href) {
-        const legendUrl = metadata.assets.thumbnail.href;
+        const legendUrl = ServicesManagement.ensureHttpsOnSecurePage(metadata.assets.thumbnail.href);
 
         // Fetch the blob
         Fetch.fetchBlob(legendUrl, { credentials: 'omit' })

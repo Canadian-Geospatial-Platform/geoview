@@ -1,3 +1,5 @@
+import { ServicesManagement } from '@/geo/utils/services-management';
+
 /**
  * Standalone OGC URL helpers.
  *
@@ -88,5 +90,5 @@ export function getNextOgcFeaturePageUrl(responseData: unknown, currentPageUrl: 
       nextPageUrl.searchParams.set(parameter, currentValue);
     }
   }
-  return nextPageUrl.toString();
+  return ServicesManagement.ensureHttpsOnSecurePage(nextPageUrl.toString());
 }
