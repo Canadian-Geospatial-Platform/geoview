@@ -99,7 +99,6 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
   // Ref
   const popperRef = useRef<HTMLDivElement | null>(null);
-  const openerRef = useRef<HTMLElement | undefined>(undefined);
 
   // #region Handlers
 
@@ -139,6 +138,7 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
   /**
    * Manages focus when the popper opens or its entry-focus configuration changes.
+   * Dismissal owners restore focus explicitly; click-away must not refocus the opener.
    */
   useEffect(() => {
     // Log
@@ -147,7 +147,6 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
     // Focus management when popper opens
     if (open && focusSelector) {
       const initialFocus = DomHelper.getActiveElement();
-      if (!openerRef.current && initialFocus instanceof HTMLElement) openerRef.current = initialFocus;
       const focusJob = doTimeout(theme.transitions.duration.shortest);
       focusJob.promise
         .then((result) => {
@@ -173,27 +172,6 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
     return undefined;
   }, [open, focusSelector, theme.transitions.duration.shortest]);
-
-  /**
-   * Restores the original opener only when the popper closes or unmounts, unless focus has moved outside.
-   */
-  useEffect(() => {
-    logger.logTraceUseEffect('UI.POPPER - restore opener on close', open);
-    if (!open) return undefined;
-
-    return (): void => {
-      const opener = openerRef.current;
-      openerRef.current = undefined;
-      const currentFocus = DomHelper.getActiveElement();
-      if (
-        opener?.isConnected &&
-        currentFocus &&
-        (currentFocus === opener.ownerDocument.body || popperRef.current?.contains(currentFocus))
-      ) {
-        opener.focus();
-      }
-    };
-  }, [open]);
 
   // TODO: style - manage z-index in theme
   return (

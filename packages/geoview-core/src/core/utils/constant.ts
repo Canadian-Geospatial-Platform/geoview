@@ -191,7 +191,6 @@ export const TIMEOUT: Record<string, number> = {
 
   dataPanelLoading: 100,
   interactionFocusText: 100,
-  resizeButtonFocusRestore: 100,
   guideSearchVisibility: 100,
 
   guideReturnFocus: 200,

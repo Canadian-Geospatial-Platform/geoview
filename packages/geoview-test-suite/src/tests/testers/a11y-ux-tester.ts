@@ -43,6 +43,91 @@ export class A11yUxTester extends GVAbstractTester {
   // #region PUBLIC METHODS
 
   /**
+   * Tests Settings click-away before releasing a dispatched Layers pointer press.
+   *
+   * @returns A promise that resolves with pre-release focus and post-click app-bar observations
+   */
+  testSettingsPointerClickAway(): Promise<Test<TypeSettingsPointerClickAwayResult>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalAppBar = getStoreUIActiveAppBarTab(mapId);
+    const originalFocusItem = getStoreUIFocusItem(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+    let restoredSettings = false;
+    let removeFocusListener: (() => void) | undefined;
+
+    return this.test(
+      'Test Settings click-away preserves focus intent during a Layers pointer press and click',
+      async (test): Promise<TypeSettingsPointerClickAwayResult> => {
+        A11yEntryTester.requireVisibleViewers(mapId);
+        const settings = DomHelper.getGVElementById(mapId, 'appBar-settings-btn');
+        const layers = DomHelper.getAppBarButton(mapId, 'layers');
+        if (!settings || !layers) throw new TestError('Settings and Layers buttons must be mounted');
+        uiController.setActiveAppBarTab(undefined, false, false);
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveTrapGeoView(true);
+        await DomHelper.waitForReactIdle();
+        settings.focus();
+        settings.click();
+        await whenThisThen(
+          () => DomHelper.getActiveElement() === DomHelper.getGVElementById(mapId, 'appBar-settings-panel-keyboard-navigation'),
+          GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS
+        );
+
+        /** Detects even a transient opener restore before the pointer is released. */
+        const recordFocus = (): void => {
+          restoredSettings = true;
+        };
+        settings.addEventListener('focusin', recordFocus);
+        removeFocusListener = (): void => {
+          settings.removeEventListener('focusin', recordFocus);
+        };
+
+        test.addStep('Dispatching pointerdown and mousedown on Layers with the Settings switch focused...');
+        layers.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' }));
+        layers.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        await DomHelper.waitForReactIdle();
+
+        // Snapshot the press before mouseup; the framework asserts these observations separately.
+        const settingsClosedBeforeMouseUp = !DomHelper.getGVElementById(mapId, 'appBar-settings-panel');
+        const settingsRestoredBeforeMouseUp = restoredSettings;
+
+        test.addStep('Dispatching mouseup and click on Layers...');
+        layers.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        layers.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await DomHelper.waitForReactIdle();
+        const activeAppBar = getStoreUIActiveAppBarTab(mapId);
+        return {
+          settingsClosedBeforeMouseUp,
+          settingsRestoredBeforeMouseUp,
+          activeTabAfterClick: activeAppBar.tabId,
+          appBarOpenAfterClick: activeAppBar.isOpen,
+        };
+      },
+      (test, observations): void => {
+        test.addStep('Verifying click-away focus before mouseup...');
+        Test.assertIsEqual(observations.settingsClosedBeforeMouseUp, true);
+        Test.assertIsEqual(observations.settingsRestoredBeforeMouseUp, false);
+        test.addStep('Verifying the Layers click opened its app-bar tab...');
+        Test.assertIsEqual(observations.activeTabAfterClick, 'layers');
+        Test.assertIsEqual(observations.appBarOpenAfterClick, true);
+      },
+      async (test): Promise<void> => {
+        removeFocusListener?.();
+        if (test.getStatus() === 'skipped') return;
+        uiController.closeMapPopovers();
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveAppBarTab(originalAppBar.tabId, originalAppBar.isOpen, originalAppBar.isFocusTrapped ?? false);
+        uiController.setActiveTrapGeoView(originalMode);
+        uiController.enableFocusTrap({ ...originalFocusItem, focusOnEntry: false });
+        await DomHelper.waitForReactIdle();
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
+  /**
    * Tests focus restoration after closing Resize and leaving navBar fullscreen.
    *
    * @returns A promise that resolves with Close and fullscreen-exit focus observations
@@ -2006,6 +2091,18 @@ export class A11yUxTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Pre-release Settings focus and post-click app-bar observations. */
+interface TypeSettingsPointerClickAwayResult {
+  /** Whether mousedown dismissed Settings before mouseup. */
+  settingsClosedBeforeMouseUp: boolean;
+  /** Whether Settings reclaimed focus during the press. */
+  settingsRestoredBeforeMouseUp: boolean;
+  /** The active app-bar tab after click. */
+  activeTabAfterClick: string | undefined;
+  /** Whether the active app-bar tab is open after click. */
+  appBarOpenAfterClick: boolean;
+}
 
 /** Focus observations after dismissing the footer popover in native fullscreen. */
 interface TypeFullscreenPopoverFocusResult {
