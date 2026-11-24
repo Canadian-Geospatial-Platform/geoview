@@ -628,9 +628,6 @@ export class DataTableTester extends GVAbstractTester {
   testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableRenders>> {
     let originalCenter: Coordinate | undefined;
     let originalFilterDataToExtent: boolean | undefined;
-    let originalLogTraceRender: typeof logger.logTraceRender | undefined;
-    let isTrackingTableRenders = false;
-    let tableRenderCount = 0;
 
     return this.test(
       'Test panning the map does not re-render the data table...',
@@ -656,23 +653,23 @@ export class DataTableTester extends GVAbstractTester {
         if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
         originalCenter = [...center];
 
-        originalLogTraceRender = logger.logTraceRender;
-        const logTraceRender = originalLogTraceRender.bind(logger);
-        logger.logTraceRender = (component: string, ...messages: unknown[]): void => {
-          if (isTrackingTableRenders && component === 'components/data-table/data-table') tableRenderCount++;
-          logTraceRender(component, ...messages);
+        // Read the existing logger counter instead of replacing its shared render method.
+        const dataTableRenderTrace = 'components/data-table/data-table';
+        const getDataTableRenderCount = (): number => {
+          const renderCount = logger.logCountRenderPerComponent[dataTableRenderTrace];
+          if (renderCount === undefined) throw new Error('DataTable render tracing is unavailable in this test environment.');
+          return renderCount;
         };
 
         test.addStep('Panning with extent filtering disabled and tracking DataTable renders...');
         const extentBeforeWithoutFilter = getStoreMapExtent(this.getMapId());
-        const renderCountBeforeWithoutFilter = tableRenderCount;
-        isTrackingTableRenders = true;
+        const renderCountBeforeWithoutFilter = getDataTableRenderCount();
         view.setCenter([center[0] + resolution * 100, center[1]]);
         mapViewer.map.renderSync();
         await DomHelper.waitForReactIdle();
-        isTrackingTableRenders = false;
         const extentChangedWithoutFilter = JSON.stringify(extentBeforeWithoutFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
-        const tableRendersWithoutFilter = tableRenderCount - renderCountBeforeWithoutFilter;
+        const renderCountAfterWithoutFilter = getDataTableRenderCount();
+        const tableRendersWithoutFilter = renderCountAfterWithoutFilter - renderCountBeforeWithoutFilter;
 
         // Return to the starting extent before confirming filtered data refreshes on a later pan
         view.setCenter(originalCenter);
@@ -683,15 +680,14 @@ export class DataTableTester extends GVAbstractTester {
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
         await DomHelper.waitForReactIdle();
         const extentBeforeWithFilter = getStoreMapExtent(this.getMapId());
-        const renderCountBeforeWithFilter = tableRenderCount;
-        isTrackingTableRenders = true;
+        const renderCountBeforeWithFilter = getDataTableRenderCount();
         view.setCenter([originalCenter[0] + resolution * 100, originalCenter[1]]);
         mapViewer.map.renderSync();
         await DomHelper.waitForReactIdle();
-        isTrackingTableRenders = false;
 
         const extentChangedWithFilter = JSON.stringify(extentBeforeWithFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
-        const tableRendersWithFilter = tableRenderCount - renderCountBeforeWithFilter;
+        const renderCountAfterWithFilter = getDataTableRenderCount();
+        const tableRendersWithFilter = renderCountAfterWithFilter - renderCountBeforeWithFilter;
         return { extentChangedWithoutFilter, tableRendersWithoutFilter, extentChangedWithFilter, tableRendersWithFilter };
       },
       (test, result) => {
@@ -704,8 +700,6 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(result.tableRendersWithFilter > 0, true);
       },
       async (): Promise<void> => {
-        isTrackingTableRenders = false;
-        if (originalLogTraceRender) logger.logTraceRender = originalLogTraceRender;
         if (originalFilterDataToExtent !== undefined) {
           this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, originalFilterDataToExtent);
         }

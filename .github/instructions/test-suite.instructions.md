@@ -11,6 +11,7 @@ Task routing: [test-suite.md](../ai/test-suite.md) → **Enforcement reminders**
 - Custom in-browser framework, not Jest; do not change tests/core for ordinary feature tests.
 - Execute the subject in `callback` (return observations for `test()`, throw the expected error for `testError()`); put `Test.assert*` calls in `callbackAssert`, never in `callback`.
 - Use `callbackFinalize` for cleanup and use shared helpers/constants.
+- Never replace or monkey-patch shared methods, module singletons, prototypes, or globals just to observe test behavior. Prefer existing read-only instrumentation or observable behavior; if a patch is genuinely unavoidable, document why, isolate it from concurrent tests, and restore the original in `callbackFinalize`.
 - Shared map changes run sequentially; prefer event registration waits and await controller zoom.
 - Tester files keep every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class.
 - Any test change requires all-suite count reconciliation and both catalog/release totals.
