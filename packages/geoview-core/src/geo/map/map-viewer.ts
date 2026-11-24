@@ -2171,6 +2171,8 @@ export class MapViewer {
     view.on('change:rotation', this.#handleViewRotationChanged.bind(this));
   }
 
+  // #region STATIC METHODS PRIVATE
+
   /**
    * Creates the default OpenLayers interactions, with drag-pan not limited to a focused map.
    *
@@ -2245,6 +2247,10 @@ export class MapViewer {
     if (Math.hypot(cos, sin) < 1e-10) throw new InvalidViewportMidpointsError();
     return Math.atan2(sin, cos);
   }
+
+  // #endregion STATIC METHODS PRIVATE
+
+  // #region HANDLER METHODS
 
   /**
    * Handles when the map ends moving.
@@ -2424,6 +2430,8 @@ export class MapViewer {
     // Show the error using the GeoViewError messageKey and params
     this.notifications.showError(event.error.messageKey, event.error.messageParams);
   }
+
+  // #endregion HANDLER METHODS
 
   /**
    * Check if geometries needs to be loaded from a URL geoms parameter
