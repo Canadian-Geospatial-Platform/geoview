@@ -17,6 +17,7 @@ import { getStoreMapExtent, getStoreMapHighlightedFeatures } from 'geoview-core/
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
+import { logger } from 'geoview-core/core/utils/logger';
 import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
@@ -30,6 +31,8 @@ export class DataTableTester extends GVAbstractTester {
   /** The GeoPackage layer path whose table contains an empty/blank field name (a column named ''). */
   static readonly GEOPACKAGE_EMPTY_FIELD_LAYER_PATH = 'railwaysEmptyField/carto_fer_debarcadere';
 
+  // #region OVERRIDES
+
   /**
    * Returns the name of the Tester.
    *
@@ -39,7 +42,9 @@ export class DataTableTester extends GVAbstractTester {
     return 'DataTableTester';
   }
 
-  // #region PUBLIC METHDOS
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
 
   /**
    * Tests that allFeaturesDataArray is populated after layer loads.
@@ -612,17 +617,20 @@ export class DataTableTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that panning the map does not re-render the data table of a layer that does not filter its data to the map extent.
+   * Tests that map pans re-render the table only when extent filtering is enabled for its layer.
    *
    * Every map extent change (pan, zoom, fullscreen or footer resize) used to rebuild the whole table, which made
    * entering fullscreen with an open table slow.
    *
    * @param layerPath - The layer path to open in the data table
-   * @returns A promise that resolves with whether the map extent changed and the number of table DOM mutations
+   * @returns A promise that resolves with extent-change and DataTable-render observations for both filter states
    */
-  testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableMutations>> {
-    let observer: MutationObserver | undefined;
+  testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableRenders>> {
     let originalCenter: Coordinate | undefined;
+    let originalFilterDataToExtent: boolean | undefined;
+    let originalLogTraceRender: typeof logger.logTraceRender | undefined;
+    let isTrackingTableRenders = false;
+    let tableRenderCount = 0;
 
     return this.test(
       'Test panning the map does not re-render the data table...',
@@ -630,19 +638,17 @@ export class DataTableTester extends GVAbstractTester {
         // Wait for layer registration and data-table to be loaded with the layer in question
         await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
 
-        // The table must not follow the map extent for this test
+        originalFilterDataToExtent = getStoreDataTableLayerSettings(this.getMapId())[layerPath]?.filterDataToExtent ?? false;
+
+        // Establish a settled baseline with extent filtering disabled
         test.addStep('Disabling filter-by-extent and waiting for the data table to render...');
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
         await DomHelper.DataTable.waitForDataTable(this.getMapId());
 
-        // Force OL to recalculate viewport dimensions (needed when the map tab is hidden), then let the table settle
         const mapViewer = this.getMapViewer();
         mapViewer.map.updateSize();
         mapViewer.map.renderSync();
         await DomHelper.waitForReactIdle();
-
-        const container = DomHelper.DataTable.getDataTableContainer(this.getMapId());
-        if (!container) throw new Error(`No data table container is rendered for ${layerPath}.`);
 
         const view = mapViewer.getView();
         const center = view.getCenter();
@@ -650,38 +656,65 @@ export class DataTableTester extends GVAbstractTester {
         if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
         originalCenter = [...center];
 
-        // Count every DOM change in the table while the map pans
-        test.addStep('Panning the map while observing the data table DOM...');
-        let mutationCount = 0;
-        observer = new MutationObserver((mutations) => {
-          mutationCount += mutations.length;
-        });
-        observer.observe(container, { subtree: true, childList: true, attributes: true, characterData: true });
+        originalLogTraceRender = logger.logTraceRender;
+        const logTraceRender = originalLogTraceRender.bind(logger);
+        logger.logTraceRender = (component: string, ...messages: unknown[]): void => {
+          if (isTrackingTableRenders && component === 'components/data-table/data-table') tableRenderCount++;
+          logTraceRender(component, ...messages);
+        };
 
-        const extentBefore = getStoreMapExtent(this.getMapId());
+        test.addStep('Panning with extent filtering disabled and tracking DataTable renders...');
+        const extentBeforeWithoutFilter = getStoreMapExtent(this.getMapId());
+        const renderCountBeforeWithoutFilter = tableRenderCount;
+        isTrackingTableRenders = true;
         view.setCenter([center[0] + resolution * 100, center[1]]);
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+        isTrackingTableRenders = false;
+        const extentChangedWithoutFilter = JSON.stringify(extentBeforeWithoutFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
+        const tableRendersWithoutFilter = tableRenderCount - renderCountBeforeWithoutFilter;
 
-        // Process the view change and its moveend (which updates the store extent), then let React apply the update
+        // Return to the starting extent before confirming filtered data refreshes on a later pan
+        view.setCenter(originalCenter);
         mapViewer.map.renderSync();
         await DomHelper.waitForReactIdle();
 
-        mutationCount += observer.takeRecords().length;
-        observer.disconnect();
+        test.addStep('Enabling extent filtering, then panning and tracking DataTable renders...');
+        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
+        await DomHelper.waitForReactIdle();
+        const extentBeforeWithFilter = getStoreMapExtent(this.getMapId());
+        const renderCountBeforeWithFilter = tableRenderCount;
+        isTrackingTableRenders = true;
+        view.setCenter([originalCenter[0] + resolution * 100, originalCenter[1]]);
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+        isTrackingTableRenders = false;
 
-        const extentAfter = getStoreMapExtent(this.getMapId());
-        return { extentChanged: JSON.stringify(extentBefore) !== JSON.stringify(extentAfter), mutationCount };
+        const extentChangedWithFilter = JSON.stringify(extentBeforeWithFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
+        const tableRendersWithFilter = tableRenderCount - renderCountBeforeWithFilter;
+        return { extentChangedWithoutFilter, tableRendersWithoutFilter, extentChangedWithFilter, tableRendersWithFilter };
       },
       (test, result) => {
-        test.addStep('Verifying the map extent changed in the store...');
-        Test.assertIsEqual(result.extentChanged, true);
+        test.addStep('Verifying a pan with extent filtering disabled changed the map extent without rendering DataTable...');
+        Test.assertIsEqual(result.extentChangedWithoutFilter, true);
+        Test.assertIsEqual(result.tableRendersWithoutFilter, 0);
 
-        test.addStep(`Verifying the data table DOM did not change (got ${result.mutationCount} mutation(s))...`);
-        Test.assertIsEqual(result.mutationCount, 0);
+        test.addStep('Verifying a pan with extent filtering enabled changed the map extent and rendered DataTable...');
+        Test.assertIsEqual(result.extentChangedWithFilter, true);
+        Test.assertIsEqual(result.tableRendersWithFilter > 0, true);
       },
-      () => {
-        // Stop observing and restore the map center if the test failed midway
-        observer?.disconnect();
-        if (originalCenter) this.getMapViewer().getView().setCenter(originalCenter);
+      async (): Promise<void> => {
+        isTrackingTableRenders = false;
+        if (originalLogTraceRender) logger.logTraceRender = originalLogTraceRender;
+        if (originalFilterDataToExtent !== undefined) {
+          this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, originalFilterDataToExtent);
+        }
+        if (originalCenter) {
+          const mapViewer = this.getMapViewer();
+          mapViewer.getView().setCenter(originalCenter);
+          mapViewer.map.renderSync();
+          await DomHelper.waitForReactIdle();
+        }
       }
     );
   }
@@ -901,7 +934,7 @@ export class DataTableTester extends GVAbstractTester {
     await DomHelper.waitForReactIdle();
   }
 
-  // #endregion PUBLIC METHDOS
+  // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
 
@@ -939,11 +972,15 @@ export class DataTableTester extends GVAbstractTester {
 // #region TYPES AND INTERFACES
 
 /** Result of the map pan data table re-render test. */
-export type TestMapPanTableMutations = {
-  /** Whether the map extent in the store changed after the pan. */
-  extentChanged: boolean;
-  /** The number of DOM mutation records observed in the data table during the pan. */
-  mutationCount: number;
+export type TestMapPanTableRenders = {
+  /** Whether the map extent changed when extent filtering was disabled. */
+  extentChangedWithoutFilter: boolean;
+  /** The number of DataTable renders when extent filtering was disabled. */
+  tableRendersWithoutFilter: number;
+  /** Whether the map extent changed when extent filtering was enabled. */
+  extentChangedWithFilter: boolean;
+  /** The number of DataTable renders when extent filtering was enabled. */
+  tableRendersWithFilter: number;
 };
 
 // #endregion TYPES AND INTERFACES
