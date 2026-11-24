@@ -29,6 +29,23 @@ Each entry has four parts: **Problem** → **Root Cause** → **Fix** → **Take
 
 ---
 
+## Metadata-advertised resource URLs
+
+**Problem:** A service advertises `http://` resource URLs even though the viewer is hosted on HTTPS.
+Browsers can block the resulting mixed-content requests.
+
+**Root Cause:** Capabilities documents, OGC Features responses, and STAC metadata can contain HTTP links
+independently of the configured service URL.
+
+**Fix:** On HTTPS pages, GeoView upgrades advertised HTTP resource links to HTTPS for WFS GET/POST,
+WMS map endpoints read from XML capabilities and legends, WMTS tiles, OGC Features items and next pages,
+STAC GeoTIFF assets and thumbnails, and SLD external graphics. On HTTP pages, those advertised URLs retain their original scheme.
+Only the leading scheme changes; query parameters, relative links, and other schemes are preserved.
+
+**Takeaways:** The advertised endpoint must support HTTPS. GeoView does not retry an upgraded URL over
+HTTP on a secure page; existing request errors and proxy handling still apply.
+See the [implementation reference](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/layers.md#metadata-url-schemes).
+
 ## GeoPackage
 
 ### SQL.js WebAssembly Import Mismatch

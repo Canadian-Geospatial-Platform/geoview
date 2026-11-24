@@ -25,6 +25,7 @@ import type {
   TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
 import { isNumeric, isObjectEmpty, toArray } from '@/core/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { GetStylesInvalidResponseError, GetStylesNotSupportedError } from '@/core/exceptions/wfs-renderer-exceptions';
@@ -1196,7 +1197,7 @@ export abstract class WfsRenderer {
 
     graphics.forEach((graphic) => {
       mimeType ??= graphic['se:Format'];
-      const imgSrc = graphic['se:OnlineResource']['@attributes']['xlink:href'];
+      const imgSrc = ServicesManagement.ensureHttpsOnSecurePage(graphic['se:OnlineResource']['@attributes']['xlink:href']);
       const graphicMimeType = graphic['se:Format'] || 'image/svg+xml';
       const isDataUri = /^data:/i.test(imgSrc);
       const isDirectSource = /^(https?:\/\/|blob:|\/)/i.test(imgSrc) || !/svg/i.test(graphicMimeType);

@@ -48,6 +48,24 @@ export class ServicesManagement {
     // Return the tweaked url
     return parsedUrl;
   }
+  /**
+   * Upgrades an advertised HTTP resource URL when the viewer is hosted on HTTPS.
+   *
+   * Only the leading scheme is changed; relative URLs, query strings, and other schemes are preserved.
+   *
+   * @param url - The metadata-advertised resource URL
+   * @returns The HTTPS URL on secure pages, or the unchanged URL otherwise
+   */
+  static ensureHttpsOnSecurePage(url: string): string {
+    // If we're hosted on https page, upgrade the URL to https if it starts with http://
+    if (window?.location.protocol === 'https:') {
+      // Upgrade the protocol to https
+      return url.replace(/^http:\/\//i, 'https://');
+    }
+
+    // As-is
+    return url;
+  }
 
   /**
    * Toggles the MapServer `ms:` prefix on a WFS/WMS layer identifier.
