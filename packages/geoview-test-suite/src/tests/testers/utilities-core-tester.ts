@@ -29,6 +29,7 @@ import {
   getLocalizedMessage,
   transformMarkdownIds,
 } from 'geoview-core/core/utils/utilities';
+import { ServicesManagement } from 'geoview-core/geo/utils/services-management';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -44,6 +45,42 @@ export class UtilitiesCoreTester extends GVAbstractTester {
    */
   override getName(): string {
     return 'UtilitiesCoreTester';
+  }
+
+  /**
+   * Tests metadata URL upgrading follows the viewer protocol without changing the rest of the URL.
+   *
+   * @returns A promise that resolves when the URL checks complete
+   */
+  testEnsureHttpsOnSecurePage(): Promise<Test<string[]>> {
+    const urls = [
+      'http://example.com/wfs?token=AbC%2f&target=http://other.example/path#layer',
+      'HTTP://example.com:8080/tiles/{z}/{x}/{y}',
+      'https://example.com/wms',
+      '../items?offset=10',
+      '//example.com/tiles/{z}',
+      'data:image/png;base64,abc',
+      'https://proxy.example/?http://example.com/wfs',
+    ];
+    const securePage = window.location.protocol === 'https:';
+    return this.test(
+      'Test metadata HTTP URLs upgrade only on HTTPS pages...',
+      (test) => {
+        test.addStep('Normalizing metadata URLs without changing page location...');
+        return urls.map((url) => ServicesManagement.ensureHttpsOnSecurePage(url));
+      },
+      (test, results) => {
+        test.addStep('Verifying HTTP schemes follow the viewer protocol...');
+        Test.assertIsEqual(
+          results[0],
+          securePage ? 'https://example.com/wfs?token=AbC%2f&target=http://other.example/path#layer' : urls[0]
+        );
+        Test.assertIsEqual(results[1], securePage ? 'https://example.com:8080/tiles/{z}/{x}/{y}' : urls[1]);
+
+        test.addStep('Verifying HTTPS, relative, protocol-relative, data, and proxy URLs are unchanged...');
+        Test.assertIsArrayEqual(results.slice(2), urls.slice(2));
+      }
+    );
   }
 
   // #region range()

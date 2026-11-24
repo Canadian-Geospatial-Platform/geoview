@@ -13,6 +13,7 @@ import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import { logger } from '@/core/utils/logger';
 import { generateId, extractGeotiffColorMap } from '@/core/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { EMPTY_FETCH_RESULT, type FetchWithProxyResult } from '@/geo/utils/utilities';
@@ -142,7 +143,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         metadata.assets?.[layerConfig.layerId]?.href
       ) {
         // Update the data access path
-        layerConfig.setDataAccessPath(metadata.assets[layerConfig.layerId].href);
+        layerConfig.setDataAccessPath(ServicesManagement.ensureHttpsOnSecurePage(metadata.assets[layerConfig.layerId].href));
       }
 
       // If there's a projection

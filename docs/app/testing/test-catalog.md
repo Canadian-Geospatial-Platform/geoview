@@ -290,6 +290,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | `testFindPropertyByRegexPath`     | test | Test findPropertyByRegexPath() finds nested properties...      |
 | `testFormatMeasurements`          | test | Test formatMeasurementValue(), formatLength(), formatArea()... |
 | `testNormalizeDatacubeAccessPath` | test | Test normalizeDatacubeAccessPath() transforms URLs...          |
+| `testEnsureHttpsOnSecurePage`     | test | Test metadata HTTP URLs upgrade only on HTTPS pages without changing paths, queries, or other URL schemes... |
 | `testSanitizeHtmlContent`         | test | Test sanitizeHtmlContent() strips dangerous HTML...            |
 | `testEnhanceLinksAccessibility`   | test | Test enhanceLinksAccessibility() adds screen reader text...    |
 | `testGetLocalizedMessage`         | test | Test getLocalizedMessage() returns translated strings...       |

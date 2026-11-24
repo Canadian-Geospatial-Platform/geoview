@@ -37,6 +37,14 @@ Read only the linked section of each doc: search for its heading and read to the
   `AbstractBaseGVLayer.isInVisibleRange(currentResolution)`; inspect signatures before copying old recipes.
 - Time: DateMgt OGC parser, ESRI normalization, TimeSliderController filter generation and registration.
 
+### Metadata URL schemes
+
+The [public mixed-content contract](../../docs/programming/troubleshooting.md#metadata-advertised-resource-urls)
+is implemented by `ServicesManagement.ensureHttpsOnSecurePage` in `geo/utils/services-management.ts`.
+Apply it when consuming advertised URLs, before proxy wrapping; do not rewrite embedded query URLs or
+XML namespace identifiers. OGC items and next links resolve against their service/page URL before upgrading,
+so relative links also follow the secure-page policy after resolution.
+
 ### WFS SLD Graphic-Stroke Rendering
 
 - `WfsRenderer.#buildLayerStyleInfoLineSymbolizer()` retains multiple `LineSymbolizer` strokes and stores endpoint graphics with their `firstPoint`/`lastPoint` placement in `TypeLineStringVectorConfig.graphicStrokes`; do not discard them when building the base line stroke.

@@ -13,6 +13,7 @@ import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
+import { ServicesManagement } from '@/geo/utils/services-management';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
@@ -1854,10 +1855,8 @@ export class GVWMS extends AbstractGVRaster {
     // Fetch and return the image (handle proxy fallback for CORS/network errors)
     if (!queryUrl) throw new ResponseContentError('No url to fetch the legend with');
 
-    // Ensure HTTPS
-    if (queryUrl.toLowerCase().startsWith('http:')) {
-      queryUrl = `https${queryUrl.slice(4)}`;
-    }
+    // Ensure https
+    queryUrl = ServicesManagement.ensureHttpsOnSecurePage(queryUrl);
 
     // If the proxy to use is the Esri proxy
     if (layerConfig.getIsUsingEsriProxy()) {
