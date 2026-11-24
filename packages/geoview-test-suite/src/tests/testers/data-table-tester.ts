@@ -653,8 +653,8 @@ export class DataTableTester extends GVAbstractTester {
         if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
         originalCenter = [...center];
 
-        // Read the existing logger counter instead of replacing its shared render method.
-        const dataTableRenderTrace = 'components/data-table/data-table';
+        // Include the map ID because the logger singleton counter is shared by all maps on the page.
+        const dataTableRenderTrace = `components/data-table/data-table - ${this.getMapId()}`;
         const getDataTableRenderCount = (): number => {
           const renderCount = logger.logCountRenderPerComponent[dataTableRenderTrace];
           if (renderCount === undefined) throw new Error('DataTable render tracing is unavailable in this test environment.');

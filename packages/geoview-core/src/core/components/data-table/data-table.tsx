@@ -253,8 +253,10 @@ function DataTable({
   filterDataToExtent,
   onRendered,
 }: DataTableProps): JSX.Element {
+  const mapId = useStoreGeoViewMapId();
+
   // Log
-  logger.logTraceRender('components/data-table/data-table');
+  logger.logTraceRender(`components/data-table/data-table - ${mapId}`);
 
   const { t } = useTranslation<string>();
 
@@ -265,7 +267,6 @@ function DataTable({
   }, [sxtheme]);
 
   // get store actions and values
-  const mapId = useStoreGeoViewMapId();
   const language = useStoreAppDisplayLanguage();
   const datatableSettings = useStoreDataTableLayerSettings();
   const layerClassFilter = useStoreLayerFilterClass(layerPath);
