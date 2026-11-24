@@ -482,8 +482,8 @@ export class WMS extends AbstractGeoViewRaster {
         trueServiceUrl = trueServiceUrl.slice(0, -1);
       }
 
-      // Normalize the endpoint
-      const trueServiceUrlNormalized = normalizeDatacubeAccessPath(ServicesManagement.ensureHttpsOnSecurePage(trueServiceUrl));
+      // Check url for datacube paths
+      const trueServiceUrlNormalized = ServicesManagement.checkUrlDatacube(ServicesManagement.ensureHttpsOnSecurePage(trueServiceUrl));
 
       // Process
       this.#processMetadataInheritance(fetchResult.data.Capability.Layer);

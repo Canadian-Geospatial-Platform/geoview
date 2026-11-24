@@ -4,7 +4,6 @@ import type { ControllerRegistry } from 'geoview-core/core/controllers/base/cont
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { DetailsTester } from '../testers/details-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite.
@@ -43,11 +42,15 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests the Details panel feature info display and interaction:<br/>
-      <b>Highlight</b> — Clear all highlights after selection<br/>
-      <b>Navigation</b> — Zoom to feature from details panel (bounded for points), including with the panel open over the map; zoom to all results of a layer; pan to the next feature<br/>
-      <b>Selection</b> — Manually selected layer persists across map clicks<br/>`;
-
+    return `Tests Details panel highlighting, selection, zoom, and feature navigation using test-owned layer fixtures:<br/>
+      <b>Highlights</b> — Clear highlights and check their state when closing and reopening the panel<br/>
+      <b>Coordinate information</b> — Toggle coordinate content, update decimal and DMS values after map clicks, and re-enable for the latest location<br/>
+      <b>Feature information</b> — Render polygon fields, images and dates using the map's date format, and Cities and Airborne WMS/WFS fields (Airborne requires VPN)<br/>
+      <b>Group zoom</b> — Fit distinct points, coincident points, tiny extents, polygons and lines; handle missing/invalid extents, geometry lookup, stale requests and interrupted animations<br/>
+      <b>Feature navigation</b> — Bound point-feature zoom; pan to small features, zoom out for larger features and avoid zooming back in<br/>
+      <b>Button state</b> — Disable group zoom after fitting, re-enable it after view changes and stop feature-follow after switching layers<br/>
+      <b>Selection</b> — Preserve the manually selected layer across map clicks<br/>
+      <b>Panel-aware zoom</b> — Keep the feature center clear of the open Details panel and map controls<br/>`;
   }
 
   /**
@@ -56,7 +59,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 6;
+    return 10;
   }
 
   /**
@@ -81,7 +84,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#detailsTester.testClearAllHighlights();
+    await this.#detailsTester.testPolygonFeatureDetailsTable();
 
     // Resolve
     return;
@@ -93,26 +96,35 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Test the coordinate information toggle and map-click updates
+    await this.#detailsTester.testShowCoordinateInfoToggle();
+
+    // Test the rendered polygon feature information and date format
+    await this.#detailsTester.testPolygonFeatureDetailsTable();
+
+    // Test the Airborne WMS/WFS feature information
+    await this.#detailsTester.testAirborneFeatureDetailsTable(this.getIsRunningOnVPN());
+
+    // Test the Cities WMS/WFS feature information
+    await this.#detailsTester.testCitiesFeatureDetailsTable();
+
     // Test clear all highlights
     await this.#detailsTester.testClearAllHighlights();
 
     // Test zoom to all results of a layer (changes zoom, sequential)
-    await this.#detailsTester.testZoomToResultsGroupExtent('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    await this.#detailsTester.testZoomToResultsGroupExtent();
 
     // Test zoom to point feature bound and pan to next feature (changes zoom, sequential)
-    await this.#detailsTester.testZoomToFeatureBoundAndPan('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    await this.#detailsTester.testZoomToFeatureBoundAndPan();
 
     // Test the zoom to all results button availability through the UI (changes zoom, sequential)
-    await this.#detailsTester.testZoomToResultsButtonUnavailableUntilViewChanges(
-      'geojsonLYR5/polygons.json',
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
-    );
+    await this.#detailsTester.testZoomToResultsButtonUnavailableUntilViewChanges();
 
     // Test the selection persistence across map clicks
     await this.#detailsTester.testLayerSelectionPersistence();
 
     // Test zoom to feature with an open app-bar panel
-    await this.#detailsTester.testZoomToFeatureWithPanelOffset(GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    await this.#detailsTester.testZoomToFeatureWithPanelOffset();
 
     // Resolve when all done
     return;

@@ -540,6 +540,7 @@ function testSuiteCreateTable(plugin) {
 }
 
 const testSuiteDurationTimers = {};
+const MIN_STARVATION_TO_CARE = 1000;
 
 function getTestSuiteDurationTimerKey(plugin, idPrefix = '') {
   return `${idPrefix || 'default'}-${plugin.mapViewer.mapId}`;
@@ -772,6 +773,13 @@ function testSuiteAddOrUpdateSuiteRow(plugin, testSuite, idPrefix = '') {
   header.cells[1].style.color = failed ? 'red' : status === 'success' ? 'green' : 'black';
   header.cells[1].style.textAlign = 'center';
   header.cells[2].textContent = testSuite.getDurationFormatted();
+  if (testSuite.getDurationStarvationMs() > MIN_STARVATION_TO_CARE) {
+    const starvation = document.createElement('span');
+    starvation.style.color = 'orange';
+    starvation.title = 'Maximum estimated test starvation duration';
+    starvation.textContent = ` (${testSuite.getDurationStarvationFormatted()})`;
+    header.cells[2].appendChild(starvation);
+  }
   header.cells[2].style.textAlign = 'center';
   header.cells[2].style.fontWeight = 'bold';
   return suiteBody;
@@ -868,7 +876,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   // If the test was starved for over 1 second, put it red
   let durationStarvationIndicator = '';
-  if (durationStarvation > 1000) {
+  if (durationStarvation > MIN_STARVATION_TO_CARE) {
     durationStarvationIndicator = ` <span style='color:orange' title='Estimated starvation duration'>(${durationStarvationFormatted})</span>`;
   }
 

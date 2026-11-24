@@ -95,6 +95,7 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
     <Tooltip title={t('details.toggleCoordinateInfo')} placement="top">
       <span>
         <Switch
+          className="coordinate-info-toggle"
           size={isSmallScreen ? 'small' : 'medium'}
           checked={coordinateInfoEnabled}
           onChange={handleCoordinateInfoToggle}
@@ -147,7 +148,7 @@ export function CoordinateInfo(): JSX.Element {
   const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = memoCoordinateData;
 
   return (
-    <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
+    <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container coordinate-info-content">
       <Box sx={memoSxClasses.coordinateInfoContainer}>
         <List>
           <ListItem sx={memoSxClasses.coordinateInfoSection}>

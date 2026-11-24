@@ -879,9 +879,13 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | Method                       | Type | Description                                          |
 | ---------------------------- | ---- | ---------------------------------------------------- |
 | `testClearAllHighlights`     | test | Test Clear all highlights on layer _{layerPath}_ ... |
-| `testZoomToResultsGroupExtent` | test | Test Zoom to all results for layer _{layerPath}_ ... |
-| `testZoomToFeatureBoundAndPan` | test | Test Zoom to point feature bound and pan to next feature on layer _{layerPath}_ ... |
-| `testZoomToResultsButtonUnavailableUntilViewChanges` | test | Test Zoom to all results button is unavailable until the map view changes on layer _{layerPath}_ ... |
+| `testPolygonFeatureDetailsTable` | test | Check polygon Details field labels, values, images, and map-configured date formatting using a temporary fixture... |
+| `testAirborneFeatureDetailsTable` | test | Check rendered Airborne WMS/WFS location, province, and string date fields; requires VPN and restores the map extent... |
+| `testCitiesFeatureDetailsTable` | test | Check rendered Cities WMS/WFS name and population using a temporary fixture... |
+| `testShowCoordinateInfoToggle` | test | Toggle coordinate information, check decimal and DMS values after map clicks, hide content while disabled, and re-enable for the latest location... |
+| `testZoomToResultsGroupExtent` | test | Test group-result zoom using its own polygon fixture; removes the fixture and restores the map extent... |
+| `testZoomToFeatureBoundAndPan` | test | Test bounded feature zoom and navigation using its own polygon fixture; removes the fixture and restores the map extent... |
+| `testZoomToResultsButtonUnavailableUntilViewChanges` | test | Test zoom-button availability using its own polygon fixture; removes the fixture and restores the map extent... |
 | `testLayerSelectionPersistence` | test | Test Details layer selection persistence across map clicks using added GeoJSON polygons and Top Projects fixtures... |
 
 ---
@@ -896,7 +900,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | Method                                             | Type | Description                                                                      |
 | -------------------------------------------------- | ---- | -------------------------------------------------------------------------------- |
 | `testAddGeoJsonCheckDataTablePopulated`            | test | Test GeoJSON population, hidden geoviewID, column visibility changes, row-count updates, default/disabled map filtering, province/date/global filters, Ontario extent filtering, and temporary row-zoom highlight expiry... |
-| `testAddCommemorativeCheckDataTablePopulated`      | test | Test the 600-feature Esri layer is populated, empty range filters are excluded, and clearing resets column filters... |
+| `testAddCommemorativeCheckDataTablePopulated`      | test | Test the 600-feature Esri layer populates the store and rendered table, visible cells contain loaded feature values, the localized summary reports 600 features, empty range filters are excluded, and clearing resets column filters... |
 | `testEmptyFieldNameDoesNotCrashDataTable`          | test | Test a layer with an empty field name renders the data table without crashing... |
 | `testCitiesNameFilterCount`                        | test | Test Cities name filter for "mo" returns 30; population minimum 1,000,000 returns 6; maximum 1,750,000 returns 3... |
 | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |

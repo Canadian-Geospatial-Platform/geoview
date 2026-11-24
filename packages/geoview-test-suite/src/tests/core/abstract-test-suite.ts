@@ -293,6 +293,27 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
   }
 
   /**
+   * Gets the largest estimated starvation duration among all tests in this suite.
+   *
+   * Taking the maximum avoids adding overlapping delays from concurrent tests.
+   * This is the maximum per-test estimate, not a measurement of suite wall-clock starvation.
+   *
+   * @returns The maximum test starvation duration in milliseconds, or zero when no tests are registered
+   */
+  getDurationStarvationMs(): number {
+    return this.#testers.reduce((maximum, tester) => Math.max(maximum, tester.getDurationStarvationMs()), 0);
+  }
+
+  /**
+   * Gets the maximum test starvation duration as a compact human-readable string.
+   *
+   * @returns The formatted maximum test starvation duration
+   */
+  getDurationStarvationFormatted(): string {
+    return formatDuration(this.getDurationStarvationMs());
+  }
+
+  /**
    * Gets the testers registered with this suite.
    *
    * @returns The registered testers as a read-only collection

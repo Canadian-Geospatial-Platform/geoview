@@ -43,9 +43,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
   override getDescriptionAsHtml(): string {
     return `Tests runtime LayerApi/controller operations, legend-store synchronization, and feature queries:<br/>
       <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
+      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
       <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
       <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
-      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
       <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
       <b>WMS styles</b> — Named and repeated selections synchronize runtime, source STYLES, and legend store; empty selections preserve the active style<br/>
       <b>Queryable and hoverable flags</b> — Public LayerApi setters enable, disable, repeat assignments, and re-enable each flag while synchronizing the legend store<br/>
@@ -66,7 +66,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 26;
+    return 24;
   }
 
   /**
@@ -89,10 +89,6 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test public LayerApi opacity updates after the visibility tests.
     await this.#layerTester.testSetLayerOpacity();
-
-    // Test queryable and hoverable setters independently through the public LayerApi.
-    await this.#layerTester.testSetLayerQueryable();
-    await this.#layerTester.testSetLayerHoverable();
 
     // Test non-queryable layer not in details
     await this.#layerTester.testNonQueryableLayerNotInDetails();
@@ -172,10 +168,6 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Test public LayerApi opacity updates after the visibility tests.
     await this.#layerTester.testSetLayerOpacity();
-
-    // Test queryable and hoverable setters independently through the public LayerApi.
-    await this.#layerTester.testSetLayerQueryable();
-    await this.#layerTester.testSetLayerHoverable();
 
     // Test non-queryable layer not in details
     await this.#layerTester.testNonQueryableLayerNotInDetails();

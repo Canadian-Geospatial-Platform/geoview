@@ -118,6 +118,38 @@ export abstract class AbstractTester {
   }
 
   /**
+   * Gets the sum of available full test lifecycle durations across all registered tests.
+   *
+   * Tests without start and end timestamps do not contribute. Concurrent test durations can overlap.
+   *
+   * @returns The accumulated recorded test duration in milliseconds, or zero when none are available
+   */
+  getDurationMs(): number {
+    return this.#tests.reduce((total, test) => total + (test.getDurationMs() ?? 0), 0);
+  }
+
+  /**
+   * Gets the sum of available execution callback durations, excluding assertions and finalization.
+   *
+   * Tests without callback start and end timestamps do not contribute, including failed callbacks
+   * without a recorded end time. Concurrent callback durations can overlap.
+   *
+   * @returns The accumulated recorded callback duration in milliseconds, or zero when none are available
+   */
+  getDurationTestMs(): number {
+    return this.#tests.reduce((total, test) => total + (test.getDurationTestMs() ?? 0), 0);
+  }
+
+  /**
+   * Gets the largest estimated starvation duration among all registered tests.
+   *
+   * @returns The maximum test starvation duration in milliseconds, or zero when no tests are registered
+   */
+  getDurationStarvationMs(): number {
+    return this.#tests.reduce((maximum, test) => Math.max(maximum, test.getDurationStarvationMs()), 0);
+  }
+
+  /**
    * Resets all the tests
    */
   resetTests(): void {

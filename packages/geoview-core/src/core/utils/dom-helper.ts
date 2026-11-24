@@ -1284,6 +1284,16 @@ export abstract class DomHelper {
   }
 
   /**
+   * Checks whether the Details app bar button is active.
+   *
+   * @param mapId - The map identifier
+   * @returns Whether the Details button exists and has the active class
+   */
+  static getAppBarButtonDetailsActive(mapId: string): boolean {
+    return this.getAppBarButton(mapId, 'details')?.classList.contains('active') ?? false;
+  }
+
+  /**
    * Builds the DOM id for an app bar tab's panel.
    *
    * @param mapId - The map identifier
@@ -1303,6 +1313,16 @@ export abstract class DomHelper {
    */
   static getAppBarPanel(mapId: string, tabId: string): HTMLElement | undefined {
     return this.getGVElementByFullId(mapId, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel`);
+  }
+
+  /**
+   * Gets the Details app bar panel element.
+   *
+   * @param mapId - The map identifier
+   * @returns The Details panel element, if found
+   */
+  static getAppBarPanelDetails(mapId: string): HTMLElement | undefined {
+    return this.getAppBarPanel(mapId, 'details');
   }
 
   /**
@@ -1560,6 +1580,59 @@ export abstract class DomHelper {
 
   // #endregion MAP DOM FUNCTIONS
 
+  // #region DETAILS SPECIFIC
+
+  static readonly Details = class Details {
+    /**
+     * Gets the coordinate information toggle in this map's Details panel.
+     *
+     * @param mapId - The map identifier
+     * @returns The toggle input, if rendered
+     */
+    static getCoordinateInfoToggle(mapId: string): HTMLInputElement | undefined {
+      return DomHelper.getAppBarPanelDetails(mapId)?.querySelector<HTMLInputElement>('.coordinate-info-toggle input') ?? undefined;
+    }
+
+    /**
+     * Gets the coordinate information content in this map's Details panel.
+     *
+     * @param mapId - The map identifier
+     * @returns The coordinate information content, if rendered
+     */
+    static getCoordinateInfoContent(mapId: string): HTMLElement | undefined {
+      return DomHelper.getAppBarPanelDetails(mapId)?.querySelector<HTMLElement>('.coordinate-info-content') ?? undefined;
+    }
+
+    /**
+     * Gets the rendered labels, values, and image sources from a Details feature table.
+     *
+     * @param table - The rendered feature information table
+     * @returns The rendered feature information rows
+     */
+    static getFeatureInfoRows(table: Element): { label: string | undefined; value: string | undefined; images: (string | undefined)[] }[] {
+      return Array.from(table.querySelectorAll<HTMLTableRowElement>('tbody tr.feature-info-row')).map((row) => ({
+        label: row.querySelector('th')?.textContent?.trim(),
+        value: row.querySelector('td')?.textContent?.trim(),
+        images: Array.from(row.querySelectorAll<HTMLImageElement>('td img')).map((image) => image.getAttribute('src') ?? undefined),
+      }));
+    }
+
+    /**
+     * Waits for the feature information table in this map's Details app bar panel.
+     *
+     * @param mapId - The map identifier
+     * @returns A promise that resolves with the rendered table element
+     * @throws {Error} When the Details panel is not found
+     */
+    static waitForFeatureInfoTable(mapId: string): Promise<Element> {
+      const panel = DomHelper.getAppBarPanelDetails(mapId);
+      if (!panel) throw new Error(`Details app bar panel not found for map "${mapId}"`);
+      return DomHelper.waitForDomElement('.details-feature-info-table table', panel);
+    }
+  };
+
+  // #endregion DETAILS SPECIFIC
+
   // #region DATA-TABLE SPECIFIC
 
   static readonly DataTable = class DataTable {
@@ -1597,6 +1670,30 @@ export abstract class DomHelper {
     }
 
     /**
+     * Gets currently rendered data rows, excluding placeholder and empty-state rows.
+     *
+     * @param mapId - The ID of the map containing the data table
+     * @returns Mounted data rows, not the full row set when virtualization is enabled
+     */
+    static getRenderedDataRows(mapId: string): HTMLTableRowElement[] {
+      return Array.from(this.getDataTableContainer(mapId)?.querySelectorAll<HTMLTableRowElement>('tbody tr') ?? []).filter((row) =>
+        row.querySelector('td[data-cell-id]')
+      );
+    }
+
+    /**
+     * Gets trimmed, nonempty text from currently rendered data cells.
+     *
+     * @param mapId - The ID of the map containing the data table
+     * @returns Mounted data cell values, not all feature values when virtualization is enabled
+     */
+    static getRenderedDataCellValues(mapId: string): string[] {
+      return Array.from(this.getDataTableContainer(mapId)?.querySelectorAll('tbody td[data-cell-id]') ?? [])
+        .map((cell) => cell.textContent?.trim() ?? '')
+        .filter((value) => value !== '');
+    }
+
+    /**
      * Waits for the data table element to render inside this map's data table container.
      *
      * @param mapId - The map identifier
@@ -1605,6 +1702,17 @@ export abstract class DomHelper {
      */
     static waitForDataTable(mapId: string): Promise<Element> {
       return DomHelper.waitForDomElement('.data-table-container table', DomHelper.getGVRootElement(mapId));
+    }
+
+    /**
+     * Gets the data table filter results summary within this map.
+     *
+     * @param mapId - The map identifier
+     * @returns The filter results summary element, if found
+     * @throws {Error} When the root element is not found
+     */
+    static getFilterResultsSummary(mapId: string): HTMLElement | undefined {
+      return DomHelper.getGVRootElement(mapId).querySelector('.filter-results-summary') ?? undefined;
     }
 
     /**
