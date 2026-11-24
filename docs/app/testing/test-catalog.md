@@ -635,6 +635,8 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | `testControllerGetFooterHeight`        | test | Test `UIController.getFooterHeight()` from a non-React consumer                              |
 | `testCrosshairCoordinates`             | test | Test SVG artwork center alignment, stale pointer reset, and Enter/Space drawing with padding, panning, and rotation |
 
+> **TODO:** Add back `testPageScrollLock` (two cases, release newest/oldest first) in `MapTester` and register it in this suite (then update `getTestsTotalFinal()`). It checks that overlapping `DomHelper.lockPageScroll` locks keep the page locked until the last release, that repeated releases are harmless, and that the original overflow styles are restored. It was removed to avoid conflicts with the ongoing testing refactor; the implementation is in commit `a65be1b9ea` (#3742).
+
 ---
 
 ### 3.2 Map Config

@@ -44,7 +44,7 @@ import { logger } from '@/core/utils/logger';
 import { Divider } from '@/ui/divider/divider';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DomHelper } from '@/core/utils/dom-helper';
-import { TIMEOUT, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useLayerController, useLayerCreatorController } from '@/core/controllers/use-controllers';
@@ -276,7 +276,11 @@ export function SingleLayer({
     // Set selected layer path
     layerController.setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [layerController, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons]);
+
+    if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
+      DomHelper.scrollFooterIntoViewAfterResize(mapId);
+    }
+  }, [layerController, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons, containerType, mapId]);
 
   /**
    * Handles clicking on the reorder arrow buttons.

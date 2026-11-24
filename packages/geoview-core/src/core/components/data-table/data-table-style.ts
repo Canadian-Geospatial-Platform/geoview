@@ -246,10 +246,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    // Override MRT's overflow hidden: when a wrapped toolbar leaves too little height, scroll toolbar and table together
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    overscrollBehaviorY: 'contain',
   },
   tableContainer: {
     flex: '1 1 0%', // Take the height left below the toolbar so the table scrolls (and its scrollbars stay visible) inside the panel
-    minHeight: 0,
+    minHeight: '200px', // Keep header and a few rows reachable on short or narrow panels (the paper scrolls instead)
     maxHeight: 'none',
   },
   tableHeaderContent: {

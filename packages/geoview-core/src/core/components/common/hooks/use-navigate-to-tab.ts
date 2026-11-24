@@ -59,11 +59,8 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
             onNavigate(layerPath);
           }
 
-          // Scroll the footer into view
-          const footer = DomHelper.getTabsContainer(mapId);
-          if (footer) {
-            DomHelper.scrollIfNotVisible(footer, 'start');
-          }
+          // Let selection scrolling finish first, then scroll the page like a footer-bar click
+          DomHelper.scrollFooterIntoViewAfterResize(mapId);
         }, delay);
       } else if (hasAppBarTab) {
         // Open appBar tab

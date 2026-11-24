@@ -51,9 +51,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Pixel tolerance for viewport geometry and scroll stability. */
   static readonly UI_SCROLL_TOLERANCE_PX = 2;
 
-  /** Default top clearance used by `DomHelper.scrollIfNotVisible` (footer alignment). */
-  static readonly UI_SCROLL_HELPER_OFFSET_PX = 100;
-
   /** WGS84 definition used to exercise local WKT resolution. */
   static readonly WGS84_WKT =
     'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]';

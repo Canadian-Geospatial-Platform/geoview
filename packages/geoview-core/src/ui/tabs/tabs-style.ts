@@ -31,6 +31,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     },
     header: {
       width: '100%',
+      flexShrink: 0,
     },
     rightIcons: {
       marginTop: theme.spacing(0),
@@ -41,7 +42,8 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     panel: {
       borderTop: `1px solid ${theme.palette.divider}`,
       flexGrow: 1,
-      height: isMapFullScreen ? 'calc(100% - 56px)' : `calc(${appHeight} - 56px)`,
+      // In fullscreen the header height varies (e.g. mobile dropdown), so the panel takes the remaining space and may shrink to 0
+      ...(isMapFullScreen ? { flexBasis: 0, minHeight: 0, height: 'auto' } : { height: `calc(${appHeight} - 56px)` }),
       overflow: 'hidden',
       paddingTop: `${theme.spacing(0)} !important`,
       width: '100%',

@@ -20,7 +20,7 @@ import {
 } from 'geoview-core/api/types/map-schema-types';
 import { InvalidViewportMidpointsError, MapViewportUnavailableError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import { CancelledError } from 'geoview-core/core/exceptions/core-exceptions';
-import { MAP_SECTION_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
+import { PAGE_SCROLL_GAP_PX } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import {
   getStoreDetailsFeatures,
@@ -1914,7 +1914,8 @@ export class MapTester extends GVAbstractTester {
    */
   static async #activateFooterTab(context: TypeScrollContext): Promise<void> {
     const { test, mapId, section, footer, preconditions } = context;
-    const helperOffset = GVAbstractTester.UI_SCROLL_HELPER_OFFSET_PX;
+    // The footer header click uses the same gap as the map section top gap
+    const helperOffset = PAGE_SCROLL_GAP_PX;
 
     // Keep the footer control visible but inside the helper's top clearance
     await MapTester.#positionSection(context, helperOffset / 2 - section.getBoundingClientRect().height);
@@ -2050,7 +2051,7 @@ export class MapTester extends GVAbstractTester {
    */
   static #assertScrollMeasurement(scenario: TypeScrollScenario, measurement: TypeScrollMeasurement, viewportHeight: number): void {
     const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
-    const gap = MAP_SECTION_SCROLL_GAP_PX;
+    const gap = PAGE_SCROLL_GAP_PX;
 
     // A section taller than the viewport cannot fit, so it is aligned with its top at the standard gap and nothing else applies
     if (scenario === 'oversized') {
