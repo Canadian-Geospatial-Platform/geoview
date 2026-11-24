@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
@@ -48,19 +48,16 @@ const extractTabName = (fullTabId: string, mapId: string): string => {
 /**
  * Traps keyboard tab focus within a container.
  *
- * TODO: Remove memo — children prop (ReactNode) creates new references on every parent render,
- * making shallow comparison always fail and negating any memo performance benefit.
- *
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export const FocusTrapContainer = memo(({
+export function FocusTrapContainer({
   children,
   open = false,
   focusTrapContainerId,
   restoreFocusElementId,
   containerType,
-}: FocusTrapContainerProps): JSX.Element => {
+}: FocusTrapContainerProps): JSX.Element {
   logger.logTraceRender('component/common/FocusTrapContainer', containerType);
 
   // Hooks
@@ -301,5 +298,4 @@ export const FocusTrapContainer = memo(({
       </Box>
     </FocusTrap>
   );
-});
-FocusTrapContainer.displayName = 'FocusTrapContainer';
+}
