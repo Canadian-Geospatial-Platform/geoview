@@ -652,7 +652,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // 5. Settings is always available on dynamic maps and is intentionally not configuration-controlled.
     if (interaction === 'dynamic') {
       items.push(
-        <ListItem key="settings">
+        // Delegated event boundary, not a control; activation remains on the child buttons.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+        <ListItem key="settings" onClick={handlePopoverClick}>
           <Settings onKeyboardNavigationModeChange={onKeyboardNavigationModeChange} />
         </ListItem>
       );
@@ -702,7 +704,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [memoBottomListItems, sxClasses]);
 
   return (
-    // Delegated listener (not a control): bubbled clicks scroll the shell into view, except About and Notifications popover interactions
+    // Delegated listener (not a control): bubbled clicks scroll the shell into view, except popover interactions
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box

@@ -43,6 +43,70 @@ export class A11yUxTester extends GVAbstractTester {
   // #region PUBLIC METHODS
 
   /**
+   * Tests that opening Settings does not scroll a clipped map section.
+   *
+   * @returns A promise that resolves with the scroll and popover observations
+   */
+  testSettingsDoesNotScrollPage(): Promise<Test<TypeSettingsScrollResult>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalMode = getStoreUIActiveTrapGeoView(mapId);
+    let originalScroll: { x: number; y: number } | undefined;
+
+    return this.test(
+      'Test opening Settings does not scroll the page',
+      async (test): Promise<TypeSettingsScrollResult> => {
+        A11yEntryTester.requireVisibleViewers(mapId);
+        const doc = DomHelper.getGVRootElement(mapId).ownerDocument;
+        const view = doc.defaultView;
+        const settings = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'appBar-settings-btn');
+        const section = DomHelper.getGVElementById(mapId, 'map');
+        if (!view || !settings || !section) throw new TestError('Settings and its map section must be mounted');
+        originalScroll = { x: view.scrollX, y: view.scrollY };
+        uiController.closeMapPopovers();
+        uiController.setActiveTrapGeoView(false);
+        test.addStep('Positioning the scrollable page with Settings visible and the map section clipped above the viewport...');
+        test.addStep('Dispatching a pointer click on Settings...');
+        await DomHelper.waitForReactIdle();
+
+        view.scrollTo({ top: view.scrollY + settings.getBoundingClientRect().bottom - view.innerHeight + 20, behavior: 'instant' });
+        const rect = settings.getBoundingClientRect();
+        if (
+          doc.documentElement.scrollHeight <= view.innerHeight ||
+          view.scrollY <= 0 ||
+          section.getBoundingClientRect().top >= 0 ||
+          rect.top < 0 ||
+          rect.bottom > view.innerHeight
+        ) {
+          throw new TestSkippedError('The page must scroll and show Settings while the map section is clipped above the viewport');
+        }
+
+        const before = view.scrollY;
+        settings.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' }));
+        settings.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        settings.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'mouse' }));
+        settings.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        settings.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await DomHelper.waitForReactIdle();
+        return { before, after: view.scrollY, open: settings.getAttribute('aria-expanded') === 'true' };
+      },
+      (test, result): void => {
+        test.addStep('Verifying Settings opened without moving the page...');
+        Test.assertIsEqual(result.open, true);
+        Test.assertIsEqual(result.after, result.before);
+      },
+      async (): Promise<void> => {
+        if (!originalScroll) return;
+        uiController.closeMapPopovers();
+        uiController.setActiveTrapGeoView(originalMode);
+        await DomHelper.waitForReactIdle();
+        const view = DomHelper.getGVRootElement(mapId).ownerDocument.defaultView;
+        view?.scrollTo({ left: originalScroll.x, top: originalScroll.y, behavior: 'instant' });
+      }
+    );
+  }
+
+  /**
    * Tests Settings click-away before releasing a dispatched Layers pointer press.
    *
    * @returns A promise that resolves with pre-release focus and post-click app-bar observations
@@ -2091,6 +2155,16 @@ export class A11yUxTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Settings opening and page scroll observations. */
+interface TypeSettingsScrollResult {
+  /** Page scroll position before opening. */
+  before: number;
+  /** Page scroll position after opening. */
+  after: number;
+  /** Whether Settings opened. */
+  open: boolean;
+}
 
 /** Pre-release Settings focus and post-click app-bar observations. */
 interface TypeSettingsPointerClickAwayResult {
