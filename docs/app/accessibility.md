@@ -62,16 +62,17 @@ for developer guidance.
 
 #### Focus Traps for Enhanced Navigation
 
-In keyboard navigation mode, activating a panel (e.g., Layers, Legend, Details) enables a keyboard boundary within that panel. Only one inner panel owns that boundary at a time; opening Settings temporarily suspends the previous owner. Normal panels are non-modal, so deliberate pointer interaction outside them is permitted without changing the mode. Auto-opened panels may remain outside the active boundary.
+In keyboard navigation mode, Tab and Shift+Tab wrap within an open app-bar panel (e.g., Layers) while focus is inside it. Settings works the same way while it is open; Esc closes it and returns focus to its button. Clicking a control outside a panel can move focus there without turning keyboard navigation off. An app-bar panel opened by configuration when the map loads gains this boundary when focus enters it.
 
 - This speeds up navigation by preventing focus from cycling through the entire map
 - Close the innermost panel or selection containing focus by pressing **Esc** — focus normally returns to the associated button
 - A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
-With the crosshair active, pressing Enter opens app-bar Details with its feature sub-panel showing
-(or its guide when there are no features). Focus lands on the **main panel's Close button**, not the
-sub-panel's, and remains there as results load. One **Esc** closes Details, focuses the map, and
-reactivates the crosshair for another query.
+**When Details is in the app bar** (it stays there if configured in both bars), pressing Enter with
+the crosshair active opens Details with its feature sub-panel showing (or its guide when there are
+no features). Focus lands on the **main panel's Close button**, not the sub-panel's, and remains
+there as results load. One **Esc** closes Details, focuses the map, and reactivates the crosshair
+for another query.
 
 If focus moves into the feature sub-panel, the first Esc closes only that sub-panel and focuses its
 layer item in the Details layer list. A second Esc closes Details and returns to the crosshair.
@@ -79,6 +80,8 @@ Tabbing, arrow-key navigation, switching results, and mouse movement preserve th
 Focus leaving Details, a mouse click (even inside Details), or the viewer window losing focus cancels it.
 Only Esc uses this return: the **Close** button and mouse-opened Details retain their usual behavior.
 Closing and reopening Details remembers its feature sub-panel and selection unless the sub-panel itself was closed.
+If Details is configured only in the footer, Enter switches the footer to Details and focus stays on
+the map; the Close-button focus and Esc returns above don't apply.
 
 Sub-panels provide similar functionality.
 Scrollable right-panel content is also a keyboard stop; focus it and use the arrow keys to scroll
