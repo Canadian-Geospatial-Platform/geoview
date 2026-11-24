@@ -214,7 +214,7 @@
 
       cgpv.onMapInit((mapViewer) => {
         if (mapViewer.mapId === 'map1') {
-          mapViewer.onMapZoomEnd((sender, event) => {
+          mapViewer.onMapResolutionChanged((sender, event) => {
             document.getElementById('currentZoom').textContent = Math.round(event.zoom * 100) / 100;
           });
         }
