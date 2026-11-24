@@ -441,10 +441,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 950   |
+| Total tests   | 901    | 951   |
 | Automated (A) | 60     | 63    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 718   |
+| Manual (M)    | 672    | 719   |
 
 ## Notes for Release Notes Author
 
