@@ -46,7 +46,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
       <b>Features</b> — allFeaturesDataArray population (GeoJSON + ESRI)<br/>
       <b>Settings</b> — geoviewID column hidden, column visibility toggle, rows filtered count<br/>
       <b>Filters</b> — mapFilteredRecord default/set, global filter disables toggle, column filter set/clear, Cities name and population range filters<br/>
-      <b>Extent filter</b> — Available for vector, unavailable for ESRI Dynamic, zoom-to-Ontario filtering<br/>
+      <b>Extent filter</b> — Available for vector, unavailable for ESRI Dynamic, zoom-to-Ontario filtering, no table re-render on map pan when off<br/>
       <b>Style filter</b> — showUnsymbolizedFeatures:false pre-filters table rows`;
   }
 
@@ -56,7 +56,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 16;
+    return 17;
   }
 
   /**
@@ -114,6 +114,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testRowsFilteredRecordCount(DataTableTester.GEOJSON_LAYER_PATH, 3);
     await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic('forest_industry/0');
     await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
+    await this.#dataTableTester.testMapPanDoesNotRerenderDataTable(DataTableTester.GEOJSON_LAYER_PATH);
     await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable('4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8/6', 68, 213);
     await this.#dataTableTester.testTemporaryZoomHighlightExpires(DataTableTester.GEOJSON_LAYER_PATH);
 

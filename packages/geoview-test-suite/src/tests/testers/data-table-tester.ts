@@ -1,3 +1,5 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -11,7 +13,7 @@ import {
   getStoreDataTableMapFilteredRecord,
   getStoreDataTableRowsFilteredCount,
 } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
+import { getStoreMapExtent, getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
@@ -610,6 +612,81 @@ export class DataTableTester extends GVAbstractTester {
   }
 
   /**
+   * Tests that panning the map does not re-render the data table of a layer that does not filter its data to the map extent.
+   *
+   * Every map extent change (pan, zoom, fullscreen or footer resize) used to rebuild the whole table, which made
+   * entering fullscreen with an open table slow.
+   *
+   * @param layerPath - The layer path to open in the data table
+   * @returns A promise that resolves with whether the map extent changed and the number of table DOM mutations
+   */
+  testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableMutations>> {
+    let observer: MutationObserver | undefined;
+    let originalCenter: Coordinate | undefined;
+
+    return this.test(
+      'Test panning the map does not re-render the data table...',
+      async (test) => {
+        // Wait for layer registration and data-table to be loaded with the layer in question
+        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+
+        // The table must not follow the map extent for this test
+        test.addStep('Disabling filter-by-extent and waiting for the data table to render...');
+        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
+        await DomHelper.DataTable.waitForDataTable(this.getMapId());
+
+        // Force OL to recalculate viewport dimensions (needed when the map tab is hidden), then let the table settle
+        const mapViewer = this.getMapViewer();
+        mapViewer.map.updateSize();
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+
+        const container = DomHelper.DataTable.getDataTableContainer(this.getMapId());
+        if (!container) throw new Error(`No data table container is rendered for ${layerPath}.`);
+
+        const view = mapViewer.getView();
+        const center = view.getCenter();
+        const resolution = view.getResolution();
+        if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
+        originalCenter = [...center];
+
+        // Count every DOM change in the table while the map pans
+        test.addStep('Panning the map while observing the data table DOM...');
+        let mutationCount = 0;
+        observer = new MutationObserver((mutations) => {
+          mutationCount += mutations.length;
+        });
+        observer.observe(container, { subtree: true, childList: true, attributes: true, characterData: true });
+
+        const extentBefore = getStoreMapExtent(this.getMapId());
+        view.setCenter([center[0] + resolution * 100, center[1]]);
+
+        // Process the view change and its moveend (which updates the store extent), then let React apply the update
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+
+        mutationCount += observer.takeRecords().length;
+        observer.disconnect();
+
+        const extentAfter = getStoreMapExtent(this.getMapId());
+        return { extentChanged: JSON.stringify(extentBefore) !== JSON.stringify(extentAfter), mutationCount };
+      },
+      (test, result) => {
+        test.addStep('Verifying the map extent changed in the store...');
+        Test.assertIsEqual(result.extentChanged, true);
+
+        test.addStep(`Verifying the data table DOM did not change (got ${result.mutationCount} mutation(s))...`);
+        Test.assertIsEqual(result.mutationCount, 0);
+      },
+      () => {
+        // Stop observing and restore the map center if the test failed midway
+        observer?.disconnect();
+        if (originalCenter) this.getMapViewer().getView().setCenter(originalCenter);
+      }
+    );
+  }
+
+  /**
    * Tests that a temporary zoom highlight (as used by the data table row zoom) is removed automatically.
    *
    * @returns A promise resolving when the test completes
@@ -858,3 +935,15 @@ export class DataTableTester extends GVAbstractTester {
 
   // #endregion PRIVATE METHODS
 }
+
+// #region TYPES AND INTERFACES
+
+/** Result of the map pan data table re-render test. */
+export type TestMapPanTableMutations = {
+  /** Whether the map extent in the store changed after the pan. */
+  extentChanged: boolean;
+  /** The number of DOM mutation records observed in the data table during the pan. */
+  mutationCount: number;
+};
+
+// #endregion TYPES AND INTERFACES

@@ -866,6 +866,7 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                                      |
 | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer...                    |
 | `testFilterByExtentOnGeoJSONOntario`               | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...                     |
+| `testMapPanDoesNotRerenderDataTable`               | test | Test panning the map does not re-render the data table...                        |
 | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table...                    |
 | `testTemporaryZoomHighlightExpires`                | test | Test temporary zoom highlight is removed automatically...                        |
 
