@@ -116,8 +116,25 @@
         data-config="{
           'map': {
             'viewSettings': { 'projection': 3573, 'initialView': { 'zoomAndCenter': [3, [-110, 80]] } },
-            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
-            'listOfGeoviewLayerConfig': []
+            'basemapOptions': { 'basemapId': 'nogeom', 'shaded': false, 'labeled': false },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'ogcWmts',
+                'geoviewLayerId': 'arctic-sdi',
+                'geoviewLayerName': 'Arctic SDI Basemap',
+                'useAsBasemap': true,
+                'listOfLayerEntryConfig': [{
+                  'layerId': 'arctic_cascading',
+                  'tileMatrixSet': '3573',
+                  'source': {
+                    'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+                    'resolutionLevels': 11,
+                    'projection': 3573,
+                    'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
+                  }
+                }]
+              }
+            ]
           },
           'components': ['north-arrow'],
           'navBar': ['zoom'],
