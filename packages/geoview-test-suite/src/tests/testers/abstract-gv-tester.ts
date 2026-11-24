@@ -2217,6 +2217,9 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @returns A promise that resolves after the query and batched store propagation complete
    */
   async simulateMapClickWaitForBatchedQuery(test: Test, clickCoordinates: Coordinate): Promise<void> {
+    // Before querying, make sure the map render is synchronized, this can be necessary for vector layers that were just added to the map
+    await this.getMapViewer().waitForRender();
+
     // Simulate map click
     test.addStep(`Simulating map click on all queryable layers for coordinate [${clickCoordinates.join(', ')}]...`);
     await this.getMapViewer().simulateMapClick(clickCoordinates);
@@ -2242,6 +2245,7 @@ export abstract class GVAbstractTester extends AbstractTester {
       // Wait for the React UI to actually pick up on the store update
       test.addStep(`Waiting on the ${tabId} panel to open...`);
       await DomHelper.waitForAppbarTabSelected(this.getMapId(), tabId);
+      await DomHelper.waitForReactIdle();
     } else {
       test.addStep(`Closing ${tabId} app bar panel...`);
       this.getControllersRegistry().uiController.setActiveAppBarTab(tabId, false, false);
@@ -2250,6 +2254,18 @@ export abstract class GVAbstractTester extends AbstractTester {
       test.addStep(`Waiting on the ${tabId} panel to close...`);
       await DomHelper.waitForAppbarTabNotSelected(this.getMapId(), tabId);
     }
+  }
+
+  /**
+   * Opens or closes the Details app bar tab and waits for its active class to reflect the requested state.
+   *
+   * @param test - The test instance used to record each step
+   * @param open - Whether to open or close the Details tab
+   * @returns A promise that resolves when the Details tab reaches the requested state
+   */
+  toggleAppbarTabDetails(test: Test, open: boolean): Promise<void> {
+    // Redirect
+    return this.toggleAppbarTab(test, 'details', open);
   }
 
   /**

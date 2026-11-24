@@ -121,13 +121,13 @@ export class DataTableTester extends GVAbstractTester {
   }
 
   /**
-   * Tests Commemorative data-table population and setting/clearing column filters in the store.
+   * Tests Commemorative data-table population in the store and UI, and setting/clearing column filters in the store.
    *
-   * NOTE: This test only verifies store-level set/clear. The MRT table does not react to programmatic
+   * NOTE: Filter checks only verify store-level set/clear. The MRT table does not react to programmatic
    * `setColumnFiltersRecord` changes — it manages its own internal filter state. Therefore, `rowsFilteredRecord`
    * cannot be verified here (it only updates when the user interacts with the filter UI directly).
    *
-   * @returns A promise that resolves with the table state and filters before and after clearing
+   * @returns A promise that resolves with rendered population observations, table state, and filters before and after clearing
    */
   testAddCommemorativeCheckDataTablePopulated(): Promise<Test<CommemorativeDataTableResult>> {
     const columnFilters: TypeColumnFiltersState = [
@@ -150,6 +150,19 @@ export class DataTableTester extends GVAbstractTester {
         // Get the settings
         const settings = getStoreDataTableLayerSettings(this.getMapId())[fixtureLayerPath];
 
+        test.addStep('Capturing rendered data rows, cell text, and the feature summary...');
+        await DomHelper.waitForReactIdle();
+        const renderedRowCount = DomHelper.DataTable.getRenderedDataRows(this.getMapId()).length;
+        const renderedCellValues = DomHelper.DataTable.getRenderedDataCellValues(this.getMapId());
+        const featureValues = commemorativeData?.flatMap((feature) =>
+          Object.values(feature.fieldInfo)
+            .map((field) => field?.value)
+            .filter((value) => typeof value === 'string' && value.trim() !== '')
+            .map((value) => String(value).trim())
+        );
+        const summaryText = DomHelper.DataTable.getFilterResultsSummary(this.getMapId())?.textContent?.trim();
+        const expectedSummary = `600 ${getLocalizedMessage(getStoreAppDisplayLanguage(this.getMapId()), 'dataTable.features')}`;
+
         test.addStep(`Setting ${columnFilters.length} active column filters and an empty range filter in the store...`);
         this.getControllersRegistry().dataTableController.setColumnFiltersRecord(fixtureLayerPath, [
           ...columnFilters,
@@ -162,11 +175,32 @@ export class DataTableTester extends GVAbstractTester {
         const filtersAfter = getStoreDataTableLayerSettings(this.getMapId())[fixtureLayerPath]?.columnFiltersRecord;
 
         // Return the data
-        return { commemorativeData, settings, filtersBefore, filtersAfter };
+        return {
+          commemorativeData,
+          settings,
+          filtersBefore,
+          filtersAfter,
+          renderedRowCount,
+          renderedCellValues,
+          featureValues,
+          summaryText,
+          expectedSummary,
+        };
       },
       (test, result) => {
         test.addStep('Verifying allFeaturesDataArray has entries for the layer...');
         Test.assertIsArrayLengthEqual(result.commemorativeData, 600);
+
+        test.addStep('Verifying the rendered table contains data rows and loaded feature values...');
+        Test.assertIsEqual(result.renderedRowCount > 0, true);
+        Test.assertIsArrayLengthMinimal(result.renderedCellValues, 1);
+        Test.assertIsEqual(
+          result.renderedCellValues.some((value) => result.featureValues?.includes(value)),
+          true
+        );
+
+        test.addStep('Verifying the rendered summary reports all 600 features...');
+        Test.assertIsEqual(result.summaryText, result.expectedSummary);
 
         test.addStep(`Verifying only the ${columnFilters.length} active filters are stored...`);
         Test.assertIsArrayLengthEqual(result.filtersBefore, columnFilters.length);
@@ -906,6 +940,11 @@ type CommemorativeDataTableResult = {
   settings: IDataTableSettings;
   filtersBefore: TypeColumnFiltersState | undefined;
   filtersAfter: TypeColumnFiltersState | undefined;
+  renderedRowCount: number;
+  renderedCellValues: string[];
+  featureValues: string[] | undefined;
+  summaryText: string | undefined;
+  expectedSummary: string;
 };
 
 /** Default GeoJSON settings and store setter observations. */

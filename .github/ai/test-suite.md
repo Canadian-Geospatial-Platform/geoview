@@ -28,6 +28,8 @@ Read only the linked section of each doc: search for its heading and read to the
 - Put `Test.assert*` calls in `callbackAssert`, never in the execution `callback`; return observations for assertion, use `callbackFinalize` for cleanup, and match `Test<T>` to the result.
 - Use `test.addStep`, generated IDs, shared constants, instance helpers and `testError` for expected errors.
 - Map-state-changing tests run sequentially after independent parallel tests.
+- When `onLaunchTestSuite()` calls change, review and update `getDescriptionAsHtml()` to reflect the
+  current coverage ([suite authoring](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite)).
 - Keep each changed suite's `getTestsTotalFinal()` aligned with its full-pipeline calls; include heavy-gated
   tests and exclude debug/commented calls. The catalog is unnumbered and the release checklist has no test
   totals, so test changes do not require documentation count reconciliation.
