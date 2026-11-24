@@ -43,7 +43,7 @@ interface DataPanelType {
 /**
  * Renders the data panel with layer list and data table.
  *
- * @param props - Datapanel properties
+ * @param props - Properties defined in DataPanelType interface
  * @returns The data panel element
  */
 export function Datapanel({ containerType }: DataPanelType): JSX.Element {
@@ -106,7 +106,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    *
    * Kept apart from the extent filtering so the layer data keeps its identity when the map moves.
    */
-  const memoSymbolizedLayerData = useMemo(() => {
+  const memoSymbolizedLayerData = useMemo<MappedLayerDataType[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - memoSymbolizedLayerData', memoOrderedLayerData, showUnsymbolizedFeatures);
 
@@ -122,9 +122,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    *
    * Layers that do not filter to the extent keep their identity, so the table is not rebuilt when the map moves.
    */
-  const memoFilteredOrderedLayerData = useMemo(() => {
+  const memoFilteredOrderedLayerData = useMemo<MappedLayerDataType[]>(() => {
     // Log
-    logger.logTraceUseMemo('DATA-PANEL - memoFilteredOrderedLayerData', memoSymbolizedLayerData, filterExtent);
+    logger.logTraceUseMemo('DATA-PANEL - memoFilteredOrderedLayerData', memoSymbolizedLayerData, filterExtent, datatableSettings);
 
     if (!filterExtent) return memoSymbolizedLayerData;
 
@@ -134,6 +134,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       return { ...layer, features: layer.features.filter((feature) => feature.geometry?.intersectsExtent(filterExtent)) };
     });
   }, [memoSymbolizedLayerData, filterExtent, datatableSettings]);
+
+  // #region Handlers
 
   /**
    * Handles layer selection change from the layer list.
@@ -155,6 +157,22 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const handleTableRendered = useCallback((): void => {
     setPendingLayerPath(undefined);
   }, []);
+
+  /**
+   * Handles panel close and restores focus to the layer list item.
+   */
+  const handlePanelClosed = useCallback((): void => {
+    // If we have a selected layer, tell disableFocusTrap to focus it
+    if (selectedLayerPath) {
+      // Build the full layer list item ID that matches the DOM
+      const layerListItemId = `${mapId}-${containerType}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
+      uiController.disableFocusTrap(layerListItemId);
+    } else {
+      uiController.disableFocusTrap('no-focus');
+    }
+  }, [mapId, selectedLayerPath, uiController, containerType]);
+
+  // #endregion
 
   /**
    * Mounts the (heavy) table only after the skeleton has painted.
@@ -248,20 +266,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     },
     [getFeaturesOfLayer, isMapFilteredSelectedForLayer]
   );
-
-  /**
-   * Handles panel close and restores focus to the layer list item.
-   */
-  const handlePanelClosed = useCallback((): void => {
-    // If we have a selected layer, tell disableFocusTrap to focus it
-    if (selectedLayerPath) {
-      // Build the full layer list item ID that matches the DOM
-      const layerListItemId = `${mapId}-${containerType}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
-      uiController.disableFocusTrap(layerListItemId);
-    } else {
-      uiController.disableFocusTrap('no-focus');
-    }
-  }, [mapId, selectedLayerPath, uiController, containerType]);
 
   /**
    * Checks if the selected layer is disabled due to null features.
