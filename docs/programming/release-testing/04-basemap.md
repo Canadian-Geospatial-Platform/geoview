@@ -6,14 +6,15 @@
 
 Basemap selector and basemap options.
 
-Both LCC (EPSG:3978) and WM (EPSG:3857) share the same set of basemap options (transport, simple, imagery, osm, nogeom) — they use different tile URLs per projection but the selector buttons are the same. EPSG:3573 has no default basemaps; the circumpolar demo uses a WMTS layer with `useAsBasemap: true` as a workaround.
+LCC (EPSG:3978), WM (EPSG:3857), and North Pole LAEA (EPSG:3573) share the same set of basemap options (transport, simple, imagery, osm, nogeom) — they use different tile URLs per projection but the selector buttons are the same.
 
 ## Basemap Selector
 
-| Test                    | Description                           | Steps                                                                             | Expected Result                                                                                | Auto |
-| ----------------------- | ------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---- |
-| All basemap types (LCC) | Verify each basemap in LCC projection | 1. On Map 1, click each basemap button (Transport, Simple, Imagery, OSM, No Geom) | Tiles load correctly, no blank/white tiles, labels render (if applicable), attribution updates | M    |
-| All basemap types (WM)  | Verify each basemap in WM projection  | 1. On Map 2, use the basemap selector in navbar<br>2. Switch to each basemap      | Same basemap options available, tiles load correctly, no blank/white tiles                     | M    |
+| Test                     | Description                           | Steps                                                                                                                                                        | Expected Result                                                                                | Auto |
+| ------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ---- |
+| All basemap types (LCC)  | Verify each basemap in LCC projection | 1. On Map 1, click each basemap button (Transport, Simple, Imagery, OSM, No Geom)                                                                            | Tiles load correctly, no blank/white tiles, labels render (if applicable), attribution updates | M    |
+| All basemap types (WM)   | Verify each basemap in WM projection  | 1. On Map 2, use the basemap selector in navbar<br>2. Switch to each basemap                                                                                 | Same basemap options available, tiles load correctly, no blank/white tiles                     | M    |
+| All basemap types (3573) | Verify each basemap in EPSG:3573      | 1. On Map 1, use the navbar projection button to switch to North Pole LAEA Canada<br>2. Click each basemap button (Transport, Simple, Imagery, OSM, No Geom) | Same basemap options available, tiles load correctly, no blank/white tiles                     | M    |
 
 ## Labels & Shaded Relief
 

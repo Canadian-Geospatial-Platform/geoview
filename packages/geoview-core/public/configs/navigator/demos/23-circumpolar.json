@@ -16,9 +16,9 @@
       "projection": 3573
     },
     "basemapOptions": {
-      "basemapId": "nogeom",
-      "shaded": false,
-      "labeled": false
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
     },
     "listOfGeoviewLayerConfig": [
       {
@@ -32,29 +32,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "sambr:C2f4_average_sea-ice_extant_sept_1979"
-          }
-        ]
-      },
-      {
-        "geoviewLayerType": "ogcWmts",
-        "geoviewLayerId": "arctic-sdi",
-        "geoviewLayerName": "arctic-sdi",
-        "useAsBasemap": true,
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "arctic_cascading",
-            "tileMatrixSet": "3573",
-            "source": {
-              "extent": [
-                -4889334.802955,
-                -4889334.802955,
-                4889334.802955,
-                4889334.802955
-              ],
-              "resolutionLevels": 11,
-              "projection": 3573,
-              "dataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts"
-            }
           }
         ]
       }

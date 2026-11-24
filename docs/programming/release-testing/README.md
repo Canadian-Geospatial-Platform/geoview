@@ -144,7 +144,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications                  | 25 min       | 60 (1/15/44)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation                        | 15 min       | 21 (2/7/12)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers                      | 15 min       | 25 (7/16/2)          |
-| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                               | 5 min        | 9 (0/6/3)            |
+| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                               | 5 min        | 10 (0/6/4)           |
 | 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer                             | 15 min       | 29 (0/9/20)          |
 | 6   | [06-overview-map.md](06-overview-map.md)                       | Overview map, hide on zoom, projection switch                         | 5 min        | 8 (5/0/3)            |
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen                              | 15 min       | 31 (0/12/19)         |
@@ -173,7 +173,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                               | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests                    | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator                      | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                                       | **~445 min** | **950 (63/169/718)** |
+|     | **TOTAL**                                                      |                                                                       | **~445 min** | **951 (63/169/719)** |
 
 **Test breakdown:**
 
@@ -181,8 +181,8 @@ Each release gets its own issue. Previous release test results are preserved as 
 | ----------------- | ------- | ---------------------------------------------------------- |
 | **A** — Automated | 63      | Covered by `geoview-test-suite` (no manual effort needed)  |
 | **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 718     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **950** | All tests across all files                                 |
+| **M** — Manual    | 719     | Requires manual verification (UI, visual, interaction)     |
+| **Total**         | **951** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 

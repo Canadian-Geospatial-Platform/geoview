@@ -4,7 +4,7 @@
 >
 > **Test page**: [rt-06-overview-map.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-06-overview-map.html) — Map 1 (LCC with overview map, hideOnZoom: 7, projection switch), Map 2 (no overview map).
 
-Overview map behavior, hide on zoom, and projection switch. The overview map is only available for LCC (EPSG:3978) and WM (EPSG:3857) — it is not created for EPSG:3573.
+Overview map behavior, hide on zoom, and projection switch. The overview map is only available for LCC (EPSG:3978), WM (EPSG:3857), and North Pole LAEA (EPSG:3573).
 
 ## Presence
 
@@ -25,7 +25,7 @@ Overview map behavior, hide on zoom, and projection switch. The overview map is 
 
 | Test                          | Description                           | Steps                                                        | Expected Result                                                        | Auto |
 | ----------------------------- | ------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- | ---- |
-| Overview map switches basemap | Basemap updates on projection change  | 1. On Map 1, switch projection (LCC → WM)                    | Overview map updates its basemap to match the new projection           | M    |
+| Overview map switches basemap | Basemap updates on projection change  | 1. On Map 1, switch projection (LCC → WM → North Pole LAEA)  | Overview map updates its basemap to match the new projection           | M    |
 | Overview map extent           | Extent indicator correct after switch | 1. After switching projection, check the overview map extent | Overview map shows the correct extent indicator for the new projection | M    |
 
 ## Combined: Hide on Zoom + Projection Switch

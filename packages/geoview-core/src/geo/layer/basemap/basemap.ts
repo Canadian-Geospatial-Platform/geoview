@@ -38,7 +38,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
- * can be filtered by projection (currently only WM and LCC projections are listed,
+ * can be filtered by projection (currently only WM, LCC, and North Pole LAEA projections are listed,
  * in case other projections needed, they need to be added to the list).
  */
 export class BasemapApi {
@@ -151,6 +151,36 @@ export class BasemapApi {
         jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
       },
     },
+    3573: {
+      transport: {
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3573_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3573_V_OSM/VectorTileServer?f=json',
+        styleUrl:
+          'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/9cf742e4d6014b8ab5724d4a394be380/resources/styles/root.json',
+      },
+      simple: {
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_Grey_3573/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_Grey_3573/VectorTileServer?f=json',
+        styleUrl:
+          'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/Simple_Grey_3573/VectorTileServer/resources/styles/root.json',
+      },
+      shaded: {
+        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json',
+      },
+      label: {
+        url: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3573_V_OSM/VectorTileServer',
+        jsonUrl: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3573_V_OSM/VectorTileServer?f=json',
+        styleUrl: {
+          en: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/d3597665d27341909f017e73a1f54fcd/resources/styles/root.json',
+          fr: 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/d1a1bbfe11eb4a7cbf0d979807394a3f/resources/styles/root.json',
+        },
+      },
+      imagery: {
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        jsonUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/?f=json',
+      },
+    },
   };
 
   /** Callback delegates for the basemap changed event */
@@ -237,9 +267,9 @@ export class BasemapApi {
    * @returns A promise that resolves when the overview map basemap has been created and set
    */
   async setOverviewMap(): Promise<void> {
-    // Only create overview map for supported projections (3857 and 3978)
+    // Only create overview map for supported projections (3857, 3978, 3573)
     const projectionCode = this.#mapViewer.getProjectionNumber();
-    if (projectionCode !== 3857 && projectionCode !== 3978) return;
+    if (!this.basemapsList[projectionCode]) return;
 
     try {
       // Create the Core Basemap
