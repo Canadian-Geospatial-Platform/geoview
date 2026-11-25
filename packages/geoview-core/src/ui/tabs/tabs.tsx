@@ -249,13 +249,15 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
       // toggle on -1, so that when no tab is selected on fullscreen
       // and tab is selected again to open the panel.
-      if (value === index || value === -1) onToggleCollapse?.();
+      const togglesPanel = value === index || value === -1;
+      const isClosing = togglesPanel && isCollapsed === false && onToggleCollapse !== undefined;
+      if (togglesPanel) onToggleCollapse?.();
 
-      // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
-      if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
+      // WCAG - Collapse must release ownership so reopening is a new focus entry.
+      if (activeTrap && !isClosing) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabs, mapId]
+    [activeTrap, isCollapsed, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabs, mapId]
   );
 
   /**

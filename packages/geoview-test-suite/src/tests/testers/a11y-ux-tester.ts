@@ -44,6 +44,118 @@ export class A11yUxTester extends GVAbstractTester {
   // #region PUBLIC METHODS
 
   /**
+   * Tests footer focus ownership through Exit, collapse, and reopening.
+   *
+   * @param input - The dispatched activation method
+   * @returns A promise that resolves with footer focus and ownership observations
+   */
+  testFooterPanelReopensWithFocus(input: 'keyboard' | 'pointer'): Promise<Test<TypeFooterPanelReopenResult>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const view = DomHelper.getGVRootElement(mapId).ownerDocument.defaultView;
+    const originalScroll = view ? { x: view.scrollX, y: view.scrollY } : undefined;
+    const originalMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalAppBar = getStoreUIActiveAppBarTab(mapId);
+    const originalFooter = getStoreUIActiveFooterBarTab(mapId);
+    const originalFocusItem = getStoreUIFocusItem(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+    const originalCrosshair = getStoreAppIsCrosshairsActive(mapId);
+
+    return this.test(
+      `Test footer Exit, collapse, and reopen focus with ${input} activation`,
+      async (test): Promise<TypeFooterPanelReopenResult> => {
+        A11yEntryTester.requireVisibleViewers(mapId);
+        const tab = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'tab-data-table');
+        if (!tab) throw new TestError('The existing Data Table footer tab must be mounted');
+        uiController.closeMapPopovers();
+        uiController.setCrosshairActive(false);
+        uiController.setActiveAppBarTab(undefined, false, false);
+        uiController.setActiveFooterBarTab(undefined, false);
+        uiController.setFooterBarIsOpen(false);
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveTrapGeoView(true);
+        await DomHelper.waitForReactIdle();
+        tab.focus();
+
+        /** Dispatches activation and supplies only the browser defaults synthetic events do not perform. */
+        const activate = async (control: HTMLButtonElement, key: 'Enter' | ' ' = 'Enter'): Promise<void> => {
+          if (input === 'pointer') {
+            control.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+            if (control.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))) control.focus();
+            control.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+            control.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+            control.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+          } else {
+            const keyDownAllowed = control.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+            if (key === 'Enter' && keyDownAllowed) control.click();
+            const keyUpAllowed = control.dispatchEvent(new KeyboardEvent('keyup', { key, bubbles: true, cancelable: true }));
+            if (key === ' ' && keyDownAllowed && keyUpAllowed) control.click();
+          }
+          await DomHelper.waitForReactIdle();
+        };
+
+        test.addStep('Opening the existing footer and checking its first Exit focus...');
+        await activate(tab);
+        const exit = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'footerBar-data-table-panel-close-btn');
+        if (!exit) throw new TestError('The open Data Table footer must expose Exit');
+        const initialExitFocused = DomHelper.getActiveElement() === exit;
+
+        test.addStep('Activating Exit without collapsing the footer...');
+        await activate(exit, ' ');
+        const exitReturnedFocus = DomHelper.getActiveElement() === tab;
+        const exitKeptPanelOpen = getStoreUIActiveFooterBarTab(mapId).isOpen;
+        const exitReleasedOwnership = getStoreUIFocusItem(mapId).activeElementId === false;
+
+        test.addStep('Collapsing the footer and checking that it releases ownership...');
+        await activate(tab);
+        const collapsed = !getStoreUIActiveFooterBarTab(mapId).isOpen;
+        const collapseReleasedOwnership = getStoreUIFocusItem(mapId).activeElementId === false;
+
+        test.addStep('Reopening the footer and checking Exit focus and ownership...');
+        await activate(tab, ' ');
+        return {
+          initialExitFocused,
+          exitReturnedFocus,
+          exitKeptPanelOpen,
+          exitReleasedOwnership,
+          collapsed,
+          collapseReleasedOwnership,
+          reopened: getStoreUIActiveFooterBarTab(mapId).isOpen,
+          reopenExitFocused: DomHelper.getActiveElement() === exit,
+          reopenOwnsFocus: getStoreUIFocusItem(mapId).activeElementId === tab.id,
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying initial entry and Exit preserve the expected footer behavior...');
+        Test.assertIsEqual(result.initialExitFocused, true);
+        Test.assertIsEqual(result.exitReturnedFocus, true);
+        Test.assertIsEqual(result.exitKeptPanelOpen, true);
+        Test.assertIsEqual(result.exitReleasedOwnership, true);
+        test.addStep('Verifying collapse releases ownership...');
+        Test.assertIsEqual(result.collapsed, true);
+        Test.assertIsEqual(result.collapseReleasedOwnership, true);
+        test.addStep('Verifying reopening focuses Exit and reacquires ownership...');
+        Test.assertIsEqual(result.reopened, true);
+        Test.assertIsEqual(result.reopenExitFocused, true);
+        Test.assertIsEqual(result.reopenOwnsFocus, true);
+      },
+      async (test): Promise<void> => {
+        if (test.getStatus() === 'skipped') return;
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveFooterBarTab(originalFooter.tabId, false);
+        uiController.setFooterBarIsOpen(originalFooter.isOpen);
+        uiController.setActiveAppBarTab(originalAppBar.tabId, originalAppBar.isOpen, originalAppBar.isFocusTrapped ?? false);
+        uiController.setActiveTrapGeoView(originalMode);
+        uiController.enableFocusTrap({ ...originalFocusItem, focusOnEntry: false });
+        await DomHelper.waitForReactIdle();
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+        uiController.setCrosshairActive(originalCrosshair);
+        if (originalScroll) view?.scrollTo({ left: originalScroll.x, top: originalScroll.y, behavior: 'instant' });
+      }
+    );
+  }
+
+  /**
    * Tests that a selected Layers sub-panel lets a Settings pointer press and popover keep focus.
    *
    * @returns A promise that resolves with pre-release focus and Settings switch observations
@@ -2265,6 +2377,28 @@ export class A11yUxTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Footer focus and ownership observations across Exit, collapse, and reopening. */
+interface TypeFooterPanelReopenResult {
+  /** Whether initial entry focused Exit. */
+  initialExitFocused: boolean;
+  /** Whether Exit returned focus to the tab. */
+  exitReturnedFocus: boolean;
+  /** Whether Exit left the panel open. */
+  exitKeptPanelOpen: boolean;
+  /** Whether Exit released focus ownership. */
+  exitReleasedOwnership: boolean;
+  /** Whether the next tab activation collapsed the panel. */
+  collapsed: boolean;
+  /** Whether collapse released focus ownership. */
+  collapseReleasedOwnership: boolean;
+  /** Whether the final tab activation reopened the panel. */
+  reopened: boolean;
+  /** Whether reopening focused Exit. */
+  reopenExitFocused: boolean;
+  /** Whether the reopened panel owns focus. */
+  reopenOwnsFocus: boolean;
+}
 
 /** Focus observations across a Layers-to-Settings pointer sequence. */
 interface TypeLayersSettingsFocusResult {

@@ -239,6 +239,9 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   consume the crosshair return.
   Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
   a newer modal or panel.
+  Footer [Tabs](../../packages/geoview-core/src/ui/tabs/tabs.tsx) releases ownership on collapse and
+  acquires it on open/selection. Registering ownership while collapsing consumes the entry transition,
+  so reopening the same tab cannot retrigger focus from unchanged owner values.
   About, Notifications, and navbar popovers read the current store owner in their coordination effects.
   If a different active owner exists, close without restoring focus; acquire ownership only when unowned.
   Keep the opening handler's pre-close snapshot for ordinary dismissal, but discard it when yielding.

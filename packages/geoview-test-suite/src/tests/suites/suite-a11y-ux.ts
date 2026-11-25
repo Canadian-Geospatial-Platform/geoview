@@ -63,7 +63,7 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
    * @returns The full-suite test count
    */
   override getTestsTotalFinal(): number {
-    return 27;
+    return 29;
   }
 
   /**
@@ -113,6 +113,10 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
       await this.#a11yEntryTester.testStaticEntryEnable();
       await this.#a11yEntryTester.testForwardAndReverseEntrySkip();
       await this.#a11yEntryTester.testSkipKeepsFocusUnderStationaryPointer();
+
+      // Tab activation schedules upstream's uncancellable delayed footer scroll; run after scroll-sensitive tests.
+      await this.#a11yUxTester.testFooterPanelReopensWithFocus('keyboard');
+      await this.#a11yUxTester.testFooterPanelReopensWithFocus('pointer');
       await this.#a11yEntryTester.testTwoMapKeyboardShortcuts();
       await this.#a11yEntryTester.testUnansweredPromptStaysOpenOnMouseMove();
     })();

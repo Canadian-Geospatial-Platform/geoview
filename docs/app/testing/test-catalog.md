@@ -965,5 +965,6 @@ are checked separately in the [manual WCAG plan](../../programming/release-testi
 | `testStaticEntryEnable`                              | test | Verify Enable focuses the static companion viewer's shell without activating its crosshair, then restores its interaction mode                      |
 | `testForwardAndReverseEntrySkip`                     | test | Verify Skip lands on the opposite outer link in each direction, reverse Enable lands on the map skip link, and each scrolls fully into the viewport |
 | `testSkipKeepsFocusUnderStationaryPointer`           | test | Verify a still pointer leaves Skip focus on the bottom outer link, and hover focus (moved, repeated, or without keyboard focus) lets arrows pan     |
+| `testFooterPanelReopensWithFocus`                    | test | Keyboard and pointer variants: Exit leaves the footer open and returns to its tab; collapse releases ownership; reopening focuses Exit              |
 | `testTwoMapKeyboardShortcuts`                        | test | Verify crosshair blur and Ctrl+M/Ctrl+Q affect only the appropriate viewer                                                                          |
 | `testUnansweredPromptStaysOpenOnMouseMove`           | test | Verify mouse movement on the dialog overlay does not dismiss the unanswered prompt                                                                  |
