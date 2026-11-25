@@ -55,8 +55,6 @@ interface ResponsiveGridLayoutProps {
   containerType: TypeContainerBox;
   titleFullscreen: string;
   toggleMode?: boolean;
-  /** Allows the owning panel to move focus outside the right sub-panel. */
-  disableEnforceFocus?: boolean;
   /** Allows automatically opened content to take focus without affecting explicit user navigation. */
   focusOnEntry?: boolean;
 }
@@ -108,7 +106,6 @@ const ResponsiveGridLayout = forwardRef(
       containerType,
       titleFullscreen,
       toggleMode = false,
-      disableEnforceFocus = false,
       focusOnEntry = true,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
@@ -693,8 +690,9 @@ const ResponsiveGridLayout = forwardRef(
 
       // Wrap the content box in FocusTrap - control activation via 'open' prop
       // disableAutoFocus is used to prevent modals fighting for focus when opened
+      // Non-modal panels keep their Tab boundary without reclaiming pointer or popover focus.
       const wrappedMainContent = (
-        <FocusTrap open={shouldTrapFocus} disableAutoFocus disableEnforceFocus={disableEnforceFocus}>
+        <FocusTrap open={shouldTrapFocus} disableAutoFocus disableEnforceFocus>
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused

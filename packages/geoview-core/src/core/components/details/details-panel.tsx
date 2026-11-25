@@ -1085,7 +1085,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       guideContentIds={[TABS.DETAILS]}
       hideEnlargeBtn={containerType === CONTAINER_TYPE.APP_BAR}
       toggleMode={containerType === CONTAINER_TYPE.APP_BAR}
-      disableEnforceFocus={containerType === CONTAINER_TYPE.APP_BAR}
       focusOnEntry={
         containerType !== CONTAINER_TYPE.APP_BAR ||
         focusItem.escapeReturn?.containerId !== DomHelper.buildAppBarPanelId(mapId, TABS.DETAILS)

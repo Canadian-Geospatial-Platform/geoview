@@ -10,6 +10,7 @@ import {
   getStoreUIFocusItem,
 } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreAppIsCrosshairsActive } from 'geoview-core/core/stores/states/app-state';
+import { getStoreLayerSelectedLayerPath } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreDetailsCurrentFeatureIndex, getStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreMapPointerPosition, setStoreMapPointerPosition } from 'geoview-core/core/stores/states/map-state';
 import type { FeatureInfoLayerSet, QueryEndedEvent } from 'geoview-core/geo/layer/layer-sets/feature-info-layer-set';
@@ -41,6 +42,115 @@ export class A11yUxTester extends GVAbstractTester {
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
+
+  /**
+   * Tests that a selected Layers sub-panel lets a Settings pointer press and popover keep focus.
+   *
+   * @returns A promise that resolves with pre-release focus and Settings switch observations
+   */
+  testLayersSubPanelYieldsToSettings(): Promise<Test<TypeLayersSettingsFocusResult>> {
+    const mapId = this.getMapId();
+    const { uiController, layerController } = this.getControllersRegistry();
+    const originalMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalAppBar = getStoreUIActiveAppBarTab(mapId);
+    const originalFocusItem = getStoreUIFocusItem(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+    const originalCrosshair = getStoreAppIsCrosshairsActive(mapId);
+    const originalSelectedLayer = getStoreLayerSelectedLayerPath(mapId);
+    let selectionClose: HTMLButtonElement | undefined;
+    let removeFocusListeners: (() => void) | undefined;
+
+    return this.test(
+      'Test Layers sub-panel yields pointer and popover focus to Settings',
+      async (test): Promise<TypeLayersSettingsFocusResult> => {
+        A11yEntryTester.requireVisibleViewers(mapId);
+        const root = DomHelper.getGVRootElement(mapId);
+        const layers = DomHelper.getAppBarButton(mapId, 'layers');
+        const settings = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'appBar-settings-btn');
+        if (!layers || !settings) throw new TestError('Layers and Settings controls must be mounted');
+        uiController.closeMapPopovers();
+        uiController.setCrosshairActive(false);
+        uiController.setActiveAppBarTab(undefined, false, false);
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveTrapGeoView(true);
+        await DomHelper.waitForReactIdle();
+
+        test.addStep('Opening Layers and selecting its existing polygon layer...');
+        layers.click();
+        await DomHelper.waitForReactIdle();
+        const panel = DomHelper.getAppBarPanel(mapId, 'layers');
+        const panelClose = DomHelper.getAppBarPanelCloseButton(mapId, 'layers');
+        if (!panel || !panelClose) throw new TestError('Layers must expose its panel and header Close');
+        await whenThisThen(() => DomHelper.getActiveElement() === panelClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        const layerRow = panel.querySelector<HTMLElement>('[role="button"][id*="-appBar-layers-"]');
+        if (!layerRow) throw new TestError('Layers must contain a selectable layer row');
+        layerRow.focus();
+        layerRow.click();
+        await DomHelper.waitForReactIdle();
+        selectionClose = panel.querySelector<HTMLButtonElement>('button[aria-label="Close selection"]') ?? undefined;
+        if (!selectionClose) throw new TestError('Selecting a layer must expose its sub-panel Close');
+        await whenThisThen(() => DomHelper.getActiveElement() === selectionClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+
+        test.addStep('Pressing Settings and applying the browser mousedown focus default before mouseup...');
+        settings.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+        settings.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        settings.focus();
+        const pointerFocusRetained = DomHelper.getActiveElement() === settings;
+        let switchReceivedFocus = false;
+        let switchLostFocus = false;
+        const switchId = DomHelper.buildGVElementId(mapId, 'appBar-settings-panel-keyboard-navigation');
+
+        /** Records transient focus theft even if another entry callback later focuses the switch again. */
+        const recordSwitchFocus = (event: FocusEvent): void => {
+          if (!(event.target instanceof HTMLElement) || event.target.id !== switchId) return;
+          if (event.type === 'focusin') switchReceivedFocus = true;
+          else switchLostFocus = true;
+        };
+        root.addEventListener('focusin', recordSwitchFocus, true);
+        root.addEventListener('focusout', recordSwitchFocus, true);
+        removeFocusListeners = (): void => {
+          root.removeEventListener('focusin', recordSwitchFocus, true);
+          root.removeEventListener('focusout', recordSwitchFocus, true);
+        };
+
+        test.addStep('Releasing Settings and checking that its switch receives and keeps focus...');
+        settings.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+        settings.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        await DomHelper.waitForReactIdle();
+        const settingsOpened = settings.getAttribute('aria-expanded') === 'true';
+        await whenThisThen(() => switchReceivedFocus, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await DomHelper.waitForReactIdle();
+        return {
+          pointerFocusRetained,
+          settingsOpened,
+          switchReceivedFocus,
+          switchKeptFocus: !switchLostFocus && DomHelper.getActiveElement()?.id === switchId,
+        };
+      },
+      (test, result): void => {
+        test.addStep('Verifying Settings kept focus before mouseup...');
+        Test.assertIsEqual(result.pointerFocusRetained, true);
+        test.addStep('Verifying Settings opened and its switch kept focus...');
+        Test.assertIsEqual(result.settingsOpened, true);
+        Test.assertIsEqual(result.switchReceivedFocus, true);
+        Test.assertIsEqual(result.switchKeptFocus, true);
+      },
+      async (test): Promise<void> => {
+        removeFocusListeners?.();
+        if (test.getStatus() === 'skipped') return;
+        uiController.closeMapPopovers();
+        selectionClose?.click();
+        layerController.setSelectedLayerPath(originalSelectedLayer ?? '');
+        uiController.disableFocusTrap('no-focus');
+        uiController.setActiveAppBarTab(originalAppBar.tabId, originalAppBar.isOpen, originalAppBar.isFocusTrapped ?? false);
+        uiController.setActiveTrapGeoView(originalMode);
+        uiController.enableFocusTrap({ ...originalFocusItem, focusOnEntry: false });
+        await DomHelper.waitForReactIdle();
+        if (originalFocus instanceof HTMLElement && DomHelper.getGVRootElement(mapId).contains(originalFocus)) originalFocus.focus();
+        uiController.setCrosshairActive(originalCrosshair);
+      }
+    );
+  }
 
   /**
    * Tests that opening Settings does not scroll a clipped map section.
@@ -2155,6 +2265,18 @@ export class A11yUxTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Focus observations across a Layers-to-Settings pointer sequence. */
+interface TypeLayersSettingsFocusResult {
+  /** Whether Settings retained the mousedown default focus before mouseup. */
+  pointerFocusRetained: boolean;
+  /** Whether the click opened Settings. */
+  settingsOpened: boolean;
+  /** Whether the Settings entry callback focused its switch. */
+  switchReceivedFocus: boolean;
+  /** Whether the switch retained focus without a transient departure. */
+  switchKeptFocus: boolean;
+}
 
 /** Settings opening and page scroll observations. */
 interface TypeSettingsScrollResult {

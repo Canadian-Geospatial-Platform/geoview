@@ -246,7 +246,11 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   for app-bar map popovers so Ctrl/Cmd+M closure is derived before map focus and cannot reclaim focus
   in a passive effect.
   [ResponsiveGridLayout](../../packages/geoview-core/src/core/components/common/responsive-grid-layout.tsx)
-  also checks toggle/mobile mode, content, and right-panel visibility.
+  also checks toggle/mobile mode, content, and right-panel visibility when deciding which controls
+  to show. Its nested non-modal trap always uses `disableEnforceFocus`: Tab/Shift+Tab still wrap at
+  its sentinels, but pointer or popover focus outside the sub-panel is not reclaimed. Apply this
+  shared rule to app-bar and footer consumers, not a Details-only override. Fullscreen dialogs
+  retain their own containment. Do not add `disableRestoreFocus`.
 - [DetailsPanel](../../packages/geoview-core/src/core/components/details/details-panel.tsx) records
   `focusItem.escapeReturn` (app-bar Details container and map target IDs from `DomHelper`) before
   showing its right panel and focusing the main Close button for a crosshair query. Keep this on
@@ -259,9 +263,6 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   ResponsiveGridLayout reads the latest permission through a ref, not an opening-effect dependency;
   re-enabling permission when the link clears must not steal focus back. Cancel pending autofocus
   frames on cleanup and preserve explicit layer/Guide navigation.
-  Enable `disableEnforceFocus` only for app-bar Details: main Close is outside the inner feature trap,
-  and leaving Details must stay effective rather than being pulled back. Tab/Shift+Tab still wrap;
-  other ResponsiveGridLayout consumers keep default enforcement. Do not add `disableRestoreFocus`.
   Do not reset the right panel on outer dismissal: reopening via app-bar, Close, Esc, or Ctrl+M must
   retain its existing sub-panel/feature selection.
 - Right-panel scrolling belongs to `.panel-content-container`, not its outer wrapper. It takes the

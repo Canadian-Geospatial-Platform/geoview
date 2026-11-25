@@ -63,7 +63,7 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
    * @returns The full-suite test count
    */
   override getTestsTotalFinal(): number {
-    return 26;
+    return 27;
   }
 
   /**
@@ -91,6 +91,7 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
       await this.#a11yUxTester.testFullscreenPopoverFocusReturn();
       await this.#a11yUxTester.testSettingsDoesNotScrollPage();
       await this.#a11yUxTester.testSettingsPointerClickAway();
+      await this.#a11yUxTester.testLayersSubPanelYieldsToSettings();
       await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('fullscreen');
       await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('legend fullscreen');
       await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('lightbox');
