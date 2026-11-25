@@ -603,10 +603,10 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly IMAGE_SERVER_USA_LAYER_ID_CITIES: string = '0';
   static readonly IMAGE_SERVER_USA_LAYER_ID_ROADS: string = '1';
 
-  /** OWS Mundialis */
-  static readonly OWS_MUNDIALIS: string = 'https://ows.mundialis.de/services/service'; // NOTE: Doesn't support EPSG:3978
-  static readonly OWS_MUNDIALIS_LAYER_ID: string = 'Dark';
-  static readonly OWS_MUNDIALIS_ICON_IMAGE: string =
+  /** OWS Terrestris */
+  static readonly OWS_TERRESTRIS: string = 'https://ows.terrestris.de/osm/service'; // NOTE: Doesn't support EPSG:3978
+  static readonly OWS_TERRESTRIS_LAYER_ID: string = 'Dark';
+  static readonly OWS_TERRESTRIS_ICON_IMAGE: string =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAMklEQVR4AezSIQ4AAAgCQMeL+P/ntBuRJm5GCDdAsp2PMl8K76AxjKEgkNkIaCvy0HAAAAD//5nQepcAAAAGSURBVAMA0jAfVcgPVAkAAAAASUVORK5CYII=';
 
   /** Datacube MSI */
@@ -1350,21 +1350,21 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Adds the OWS Mundialis WMS layer and waits for loading and legend resolution.
+   * Adds the OWS Terrestris WMS layer and waits for loading and legend resolution.
    *
    * @param test - The test instance used to log layer setup steps
    * @returns An immediate fixture result whose `promiseLayer` resolves with the loaded selected layer after its legend has been queried
    */
-  addLayerWMSWithOWSMundialis<T>(test: Test<T>): GVLayerFixtureResult<GVWMS> {
+  addLayerWMSWithOWSTerrestris<T>(test: Test<T>): GVLayerFixtureResult<GVWMS> {
     const gvLayerId = generateId();
-    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.OWS_MUNDIALIS_LAYER_ID}`;
-    const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
-    const gvLayerName = 'OWS Mundialis';
+    const fixtureLayerPath = `${gvLayerId}/${GVAbstractTester.OWS_TERRESTRIS_LAYER_ID}`;
+    const layerUrl = GVAbstractTester.OWS_TERRESTRIS;
+    const gvLayerName = 'OWS Terrestris';
 
     // Create the config
     test.addStep('Creating the GeoView Layer Configuration...');
     const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
-      { id: GVAbstractTester.OWS_MUNDIALIS_LAYER_ID },
+      { id: GVAbstractTester.OWS_TERRESTRIS_LAYER_ID },
     ]);
 
     // Redirect to helper to add the layer to the map and wait

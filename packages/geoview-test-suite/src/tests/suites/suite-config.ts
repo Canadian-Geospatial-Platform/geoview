@@ -119,11 +119,11 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test EsriImage Elevation config
     const pProcessEsriImage = this.#configTester.testInitEsriImageWithElevation();
 
-    // Test WMS OWSMundialis config
-    const pWMSMundialis = this.#configTester.testInitWMSLayerWithOWSMundialis();
+    // Test WMS OWSTerrestris config
+    const pWMSTerrestris = this.#configTester.testInitWMSLayerWithOWSTerrestris();
 
-    // Test WMS OWSMundialis config no full sub layers
-    const pWMSMundialisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSMundialisNoFullSubLayers();
+    // Test WMS OWSTerrestris config no full sub layers
+    const pWMSTerrestrisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSTerrestrisNoFullSubLayers();
 
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testInitWMSLayerWithDatacubeMSI();
@@ -215,8 +215,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pInitEsriImage,
       pInitEsriImageBadUrl,
       pProcessEsriImage,
-      pWMSMundialis,
-      pWMSMundialisNoFullSubLayers,
+      pWMSTerrestris,
+      pWMSTerrestrisNoFullSubLayers,
       pWMSDatacubeMSI,
       pWMSDatacubeMSINoFullSubLayers,
       pWMSBadUrl,

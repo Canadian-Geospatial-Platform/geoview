@@ -645,25 +645,25 @@ export class LayerTester extends GVAbstractTester {
   // #region WMS
 
   /**
-   * Tests adding a WMS Layer from OWS Mundialis on the map.
+   * Tests adding a WMS Layer from OWS Terrestris on the map.
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractBaseGVLayer>> {
+  testAddWMSLayerWithOWSTerrestris(): Promise<Test<AbstractBaseGVLayer>> {
     let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
-      `Test Adding WMS Mundialis on map...`,
+      `Test Adding WMS Terrestris on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const fixture = this.addLayerWMSWithOWSMundialis(test);
+        const fixture = this.addLayerWMSWithOWSTerrestris(test);
         fixtureLayerPath = fixture.layerPath;
         return fixture.promiseLayer;
       },
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.OWS_MUNDIALIS_ICON_IMAGE);
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.OWS_TERRESTRIS_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
