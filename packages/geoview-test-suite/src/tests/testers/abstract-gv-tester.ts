@@ -604,7 +604,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly IMAGE_SERVER_USA_LAYER_ID_ROADS: string = '1';
 
   /** OWS Mundialis */
-  static readonly OWS_MUNDIALIS: string = 'https://ows.mundialis.de/services/service'; // NOTE: Doesn't support EPSG:3978
+  static readonly OWS_MUNDIALIS: string = 'https://ows.terrestris.de/osm/service'; // NOTE: Doesn't support EPSG:3978
   static readonly OWS_MUNDIALIS_LAYER_ID: string = 'Dark';
   static readonly OWS_MUNDIALIS_ICON_IMAGE: string =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAMklEQVR4AezSIQ4AAAgCQMeL+P/ntBuRJm5GCDdAsp2PMl8K76AxjKEgkNkIaCvy0HAAAAD//5nQepcAAAAGSURBVAMA0jAfVcgPVAkAAAAASUVORK5CYII=';
