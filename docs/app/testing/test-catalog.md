@@ -946,7 +946,7 @@ are checked separately in the [manual WCAG plan](../../programming/release-testi
 
 | Method                                               | Type | Description                                                                                                                                         |
 | ---------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `testFullscreenPopoverFocusReturn`                   | test | Enter navBar fullscreen once; check Resize Close restoration and fullscreen-exit focus after Resize and its trigger unmount                         |
+| `testFullscreenPopoverFocusReturn`                   | test | Enter navBar fullscreen; check Resize Close and pointer-commit focus return, the committed value, and fullscreen-exit focus                           |
 | `testSettingsDoesNotScrollPage`                      | test | Open Settings on a scrollable page with the map clipped and verify the page position does not change                                                |
 | `testSettingsPointerClickAway`                       | test | Dispatch a Layers press with the Settings switch focused; verify Settings closes without opener focus before mouseup, then click opens Layers        |
 | `testLayersSubPanelYieldsToSettings`                 | test | Select a layer; verify Settings retains mousedown focus before mouseup, then opens and keeps focus on its keyboard-navigation switch                   |

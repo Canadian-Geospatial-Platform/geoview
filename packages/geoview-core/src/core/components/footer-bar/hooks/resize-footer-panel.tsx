@@ -200,14 +200,12 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   const handleOnSliderChangeCommitted = useCallback(
     (value: number | number[]): void => {
       if (!isPointerInteractionRef.current) return;
-      isPointerInteractionRef.current = false;
 
+      // Apply the committed value last because closePanel may flush a pending keyboard value.
+      closePanel(true);
       uiController.setFooterPanelResizeValue(value as number);
-      setPendingValue(undefined);
-      setOpen(false);
-      setAnchorEl(null);
     },
-    [uiController]
+    [closePanel, uiController]
   );
 
   // #endregion Handlers

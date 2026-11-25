@@ -190,13 +190,11 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   effect schedules a second render whose focus-trap cleanup can run after map focus. New map-control
   popovers use the `useMapPopover` hook, which owns that derivation, rather than re-implementing it.
   Keep the animated Popper wrapper at module scope: creating it during render remounts its focus trap.
-  Popper owns guarded opener restoration when its focus-managed content closes: restore only if focus
-  remains inside or fell to the document body on unmount. Do not re-enable unconditional MUI restoration,
-  which can override a caller's explicit map/panel destination. Keep restoration in the open-lifetime
-  effect (`[open]`), separate from selector/transition-dependent entry focus, and preserve the original
-  opener across those updates. Resize relies on this shared behavior for Close; its slider Enter handler
-  separately restores after layout changes. Native browser fullscreen Escape is not a synthetic popup-close
-  test path; the fullscreen regression covers Close and click-away (#3694).
+  Popper does not restore focus on unmount: the dismissal owner decides whether to focus its trigger.
+  Explicit Close, Escape, and Resize pointer commit restore it; click-away and superseding controller
+  closes do not steal focus from their destination. Do not infer this decision from the active DOM element
+  or re-enable MUI restoration. Native browser fullscreen Escape is not a synthetic popup-close test path;
+  Group 6 covers Resize Close, pointer commit, and fullscreen exit (#3694).
   Crosshair coordinate checks must measure the SVG artwork center, not just its element box;
   off-center artwork can leave a visible offset even when viewport coordinates are correct.
   Compare tolerances in the unit being measured: layout snaps to 1/64 px, which is meters at low zoom,

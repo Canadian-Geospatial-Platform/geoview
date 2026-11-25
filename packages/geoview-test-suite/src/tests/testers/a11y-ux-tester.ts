@@ -495,9 +495,9 @@ export class A11yUxTester extends GVAbstractTester {
   }
 
   /**
-   * Tests focus restoration after closing Resize and leaving navBar fullscreen.
+   * Tests focus restoration after Resize dismissal and leaving navBar fullscreen.
    *
-   * @returns A promise that resolves with Close and fullscreen-exit focus observations
+   * @returns A promise that resolves with Resize and fullscreen-exit observations
    */
   testFullscreenPopoverFocusReturn(): Promise<Test<TypeFullscreenPopoverFocusResult>> {
     const mapId = this.getMapId();
@@ -508,6 +508,7 @@ export class A11yUxTester extends GVAbstractTester {
     const originalFocus = DomHelper.getActiveElement();
     let closeButton: HTMLButtonElement | undefined;
     let enteredFullscreen = false;
+    let originalResizeValue: number | undefined;
 
     return this.test(
       'Test navBar fullscreen Resize Close and fullscreen exit restore focus',
@@ -573,6 +574,10 @@ export class A11yUxTester extends GVAbstractTester {
           return {
             resizeReached,
             closeRestored: false,
+            pointerClosed: false,
+            pointerValue: undefined,
+            expectedPointerValue: undefined,
+            pointerFocusRestored: false,
             fullscreenControlsUnmounted: false,
             exitFocusRestored: false,
           };
@@ -593,9 +598,37 @@ export class A11yUxTester extends GVAbstractTester {
         await delay(MODAL_FOCUS_SETTLE_MS);
         const closeRestored = DomHelper.getActiveElement() === resizeButton;
 
-        test.addStep('Exiting browser fullscreen while Resize Close owns focus...');
-        resizeButton.focus();
+        test.addStep('Committing a Resize slider value with a dispatched pointer press and release...');
         await openResize();
+        const input = closeButton?.closest('[role="dialog"]')?.querySelector<HTMLInputElement>('input[type="range"]');
+        const slider = input?.closest<HTMLElement>('.MuiSlider-root');
+        if (!input || !slider) throw new TestError('Resize must expose its slider');
+        originalResizeValue = Number(input.value);
+        const expectedPointerValue = originalResizeValue === 100 ? 35 : 100;
+        input.focus();
+        const rect = slider.getBoundingClientRect();
+        if (!rect.height) throw new TestError('Resize slider must have a visible track');
+        const pointer = {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          pointerType: 'mouse',
+          clientX: rect.left + rect.width / 2,
+          clientY: expectedPointerValue === 100 ? rect.top : rect.bottom,
+        };
+        slider.dispatchEvent(new PointerEvent('pointerdown', { ...pointer, button: 0, buttons: 1 }));
+        await DomHelper.waitForReactIdle();
+        slider.ownerDocument.dispatchEvent(new PointerEvent('pointerup', { ...pointer, button: 0, buttons: 0 }));
+        await DomHelper.waitForReactIdle();
+        const pointerClosed = resizeButton.getAttribute('aria-expanded') === 'false';
+        const pointerFocusRestored = DomHelper.getActiveElement() === resizeButton;
+        if (pointerClosed) await openResize();
+        const reopenedInput = closeButton?.closest('[role="dialog"]')?.querySelector<HTMLInputElement>('input[type="range"]');
+        if (!reopenedInput) throw new TestError('Resize must expose its slider after the pointer commit');
+        const pointerValue = Number(reopenedInput.value);
+
+        test.addStep('Exiting browser fullscreen while Resize Close owns focus...');
+        closeButton?.focus();
 
         // exitFullscreen fires the same fullscreenchange as browser-handled Esc, which a synthetic key cannot invoke.
         await shell.ownerDocument.exitFullscreen();
@@ -604,6 +637,10 @@ export class A11yUxTester extends GVAbstractTester {
         return {
           resizeReached,
           closeRestored,
+          pointerClosed,
+          pointerValue,
+          expectedPointerValue,
+          pointerFocusRestored,
           fullscreenControlsUnmounted: !getFullscreenElement() && !closeButton?.isConnected && !resizeButton.isConnected,
           exitFocusRestored: DomHelper.getActiveElement() === fullscreenButton,
         };
@@ -613,6 +650,11 @@ export class A11yUxTester extends GVAbstractTester {
         Test.assertIsEqual(result.resizeReached, true);
         test.addStep('Verifying Close returned focus to Resize...');
         Test.assertIsEqual(result.closeRestored, true);
+        test.addStep('Verifying the pointer commit closed Resize and applied its value...');
+        Test.assertIsEqual(result.pointerClosed, true);
+        Test.assertIsEqual(result.pointerValue, result.expectedPointerValue);
+        test.addStep('Verifying the pointer commit returned focus to Resize...');
+        Test.assertIsEqual(result.pointerFocusRestored, true);
         test.addStep('Verifying fullscreen exit unmounted Resize and its trigger...');
         Test.assertIsEqual(result.fullscreenControlsUnmounted, true);
         test.addStep('Verifying lost fullscreen focus returned to the navBar fullscreen button...');
@@ -625,6 +667,7 @@ export class A11yUxTester extends GVAbstractTester {
           uiController.setFullScreen(false);
           await whenThisThen(() => !getFullscreenElement(), GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
         }
+        if (originalResizeValue !== undefined) uiController.setFooterPanelResizeValue(originalResizeValue);
         uiController.setActiveFooterBarTab(originalFooter.tabId, false);
         uiController.setFooterBarIsOpen(originalFooter.isOpen);
         uiController.setActiveTrapGeoView(originalMode);
@@ -2537,6 +2580,14 @@ interface TypeFullscreenPopoverFocusResult {
   resizeReached: boolean;
   /** Whether Close returned focus to Resize. */
   closeRestored: boolean;
+  /** Whether the pointer commit closed Resize. */
+  pointerClosed: boolean;
+  /** The value displayed after the pointer commit. */
+  pointerValue: number | undefined;
+  /** The value selected by the pointer commit. */
+  expectedPointerValue: number | undefined;
+  /** Whether the pointer commit returned focus to Resize. */
+  pointerFocusRestored: boolean;
   /** Whether leaving browser fullscreen unmounted Resize and its fullscreen-only trigger. */
   fullscreenControlsUnmounted: boolean;
   /** Whether focus lost when Resize unmounted returned to the navBar fullscreen button. */

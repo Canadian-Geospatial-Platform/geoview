@@ -97,7 +97,7 @@ The Esc key intelligently handles different scenarios:
 
 Nested content, time-slider deferred closing, and browser fullscreen can affect which action happens first. See [intentional interaction patterns](#002-intentional-interaction-patterns) and [fullscreen constraints](#fullscreen-api-and-esc-key-priority).
 
-Closing a floating control panel returns focus to its opening button unless focus has already moved to another control.
+Explicitly closing a floating control panel returns focus to its opening button. Clicking away or moving to another panel leaves focus at its new destination.
 
 ### 2. For Screen Reader Users
 
