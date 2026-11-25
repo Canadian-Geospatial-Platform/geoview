@@ -221,9 +221,8 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   `DomHelper.getWCAGLinkToMap(mapId)` for dynamic maps or `DomHelper.getShellElement(mapId)` for static maps.
   Static maps omit the inner skip link; the shell has `tabIndex=-1` and accepts programmatic focus without FocusTrap autofocus.
   Do not focus the OpenLayers target or activate the crosshair on entry; the skip link owns that action.
-  The inactive entry prompt may be dismissed by real pointer movement outside the prompt, but movement
-  must not disable an already-enabled mode. Ignore zero movement and cancel any pending focus job when
-  dismissing the prompt.
+  The unanswered entry prompt is modal; pointer movement neither dismisses it nor changes keyboard mode.
+  It closes only through Enable or Skip. Movement after Enable leaves keyboard mode unchanged.
   Fullscreen exit restores map focus for active crosshair drawing/measurement on the next animation
   frame, after browser focus restoration. Cancel pending restoration on controller unhook or fullscreen re-entry.
 - [FocusTrapContainer](../../packages/geoview-core/src/core/components/common/focus-trap-container.tsx)
