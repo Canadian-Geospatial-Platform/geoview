@@ -449,13 +449,13 @@ export class ConfigTester extends GVAbstractTester {
   // #region WMS
 
   /**
-   * Tests a WMS Config using OWS Mundialis.
+   * Tests a WMS Config using OWS Terrestris.
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testInitWMSLayerWithOWSMundialis(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithOWSTerrestris(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.OWS_MUNDIALIS;
+    const url = ConfigTester.OWS_TERRESTRIS;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -472,7 +472,7 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the Esri Feature config
     return this.test(
-      'Test a WMS with OWS Mundialis',
+      'Test a WMS with OWS Terrestris',
       (test) => {
         // Set step
         test.addStep(`Initializing config on url: ${url}`);
@@ -508,13 +508,13 @@ export class ConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Tests a WMS Config using OWS Mundialis without full sub layers.
+   * Tests a WMS Config using OWS Terrestris without full sub layers.
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testInitWMSLayerWithOWSMundialisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithOWSTerrestrisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.OWS_MUNDIALIS;
+    const url = ConfigTester.OWS_TERRESTRIS;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -531,7 +531,7 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the Esri Feature config
     return this.test(
-      'Test a WMS with OWS Mundialis no full sub layers',
+      'Test a WMS with OWS Terrestris no full sub layers',
       (test) => {
         // Set step
         test.addStep(`Initializing config on url: ${url}`);

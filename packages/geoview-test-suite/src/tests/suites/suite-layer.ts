@@ -114,8 +114,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
 
-    // Test adding layer OWS Mundialis
-    const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+    // Test adding layer OWS Terrestris
+    const pLayerWMSOWSTerrestris = this.#layerTester.testAddWMSLayerWithOWSTerrestris();
 
     // Test adding layer
     const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
@@ -234,7 +234,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerEsriImageElevation,
       pLayerEsriImageUSA,
       pLayerEsriImageBadUrl,
-      pLayerWMSOWSMundialis,
+      pLayerWMSOWSTerrestris,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
       pLayerWMSLandcoverGroupDimension,
