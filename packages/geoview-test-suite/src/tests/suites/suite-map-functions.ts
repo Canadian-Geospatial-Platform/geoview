@@ -42,16 +42,17 @@ export class GVTestSuiteMapFunctions extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests runtime map navigation, projection, basemap, and UI controller operations:<br/>
-      <b>Map state</b> — Initial state verification, zoom operations, extent/coordinate navigation<br/>
-      <b>Projection</b> — Switch between EPSG:3978 and EPSG:3857, vector tile warning<br/>
+      <b>Map state</b> — Initial state verification<br/>
+      <b>Crosshair</b> — Keyboard crosshair coordinates with padding, rotation and stale mouse positions<br/>
+      <b>Navigation</b> — Zoom operations, projection/extent switching between EPSG:3978 and EPSG:3857, extent and coordinate navigation<br/>
       <b>Basemap</b> — Runtime basemap creation and activation<br/>
       <b>North arrow</b> — Rotation computation under LCC projection<br/>
-      <b>UI tabs</b> — Footer bar select/create tab, app bar select tab<br/>
-      <b>Language</b> — Runtime language switch<br/>
+      <b>Vector tiles</b> — Projection warning<br/>
       <b>Geometry</b> — Geometry group z-index updates<br/>
+      <b>Language</b> — Runtime language switch<br/>
+      <b>UI tabs</b> — Footer bar selection, app bar selection, then footer bar tab creation<br/>
       <b>Fullscreen</b> — Restore the original view without interaction; preserve the current view after interaction<br/>
       <b>UI</b> — Details panel guide Top anchor; footer-height getter for non-React consumers<br/>
-      <b>Interaction</b> — Keyboard crosshair coordinates with padding, rotation and stale mouse positions<br/>
       <b>Page scrolling</b> — Partially visible, transitioning, already visible, and oversized map sections, run with exclusive page access`;
   }
 

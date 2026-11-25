@@ -14,5 +14,5 @@ Task routing: [test-suite.md](../ai/test-suite.md) → **Enforcement reminders**
 - Shared map changes run sequentially; prefer event registration waits and await controller zoom.
 - Tester files keep every `type`/`interface` in a `// #region TYPES AND INTERFACES` at the bottom, after the class.
 - Any test change requires all-suite count reconciliation and both catalog/release totals.
-- When `onLaunchTestSuite()` calls change, review and update `getDescriptionAsHtml()` to reflect current coverage; keep `getTestsTotalFinal()` aligned with the calls. See [suite authoring](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite).
+- When `onLaunchTestSuite()` calls change, review and update `getDescriptionAsHtml()` to reflect coverage in source call order (including parallel launch order); group only adjacent related tests. Keep `getTestsTotalFinal()` aligned with the calls. See [suite authoring](../../docs/app/testing/creating-tests.md#step-2-create-a-test-suite).
 - Update the unnumbered catalog inventory when test methods change; the automated checklist has no test totals and only needs edits when suite execution rows change.

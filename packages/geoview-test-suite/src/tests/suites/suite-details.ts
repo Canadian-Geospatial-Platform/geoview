@@ -43,9 +43,9 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests Details panel highlighting, selection, zoom, and feature navigation using test-owned layer fixtures:<br/>
-      <b>Highlights</b> — Clear highlights and check their state when closing and reopening the panel<br/>
       <b>Coordinate information</b> — Toggle coordinate content, update decimal and DMS values after map clicks, and re-enable for the latest location<br/>
-      <b>Feature information</b> — Render polygon fields, images and dates using the map's date format, and Cities and Airborne WMS/WFS fields (Airborne requires VPN)<br/>
+      <b>Feature information</b> — Render polygon fields, images and dates using the map's date format, then Airborne (VPN only) and Cities WMS/WFS fields<br/>
+      <b>Highlights</b> — Clear highlights and check their state when closing and reopening the panel<br/>
       <b>Group zoom</b> — Fit distinct points, coincident points, tiny extents, polygons and lines; handle missing/invalid extents, geometry lookup, stale requests and interrupted animations<br/>
       <b>Feature navigation</b> — Bound point-feature zoom; pan to small features, zoom out for larger features and avoid zooming back in<br/>
       <b>Button state</b> — Disable group zoom after fitting, re-enable it after view changes and stop feature-follow after switching layers<br/>

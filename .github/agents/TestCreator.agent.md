@@ -142,7 +142,7 @@ Follow the template exactly, including helpers, the three-callback separation (e
 
 1. Add constants (URLs, IDs, icon lists) to `GVAbstractTester` or the tester as `static readonly`
 2. Call the new test method from the suite's `onLaunchTestSuite()`
-3. Review and update `getDescriptionAsHtml()` to reflect the current coverage, and update `getTestsTotalFinal()` to the exact call count (rules in `.github/ai/test-suite.md`)
+3. Review and update `getDescriptionAsHtml()` to reflect coverage in `onLaunchTestSuite()` source call order, grouping only adjacent related tests; update `getTestsTotalFinal()` to the exact call count (rules in `.github/ai/test-suite.md`)
 4. Add imports for new types or layer classes
 5. **New suite/tester:** follow `.github/ai/test-suite.md` → "Algorithm: Creating a New Test Suite & Tester (Full Stack)" — tester file, suite file, `index.tsx` registration, and a map div in `packages/geoview-core/public/templates/tests/tests.html`
 
@@ -159,7 +159,7 @@ Apply every rule in `.github/ai/release-testing.md`:
 ### Phase 6 — Verify
 
 1. Check the generated files for TypeScript errors and unresolved imports
-2. Confirm the test is wired into `onLaunchTestSuite()`, `getDescriptionAsHtml()` reflects the current coverage, and `getTestsTotalFinal()` matches
+2. Confirm the test is wired into `onLaunchTestSuite()`, `getDescriptionAsHtml()` reflects coverage in source call order, and `getTestsTotalFinal()` matches
 3. Confirm constants exist for every URL and ID used
 4. Run the release-testing count command from `.github/ai/release-testing.md` only when manual-plan rows or `Auto` flags change; for automated tests, verify source calls against `getTestsTotalFinal()`
 

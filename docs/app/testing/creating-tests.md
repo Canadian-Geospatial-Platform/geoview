@@ -261,7 +261,9 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
 ```
 
 When the tests called by `onLaunchTestSuite()` change, review and update `getDescriptionAsHtml()` so
-the suite description accurately summarizes the current coverage.
+the suite description accurately summarizes the current coverage in the same order as the test calls.
+Group adjacent related tests, but split a topic into separate entries when its tests occur in different
+parts of the launch sequence. For parallel tests, describe their source launch order, not completion order.
 
 `getTestsTotalFinal()` is required for every concrete suite. Keep it equal to the full
 `onLaunchTestSuite()` call count, including heavy tests gated by `getIsRunningHeavyTests()` and

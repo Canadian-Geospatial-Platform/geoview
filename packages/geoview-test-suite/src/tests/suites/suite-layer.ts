@@ -42,12 +42,16 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests layer addition, expected loading failures, legend icons, and configuration overrides:<br/>
-      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields); case-sensitive export bbox/size and returned image dimensions<br/>
-      <b>OGC</b> — WMS services, VPN-aware group dimensions, metadata/configured names and CORS proxy; WFS, OGC Feature, WMTS; bad URLs and WFS without capabilities<br/>
-      <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (+ bad URLs)<br/>
+      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry); case-sensitive export bbox/size and returned image dimensions<br/>
+      <b>WMS/WFS</b> — WMS services, VPN-aware group dimensions, metadata/configured names and CORS proxy; WFS; bad URLs and WFS without capabilities<br/>
+      <b>GeoJSON/CSV</b> — File-based layer addition and bad URLs<br/>
+      <b>OGC Feature</b> — Layer addition and bad URL<br/>
+      <b>WKB/KML/GeoTIFF</b> — File-based layer addition and bad URLs<br/>
+      <b>WMTS</b> — World timezones and bad URL<br/>
       <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
+      <b>Settings</b> — initialSettings cascade on added layers<br/>
       <b>GeoCore</b> — Inline layer entry and simplified name overrides<br/>
-      <b>Settings</b> — initialSettings cascade on added layers`;
+      <b>ESRI domains</b> — Dynamic and Feature domain fields`;
   }
 
   /**

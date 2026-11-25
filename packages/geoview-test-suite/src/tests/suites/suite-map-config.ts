@@ -43,16 +43,20 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests isolated map configuration overrides, viewport calculations, and feature-info presentation:<br/>
-      <b>Footer/App bar</b> — Tab selection, default/empty configs, duplicate panels, fixed-height layout, GeoCore selected-layer resolution<br/>
+      <b>Fixed-height layout</b> — Maps without a footer bar and with a collapsed footer bar<br/>
+      <b>Details queries</b> — Ontario/Alberta queries, visibility and feature zoom<br/>
+      <b>Footer/App bar</b> — Tab selection, GeoCore selected-layer resolution, default/empty configs and duplicate panels<br/>
       <b>Nav bar</b> — Default controls, empty array fallback<br/>
-      <b>View settings</b> — Zoom constraints, initial layer extent, initialView vs homeView, home button navigation<br/>
-      <b>Viewport</b> — Boundary samples, midpoint fitting, rotation, padding, resize, projection changes, antimeridian and error cases<br/>
-      <b>Details and feature info</b> — Ontario/Alberta queries, visibility and feature zoom; nameField labels, summary:false field hiding, and aliases<br/>
-      <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
+      <b>Initial extent</b> — Initial view fits configured layer IDs<br/>
       <b>Overlays</b> — Point markers from config<br/>
-      <b>initialSettings</b> — Controls (all false, cascade and group overrides), states (visible, opacity, queryable, hoverable),<br/>
-      &nbsp;&nbsp;legend collapsed, filters (GeoJSON, OGC Feature, WFS, ESRI Dynamic, ESRI Feature),<br/>
-      &nbsp;&nbsp;opacity parent-child capping, runtime parent opacity change`;
+      <b>View settings</b> — Zoom constraints, initialView vs homeView and home button navigation<br/>
+      <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
+      <b>initialSettings</b> — All-false controls; visible, opacity, queryable and hoverable states; query/hover control combinations; removal and visibility cascade;<br/>
+      &nbsp;&nbsp;opacity parent-child capping and runtime parent changes; legend collapsed; control cascade and group overrides;<br/>
+      &nbsp;&nbsp;filters (GeoJSON, OGC Feature, WFS, ESRI Dynamic, ESRI Feature)<br/>
+      <b>Feature presentation</b> — nameField labels, summary:false field hiding and aliases<br/>
+      <b>Viewport fitting</b> — Midpoint fitting, rotation, padding, projection changes, antimeridian and error cases<br/>
+      <b>Viewport boundaries</b> — Boundary samples, padding, resize and unavailable-map errors`;
   }
 
   /**

@@ -43,9 +43,13 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests Swiper layer selection, rendering isolation, and interactive settings:<br/>
-      <b>Lifecycle</b> — Layer activation/deactivation, multi-layer assignment and orientation changes<br/>
       <b>Rendering isolation</b> — Per-layer render clipping is isolated to descendants of the selected layer path<br/>
-      <b>Interactive customization</b> — Left/right and up/down clipping sides, exported config persistence, settings control visibility, progressive layer registration, and hover suppression over the bar/handle`;
+      <b>Lifecycle</b> — Layer activation/deactivation, multi-layer assignment and orientation changes<br/>
+      <b>Clipping sides</b> — Left/right and up/down per-layer clipping<br/>
+      <b>Registration</b> — Progressive layer registration<br/>
+      <b>Persistence</b> — Exported configuration preserves settings<br/>
+      <b>Hover</b> — Suppression over the bar/handle<br/>
+      <b>Settings</b> — Settings control visibility`;
   }
 
   /**
