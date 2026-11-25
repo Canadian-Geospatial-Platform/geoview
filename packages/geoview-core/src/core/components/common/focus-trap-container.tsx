@@ -117,6 +117,8 @@ export function FocusTrapContainer({
    * Cancels a pending restore-focus job on unmount.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - cancel pending restore focus');
+
     return () => {
       closeDelayJobRef.current?.cancel();
     };
