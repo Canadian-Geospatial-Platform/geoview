@@ -2105,8 +2105,9 @@ export class MapViewer {
     // If map isn't static
     this.registerMapPointerHandlers(map);
 
-    // Register mouse interaction events. Hover focus lets the OpenLayers keyboard pan/zoom work without a click; wheel zoom and
-    // drag pan do not need it (onFocusOnly: false). Hover-driven focus is disabled while keyboard navigation is active.
+    // Register mouse interaction events. Hover focus lets the OpenLayers keyboard pan/zoom work without a click; drag-pan
+    // works without focus, and wheel zoom needs it. In keyboard navigation mode, hover does not focus the map, so it cannot
+    // steal focus from the active control; wheel zoom then works once the map has focus (by click or Tab).
     // Boundary events also fire when content mounts, unmounts or scrolls under a stationary pointer, so while keyboard-placed
     // focus (:focus-visible) is held, hover focus waits for genuine pointer movement instead of taking focus on mouseenter.
     const mapHTMLElement = map.getTargetElement();
@@ -2195,8 +2196,8 @@ export class MapViewer {
    *
    * OpenLayers enables `onFocusOnly` by default for a focusable (tabindex) target. Touch gestures do not focus the target
    * before they start, so the first one-finger drag scrolled the page instead of panning the map. Drag-pan accepts the gesture
-   * without focus (and stops the page scrolling). Mouse wheel zoom stays focus-only; the `mouseenter` handler in
-   * `#registerMapHandlers` focuses the map, so the wheel zooms under the pointer.
+   * without focus (and stops the page scrolling). Mouse wheel zoom stays focus-only; `#registerMapHandlers` focuses the map
+   * on hover when keyboard navigation is inactive, or the map can be focused by click or Tab.
    *
    * @returns The default interactions collection
    */
