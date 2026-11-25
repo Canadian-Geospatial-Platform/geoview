@@ -1,3 +1,5 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -11,10 +13,11 @@ import {
   getStoreDataTableMapFilteredRecord,
   getStoreDataTableRowsFilteredCount,
 } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
+import { getStoreMapExtent, getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
+import { logger } from 'geoview-core/core/utils/logger';
 import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 
@@ -28,6 +31,8 @@ export class DataTableTester extends GVAbstractTester {
   /** The GeoPackage layer path whose table contains an empty/blank field name (a column named ''). */
   static readonly GEOPACKAGE_EMPTY_FIELD_LAYER_PATH = 'railwaysEmptyField/carto_fer_debarcadere';
 
+  // #region OVERRIDES
+
   /**
    * Returns the name of the Tester.
    *
@@ -37,7 +42,9 @@ export class DataTableTester extends GVAbstractTester {
     return 'DataTableTester';
   }
 
-  // #region PUBLIC METHDOS
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
 
   /**
    * Tests that allFeaturesDataArray is populated after layer loads.
@@ -610,6 +617,103 @@ export class DataTableTester extends GVAbstractTester {
   }
 
   /**
+   * Tests that map pans re-render the table only when extent filtering is enabled for its layer.
+   *
+   * Every map extent change (pan, zoom, fullscreen or footer resize) used to rebuild the whole table, which made
+   * entering fullscreen with an open table slow.
+   *
+   * @param layerPath - The layer path to open in the data table
+   * @returns A promise that resolves with extent-change and DataTable-render observations for both filter states
+   */
+  testMapPanDoesNotRerenderDataTable(layerPath: string): Promise<Test<TestMapPanTableRenders>> {
+    let originalCenter: Coordinate | undefined;
+    let originalFilterDataToExtent: boolean | undefined;
+
+    return this.test(
+      'Test panning the map does not re-render the data table...',
+      async (test) => {
+        // Wait for layer registration and data-table to be loaded with the layer in question
+        await this.waitForLayerRegistrationAndOpenDataTableOnTheLayer(test, layerPath);
+
+        originalFilterDataToExtent = getStoreDataTableLayerSettings(this.getMapId())[layerPath]?.filterDataToExtent ?? false;
+
+        // Establish a settled baseline with extent filtering disabled
+        test.addStep('Disabling filter-by-extent and waiting for the data table to render...');
+        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
+        await DomHelper.DataTable.waitForDataTable(this.getMapId());
+
+        const mapViewer = this.getMapViewer();
+        mapViewer.map.updateSize();
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+
+        const view = mapViewer.getView();
+        const center = view.getCenter();
+        const resolution = view.getResolution();
+        if (!center || !resolution) throw new Error('The map view has no center or resolution to pan from.');
+        originalCenter = [...center];
+
+        // Include the map ID because the logger singleton counter is shared by all maps on the page.
+        const dataTableRenderTrace = `components/data-table/data-table - ${this.getMapId()}`;
+        const getDataTableRenderCount = (): number => {
+          const renderCount = logger.logCountRenderPerComponent[dataTableRenderTrace];
+          if (renderCount === undefined) throw new Error('DataTable render tracing is unavailable in this test environment.');
+          return renderCount;
+        };
+
+        test.addStep('Panning with extent filtering disabled and tracking DataTable renders...');
+        const extentBeforeWithoutFilter = getStoreMapExtent(this.getMapId());
+        const renderCountBeforeWithoutFilter = getDataTableRenderCount();
+        view.setCenter([center[0] + resolution * 100, center[1]]);
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+        const extentChangedWithoutFilter = JSON.stringify(extentBeforeWithoutFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
+        const renderCountAfterWithoutFilter = getDataTableRenderCount();
+        const tableRendersWithoutFilter = renderCountAfterWithoutFilter - renderCountBeforeWithoutFilter;
+
+        // Return to the starting extent before confirming filtered data refreshes on a later pan
+        view.setCenter(originalCenter);
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+
+        test.addStep('Enabling extent filtering, then panning and tracking DataTable renders...');
+        this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
+        await DomHelper.waitForReactIdle();
+        const extentBeforeWithFilter = getStoreMapExtent(this.getMapId());
+        const renderCountBeforeWithFilter = getDataTableRenderCount();
+        view.setCenter([originalCenter[0] + resolution * 100, originalCenter[1]]);
+        mapViewer.map.renderSync();
+        await DomHelper.waitForReactIdle();
+
+        const extentChangedWithFilter = JSON.stringify(extentBeforeWithFilter) !== JSON.stringify(getStoreMapExtent(this.getMapId()));
+        const renderCountAfterWithFilter = getDataTableRenderCount();
+        const tableRendersWithFilter = renderCountAfterWithFilter - renderCountBeforeWithFilter;
+        return { extentChangedWithoutFilter, tableRendersWithoutFilter, extentChangedWithFilter, tableRendersWithFilter };
+      },
+      (test, result) => {
+        test.addStep('Verifying a pan with extent filtering disabled changed the map extent without rendering DataTable...');
+        Test.assertIsEqual(result.extentChangedWithoutFilter, true);
+        Test.assertIsEqual(result.tableRendersWithoutFilter, 0);
+
+        test.addStep('Verifying a pan with extent filtering enabled changed the map extent and rendered DataTable...');
+        Test.assertIsEqual(result.extentChangedWithFilter, true);
+        Test.assertIsEqual(result.tableRendersWithFilter > 0, true);
+      },
+      async (): Promise<void> => {
+        if (originalFilterDataToExtent !== undefined) {
+          this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, originalFilterDataToExtent);
+        }
+        if (originalCenter) {
+          const mapViewer = this.getMapViewer();
+          mapViewer.getView().setCenter(originalCenter);
+          mapViewer.map.renderSync();
+          await DomHelper.waitForReactIdle();
+        }
+      }
+    );
+  }
+
+  /**
    * Tests that a temporary zoom highlight (as used by the data table row zoom) is removed automatically.
    *
    * @returns A promise resolving when the test completes
@@ -824,7 +928,7 @@ export class DataTableTester extends GVAbstractTester {
     await DomHelper.waitForReactIdle();
   }
 
-  // #endregion PUBLIC METHDOS
+  // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
 
@@ -858,3 +962,19 @@ export class DataTableTester extends GVAbstractTester {
 
   // #endregion PRIVATE METHODS
 }
+
+// #region TYPES AND INTERFACES
+
+/** Result of the map pan data table re-render test. */
+export type TestMapPanTableRenders = {
+  /** Whether the map extent changed when extent filtering was disabled. */
+  extentChangedWithoutFilter: boolean;
+  /** The number of DataTable renders when extent filtering was disabled. */
+  tableRendersWithoutFilter: number;
+  /** Whether the map extent changed when extent filtering was enabled. */
+  extentChangedWithFilter: boolean;
+  /** The number of DataTable renders when extent filtering was enabled. */
+  tableRendersWithFilter: number;
+};
+
+// #endregion TYPES AND INTERFACES
