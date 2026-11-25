@@ -279,7 +279,7 @@ labels: ["testing", "release"]
 - [ ] [Skip Links](../docs/programming/release-testing/21-wcag-accessibility.md#skip-links) (3 tests)
 - [ ] [WCAG Mode Dialog](../docs/programming/release-testing/21-wcag-accessibility.md#wcag-mode-dialog) (4 tests)
 - [ ] [Ctrl+Q Exit WCAG Mode](../docs/programming/release-testing/21-wcag-accessibility.md#ctrlq-exit-wcag-mode) (4 tests)
-- [ ] [Map Focus & Crosshair](../docs/programming/release-testing/21-wcag-accessibility.md#map-focus--crosshair) (16 tests)
+- [ ] [Map Focus & Crosshair](../docs/programming/release-testing/21-wcag-accessibility.md#map-focus--crosshair) (18 tests)
 - [ ] [Tab Order](../docs/programming/release-testing/21-wcag-accessibility.md#tab-order) (5 tests)
 - [ ] [Panel Focus Trapping (WCAG Mode)](../docs/programming/release-testing/21-wcag-accessibility.md#panel-focus-trapping-wcag-mode) (29 tests)
 - [ ] [Panel Full Screen Mode Focus](../docs/programming/release-testing/21-wcag-accessibility.md#panel-full-screen-mode-focus) (10 tests)
