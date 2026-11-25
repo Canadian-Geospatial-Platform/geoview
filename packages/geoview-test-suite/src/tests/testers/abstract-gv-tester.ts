@@ -311,6 +311,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Quebec invasive species service whose export endpoint requires case-sensitive parameter names. */
   static readonly ESRI_DYNAMIC_CASE_SENSITIVE_EXPORT_UUID = '31f841b6-a544-47f9-93fb-b111a46fc654';
 
+  /** The GeoCore UUID used for simplified inline layer name override tests. */
+  static readonly GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
+
   /** GNWT administrative boundaries (ESRI Dynamic) — adjacent polygons meet at shared junctions (issue #3636) */
   static readonly GNWT_BOUNDARIES_URL_MAP_SERVER: string =
     'https://www.apps.geomatics.gov.nt.ca/arcgis/rest/services/GNWT/Boundaries_LCC/MapServer/';

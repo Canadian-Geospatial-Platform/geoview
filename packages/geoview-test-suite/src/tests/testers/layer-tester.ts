@@ -60,12 +60,6 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
  * Main Layer testing class.
  */
 export class LayerTester extends GVAbstractTester {
-  /** The GeoCore UUID used for simplified inline layer name override tests.
-   *
-   * @deprecated Move this elsewhere
-   */
-  static readonly GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
-
   /**
    * Tests object injection followed by JSON-string replacement through the public API.
    *
@@ -2903,7 +2897,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddGeocoreWithSimplifiedInlineLayerNameOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
-    const geocoreUuid = LayerTester.GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID;
+    const geocoreUuid = GVAbstractTester.GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID;
     const customLayerName = 'Issue 3548 - Simplified Inline Name';
     const customLayerEntryConfig = JSON.stringify([
       {
