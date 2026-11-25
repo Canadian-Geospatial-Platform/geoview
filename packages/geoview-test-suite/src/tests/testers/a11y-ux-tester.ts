@@ -69,6 +69,12 @@ export class A11yUxTester extends GVAbstractTester {
 
         /** Activates a panel and dismisses it from its close control. */
         const openAndEscape = async (button: HTMLButtonElement): Promise<TypeNavbarPanelFocusResult> => {
+          /** Finds the visible navbar panel Close button. */
+          const getVisibleClose = (): HTMLButtonElement | undefined =>
+            DomHelper.queryGVSelectorAll<HTMLButtonElement>(mapId, '[role="dialog"] .buttonPopperClose').find((element) =>
+              element.checkVisibility({ visibilityProperty: true })
+            );
+
           button.focus();
           const allowed = button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
           if (allowed) button.click();
@@ -77,12 +83,29 @@ export class A11yUxTester extends GVAbstractTester {
 
           const focusItem = getStoreUIFocusItem(mapId);
           const opened = button.getAttribute('aria-expanded') === 'true';
-          const close = DomHelper.queryGVSelectorAll<HTMLButtonElement>(mapId, '[role="dialog"] .buttonPopperClose').find((element) =>
-            element.checkVisibility({ visibilityProperty: true })
-          );
+          const close = getVisibleClose();
           if (!close) throw new TestError('The open navbar panel must expose its Close button');
-          close.focus();
-          close.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+          uiController.setActiveTrapGeoView(false);
+          await DomHelper.waitForReactIdle();
+          const originalClose = getVisibleClose();
+          if (!originalClose) throw new TestError('The navbar panel must remain mounted without keyboard ownership');
+          const stayedOpenOnRelease = button.getAttribute('aria-expanded') === 'true';
+          uiController.setActiveTrapGeoView(true);
+          await DomHelper.waitForReactIdle();
+          const acquiredClose = getVisibleClose();
+          if (!acquiredClose) throw new TestError('The navbar panel must remain mounted after acquiring keyboard ownership');
+          const reacquiredOwnership = getStoreUIFocusItem(mapId).activeElementId === focusItem.activeElementId;
+          const preservedOnAcquire = originalClose.isConnected && originalClose === acquiredClose;
+          uiController.setActiveTrapGeoView(false);
+          await DomHelper.waitForReactIdle();
+          const releasedClose = getVisibleClose();
+          const preservedOnRelease = acquiredClose.isConnected && acquiredClose === releasedClose;
+          uiController.setActiveTrapGeoView(true);
+          await DomHelper.waitForReactIdle();
+          const currentClose = getVisibleClose();
+          if (!currentClose) throw new TestError('The reopened focus trap must expose its Close button');
+          currentClose.focus();
+          currentClose.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
           await DomHelper.waitForReactIdle();
 
           return {
@@ -90,6 +113,10 @@ export class A11yUxTester extends GVAbstractTester {
             ownerId: focusItem.activeElementId,
             callbackId: focusItem.callbackElementId,
             opened,
+            reacquiredOwnership,
+            preservedOnAcquire,
+            preservedOnRelease,
+            stayedOpenOnRelease,
             closed: button.getAttribute('aria-expanded') === 'false',
             focusReturned: DomHelper.getActiveElement() === button,
           };
@@ -104,11 +131,16 @@ export class A11yUxTester extends GVAbstractTester {
       (test, result): void => {
         test.addStep('Verifying distinct owners and callbacks for the two navbar buttons...');
         Test.assertIsNotEqual(result[0].ownerId, result[1].ownerId);
+        test.addStep('Verifying panel content survives ownership changes...');
         result.forEach((panel): void => {
           Test.assertIsNotEqual(panel.buttonId, '');
           Test.assertIsNotEqual(panel.ownerId, false);
           Test.assertIsEqual(panel.callbackId, panel.buttonId);
           Test.assertIsEqual(panel.opened, true);
+          Test.assertIsEqual(panel.reacquiredOwnership, true);
+          Test.assertIsEqual(panel.preservedOnAcquire, true);
+          Test.assertIsEqual(panel.preservedOnRelease, true);
+          Test.assertIsEqual(panel.stayedOpenOnRelease, true);
           Test.assertIsEqual(panel.closed, true);
           Test.assertIsEqual(panel.focusReturned, true);
         });
@@ -2512,6 +2544,14 @@ interface TypeNavbarPanelFocusResult {
   callbackId: string | false;
   /** Whether the panel opened. */
   opened: boolean;
+  /** Whether keyboard mode restored the same panel owner. */
+  reacquiredOwnership: boolean;
+  /** Whether the original content survived acquiring ownership. */
+  preservedOnAcquire: boolean;
+  /** Whether the original content survived releasing keyboard mode. */
+  preservedOnRelease: boolean;
+  /** Whether releasing keyboard mode kept the panel open. */
+  stayedOpenOnRelease: boolean;
   /** Whether Escape closed the panel. */
   closed: boolean;
   /** Whether Escape returned focus to the button. */

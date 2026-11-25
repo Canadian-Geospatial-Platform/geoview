@@ -176,13 +176,10 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   // TODO: style - manage z-index in theme
   return (
     <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={setPopperRef}>
-      {focusTrap ? (
-        <FocusTrap open={open} disableEnforceFocus disableAutoFocus disableRestoreFocus>
-          {children}
-        </FocusTrap>
-      ) : (
-        children
-      )}
+      {/* Keep the wrapper mounted so ownership changes do not remount the content. */}
+      <FocusTrap open={open && focusTrap} disableEnforceFocus disableAutoFocus disableRestoreFocus>
+        {children}
+      </FocusTrap>
     </AnimatedPopper>
   );
 }
