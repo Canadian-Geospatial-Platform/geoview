@@ -107,6 +107,9 @@ export default function Measurement(): JSX.Element {
   /** Listener for point-count changes in the active sketch. */
   const sketchGeometryChangeKey = useRef<EventsKey | undefined>(undefined);
 
+  /** Current segment-label visibility, read when a measurement completes. */
+  const showSegmentLabelsRef = useRef(showSegmentLabels);
+
   /**
    * Builds custom sx classes for the measurement component.
    */
@@ -162,7 +165,7 @@ export default function Measurement(): JSX.Element {
         if (geometry instanceof LineString) {
           coordinates = geometry.getCoordinates();
         } else if (geometry instanceof Polygon) {
-          coordinates = geometry.getCoordinates()[0];
+          coordinates = geometry.getCoordinates()[0] ?? [];
         } else {
           return styles;
         }
@@ -211,7 +214,8 @@ export default function Measurement(): JSX.Element {
         // Keep totals canvas-based so the text, rounded backing and pointer appear in map exports.
         let labelCoord: number[];
         let totalLabel = '';
-        let labelOffsetY = -15; // Default offset for line (above end point)
+        // Line total sits above the end point: half the 29px label + 6px pointer + a 6px gap keeps the vertex and cursor visible
+        let labelOffsetY = -26;
 
         if (geometry instanceof LineString) {
           labelCoord = coordinates[coordinates.length - 1];
@@ -230,6 +234,9 @@ export default function Measurement(): JSX.Element {
         } else {
           return styles;
         }
+
+        // A collinear polygon sketch has no interior point, skip its total until the polygon has an area
+        if (!labelCoord.every(Number.isFinite)) return styles;
 
         styles.push(...createMeasurementLabelStyles(feature, labelCoord, totalLabel, labelOffsetY));
 
@@ -274,6 +281,21 @@ export default function Measurement(): JSX.Element {
         const geometry = event.feature.getGeometry();
         if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
 
+        // Show only the live total while drawing, segment labels would overlap it near the cursor
+        const totalStyle = createSegmentStyle(false);
+        if (geometry instanceof Polygon) {
+          // The polygon sketch ring is [vertices..., cursor, first vertex]: wait for 3 placed vertices before showing the total
+          const baseStyle = new Style({
+            stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }),
+            fill: new Fill({ color: FILL_COLORS }),
+          });
+          event.feature.setStyle((feature, resolution) =>
+            (geometry.getCoordinates()[0]?.length ?? 0) - 2 >= 3 ? totalStyle(feature, resolution) : baseStyle
+          );
+        } else {
+          event.feature.setStyle(totalStyle);
+        }
+
         setHint(true);
 
         sketchVertexCount.current = 1;
@@ -301,12 +323,8 @@ export default function Measurement(): JSX.Element {
         const geometry = feature.getGeometry();
 
         if (geometry && (geometry instanceof LineString || geometry instanceof Polygon)) {
-          // Use current state value for segment labels visibility
-          setShowSegmentLabels((currentShowSegments) => {
-            // Apply final style with segment labels (canvas-based)
-            feature.setStyle(createSegmentStyle(currentShowSegments));
-            return currentShowSegments;
-          });
+          // Apply final style with segment labels (canvas-based)
+          feature.setStyle(createSegmentStyle(showSegmentLabelsRef.current));
 
           // Store feature reference
           setMeasurementFeatures((prev) => [...prev, feature]);
@@ -463,6 +481,7 @@ export default function Measurement(): JSX.Element {
 
       // Set the segments hook state
       setShowSegmentLabels(shouldShow);
+      showSegmentLabelsRef.current = shouldShow;
 
       // Update all stored measurement features with new style
       setMeasurementFeatures((currentFeatures) => {
