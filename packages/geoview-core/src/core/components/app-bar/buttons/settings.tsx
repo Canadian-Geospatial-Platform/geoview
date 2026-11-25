@@ -51,6 +51,7 @@ export function Settings(props: SettingsProps): JSX.Element {
   /**
    * Builds the Settings component styles for the active theme.
    */
+  // TODO: Declaration order is inconsistent across components; batch-fix to the order in docs/programming/best-practices.md §8 in a separate PR.
   const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('SETTINGS - memoSxClasses', theme);
     return getSxClasses(theme);
