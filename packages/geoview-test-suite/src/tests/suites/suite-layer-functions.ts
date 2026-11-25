@@ -42,22 +42,24 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests runtime LayerApi/controller operations, legend-store synchronization, and feature queries:<br/>
-      <b>Layer path resolution</b> — Nested WMS groups with duplicate names are loaded without ambiguous paths or recursion loops; the first layer under a root id (e.g. a GeoCore UUID) is resolved by <code>getGeoviewLayerByRootId</code><br/>
-      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
-      <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
-      <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
-      <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
-      <b>WMS styles</b> — Named and repeated selections synchronize runtime, source STYLES, and legend store; empty selections preserve the active style<br/>
-      <b>Queryable and hoverable flags</b> — Public LayerApi setters enable, disable, repeat assignments, and re-enable each flag while synchronizing the legend store<br/>
-      <b>Details queries</b> — Disabling queryability excludes the layer's features from Details results; re-enabling restores them<br/>
-      <b>Hover queries</b> — Disabling hoverability excludes the layer from hover results; re-enabling restores its hover feature<br/>
-      <b>GeoCore visibility</b> — Group defaultVisibility=false (only when heavy tests are enabled)<br/>
+      <b>WMS group paths</b> — Nested groups with duplicate names are loaded without ambiguous paths or recursion loops<br/>
       <b>Zoom to extent</b> — Single-feature layers, empty layers, and configured fallback extents<br/>
       <b>Feature geometry</b> — Details queries still retrieve geometry when configured outfields omit geometry fields<br/>
       <b>WMS feature queries</b> — Cities and Airborne layers retrieve features through associated WFS services, with VPN-aware Airborne execution<br/>
-      <b>ESRI queries</b> — Dynamic and Feature domain value translation; Dynamic feature geometry and OBJECTID pairing<br/>
+      <b>Root layer resolution</b> — Resolve the first layer under a root id (e.g. a GeoCore UUID) with <code>getGeoviewLayerByRootId</code><br/>
       <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>
-      <b>GeoJSON</b> — GeometryCollection layer loading; object/string source replacement, feature-info refresh, and reprojection after injection`;
+      <b>GeoJSON source</b> — Object/string replacement, feature-info refresh, and reprojection after injection<br/>
+      <b>ESRI domain queries</b> — Dynamic and Feature domain value translation<br/>
+      <b>GeometryCollection</b> — GeoJSON GeometryCollection layer loading<br/>
+      <b>GeoCore visibility</b> — Group defaultVisibility=false (only when heavy tests are enabled)<br/>
+      <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
+      <b>Layer visibility</b> — Explicit updates and toggles through the public LayerApi; making a child and its parents visible<br/>
+      <b>Layer opacity</b> — Parent-to-child propagation, independent child updates, runtime parent caps versus requested store opacity, and restoration from transparency<br/>
+      <b>Details queryability</b> — Public LayerApi updates synchronize the legend store; disabling excludes features and re-enabling restores them<br/>
+      <b>Hoverability</b> — Public LayerApi updates synchronize the legend store; disabling excludes hover results and re-enabling restores them<br/>
+      <b>Text visibility</b> — Layer controller updates synchronize the vector layer's independent text flag and legend store<br/>
+      <b>WMS styles</b> — Named and repeated selections synchronize runtime, source STYLES, and legend store; empty selections preserve the active style<br/>
+      <b>ESRI geometry pairing</b> — Dynamic feature geometry and OBJECTID pairing`;
   }
 
   /**

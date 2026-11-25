@@ -43,11 +43,11 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    */
   override getDescriptionAsHtml(): string {
     return `Tests Data Table population, store settings, and visible filtering behavior in the footer panel:<br/>
-      <b>Features</b> — GeoJSON and Commemorative data population; empty GeoPackage field name renders without crashing<br/>
-      <b>Settings and filters</b> — GeoJSON column visibility, row counts, map-filter state, column/global filters and Ontario extent filtering;<br/>
-      &nbsp;&nbsp;Commemorative column filter store set/clear and empty-range exclusion; Cities name and population range row counts<br/>
-      <b>Extent filter</b> — Toggle absence check on the ESRI Feature Forest Industry fixture<br/>
-      <b>Row zoom</b> — Temporary highlight creation and expiry<br/>
+      <b>GeoJSON</b> — Data population, column visibility, row counts, map-filter state, column/global filters, Ontario extent filtering and temporary row-zoom highlight expiry<br/>
+      <b>Commemorative</b> — Data population, rendered feature values, column filter store set/clear and empty-range exclusion<br/>
+      <b>Empty field name</b> — GeoPackage field renders without crashing<br/>
+      <b>Cities filters</b> — Name and population range row counts<br/>
+      <b>Extent filter</b> — Toggle unavailable for ESRI Dynamic and available for vector layers<br/>
       <b>Style filter</b> — showUnsymbolizedFeatures true and false table summaries`;
   }
 
