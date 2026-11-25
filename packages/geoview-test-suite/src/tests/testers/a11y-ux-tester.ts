@@ -44,6 +44,87 @@ export class A11yUxTester extends GVAbstractTester {
   // #region PUBLIC METHODS
 
   /**
+   * Tests navbar panel ownership and Escape focus return for two built-in controls.
+   *
+   * @returns A promise that resolves with the panel ownership and focus observations
+   */
+  testNavbarPanelFocusOwnership(): Promise<Test<TypeNavbarPanelFocusResult[]>> {
+    const mapId = this.getMapId();
+    const { uiController } = this.getControllersRegistry();
+    const originalMode = getStoreUIActiveTrapGeoView(mapId);
+    const originalFocusItem = getStoreUIFocusItem(mapId);
+    const originalFocus = DomHelper.getActiveElement();
+
+    return this.test(
+      'Test navbar panel ownership and Escape focus return',
+      async (test): Promise<TypeNavbarPanelFocusResult[]> => {
+        A11yEntryTester.requireVisibleViewers(mapId);
+        const basemap = DomHelper.queryGVSelector<HTMLButtonElement>(mapId, 'button[aria-label="Change basemap"]');
+        const rotation = DomHelper.queryGVSelector<HTMLButtonElement>(mapId, 'button[aria-label="Map Rotation"]');
+        if (!basemap || !rotation) throw new TestError('The basemap and rotation navbar controls must be mounted');
+
+        uiController.closeMapPopovers();
+        uiController.setActiveTrapGeoView(true);
+        await DomHelper.waitForReactIdle();
+
+        /** Activates a panel and dismisses it from its close control. */
+        const openAndEscape = async (button: HTMLButtonElement): Promise<TypeNavbarPanelFocusResult> => {
+          button.focus();
+          const allowed = button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+          if (allowed) button.click();
+          button.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true }));
+          await DomHelper.waitForReactIdle();
+
+          const focusItem = getStoreUIFocusItem(mapId);
+          const opened = button.getAttribute('aria-expanded') === 'true';
+          const close = DomHelper.queryGVSelectorAll<HTMLButtonElement>(mapId, '[role="dialog"] .buttonPopperClose').find((element) =>
+            element.checkVisibility({ visibilityProperty: true })
+          );
+          if (!close) throw new TestError('The open navbar panel must expose its Close button');
+          close.focus();
+          close.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+          await DomHelper.waitForReactIdle();
+
+          return {
+            buttonId: button.id,
+            ownerId: focusItem.activeElementId,
+            callbackId: focusItem.callbackElementId,
+            opened,
+            closed: button.getAttribute('aria-expanded') === 'false',
+            focusReturned: DomHelper.getActiveElement() === button,
+          };
+        };
+
+        test.addStep('Opening Basemap and dismissing it with Escape...');
+        const basemapResult = await openAndEscape(basemap);
+        test.addStep('Opening Rotation and dismissing it with Escape...');
+        const rotationResult = await openAndEscape(rotation);
+        return [basemapResult, rotationResult];
+      },
+      (test, result): void => {
+        test.addStep('Verifying distinct owners and callbacks for the two navbar buttons...');
+        Test.assertIsNotEqual(result[0].ownerId, result[1].ownerId);
+        result.forEach((panel): void => {
+          Test.assertIsNotEqual(panel.buttonId, '');
+          Test.assertIsNotEqual(panel.ownerId, false);
+          Test.assertIsEqual(panel.callbackId, panel.buttonId);
+          Test.assertIsEqual(panel.opened, true);
+          Test.assertIsEqual(panel.closed, true);
+          Test.assertIsEqual(panel.focusReturned, true);
+        });
+      },
+      async (test): Promise<void> => {
+        if (test.getStatus() === 'skipped') return;
+        uiController.closeMapPopovers();
+        uiController.setActiveTrapGeoView(originalMode);
+        uiController.enableFocusTrap({ ...originalFocusItem, focusOnEntry: false });
+        await DomHelper.waitForReactIdle();
+        if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus();
+      }
+    );
+  }
+
+  /**
    * Tests footer focus ownership through Exit, collapse, and reopening.
    *
    * @param input - The dispatched activation method
@@ -2377,6 +2458,22 @@ export class A11yUxTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Navbar panel ownership and Escape focus observations. */
+interface TypeNavbarPanelFocusResult {
+  /** Rendered button identifier. */
+  buttonId: string;
+  /** Focus owner while the panel was open. */
+  ownerId: string | false;
+  /** Focus callback while the panel was open. */
+  callbackId: string | false;
+  /** Whether the panel opened. */
+  opened: boolean;
+  /** Whether Escape closed the panel. */
+  closed: boolean;
+  /** Whether Escape returned focus to the button. */
+  focusReturned: boolean;
+}
 
 /** Footer focus and ownership observations across Exit, collapse, and reopening. */
 interface TypeFooterPanelReopenResult {

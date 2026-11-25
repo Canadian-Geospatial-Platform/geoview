@@ -63,7 +63,7 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
    * @returns The full-suite test count
    */
   override getTestsTotalFinal(): number {
-    return 29;
+    return 30;
   }
 
   /**
@@ -101,6 +101,7 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
       await this.#a11yUxTester.testModalShortcutViewerIsolation();
       await this.#a11yUxTester.testKeyboardQueryMapFocusReturn();
       await this.#a11yUxTester.testKeyboardShortcutClosesPanelsAndPreservesFooter();
+      await this.#a11yUxTester.testNavbarPanelFocusOwnership();
       await this.#a11yUxTester.testCrosshairDetailsEscapeReturnsToMap();
       await this.#a11yUxTester.testDetailsEscapeOwnershipCancellation();
       await this.#a11yUxTester.testDetailsEscapeFocusLeaveCancellation();

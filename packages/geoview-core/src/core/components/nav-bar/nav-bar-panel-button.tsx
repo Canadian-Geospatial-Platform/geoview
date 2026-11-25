@@ -93,7 +93,9 @@ export default function NavbarPanelButton({
   const previousOpen = useRef(open);
   const previousOwnerOpen = useRef(open);
   const previousFocusItemRef = useRef<FocusItemProps | undefined>(undefined);
-  const focusTrapId = DomHelper.buildGVElementId(mapId, `${buttonPanel.button.id}-navbar-focus-trap`);
+  // Built-in panels may provide a panel ID without a button ID.
+  const buttonId = buttonPanel.button.id || DomHelper.buildGVElementId(mapId, `${buttonPanel.buttonPanelId}-navbar-button`);
+  const focusTrapId = DomHelper.buildGVElementId(mapId, `${buttonId}-navbar-focus-trap`);
 
   /**
    * Synchronizes externally requested panel visibility.
@@ -198,7 +200,7 @@ export default function NavbarPanelButton({
       if (previousFocusItemRef.current === undefined) previousFocusItemRef.current = currentFocusItem;
       uiController.enableFocusTrap({
         activeElementId: focusTrapId,
-        callbackElementId: buttonPanel.button.id || false,
+        callbackElementId: buttonId,
         focusOnEntry: false,
       });
     }
@@ -206,7 +208,7 @@ export default function NavbarPanelButton({
     const wasOpen = previousOwnerOpen.current;
     previousOwnerOpen.current = open;
     if (wasOpen && !open) closePanelWithFocus(false);
-  }, [activeTrapGeoView, buttonPanel.button.id, closePanelWithFocus, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
+  }, [activeTrapGeoView, buttonId, closePanelWithFocus, focusItem.activeElementId, focusTrapId, mapId, open, uiController]);
 
   /**
    * Renders the panel content based on the button panel configuration.
@@ -222,11 +224,11 @@ export default function NavbarPanelButton({
   };
 
   return (
-    <ClickAwayListener key={buttonPanel.button.id} mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
+    <ClickAwayListener key={buttonId} mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box>
         <IconButton
-          key={buttonPanel.button.id}
-          id={buttonPanel.button.id}
+          key={buttonId}
+          id={buttonId}
           iconRef={buttonRef}
           aria-label={t(buttonPanel.button['aria-label'])}
           aria-expanded={open}
