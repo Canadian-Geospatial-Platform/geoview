@@ -58,6 +58,8 @@ Depending on the viewer configuration, the map's bottom right corner contains th
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
+In keyboard navigation mode, hovering over the map does not focus it, so the mouse wheel scrolls the page. Click the map or Tab to focus it before using the wheel to zoom; drag-panning works without focus.
+
 Press the **Shift** key while click-holding and dragging the mouse to define a map extent region. When the mouse button is released, the view will zoom to the chosen area.
 
 Press **Shift** and **Alt** keys while click-holding and dragging the mouse to rotate the map.
@@ -80,7 +82,7 @@ Click-hold on the box in the overview map and drag it to change the extent of th
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
 
-When you Tab into the viewer through a skip link, the **Keyboard Navigation** prompt appears. Select **Enable** and press **Enter**; focus moves to **Skip to main content - Map**. Press **Enter** again to focus the map. On dynamic maps, use **Settings** below Notifications and its **Keyboard navigation** switch to turn the mode on or off.
+When you Tab into the viewer through a skip link, the **Keyboard Navigation** prompt appears. Select **Enable** and press **Enter**. On dynamic maps, focus moves to **Skip to main content - Map**; press **Enter** again to focus the map. On static maps, focus moves to the viewer itself. On dynamic maps, use **Settings** below Notifications and its **Keyboard navigation** switch to turn the mode on or off.
 
 When you focus the map using **Tab**, its skip link, or **Ctrl+M**, a crosshair is displayed in the center of the map:
 

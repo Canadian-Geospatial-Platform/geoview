@@ -58,6 +58,8 @@ Selon la configuration de la visionneuse, le coin inférieur droit de la carte c
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte et en la faisant glisser. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
+En mode de navigation au clavier, le survol ne focalise pas la carte, alors la molette fait défiler la page. Cliquez sur la carte ou appuyez sur la touche de tabulation pour la focaliser avant d'utiliser la molette pour zoomer ; le déplacement par glissement fonctionne sans focus.
+
 Appuyez sur la touche **Maj.** tout en cliquant et en déplaçant la souris pour définir une zone sur la carte. Relâchez la souris; le zoom se fait sur la zone sélectionnée.
 
 Appuyez sur les touches **Maj.** et **Alt.** tout en cliquant et en déplaçant la souris pour faire tourner la carte.
@@ -80,7 +82,7 @@ Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la 
 
 Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer avec le clavier. Utilisez la touche de **tabulation** pour atteindre les liens et les commandes sur la page. Appuyez sur **Maj.** et la touche de **tabulation** pour revenir à l’élément précédent. Utilisez la touche **Entrée** ou la **barre d’espace** pour activer les liens et les commandes.
 
-Lorsque vous entrez dans le visualiseur avec la touche de **tabulation** en passant par un lien d'évitement, la fenêtre contextuelle **Navigation clavier** s'affiche. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** ; le focus passe au lien **Aller au contenu principal - Carte**. Appuyez de nouveau sur **Entrée** pour focaliser la carte. Sur les cartes dynamiques, utilisez **Paramètres**, sous Notifications, et son commutateur **Navigation clavier** pour activer ou désactiver ce mode.
+Lorsque vous entrez dans le visualiseur avec la touche de **tabulation** en passant par un lien d'évitement, la fenêtre contextuelle **Navigation clavier** s'affiche. Sélectionnez le bouton **Activer** et appuyez sur **Entrée**. Sur les cartes dynamiques, le focus passe au lien **Aller au contenu principal - Carte** ; appuyez de nouveau sur **Entrée** pour focaliser la carte. Sur les cartes statiques, le focus passe au visualiseur lui-même. Sur les cartes dynamiques, utilisez **Paramètres**, sous Notifications, et son commutateur **Navigation clavier** pour activer ou désactiver ce mode.
 
 Lorsque vous focalisez la carte avec la touche de **tabulation**, son lien d'évitement ou **Ctrl+M**, un pointeur en croix s'affiche en son centre :
 

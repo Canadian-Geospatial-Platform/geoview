@@ -44,6 +44,7 @@ For static maps, Enable focuses the viewer shell so Tab moves through its availa
 
 - Dynamic maps include a permanent **Settings** button below Notifications. Its **Keyboard navigation** switch controls the same mode as the entry prompt; it stays open and focused when the switch changes.
 - Keyboard navigation mode remains enabled during mouse movement. Normal panels and Settings retain their Tab/Shift+Tab boundaries, but a deliberate pointer click may move focus outside them without turning the mode off. Keyboard input then continues from the clicked control.
+- In keyboard navigation mode, hovering over the map does not focus it, so the mouse wheel scrolls the page. Click the map or Tab to focus it before using the wheel to zoom; drag-panning works without focus.
 - Settings temporarily takes focus-trap ownership from another panel. Escape or its Close button returns focus to Settings; clicking elsewhere closes it without pulling focus away from the clicked target. Genuine modal dialogs keep strict focus containment.
 
 - Press Ctrl + Q to exit keyboard navigation mode
