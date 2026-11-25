@@ -210,9 +210,11 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   for focus within its own root. It activates only when the map target itself is focused and does not
   manage focus-indicator CSS. Do not restore JS-managed `.keyboard-focused`.
 - [MapViewer](../../packages/geoview-core/src/geo/map/map-viewer.ts) must not let mouseenter or
-  mouseleave move focus while `activeTrapGeoView` is enabled. Keep OpenLayers interactions configured
-  with `defaultInteractions({ onFocusOnly: false })` so wheel and drag input still works when another
-  control owns focus. A real map blur releases crosshair interactions only; it must not disable the mode.
+  mouseleave move focus while `activeTrapGeoView` is enabled. Keep `#createDefaultInteractions()` as
+  is: `defaultInteractions({ onFocusOnly: true })` with only `DragPan` replaced, so drag-pan works
+  without focus and wheel zoom stays focus-only. In keyboard navigation mode, the map needs a click or
+  Tab before the wheel zooms. Do not set `onFocusOnly: false`; it would also enable unfocused wheel
+  zoom. A real map blur releases crosshair interactions only; it must not disable the mode.
 - [Shell](../../packages/geoview-core/src/core/containers/shell.tsx) uses `activeTrapGeoView` to switch
   `.geoview-keyboard-active`/`.geoview-keyboard-inactive` and keep its viewer-level Tab boundary.
   The dynamic-map Settings switch and entry prompt must invoke the same mode lifecycle through the
