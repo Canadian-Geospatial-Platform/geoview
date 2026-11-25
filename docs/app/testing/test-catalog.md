@@ -562,6 +562,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                                              | Type | Description                                                           |
 | --------------------------------------------------- | ---- | --------------------------------------------------------------------- |
 | `testZoomExtentWithOneFeature`                      | test | Test zoom to extent of a layer with only one point feature...         |
+| `testGetExtentOfMultipleLayers` | test | Check the union of GeoJSON, Esri Feature, Esri Dynamic GNWT Boundaries and Halifax WMS bounds with layer paths and root IDs... |
 | `testZoomExtentWithoutFeatures`                     | test | Test zoom to extent of a layer without features...                    |
 | `testZoomExtentWithoutFeaturesWithConfiguredExtent` | test | Test zoom to extent falls back to the configured extent when empty... |
 

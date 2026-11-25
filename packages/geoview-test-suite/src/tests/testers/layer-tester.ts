@@ -16,6 +16,7 @@ import type {
   TypeFeatureInfoResult,
   codedValueType,
   TypeFeatureInfoEntry,
+  Extent,
 } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
@@ -60,6 +61,88 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
  * Main Layer testing class.
  */
 export class LayerTester extends GVAbstractTester {
+  /**
+   * Tests the combined extent of GeoJSON, Esri Feature, Esri Dynamic, and WMS fixtures.
+   *
+   * @returns A promise resolving with individual bounds and combined extent observations
+   */
+  testGetExtentOfMultipleLayers(): Promise<Test<MultipleLayersExtentResult>> {
+    const fixtureLayerPaths: string[] = [];
+    const expectedExtentAll = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
+    const expectedExtentVectors = [-15490107.081926208, 5653062.530474714, -6097718.768649618, 10332401.648523508];
+    const expectedExtentRasters = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
+
+    return this.test(
+      'Test getExtentOfMultipleLayers with GeoJSON, Esri Feature, Esri Dynamic and WMS...',
+      async (test) => {
+        // Capture each cleanup path before awaiting loading, including partially loaded fixtures.
+        const polygonsFixture = this.addLayerGeoJSONWithMetadataPolygons(test);
+        fixtureLayerPaths.push(polygonsFixture.layerPath);
+        const polygons = await polygonsFixture.promiseLayer;
+
+        const projectsFixture = this.addLayerEsriFeatureTopProjects(test);
+        fixtureLayerPaths.push(projectsFixture.layerPath);
+        const projects = await projectsFixture.promiseLayer;
+
+        // Include a raster-backed ESRI layer alongside the two vector fixtures.
+        const boundariesFixture = this.addLayerEsriDynamicGNWTBoundaries(test);
+        fixtureLayerPaths.push(boundariesFixture.layerPath);
+        const boundaries = await boundariesFixture.promiseLayer;
+
+        // Use a regional WMS fixture rather than the global Cities layer.
+        const halifaxFixture = this.addLayerWMSWithDatacubeRingOfFire(test);
+        fixtureLayerPaths.push(halifaxFixture.layerPath);
+        const halifax = await halifaxFixture.promiseLayer;
+
+        // Loaded layers may still be initializing bounds; wait for each projected extent.
+        const layers = [polygons, projects, boundaries, halifax];
+        const bounds = await Promise.all(layers.map((layer) => layer.waitForBounds()));
+        const { layerController } = this.getControllersRegistry();
+
+        test.addStep('Combining the bounds of four different layer types...');
+        const allExtent = await layerController.getExtentOfMultipleLayers([
+          polygonsFixture.layerPath,
+          projectsFixture.layerPath,
+          boundariesFixture.layerPath,
+          halifaxFixture.layerPath,
+        ]);
+
+        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
+        const vectorExtent = await layerController.getExtentOfMultipleLayers([polygonsFixture.layerPath, projectsFixture.layerPath]);
+
+        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
+        const rasterExtent = await layerController.getExtentOfMultipleLayers([boundariesFixture.layerPath, halifaxFixture.layerPath]);
+
+        // Return test results
+        return { bounds, allExtent, vectorExtent, rasterExtent };
+      },
+      (test, result) => {
+        test.addStep('Verifying four distinct layer types have finite bounds...');
+        Test.assertIsEqual(result.bounds.length, 4);
+        const validBounds: Extent[] = [];
+        result.bounds.forEach((bounds) => {
+          Test.assertIsDefined('fixture bounds', bounds);
+          Test.assertIsEqual(bounds.length, 4);
+          Test.assertIsEqual(bounds.every(Number.isFinite), true);
+          Test.assertIsEqual(bounds[0] <= bounds[2] && bounds[1] <= bounds[3], true);
+          validBounds.push(bounds);
+        });
+
+        test.addStep('Verifying the combined extent matches the union of all fixture bounds...');
+        Test.assertIsDefined('combined extent', result.allExtent);
+        Test.assertIsArrayEqual(result.allExtent, expectedExtentAll);
+        Test.assertIsDefined('vector extent', result.vectorExtent);
+        Test.assertIsArrayEqual(result.vectorExtent, expectedExtentVectors);
+        Test.assertIsDefined('raster extent', result.rasterExtent);
+        Test.assertIsArrayEqual(result.rasterExtent, expectedExtentRasters);
+      },
+      (test) => {
+        // Only remove test-owned layers; no zoom or extent restoration is necessary.
+        fixtureLayerPaths.reverse().forEach((layerPath) => this.removeLayerConfigAndAssert(test, layerPath));
+      }
+    );
+  }
+
   /**
    * Tests object injection followed by JSON-string replacement through the public API.
    *
@@ -3519,6 +3602,14 @@ export class LayerTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** Individual fixture bounds and controller extent-union observations. */
+type MultipleLayersExtentResult = {
+  bounds: (Extent | undefined)[];
+  allExtent?: Extent;
+  rasterExtent?: Extent;
+  vectorExtent?: Extent;
+};
 
 /** Runtime and legend-store observations after one parent or child opacity update. */
 type LayerOpacitySnapshot = {

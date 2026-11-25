@@ -50,6 +50,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
       <b>Layer reload</b> — Reloading a layer rebuilds it from scratch and keeps it at the same position in the layer order<br/>
       <b>GeoJSON source</b> — Object/string replacement, feature-info refresh, and reprojection after injection<br/>
       <b>ESRI domain queries</b> — Dynamic and Feature domain value translation<br/>
+      <b>Combined extent</b> — Union GeoJSON, Esri Feature, Esri Dynamic GNWT Boundaries and Halifax WMS bounds using layer paths or root IDs<br/>
       <b>GeometryCollection</b> — GeoJSON GeometryCollection layer loading<br/>
       <b>GeoCore visibility</b> — Group defaultVisibility=false (only when heavy tests are enabled)<br/>
       <b>Layer naming</b> — Repeated renaming through the public LayerApi updates runtime, legend store, and the rendered Layers panel label<br/>
@@ -68,7 +69,7 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 24;
+    return 25;
   }
 
   /**
@@ -152,6 +153,9 @@ export class GVTestSuiteLayerFunctions extends GVAbstractTestSuite {
 
     // Make sure the map is reset in its initial extent after the zooms
     await this.zoomToInitialExtent();
+
+    // Test combined bounds across four different layer types
+    await this.#layerTester.testGetExtentOfMultipleLayers();
 
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     await this.#layerTester.testAddGeoJSONWithGeometryCollection();
