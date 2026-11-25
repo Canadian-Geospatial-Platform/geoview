@@ -45,6 +45,8 @@ export class A11yEntryTester extends GVAbstractTester {
       async (entry): Promise<void> => {
         const b = A11yEntryTester.COMPANION_ID;
         const a = this.getMapId();
+
+        // The companion was reloaded for this case, so its first-entry guard has not been consumed yet.
         const trigger = A11yEntryTester.#requireControl(b, 'appBar-settings-btn');
         await entry.activate(trigger, 'Open Settings in the companion viewer');
         const toggle = A11yEntryTester.#requireControl(b, SETTINGS_SWITCH);
@@ -54,6 +56,7 @@ export class A11yEntryTester extends GVAbstractTester {
         entry.mode(b, false);
         entry.prompt();
 
+        // Compare Tab handling before and after enabling keyboard navigation.
         entry.check(
           'The off switch Tab was intercepted',
           await entry.pressKey('Tab', 'Check the first-entry guard from the off switch'),
@@ -80,6 +83,8 @@ export class A11yEntryTester extends GVAbstractTester {
           true
         );
         entry.focus(b, 'wcag-toplink');
+
+        // Showing the prompt consumes the guard, even after keyboard navigation is turned off.
         await A11yEntryTester.#openPrompt(entry, b);
         await entry.activate(A11yEntryTester.#requireControl(b, 'enable-focus'), 'Enable from the prompt');
         entry.focus(b, 'wcag-link-to-map');
@@ -109,6 +114,8 @@ export class A11yEntryTester extends GVAbstractTester {
   testForwardEntryEnable(): Promise<Test<EntryCheck[]>> {
     return this.#runEntryTest('Test opening the prompt from the top link, Enable, and focus the map', async (entry): Promise<void> => {
       const a = this.getMapId();
+
+      // Enable navigation in one viewer before following its inner map link.
       entry.prompt();
       await A11yEntryTester.#openPrompt(entry, a);
       await entry.activate(A11yEntryTester.#requireControl(a, 'enable-focus'), 'Enable keyboard navigation');
@@ -116,6 +123,8 @@ export class A11yEntryTester extends GVAbstractTester {
       entry.mode(a, true);
       entry.mode(A11yEntryTester.COMPANION_ID, false);
       entry.crosshair(a, false);
+
+      // Focusing the map activates only this viewer's crosshair.
       await entry.activate(A11yEntryTester.#requireControl(a, 'wcag-link-to-map'), 'Activate the inner map skip link');
       entry.focus(a, 'mapTargetElement');
       entry.crosshair(a, true);
@@ -134,6 +143,8 @@ export class A11yEntryTester extends GVAbstractTester {
       'Test Enable focuses the static viewer shell without activating the crosshair',
       async (entry): Promise<void> => {
         const b = A11yEntryTester.COMPANION_ID;
+
+        // A static viewer has no interactive map link or Settings button to receive focus.
         this.getApi().getMapViewer(b).setInteraction('static');
         await DomHelper.waitForReactIdle();
         entry.ids(b, 'wcag-link-to-map', false);
@@ -159,6 +170,8 @@ export class A11yEntryTester extends GVAbstractTester {
       'Test Skip returns to the opposite outer link for reverse and forward entry, and reverse Enable reveals the map skip link',
       async (entry): Promise<void> => {
         const b = A11yEntryTester.COMPANION_ID;
+
+        // Exercise both boundary links before checking reverse entry's Enable destination.
         await this.#skipPrompt(entry, b, true);
         await this.#skipPrompt(entry, this.getMapId(), false);
 
@@ -201,6 +214,7 @@ export class A11yEntryTester extends GVAbstractTester {
           await DomHelper.waitForReactIdle();
           entry.focus(a, 'wcag-bottomlink');
 
+          // Genuine pointer movement (not a layout shift under a still pointer) lets hover focus the map.
           target.dispatchEvent(new MouseEvent('mousemove', { ...point, bubbles: true, movementX: 4 }));
           await DomHelper.waitForReactIdle();
           entry.focus(a, 'mapTargetElement');
@@ -243,6 +257,8 @@ export class A11yEntryTester extends GVAbstractTester {
       async (entry): Promise<void> => {
         const a = this.getMapId();
         const b = A11yEntryTester.COMPANION_ID;
+
+        // The viewers share browser focus, so finish entry in each before exercising shortcuts.
         for (const id of [a, b]) {
           // eslint-disable-next-line no-await-in-loop -- The two viewers share browser focus.
           await A11yEntryTester.#openPrompt(entry, id);
@@ -253,6 +269,7 @@ export class A11yEntryTester extends GVAbstractTester {
         entry.mode(a, true);
         entry.mode(b, true);
 
+        // Transfer map focus between viewers and check that crosshairs follow the focused viewer.
         await entry.activate(A11yEntryTester.#requireControl(a, 'wcag-link-to-map'), 'Focus the first map and activate its crosshair');
         entry.focus(a, 'mapTargetElement');
         entry.crosshair(a, true);
@@ -272,6 +289,8 @@ export class A11yEntryTester extends GVAbstractTester {
         entry.mode(b, false);
         entry.mode(a, true);
         entry.crosshair(b, false);
+
+        // Shortcuts from the surrounding page must not act on either viewer.
         entry.before.focus();
         await entry.pressKey('m', 'Verify Ctrl+M does nothing from the host page', { ctrlKey: true });
         entry.check('Host control retained focus', DomHelper.getActiveElement()?.id, entry.before.id);
@@ -303,6 +322,8 @@ export class A11yEntryTester extends GVAbstractTester {
       entry.focus(b, 'enable-focus');
       entry.mode(b, false);
       entry.mode(a, false);
+
+      // The unanswered prompt must still accept Enable after the pointer moves.
       await entry.activate(A11yEntryTester.#requireControl(b, 'enable-focus'), 'Enable after mouse movement');
       entry.focus(b, 'wcag-link-to-map');
       entry.mode(b, true);
@@ -387,6 +408,7 @@ export class A11yEntryTester extends GVAbstractTester {
         }
         A11yEntryTester.requireVisibleViewers(ownerId);
 
+        // Save both viewers and host-page focus before the case changes shared state.
         const originalFocus = DomHelper.getActiveElement();
         const view = doc.defaultView;
         const originalScroll = { x: view?.scrollX ?? 0, y: view?.scrollY ?? 0 };
@@ -423,6 +445,8 @@ export class A11yEntryTester extends GVAbstractTester {
           if (originalFocus instanceof HTMLElement && originalFocus.isConnected) originalFocus.focus({ preventScroll: true });
           view?.scrollTo(originalScroll.x, originalScroll.y);
         };
+
+        // Reload only when the case needs the companion's untouched first-entry guard.
         if (freshCompanion) {
           const companion = await this.getApi().reload(A11yEntryTester.COMPANION_ID);
           await companion.waitForMapReady();
@@ -494,6 +518,8 @@ export class A11yEntryTester extends GVAbstractTester {
           mode: (id, expected): void => check(`${id} keyboard navigation mode`, getStoreUIActiveTrapGeoView(id), expected),
           crosshair: (id, expected): void => check(`${id} crosshair`, getStoreAppIsCrosshairsActive(id), expected),
         });
+
+        // Defer all assertions until the complete interaction has been observed.
         return checks;
       },
       (test, checks): void => {

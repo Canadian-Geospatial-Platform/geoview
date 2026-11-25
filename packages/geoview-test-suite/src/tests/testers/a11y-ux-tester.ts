@@ -51,6 +51,8 @@ export class A11yUxTester extends GVAbstractTester {
   testNavbarPanelFocusOwnership(): Promise<Test<TypeNavbarPanelFocusResult[]>> {
     const mapId = this.getMapId();
     const { uiController } = this.getControllersRegistry();
+
+    // Preserve the viewer's focus ownership so the next test sees the original state.
     const originalMode = getStoreUIActiveTrapGeoView(mapId);
     const originalFocusItem = getStoreUIFocusItem(mapId);
     const originalFocus = DomHelper.getActiveElement();
@@ -75,6 +77,7 @@ export class A11yUxTester extends GVAbstractTester {
               element.checkVisibility({ visibilityProperty: true })
             );
 
+          // Synthetic Enter does not perform the browser's click default.
           button.focus();
           const allowed = button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
           if (allowed) button.click();
@@ -85,6 +88,8 @@ export class A11yUxTester extends GVAbstractTester {
           const opened = button.getAttribute('aria-expanded') === 'true';
           const close = getVisibleClose();
           if (!close) throw new TestError('The open navbar panel must expose its Close button');
+
+          // Release and reacquire keyboard ownership without replacing the open panel.
           uiController.setActiveTrapGeoView(false);
           await DomHelper.waitForReactIdle();
           const originalClose = getVisibleClose();
@@ -166,6 +171,8 @@ export class A11yUxTester extends GVAbstractTester {
     const mapId = this.getMapId();
     const { uiController } = this.getControllersRegistry();
     const view = DomHelper.getGVRootElement(mapId).ownerDocument.defaultView;
+
+    // Preserve page and viewer state before exercising both activation methods.
     const originalScroll = view ? { x: view.scrollX, y: view.scrollY } : undefined;
     const originalMode = getStoreUIActiveTrapGeoView(mapId);
     const originalAppBar = getStoreUIActiveAppBarTab(mapId);
@@ -180,6 +187,8 @@ export class A11yUxTester extends GVAbstractTester {
         A11yEntryTester.requireVisibleViewers(mapId);
         const tab = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'tab-data-table');
         if (!tab) throw new TestError('The existing Data Table footer tab must be mounted');
+
+        // Begin with no panel or focus trap competing for the footer.
         uiController.closeMapPopovers();
         uiController.setCrosshairActive(false);
         uiController.setActiveAppBarTab(undefined, false, false);
@@ -254,6 +263,8 @@ export class A11yUxTester extends GVAbstractTester {
       },
       async (test): Promise<void> => {
         if (test.getStatus() === 'skipped') return;
+
+        // Restore panel ownership before returning focus and scroll to the host page.
         uiController.disableFocusTrap('no-focus');
         uiController.setActiveFooterBarTab(originalFooter.tabId, false);
         uiController.setFooterBarIsOpen(originalFooter.isOpen);
@@ -316,6 +327,7 @@ export class A11yUxTester extends GVAbstractTester {
         if (!selectionClose) throw new TestError('Selecting a layer must expose its sub-panel Close');
         await whenThisThen(() => DomHelper.getActiveElement() === selectionClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
 
+        // Observe focus between press and release, before the Settings click opens its popover.
         test.addStep('Pressing Settings and applying the browser mousedown focus default before mouseup...');
         settings.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
         settings.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
@@ -363,6 +375,8 @@ export class A11yUxTester extends GVAbstractTester {
       async (test): Promise<void> => {
         removeFocusListeners?.();
         if (test.getStatus() === 'skipped') return;
+
+        // Remove the test selection and restore the previous panel and focus owner.
         uiController.closeMapPopovers();
         selectionClose?.click();
         layerController.setSelectedLayerPath(originalSelectedLayer ?? '');
@@ -404,6 +418,7 @@ export class A11yUxTester extends GVAbstractTester {
         test.addStep('Dispatching a pointer click on Settings...');
         await DomHelper.waitForReactIdle();
 
+        // Keep Settings visible while clipping the map section, so any unwanted page scroll on click is detectable.
         view.scrollTo({ top: view.scrollY + settings.getBoundingClientRect().bottom - view.innerHeight + 20, behavior: 'instant' });
         const rect = settings.getBoundingClientRect();
         if (
@@ -416,6 +431,7 @@ export class A11yUxTester extends GVAbstractTester {
           throw new TestSkippedError('The page must scroll and show Settings while the map section is clipped above the viewport');
         }
 
+        // Capture scroll around the complete pointer sequence, not just the resulting popover state.
         const before = view.scrollY;
         settings.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse' }));
         settings.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -432,6 +448,8 @@ export class A11yUxTester extends GVAbstractTester {
       },
       async (): Promise<void> => {
         if (!originalScroll) return;
+
+        // Return the host page to its original position after closing the popover.
         uiController.closeMapPopovers();
         uiController.setActiveTrapGeoView(originalMode);
         await DomHelper.waitForReactIdle();
@@ -565,6 +583,7 @@ export class A11yUxTester extends GVAbstractTester {
         }
         if (getFullscreenElement()) throw new TestError('Launch Group 6 outside fullscreen so the test can enter through the navBar');
 
+        // Native fullscreen requires the real suite-launch gesture; a synthetic key cannot grant it.
         test.addStep('Activating navBar fullscreen from the suite launch user gesture...');
         await new Promise<void>((resolve, reject) => {
           /** Completes the native fullscreen request or reports its browser rejection. */
@@ -694,6 +713,8 @@ export class A11yUxTester extends GVAbstractTester {
       },
       async (test): Promise<void> => {
         if (test.getStatus() === 'skipped') return;
+
+        // Close Resize and exit native fullscreen before restoring the original footer and focus.
         closeButton?.click();
         if (enteredFullscreen) {
           uiController.setFullScreen(false);
@@ -791,6 +812,8 @@ export class A11yUxTester extends GVAbstractTester {
           const shortcutCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
           const detailsClosedAfterShortcut = !getStoreUIActiveAppBarTab(mapId).isOpen;
           const queryCountAfterShortcut = queries.length;
+
+          // Render the new view before synchronizing the crosshair used by the next query.
           await mapController.zoomToLonLatExtentOrCoordinate(
             expectsFeatures ? MULTI_FEATURE_QUERY_EXTENT : GVAbstractTester.ALBERTA_CENTER_LONLAT,
             false
@@ -906,6 +929,8 @@ export class A11yUxTester extends GVAbstractTester {
       async (test): Promise<void> => {
         querySet.offQueryEnded(recordQuery);
         if (test.getStatus() === 'skipped') return;
+
+        // Restore view, pointer and focus state so subsequent shared-map cases start cleanly.
         uiController.setCrosshairActive(false);
         uiController.disableFocusTrap('no-focus');
         uiController.setActiveTrapGeoView(false);
@@ -1041,6 +1066,8 @@ export class A11yUxTester extends GVAbstractTester {
       },
       async (test): Promise<void> => {
         if (test.getStatus() === 'skipped') return;
+
+        // Restore both the map view and the remembered Details selection.
         uiController.setCrosshairActive(false);
         uiController.disableFocusTrap('no-focus');
         uiController.setActiveTrapGeoView(false);
@@ -1148,6 +1175,7 @@ export class A11yUxTester extends GVAbstractTester {
         const crosshairActiveAfterMapPopover = getStoreAppIsCrosshairsActive(mapId);
         const footerAfterMapPopover = getStoreUIActiveFooterBarTab(mapId);
 
+        // Repeat the shortcut without an open panel to cover the baseline map behavior.
         test.addStep('Pressing Ctrl+M with no panel or popover open...');
         target.focus();
         pressCtrlM();
@@ -1217,6 +1245,8 @@ export class A11yUxTester extends GVAbstractTester {
       },
       async (test): Promise<void> => {
         if (test.getStatus() === 'skipped') return;
+
+        // Restore both app-bar and footer state after comparing their shortcut behavior.
         uiController.closeMapPopovers();
         uiController.disableFocusTrap('no-focus');
         uiController.setActiveAppBarTab(originalAppBar.tabId, originalAppBar.isOpen, originalAppBar.isFocusTrapped ?? false);
@@ -1321,6 +1351,7 @@ export class A11yUxTester extends GVAbstractTester {
           throw new TestError('The map13 query must expose multiple Details results to exercise result navigation');
         }
 
+        // Exercise in-panel navigation before testing the two nested Escape destinations.
         test.addStep('Moving focus within Details, navigating a result, and moving the mouse without clicking...');
         closeButton.focus();
         closeButton.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
@@ -1509,6 +1540,7 @@ export class A11yUxTester extends GVAbstractTester {
           throw new TestError('The query-opened Details panel must expose its feature sub-panel and navigation');
         }
 
+        // Mouse input cancels query-origin ownership before the Escape sequence.
         test.addStep('Canceling query-origin Escape ownership with a mouse click on the next-result button...');
         const previousFeatureIndex = getStoreDetailsCurrentFeatureIndex(mapId);
         nextFeatureButton.focus();
@@ -1692,6 +1724,7 @@ export class A11yUxTester extends GVAbstractTester {
         await DomHelper.waitForReactIdle();
         const subPanelFocusedBeforeLeaving = DomHelper.getActiveElement() === nextFeatureButton;
 
+        // Moving focus outside Details cancels the pending return to the crosshair.
         test.addStep('Moving focus from the feature sub-panel to Layers and waiting for focus effects...');
         layersButton.focus();
         await DomHelper.waitForReactIdle();
@@ -1817,6 +1850,8 @@ export class A11yUxTester extends GVAbstractTester {
         pressActiveKey('x');
         const ordinaryKeyboardNotification = keyboardEvents.length > notificationsBeforeOrdinaryKey;
         const exportOpenBeforeShortcut = getStoreUIFocusItem(mapId).activeElementId === 'export';
+
+        // The format list is portaled outside the dialog, so it needs its own focus observation.
         if (withFormatDropdown) {
           test.addStep('Opening the format dropdown and waiting for focus in its portaled list...');
           formatSelect = openedExportDialog.querySelector<HTMLElement>('[role="combobox"]') ?? undefined;
@@ -1889,6 +1924,8 @@ export class A11yUxTester extends GVAbstractTester {
       async (test): Promise<void> => {
         viewer.offMapKeyboardEvent(keyboardEventDelegate);
         if (test.getStatus() === 'skipped') return;
+
+        // Close the portaled list first so it cannot retain focus during restoration.
         if (formatSelect?.getAttribute('aria-expanded') === 'true' && formatDropdown?.isConnected) {
           formatDropdown.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
           await DomHelper.waitForReactIdle();
@@ -1968,6 +2005,7 @@ export class A11yUxTester extends GVAbstractTester {
           return !!activeElement && openedShareDialog.contains(activeElement);
         }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
 
+        // Share lives outside the map root, unlike the viewer-owned Export dialog.
         test.addStep('Pressing Ctrl+M while focus is inside Share...');
         const shareFocusBefore = DomHelper.getActiveElement();
         const shareDialogOpenBeforeShortcut = openedShareDialog.getAttribute('aria-modal') === 'true';
@@ -2054,6 +2092,8 @@ export class A11yUxTester extends GVAbstractTester {
         test.addStep(`Opening the ${kind} dialog...`);
         ({ dialog, closeButton } = await A11yUxTester.#openOverlay(mapId, kind, panelId));
         const context = { mapId, kind, panelId, dialog, closeButton, keyboardEvents };
+
+        // Keep the dialog references before waiting so finalization can close it on timeout.
         await A11yUxTester.#waitForOverlayFocus(context);
         return this.#exerciseOverlayShortcuts(test, context);
       },
@@ -2100,6 +2140,8 @@ export class A11yUxTester extends GVAbstractTester {
       async (test): Promise<void> => {
         viewer.offMapKeyboardEvent(keyboardEventDelegate);
         if (test.getStatus() === 'skipped') return;
+
+        // Dismiss the overlay before restoring its underlying panels and focus owner.
         if (dialog?.isConnected && closeButton) {
           closeButton.click();
           await whenThisThen(() => !dialog?.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
@@ -2188,6 +2230,8 @@ export class A11yUxTester extends GVAbstractTester {
           GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS,
           10
         );
+
+        // Dispatch from the first viewer while the companion dialog is still mounted.
         layers.focus({ preventScroll: true });
         if (DomHelper.getActiveElement() !== layers) throw new TestError('The first viewer must have focus before Ctrl+M');
         const companionDialogOpen = !!dialog?.isConnected;
@@ -2215,6 +2259,8 @@ export class A11yUxTester extends GVAbstractTester {
       async (test): Promise<void> => {
         viewer.offMapKeyboardEvent(delegate);
         if (test.getStatus() === 'skipped') return;
+
+        // Close the companion dialog before restoring each viewer's independent state.
         if (dialog?.isConnected) {
           dialog.querySelector<HTMLButtonElement>('button')?.click();
           await whenThisThen(() => !dialog?.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
