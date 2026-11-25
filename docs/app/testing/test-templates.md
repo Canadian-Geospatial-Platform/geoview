@@ -51,7 +51,7 @@ Before writing a test, classify it into one of these groups:
 
 | Category              | Tester Class   | Suite Class     | Execution Pattern                     |
 | --------------------- | -------------- | --------------- | ------------------------------------- |
-| **Keyboard / Focus** | `A11yUxTester` | `suite-a11y-ux` | Sequential on the dedicated suite map |
+| **Keyboard / Focus** | `A11yUxTester`, `A11yEntryTester` | `suite-a11y-ux` | Sequential on the dedicated suite map |
 
 > **Choosing the right group:** Pure function with no side effects → Group 1. Adds/removes/queries a layer → Group 2. Changes map state or tests map-scoped UI → Group 3. Tests a dedicated Details or Data Table panel suite → Group 4. Tests a plugin package → Group 5. Tests keyboard focus or cross-panel accessibility/UX → Group 6.
 
