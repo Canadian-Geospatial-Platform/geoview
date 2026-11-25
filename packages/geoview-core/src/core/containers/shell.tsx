@@ -149,8 +149,10 @@ export function Shell(props: ShellProps): JSX.Element {
     changeMode(active);
   }, []);
 
-  // TODO: Revisit whether requestAnimationFrame makes setTimeout unnecessary for focus restoration.
+  // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
   // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
+  // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
+  // See issue #3222 for more detail.
   /**
    * Restores focus after a controller requests a focus target.
    */
