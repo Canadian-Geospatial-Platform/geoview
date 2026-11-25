@@ -86,41 +86,39 @@ export class GVTestSuiteA11yUx extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when the test finishes
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
-    return (async (): Promise<void> => {
-      await this.#a11yUxTester.testFullscreenPopoverFocusReturn();
-      await this.#a11yUxTester.testSettingsDoesNotScrollPage();
-      await this.#a11yUxTester.testSettingsPointerClickAway();
-      await this.#a11yUxTester.testLayersSubPanelYieldsToSettings();
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('fullscreen');
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('legend fullscreen');
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('lightbox');
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('export');
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('basic table');
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('feature detail');
-      await this.#a11yUxTester.testModalShortcutViewerIsolation();
-      await this.#a11yUxTester.testKeyboardQueryMapFocusReturn();
-      await this.#a11yUxTester.testKeyboardShortcutClosesPanelsAndPreservesFooter();
-      await this.#a11yUxTester.testNavbarPanelFocusOwnership();
-      await this.#a11yUxTester.testCrosshairDetailsEscapeReturnsToMap();
-      await this.#a11yUxTester.testDetailsEscapeOwnershipCancellation();
-      await this.#a11yUxTester.testDetailsEscapeFocusLeaveCancellation();
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForExportModal();
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForShareModal();
-      await this.#a11yUxTester.testKeyboardShortcutIgnoredForExportModal(true);
-      await this.#a11yUxTester.testDetailsSubPanelReopensAfterDismissal();
-      await this.#a11yEntryTester.testSettingsEntryGuard();
-      await this.#a11yEntryTester.testForwardEntryEnable();
-      await this.#a11yEntryTester.testStaticEntryEnable();
-      await this.#a11yEntryTester.testForwardAndReverseEntrySkip();
-      await this.#a11yEntryTester.testSkipKeepsFocusUnderStationaryPointer();
+  protected override async onLaunchTestSuite(): Promise<void> {
+    await this.#a11yUxTester.testFullscreenPopoverFocusReturn();
+    await this.#a11yUxTester.testSettingsDoesNotScrollPage();
+    await this.#a11yUxTester.testSettingsPointerClickAway();
+    await this.#a11yUxTester.testLayersSubPanelYieldsToSettings();
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('fullscreen');
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('legend fullscreen');
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('lightbox');
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('export');
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('basic table');
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForOverlay('feature detail');
+    await this.#a11yUxTester.testModalShortcutViewerIsolation();
+    await this.#a11yUxTester.testKeyboardQueryMapFocusReturn();
+    await this.#a11yUxTester.testKeyboardShortcutClosesPanelsAndPreservesFooter();
+    await this.#a11yUxTester.testNavbarPanelFocusOwnership();
+    await this.#a11yUxTester.testCrosshairDetailsEscapeReturnsToMap();
+    await this.#a11yUxTester.testDetailsEscapeOwnershipCancellation();
+    await this.#a11yUxTester.testDetailsEscapeFocusLeaveCancellation();
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForExportModal();
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForShareModal();
+    await this.#a11yUxTester.testKeyboardShortcutIgnoredForExportModal(true);
+    await this.#a11yUxTester.testDetailsSubPanelReopensAfterDismissal();
+    await this.#a11yEntryTester.testSettingsEntryGuard();
+    await this.#a11yEntryTester.testForwardEntryEnable();
+    await this.#a11yEntryTester.testStaticEntryEnable();
+    await this.#a11yEntryTester.testForwardAndReverseEntrySkip();
+    await this.#a11yEntryTester.testSkipKeepsFocusUnderStationaryPointer();
 
-      // Tab activation schedules upstream's uncancellable delayed footer scroll; run after scroll-sensitive tests.
-      await this.#a11yUxTester.testFooterPanelReopensWithFocus('keyboard');
-      await this.#a11yUxTester.testFooterPanelReopensWithFocus('pointer');
-      await this.#a11yEntryTester.testTwoMapKeyboardShortcuts();
-      await this.#a11yEntryTester.testUnansweredPromptStaysOpenOnMouseMove();
-    })();
+    // Tab activation schedules upstream's uncancellable delayed footer scroll; run after scroll-sensitive tests.
+    await this.#a11yUxTester.testFooterPanelReopensWithFocus('keyboard');
+    await this.#a11yUxTester.testFooterPanelReopensWithFocus('pointer');
+    await this.#a11yEntryTester.testTwoMapKeyboardShortcuts();
+    await this.#a11yEntryTester.testUnansweredPromptStaysOpenOnMouseMove();
   }
 
   // #endregion OVERRIDES
