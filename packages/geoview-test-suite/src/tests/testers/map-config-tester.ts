@@ -250,73 +250,6 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Verifies the query results and zoom change for the visibility scenarios.
-   *
-   * @param test - The test being asserted
-   * @param results - The scenario results
-   */
-  static #assertVisibilityAndZoomResults(test: Test<DetailsOntarioAlbertaResult>, results: DetailsOntarioAlbertaResult): void {
-    test.addStep('Verifying there is 2 feature info result for the Ontario query...');
-    Test.assertIsArrayLengthEqual(results.resultsOntarioResults, 2);
-
-    test.addStep('Verifying there is 0 feature info result for the Ontario query...');
-    Test.assertIsArrayLengthEqual(results.resultsOntarioNoResults, 0);
-
-    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults1, 0);
-
-    test.addStep('Verifying there is 1 feature info result for the Alberta query...');
-    Test.assertIsArrayLengthEqual(results.resultsAlbertaResults, 1);
-
-    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
-    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults2, 0);
-
-    test.addStep('Verifying zoom level changed...');
-    Test.assertIsNotEqual(results.initialZoom, results.finalZoom);
-  }
-
-  /**
-   * Verifies the name-field, summary, and alias feature-info results.
-   *
-   * @param test - The test being asserted
-   * @param results - The configuration scenario results
-   * @param nameField - The date field used by the name-field and summary scenarios
-   * @param aliasValue - The expected Province field alias
-   */
-  static #assertFeatureInfoConfigurationResults(
-    test: Test<DetailsOntarioAlbertaResult>,
-    results: DetailsOntarioAlbertaResult,
-    nameField: string,
-    aliasValue: string
-  ): void {
-    const { nameFieldResults, summaryResults, aliasResults } = results;
-    test.addStep('Verifying query returned features...');
-    Test.assertIsDefined('features', nameFieldResults);
-    Test.assertIsArrayLengthMinimal(nameFieldResults, 1);
-
-    test.addStep('Verifying nameField is set on result...');
-    Test.assertIsEqual(nameFieldResults[0].nameField, nameField);
-
-    test.addStep('Verifying query returned features...');
-    Test.assertIsDefined('features', summaryResults);
-    Test.assertIsArrayLengthMinimal(summaryResults, 1);
-
-    test.addStep(`Verifying field '${nameField}' is excluded from fieldInfo...`);
-    Test.assertIsUndefined(`fieldInfo.${nameField}`, summaryResults[0].fieldInfo[nameField]);
-
-    test.addStep('Verifying Province field IS present in fieldInfo...');
-    Test.assertIsDefined('fieldInfo.Province', summaryResults[0].fieldInfo.Province);
-
-    test.addStep('Verifying query returned features...');
-    Test.assertIsDefined('features', aliasResults);
-    Test.assertIsArrayLengthMinimal(aliasResults, 1);
-
-    test.addStep(`Verifying Province field alias is '${aliasValue}'...`);
-    Test.assertIsDefined('fieldInfo.Province', aliasResults[0].fieldInfo.Province);
-    Test.assertIsEqual(aliasResults[0].fieldInfo.Province.alias, aliasValue);
-  }
-
-  /**
    * Tests that a fixed-height map without a footer bar keeps the requested viewer height.
    *
    * @returns A promise that resolves when the test completes
@@ -2661,6 +2594,73 @@ export class MapConfigTester extends GVAbstractTester {
   // #endregion PROTECTED METHODS
 
   // #region PRIVATE METHODS
+
+  /**
+   * Verifies the query results and zoom change for the visibility scenarios.
+   *
+   * @param test - The test being asserted
+   * @param results - The scenario results
+   */
+  static #assertVisibilityAndZoomResults(test: Test<DetailsOntarioAlbertaResult>, results: DetailsOntarioAlbertaResult): void {
+    test.addStep('Verifying there is 2 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioResults, 2);
+
+    test.addStep('Verifying there is 0 feature info result for the Ontario query...');
+    Test.assertIsArrayLengthEqual(results.resultsOntarioNoResults, 0);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults1, 0);
+
+    test.addStep('Verifying there is 1 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaResults, 1);
+
+    test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+    Test.assertIsArrayLengthEqual(results.resultsAlbertaNoResults2, 0);
+
+    test.addStep('Verifying zoom level changed...');
+    Test.assertIsNotEqual(results.initialZoom, results.finalZoom);
+  }
+
+  /**
+   * Verifies the name-field, summary, and alias feature-info results.
+   *
+   * @param test - The test being asserted
+   * @param results - The configuration scenario results
+   * @param nameField - The date field used by the name-field and summary scenarios
+   * @param aliasValue - The expected Province field alias
+   */
+  static #assertFeatureInfoConfigurationResults(
+    test: Test<DetailsOntarioAlbertaResult>,
+    results: DetailsOntarioAlbertaResult,
+    nameField: string,
+    aliasValue: string
+  ): void {
+    const { nameFieldResults, summaryResults, aliasResults } = results;
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', nameFieldResults);
+    Test.assertIsArrayLengthMinimal(nameFieldResults, 1);
+
+    test.addStep('Verifying nameField is set on result...');
+    Test.assertIsEqual(nameFieldResults[0].nameField, nameField);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', summaryResults);
+    Test.assertIsArrayLengthMinimal(summaryResults, 1);
+
+    test.addStep(`Verifying field '${nameField}' is excluded from fieldInfo...`);
+    Test.assertIsUndefined(`fieldInfo.${nameField}`, summaryResults[0].fieldInfo[nameField]);
+
+    test.addStep('Verifying Province field IS present in fieldInfo...');
+    Test.assertIsDefined('fieldInfo.Province', summaryResults[0].fieldInfo.Province);
+
+    test.addStep('Verifying query returned features...');
+    Test.assertIsDefined('features', aliasResults);
+    Test.assertIsArrayLengthMinimal(aliasResults, 1);
+
+    test.addStep(`Verifying Province field alias is '${aliasValue}'...`);
+    Test.assertIsDefined('fieldInfo.Province', aliasResults[0].fieldInfo.Province);
+    Test.assertIsEqual(aliasResults[0].fieldInfo.Province.alias, aliasValue);
+  }
 
   /**
    * Helper to create a map config with initialSettings on the GeoJSON layer.
