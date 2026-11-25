@@ -2090,26 +2090,30 @@ export abstract class GeoUtilities {
    * Gets the area of a given geometry.
    *
    * @param geometry - The geometry to calculate the area
-   * @returns The area of the given geometry
+   * @param projection - Optional projection of the geometry coordinates (defaults to EPSG:3857)
+   * @returns The geodesic area of the given geometry in square meters
    */
-  static getArea(geometry: Geometry): number {
+  static getArea(geometry: Geometry, projection?: ProjectionLike): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
     // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
-    return getAreaOL(geometry);
+    // The ol/sphere functions assume EPSG:3857 coordinates unless the geometry projection is provided.
+    return getAreaOL(geometry, projection ? { projection } : undefined);
   }
 
   /**
    * Gets the length of a given geometry.
    *
    * @param geometry - The geometry to calculate the length
-   * @returns The length of the given geometry
+   * @param projection - Optional projection of the geometry coordinates (defaults to EPSG:3857)
+   * @returns The geodesic length of the given geometry in meters
    */
-  static getLength(geometry: Geometry): number {
+  static getLength(geometry: Geometry, projection?: ProjectionLike): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
     // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
-    return getLengthOL(geometry);
+    // The ol/sphere functions assume EPSG:3857 coordinates unless the geometry projection is provided.
+    return getLengthOL(geometry, projection ? { projection } : undefined);
   }
 
   /**
@@ -2126,10 +2130,10 @@ export abstract class GeoUtilities {
     const geom = new LineString(arr);
     const sections: number[] = [];
     geom.forEachSegment((start, end) => {
-      sections.push(Math.round((this.getLength(new LineString([start, end])) / 1000) * 100) / 100);
+      sections.push(Math.round((this.getLength(new LineString([start, end]), outProj) / 1000) * 100) / 100);
     });
 
-    return { total: Math.round((this.getLength(geom) / 1000) * 100) / 100, sections };
+    return { total: Math.round((this.getLength(geom, outProj) / 1000) * 100) / 100, sections };
   }
 
   /**

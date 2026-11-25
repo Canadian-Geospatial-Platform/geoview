@@ -31,12 +31,14 @@ import { formatLength, formatArea } from '@/core/utils/utilities';
 import { DomHelper } from '@/core/utils/dom-helper';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
+import { MapController } from '@/core/controllers/map-controller';
 
 /** The geometry group key for measurement features. */
-const MEASURE_GROUP_KEY = 'geoview-measurement';
+const { MEASURE_GROUP_KEY } = MapController;
 
 /** Stroke color for measurement lines. */
 const STROKE_COLORS = '#ff0000';
@@ -88,6 +90,7 @@ export default function Measurement(): JSX.Element {
   // Stores
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
+  const mapProjection = useStoreMapCurrentProjectionEPSG();
   const shellContainer = useShellContainer();
   const mapController = useMapController();
   const uiController = useUIController();
@@ -168,7 +171,7 @@ export default function Measurement(): JSX.Element {
         if (includeSegmentLabels) {
           for (let i = 0; i < coordinates.length - 1; i++) {
             const segment = new LineString([coordinates[i], coordinates[i + 1]]);
-            const segmentLength = GeoUtilities.getLength(segment);
+            const segmentLength = GeoUtilities.getLength(segment, mapProjection);
             const segmentLabel = formatLength(segmentLength, displayLanguage);
 
             // Get midpoint of segment
@@ -212,15 +215,15 @@ export default function Measurement(): JSX.Element {
 
         if (geometry instanceof LineString) {
           labelCoord = coordinates[coordinates.length - 1];
-          const length = GeoUtilities.getLength(geometry);
+          const length = GeoUtilities.getLength(geometry, mapProjection);
           totalLabel = formatLength(length, displayLanguage);
         } else if (geometry instanceof Polygon) {
           // Position at an interior point so the total stays inside the polygon.
           labelCoord = geometry.getInteriorPoint().getCoordinates();
           labelCoord.pop(); // Remove the third coordinate
           labelOffsetY = 0; // No offset for polygon - keep label inside
-          const area = GeoUtilities.getArea(geometry);
-          const length = GeoUtilities.getLength(geometry);
+          const area = GeoUtilities.getArea(geometry, mapProjection);
+          const length = GeoUtilities.getLength(geometry, mapProjection);
           // Convert HTML <sup> tags to Unicode superscript for canvas rendering
           const areaText = formatArea(area, displayLanguage).replace(/<sup>2<\/sup>/g, '²');
           totalLabel = `${formatLength(length, displayLanguage)}\n${areaText}`;
@@ -233,7 +236,7 @@ export default function Measurement(): JSX.Element {
         return styles;
       };
     },
-    [displayLanguage]
+    [displayLanguage, mapProjection]
   );
 
   /**
@@ -310,12 +313,12 @@ export default function Measurement(): JSX.Element {
 
           // Announce measurement completion with actual values
           if (geometry instanceof LineString) {
-            const length = GeoUtilities.getLength(geometry);
+            const length = GeoUtilities.getLength(geometry, mapProjection);
             const distance = formatLength(length, displayLanguage);
             setStatusMessage(t('measurement.status.completedLine', { distance }));
           } else if (geometry instanceof Polygon) {
-            const perimeter = GeoUtilities.getLength(geometry);
-            const area = GeoUtilities.getArea(geometry);
+            const perimeter = GeoUtilities.getLength(geometry, mapProjection);
+            const area = GeoUtilities.getArea(geometry, mapProjection);
             const perimeterFormatted = formatLength(perimeter, displayLanguage);
             const areaFormatted = formatArea(area, displayLanguage);
             setStatusMessage(
@@ -340,8 +343,18 @@ export default function Measurement(): JSX.Element {
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
     },
-    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, t]
+    [clearSketchListener, createSegmentStyle, mapController, uiController, displayLanguage, mapProjection, t]
   );
+
+  /**
+   * Reapplies measurement styles when the projection or language changes, so existing labels use the current values.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('MEASUREMENT - refresh measurement styles', mapProjection, displayLanguage);
+    measurementFeatures.forEach((feature) => feature.setStyle(createSegmentStyle(showSegmentLabels)));
+    // Only refresh when the style inputs change, feature additions and label toggles already apply their own style
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createSegmentStyle]);
 
   /**
    * Synchronizes the measurement controls when measurement stops, including when drawer drawing or editing takes over.
