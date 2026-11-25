@@ -253,6 +253,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       const isClosing = togglesPanel && isCollapsed === false && onToggleCollapse !== undefined;
       if (togglesPanel) onToggleCollapse?.();
 
+      // WCAG - if keyboard navigation is on and the tabs gets expanded, set the trap store info to open, close otherwise
       // WCAG - Collapse must release ownership so reopening is a new focus entry.
       if (activeTrap && !isClosing) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();

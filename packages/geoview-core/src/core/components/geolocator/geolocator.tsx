@@ -130,6 +130,7 @@ export function Geolocator(): JSX.Element {
   const handleReset = useCallback((): void => {
     setSearchValue('');
     uiController.setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
+    // TODO: Replace manual setTimeout with a shared utilities helper (e.g. delayDeferExecution() using TIMEOUT.deferExecution) to centralize deferred calls.
     setTimeout(() => {
       uiController.disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
     }, TIMEOUT.deferExecution);
