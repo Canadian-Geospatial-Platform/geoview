@@ -27,6 +27,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 interface ItemsListProps {
   items: TypeLegendItem[];
   layerPath: string;
+  showControls: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ const LegendListItem = memo(
     item: { icon, name, isVisible },
     layerVisible,
     canToggle,
+    showControls,
     showNameTooltip,
     onToggle,
     sxClasses,
@@ -50,6 +52,7 @@ const LegendListItem = memo(
     item: TypeLegendItem;
     layerVisible: boolean;
     canToggle: boolean;
+    showControls: boolean;
     showNameTooltip: boolean;
     onToggle?: () => void;
     sxClasses: Record<string, object>;
@@ -87,6 +90,7 @@ const LegendListItem = memo(
         >
           <ListItemButton
             id={id}
+            tabIndex={showControls ? undefined : -1}
             onClick={!isDisabled ? onToggle : undefined}
             disabled={isDisabled}
             disableRipple
@@ -129,12 +133,15 @@ const CONST_NAME_LENGTH_TOOLTIP = 30;
  * @param props - Properties defined in ItemsListProps interface
  * @returns The items list element, or null if no items
  */
-export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Element | null => {
+export const ItemsList = memo(({ items, layerPath, showControls }: ItemsListProps): JSX.Element | null => {
   logger.logTraceRender('components/legend/legend-layer-items');
 
   // Hooks
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  /**
+   * Builds the themed styles for the legend item list.
+   */
+  const memoSxClasses = useMemo((): Record<string, object> => {
     logger.logTraceUseMemo('LEGEND-LAYER-ITEMS - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -229,6 +236,7 @@ export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Elemen
           <LegendListItem
             key={`${item.name}-${item.isVisible}-${item.icon}`}
             id={itemId}
+            showControls={showControls}
             {...commonProps}
             onToggle={canToggle ? () => handleToggleItemVisibility(item, itemId) : undefined}
             sxClasses={memoSxClasses}

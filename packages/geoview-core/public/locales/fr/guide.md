@@ -58,6 +58,8 @@ Selon la configuration de la visionneuse, le coin inférieur droit de la carte c
 
 Vous pouvez aussi déplacer la carte avec les touches fléchées vers la gauche, la droite, le haut et le bas, ou en cliquant sur la carte et en la faisant glisser. Lorsque le pointeur est sur la carte, la molette de la souris permet de faire un zoom avant et arrière.
 
+En mode de navigation au clavier, le survol ne focalise pas la carte, alors la molette fait défiler la page. Cliquez sur la carte ou appuyez sur la touche de tabulation pour la focaliser avant d'utiliser la molette pour zoomer ; le déplacement par glissement fonctionne sans focus.
+
 Appuyez sur la touche **Maj.** tout en cliquant et en déplaçant la souris pour définir une zone sur la carte. Relâchez la souris; le zoom se fait sur la zone sélectionnée.
 
 Appuyez sur les touches **Maj.** et **Alt.** tout en cliquant et en déplaçant la souris pour faire tourner la carte.
@@ -80,21 +82,23 @@ Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la 
 
 Les personnes qui ne peuvent pas utiliser de souris peuvent choisir de naviguer avec le clavier. Utilisez la touche de **tabulation** pour atteindre les liens et les commandes sur la page. Appuyez sur **Maj.** et la touche de **tabulation** pour revenir à l’élément précédent. Utilisez la touche **Entrée** ou la **barre d’espace** pour activer les liens et les commandes.
 
-Si vous utilisez la touche de **tabulation** pour naviguer dans la carte, la fenêtre contextuelle **Navigation clavier** s’affichera. Sélectionnez le bouton **Activer** et appuyez sur **Entrée** pour utiliser la navigation avec le clavier.
+Lorsque vous entrez dans le visualiseur avec la touche de **tabulation** en passant par un lien d'évitement, la fenêtre contextuelle **Navigation clavier** s'affiche. Sélectionnez le bouton **Activer** et appuyez sur **Entrée**. Sur les cartes dynamiques, le focus passe au lien **Aller au contenu principal - Carte** ; appuyez de nouveau sur **Entrée** pour focaliser la carte. Sur les cartes statiques, le focus passe au visualiseur lui-même. Sur les cartes dynamiques, utilisez **Paramètres**, sous Notifications, et son commutateur **Navigation clavier** pour activer ou désactiver ce mode.
 
-Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
+Lorsque vous focalisez la carte avec la touche de **tabulation**, son lien d'évitement ou **Ctrl+M**, un pointeur en croix s'affiche en son centre :
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
-La carte peut être rapidement centrée en appuyant sur **Ctrl+M** n'importe où dans l'application GeoView.
+Lorsque le focus est dans un visualiseur dynamique, **Ctrl+M** (**Cmd+M** sur macOS) focalise la carte et active le pointeur en croix. Ce raccourci ferme les panneaux de la barre latérale, dont Détails, et les panneaux des commandes de navigation, sans fermer les panneaux du pied de page. Il est sans effet lorsqu’une boîte de dialogue est ouverte.
 
-Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** ou **Ctrl+Flèche haut** / **Ctrl+Flèche bas** pour faire un zoom avant ou arrière. Appuyez sur **Maj.+Flèche haut** / **Maj.+Flèche bas** pour augmenter ou diminuer la distance de déplacement de la carte à chaque touche fléchée. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
+Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** ou **Ctrl+Flèche haut** / **Ctrl+Flèche bas** pour faire un zoom avant ou arrière. Appuyez sur **Maj.+Flèche haut** / **Maj.+Flèche bas** pour augmenter ou diminuer la distance de déplacement de la carte à chaque touche fléchée. Appuyez sur **Entrée** pour sélectionner un élément pris en charge sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
-Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
+Lorsque Détails est accessible depuis la barre latérale, chaque requête au pointeur en croix ouvre son sous-panneau des détails de l'entité (ou son guide s'il n'y a aucun résultat), avec le focus sur le **bouton Fermer du panneau principal**. Appuyez une fois sur **Échap** pour fermer Détails et revenir au pointeur en croix. Si vous déplacez le focus dans le sous-panneau, le premier **Échap** ferme celui-ci et focalise sa couche dans la liste ; le second ferme Détails et revient au pointeur en croix.
+
+La navigation dans Détails et les mouvements de la souris préservent ce retour. Quitter Détails, cliquer avec la souris ou passer à une autre fenêtre l'annule. Le bouton **Fermer** et le panneau Détails ouvert avec la souris conservent leur comportement habituel.
 
 ## Mesurer
 
-#### Avec une souris
+### Avec une souris
 
 1. Ouvrez **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
 2. Cliquez sur la carte pour commencer, puis cliquez pour ajouter des points.
@@ -103,14 +107,14 @@ Pour les éléments pris en charge, l’information s’affiche lorsque le point
 5. Appuyez sur **Échap** pour annuler le tracé en cours. L'outil reste activé et vous pouvez recommencer.
 6. Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point. Utilisez **Effacer** dans le panneau Mesurer pour supprimer les mesures terminées.
 
-#### Avec le pointeur en croix
+### Avec le pointeur en croix
 
-La mesure au clavier nécessite la navigation au clavier : appuyez sur **Tabulation** pour focaliser la carte, sélectionnez **Activer** et vérifiez que le pointeur en croix est visible. Ouvrez ensuite **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**.
+Activez la navigation au clavier, puis ouvrez **Mesurer**, activez l'outil et choisissez **Distance** ou **Surface**. Appuyez sur **Ctrl+M** pour focaliser la carte et afficher le pointeur en croix.
 
 - Appuyez sur **Entrée** ou **Espace** pour commencer et ajouter un point à la position du pointeur en croix.
 - Appuyez sur **Maj.+Entrée** ou **Maj.+Espace** pour terminer la mesure.
 - Pendant le tracé, appuyez sur **Ctrl+Z** ou **Retour arrière** pour annuler le dernier point; appuyez sur **Échap** pour annuler le tracé. Appuyez de nouveau sur **Échap**, lorsqu'il n'y a plus rien à annuler, pour ramener le focus sur le bouton **Mesurer**.
-- Utilisez les touches **fléchées** pour déplacer la carte. **Ctrl+M** focalise la carte et ferme le panneau de navigation ouvert sans désactiver l'outil Mesurer.
+- Utilisez les touches **fléchées** pour déplacer la carte. **Ctrl+M** focalise la carte et ferme les panneaux ouverts de la barre latérale et des commandes de navigation sans désactiver l'outil Mesurer.
 
 Le résultat de la mesure et les actions de tracé sont annoncés aux lecteurs d'écran. En plein écran, **Échap** annule le tracé en cours et quitte également le plein écran, car le navigateur réserve cette touche.
 
@@ -122,15 +126,12 @@ La carte n'est pas pleinement conforme au niveau AA des Règles pour l'accessibi
 
 ### Utilisateurs au clavier
 
-- L'ouverture des panneaux déclenche des pièges de focus pour accélérer la navigation ; la touche Échap ferme les panneaux et ramène le focus sur l'élément déclencheur.
-- En mode plein écran, la touche Échap permet de quitter le mode plein écran plutôt que de fermer les panneaux qui ont été ouverts.
+- Les panneaux délimitent la navigation par **Tab/Maj.+Tab**. **Échap** ferme le panneau le plus interne contenant le focus et revient normalement à la commande associée ; les requêtes au pointeur en croix utilisent le retour décrit ci-dessus.
+- En mode plein écran, la touche Échap permet de quitter le mode plein écran plutôt que de fermer les panneaux qui ont été ouverts. Le focus reste sur une commande visible ou revient au bouton plein écran si la commande qui avait le focus disparaît.
+- En plein écran, la touche Tab peut passer aux commandes masquées du navigateur ; continuez d'appuyer sur Tab pour revenir à la carte ou appuyez sur Échap pour quitter le plein écran.
 - Dans un panneau latéral, appuyez sur **Tab** jusqu’à ce que sa zone de contenu défilante reçoive le focus, puis utilisez les touches **fléchées** pour la faire défiler. Le défilement reste dans le panneau lorsqu’il atteint le haut ou le bas.
-
-Le mouvement ou le positionnement de la souris peut provoquer un comportement inattendu en mode de navigation au clavier. Pour éviter ce problème :
-
-- Avant de tabuler vers la visionneuse pour activer le mode de navigation au clavier (WCAG), éloignez votre souris de la fenêtre du navigateur.
-- Évitez de déplacer votre souris après avoir activé le mode de navigation au clavier.
-- Avant d'activer le mode plein écran de la visionneuse, éloignez votre souris de l'endroit où la visionneuse apparaîtra, afin qu'elle ne chevauche pas la souris lorsque la visionneuse s'agrandit pour remplir l'écran. Placer la souris dans l'un des coins de votre écran devrait aider à éviter tout problème.
+- Le mouvement de la souris ne désactive pas la navigation au clavier ; les panneaux normaux conservent leurs limites de navigation au clavier tout en permettant une interaction volontaire avec les commandes à l'extérieur.
+- Le commutateur des paramètres reste ouvert et conserve le focus lorsqu'il change d'état. Échap ou **Fermer** ramène le focus aux paramètres ; un clic ailleurs conserve le focus sur la commande sélectionnée.
 
 ### Utilisateurs de lecteurs d'écran
 
@@ -196,11 +197,11 @@ _Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être act
 
 ## Dessin et édition avec le pointeur en croix
 
-Lorsque la navigation au clavier est activée (pointeur en croix actif), les outils de dessin offrent un contrôle clavier amélioré :
+Lorsque le pointeur en croix est actif, les outils de dessin offrent un contrôle clavier amélioré :
 
 ### Dessiner avec le pointeur en croix
 
-1. Activez la navigation au clavier (touche **Tab** vers la carte, puis **Activer**)
+1. Activez la navigation au clavier, puis appuyez sur **Ctrl+M** pour focaliser la carte
 2. Activez le mode dessin (**D**)
 3. Sélectionnez un type de géométrie (**G** pour parcourir)
 4. Positionnez le pointeur en croix avec les **touches fléchées**

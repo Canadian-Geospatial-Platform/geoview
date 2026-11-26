@@ -50,6 +50,16 @@ Source boundaries most likely to produce misleading tests:
 - `setMapZoomLevel` returns void; await controller zoom when completion matters.
 - Fullscreen view-restoration tests use `map.renderSync()` to process view changes and `moveend`; do not await
   `waitForRender()` there, since its `rendercomplete` event also depends on map sources finishing loading.
+- Before testing focus/blur behavior, verify `document.hasFocus()`; if false, bring the browser document to the foreground.
+  A background document can update `activeElement` without firing the focus/blur events being tested.
+- Keep the real pointer off the test maps during multi-viewer focus runs: when a viewer is not in keyboard mode,
+  `MapViewer` focuses its map target on `mouseenter`, or on the first genuine `mousemove` after it while keyboard-placed
+  focus (`:focus-visible`) is held elsewhere, so moving the mouse over a map mid-run steals focus.
+- App-bar panels autofocus Close after the opening transition unless a new competing focus owner has taken over.
+  Wait for Close focus when a test needs settled panel entry; React idle and CSS transition completion do not
+  signal completion of the delayed autofocus job.
+- In overlay tests, retain the dialog and close-control references for finalization before awaiting initial focus.
+  A focus-settlement timeout must not prevent cleanup from closing an already mounted overlay.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.
 - Layer visibility DOM checks must pass the Layers panel's `containerType` to `DomHelper.getVisibleButton` and
   `getVisibleButtonVisibility`; suffix-only row matching can select another panel's entry.
@@ -73,6 +83,7 @@ AI-specific workflow for TestCreator Mode 2. Classifications/templates are canon
 | Dedicated Details/Data Table panel behavior         | Group 4: matching panel tester                                                     |
 | Map-scoped guide/app-bar/footer-bar/UIController    | Group 3: MapTester                                                                 |
 | Geochart/swiper/time-slider/drawer/other plugin      | Group 5: guarded plugin tester; confirm an existing suite before inventing a tester |
+| Keyboard focus and cross-panel accessibility/UX     | Group 6: A11yUxTester (`suite-a11y-ux`)                                              |
 | LayerController methods                              | Classify by behavior: lifecycle (2), map state (3), panel state (4)                 |
 | Bug fix                                              | Reproduce the smallest failing behavior in its corresponding group                  |
 
@@ -81,7 +92,7 @@ effects, not just new method names. Include happy path, boundary, failure and cl
 Prefer deterministic utility/config coverage before service-dependent lifecycle tests; do not misclassify
 all controller methods as map interactions.
 
-Report **Missing Test Coverage Report** with branch/base and files analyzed. Group findings 1–5;
+Report **Missing Test Coverage Report** with branch/base and files analyzed. Group findings 1–6;
 for each include source path/symbol, changed behavior, existing coverage gap, proposed tester/test cases,
 and priority (determinism, risk, service/plugin prerequisites). Ask which proposals to implement when
 the request is review-only; keep manual gaps in [release-testing.md](release-testing.md#mode-3-workflow--manual-release-testing-review).

@@ -130,6 +130,7 @@ export function Geolocator(): JSX.Element {
   const handleReset = useCallback((): void => {
     setSearchValue('');
     uiController.setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
+    // TODO: Replace manual setTimeout with a shared utilities helper (e.g. delayDeferExecution() using TIMEOUT.deferExecution) to centralize deferred calls.
     setTimeout(() => {
       uiController.disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
     }, TIMEOUT.deferExecution);
@@ -199,7 +200,6 @@ export function Geolocator(): JSX.Element {
       ref={panelRef}
       component="section"
       role={isPanelOpen ? 'dialog' : undefined}
-      aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')}
       sx={{ ...memoSxClasses.root, visibility: isPanelOpen ? 'visible' : 'hidden' }}

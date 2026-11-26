@@ -39,6 +39,8 @@ interface LayoutProps {
   titleFullscreen: string;
   hideEnlargeBtn?: boolean;
   toggleMode?: boolean;
+  /** Allows automatically opened content to take focus without affecting explicit user navigation. */
+  focusOnEntry?: boolean;
   /** Compact mode for the collapsed app-bar icon view: hides the list section headings and the "no layers" instructions item. */
   compact?: boolean;
   /** Omits the available-layers heading for non-layer lists such as Guide topics. */
@@ -83,6 +85,7 @@ const Layout = forwardRef(
       titleFullscreen,
       hideEnlargeBtn,
       toggleMode = false,
+      focusOnEntry,
       compact = false,
       hideAvailableHeading = false,
     }: LayoutProps,
@@ -223,6 +226,7 @@ const Layout = forwardRef(
         containerType={containerType}
         titleFullscreen={titleFullscreen}
         toggleMode={toggleMode}
+        focusOnEntry={focusOnEntry}
       />
     );
   }

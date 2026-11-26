@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { useMemo, memo, useCallback, useState, useRef, useEffect, useId } from 'react';
+import { useMemo, memo, useCallback, useState, useRef, useId } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -20,7 +20,6 @@ import { useShellContainer } from '@/core/containers/shell-container-context';
 import { useStoreUIFooterPanelResizeValue, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { TIMEOUT } from '@/core/utils/constant';
 
 /** Available resize percentage values. */
 const RESIZE_VALUES = [35, 50, 100];
@@ -71,9 +70,6 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // Refs
   const resizeButtonRef = useRef<HTMLButtonElement>(null);
-  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const prevOpenRef = useRef<boolean>(false);
-  const keyboardCloseRef = useRef<boolean>(false);
   const isPointerInteractionRef = useRef<boolean>(false);
 
   // Get container
@@ -91,18 +87,30 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   /**
    * Handles closing the resize popper, applying any pending keyboard value.
+   *
+   * @param restoreTrigger - Whether an explicit dismissal should return focus to Resize
    */
-  const handleClose = useCallback((): void => {
-    // Apply pending keyboard value on close
-    if (pendingValue !== undefined) {
-      uiController.setFooterPanelResizeValue(pendingValue);
-      setPendingValue(undefined);
-    }
-    // Reset in case the popper closes (click-away/Escape) mid-drag, before onChangeCommitted fires
-    isPointerInteractionRef.current = false;
-    setOpen(false);
-    setAnchorEl(null);
-  }, [pendingValue, uiController]);
+  const closePanel = useCallback(
+    (restoreTrigger: boolean): void => {
+      // Apply pending keyboard value on close
+      if (pendingValue !== undefined) {
+        uiController.setFooterPanelResizeValue(pendingValue);
+        setPendingValue(undefined);
+      }
+      // Reset in case the popper closes (click-away/Escape) mid-drag, before onChangeCommitted fires
+      isPointerInteractionRef.current = false;
+      setOpen(false);
+      setAnchorEl(null);
+      if (restoreTrigger) resizeButtonRef.current?.focus();
+    },
+    [pendingValue, uiController]
+  );
+
+  /** Closes explicitly without letting popper unmount decide the focus destination. */
+  const handleClose = useCallback((): void => closePanel(true), [closePanel]);
+
+  /** Closes on click-away without taking focus from the pointer target. */
+  const handleClickAway = useCallback((): void => closePanel(false), [closePanel]);
 
   /**
    * Handles toggling the resize popper open or closed.
@@ -146,7 +154,6 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
       // Enter closes the popper and applies the pending value
       if (event.key === 'Enter') {
-        keyboardCloseRef.current = true;
         handleClose();
         return;
       }
@@ -193,56 +200,18 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   const handleOnSliderChangeCommitted = useCallback(
     (value: number | number[]): void => {
       if (!isPointerInteractionRef.current) return;
-      isPointerInteractionRef.current = false;
 
+      // Apply the committed value last because closePanel may flush a pending keyboard value.
+      closePanel(true);
       uiController.setFooterPanelResizeValue(value as number);
-      setPendingValue(undefined);
-      setOpen(false);
-      setAnchorEl(null);
     },
-    [uiController]
+    [closePanel, uiController]
   );
 
   // #endregion Handlers
 
-  /**
-   * Restores focus to the Resize button when the popper closes via keyboard (Enter key).
-   *
-   * Only restores focus on Enter-key close to avoid stealing focus from click-away or mouse drag closes.
-   * Uses 100ms timeout to allow DOM reflow to complete after footer panel resize.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('RESIZE-FOOTER-PANEL - restore focus', open);
-
-    // When popper closes, reset the flag and attempt focus restoration
-    if (prevOpenRef.current && !open) {
-      // Reset flag at start of close transition — before any async callbacks
-      const wasKeyboardClose = keyboardCloseRef.current;
-      keyboardCloseRef.current = false;
-
-      // Only restore focus if this was a keyboard-initiated close and button is available
-      if (resizeButtonRef.current && wasKeyboardClose) {
-        focusTimeoutRef.current = setTimeout(() => {
-          resizeButtonRef.current?.focus({ focusVisible: true });
-          focusTimeoutRef.current = undefined;
-        }, TIMEOUT.resizeButtonFocusRestore);
-      }
-    }
-
-    // Track previous open state for next render
-    prevOpenRef.current = open;
-
-    return () => {
-      if (focusTimeoutRef.current !== undefined) {
-        clearTimeout(focusTimeoutRef.current);
-        focusTimeoutRef.current = undefined;
-      }
-    };
-  }, [open]);
-
   return (
-    <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClose}>
+    <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={memoSxClasses.root}>
         <IconButton
           iconRef={resizeButtonRef}

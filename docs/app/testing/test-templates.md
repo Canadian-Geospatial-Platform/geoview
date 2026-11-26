@@ -47,7 +47,13 @@ Before writing a test, classify it into one of these groups:
 | **Time Slider** | `TimeSliderTester` (new) | `suite-time-slider` (new) | Guarded (`time-slider` plugin required) |
 | **Drawer**      | `DrawerTester` (new)     | `suite-drawer` (new)      | Guarded (`drawer` plugin required)      |
 
-> **Choosing the right group:** Pure function with no side effects → Group 1. Adds/removes/queries a layer → Group 2. Changes map state or tests map-scoped UI → Group 3. Tests a dedicated Details or Data Table panel suite → Group 4. Tests a plugin package → Group 5.
+### Group 6 — A11Y and UX (keyboard accessibility and cross-panel interactions)
+
+| Category              | Tester Class   | Suite Class     | Execution Pattern                     |
+| --------------------- | -------------- | --------------- | ------------------------------------- |
+| **Keyboard / Focus** | `A11yUxTester`, `A11yEntryTester` | `suite-a11y-ux` | Sequential on the dedicated suite map |
+
+> **Choosing the right group:** Pure function with no side effects → Group 1. Adds/removes/queries a layer → Group 2. Changes map state or tests map-scoped UI → Group 3. Tests a dedicated Details or Data Table panel suite → Group 4. Tests a plugin package → Group 5. Tests keyboard focus or cross-panel accessibility/UX → Group 6.
 
 ---
 

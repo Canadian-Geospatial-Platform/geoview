@@ -239,6 +239,7 @@
       <button class="tab-button" onclick="openGroup(event, 'group3')">3 - Map</button>
       <button class="tab-button" onclick="openGroup(event, 'group4')">4 - Components</button>
       <button class="tab-button" onclick="openGroup(event, 'group5')">5 - Packages</button>
+      <button class="tab-button" onclick="openGroup(event, 'group6')">6 - A11Y and UX</button>
     </div>
 
     <!-- Group 1: Core / Utility -->
@@ -270,6 +271,11 @@
       <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
       <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button>
       <button class="tab-button" onclick="openTab(event, 'map12-test')">Time Slider</button>
+    </div>
+
+    <!-- Group 6: A11Y and UX -->
+    <div id="group6-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map13-test')">A11Y and UX</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -412,6 +418,18 @@
       </button>
       <div class="panel">
         <div id="runAll-map12-results"></div>
+      </div>
+
+      <!-- Group 6: A11Y and UX -->
+      <div class="group-header">Group 6 - A11Y and UX</div>
+
+      <!-- Map 13 Results -->
+      <button id="collapsible-map13" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 13 - A11Y and UX Tests</span>
+        <span id="stats-map13" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Success: 0 | Skiped: 0 | Failed: 0 | Progress: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAll-map13-results"></div>
       </div>
     </div>
 
@@ -1148,6 +1166,110 @@
       ></div>
     </div>
 
+    <!-- Map 13 Tab -->
+    <div id="map13-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT13">13. Tests on A11Y and UX</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map13"></div>
+      <button id="a11y-entry-before" type="button">Before the test viewers</button>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <!-- TODO: Consider emptying listOfGeoviewLayerConfig; the Group 6 tests that need this layer should add it themselves and remove it in their finalization callbacks. -->
+      <div
+        id="map13"
+        style="min-width: 0; height: 900px; margin: 0"
+        class="geoview-map"
+        data-shared
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978,
+              'initialView': {
+                'zoomAndCenter': [4, [-88.31, 51.97]]
+              }
+            },
+            'basemapOptions': {
+              'basemapId': 'nogeom',
+              'shaded': false,
+              'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'serviceDateFormat': 'DD/MM/YYYYTHH:mm:ss',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'appBar': {
+            'tabs': {
+              'core': ['details', 'layers', 'export']
+            }
+          },
+          'footerBar': {
+            'tabs': {
+              'core': ['data-table'],
+              'custom': []
+            }
+          },
+          'corePackages': ['test-suite'],
+          'theme': 'geo.ca',
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-a11y-ux'] }
+            }
+          ]
+        }"
+      ></div>
+      <div
+        id="map14"
+        style="min-width: 0; height: 480px; margin: 0"
+        class="geoview-map"
+        data-lang="fr"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978,
+              'initialView': { 'zoomAndCenter': [4, [-88.31, 51.97]] }
+            },
+            'basemapOptions': { 'basemapId': 'nogeom', 'shaded': false, 'labeled': false },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'serviceDateFormat': 'DD/MM/YYYYTHH:mm:ss',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': 'polygons.json', 'layerName': 'Polygons' }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'appBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'footerBar': { 'tabs': { 'core': [], 'custom': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+      </div>
+      <button id="a11y-entry-after" type="button">After the test viewers</button>
+    </div>
+
     <script>
       insertPageHeader();
 
@@ -1231,6 +1353,7 @@
       cgpv.onMapInit((mapViewer) => {
         // Get the test-suite plugin as loaded in the map viewer
         const plugin = mapViewer.plugins['test-suite'];
+        if (!plugin) return;
 
         // Keep in global object on the page
         testSuitesPlugins[plugin.mapViewer.mapId] = plugin;

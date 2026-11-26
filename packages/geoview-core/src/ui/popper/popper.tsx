@@ -9,7 +9,8 @@ import { animated } from '@react-spring/web';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui/mui-reexports/mui-reexports';
-import { delay } from '@/core/utils/utilities';
+import { doTimeout } from '@/core/utils/utilities';
+import { DomHelper } from '@/core/utils/dom-helper';
 
 /** Stable animated wrapper so popper rerenders do not remount its focus trap. */
 const AnimatedPopper = animated(MaterialPopper);
@@ -121,6 +122,11 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
      * Handles keyboard events for the popper.
      */
     const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.defaultPrevented || !popperRef.current?.contains(event.target as Node)) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       handleKeyDown?.(event.key, () => open && onClose?.());
     };
 
@@ -131,7 +137,8 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   }, [open, onClose, handleKeyDown]);
 
   /**
-   * Manages focus when the popper opens.
+   * Manages focus when the popper opens or its entry-focus configuration changes.
+   * Dismissal owners restore focus explicitly; click-away must not refocus the opener.
    */
   useEffect(() => {
     // Log
@@ -139,25 +146,28 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
     // Focus management when popper opens
     if (open && focusSelector) {
-      let isOpen = true;
-
-      // Wait the transition period then focus the close button when popover opens
-      delay(theme.transitions.duration.shortest)
-        .then(() => {
-          if (!isOpen) return;
-
-          const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
-          if (focusElement) {
-            focusElement.focus();
+      const initialFocus = DomHelper.getActiveElement();
+      const focusJob = doTimeout(theme.transitions.duration.shortest);
+      focusJob.promise
+        .then((result) => {
+          if (result !== 'timeout') return;
+          const currentFocus = DomHelper.getActiveElement();
+          if (
+            currentFocus &&
+            currentFocus !== initialFocus &&
+            currentFocus.tagName !== 'BODY' &&
+            !popperRef.current?.contains(currentFocus)
+          ) {
+            return;
           }
+          const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
+          focusElement?.focus();
         })
-        .catch(() => {
-          logger.logPromiseFailed('in delay in UI.POPPER - open');
+        .catch((error: unknown) => {
+          logger.logError('Popper focus delay rejected unexpectedly:', error);
         });
 
-      return (): void => {
-        isOpen = false;
-      };
+      return (): void => focusJob.cancel();
     }
 
     return undefined;
@@ -166,13 +176,10 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
   // TODO: style - manage z-index in theme
   return (
     <AnimatedPopper sx={{ zIndex: '2000' }} style={fadeInAnimation} {...props} open={open} ref={setPopperRef}>
-      {focusTrap ? (
-        <FocusTrap open={open} disableAutoFocus>
-          {children}
-        </FocusTrap>
-      ) : (
-        children
-      )}
+      {/* Keep the wrapper mounted so ownership changes do not remount the content. */}
+      <FocusTrap open={open && focusTrap} disableEnforceFocus disableAutoFocus disableRestoreFocus>
+        {children}
+      </FocusTrap>
     </AnimatedPopper>
   );
 }

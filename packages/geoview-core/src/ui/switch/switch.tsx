@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from '@/ui/switch/switch-style';
 import { logger } from '@/core/utils/logger';
+import type { SxStyles } from '@/ui/style/types';
 
 // Extend SwitchProps to include some FormControlLabel Props
 interface ExtendedSwitchProps extends SwitchProps {
@@ -15,7 +16,7 @@ interface ExtendedSwitchProps extends SwitchProps {
  * Material-UI Switch component with integrated label using FormControlLabel.
  *
  * Wraps Material-UI's Switch with FormControlLabel for proper labeling and accessibility.
- * Auto-generates unique IDs to associate labels with switch controls.
+ * Uses a supplied ID or generates a unique ID to associate labels with switch controls.
  * All Material-UI Switch props are supported and passed through directly.
  *
  * @param props - Switch configuration (see ExtendedSwitchProps)
@@ -38,12 +39,13 @@ function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/switch/switch', props);
 
   // Get constant from props
-  const { label, ...otherProps } = props;
+  const { label, id: providedId, ...otherProps } = props;
 
   // Hooks
-  const switchId = useId(); // WCAG - Unique ID to associate label with switch
+  const generatedSwitchId = useId(); // WCAG - Unique ID to associate label with switch
+  const switchId = providedId ?? generatedSwitchId;
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('SWITCH - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);

@@ -105,6 +105,7 @@ import {
   getStoreMapStateJson,
   getStoreMapGeolocatorSearchArea,
 } from '@/core/stores/states/map-state';
+import { getStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -2104,20 +2105,37 @@ export class MapViewer {
     // If map isn't static
     this.registerMapPointerHandlers(map);
 
-    // Register mouse interaction events. On mouse enter or leave, focus or blur the map container
+    // Register mouse interaction events. Hover focus lets the OpenLayers keyboard pan/zoom work without a click; drag-pan
+    // works without focus, and wheel zoom needs it. In keyboard navigation mode, hover does not focus the map, so it cannot
+    // steal focus from the active control; wheel zoom then works once the map has focus (by click or Tab).
+    // Boundary events also fire when content mounts, unmounts or scrolls under a stationary pointer, so while keyboard-placed
+    // focus (:focus-visible) is held, hover focus waits for genuine pointer movement instead of taking focus on mouseenter.
     const mapHTMLElement = map.getTargetElement();
-    mapHTMLElement.addEventListener('mouseenter', () => {
+    let isHoverFocusPending = false;
+    const focusOnHover = (): void => {
+      isHoverFocusPending = false;
+
       // Intentionally use focus() without focusVisible: true because this is mouse-triggered focus.
       // The focus indicator should NOT appear for mouse hover - only keyboard navigation should show indicators.
-      // This enables scroll wheel zoom without showing the focus ring.
-      mapHTMLElement.focus({ preventScroll: true });
+      if (!getStoreUIActiveTrapGeoView(this.mapId)) mapHTMLElement.focus({ preventScroll: true });
+    };
+
+    mapHTMLElement.addEventListener('mouseenter', () => {
+      isHoverFocusPending = true;
+      if (!DomHelper.getActiveElement()?.matches(':focus-visible')) focusOnHover();
 
       // Emit to the outside
       this.#emitMapMouseEnter({});
     });
 
+    mapHTMLElement.addEventListener('mousemove', (event: MouseEvent) => {
+      if (!isHoverFocusPending || (event.movementX === 0 && event.movementY === 0)) return;
+      focusOnHover();
+    });
+
     mapHTMLElement.addEventListener('mouseleave', () => {
-      mapHTMLElement.blur();
+      isHoverFocusPending = false;
+      if (!getStoreUIActiveTrapGeoView(this.mapId)) mapHTMLElement.blur();
 
       // Emit to the outside
       this.#emitMapMouseLeave({});
@@ -2178,8 +2196,8 @@ export class MapViewer {
    *
    * OpenLayers enables `onFocusOnly` by default for a focusable (tabindex) target. Touch gestures do not focus the target
    * before they start, so the first one-finger drag scrolled the page instead of panning the map. Drag-pan accepts the gesture
-   * without focus (and stops the page scrolling). Mouse wheel zoom stays focus-only; the `mouseenter` handler in
-   * `#registerMapHandlers` focuses the map, so the wheel zooms under the pointer.
+   * without focus (and stops the page scrolling). Mouse wheel zoom stays focus-only; `#registerMapHandlers` focuses the map
+   * on hover when keyboard navigation is inactive, or the map can be focused by click or Tab.
    *
    * @returns The default interactions collection
    */

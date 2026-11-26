@@ -66,6 +66,8 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
   - [5.1 Geochart](#51-geochart)
   - [5.2 Swiper](#52-swiper)
   - [5.3 Time Slider](#53-time-slider)
+- [6. A11Y and UX](#6-a11y-and-ux)
+  - [6.1 Keyboard Navigation](#61-keyboard-navigation)
 - [Summary](#summary)
 
 ---
@@ -86,6 +88,7 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | 5. Packages       | `suite-geochart`        | `GeochartTester`                                                                                | Guarded sequential            |
 | 5. Packages       | `suite-swiper`          | `SwiperTester`                                                                                  | Guarded sequential            |
 | 5. Packages       | `suite-time-slider`     | `TimeSliderTester`                                                                              | Guarded sequential            |
+| 6. A11Y and UX    | `suite-a11y-ux`         | `A11yUxTester`, `A11yEntryTester`                                                               | Sequential                    |
 
 ---
 
@@ -922,3 +925,47 @@ its expected error. Finalizers restore the host width, map target, and usable vi
 | `testResetValues`                          | test | Test Time Slider reset restores registered default values...                                     |
 | `testConstrainValues`                      | test | Test Time Slider prevents dual-handle overlap for discrete and continuous ranges...              |
 | `testWMSLayerLandcoverGroupDimensionFlags` | test | Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers... |
+
+---
+
+## 6. A11Y and UX
+
+[↑ Back to top](#table-of-contents)
+
+### 6.1 Keyboard Navigation
+
+**Suite:** `suite-a11y-ux` · **File:** `tests/suites/suite-a11y-ux.ts` · **Testers:** `A11yUxTester` (`tests/testers/a11y-ux-tester.ts`), `A11yEntryTester` (`tests/testers/a11y-entry-tester.ts`)
+**Execution:** Sequential on the dedicated map · **Guard:** Details must be available in the app bar and the map14 companion viewer must be ready
+
+The two-viewer entry cases use `A11yEntryTester` (`tests/testers/a11y-entry-tester.ts`) and share the same suite.
+Launch Group 6 outside browser fullscreen, with both viewers visible and the document focused. The first case uses
+the launch button's user activation to enter real navBar fullscreen; it skips without activation, but fails if the browser rejects the request.
+The existing fullscreen overlay cases use modal dialogs, not the Fullscreen API. The cases dispatch input events automatically.
+All Group 6 tests are reported as skipped in the hidden Run All view or when the document is not focused. Native traversal and wrapping
+are checked separately in the [manual WCAG plan](../../programming/release-testing/21-wcag-accessibility.md#tab-order).
+
+| Method                                               | Type | Description                                                                                                                                         |
+| ---------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `testFullscreenPopoverFocusReturn`                   | test | Enter navBar fullscreen; check Resize Close and pointer-commit focus return, the committed value, and fullscreen-exit focus                           |
+| `testSettingsDoesNotScrollPage`                      | test | Open Settings on a scrollable page with the map clipped and verify the page position does not change                                                |
+| `testSettingsPointerClickAway`                       | test | Dispatch a Layers press with the Settings switch focused; verify Settings closes without opener focus before mouseup, then click opens Layers        |
+| `testLayersSubPanelYieldsToSettings`                 | test | Select a layer; verify Settings retains mousedown focus before mouseup, then opens and keeps focus on its keyboard-navigation switch                   |
+| `testKeyboardQueryMapFocusReturn`                    | test | Test Ctrl+M closes query-opened Details, returns focus to the map, and allows Enter to query again                                                  |
+| `testKeyboardShortcutClosesPanelsAndPreservesFooter` | test | Test Ctrl+M closes app-bar panels and map popovers while preserving the open footer panel                                                           |
+| `testNavbarPanelFocusOwnership`                      | test | Verify Basemap and Rotation preserve content across focus ownership changes, use distinct owners and callbacks, and return focus on Escape         |
+| `testCrosshairDetailsEscapeReturnsToMap`             | test | Test Escape closes the feature sub-panel and focuses its layer item, then closes Details and returns to the map                                     |
+| `testDetailsEscapeOwnershipCancellation`             | test | Test two-level Escape after mouse cancellation, mouse-open Details, and Close preserve existing focus behavior                                      |
+| `testDetailsEscapeFocusLeaveCancellation`            | test | Test focus can leave query-opened Details' feature sub-panel, stays on Layers, and cancels its Escape focus return                                  |
+| `testKeyboardShortcutIgnoredForExportModal`          | test | Test Ctrl+M is ignored while Export is open and no map keyboard events are forwarded                                                                |
+| `testKeyboardShortcutIgnoredForShareModal`           | test | Test Ctrl+M leaves Share open and focused without notifying the map                                                                                 |
+| `testKeyboardShortcutIgnoredForOverlay`              | test | Test modal keyboard notification suppression, Ctrl+M from landing and escaped focus, and Tab/entry and Ctrl+Q behavior in both fullscreen variants  |
+| `testModalShortcutViewerIsolation`                   | test | Test a modal in the companion viewer does not block Ctrl+M in the focused viewer                                                                    |
+| `testDetailsSubPanelReopensAfterDismissal`           | test | Test reopening Details preserves its feature sub-panel and selected layer/feature after app-bar and Ctrl+M dismissal                                |
+| `testSettingsEntryGuard`                             | test | Verify the per-viewer Settings switch, initial Tab guard, and repeatable boundary prompt                                                            |
+| `testForwardEntryEnable`                             | test | Verify the top-link Tab handler, Enable, and activation of the first viewer’s map skip link                                                         |
+| `testStaticEntryEnable`                              | test | Verify Enable focuses the static companion viewer's shell without activating its crosshair, then restores its interaction mode                      |
+| `testForwardAndReverseEntrySkip`                     | test | Verify Skip lands on the opposite outer link in each direction, reverse Enable lands on the map skip link, and each scrolls fully into the viewport |
+| `testSkipKeepsFocusUnderStationaryPointer`           | test | Verify a still pointer leaves Skip focus on the bottom outer link, and hover focus (moved, repeated, or without keyboard focus) lets arrows pan     |
+| `testFooterPanelReopensWithFocus`                    | test | Keyboard and pointer variants: Exit leaves the footer open and returns to its tab; collapse releases ownership; reopening focuses Exit              |
+| `testTwoMapKeyboardShortcuts`                        | test | Verify crosshair blur and Ctrl+M/Ctrl+Q affect only the appropriate viewer                                                                          |
+| `testUnansweredPromptStaysOpenOnMouseMove`           | test | Verify mouse movement on the dialog overlay does not dismiss the unanswered prompt                                                                  |

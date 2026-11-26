@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FocusEvent } from 'react';
 import { flushSync } from 'react-dom';
 
 import { useTranslation } from 'react-i18next';
@@ -71,6 +72,26 @@ export function Map(props: MapProps): JSX.Element {
   const hasRun = useRef<boolean>(false);
 
   /**
+   * Deactivates crosshair interactions when keyboard focus leaves the map region.
+   *
+   * @param event - The map region blur event
+   */
+  const handleMapBlur = (event: FocusEvent<HTMLElement>): void => {
+    if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+      uiController.setCrosshairActive(false);
+    }
+  };
+
+  /**
+   * Reactivates keyboard pan and zoom when the map target itself gains focus (e.g. hover focus after a blur), leaving the crosshair unchanged.
+   *
+   * @param event - The map region focus event
+   */
+  const handleMapFocus = (event: FocusEvent<HTMLElement>): void => {
+    if (event.target === event.currentTarget && mapInteraction !== 'static') uiController.setActiveMapInteractionWCAG(true);
+  };
+
+  /**
    * Initializes the map viewer on mount.
    */
   useEffect(() => {
@@ -100,19 +121,27 @@ export function Map(props: MapProps): JSX.Element {
       // Only handle shortcuts while focus is within this specific map instance.
       if (!activeElement) return;
 
+      const isMapFocusShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey;
+
+      if (isMapFocusShortcut) {
+        // Reserve the shortcut in this viewer whether it acts or is blocked: macOS maps Ctrl+M to Return,
+        // which would otherwise activate the focused control (e.g. a dialog's close button).
+        event.preventDefault();
+      }
+
+      if (DomHelper.hasOpenModal(mapId)) return;
+
       const isTextInputFocused = DomHelper.isInputOrContentEditableElement(activeElement);
       const isMapTargetFocused = mapElement.current?.contains(activeElement) ?? false;
       viewer.notifyMapKeyboardEvent({ keyboardEvent: event, isTextInputFocused, isMapTargetFocused });
 
       // Ctrl+M (or Cmd+M on Mac)
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm' && !event.shiftKey) {
+      if (isMapFocusShortcut) {
         // Only activate if map interaction is not static
         if (mapInteraction !== 'static' && mapElement.current) {
-          event.preventDefault();
-
-          // Finish closing panels and restoring their focus before transferring focus to the map.
+          // Release panel focus traps before transferring focus to the map.
           flushSync((): void => {
-            uiController.closeMapPopovers();
+            uiController.closeMapControls();
             setShortcutMessage('');
           });
 
@@ -143,7 +172,7 @@ export function Map(props: MapProps): JSX.Element {
       if (event.key !== 'Tab') return;
 
       const activeElement = DomHelper.getActiveElementWithinMap(mapId);
-      if (!activeElement) return;
+      if (!activeElement || DomHelper.hasOpenModal(mapId)) return;
 
       const mapFocus = activeElement === mapElement.current;
       if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
@@ -167,6 +196,8 @@ export function Map(props: MapProps): JSX.Element {
       tabIndex={mapInteraction === 'static' ? -1 : 0}
       role="region"
       aria-label={t('map.container', { mapId })}
+      onFocus={handleMapFocus}
+      onBlur={handleMapBlur}
     >
       <Typography role="status" aria-live="polite" sx={visuallyHidden}>
         {shortcutMessage}

@@ -20,6 +20,7 @@ packages/geoview-test-suite/src/
     │   ├── suite-config.ts             # Layer config validation
     │   ├── suite-layer.ts              # Layer add/remove/legend/query
     │   ├── suite-map-functions.ts      # Map interactions and map-scoped UI checks
+    │   ├── suite-a11y-ux.ts            # Keyboard accessibility and cross-panel UX
     │   ├── suite-map-config.ts         # Map config creation/destruction
     │   ├── suite-geochart.ts           # Geochart plugin tests
     │   ├── suite-details.ts            # Details panel tests
@@ -32,6 +33,8 @@ packages/geoview-test-suite/src/
         ├── config-tester.ts
         ├── layer-tester.ts
         ├── map-tester.ts
+        ├── a11y-ux-tester.ts
+        ├── a11y-entry-tester.ts
         ├── map-config-tester.ts
         ├── geochart-tester.ts
         ├── details-tester.ts
@@ -340,6 +343,7 @@ class TestSuitePlugin {
     this.#suites = {
       "suite-config": GVTestSuiteConfig,
       "suite-map": GVTestSuiteMapVaria,
+      "suite-a11y-ux": GVTestSuiteA11yUx,
       "suite-layer": GVTestSuiteLayer,
       "suite-geochart": GVTestSuiteGeochart,
       "suite-time-slider": GVTestSuiteTimeSlider,

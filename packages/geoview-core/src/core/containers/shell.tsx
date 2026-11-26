@@ -30,6 +30,7 @@ import {
   useStoreAppHeight,
 } from '@/core/stores/states/app-state';
 import {
+  getStoreUIFocusItem,
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIFocusRestoreRequest,
@@ -85,6 +86,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const theme = useTheme();
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellElement, setShellElement] = useState<HTMLElement | undefined>();
+  const keyboardNavigationModeActionRef = useRef<((active: boolean) => void) | undefined>(undefined);
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
@@ -92,13 +94,13 @@ export function Shell(props: ShellProps): JSX.Element {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   // State snackbar
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
 
   // State for transient status announcements
-  const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState('');
-  const [processingCompleteAnnouncement, setProcessingCompleteAnnouncement] = useState('');
+  const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState<string>('');
+  const [processingCompleteAnnouncement, setProcessingCompleteAnnouncement] = useState<string>('');
 
   // Store
   const mapLoaded = useStoreMapLoaded();
@@ -120,15 +122,50 @@ export function Shell(props: ShellProps): JSX.Element {
   // The navbar fullscreen button already toggles the fallback off; otherwise the fallback renders its own exit button
   const showFullscreenFallbackExit = isFullscreenFallback && !(interaction === 'dynamic' && navBarComponents.includes('fullscreen'));
 
+  /**
+   * Registers the FocusTrapDialog-owned keyboard-navigation lifecycle action.
+   *
+   * @param action - The action that performs a coordinated mode transition
+   * @returns A cleanup callback that removes the action when the dialog unmounts
+   */
+  const registerModeAction = useCallback((action: (active: boolean) => void): (() => void) => {
+    keyboardNavigationModeActionRef.current = action;
+    return (): void => {
+      if (keyboardNavigationModeActionRef.current === action) keyboardNavigationModeActionRef.current = undefined;
+    };
+  }, []);
+
+  /**
+   * Delegates a Settings switch change to the mode lifecycle owner.
+   *
+   * @param active - Whether keyboard navigation should be enabled
+   */
+  const handleKeyboardNavigationModeChange = useCallback((active: boolean): void => {
+    const changeMode = keyboardNavigationModeActionRef.current;
+    if (!changeMode) {
+      logger.logError('Keyboard-navigation mode action is not registered');
+      return;
+    }
+    changeMode(active);
+  }, []);
+
   // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
   // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
   // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
   // See issue #3222 for more detail.
+  /**
+   * Restores focus after a controller requests a focus target.
+   */
   useEffect(() => {
+    logger.logTraceUseEffect('SHELL - restore requested focus', focusRestoreRequest, mapId, uiController);
     if (!focusRestoreRequest) return undefined;
 
     const requestId = requestAnimationFrame(() => {
-      DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId)?.focus({ focusVisible: true });
+      const target = DomHelper.getGVElementByFullId(mapId, focusRestoreRequest.elementId);
+      target?.focus({ focusVisible: true });
+      if (focusRestoreRequest.reactivateCrosshair && target && DomHelper.getActiveElement() === target) {
+        uiController.setCrosshairActive(true);
+      }
       uiController.completeFocusRestore(focusRestoreRequest.requestId);
     });
     return (): void => {
@@ -136,9 +173,46 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [focusRestoreRequest, mapId, uiController]);
 
+  /**
+   * Cancels scoped Escape restoration when focus leaves its container or pointer input takes over.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SHELL - scoped Escape return', focusItem.escapeReturn, mapId);
+    if (!focusItem.escapeReturn) return undefined;
+
+    /** Keeps internal focus transitions, including a sub-panel returning to its parent, within the same scope. */
+    const handleFocusChange = (): void => {
+      const { escapeReturn } = getStoreUIFocusItem(mapId);
+      if (!escapeReturn) return;
+      const container = DomHelper.getGVElementByFullId(mapId, escapeReturn.containerId);
+      const activeElement = DomHelper.getActiveElement();
+      if (!activeElement || !container?.contains(activeElement)) uiController.setFocusEscapeReturn(undefined);
+    };
+
+    /** Cancels keyboard-origin restoration before pointer handlers can close or move focus within the panel. */
+    const handlePointerDown = (): void => uiController.setFocusEscapeReturn(undefined);
+
+    /** Handles mouse clicks while preserving keyboard-generated button clicks. */
+    const handleClick = (event: MouseEvent): void => {
+      if (event.detail > 0) uiController.setFocusEscapeReturn(undefined);
+    };
+
+    handleFocusChange();
+    document.addEventListener('focusin', handleFocusChange);
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('click', handleClick, true);
+    window.addEventListener('blur', handlePointerDown);
+    return (): void => {
+      document.removeEventListener('focusin', handleFocusChange);
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('click', handleClick, true);
+      window.removeEventListener('blur', handlePointerDown);
+    };
+  }, [focusItem.escapeReturn, mapId, uiController]);
+
   const prevMapLoadedRef = useRef<boolean>(mapLoaded);
   const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
-  const [collapsedFooterHeight, setCollapsedFooterHeight] = useState(0);
+  const [collapsedFooterHeight, setCollapsedFooterHeight] = useState<number>(0);
 
   const gvRootElement = DomHelper.getGVRootElement(mapId);
 
@@ -512,7 +586,7 @@ export function Shell(props: ShellProps): JSX.Element {
       >
         {t('keyboardnav.start')}
       </Link>
-      <FocusTrap open={activeTrapGeoView} getTabbable={getShellTabbable}>
+      <FocusTrap open={activeTrapGeoView} disableEnforceFocus disableAutoFocus disableRestoreFocus getTabbable={getShellTabbable}>
         <Box
           ref={setShellElementRef}
           id={DomHelper.buildShellId(mapViewer.mapId)}
@@ -553,7 +627,11 @@ export function Shell(props: ShellProps): JSX.Element {
               className="mapContainer"
               ref={mapShellContainerRef}
             >
-              <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
+              <AppBar
+                api={mapViewer.appBarApi}
+                onScrollShellIntoView={handleScrollShellIntoView}
+                onKeyboardNavigationModeChange={handleKeyboardNavigationModeChange}
+              />
               <Box sx={memoSxClasses.mapContainer}>
                 <Map viewer={mapViewer} />
               </Box>
@@ -584,7 +662,7 @@ export function Shell(props: ShellProps): JSX.Element {
               <Modal key={modalId} modalId={modalId} open={modalOpen} modalProps={modalProps} container={gvRootElement} />
             ))}
             {/* modal section start */}
-            <FocusTrapDialog mapId={mapViewer.mapId} />
+            <FocusTrapDialog mapId={mapViewer.mapId} isDynamic={interaction === 'dynamic'} registerModeAction={registerModeAction} />
             {mapLoaded && <ExportModal />}
             {focusItem.activeElementId === 'layerDataTable' && <DataTableModal />}
             {/* Show Feature Detail Modal when detail icon is clicked in datatable each row */}

@@ -301,6 +301,8 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Added a persistent Settings button on dynamic maps with an EN/FR Keyboard navigation switch that controls the existing keyboard-navigation mode; mouse movement no longer turns the mode off (#3694).
+- Ctrl/Cmd+M closes app-bar panels and map popovers, preserves footer panels, and is ignored in fullscreen, legend fullscreen, lightbox, Export, data table and feature detail dialogs. Share remains outside the viewer's keyboard scope. Crosshair queries focus the main Details Close button, and Esc returns to the crosshair unless focus leaves Details or the user clicks or switches windows (#3694, PR #3751).
 - Added shared EN/FR on-map guidance for measurement, drawer geometries, and editing (mouse wording, or keyboard wording starting with Ctrl+M when keyboard navigation is on); measurement vertex undo via Ctrl+Z/Backspace; Enter/Space at the mouse pointer while measuring or drawing; corrected crosshair artwork/coordinate alignment; and improved Ctrl+M popover closure, Escape returning focus to the Measure/Toggle Drawing/Toggle editing button, and fullscreen-exit map focus. Measurement and drawer drawing/editing now exclude each other, and drawer mode transitions keep Details queries suppressed ([Canadian-Geospatial-Platform/geoview#3712](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3712), commit `9de43e4d9f`). This records implemented behavior, not completion of the issue's full WCAG/embedded/fullscreen validation.
 - Standardized border-radius values with named MUI theme shape tokens across core and plugins, replacing inconsistent radii and documenting/enforcing the shared token system (#3681)
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
@@ -374,6 +376,7 @@ _(Tests added, moved, removed, or reorganized)_
 
 - Added automated `suite-data-table` test `testMapPanDoesNotRerenderDataTable` (DataTableTester): it verifies the map extent changes without rendering `DataTable` when **Filter to extent** is off, and that panning renders the table when the filter is on. The test restores the original map center and filter setting. Registered in the full suite (`getTestsTotalFinal` 16 → 17) and listed in the test catalog. It replaces the issue's timing-based fullscreen test proposal because the fullscreen mock does not resize the viewport and timing assertions are flaky ([Canadian-Geospatial-Platform/geoview#3730](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3730)).
 - Added manual checks for unfocused touch panning, fullscreen fallback and short Data Table panels; adjusted the existing footer-scroll test to use the shared gap. Review follow-up: synchronized the release index to 950 checks (63 automated, 169 candidates, 718 manual) and audited all suite counts. The overlapping page-scroll-lock regression test is a TODO in the test catalog, pending the testing refactor. The full device/browser matrix remains unverified ([Canadian-Geospatial-Platform/geoview#3742](https://github.com/Canadian-Geospatial-Platform/geoview/issues/3742)).
+- Expanded WCAG checks for Ctrl+M panel/popover closure, modal/overlay and dropdown guards (fullscreen, legend fullscreen, lightbox, Export, data table, feature detail and Share isolation), stable Details query focus, nested Esc, return cancellation, Tab wrapping, and remembered sub-panel selection; linked map13 coverage and synchronized EN/FR guidance (#3694, PR #3751). Added a map14 companion for unattended Group 6 regressions covering per-viewer prompt actions, Settings, shortcuts, focus destinations, and footer Exit/reopen focus. Updated the manual checklist for Settings switch announcements, focused-map wheel zoom, non-modal pointer focus, Notifications dismissal focus, and static-map behavior; aligned app-bar Details testing with RT-10 Map 1 and documented duplicate Details normalization. Added manual checks distinguishing map clicks with and without Details on RT-10 Map 1 and RT-02 Map 1, and for hover preserving the crosshair while keyboard navigation is enabled (commit `3743e822d`). Click expectations reflect manual findings; the hover check has not been run manually. The index now has 975 checks (75 automated, 169 candidates, 731 manual).
 - Added `suite-layer-functions` coverage for public `LayerApi.setOrToggleLayerVisibility`, checking explicit values, no-argument toggles, return values, and resulting layer state.
 - Merged the two UI tests into the sequential `suite-map` flow and removed the separate Map 7 runner page.
 - Added automated `suite-data-table` test `testEmptyFieldNameDoesNotCrashDataTable` (DataTableTester) guarding the empty-field data-table crash: a new GeoPackage fixture (`datasets/geopackages/railways-emptyfieldname.gpkg`, table `carto_fer_debarcadere` under layer `railwaysEmptyField`) with a blank-named column exposes an empty-named field; the test opens the data table for that layer and asserts the table element renders (i.e. MRT does not throw `Columns require an id when using an accessorFn`). GeoPackage is used because it preserves a blank column verbatim (via `GeoPackageReader.#processFeatureInfoConfig`), whereas GeoJSON/CSV go through the filtered inference path.
@@ -443,10 +446,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | 901    | 951   |
-| Automated (A) | 60     | 63    |
+| Total tests   | 901    | 969   |
+| Automated (A) | 60     | 74    |
 | Candidate (C) | 169    | 169   |
-| Manual (M)    | 672    | 719   |
+| Manual (M)    | 672    | 726   |
 
 ## Notes for Release Notes Author
 
