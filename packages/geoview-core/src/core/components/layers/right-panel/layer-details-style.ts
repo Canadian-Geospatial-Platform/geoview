@@ -68,6 +68,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   infoSectionContent: {
     paddingLeft: theme.spacing(0.25),
   },
+  infoList: {
+    listStyle: 'none',
+    margin: theme.spacing(0),
+    padding: theme.spacing(0, 0, 0, 0.25),
+  },
   swiperSectionContent: {
     paddingLeft: theme.spacing(1),
     display: 'flex',

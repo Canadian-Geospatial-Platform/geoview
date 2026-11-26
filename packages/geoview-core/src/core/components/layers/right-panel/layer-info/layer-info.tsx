@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui/layout';
+import { List } from '@/ui/list/list';
 import { Divider } from '@/ui/divider/divider';
 import { Typography } from '@/ui/typography/typography';
 
@@ -175,19 +176,19 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
    *
    * @param rangeItems - Temporal range information to render
    * @param isDiscrete - Whether the range contains discrete values
-   * @returns The temporal range information, or null when the range is empty
+   * @returns The temporal range information as list items (must be rendered inside a list), or null when the range is empty
    */
   const renderTemporalRangeInfo = (rangeItems: RangeItems, isDiscrete: boolean): JSX.Element | null => {
     if (!rangeItems.range[0]) return null;
 
     if (isDiscrete && !rangeItems.durationInterval) {
-      return <Box>{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${rangeItems.range.join(', ')}`}</Box>;
+      return <Box component="li">{`${t('layers.layerTimeDimensionRangeTypeValues')}: ${rangeItems.range.join(', ')}`}</Box>;
     }
 
     return (
       <>
-        <Box>{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${rangeItems.range[0]} / ${rangeItems.range[rangeItems.range.length - 1]}`}</Box>
-        <Box>
+        <Box component="li">{`${t('layers.layerTimeDimensionRangeTypeMinMax')}: ${rangeItems.range[0]} / ${rangeItems.range[rangeItems.range.length - 1]}`}</Box>
+        <Box component="li">
           {t('layers.layerTimeDimensionRangeDurationInterval')} (
           <a href={`${GeoUtilities.ISO_8601_REF_DIMENSION_INTERVAL}`} target="_blank" rel="noopener noreferrer">
             {t('layers.layerTimeDimensionRangeDurationIntervalSpec')}
@@ -204,81 +205,92 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
 
       {/* Service Information */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
+        <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoServiceInfo')}
         </Typography>
-        <Box sx={memoSxClasses.infoSectionContent}>
-          {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
-          <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
+        <List sx={memoSxClasses.infoList}>
+          {isLocalhost() && <Box component="li">{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
+          <Box component="li">{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
           {memoResources !== '' && (
-            <Box className="info-container">
-              {`${t('layers.layerResource')}`}
-              <a href={memoResources} target="_blank" rel="noopener noreferrer">
-                {memoResources}
-              </a>
+            <Box component="li">
+              <Box className="info-container">
+                {`${t('layers.layerResource')}`}
+                <a href={memoResources} target="_blank" rel="noopener noreferrer">
+                  {memoResources}
+                </a>
+              </Box>
             </Box>
           )}
           {validId && (
-            <Box className="info-container">
-              {`${t('layers.layerMetadata')}`}
-              <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
-                {`${id}`}
-              </a>
+            <Box component="li">
+              <Box className="info-container">
+                {`${t('layers.layerMetadata')}`}
+                <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
+                  {`${id}`}
+                </a>
+              </Box>
             </Box>
           )}
           {vectorStructureFullUrl && (
-            <Box className="info-container">
-              {`${t('layers.layerVectorStructureFullUrl')}`}
-              <a href={vectorStructureFullUrl} target="_blank" rel="noopener noreferrer">
-                {vectorStructureFullUrl}
-              </a>
+            <Box component="li">
+              <Box className="info-container">
+                {`${t('layers.layerVectorStructureFullUrl')}`}
+                <a href={vectorStructureFullUrl} target="_blank" rel="noopener noreferrer">
+                  {vectorStructureFullUrl}
+                </a>
+              </Box>
             </Box>
           )}
           {wmsGetStylesFullUrl && (
-            <Box className="info-container">
-              {`${t('layers.layerWmsGetStylesFullUrl')}`}
-              <a href={wmsGetStylesFullUrl} target="_blank" rel="noopener noreferrer">
-                {wmsGetStylesFullUrl}
-              </a>
+            <Box component="li">
+              <Box className="info-container">
+                {`${t('layers.layerWmsGetStylesFullUrl')}`}
+                <a href={wmsGetStylesFullUrl} target="_blank" rel="noopener noreferrer">
+                  {wmsGetStylesFullUrl}
+                </a>
+              </Box>
             </Box>
           )}
-          {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
+          {ogcVersion && <Box component="li">{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
           {layerDataProjectionCode && (
-            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
+            <Box component="li">{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
           )}
-          <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
-          <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
-          {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
-          {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
-          {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
-          {vectorStrategy && <Box>{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
-          {maxPageSize && <Box>{`${t('layers.layerMaxPageSize')}: ${maxPageSize}`}</Box>}
-          {maxRecordCount && <Box>{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
+          <Box component="li">{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
+          <Box component="li">{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
+          {layerScaleDependant && <Box component="li">{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
+          {layerScaleDependant && <Box component="li">{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
+          {!isLayerGroup && <Box component="li">{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
+          {vectorStrategy && <Box component="li">{`${t('layers.layerVectorStrategy')}: ${vectorStrategy}`}</Box>}
+          {/* Check for undefined, not falsy: 0 is a valid configured value and should be shown. */}
+          {maxPageSize !== undefined && <Box component="li">{`${t('layers.layerMaxPageSize')}: ${maxPageSize}`}</Box>}
+          {maxRecordCount !== undefined && <Box component="li">{`${t('layers.layerMaxRecordCount')}: ${maxRecordCount}`}</Box>}
           {totalRecordsCount !== undefined && (
-            <Box>
+            <Box component="li">
               {`${t(isExtentRecordCount ? 'layers.layerTotalRecordsCountInExtent' : 'layers.layerTotalRecordsCount')}: ${totalRecordsCount}`}
               {totalRecordsCountSource === 'numberMatched' && ` (${t('layers.layerRecordsCountProvided')})`}
               {totalRecordsCountSource === 'service' && ` (${t('layers.layerRecordsCountService')})`}
               {totalRecordsCountSource === 'counted' && ` (${t('layers.layerRecordsCountCounted')})`}
             </Box>
           )}
-          {!isLayerGroup && <Box>{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
-        </Box>
+          {!isLayerGroup && <Box component="li">{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
+        </List>
       </Box>
 
       {/* Active Filters */}
       <Box sx={memoSxClasses.infoSection}>
-        <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
+        <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
           {t('layers.layerInfoActiveFilters')}
         </Typography>
-        <Box sx={memoSxClasses.infoSectionContent}>
-          {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
-          {classFilter && <Box>{`${t('layers.layerClassFilter')}${classFilter}`}</Box>}
-          {dataFilter && <Box>{`${t('layers.layerDataTableFilter')}${dataFilter}`}</Box>}
-          {timeFilter && <Box>{`${t('layers.layerTimeFilter')}${timeFilter}`}</Box>}
-          {panelFilter && <Box>{`${t('layers.layerPanelFilter')}${panelFilter}`}</Box>}
-          {!layerFilter && !classFilter && !dataFilter && !timeFilter && !panelFilter && <Box>{t('layers.layerActiveFiltersNone')}</Box>}
-        </Box>
+        <List sx={memoSxClasses.infoList}>
+          {layerFilter && <Box component="li">{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
+          {classFilter && <Box component="li">{`${t('layers.layerClassFilter')}${classFilter}`}</Box>}
+          {dataFilter && <Box component="li">{`${t('layers.layerDataTableFilter')}${dataFilter}`}</Box>}
+          {timeFilter && <Box component="li">{`${t('layers.layerTimeFilter')}${timeFilter}`}</Box>}
+          {panelFilter && <Box component="li">{`${t('layers.layerPanelFilter')}${panelFilter}`}</Box>}
+          {!layerFilter && !classFilter && !dataFilter && !timeFilter && !panelFilter && (
+            <Box component="li">{t('layers.layerActiveFiltersNone')}</Box>
+          )}
+        </List>
       </Box>
 
       {/* Temporal Settings */}
@@ -288,48 +300,50 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         layerDisplayDateTimezone ||
         layerTimeDimension?.field) && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalInformation')}
           </Typography>
-          <Box sx={memoSxClasses.infoSectionContent}>
-            {layerDisplayDateFormat && <Box>{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>}
-            {layerDisplayDateFormatShort && (
-              <Box>{`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`}</Box>
+          <List sx={memoSxClasses.infoList}>
+            {layerDisplayDateFormat && (
+              <Box component="li">{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>
             )}
-            {layerDateTemporalMode && <Box>{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
-            {layerDisplayDateTimezone && <Box>{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
-            {layerTimeDimension?.field && <Box>{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
+            {layerDisplayDateFormatShort && (
+              <Box component="li">{`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`}</Box>
+            )}
+            {layerDateTemporalMode && <Box component="li">{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
+            {layerDisplayDateTimezone && <Box component="li">{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
+            {layerTimeDimension?.field && <Box component="li">{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
             {layerTimeDimension?.rangeItems.type && (
-              <Box>{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems.type}`}</Box>
+              <Box component="li">{`${t('layers.layerTimeDimensionRangeType')}: ${layerTimeDimension?.rangeItems.type}`}</Box>
             )}
             {layerTimeDimension &&
               renderTemporalRangeInfo(layerTimeDimension.rangeItems, layerTimeDimension.rangeItems.type === 'discrete')}
-            <Box>{`${t('layers.layerIsGroupDimension')}: ${layerTimeDimension?.isGroupDimension ?? false}`}</Box>
-          </Box>
+            <Box component="li">{`${t('layers.layerIsGroupDimension')}: ${layerTimeDimension?.isGroupDimension ?? false}`}</Box>
+          </List>
         </Box>
       )}
 
       {/* Temporal Dimension (Time Slider) */}
       {timeSliderDimension && (
         <Box sx={memoSxClasses.infoSection}>
-          <Typography component="p" variant="h6" sx={memoSxClasses.infoSectionTitle}>
+          <Typography component="h3" variant="h6" sx={memoSxClasses.infoSectionTitle}>
             {t('layers.layerInfoTemporalDimension')}
           </Typography>
-          <Box sx={memoSxClasses.infoSectionContent}>
+          <List sx={memoSxClasses.infoList}>
             {timeSliderDimension.displayDateFormat?.[language] && (
-              <Box>{`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`}</Box>
+              <Box component="li">{`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`}</Box>
             )}
             {timeSliderDimension.serviceDateTemporalMode && (
-              <Box>{`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`}</Box>
+              <Box component="li">{`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`}</Box>
             )}
             {timeSliderDimension.displayDateTimezone && (
-              <Box>{`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`}</Box>
+              <Box component="li">{`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`}</Box>
             )}
             {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
-              <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
+              <Box component="li">{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
             )}
             {renderTemporalRangeInfo(timeSliderDimension.rangeItems, timeSliderDimension.discreteValues)}
-          </Box>
+          </List>
         </Box>
       )}
     </Box>
