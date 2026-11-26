@@ -1070,6 +1070,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             onClick={handleClearAllHighlights}
             className="buttonOutline"
             aria-disabled={checkedFeatures.length === 0}
+            sx={memoSxClasses.clearAllButton}
           >
             <Box sx={memoSxClasses.clearHighlightIconContainer}>
               <ClearHighlightIcon fontSize="medium" />

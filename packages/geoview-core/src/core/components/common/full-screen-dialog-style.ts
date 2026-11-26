@@ -19,6 +19,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dialogHeader: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'center',
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
 });

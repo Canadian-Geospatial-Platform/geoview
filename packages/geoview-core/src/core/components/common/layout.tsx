@@ -179,7 +179,7 @@ const Layout = forwardRef(
       );
 
       return (
-        <Typography sx={sxClasses} component="h3" variant="h3">
+        <Typography sx={sxClasses} component="h3" variant="h4">
           {layerName}
         </Typography>
       );

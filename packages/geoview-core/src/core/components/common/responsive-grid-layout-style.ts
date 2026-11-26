@@ -60,6 +60,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     top: '32px',
   },
   topRow: {
+    gap: theme.spacing(1.25),
     '& .responsive-layout-left-top': {
       alignItems: 'end',
       width: '100%',
