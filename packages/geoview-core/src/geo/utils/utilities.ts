@@ -2090,30 +2090,30 @@ export abstract class GeoUtilities {
    * Gets the area of a given geometry.
    *
    * @param geometry - The geometry to calculate the area
-   * @param projection - Optional projection of the geometry coordinates (defaults to EPSG:3857)
+   * @param projection - The projection of the geometry coordinates
    * @returns The geodesic area of the given geometry in square meters
    */
-  static getArea(geometry: Geometry, projection?: ProjectionLike): number {
+  static getArea(geometry: Geometry, projection: ProjectionLike): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
     // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
     // The ol/sphere functions assume EPSG:3857 coordinates unless the geometry projection is provided.
-    return getAreaOL(geometry, projection ? { projection } : undefined);
+    return getAreaOL(geometry, { projection });
   }
 
   /**
    * Gets the length of a given geometry.
    *
    * @param geometry - The geometry to calculate the length
-   * @param projection - Optional projection of the geometry coordinates (defaults to EPSG:3857)
+   * @param projection - The projection of the geometry coordinates
    * @returns The geodesic length of the given geometry in meters
    */
-  static getLength(geometry: Geometry, projection?: ProjectionLike): number {
+  static getLength(geometry: Geometry, projection: ProjectionLike): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
     // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
     // The ol/sphere functions assume EPSG:3857 coordinates unless the geometry projection is provided.
-    return getLengthOL(geometry, projection ? { projection } : undefined);
+    return getLengthOL(geometry, { projection });
   }
 
   /**
