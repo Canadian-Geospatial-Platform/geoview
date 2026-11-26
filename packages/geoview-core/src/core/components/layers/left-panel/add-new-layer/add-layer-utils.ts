@@ -10,6 +10,7 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 type BuildGeoViewLayerInput = {
   layerIdsToAdd: string[];
@@ -278,6 +279,7 @@ export class UtilAddLayer {
    *
    * @param inputProps - The selected layer metadata and source tree context
    * @returns The map configuration layer entry to add to the map config
+   * @throws {GeoViewError} When a WFS or WMS selection is empty or contains an unresolved view path
    */
   static buildGeoLayerToAdd(inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry {
     const { layerIdsToAdd, layerName, layerType, layerURL, layerTree, isGeoCore } = inputProps;
@@ -311,6 +313,12 @@ export class UtilAddLayer {
         (selectedLayer): selectedLayer is { layerViewId: string; layerToAdd: TypeGeoviewLayerConfig | TypeLayerEntryConfig } =>
           !!selectedLayer.layerToAdd
       );
+    if (
+      (layerType === CONST_LAYER_TYPES.WFS || layerType === CONST_LAYER_TYPES.WMS) &&
+      (!selectedLayers.length || selectedLayers.length !== layerIdsToAdd.length)
+    ) {
+      throw new GeoViewError('validation.layer.invalidLayerSelection');
+    }
     const layersToAdd = selectedLayers.map((selectedLayer) => selectedLayer.layerToAdd);
 
     // If the layers to add is only 1 and it's already a group, go as-is

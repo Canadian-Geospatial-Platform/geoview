@@ -22,6 +22,7 @@ Read only the linked section of each doc: search for its heading and read to the
 - Preserve GeoCore suffixes through both return branches and ordered paths; strip only for API/UUID validation.
 - Rewrite configured bare-UUID selection at resolution, not map-ready runtime lookup.
 - A working child makes a partially loaded group valid; don't disable all siblings for one error.
+- Revalidating a group recreates it from its stored props; synchronize those props with its live child list first.
 - GeoCore may split `/FeatureServer/6` into a service-root URL and entry `6`. `ConfigApi.createInitConfigFromType` restores the single entry id before URL-based ESRI Feature initialization; do not loosen direct URL validation. See [resolution behavior](../../docs/app/config/configuration-reference.md#error-handling).
 
 ## Source navigation and implementation gotchas
@@ -32,7 +33,7 @@ Read only the linked section of each doc: search for its heading and read to the
 | Duplicated bar panels (#3648/#3221) | Config constructor corrects; `app.tsx` notifies after MapViewer exists                                                                                 |
 | Duplicate UUIDs                     | `Config.prevalidateGeoviewLayersConfig` → `GeoCore.createLayerConfigFromUUID` → `generateOrderedLayerPaths` → LayerController placeholder registration |
 | Preselected GeoCore                 | `LayerCreatorController.#resolveConfiguredSelectedLayersLayerPath`; `#readyMap` is too early for GV lookup                                             |
-| Custom entries                      | UUID reader extracts separately; GeoCore alone chooses inline > GCS > RCS                                                                              |
+| Custom entries                      | `UUIDmapConfigReader` extracts GCS entries separately; see the [public list-resolution contract](../../docs/app/config/configuration-reference.md#listoflayerentryconfig-optional) |
 | VCS packages                        | Package-specific UUID reader → GeoCore response → LayerCreatorController merge; include runtime add and Add Layer UI                                   |
 | Slider dual init                    | `tryRegisterLayer` may precede plugin `onAdd`; live `mapFeaturesConfig` can be newer than store                                                        |
 | Conversion failure                  | `handleStepLast` must end spinner even when `addGeoviewLayer` never began                                                                              |

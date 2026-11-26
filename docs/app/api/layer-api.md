@@ -43,13 +43,8 @@ await mapViewer.layer.addGeoviewLayerByGeoCoreUUID(
 );
 ```
 
-When GeoCore layer entries are resolved, `listOfLayerEntryConfig` uses complete-list precedence:
-
-- Inline custom config list (if provided)
-- GeoCore GCS custom list
-- GeoCore RCS default list
-
-The selected list is treated as complete (entries are not merged across sources).
+GeoCore `listOfLayerEntryConfig` resolution follows the [complete-list precedence and inline-group
+override rules](../config/configuration-reference.md#listoflayerentryconfig-optional).
 
 ### Removing Layers
 

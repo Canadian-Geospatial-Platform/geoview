@@ -38,6 +38,7 @@ import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from
 import { Projection } from '@/geo/utils/projection';
 import { ServicesManagement } from '@/geo/utils/services-management';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { getRequestedOgcLayerIds, restrictOgcLayerEntries } from '@/core/utils/ogc-layer-helper';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
@@ -113,12 +114,14 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entries have been initialized
+   * @throws {GeoViewError} When LAYERS is empty or contains an unadvertised identifier
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const rootUrl = this.getMetadataAccessPath();
+    const requestedIds = getRequestedOgcLayerIds(rootUrl);
     const fetchResult = await this.fetchServiceMetadata<TypeMetadataWFSCapabilities>(abortSignal);
 
     // The entries
@@ -152,7 +155,7 @@ export class WFS extends AbstractGeoViewVector {
       rootUrl,
       this.getGeoviewLayerConfig().isTimeAware,
       'all',
-      entries
+      restrictOgcLayerEntries(entries, requestedIds)
     );
   }
 

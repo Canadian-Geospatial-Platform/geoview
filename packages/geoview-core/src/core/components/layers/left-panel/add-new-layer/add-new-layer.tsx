@@ -46,7 +46,7 @@ import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import type { GeoViewLayerAddedResult } from '@/core/controllers/layer-creator-controller';
-import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import {
   useGeoChartControllerIfExists,
   useLayerController,
@@ -544,6 +544,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const handleStep2 = (): void => {
     setIsLoading(true);
+    const discoveryController = abortControllerRef.current;
 
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
@@ -556,8 +557,9 @@ export function AddNewLayer(): JSX.Element {
           true, // isTimeAware true by default
           language,
           mapId,
-          abortControllerRef.current.signal
+          discoveryController.signal
         );
+        if (discoveryController.signal.aborted) return false;
 
         // Get the config info from the created config
         const geoviewLayerConfig = configFromType.configInfo;
@@ -605,6 +607,8 @@ export function AddNewLayer(): JSX.Element {
         // All good
         return true;
       } catch (err) {
+        if (discoveryController.signal.aborted) return false;
+
         // If the error carries a localized message key (GeoViewError), show it directly
         const gvError = err as GeoViewError;
         if (gvError?.messageKey && gvError.messageKey.startsWith('validation.')) {
@@ -655,12 +659,13 @@ export function AddNewLayer(): JSX.Element {
     }
 
     // If we have a promise of a layer validation
-    if (promise && !abortControllerRef.current.signal.aborted) {
+    if (promise && !discoveryController.signal.aborted) {
       promise
         .then((isValid) => {
+          if (discoveryController.signal.aborted) return;
+          setIsLoading(false);
           if (isValid) {
-            setIsLoading(false);
-            if (!abortControllerRef.current.signal.aborted) setActiveStep(2);
+            setActiveStep(2);
           }
         })
         .catch((error: unknown) => {
@@ -784,29 +789,28 @@ export function AddNewLayer(): JSX.Element {
   const handleStepLast = (): void => {
     setLoadErrorMessage('');
     setIsLoading(true);
-    const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
-      layerIdsToAdd,
-      layerName,
-      layerType: layerType as TypeInitialGeoviewLayerType,
-      layerURL,
-      layerTree: layerTree!,
-      isGeoCore,
-    });
-
-    if (newGeoViewLayer)
-      addGeoviewLayer(newGeoViewLayer).catch((error) => {
-        doneAdding();
-        uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
-        setLoadErrorMessage(t('layers.errorNotLoaded', { layerName }));
+    Promise.resolve()
+      .then(() =>
+        UtilAddLayer.buildGeoLayerToAdd({
+          layerIdsToAdd,
+          layerName,
+          layerType: layerType as TypeInitialGeoviewLayerType,
+          layerURL,
+          layerTree: layerTree!,
+          isGeoCore,
+        })
+      )
+      .then((newGeoViewLayer) => addGeoviewLayer(newGeoViewLayer))
+      .catch((error: unknown) => {
+        const validationError = error instanceof GeoViewError && error.messageKey.startsWith('validation.') ? error : undefined;
+        if (validationError) setIsLoading(false);
+        else doneAdding();
+        const messageKey = validationError?.messageKey ?? 'layers.errorNotLoaded';
+        const messageParams = validationError?.messageParams ?? { layerName };
+        uiController.addMessage('error', messageKey, messageParams);
+        setLoadErrorMessage(t(messageKey, messageParams));
         logger.logError(error, 'Unable to load layer');
       });
-    else {
-      // Remove spinning circle if failed.
-      doneAdding();
-      uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
-      setLoadErrorMessage(t('layers.errorNotLoaded', { layerName }));
-      logger.logError('Unable to load layer');
-    }
   };
 
   // #endregion HANDLERS FOR THE STEPS

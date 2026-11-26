@@ -103,6 +103,22 @@ Files: `geotiff.ts` (`createGeoTIFFSource`, `onProcessLayerMetadata`), `gv-geoti
 
 ---
 
+## WFS and WMS URL layer restrictions
+
+The Add layer wizard treats a `LAYERS` URL parameter as an explicit selection restriction for
+both WFS and WMS, even when the server returns its full capabilities catalog. Parameter names are
+case-insensitive; identifiers are decoded once and matched exactly, including their case and namespace.
+Comma-separated identifiers restrict discovery to those entries. A requested advertised WMS group
+includes its descendants, but a requested leaf does not include siblings or its enclosing groups.
+Generated service wrappers are not advertised groups and cannot satisfy a requested identifier.
+
+An empty identifier or any identifier absent from the discovered entries produces validation feedback;
+GeoView does not fall back to another entry. Without `LAYERS`, full-service discovery is unchanged.
+The final added configuration uses only entries selected from the current discovery result.
+
+For implementation maintenance, see the
+[OGC discovery notes](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/.github/ai/layers.md#ogc-discovery-restrictions).
+
 ## WMS
 
 ### Duplicate names in nested groups

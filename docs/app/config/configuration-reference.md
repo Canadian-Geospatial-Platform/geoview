@@ -1072,11 +1072,13 @@ Array of sublayer configurations (for services with multiple layers).
 
 For GeoCore layers, the `listOfLayerEntryConfig` source is selected by complete-list precedence:
 
-- Inline custom config list (if provided)
-- GeoCore GCS custom list
+- Non-empty inline custom config list
+- Non-empty GeoCore GCS custom list
 - GeoCore RCS default list
 
-The selected list is treated as complete (entries are not merged across sources).
+Missing or empty lists fall back to the next source. The selected list is treated as complete
+(entries are not merged across sources). A single inline group override with settings retains its
+name and settings and contains the selected GeoCore entries when its children are missing or empty.
 
 ```typescript
 listOfLayerEntryConfig?: TypeLayerEntryConfig[];
@@ -3678,8 +3680,8 @@ is not used for this rewrite; it returns the first exact-root or descendant matc
 VCS package configs come from `response.gcs[].{lang}.packages`.
 `UUIDmapConfigReader` uses package-specific extraction (geochart transforms `.layers` and trims;
 time-slider passes through). It carries `customListOfLayerEntryConfig` separately from RCS `layers`;
-legacy GCS `layers` is unsupported. `GeoCore.createLayerConfigFromUUID` alone chooses a complete list:
-inline entries > GCS custom entries > RCS defaults, without mixing entries across sources.
+legacy GCS `layers` is unsupported. `GeoCore.createLayerConfigFromUUID` applies the
+[list precedence and inline-group override contract](#listoflayerentryconfig-optional).
 Name-only inline overrides remain a separate compatibility branch: `layerName` becomes
 `geoviewLayerName` and, for a single entry, that entry's name too.
 

@@ -45,6 +45,16 @@ Apply it when consuming advertised URLs, before proxy wrapping; do not rewrite e
 XML namespace identifiers. OGC items and next links resolve against their service/page URL before upgrading,
 so relative links also follow the secure-page policy after resolution.
 
+### OGC discovery restrictions
+
+The [public URL restriction contract](../../docs/programming/troubleshooting.md#wfs-and-wms-url-layer-restrictions)
+is shared by WFS/WMS discovery through `core/utils/ogc-layer-helper.ts`. Parse the original unproxied URL
+before metadata fetching can normalize it. Scope entry shells, not the capabilities metadata: WMS still
+needs its full metadata hierarchy for inheritance and later per-layer processing. Promote matched
+subtrees rather than keeping unmatched ancestors that WMS could expand back into unrelated siblings.
+Only an advertised WMS root `Name`, never its generated wrapper ID or title, may match a restriction.
+The Add layer builder rejects unresolved WFS/WMS view paths instead of manufacturing fallback entries.
+
 ### WFS SLD Graphic-Stroke Rendering
 
 - `WfsRenderer.#buildLayerStyleInfoLineSymbolizer()` retains multiple `LineSymbolizer` strokes and stores endpoint graphics with their `firstPoint`/`lastPoint` placement in `TypeLineStringVectorConfig.graphicStrokes`; do not discard them when building the base line stroke.

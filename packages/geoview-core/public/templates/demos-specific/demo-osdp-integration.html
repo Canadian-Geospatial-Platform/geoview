@@ -190,6 +190,7 @@ function addLayers(layers) {
             <select name="Select custom config" id="switchCustom" class="form-select">
               <option value="Airborne Radioactivity">Airborne Radioactivity</option>
               <option value="IAAC">IAAC</option>
+              <option value="IAAC Full List">IAAC Full List</option>
               <option value="CESI">CESI</option>
               <option value="DFO">DFO</option>
               <option value="landCover">Land Cover 2010</option>
@@ -595,6 +596,19 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
           },
         ],
         IAAC: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
+        IAACFullList: 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509',
+        IAACFullListConfig: [
+          {
+            entryType: 'group',
+            layerName: 'IAAC Projects',
+            initialSettings: {
+              states: {
+                legendCollapsed: true,
+                visible: false,
+              },
+            },
+          },
+        ],
         IAACConfig: [
           {
             entryType: 'group',
