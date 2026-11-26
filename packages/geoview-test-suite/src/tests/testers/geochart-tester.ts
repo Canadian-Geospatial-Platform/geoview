@@ -127,6 +127,7 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), gvLayer.getLayerPath());
       },
       (test) => {
+        // Clear
         if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
@@ -138,67 +139,46 @@ export class GeochartTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes.
    */
   testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
-    // Test it
-    return this.testAddGeocoreLayerUUIDForGeochart(
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-      GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP,
-      GVAbstractTester.OTTAWA_LONLAT,
-      {
-        [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
-          layers: [
-            {
-              layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-              propertyValue: 'OBJECTID',
-              propertyDisplay: 'Location_Emplacement',
-            },
-          ],
-          chart: 'line',
-          query: {
-            type: 'esriRegular',
-            url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
-            queryOptions: {
-              whereClauses: [
-                {
-                  field: 'Location_Emplacement',
-                  prefix: "'",
-                  valueFrom: 'Location_Emplacement',
-                  suffix: "'",
-                },
-              ],
-              orderByField: 'CollectionStart_DebutPrelevement',
-            },
+    const expectedGeochartChartsConfig = {
+      [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
+        layers: [
+          {
+            layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
+            propertyValue: 'OBJECTID',
+            propertyDisplay: 'Location_Emplacement',
+          },
+        ],
+        chart: 'line',
+        query: {
+          type: 'esriRegular',
+          url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+          queryOptions: {
+            whereClauses: [
+              {
+                field: 'Location_Emplacement',
+                prefix: "'",
+                valueFrom: 'Location_Emplacement',
+                suffix: "'",
+              },
+            ],
+            orderByField: 'CollectionStart_DebutPrelevement',
           },
         },
-      }
-    );
-  }
+      },
+    };
 
-  /**
-   * Tests adding a Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-   *
-   * @param uuid - The uuid of the Gecoore layer
-   * @param layerPathAdd - The layer path of the layer that was added
-   * @param layerPathRemove - The layer path of the layer to remove once the test terminates
-   * @param lonlat - The coordinate on the map to query
-   * @param expectedGeochartChartsConfig - The expected geochart charts configuration to validate
-   */
-  testAddGeocoreLayerUUIDForGeochart(
-    uuid: string,
-    layerPathAdd: string,
-    layerPathRemove: string,
-    lonlat: Coordinate,
-    expectedGeochartChartsConfig: Record<string, unknown>
-  ): Promise<Test<AbstractGVLayer>> {
     // Test
+    let fixtureLayerPath: string | undefined;
     return this.test(
       'Test Geochart',
       async (test) => {
         // Add the geoview layer by geocore uuid
-        await this.addLayerOnMapFromUUID(test, uuid);
+        const fixture = this.addLayerEsriDynamicAirborneViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
 
         // Continue the test and return the layer
-        return this.queryLonLatSelectLayerInPanel(test, layerPathAdd, lonlat);
+        return this.queryLonLatSelectLayerInPanel(test, fixtureLayerPath, GVAbstractTester.OTTAWA_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -211,12 +191,12 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
-        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPathAdd);
+        test.addStep(`Verifying ${fixtureLayerPath} is the selected layer for the geochart...`);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), fixtureLayerPath);
       },
       (test) => {
-        // Redirect to LayerTest to help test the removal of the layer
-        this.removeLayerConfigAndAssert(test, layerPathRemove);
+        // Clear
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }

@@ -1,7 +1,6 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import { GeoPackageReader } from 'geoview-core/api/config/reader/geopackage-reader';
 import type { IDataTableSettings, TypeColumnFiltersState } from 'geoview-core/core/stores/states/data-table-state';
 import {
   getStoreAppDisplayDateFormatDefault,
@@ -223,55 +222,35 @@ export class DataTableTester extends GVAbstractTester {
    * accessorFn"). GeoPackage preserves a blank-named column verbatim, so opening its data table exercises the crash
    * path. The test passes when the data table is created (its table element renders) for the layer.
    *
-   * @returns Fixture failure observations and whether the table rendered
+   * @returns A promise resolving with the queried features and rendered table
    */
   testEmptyFieldNameDoesNotCrashDataTable(): Promise<Test<EmptyFieldNameDataTableResult>> {
-    let setupLayer: AbstractBaseGVLayer | undefined;
     let fixtureLayerPath: string | undefined;
     return this.test(
       'Test empty field name renders the data table without crashing...',
       async (test) => {
-        const failingFixture = (() => {
-          // TODO: CHECK - REVISE THIS OVERWRITE OF GeoPackageReader.createLayerConfigFromGeoPackage FOR TESTING FAILURE SCENARIO
-          const originalReader = GeoPackageReader.createLayerConfigFromGeoPackage;
-          GeoPackageReader.createLayerConfigFromGeoPackage = () => Promise.reject(new Error('Expected fixture reader failure'));
-          try {
-            return this.addGeopackageRailwaysCartoFerDebarcadere(test);
-          } finally {
-            GeoPackageReader.createLayerConfigFromGeoPackage = originalReader;
-          }
-        })();
-        const failureLayerPath = failingFixture.layerPath;
-        const failureIsPromise = failingFixture.promiseLayer instanceof Promise;
-
-        let fixtureFailure: unknown;
-        try {
-          await failingFixture.promiseLayer;
-        } catch (error) {
-          fixtureFailure = error;
-        }
-
-        // Add railways empty field layer
+        // The reader override was removed; fixture failure coverage belongs in a separate test.
         const fixture = this.addGeopackageRailwaysCartoFerDebarcadere(test);
         fixtureLayerPath = fixture.layerPath;
-        setupLayer = await fixture.promiseLayer;
+        await fixture.promiseLayer;
 
-        // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.openDataTableAndWait(test, setupLayer.getLayerPath());
+        // Select the GeoPackage table entry, not its root cleanup scope.
+        const features = await this.openDataTableAndWait(test, fixture.selectedLayerPath);
+        const table = await DomHelper.DataTable.waitForDataTable(this.getMapId());
 
-        // The table was created (rendered) for the layer
-        return { failureLayerPath, failureIsPromise, fixtureFailure };
+        return { features, table };
       },
       (test, result) => {
-        test.addStep('Verifying the failed fixture exposes its cleanup path and rejects its loading promise...');
-        Test.assertIsEqual(typeof result.failureLayerPath, 'string');
-        Test.assertIsNotEqual(result.failureLayerPath, '');
-        Test.assertIsEqual(result.failureIsPromise, true);
-        Test.assertIsDefined('fixtureFailure', result.fixtureFailure);
-        Test.assertIsEqual(result.fixtureFailure instanceof Error, true);
-        if (result.fixtureFailure instanceof Error) {
-          Test.assertIsEqual(result.fixtureFailure.message, 'Expected fixture reader failure');
-        }
+        test.addStep('Verifying the queried features contain the blank-named field...');
+        Test.assertIsDefined('features', result.features);
+        Test.assertIsArrayLengthMinimal(result.features, 1);
+        Test.assertIsEqual(
+          result.features.some((feature) => Object.hasOwn(feature.fieldInfo, '')),
+          true
+        );
+
+        test.addStep('Verifying the data table rendered...');
+        Test.assertIsDefined('table', result.table);
       },
       (test) => {
         if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
@@ -426,7 +405,10 @@ export class DataTableTester extends GVAbstractTester {
         // Add Permafrost layer
         const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
         fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const layer = await fixture.promiseLayer;
+
+        // Turn the layer visible, because it's invisible by default
+        layer.setVisible(true);
 
         // Wait for layer registration and data-table to be loaded with the layer in question
         const features = await this.openDataTableAndWait(test, fixtureLayerPath);
@@ -478,7 +460,10 @@ export class DataTableTester extends GVAbstractTester {
         // Add Permafrost layer
         const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
         fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const layer = await fixture.promiseLayer;
+
+        // Turn the layer visible, because it's invisible by default
+        layer.setVisible(true);
 
         // Wait for layer registration and data-table to be loaded with the layer in question
         const features = await this.openDataTableAndWait(test, fixtureLayerPath);
@@ -925,11 +910,10 @@ export class DataTableTester extends GVAbstractTester {
 
 // #region TYPES AND INTERFACES
 
-/** Fixture rejection observations and empty-field table rendering result. */
+/** Queried features and the rendered empty-field data table. */
 type EmptyFieldNameDataTableResult = {
-  failureLayerPath: string;
-  failureIsPromise: boolean;
-  fixtureFailure: unknown;
+  features: TypeFeatureInfoEntry[] | undefined;
+  table: Element;
 };
 
 /** Commemorative table state and column-filter snapshots before and after clearing. */

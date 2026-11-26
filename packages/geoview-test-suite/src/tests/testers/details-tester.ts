@@ -318,6 +318,9 @@ export class DetailsTester extends GVAbstractTester {
         const layerPath = layer.getLayerPath();
         const mapId = this.getMapId();
 
+        // This layer is only visible within a certain zoom range, so zoom in before interacting with it.
+        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+
         // Synchronize the render before querying, then wait for the Details store update.
         await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinate);
         await this.toggleAppbarTabDetails(test, true);

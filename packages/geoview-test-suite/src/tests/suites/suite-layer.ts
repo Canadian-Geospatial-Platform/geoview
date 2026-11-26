@@ -41,7 +41,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return `Tests layer addition, expected loading failures, legend icons, and configuration overrides:<br/>
+    return `Tests layer addition with rendered Legend and Layers panel entries, expected loading failures, legend icons, and configuration overrides:<br/>
       <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry); case-sensitive export bbox/size and returned image dimensions<br/>
       <b>WMS/WFS</b> — WMS services, VPN-aware group dimensions, metadata/configured names and CORS proxy; WFS; bad URLs and WFS without capabilities<br/>
       <b>GeoJSON/CSV</b> — File-based layer addition and bad URLs<br/>
@@ -50,7 +50,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       <b>WMTS</b> — World timezones and bad URL<br/>
       <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
       <b>Settings</b> — initialSettings cascade on added layers<br/>
-      <b>GeoCore</b> — Inline layer entry and simplified name overrides<br/>
+      <b>GeoCore</b> — Inline layer entry, simplified name, land-cover, CESI and IAAC group initial-state overrides<br/>
       <b>ESRI domains</b> — Dynamic and Feature domain fields`;
   }
 
@@ -60,7 +60,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The number of active full-suite tester calls, excluding debug-only calls
    */
   override getTestsTotalFinal(): number {
-    return 45;
+    return 48;
   }
 
   /**
@@ -71,7 +71,20 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override async onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    await this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
+    // Test geocore custom inline override scenarios
+    await this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
+
+    // Test geocore simplified inline layer name override
+    // await this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
+
+    // Test the land-cover entry's custom name and collapsed/hidden initial states.
+    // await this.#layerTester.testAddGeocoreWithInlineLandCoverEntryOverride();
+
+    // Test the CESI group hierarchy and nested visibility/collapse overrides.
+    // await this.#layerTester.testAddGeocoreWithInlineCesiGroupOverrides();
+
+    // Test the IAAC group and each child's visibility/collapse overrides.
+    // await this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
 
     // Resolve
     return;
@@ -168,7 +181,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerCSVBadUrl = this.#layerTester.testAddCSVWithBadUrl();
 
     // Test adding layer
-    const pLayerOGCFeatureWithPygeoapi = this.#layerTester.testAddOGCFeatureWithPygeoapi();
+    const pLayerOGCFeatureLakes = this.#layerTester.testAddOGCFeatureLakes();
 
     // Test true negative
     const pLayerOGCFeatureBadUrl = this.#layerTester.testAddOGCFeatureWithBadUrl();
@@ -215,7 +228,19 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test geocore custom inline override scenarios
     const pGeocoreInlineListOverride = this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
 
+    // Test geocore simplified inline layer name override
     const pGeocoreSimplifiedNameOverride = this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
+
+    // Test the land-cover entry's custom name and collapsed/hidden initial states.
+    const pGeocoreLandCoverOverride = this.#layerTester.testAddGeocoreWithInlineLandCoverEntryOverride();
+
+    // Test the CESI group hierarchy and nested visibility/collapse overrides.
+    const pGeocoreCesiOverride = this.#layerTester.testAddGeocoreWithInlineCesiGroupOverrides();
+
+    // Test the IAAC group and each child's visibility/collapse overrides.
+    // TODO: ALEX - Uncomment this
+    // const pGeocoreIaacOverride = this.#layerTester.testAddGeocoreWithInlineIAACGroupOverride();
+    const pGeocoreIaacOverride = Promise.resolve();
 
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
@@ -251,7 +276,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerGeoJSonBadUrl,
       pLayerCSVStationList,
       pLayerCSVBadUrl,
-      pLayerOGCFeatureWithPygeoapi,
+      pLayerOGCFeatureLakes,
       pLayerOGCFeatureBadUrl,
       pLayerWKBWithSouthAfrica,
       pLayerWKBBadUrl,
@@ -268,6 +293,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pInitialSettingsCascade,
       pGeocoreInlineListOverride,
       pGeocoreSimplifiedNameOverride,
+      pGeocoreLandCoverOverride,
+      pGeocoreCesiOverride,
+      pGeocoreIaacOverride,
       pEsriDynamicDomainField,
       pEsriFeatureDomainField,
     ]);

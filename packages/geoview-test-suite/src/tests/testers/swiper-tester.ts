@@ -41,7 +41,7 @@ export class SwiperTester extends GVAbstractTester {
         await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         await fixtureOgc.promiseLayer;
 
@@ -107,7 +107,7 @@ export class SwiperTester extends GVAbstractTester {
         await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         await fixtureOgc.promiseLayer;
 
@@ -160,7 +160,7 @@ export class SwiperTester extends GVAbstractTester {
         const msiLayer = await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         const lakesLayer = await fixtureOgc.promiseLayer;
 
@@ -209,7 +209,7 @@ export class SwiperTester extends GVAbstractTester {
         await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         await fixtureOgc.promiseLayer;
 
@@ -260,7 +260,7 @@ export class SwiperTester extends GVAbstractTester {
         await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         await fixtureOgc.promiseLayer;
 
@@ -304,7 +304,7 @@ export class SwiperTester extends GVAbstractTester {
         const msiLayer = await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         const lakesLayer = await fixtureOgc.promiseLayer;
 
@@ -392,7 +392,7 @@ export class SwiperTester extends GVAbstractTester {
         await fixture.promiseLayer;
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPathLakes = fixtureOgc.layerPath;
         await fixtureOgc.promiseLayer;
 

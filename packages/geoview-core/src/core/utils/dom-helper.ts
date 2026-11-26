@@ -172,6 +172,20 @@ export abstract class DomHelper {
   }
 
   /**
+   * Gets a layer's rendered entry in the specified Legend panel.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The full layer path
+   * @param containerType - The app bar or footer bar containing the Legend panel
+   * @returns The legend list item, or undefined when it is not rendered
+   */
+  static getLayerBoxInLegendPanel(mapId: string, layerPath: string, containerType: TypeContainerBox): HTMLElement | undefined {
+    // The fullscreen legend renders the same layers; scope to the requested panel's own list.
+    const container = this.getGVElementById(mapId, `${containerType}-legendContainer`);
+    return container?.querySelector<HTMLElement>(`[data-layer-path="${CSS.escape(layerPath)}"]`) ?? undefined;
+  }
+
+  /**
    * Gets the rendered primary layer name from the specified Layers panel.
    *
    * @param mapId - The map identifier

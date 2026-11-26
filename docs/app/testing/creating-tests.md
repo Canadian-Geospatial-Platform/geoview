@@ -150,22 +150,25 @@ map root. It throws `TestError` if the container is missing; reuse this root rat
 appending fixture maps to the runner page.
 
 ```typescript
-this.addLayerOnMap(test, gvConfig); // Add layer and wait for creation
-this.addLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
+this.addLayerOnMap(test, gvConfig, layerPath); // Add layer and wait for configuration registration
+this.addLayerOnMapFromUUID(test, uuid, false, layerPath); // Add from GeoCore UUID
 this.waitLayerAtLayerPath(test, layerPath); // Wait for loading and legend resolution
 this.removeLayerConfigAndAssert(test, layerPath); // Cleanup
 ```
 
 For successful layer setup, use a fixture-specific `addLayer...` helper on `GVAbstractTester`,
 such as `addLayerEsriDynamicHistoFloodEvents(test)` or `addLayerEsriFeatureForestIndustry(test)`.
-Each helper immediately returns `{ layerPath, promiseLayer }`: capture `layerPath` synchronously,
-then await `promiseLayer` for the selected layer after loading and legend resolution.
+Each helper immediately returns `{ layerPath, selectedLayerPath, promiseLayerConfig, promiseLayer }`.
+Capture `layerPath` synchronously for cleanup. `promiseLayerConfig` resolves when the selected
+configuration is registered; `promiseLayer` resolves with the selected layer after loading and legend
+resolution. The layer promise starts its readiness wait on first access, is cached, and propagates
+configuration failures. Configuration failures are logged even if no promise is subsequently awaited.
 
 When writing a fixture helper, create its configuration with normal synchronous setup code and
-reuse `addLayerOnMapAndWait()` for addition, loading, and legend readiness:
+use the shared fixture constructor to separate configuration and layer readiness:
 
 ```typescript
-addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult<GVEsriFeature> {
+addLayerEsriFeatureTopProjects(test: Test): GVLayerFixtureResult<ConfigBaseClass, GVEsriFeature> {
   const gvLayerId = generateId();
   const layerPath = `${gvLayerId}/${GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID}`;
   test.addStep('Creating the Top Projects Esri Feature configuration...');
@@ -176,18 +179,19 @@ addLayerEsriFeatureTopProjects<T>(test: Test<T>): GVLayerFixtureResult<GVEsriFea
     false,
     [{ id: GVAbstractTester.TOP_PROJECTS_900A_LAYER_ID }]
   );
-  const promiseLayer = this.addLayerOnMapAndWait<T, GVEsriFeature>(test, gvConfig, layerPath);
-  return { layerPath, selectedLayerPath: layerPath, promiseLayer };
+  const promiseLayerConfig = this.addLayerOnMap(test, gvConfig, layerPath);
+  return GVAbstractTester.#createLayerFixture(layerPath, layerPath, promiseLayerConfig, () =>
+    this.waitLayerAtLayerPath<GVEsriFeature>(test, layerPath)
+  );
 }
 ```
 
 Synchronous setup exceptions propagate directly from the helper. Addition, loading, and readiness
-failures reject `promiseLayer` without hiding the error, so callers can retain the returned cleanup
-path before awaiting it. Start genuinely asynchronous setup (such as reading a GeoPackage) with its
-own promise, then chain configuration selection, addition, and readiness. Chain required sibling
-waits in order rather than running them concurrently.
-Pass `true` as the fourth argument to `addLayerOnMapAndWait()` when empty or no-data legends are
-valid. Fixtures with GeoCore or metadata-dependent selection retain their specialized setup chains.
+failures reject `promiseLayer`, so callers can retain the returned cleanup path before awaiting it.
+Start genuinely asynchronous setup (such as reading a GeoPackage) with its own promise, then chain
+configuration selection and addition. Chain required sibling waits in order rather than running them
+concurrently. Pass `true` to `waitLayerAtLayerPath()` when empty or no-data legends are valid.
+Fixtures with GeoCore or metadata-dependent selection retain their specialized setup chains.
 
 Fixture helpers own ID generation. Use the resolved layer's `getLayerPath()` for assertions and
 layer-specific operations. Retain the immediate `layerPath` for finalizer cleanup before awaiting

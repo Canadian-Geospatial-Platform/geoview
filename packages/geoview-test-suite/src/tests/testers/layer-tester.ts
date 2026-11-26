@@ -12,13 +12,12 @@ import { getStoreMapHoverFeatureInfo, getStoreMapStateJson } from 'geoview-core/
 import { getStoreDataTableFeaturesByPath } from 'geoview-core/core/stores/states/data-table-state';
 import type { TypeHoverFeatureInfo } from 'geoview-core/core/stores/states/feature-info-state';
 import type {
-  TypeMapFeaturesInstance,
   TypeFeatureInfoResult,
   codedValueType,
   TypeFeatureInfoEntry,
   Extent,
+  TypeMapFeaturesInstance,
 } from 'geoview-core/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import {
   getStoreLayerLegendLayerByPath,
@@ -28,7 +27,7 @@ import {
   getStoreLayerVisible,
 } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreUIActiveAppBarTab } from 'geoview-core/core/stores/states/ui-state';
-import { generateId } from 'geoview-core/core/utils/utilities';
+import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { CONTAINER_TYPE } from 'geoview-core/core/utils/constant';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -42,7 +41,7 @@ import type { GVEsriDynamic } from 'geoview-core/geo/layer/gv-layers/raster/gv-e
 import { GVGroupLayer } from 'geoview-core/geo/layer/gv-layers/gv-group-layer';
 import { GVWMS } from 'geoview-core/geo/layer/gv-layers/raster/gv-wms';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
-import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -56,6 +55,8 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
+import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
+import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 
 /**
  * Main Layer testing class.
@@ -438,6 +439,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           undefined,
           GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST
         );
@@ -455,25 +457,23 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves with the loaded layer, export parameters, and requested/returned image dimensions
    */
   testAddEsriDynamicCaseSensitiveExport(): Promise<Test<AbstractBaseGVLayer>> {
-    const uuid = GVAbstractTester.ESRI_DYNAMIC_CASE_SENSITIVE_EXPORT_UUID;
-    const layerPath = `${uuid}/0`;
+    let fixtureLayerPath: string | undefined;
 
     return this.test(
       'Test GeoCore ESRI Dynamic export with case-sensitive bbox and size parameters...',
-      async (test) => {
+      (test) => {
         // Add the layer using the UUID
-        await this.addLayerOnMapFromUUID(test, uuid);
-
-        // Wait for the layer to get registered
-        return this.waitLayerAtLayerPath(test, layerPath, false);
+        const fixture = this.addLayerEsriDynamicCaseSensitiveExportViaGeocore(test);
+        fixtureLayerPath = fixture.layerPath;
+        return fixture.promiseLayer;
       },
-      (result) => {
+      (test, result) => {
         // At this point, the layer successfully loaded
-        Test.assertIsDefined('result', result);
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
-        // Remove the UUID root even when creation, image loading, or an assertion fails.
-        this.removeLayerConfigAndAssert(test, layerPath);
+        // Redirect to helper to clean up and assert
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -543,6 +543,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           undefined,
           GVAbstractTester.FOREST_INDUSTRY_ICON_LIST
         );
@@ -611,7 +612,14 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), undefined, undefined);
+        LayerTester.assertCheckLayerExistsInStore(
+          test,
+          this.getMapId(),
+          result.getLayerPath(),
+          result.getLayerName(),
+          undefined,
+          undefined
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -643,7 +651,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -675,8 +683,13 @@ export class LayerTester extends GVAbstractTester {
         const layerPathCities = `${group.getLayerPath()}/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
 
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), layerPathCities);
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(
+          test,
+          this.getMapId(),
+          layerPathCities,
+          this.getControllersRegistry().layerController.getGeoviewLayer(layerPathCities).getLayerName()
+        );
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -714,6 +727,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -746,7 +762,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.OWS_TERRESTRIS_ICON_IMAGE);
+        LayerTester.assertCheckLayerExistsInStore(
+          test,
+          this.getMapId(),
+          result.getLayerPath(),
+          result.getLayerName(),
+          GVAbstractTester.OWS_TERRESTRIS_ICON_IMAGE
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -774,7 +796,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), GVAbstractTester.DATACUBE_MSI_ICON_IMAGE);
+        LayerTester.assertCheckLayerExistsInStore(
+          test,
+          this.getMapId(),
+          result.getLayerPath(),
+          result.getLayerName(),
+          GVAbstractTester.DATACUBE_MSI_ICON_IMAGE
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -806,6 +834,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
         );
       },
@@ -844,7 +873,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Validate the layer is a group layer
         Test.assertIsInstance(result, GVGroupLayer);
@@ -901,7 +930,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Validate the layer is a group layer
         Test.assertIsInstance(result, GVGroupLayer);
@@ -948,7 +977,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -995,6 +1024,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1033,7 +1065,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), duplicateGroupPath);
 
         // The deeply-nested leaf must exist and have loaded
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert (removing the outer group removes the whole subtree)
@@ -1107,7 +1139,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1148,6 +1180,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1179,7 +1214,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1217,6 +1252,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1250,7 +1288,7 @@ export class LayerTester extends GVAbstractTester {
         },
         (test, result) => {
           // Perform assertions
-          LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+          LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
         },
         (test) => {
           // Redirect to helper to clean up and assert
@@ -1277,6 +1315,9 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1315,6 +1356,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1348,7 +1392,14 @@ export class LayerTester extends GVAbstractTester {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         // GV Current Conditions isn't returning a legend for us anymore, sending checkIconsList = undefined now
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), undefined, undefined);
+        LayerTester.assertCheckLayerExistsInStore(
+          test,
+          this.getMapId(),
+          result.getLayerPath(),
+          result.getLayerName(),
+          undefined,
+          undefined
+        );
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1386,6 +1437,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1423,6 +1477,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1459,6 +1516,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           undefined,
           GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST
         );
@@ -1488,7 +1546,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists and legend information was created
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1563,7 +1621,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        return LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1642,6 +1700,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           undefined,
           GVAbstractTester.CSV_STATION_ICON_LIST
         );
@@ -1698,21 +1757,21 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion CSV
 
-  // #region OGC Feature
+  // #region OGC FEATURE
 
   /**
    * Tests adding an OGC Feature layer with Pygeoapi on the map.
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddOGCFeatureWithPygeoapi(): Promise<Test<AbstractBaseGVLayer>> {
+  testAddOGCFeatureLakes(): Promise<Test<AbstractBaseGVLayer>> {
     let fixtureLayerPath: string | undefined;
     // Test
     return this.test(
       `Test Adding an OGC Feature with Pygeoapi layer on map...`,
       (test) => {
         // Add the fixture and wait for its selected layer to be ready
-        const fixture = this.addLayerOGCFeatureWithPygeoapi(test);
+        const fixture = this.addLayerOGCFeatureLakes(test);
         fixtureLayerPath = fixture.layerPath;
         return fixture.promiseLayer;
       },
@@ -1723,6 +1782,7 @@ export class LayerTester extends GVAbstractTester {
           test,
           this.getMapId(),
           result.getLayerPath(),
+          result.getLayerName(),
           undefined,
           GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
         );
@@ -1763,6 +1823,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1795,7 +1858,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1833,6 +1896,9 @@ export class LayerTester extends GVAbstractTester {
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
+
+        // Wait for the layer to be loaded
+        await this.waitLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
@@ -1865,7 +1931,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Redirect to helper to clean up and assert
@@ -1931,6 +1997,8 @@ export class LayerTester extends GVAbstractTester {
       groupHighlight: false,
       groupRemove: false,
       childHighlight: true,
+      childRemove: false,
+      childZoom: false,
     };
 
     // Test the WMS
@@ -1996,7 +2064,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -2052,7 +2120,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath());
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -2328,11 +2396,14 @@ export class LayerTester extends GVAbstractTester {
           throw new TestSkippedError('Not running the heavy tests');
         }
 
-        const fixture = this.addLayerGeocoreMarineFisheriesViaGeocore(test);
+        const fixture = this.addLayerEsriDynamicMarineFisheriesViaGeocore(test);
         fixtureLayerPath = fixture.layerPath;
         return fixture.promiseLayer;
       },
       (test, result) => {
+        // Verify the layer exists
+        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result.getLayerPath());
+
         const gvLayerPathWithGroupVisibilityFalse = result.getLayerPath();
         // Get the root layer (group)
         const rootLayer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(gvLayerPathWithGroupVisibilityFalse);
@@ -2906,9 +2977,10 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeocoreWithInlineListOfLayerEntryConfigOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
-    const geocoreUuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
+  testAddGeocoreWithInlineListOfLayerEntryConfigOverride(): Promise<Test<string>> {
     const customGeoviewLayerName = 'Issue 3548 - Inline GeoCore Override';
+    const customLayerNameGroup = 'Issue 3548 - Main Group';
+    const customLayerNameChild = 'Issue 3548 - Child Layer';
     const customLayerEntryConfig = JSON.stringify([
       {
         geoviewLayerName: customGeoviewLayerName,
@@ -2916,11 +2988,11 @@ export class LayerTester extends GVAbstractTester {
           {
             layerId: '0',
             entryType: 'group',
-            layerName: 'Issue 3548 - Main Group',
+            layerName: customLayerNameGroup,
             listOfLayerEntryConfig: [
               {
                 layerId: '1',
-                layerName: 'Issue 3548 - Child Layer',
+                layerName: customLayerNameChild,
                 initialSettings: {
                   states: {
                     visible: false,
@@ -2933,43 +3005,43 @@ export class LayerTester extends GVAbstractTester {
       },
     ]);
 
+    let fixtureLayerPath: string | undefined;
     return this.test(
       'Test geocore inline listOfLayerEntryConfig override',
       async (test) => {
         // Add the geoview layer by geocore uuid
-        await this.addLayerOnMapFromUUID(test, geocoreUuid, customLayerEntryConfig);
+        const fixture = this.addLayerEsriDynamicAirborneViaGeocore(test, customLayerEntryConfig); // `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0/1`
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
 
         // Create map config from map state
-        test.addStep('Creating map config from current map state...');
-        return this.getControllersRegistry().mapController.createMapConfigFromMapState();
+        return fixtureLayerPath;
       },
       (test, result) => {
-        test.addStep('Finding the added geocore layer config in map state...');
-        const layerConfig = result?.map?.listOfGeoviewLayerConfig.find((layer) => layer.geoviewLayerId.startsWith(geocoreUuid));
-        Test.assertIsDefined('layerConfig', layerConfig);
+        // Verify the layer exists
+        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result);
+
+        // Get the layer
+        const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(result);
+
+        Test.assertIsDefined('childLayer', childLayer);
+        Test.assertIsEqual(childLayer.getLayerConfig().layerId, '1');
+        Test.assertIsEqual(childLayer.getGeoviewLayerName(), customGeoviewLayerName);
+        Test.assertIsEqual(childLayer.getLayerName(), customLayerNameChild);
+        Test.assertIsEqual(childLayer.getVisible(), false);
+
+        // Get the parent
+        const parentLayer = childLayer.getParent();
 
         test.addStep('Verifying custom geoviewLayerName override is applied...');
-        Test.assertIsEqual(layerConfig?.geoviewLayerName, customGeoviewLayerName);
-
-        test.addStep('Verifying overridden listOfLayerEntryConfig structure is applied...');
-        Test.assertIsArrayLengthEqual(layerConfig?.listOfLayerEntryConfig, 1);
-
-        const groupEntry = layerConfig?.listOfLayerEntryConfig?.[0];
-        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(groupEntry), '0');
-        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerName(groupEntry), 'Issue 3548 - Main Group');
-
-        const childEntry = groupEntry?.listOfLayerEntryConfig?.[0];
-        Test.assertIsDefined('childEntry', childEntry);
-        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(childEntry), '1');
-        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerName(childEntry), 'Issue 3548 - Child Layer');
-        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(childEntry)?.states?.visible, false);
+        Test.assertIsDefined('parentLayer', parentLayer);
+        Test.assertIsEqual(parentLayer.getLayerConfig().layerId, '0');
+        Test.assertIsEqual(parentLayer.getGeoviewLayerName(), customGeoviewLayerName);
+        Test.assertIsEqual(parentLayer.getLayerName(), customLayerNameGroup);
       },
       (test) => {
-        const cleanupLayerPath = this.getControllersRegistry()
-          .layerController.getGeoviewLayerPaths()
-          .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
-        Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.removeLayerConfigAndAssert(test, cleanupLayerPath);
+        // Keep cleanup available even when fixture loading or style verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -2979,8 +3051,7 @@ export class LayerTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testAddGeocoreWithSimplifiedInlineLayerNameOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
-    const geocoreUuid = GVAbstractTester.GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID;
+  testAddGeocoreWithSimplifiedInlineLayerNameOverride(): Promise<Test<string>> {
     const customLayerName = 'Issue 3548 - Simplified Inline Name';
     const customLayerEntryConfig = JSON.stringify([
       {
@@ -2988,30 +3059,305 @@ export class LayerTester extends GVAbstractTester {
       },
     ]);
 
+    let fixtureLayerPath: string | undefined;
     return this.test(
       'Test geocore simplified inline layerName override precedence',
       async (test) => {
         // Add the geoview layer by geocore uuid
-        await this.addLayerOnMapFromUUID(test, geocoreUuid, customLayerEntryConfig);
+        const fixture = this.addLayerWMSMajorEconomicPointViaGeocore(test, customLayerEntryConfig);
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
 
         // Create map config from map state
-        test.addStep('Creating map config from current map state...');
-        return this.getControllersRegistry().mapController.createMapConfigFromMapState();
+        return fixtureLayerPath;
       },
       (test, result) => {
-        test.addStep('Finding the added geocore layer config in map state...');
-        const layerConfig = result?.map?.listOfGeoviewLayerConfig.find((layer) => layer.geoviewLayerId.startsWith(geocoreUuid));
-        Test.assertIsDefined('layerConfig', layerConfig);
+        // Verify the layer exists
+        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result);
+
+        // Get the layer
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayer(result);
 
         test.addStep('Verifying simplified inline layerName override is applied...');
-        Test.assertIsEqual(layerConfig?.geoviewLayerName, customLayerName);
+        Test.assertIsEqual(layer.getLayerName(), customLayerName);
       },
       (test) => {
-        const cleanupLayerPath = this.getControllersRegistry()
-          .layerController.getGeoviewLayerPaths()
-          .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
-        Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
-        if (cleanupLayerPath) this.removeLayerConfigAndAssert(test, cleanupLayerPath);
+        // Keep cleanup available even when fixture loading or style verification fails.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests an inline GeoCore land-cover entry override with a custom name and collapsed, hidden initial states.
+   *
+   * @returns A promise resolving with the selected layer and its initial store and configuration observations
+   */
+  testAddGeocoreWithInlineLandCoverEntryOverride(): Promise<Test<LayerTestResult<LandCoverOverrideResult>>> {
+    const layerId = GVAbstractTester.GEOCORE_LAND_COVER_LAYER_ID;
+    const layerName = '2010 Land Cover of Canada';
+    const customLayerEntryConfig = JSON.stringify([
+      {
+        layerId,
+        layerName,
+        initialSettings: {
+          states: {
+            legendCollapsed: true,
+            visible: false,
+          },
+        },
+      },
+    ]);
+    let fixtureLayerPath: string | undefined;
+
+    return this.test(
+      'Test GeoCore land-cover inline layer entry name and initial states...',
+      async (test) => {
+        test.addStep('Adding the GeoCore land-cover record with the inline entry configuration...');
+        const fixture = this.addLayerWMSLancoverViaGeocore(test, customLayerEntryConfig);
+        fixtureLayerPath = fixture.layerPath;
+        const layerPath = fixtureLayerPath;
+        const gvLayer = await fixture.promiseLayer;
+
+        test.addStep(`Waiting for the selected land-cover entry '${layerPath}' and its legend store entry...`);
+        await whenThisThen(() => getStoreLayerLegendLayerByPath(this.getMapId(), layerPath), GVAbstractTester.UI_STATE_TIMEOUT_MS);
+
+        // Inspect the store directly rather than requiring the panel boxes to be rendered.
+        const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
+        return {
+          gvLayer,
+          data: {
+            layerId: gvLayer.getLayerConfig().layerId,
+            layerName: gvLayer.getLayerName(),
+            visible: gvLayer.getVisible(),
+            legendName: legendLayer?.layerName,
+            legendVisible: legendLayer?.visible,
+            legendCollapsed: legendLayer?.legendCollapsed,
+            initialStates: gvLayer.getLayerConfig().getInitialSettings()?.states,
+          },
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the selected entry and custom layer name...');
+        Test.assertIsEqual(result.data.layerId, layerId);
+        Test.assertIsEqual(result.data.layerName, layerName);
+        Test.assertIsEqual(result.data.legendName, layerName);
+
+        // Check the configured values as well as runtime and store state, without changing either state.
+        test.addStep('Verifying the configured and applied hidden and collapsed states...');
+        Test.assertIsEqual(result.data.initialStates?.visible, false);
+        Test.assertIsEqual(result.data.initialStates?.legendCollapsed, true);
+        Test.assertIsEqual(result.data.visible, false);
+        Test.assertIsEqual(result.data.legendVisible, false);
+        Test.assertIsEqual(result.data.legendCollapsed, true);
+      },
+      (test) => {
+        // Remove the captured fixture path when cleanup is enabled.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests a GeoCore CESI override containing two named groups and nested initial states.
+   *
+   * @returns A promise resolving with the group structure and initial-state observations
+   */
+  testAddGeocoreWithInlineCesiGroupOverrides(): Promise<Test<CesiGroupOverrideResult>> {
+    const quantityName = 'CESI - Water Quantity Group';
+    const qualityName = 'CESI - Water Quality Group';
+    const customLayerEntryConfig = JSON.stringify([
+      {
+        layerId: '0',
+        entryType: 'group',
+        layerName: quantityName,
+        listOfLayerEntryConfig: [{ layerId: '1', initialSettings: { states: { visible: false } } }],
+      },
+      {
+        layerId: '4',
+        entryType: 'group',
+        layerName: qualityName,
+        initialSettings: { states: { visible: false, legendCollapsed: true } },
+        listOfLayerEntryConfig: [{ layerId: '5' }],
+      },
+    ]);
+    const customLayerPathWaterQuantity = `${GVAbstractTester.GEOCORE_CESI_UUID}/base-group/0/1`;
+    const customLayerPathWaterQuality = `${GVAbstractTester.GEOCORE_CESI_UUID}/base-group/4/5`;
+
+    let fixtureLayerPath: string | undefined;
+    return this.test(
+      'Test GeoCore CESI inline group names, children and initial states...',
+      async (test) => {
+        const fixture = this.addLayerEsriDynamicCESIViaGeocore(test, customLayerEntryConfig, customLayerPathWaterQuantity);
+        fixtureLayerPath = GVAbstractTester.GEOCORE_CESI_UUID;
+        const layerWaterQuantity = await fixture.promiseLayer;
+        const layerWaterQuality = await this.waitLayerAtLayerPath<GVEsriDynamic>(test, customLayerPathWaterQuality);
+        const layerWaterQuantityGroup = layerWaterQuantity.getParent()!;
+        const layerWaterQualityGroup = layerWaterQuality.getParent()!;
+
+        test.addStep('Waiting for the quality group to apply its initial visibility...');
+        await whenThisThen(() => {
+          if (layerWaterQualityGroup.getLayerStatus() === 'error') throw new TestError('CESI quality group failed to load');
+          return layerWaterQualityGroup.loadedOnce;
+        }, GVAbstractTester.UI_STATE_TIMEOUT_MS);
+
+        const layerPathQuantity = layerWaterQuantity.getLayerPath();
+        const layerPathQuantityGroup = layerWaterQuantityGroup.getLayerPath();
+        const layerPathQuality = layerWaterQuality.getLayerPath();
+        const layerPathQualityGroup = layerWaterQualityGroup.getLayerPath();
+
+        // Inspect the store without changing the configured collapsed state.
+        await whenThisThen(
+          () =>
+            [layerPathQuantity, layerPathQuantityGroup, layerPathQuality, layerPathQualityGroup].every(
+              (path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined
+            ),
+          GVAbstractTester.UI_STATE_TIMEOUT_MS
+        );
+        const storeWaterQuantity = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQuantity);
+        const storeWaterQuantityGroup = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQuantityGroup);
+        const storeWaterQuality = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQuality);
+        const storeWaterQualityGroup = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQualityGroup);
+
+        return {
+          quantityName: layerWaterQuantity.getLayerName(),
+          quantityGroupName: layerWaterQuantityGroup.getLayerName(),
+          quantityInitialVisible: layerWaterQuantity.getLayerConfig().getInitialSettings()?.states?.visible,
+          quantityVisible: layerWaterQuantity.getVisible(),
+          quantityStoreVisible: storeWaterQuantity?.visible,
+          quantityInitialCollapsed: layerWaterQuantityGroup.getLayerConfig().getInitialSettings()?.states?.legendCollapsed,
+          quantityCollapsed: storeWaterQuantityGroup?.legendCollapsed,
+          quantityStoreCollapsed: storeWaterQuantity?.legendCollapsed,
+          qualityName: layerWaterQuality.getLayerName(),
+          qualityGroupName: layerWaterQualityGroup.getLayerName(),
+          qualityInitialVisible: layerWaterQualityGroup.getLayerConfig().getInitialSettings()?.states?.visible,
+          qualityVisible: layerWaterQualityGroup.getVisible(),
+          qualityStoreVisible: storeWaterQualityGroup?.visible,
+          qualityInitialCollapsed: layerWaterQualityGroup.getLayerConfig().getInitialSettings()?.states?.legendCollapsed,
+          qualityCollapsed: storeWaterQualityGroup?.legendCollapsed,
+          qualityStoreCollapsed: storeWaterQuality?.legendCollapsed,
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the two group names and the exact configured child hierarchy...');
+        Test.assertIsEqual(result.quantityGroupName, quantityName);
+        Test.assertIsEqual(result.qualityGroupName, qualityName);
+
+        test.addStep('Verifying configured, runtime and legend-store visibility and collapsed state...');
+        Test.assertIsEqual(result.quantityInitialVisible, false);
+        Test.assertIsEqual(result.quantityVisible, false);
+        Test.assertIsEqual(result.quantityStoreVisible, false);
+        Test.assertIsEqual(result.qualityInitialVisible, false);
+        Test.assertIsEqual(result.qualityInitialCollapsed, true);
+        Test.assertIsEqual(result.qualityVisible, false);
+        Test.assertIsEqual(result.qualityStoreVisible, false);
+        Test.assertIsEqual(result.qualityCollapsed, true);
+      },
+      (test) => {
+        // Remove the complete fixture even when a readiness wait or assertion failed.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests an inline GeoCore IAAC group override and the distinct initial states of its three children.
+   *
+   * @returns A promise resolving with the group and child state observations
+   */
+  testAddGeocoreWithInlineIAACGroupOverride(): Promise<Test<IaacGroupOverrideResult>> {
+    const uuid = GVAbstractTester.GEOCORE_IAAC_UUID;
+    const groupName = 'IAAC Projects';
+    const customLayerEntryConfig = JSON.stringify([
+      {
+        entryType: 'group',
+        layerName: groupName,
+        listOfLayerEntryConfig: [
+          { layerId: '0', initialSettings: { states: { legendCollapsed: true, visible: false } } },
+          { layerId: '1', initialSettings: { states: { legendCollapsed: false, visible: true } } },
+          { layerId: '2', initialSettings: { states: { legendCollapsed: true, visible: false } } },
+        ],
+      },
+    ]);
+    let fixtureRootId: string | undefined;
+
+    return this.test(
+      'Test GeoCore IAAC inline group name and child initial states...',
+      async (test) => {
+        test.addStep('Adding the IAAC GeoCore record with the custom group and three child entries...');
+        // TODO: ALEX - Don't call addGeoviewLayerByGeoCoreUUID directly, call a this.addLayerXXXXXViaGeocore function equivalent
+        const added = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid, customLayerEntryConfig);
+        if (!added) throw new TestError(`GeoCore did not create the IAAC fixture '${uuid}'`);
+
+        // Record the actual root before awaiting creation so failures still remove the correct fixture.
+        fixtureRootId = added.layer.getGeoviewLayerId();
+        await added.promiseLayerOnMap;
+        const groupPath = `${fixtureRootId}/base-group`;
+        const childPaths = ['0', '1', '2'].map((id) => `${groupPath}/${id}`);
+        const { layerController } = this.getControllersRegistry();
+
+        // The API supplies base-group when the inline group has no explicit layerId.
+        test.addStep('Waiting for the generated group and its configured children...');
+        const [group, ...children] = await Promise.all(
+          [groupPath, ...childPaths].map((path) => layerController.waitForLayerRegistered(path, GVAbstractTester.UI_STATE_TIMEOUT_MS))
+        );
+        if (!(group instanceof GVGroupLayer)) throw new TestError(`Expected the IAAC entry '${groupPath}' to be a group`);
+
+        // Initial OpenLayers visibility is set on first load, not necessarily at registration.
+        test.addStep('Waiting for each child to apply its initial visibility...');
+        await whenThisThen(() => {
+          if (children.some((child) => child.getLayerStatus() === 'error')) throw new TestError('An IAAC child layer failed to load');
+          return children.every((child) => child.loadedOnce);
+        }, GVAbstractTester.UI_STATE_TIMEOUT_MS);
+
+        // Inspect the store directly without changing the requested collapsed states.
+        test.addStep('Waiting for the group and child legend entries...');
+        await whenThisThen(
+          () => [groupPath, ...childPaths].every((path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined),
+          GVAbstractTester.UI_STATE_TIMEOUT_MS
+        );
+
+        return {
+          groupId: group.getLayerConfig().layerId,
+          groupName: group.getLayerName(),
+          groupLegendName: getStoreLayerLegendLayerByPath(this.getMapId(), groupPath)?.layerName,
+          childIds: group.getLayers().map((child) => child.getLayerConfig().layerId),
+          children: children.map((child) => {
+            const legend = getStoreLayerLegendLayerByPath(this.getMapId(), child.getLayerPath());
+            return {
+              id: child.getLayerConfig().layerId,
+              initialVisible: child.getLayerConfig().getInitialSettings()?.states?.visible,
+              initialCollapsed: child.getLayerConfig().getInitialSettings()?.states?.legendCollapsed,
+              visible: child.getVisible(),
+              storeVisible: legend?.visible,
+              storeCollapsed: legend?.legendCollapsed,
+            };
+          }),
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying the generated group, custom name, and exact child order...');
+        Test.assertIsEqual(result.groupId, 'base-group');
+        Test.assertIsEqual(result.groupName, groupName);
+        Test.assertIsEqual(result.groupLegendName, groupName);
+        Test.assertIsArrayEqual(result.childIds, ['0', '1', '2']);
+        Test.assertIsArrayLengthEqual(result.children, 3);
+
+        // Check each explicitly supplied true and false value against configuration, runtime and store.
+        test.addStep('Verifying each child initial visibility and legend collapsed state...');
+        result.children.forEach((child, index) => {
+          const expectedVisible = index === 1;
+          Test.assertIsEqual(child.id, String(index));
+          Test.assertIsEqual(child.initialVisible, expectedVisible);
+          Test.assertIsEqual(child.initialCollapsed, !expectedVisible);
+          Test.assertIsEqual(child.visible, expectedVisible);
+          Test.assertIsEqual(child.storeVisible, expectedVisible);
+          Test.assertIsEqual(child.storeCollapsed, !expectedVisible);
+        });
+      },
+      (test) => {
+        // Remove the root including all children, even if a readiness wait or assertion failed.
+        if (fixtureRootId) this.removeLayerConfigAndAssert(test, fixtureRootId);
       }
     );
   }
@@ -3064,30 +3410,28 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testZoomExtentWithoutFeatures(): Promise<Test<NoBoundsError>> {
-    // Create a random geoview layer id
-    const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.GEOJSON_METADATA_META_BLANK;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_BLANK}`;
+    let fixtureLayerPath: string | undefined;
 
     // Test
     return this.testError(
       `Test zoom to extent on GeoJSON without features...`,
       NoBoundsError,
       async (test) => {
-        // Create the config
-        test.addStep('Creating the GeoView Layer Configuration...');
-        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: GVAbstractTester.GEOJSON_BLANK }]);
-
-        // Redirect to helper to add the layer to the map and wait
-        await this.addLayerOnMap(test, gvConfig, layerPath);
+        // Capture the cleanup path before either fixture readiness promise can reject.
+        const fixture = this.addLayerGeoJSONBlank(test);
+        fixtureLayerPath = fixture.layerPath;
+        await fixture.promiseLayer;
 
         // Call zoom to layer extent, it should throw a NoBoundsError
-        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(
+          fixture.selectedLayerPath,
+          GVAbstractTester.USE_ZOOM_ANIMATION
+        );
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        this.removeLayerConfigAndAssert(test, layerPath);
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -3423,6 +3767,11 @@ export class LayerTester extends GVAbstractTester {
         const fixture = this.addLayerWMSAirborneWithWFS(test);
         fixtureLayerPath = fixture.layerPath;
         const gvLayer = await fixture.promiseLayer;
+
+        // This layer is only visible within a certain zoom range, so zoom in before interacting with it.
+        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Get the layer
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
 
         // Query the layer at the given coordinates
@@ -3454,7 +3803,31 @@ export class LayerTester extends GVAbstractTester {
   // #region HELPERS
 
   /**
-   * Asserts that a layer with the given path exists in the map's legend store.
+   * Asserts that a layer has mounted entries in both the Legend and Layers panels.
+   *
+   * @param test - The test instance used to record the verification steps
+   * @param mapId - The map identifier
+   * @param layerPath - The full path of the layer to verify
+   */
+  static assertCheckLayerExistsInPanels(test: Test, mapId: string, layerPath: string): void {
+    // Use full paths rather than labels, which may be duplicated across concurrent fixtures.
+    test.addStep(`Verifying layer '${layerPath}' exists in the Layers panel...`);
+    Test.assertIsDefined(
+      'layers panel layer',
+      DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
+    );
+
+    test.addStep(`Verifying layer '${layerPath}' exists in the Legend panel...`);
+    Test.assertIsDefined(
+      'legend panel layer',
+      DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
+    );
+  }
+
+  /**
+   * Asserts that a layer exists in the legend store and in both rendered panels.
    *
    * Logs the verification step in the test instance.
    * If `checkIconImage` or `checkIconsList` is provided, this method will also
@@ -3464,6 +3837,7 @@ export class LayerTester extends GVAbstractTester {
    * @param test - The test instance used to record the verification steps
    * @param mapId - The map id
    * @param layerPath - The path or ID of the layer to verify
+   * @param layerName - Expected display name in the Layers panel
    * @param checkIconImage - Optional expected icon image.
    *   If provided, the function will additionally check that the legend contains a matching icon
    * @param checkIconsList - Optional list of expected legend icon items.
@@ -3473,6 +3847,7 @@ export class LayerTester extends GVAbstractTester {
     test: Test<AbstractBaseGVLayer>,
     mapId: string,
     layerPath: string,
+    layerName: string,
     checkIconImage?: string,
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
@@ -3482,6 +3857,17 @@ export class LayerTester extends GVAbstractTester {
     // Verify the layer has a legend information
     test.addStep(`Verify the layer ${layerPath} has legend information...`);
     Test.assertIsDefined('legendLayer', legendLayer);
+
+    // Store registration alone does not prove that either React panel rendered the layer.
+    this.assertCheckLayerExistsInPanels(test, mapId, layerPath);
+
+    // Read the primary label rather than the whole row, which also contains controls and status text.
+    test.addStep(`Verifying layer '${layerPath}' is named '${layerName}' in the Layers panel...`);
+    Test.assertIsEqual(
+      DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR),
+      layerName
+    );
 
     // If checking the style
     if (checkIconImage || checkIconsList) {
@@ -3545,6 +3931,39 @@ export class LayerTester extends GVAbstractTester {
   // #region PRIVATE METHODS
 
   /**
+   * Waits for a layer's box to mount in both panels without changing group or tab state.
+   *
+   * @param test - The test instance used to record readiness steps
+   * @param layerPath - The full path of the layer to wait for
+   * @param timeout - Maximum wait in milliseconds for each readiness condition
+   * @returns The registered layer configuration
+   */
+  // TODO: ALEX - Turn this function private
+  async waitForLayerBoxInLayersPanels(test: Test, layerPath: string, timeout = 60000): Promise<ConfigBaseClass> {
+    const mapId = this.getMapId();
+
+    // Wait for the layer config to be registered
+    test.addStep('Waiting for layer config to be registered...');
+    const layerConfig = await this.getControllersRegistry().layerController.waitForLayerConfigRegistered(layerPath, timeout);
+
+    test.addStep('Waiting for fixture entries in the Legend and Layers panels...');
+    await whenThisThen(() => getStoreLayerLegendLayerByPath(mapId, layerPath), timeout);
+
+    test.addStep('Waiting for UI to hold the box...');
+    await whenThisThen(() => {
+      return (
+        (DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
+          DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)) &&
+        (DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ||
+          DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR))
+      );
+    }, timeout);
+
+    // Return the layer config
+    return layerConfig;
+  }
+
+  /**
    * Adds the ZPEGT WMS group and verifies its resolved name and metadata-derived sublayer names.
    *
    * @param description - Test description shown in the test results
@@ -3571,6 +3990,9 @@ export class LayerTester extends GVAbstractTester {
         return fixture.promiseLayer;
       },
       (test, result) => {
+        // Verify the layer exists
+        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+
         test.addStep('Verifying the resolved ZPEGT group name and metadata-derived sublayer names...');
         Test.assertIsInstance(result, GVGroupLayer);
         Test.assertIsEqual(result.getLayerName(), expectedGroupName);
@@ -3591,9 +4013,9 @@ export class LayerTester extends GVAbstractTester {
           Test.assertIsArrayLengthEqual(parents, 0);
         }
       },
-      (test, result) => {
-        // A failed setup may leave no path to remove; otherwise remove the registered subtree.
-        if (result) if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+      (test) => {
+        // Panel readiness can fail after addition; the captured path still owns the fixture's cleanup.
+        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
       }
     );
   }
@@ -3602,6 +4024,58 @@ export class LayerTester extends GVAbstractTester {
 }
 
 // #region TYPES AND INTERFACES
+
+/** IAAC group hierarchy and child initial-state snapshots. */
+type IaacGroupOverrideResult = {
+  groupId: string;
+  groupName: string;
+  groupLegendName: string | undefined;
+  childIds: string[];
+  children: {
+    id: string;
+    initialVisible: boolean | undefined;
+    initialCollapsed: boolean | undefined;
+    visible: boolean;
+    storeVisible: boolean | undefined;
+    storeCollapsed: boolean | undefined;
+  }[];
+};
+
+/** CESI group hierarchy and initial-state snapshots. */
+type CesiGroupOverrideResult = {
+  quantityName: string;
+  quantityGroupName: string;
+  quantityInitialVisible: boolean | undefined;
+  quantityVisible: boolean;
+  quantityStoreVisible: boolean | undefined;
+  quantityInitialCollapsed: boolean | undefined;
+  /** Group legend state. */
+  quantityCollapsed: boolean | undefined;
+  /** Child legend state. */
+  quantityStoreCollapsed: boolean | undefined;
+
+  qualityName: string;
+  qualityGroupName: string;
+  qualityInitialVisible: boolean | undefined;
+  qualityVisible: boolean;
+  qualityStoreVisible: boolean | undefined;
+  qualityInitialCollapsed: boolean | undefined;
+  /** Group legend state. */
+  qualityCollapsed: boolean | undefined;
+  /** Child legend state. */
+  qualityStoreCollapsed: boolean | undefined;
+};
+
+/** Land-cover entry configuration and initial runtime/store state. */
+type LandCoverOverrideResult = {
+  layerId: string;
+  layerName: string;
+  visible: boolean;
+  legendName: string | undefined;
+  legendVisible: boolean | undefined;
+  legendCollapsed: boolean | undefined;
+  initialStates: { visible?: boolean; legendCollapsed?: boolean } | undefined;
+};
 
 /** Individual fixture bounds and controller extent-union observations. */
 type MultipleLayersExtentResult = {

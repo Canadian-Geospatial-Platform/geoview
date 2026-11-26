@@ -218,7 +218,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   }, [layerStatus, layerName, t]);
 
   return (
-    <ListItem className="legendListItem" sx={memoSxClasses.legendListItem} key={layerPath}>
+    <ListItem data-layer-path={layerPath} className="legendListItem" sx={memoSxClasses.legendListItem} key={layerPath}>
       <LegendLayerHeader
         layerPath={layerPath}
         tooltip={t('layers.toggleCollapse')}

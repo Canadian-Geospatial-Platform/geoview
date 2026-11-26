@@ -43,18 +43,29 @@ Read only the linked section of each doc: search for its heading and read to the
   legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
   subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
 - Fixture helpers return an immediate `GVLayerFixtureResult`: capture `layerPath` before awaiting
-  `promiseLayer`, which resolves to the selected loaded layer. Use the layer's runtime path for
+  `promiseLayer`, which lazily waits for configuration, loading and legend readiness and is cached.
+  Configuration rejection is logged and remains observable via either promise. Use the layer's runtime path for
   assertions and operations; use the captured fixture path for cleanup even when loading rejects.
   For metadata-derived children or fixtures with siblings, `layerPath` may be the GeoView root cleanup
   scope while `promiseLayer` still resolves to the actual selected child. Root-scope cleanup removes
   the entries beneath that root.
 - Fixture authoring follows the linked helper contract: normal synchronous configuration setup and
-  `addLayerOnMapAndWait()` for the common add/load/legend sequence. Keep specialized GeoCore and metadata-selection
-  chains, not async IIFEs or deferred whole-body wrappers. Synchronous setup errors propagate
-  directly; async read/add/readiness failures reject `promiseLayer`, preserving the captured cleanup
-  path. Keep sibling waits serial and metadata-path discovery after addition.
+  `#createLayerFixture()` to connect configuration readiness with the lazy load/legend wait.
+  Keep specialized GeoCore and metadata-selection chains. Synchronous setup errors propagate directly;
+  async read/add/readiness failures reject `promiseLayer`, preserving the captured cleanup path.
+  Keep sibling waits serial and metadata-path discovery after addition.
 
 ### Gotchas & Pitfalls
+
+- Layer-add panel checks for configuration-based fixtures await `promiseLayerConfig`, then
+  `LayerTester.#waitForLayerBoxInPanels` on the selected path, and finally `promiseLayer`.
+  Preserve the fixture's empty-legend option and any preceding sibling waits. The panel wait does not expand
+  groups or switch tabs; a child hidden beneath a collapsed group cannot have a rendered legend box.
+  Use the path-based `DomHelper` getters, not names that can repeat across fixtures
+  ([coverage contract](../../docs/app/testing/test-catalog.md#21-layers-epsg-3978--3857)).
+- For raster initial-visibility tests, wait for the first load before reading OpenLayers visibility:
+  `AbstractGVLayer` applies the configured value on that transition. Inspect the store directly when
+  testing initial collapsed state, without expanding groups or requiring hidden child boxes to render.
 
 - Data-table global-filter UI checks must edit the search input: `useGlobalFilter` initializes local state
   from the store and subsequently writes local changes back, but does not consume later programmatic store changes.

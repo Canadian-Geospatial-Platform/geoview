@@ -373,6 +373,10 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 
 > **Note:** This suite runs on two separate maps — one with EPSG: 3978 and one with EPSG: 3857 — executing the same tests under both projections.
 
+Successful layer-add tests also verify mounted entries in the Legend and Layers panels, including grouped fixtures.
+The shared store assertion additionally checks that the Layers panel's primary label matches the supplied expected layer name.
+These checks do not require activating either panel or changing layer visibility.
+
 #### 2.1.1 Esri Dynamic — Lifecycle
 
 [↑ Back to top](#table-of-contents)
@@ -490,6 +494,14 @@ This catalog lists every test by group, suite, and tester. Each entry gives the 
 | Method                       | Type | Description                   |
 | ---------------------------- | ---- | ----------------------------- |
 | `testInitialSettingsCascade` | test | Test initial settings cascade |
+
+**GeoCore inline overrides:** `testAddGeocoreWithInlineLandCoverEntryOverride` adds UUID
+`c688b87f-e85f-4842-b0e1-a8f79ebf1133` with the `landcover-2010` entry and verifies its
+custom name, hidden visibility, and collapsed legend state.
+`testAddGeocoreWithInlineCesiGroupOverrides` verifies the CESI record's two named groups,
+their selected children, and the configured child and group visibility and collapsed state.
+`testAddGeocoreWithInlineIAACGroupOverride` verifies the IAAC Projects group and the
+visibility and collapsed states of children `0`, `1`, and `2`.
 
 #### 2.1.13 Domain Fields (sequential)
 

@@ -150,7 +150,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     const pWFSGeomet = this.#configTester.testProcessWFSGeomet();
 
     // Test OGC Feature config
-    const pOGcFeature = this.#configTester.testOGCFeatureWithPygeoapi();
+    const pOGcFeature = this.#configTester.testOGCFeatureLakes();
 
     // Test a true negative
     const pOgcFeatureBadUrl = this.#configTester.testOGCFeatureBadUrl();

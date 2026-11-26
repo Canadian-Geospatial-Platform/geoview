@@ -1210,7 +1210,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testOGCFeatureWithPygeoapi(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testOGCFeatureLakes(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
 
@@ -1228,7 +1228,7 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test the WMS
     return this.test(
-      'Test an OGC Feature with Pygeoapi',
+      'Test an OGC Feature with Lakes',
       (test) => {
         // Set step
         test.addStep(`Initializing config on url: ${url}`);
