@@ -90,7 +90,7 @@ Sources: [`projection.ts`](../../packages/geoview-core/src/geo/utils/projection.
 Public contract: [State Change Events](../../docs/app/api/map-viewer-api.md#state-change-events).
 
 - Each owner reprojects its own geometry group: `DrawerController` handles `draw-group`, and `MapController.#reprojectMeasurements`
-  handles `MapController.MEASURE_GROUP_KEY` (`geoview-measurement`) from `#handleMapProjectionChanged`. It stops the active Measure
+  handles `MEASURE_GROUP_KEY` (`geoview-measurement`, in `@/core/utils/constant`) from `#handleMapProjectionChanged`. It stops the active Measure
   sketch first, because the sketch coordinates belong to the previous projection (#3771).
 - Measure labels read the store projection (`useStoreMapCurrentProjectionEPSG`), and the component restyles existing features when the
   projection or language changes. Geodesic values should therefore stay the same after a switch; a change in value means the projection

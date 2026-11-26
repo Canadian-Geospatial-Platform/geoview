@@ -35,10 +35,7 @@ import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state
 import { useShellContainer } from '@/core/containers/shell-container-context';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
-import { MapController } from '@/core/controllers/map-controller';
-
-/** The geometry group key for measurement features. */
-const { MEASURE_GROUP_KEY } = MapController;
+import { MEASURE_GROUP_KEY } from '@/core/utils/constant';
 
 /** Stroke color for measurement lines. */
 const STROKE_COLORS = '#ff0000';
@@ -48,6 +45,18 @@ const FILL_COLORS = 'rgba(255, 0, 0, 0.2)';
 
 /** Stroke width for measurement lines. */
 const STROKE_WIDTH = 2;
+
+/** Base geometry style for measurement lines. */
+const LINE_BASE_STYLE = new Style({ stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }) });
+
+/** Base geometry style for measurement areas. */
+const POLYGON_BASE_STYLE = new Style({
+  stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }),
+  fill: new Fill({ color: FILL_COLORS }),
+});
+
+/** Minimum number of placed vertices before a polygon sketch shows its live total. */
+const POLYGON_SKETCH_MIN_VERTICES = 3;
 
 /** Base style values for measurement segment labels. */
 const SEGMENT_LABEL_BASE_STYLE = {
@@ -73,6 +82,22 @@ const LABEL_HALO_STROKE = new Stroke({ color: LABEL_STYLE_CONFIG.haloColor, widt
 
 /** The type of measurement operation. */
 type MeasureType = 'line' | 'area' | null;
+
+/**
+ * Creates the style function for an in-progress measurement sketch, which shows only the live total.
+ *
+ * A polygon sketch ring is [vertices..., cursor, first vertex], so its total waits for the minimum placed vertices.
+ *
+ * @param geometry - The sketch geometry
+ * @param totalStyle - The style function that renders the geometry and its total
+ * @returns The sketch style function
+ */
+function createSketchStyle(geometry: LineString | Polygon, totalStyle: StyleFunction): StyleFunction {
+  if (geometry instanceof LineString) return totalStyle;
+
+  return (feature: FeatureLike, resolution: number): ReturnType<StyleFunction> =>
+    (geometry.getCoordinates()[0]?.length ?? 0) - 2 >= POLYGON_SKETCH_MIN_VERTICES ? totalStyle(feature, resolution) : POLYGON_BASE_STYLE;
+}
 
 /**
  * Creates a measurement button to open the measurement panel.
@@ -108,7 +133,7 @@ export default function Measurement(): JSX.Element {
   const sketchGeometryChangeKey = useRef<EventsKey | undefined>(undefined);
 
   /** Current segment-label visibility, read when a measurement completes. */
-  const showSegmentLabelsRef = useRef(showSegmentLabels);
+  const showSegmentLabelsRef = useRef<boolean>(showSegmentLabels);
 
   /**
    * Builds custom sx classes for the measurement component.
@@ -139,26 +164,12 @@ export default function Measurement(): JSX.Element {
   const createSegmentStyle = useCallback(
     (includeSegmentLabels = true): StyleFunction => {
       return (feature: FeatureLike): Style[] => {
-        const styles: Style[] = [];
         const geometry = feature.getGeometry();
 
-        if (!geometry) return styles;
-
-        // Base stroke style
-        const stroke = new Stroke({
-          color: STROKE_COLORS,
-          width: STROKE_WIDTH,
-        });
+        if (!geometry) return [];
 
         // Add base geometry style
-        if (geometry instanceof Polygon) {
-          const fill = new Fill({
-            color: FILL_COLORS,
-          });
-          styles.push(new Style({ stroke, fill }));
-        } else {
-          styles.push(new Style({ stroke }));
-        }
+        const styles: Style[] = [geometry instanceof Polygon ? POLYGON_BASE_STYLE : LINE_BASE_STYLE];
 
         // Add segment labels
         let coordinates: number[][];
@@ -282,19 +293,7 @@ export default function Measurement(): JSX.Element {
         if (!(geometry instanceof LineString || geometry instanceof Polygon)) return;
 
         // Show only the live total while drawing, segment labels would overlap it near the cursor
-        const totalStyle = createSegmentStyle(false);
-        if (geometry instanceof Polygon) {
-          // The polygon sketch ring is [vertices..., cursor, first vertex]: wait for 3 placed vertices before showing the total
-          const baseStyle = new Style({
-            stroke: new Stroke({ color: STROKE_COLORS, width: STROKE_WIDTH }),
-            fill: new Fill({ color: FILL_COLORS }),
-          });
-          event.feature.setStyle((feature, resolution) =>
-            (geometry.getCoordinates()[0]?.length ?? 0) - 2 >= 3 ? totalStyle(feature, resolution) : baseStyle
-          );
-        } else {
-          event.feature.setStyle(totalStyle);
-        }
+        event.feature.setStyle(createSketchStyle(geometry, createSegmentStyle(false)));
 
         setHint(true);
 

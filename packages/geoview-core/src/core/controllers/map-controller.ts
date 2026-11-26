@@ -121,7 +121,7 @@ import {
   isStoreSwiperInitialized,
   type TypeSwiperConfig,
 } from '@/core/stores/states/swiper-state';
-import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
+import { MEASURE_GROUP_KEY, TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -170,9 +170,6 @@ import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-read
  * Controller responsible for Map interactions.
  */
 export class MapController extends AbstractMapViewerController {
-  /** The geometry group key for navbar measurement features. */
-  static readonly MEASURE_GROUP_KEY = 'geoview-measurement';
-
   /** The bounded reference to the handle map ready method */
   #boundedHandleMapReady: MapReadyDelegate;
 
@@ -2145,11 +2142,11 @@ export class MapController extends AbstractMapViewerController {
 
     // Check if the measurement group exists (it is created on the first measurement)
     const geometryApi = this.getGeometryApi();
-    if (!geometryApi.hasGeometryGroup(MapController.MEASURE_GROUP_KEY)) return;
+    if (!geometryApi.hasGeometryGroup(MEASURE_GROUP_KEY)) return;
 
     // Transform every completed measurement once, in place, so feature styles and references are preserved
     geometryApi
-      .getGeometryGroup(MapController.MEASURE_GROUP_KEY)
+      .getGeometryGroup(MEASURE_GROUP_KEY)
       .vectorSource.getFeatures()
       .forEach((feature) => {
         feature.getGeometry()?.transform(event.previousProjection, event.projection);
