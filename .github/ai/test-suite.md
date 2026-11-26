@@ -55,8 +55,9 @@ Source boundaries most likely to produce misleading tests:
 - Keep the real pointer off the test maps during multi-viewer focus runs: when a viewer is not in keyboard mode,
   `MapViewer` focuses its map target on `mouseenter`, or on the first genuine `mousemove` after it while keyboard-placed
   focus (`:focus-visible`) is held elsewhere, so moving the mouse over a map mid-run steals focus.
-- App-bar panels focus their close button after the opening transition. Wait for that focus before opening a dialog,
-  or the delayed panel focus can invalidate the dialog's shortcut assertions.
+- App-bar panels autofocus Close after the opening transition unless a new competing focus owner has taken over.
+  Wait for Close focus when a test needs settled panel entry; React idle and CSS transition completion do not
+  signal completion of the delayed autofocus job.
 - In overlay tests, retain the dialog and close-control references for finalization before awaiting initial focus.
   A focus-settlement timeout must not prevent cleanup from closing an already mounted overlay.
 - Query visibility is parent visibility plus current OL resolution limits; a hidden/out-of-range result is empty, not an error.

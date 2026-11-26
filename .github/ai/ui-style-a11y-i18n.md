@@ -238,6 +238,10 @@ Contracts: [Keyboard navigation](../../docs/app/accessibility.md#keyboard-naviga
   consume the crosshair return.
   Cancel delayed focus work when its owner closes or changes, and guard against restoring focus over
   a newer modal or panel.
+  [Panel](../../packages/geoview-core/src/ui/panel/panel.tsx) snapshots the store's `activeElementId`
+  when scheduling opening autofocus. At execution, focus Close only if ownership is unchanged or
+  now belongs to this panel. An existing footer owner must not block opening autofocus; a new Settings
+  owner must. Keep the transition callbacks running even when autofocus is skipped.
   Footer [Tabs](../../packages/geoview-core/src/ui/tabs/tabs.tsx) releases ownership on collapse and
   acquires it on open/selection. Registering ownership while collapsing consumes the entry transition,
   so reopening the same tab cannot retrigger focus from unchanged owner values.
