@@ -1,5 +1,3 @@
-import type { Coordinate } from 'ol/coordinate';
-
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -19,7 +17,7 @@ import {
   getStoreDataTableMapFilteredRecord,
   getStoreDataTableRowsFilteredCount,
 } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreMapExtent, getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
+import { getStoreMapHighlightedFeatures } from 'geoview-core/core/stores/states/map-state';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
