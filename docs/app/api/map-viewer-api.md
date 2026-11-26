@@ -304,6 +304,11 @@ mapViewer.onMapComponentRemoved((sender, payload) => {
 });
 ```
 
+Geometries in your own geometry groups are not reprojected for you. In an `onMapProjectionChanged` handler, transform them once
+with `geometry.transform(payload.previousProjection, payload.projection)`, as the core Drawer and Measure tools do. To measure them,
+pass the current map projection to `GeoUtilities.getLength(geometry, projection)` and `GeoUtilities.getArea(geometry, projection)`:
+without it, the geodesic results assume EPSG:3857 coordinates and are wrong in other projections such as EPSG:3978.
+
 ---
 
 ## Best Practices
