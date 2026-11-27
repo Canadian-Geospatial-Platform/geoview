@@ -12,8 +12,6 @@ import {
 } from 'geoview-core/core/stores/states/time-slider-state';
 import { getStoreLayerTimeDimension } from 'geoview-core/core/stores/states/layer-state';
 import type { TimeDimension } from 'geoview-core/core/utils/date-mgt';
-import { generateId } from 'geoview-core/core/utils/utilities';
-import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
 import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 
 /** Main Time Slider testing class. */
@@ -195,12 +193,7 @@ export class TimeSliderTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testWMSLayerLandcoverGroupDimensionFlags(isRunningOnVPN: boolean): Promise<Test<LandcoverGroupDimensionResult>> {
-    const gvLayerId = generateId();
-    const groupPath = `${gvLayerId}/${TestConstants.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
-    const year2010Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2010}`;
-    const year2015Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2015}`;
-    const year2020Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2020}`;
-    const gvLayerName = 'Landcover 2010-2020 (XML)';
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test WMS Landcover group dimension flags are set in the store on the group and its sub-layers...',
@@ -210,22 +203,21 @@ export class TimeSliderTester extends GVAbstractTester {
           throw new TestSkippedError('Not running on VPN');
         }
 
-        test.addStep('Creating the GeoView Layer Configuration...');
-        // isTimeAware must be true so the layers get registered by TimeSliderController.tryRegisterLayer()
-        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, TestConstants.LANDCOVER_CDTK_URL, undefined, true, [
-          { id: TestConstants.LANDCOVER_CDTK_LAYER_GROUP_ID },
-        ]);
+        // Add the Landcover group dimensions layer
+        const groupLayer = await this.addLayerWMSLandcoverGroupDimensions(
+          test,
+          {
+            onLayerPath: (rootPath): void => {
+              rootLayerPath = rootPath;
+            },
+          },
+          true
+        );
 
-        // Add the layer on the map
-        test.addStep('Adding the layer on the map...');
-        this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
-
-        // Wait for the group and its sub-layers to be registered and loaded
-        test.addStep('Waiting for the group and its sub-layers to be registered and loaded...');
-        const groupLayer = await this.getControllersRegistry().layerController.waitForLayerRegistered(groupPath);
-
-        // Wait for each layer to be loaded at least once
-        await groupLayer.waitForLoadedOnce();
+        const groupPath = groupLayer.getLayerPath();
+        const year2010Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2010}`;
+        const year2015Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2015}`;
+        const year2020Path = `${groupPath}/${TestConstants.LANDCOVER_CDTK_LAYER_ID_2020}`;
 
         // Wait for the legend to be queried for each sub-layer
         test.addStep('Waiting for the legend to be queried for each sub-layer...');
@@ -274,7 +266,7 @@ export class TimeSliderTester extends GVAbstractTester {
         // If the test was running
         if (isRunningOnVPN) {
           // Clear the layer from the map and assert it was removed
-          this.removeLayerConfigAndAssert(test, groupPath);
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         }
       }
     );

@@ -32,7 +32,6 @@ import {
 } from 'geoview-core/core/stores/states/map-state';
 import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
 /**
@@ -991,17 +990,14 @@ export class MapTester extends GVAbstractTester {
    * This test performs the following operations:
    * 1. Adds a vector tile layer (EPSG:3978) to the map
    * 2. Verifies the layer loads and appears in ordered layers
-   * 3. Records the notification count before projection switch
-   * 4. Switches projection to 3857
-   * 5. Verifies a warning notification about vector tiles was emitted
-   * 6. Restores projection to 3978 and removes the layer
+   * 3. Switches projection to 3857
+   * 4. Verifies a warning notification about vector tiles was emitted
+   * 5. Restores projection to 3978 and removes the layer
    *
    * @returns A promise that resolves with the Test containing the MapViewer instance
    */
   testVectorTileProjectionWarning(): Promise<Test<MapViewer>> {
-    const gvLayerId = generateId();
-    const layerUrl = TestConstants.VECTOR_TILES_CBMT_3978_URL;
-    const gvLayerName = TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+    let rootLayerPath: string | undefined;
 
     return this.test<MapViewer>(
       'Test vector tile projection warning on projection switch',
@@ -1013,25 +1009,20 @@ export class MapTester extends GVAbstractTester {
           await this.getControllersRegistry().mapController.setProjection(3978);
         }
 
-        // Create the VT layer config
-        test.addStep('Creating Vector Tiles layer configuration...');
-        const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: '' }]);
-
-        // Add the layer to the map
-        test.addStep('Adding the Vector Tiles layer on the map...');
-        const result = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
-
-        // Wait for the layer to be added
-        test.addStep('Waiting for the layer to be added on map...');
-        await result.promiseLayerOnMap;
+        // Add the vector tile layer (CBMT)
+        const layer = await this.addLayerVectorTilesCBMT(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Verify the layer appears in ordered layers
         test.addStep('Verifying the layer is present in ordered layers...');
         const orderedLayersBefore = getStoreLayerOrderedLayerPaths(this.getMapId());
-        const layerPresent = orderedLayersBefore.some((path) => path.startsWith(gvLayerId));
+        const layerPresent = orderedLayersBefore.includes(layer.getLayerPath());
 
         if (!layerPresent) {
-          throw new TestError(`Vector tile layer ${gvLayerId} was not found in ordered layers after adding.`);
+          throw new TestError(`Vector tile layer ${layer.getLayerPath()} was not found in ordered layers after adding.`);
         }
 
         // Switch projection to 3857
@@ -1060,15 +1051,8 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Restoring projection to LCC (3978)...');
         await this.getControllersRegistry().mapController.setProjection(3978);
 
-        // Remove the layer using its path prefix
-        test.addStep('Removing the Vector Tiles layer...');
-        const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
-
-        // Clear the layer from the map and assert it was removed
-        const vtLayerPath = orderedLayers.find((path) => path.startsWith(gvLayerId));
-        if (vtLayerPath) {
-          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(vtLayerPath);
-        }
+        // Clear the fixture even if addition failed after its path was assigned.
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }

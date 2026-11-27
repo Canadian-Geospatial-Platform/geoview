@@ -96,6 +96,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // Test adding layer
+    const pLayerEsriDynamicHistoFloods = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
+
     // Test canonical export parameters against the case-sensitive Quebec service.
     const pLayerEsriDynamicCaseSensitive = this.#layerTester.testAddEsriDynamicCaseSensitiveExport();
 

@@ -559,7 +559,7 @@ export class LayerTester extends GVAbstractTester {
         }
 
         // Add the fixture and wait for its selected layer to be ready
-        return this.addLayerWMSLandcoverGroupDimension(test, {
+        return this.addLayerWMSLandcoverGroupDimensions(test, {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
           },
