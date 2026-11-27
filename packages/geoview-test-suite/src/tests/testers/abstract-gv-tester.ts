@@ -6,7 +6,6 @@ import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
-import { logger } from 'geoview-core/core/utils/logger';
 import { NotImplementedError } from 'geoview-core/core/exceptions/core-exceptions';
 import { delay, generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -14,8 +13,19 @@ import { GeoPackageReader } from 'geoview-core/api/config/reader/geopackage-read
 import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import type { GroupLayerEntryConfig } from 'geoview-core/api/config/validation-classes/group-layer-entry-config';
 import type { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import type { EsriImageLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { OgcWmtsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import type { VectorTilesLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
+import type { XYZTilesLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import type { CsvLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import type { EsriFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import type { GeoJSONLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import type { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
+import type { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
+import type { OgcWfsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import type { WkbLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { CONTAINER_TYPE } from 'geoview-core/core/utils/constant';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
@@ -171,7 +181,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriFeatureForestIndustry(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriFeature> {
+  async addLayerEsriFeatureForestIndustry(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<EsriFeatureLayerEntryConfig>
+  ): Promise<GVEsriFeature> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.FOREST_INDUSTRY_LAYER_ID}`;
     const layerUrl = TestConstants.FOREST_INDUSTRY_MAP_SERVER;
@@ -183,7 +196,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriFeature>(test, layerPath);
   }
 
@@ -194,7 +207,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriFeatureTopProjects(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriFeature> {
+  async addLayerEsriFeatureTopProjects(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<EsriFeatureLayerEntryConfig>
+  ): Promise<GVEsriFeature> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.TOP_PROJECTS_900A_LAYER_ID}`;
 
@@ -207,7 +223,7 @@ export abstract class GVAbstractTester extends AbstractTester {
       false,
       [{ id: TestConstants.TOP_PROJECTS_900A_LAYER_ID }]
     );
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriFeature>(test, layerPath);
   }
 
@@ -218,7 +234,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriFeatureInvalidGeometry(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriFeature> {
+  async addLayerEsriFeatureInvalidGeometry(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<EsriFeatureLayerEntryConfig>
+  ): Promise<GVEsriFeature> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.LOW_HEAD_HYDRO_DATABASE_YUKON_ID}`;
     const layerUrl = TestConstants.LOW_HEAD_HYDRO_DATABASE;
@@ -231,7 +250,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriFeature>(test, layerPath);
   }
 
@@ -242,7 +261,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriImageWithElevation(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriImage> {
+  async addLayerEsriImageWithElevation(test: Test, callbacks?: LayerAdditionCallbacks<EsriImageLayerEntryConfig>): Promise<GVEsriImage> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const layerUrl = TestConstants.IMAGE_SERVER_ELEVATION_URL;
@@ -255,7 +274,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriImage>(test, layerPath);
   }
 
@@ -266,7 +285,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriImageWithUSA(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriImage> {
+  async addLayerEsriImageWithUSA(test: Test, callbacks?: LayerAdditionCallbacks<EsriImageLayerEntryConfig>): Promise<GVEsriImage> {
     const gvLayerId = generateId();
     const layerUrl = TestConstants.IMAGE_SERVER_USA_URL;
     const layerPathRoads = `${gvLayerId}/base-group/${TestConstants.IMAGE_SERVER_USA_LAYER_ID_ROADS}`;
@@ -286,7 +305,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPathRoads, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPathRoads, callbacks);
     return this.waitLayerAtLayerPath<GVEsriImage>(test, layerPathRoads);
   }
 
@@ -297,7 +316,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSWithOWSTerrestris(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSWithOWSTerrestris(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.OWS_TERRESTRIS_LAYER_ID}`;
     const layerUrl = TestConstants.OWS_TERRESTRIS;
@@ -310,7 +329,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -321,7 +340,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSWithDatacubeMSI(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSWithDatacubeMSI(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const layerUrl = TestConstants.DATACUBE_MSI_URL;
@@ -340,7 +359,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -351,7 +370,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSWithDatacubeRingOfFire(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSWithDatacubeRingOfFire(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX}`;
     const layerUrl = TestConstants.DATACUBE_RING_FIRE;
@@ -370,7 +389,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -381,7 +400,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSLandcoverGroupDimension(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSLandcoverGroupDimension(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.LANDCOVER_CDTK_LAYER_GROUP_ID}`;
     const layerUrl = TestConstants.LANDCOVER_CDTK_URL;
@@ -394,7 +413,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -405,7 +424,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSLandcoverSubLayers(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSLandcoverSubLayers(test: Test, callbacks?: LayerAdditionCallbacks<GroupLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = gvLayerId;
     const layerUrl = TestConstants.LANDCOVER_CDTK_URL;
@@ -421,7 +440,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPathGroup, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPathGroup, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -432,7 +451,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSNonna(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSNonna(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.NONNA_WMS_LAYER_ID}`;
     const layerUrl = TestConstants.NONNA_WMS_URL;
@@ -445,7 +464,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -456,7 +475,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSDuplicateGroupNames(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSDuplicateGroupNames(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerUrl = TestConstants.CANIMAGE_WMS_URL;
     const groupPath = `${gvLayerId}/${TestConstants.CANIMAGE_WMS_GROUP_ID}`;
@@ -472,7 +491,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Redirect to helper to add the layer to the map and wait
     // The selected path traverses both identically named groups.
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, leafPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, leafPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, leafPath);
   }
 
@@ -483,7 +502,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMTSWorldTimezones(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMTS> {
+  async addLayerWMTSWorldTimezones(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmtsLayerEntryConfig>): Promise<GVWMTS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
     const layerUrl = TestConstants.WORLD_TIMEZONES_WMTS_URL;
@@ -499,7 +518,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMTS>(test, layerPath, true);
   }
 
@@ -510,7 +529,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerXYZTilesOSM(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVXYZTiles> {
+  async addLayerXYZTilesOSM(test: Test, callbacks?: LayerAdditionCallbacks<XYZTilesLayerEntryConfig>): Promise<GVXYZTiles> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.XYZ_TILES_OSM_LAYER_ID}`;
     const layerUrl = TestConstants.XYZ_TILES_OSM_URL;
@@ -528,7 +547,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVXYZTiles>(test, layerPath, true);
   }
 
@@ -539,7 +558,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerVectorTilesCBMT(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVVectorTiles> {
+  async addLayerVectorTilesCBMT(test: Test, callbacks?: LayerAdditionCallbacks<VectorTilesLayerEntryConfig>): Promise<GVVectorTiles> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
     const layerUrl = TestConstants.VECTOR_TILES_CBMT_3978_URL;
@@ -552,7 +571,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     test.addStep('Creating the GeoView Layer Configuration...');
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVVectorTiles>(test, layerPath, true);
   }
 
@@ -563,7 +582,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWFSGeometCurrentConditions(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWFS> {
+  async addLayerWFSGeometCurrentConditions(test: Test, callbacks?: LayerAdditionCallbacks<OgcWfsLayerEntryConfig>): Promise<GVWFS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const layerUrl = TestConstants.GEOMET_URL;
@@ -577,7 +596,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Redirect to helper to add the layer to the map and wait
     // GV Current Conditions isn't returning a legend for us anymore, sending acceptNoIconsOrNoData = true now
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWFS>(test, layerPath, true);
   }
 
@@ -588,7 +607,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONWithMetadataPolygons(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONWithMetadataPolygons(test: Test, callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>): Promise<GVGeoJSON> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_POLYGONS}`;
     const layerUrl = TestConstants.GEOJSON_METADATA_META;
@@ -602,7 +621,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvConfig.serviceDateFormat = 'DD/MM/YYYYTHH:mm:ss';
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath);
   }
 
@@ -613,7 +632,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONBlank(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONBlank(test: Test, callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>): Promise<GVGeoJSON> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_BLANK}`;
 
@@ -623,7 +642,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath, true);
   }
 
@@ -634,7 +653,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONWithGeometryCollection(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONWithGeometryCollection(test: Test, callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>): Promise<GVGeoJSON> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_GEOMETRY_COLLECTION}`;
     const layerUrl = TestConstants.GEOJSON_DATASET_ROOT;
@@ -647,7 +666,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath);
   }
 
@@ -658,7 +677,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoTIFFWithDatacubeVegetation(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoTIFF> {
+  async addLayerGeoTIFFWithDatacubeVegetation(test: Test, callbacks?: LayerAdditionCallbacks<GeoTIFFLayerEntryConfig>): Promise<GVGeoTIFF> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOTIFF_VEGETATION_FILE}`;
     const layerUrl = TestConstants.GEOTIFF_VEGETATION;
@@ -672,7 +691,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Redirect to helper to add the layer to the map and wait
     // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoTIFF>(test, layerPath, true);
   }
 
@@ -683,7 +702,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerCSVWithStationList(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVCSV> {
+  async addLayerCSVWithStationList(test: Test, callbacks?: LayerAdditionCallbacks<CsvLayerEntryConfig>): Promise<GVCSV> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.CSV_STATION_LIST_FILE}`;
     const layerUrl = TestConstants.CSV_STATION_LIST;
@@ -694,7 +713,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = CSV.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: TestConstants.CSV_STATION_LIST_FILE }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVCSV>(test, layerPath);
   }
 
@@ -705,7 +724,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerOGCFeatureLakes(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVOGCFeature> {
+  async addLayerOGCFeatureLakes(test: Test, callbacks?: LayerAdditionCallbacks<OgcFeatureLayerEntryConfig>): Promise<GVOGCFeature> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const layerUrl = TestConstants.PYGEOAPI_B6RYUVAKK5;
@@ -718,7 +737,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVOGCFeature>(test, layerPath);
   }
 
@@ -729,7 +748,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWKBWithSouthAfrica(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWKB> {
+  async addLayerWKBWithSouthAfrica(test: Test, callbacks?: LayerAdditionCallbacks<WkbLayerEntryConfig>): Promise<GVWKB> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.WKB_SOUTH_AFRICA}`;
     const layerUrl = TestConstants.WKB_SOUTH_AFRICA;
@@ -740,7 +759,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: TestConstants.WKB_SOUTH_AFRICA }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWKB>(test, layerPath, true);
   }
 
@@ -751,7 +770,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerKMLWithTornado(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVKML> {
+  async addLayerKMLWithTornado(test: Test, callbacks?: LayerAdditionCallbacks<KmlLayerEntryConfig>): Promise<GVKML> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.KML_TORNADO_FILE}`;
     const layerUrl = TestConstants.KML_TORNADO;
@@ -762,7 +781,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: TestConstants.KML_TORNADO_FILE }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVKML>(test, layerPath, true);
   }
 
@@ -773,14 +792,17 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONPointsSettingsUnderGroup(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONPointsSettingsUnderGroup(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>
+  ): Promise<GVGeoJSON> {
     const geoviewLayerId = generateId();
     const gvConfig = GVAbstractTester.createGeoJsonPointsSettings(geoviewLayerId);
     const groupPath = `${geoviewLayerId}/point-feature-group`;
     const layerPath = `${groupPath}/points_1.json`;
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath);
   }
 
@@ -795,7 +817,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   async addLayerEsriDynamicWaterNetwork(
     test: Test,
     gvLayerName = 'Esri Dynamic Water Network',
-    callbacks?: LayerAdditionCallbacks<ConfigBaseClass>
+    callbacks?: LayerAdditionCallbacks<EsriDynamicLayerEntryConfig>
   ): Promise<GVEsriDynamic> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.WATER_NETWORK_LAYER_ID}`;
@@ -808,7 +830,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriDynamic>(test, layerPath);
   }
 
@@ -823,7 +845,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   async addLayerEsriFeatureWaterNetwork(
     test: Test,
     gvLayerName = 'Esri Feature Water Network',
-    callbacks?: LayerAdditionCallbacks<ConfigBaseClass>
+    callbacks?: LayerAdditionCallbacks<EsriFeatureLayerEntryConfig>
   ): Promise<GVEsriFeature> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.WATER_NETWORK_LAYER_ID}`;
@@ -836,7 +858,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriFeature>(test, layerPath);
   }
 
@@ -847,7 +869,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONSinglePoint(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONSinglePoint(test: Test, callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>): Promise<GVGeoJSON> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_SINGLE_POINT}`;
     const layerUrl = TestConstants.GEOJSON_METADATA_META;
@@ -857,7 +879,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, undefined, layerUrl, false, [{ id: TestConstants.GEOJSON_SINGLE_POINT }]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath);
   }
 
@@ -868,7 +890,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerGeoJSONBlankWithConfiguredExtent(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVGeoJSON> {
+  async addLayerGeoJSONBlankWithConfiguredExtent(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<GeoJSONLayerEntryConfig>
+  ): Promise<GVGeoJSON> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_BLANK}`;
     const layerUrl = TestConstants.GEOJSON_METADATA_META_BLANK;
@@ -882,7 +907,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.getSource().extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVGeoJSON>(test, layerPath);
   }
 
@@ -895,7 +920,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   async addLayerEsriDynamicTopProjectsWithRestrictedOutfields(
     test: Test,
-    callbacks?: LayerAdditionCallbacks<ConfigBaseClass>
+    callbacks?: LayerAdditionCallbacks<EsriDynamicLayerEntryConfig>
   ): Promise<GVEsriDynamic> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.TOP_PROJECTS_900A_LAYER_ID}`;
@@ -916,7 +941,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.getSource().featureInfo!.outfields = TestConstants.TOP_PROJECTS_900A_OUTFIELDS;
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriDynamic>(test, layerPath, true);
   }
 
@@ -927,7 +952,10 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerEsriDynamicGNWTBoundaries(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVEsriDynamic> {
+  async addLayerEsriDynamicGNWTBoundaries(
+    test: Test,
+    callbacks?: LayerAdditionCallbacks<EsriDynamicLayerEntryConfig>
+  ): Promise<GVEsriDynamic> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.GNWT_BOUNDARIES_LAYER_ID}`;
     const gvLayerName = 'GNWT Boundaries';
@@ -939,7 +967,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Add the layer and wait for its configuration to register.
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVEsriDynamic>(test, layerPath, true);
   }
 
@@ -950,7 +978,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSCitiesWithWFS(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSCitiesWithWFS(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.CITIES_WMS_LAYER_ID}`;
     const layerName = 'Cities';
@@ -969,7 +997,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     gvLayerConfig.setWfsLayerId(TestConstants.CITIES_WFS_LAYER_ID);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath, true);
   }
 
@@ -980,7 +1008,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param callbacks - Optional selected-path and registered-configuration callbacks
    * @returns A promise resolving with the loaded layer after its legend is queried
    */
-  async addLayerWMSAirborneWithWFS(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
+  async addLayerWMSAirborneWithWFS(test: Test, callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID}`;
     const metadataAccessPath = TestConstants.AIRBORNE_RADIOACTIVITY_WMS_URL;
@@ -996,7 +1024,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     ]);
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, layerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, layerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, layerPath);
   }
 
@@ -1013,7 +1041,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     test: Test,
     geoviewLayerName?: string,
     includeAirport = false,
-    callbacks?: LayerAdditionCallbacks<ConfigBaseClass>
+    callbacks?: LayerAdditionCallbacks<OgcWmsLayerEntryConfig>
   ): Promise<GVWMS> {
     const gvLayerId = generateId();
     const zpegtLayerId = TestConstants.TRANSPORTS_WMS_ZPEGT_LAYER_ID;
@@ -1034,7 +1062,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     );
 
     // Redirect to helper to add the layer to the map and wait
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, selectedLayerPath, callbacks);
+    await this.addLayerOnMap(test, gvConfig, selectedLayerPath, callbacks);
     return this.waitLayerAtLayerPath<GVWMS>(test, selectedLayerPath, true);
   }
 
@@ -1047,7 +1075,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   async addGeopackageRailwaysCartoFerDebarcadere(
     test: Test,
-    callbacks?: LayerAdditionCallbacks<ConfigBaseClass>
+    callbacks?: LayerAdditionCallbacks<WkbLayerEntryConfig>
   ): Promise<AbstractGVLayer> {
     const gvLayerId = generateId();
     const tableId = 'carto_fer_debarcadere';
@@ -1063,7 +1091,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     });
     const tableConfig = gvConfig.listOfLayerEntryConfig.find((entry) => entry.layerId === tableId);
     gvConfig.listOfLayerEntryConfig = [tableConfig!];
-    await this.addLayerOnMap<ConfigBaseClass>(test, gvConfig, selectedLayerPath, { onConfig: callbacks?.onConfig });
+    await this.addLayerOnMap(test, gvConfig, selectedLayerPath, { onConfig: callbacks?.onConfig });
     return this.waitLayerAtLayerPath<AbstractGVLayer>(test, selectedLayerPath);
   }
 
@@ -1385,24 +1413,15 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Add the geoview layer by geocore uuid
     test.addStep('Adding the layer on the map...');
-    const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid, layerEntryConfig);
-    if (!result) throw new Error(`GeoCore did not create a layer for '${uuid}'`);
+    const layerAddition = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid, layerEntryConfig);
+    if (!layerAddition) throw new Error(`GeoCore did not create a layer for '${uuid}'`);
 
-    const root = result.layer.getGeoviewLayerId();
+    // Read paths
+    const root = layerAddition.layer.getGeoviewLayerId();
     const actualLayerPath = `${root}${layerPath.slice(uuid.length)}`;
-    try {
-      callbacks?.onLayerPath?.(root, actualLayerPath);
-    } catch (error: unknown) {
-      // The addition is already in flight even though the ownership callback failed.
-      result.promiseLayerOnMap.catch((additionError: unknown): void => {
-        logger.logError(`GeoCore layer addition failed after the ownership callback failed for '${root}'`, additionError);
-      });
-      throw error;
-    }
 
-    // Wait for the layer to be fully added on the map
-    test.addStep('Waiting for the layer to be added on map...');
-    await result.promiseLayerOnMap;
+    // Callback
+    callbacks?.onLayerPath?.(root, actualLayerPath);
 
     // Wait for the layer to get registered
     test.addStep(`Wait for the layer config ${actualLayerPath} to be registered...`);
@@ -1410,6 +1429,10 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Callback with the config
     await callbacks?.onConfig?.(config);
+
+    // Wait for the layer to be fully added on the map
+    test.addStep('Waiting for the layer to be added on map...');
+    await layerAddition.promiseLayerOnMap;
 
     // Return the config
     return config;
