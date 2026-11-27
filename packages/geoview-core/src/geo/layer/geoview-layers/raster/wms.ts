@@ -50,6 +50,7 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { ServicesManagement } from '@/geo/utils/services-management';
+import { getRequestedOgcLayerIds, restrictOgcLayerEntries } from '@/core/utils/ogc-layer-helper';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -140,10 +141,13 @@ export class WMS extends AbstractGeoViewRaster {
    * Overrides the way a geoview layer config initializes its layer entries.
    *
    * @returns A promise that resolves once the layer entries have been initialized
+   * @throws {GeoViewError} When LAYERS is empty or contains an unadvertised identifier
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
+    const requestedIds = getRequestedOgcLayerIds(this.getMetadataAccessPath());
+
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const fetchResult = await this.fetchServiceMetadata<TypeMetadataWMSCapabilities>();
 
@@ -169,7 +173,7 @@ export class WMS extends AbstractGeoViewRaster {
       this.getMetadataAccessPath(),
       undefined,
       this.getGeoviewLayerConfig().isTimeAware,
-      entry,
+      restrictOgcLayerEntries(requestedIds && !fetchResult.data.Capability.Layer.Name ? entries : entry, requestedIds),
       this.getGeoviewLayerConfig().useFullWmsSublayers
     );
   }

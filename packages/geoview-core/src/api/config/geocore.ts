@@ -2,11 +2,13 @@ import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/confi
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
-import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/states/map-state';
 
@@ -65,8 +67,37 @@ export class GeoCore {
     // Collect all time-slider configs from the response
     const timeSliderConfigs = response.timeSliderConfigs ?? [];
 
-    const selectedListOfLayerEntryConfig =
-      layerConfig?.listOfLayerEntryConfig ?? response.customListOfLayerEntryConfig ?? response.layers[0].listOfLayerEntryConfig;
+    const inlineEntries = layerConfig?.listOfLayerEntryConfig;
+
+    // A single empty inline group is a wrapper for the resolved entries, not a sublayer selection.
+    const inlineGroup =
+      inlineEntries?.length === 1 &&
+      ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(inlineEntries[0]) &&
+      !inlineEntries[0].listOfLayerEntryConfig?.length
+        ? inlineEntries[0]
+        : undefined;
+
+    // A non-empty inline selection takes precedence; otherwise prefer GCS entries over RCS defaults.
+    const resolvedEntries = response.customListOfLayerEntryConfig?.length
+      ? response.customListOfLayerEntryConfig
+      : response.layers[0].listOfLayerEntryConfig;
+    const useRcsFallback = (!inlineEntries?.length || !!inlineGroup) && !response.customListOfLayerEntryConfig?.length;
+    let selectedListOfLayerEntryConfig = inlineEntries?.length ? inlineEntries : resolvedEntries;
+    if (inlineGroup) {
+      const group = inlineGroup instanceof ConfigBaseClass ? inlineGroup.toJson<TypeLayerEntryConfig>() : Object.assign({}, inlineGroup);
+      if (inlineGroup instanceof ConfigBaseClass) {
+        // Remove instance-only fields that are not accepted by the group schema.
+        Reflect.deleteProperty(group, 'schemaTag');
+        Reflect.deleteProperty(group, 'isMetadataLayerGroup');
+        Object.assign(group, { initialSettings: inlineGroup.getInitialSettings() });
+      }
+
+      // RCS entries are config instances and are attached after the inline group is schema-checked.
+      group.listOfLayerEntryConfig = useRcsFallback ? [] : resolvedEntries;
+      selectedListOfLayerEntryConfig = [group];
+    } else if (useRcsFallback) {
+      selectedListOfLayerEntryConfig = [];
+    }
 
     // Use custom layer entry config (inline config has precedence over GCS custom config).
     if (layerConfig?.listOfLayerEntryConfig || response.customListOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -86,6 +117,19 @@ export class GeoCore {
         // When an error happens, raise the exception, we handle it higher in this case
         throw error;
       });
+
+      if (useRcsFallback) {
+        const validatedConfig = newLayerConfig[0] as TypeGeoviewLayerConfig;
+        if (inlineGroup) {
+          const group = validatedConfig.listOfLayerEntryConfig[0];
+          group.listOfLayerEntryConfig = resolvedEntries;
+          // Revalidation reconstructs the group from its original properties.
+          ConfigBaseClass.getClassOrTypeLayerEntryProps<GroupLayerEntryConfigProps>(group).listOfLayerEntryConfig = resolvedEntries;
+        } else validatedConfig.listOfLayerEntryConfig = resolvedEntries;
+
+        // RCS entries are already config instances; attach them after schema-checking the inline group.
+        ConfigValidation.validateListOfGeoviewLayerConfig([validatedConfig]);
+      }
 
       // Make sure if it's a duplicate, the response has the duplicates safe ID.
       if (uuid.includes(':') && uuid.split(':')[0] === newLayerConfig[0].geoviewLayerId) {
