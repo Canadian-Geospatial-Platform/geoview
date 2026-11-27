@@ -323,7 +323,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   async addLayerWMSWithDatacubeMSI(test: Test, callbacks?: LayerAdditionCallbacks<ConfigBaseClass>): Promise<GVWMS> {
     const gvLayerId = generateId();
     const layerPath = `${gvLayerId}/${TestConstants.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
-    const layerUrl = TestConstants.DATACUBE_MSI;
+    const layerUrl = TestConstants.DATACUBE_MSI_URL;
     const gvLayerName = 'Datacube MSI';
 
     // Create the config

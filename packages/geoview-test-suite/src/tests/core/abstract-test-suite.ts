@@ -130,6 +130,21 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
    */
   protected abstract onLaunchTestSuite(): Promise<unknown>;
 
+  /**
+   * Provides an overridable hook for cleanup after a test suite launch.
+   *
+   * Called after the suite status and end time are recorded, whether preparation or test execution succeeds or fails.
+   * It is not called if the running guard, initialization, or eligibility check fails.
+   * The default implementation does nothing.
+   *
+   * @returns A promise that resolves when finalization is complete
+   */
+  // GV This method can be overriden, hence disable the eslint warning about the 'this'
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onFinalizeLaunchTestSuite(): Promise<void> {
+    return Promise.resolve();
+  }
+
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
@@ -422,6 +437,9 @@ export abstract class AbstractTestSuite<TTester extends AbstractTester = Abstrac
 
       // Emit that the suite has udpdated/terminated in fact
       this.#emitSuiteUpdated({});
+
+      // Finalize the test suite execution
+      await this.onFinalizeLaunchTestSuite();
     }
   }
 

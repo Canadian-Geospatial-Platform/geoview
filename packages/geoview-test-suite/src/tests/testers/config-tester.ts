@@ -567,7 +567,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithDatacubeMSI(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = TestConstants.DATACUBE_MSI;
+    const url = TestConstants.DATACUBE_MSI_URL;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -632,7 +632,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithDatacubeMSINoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = TestConstants.DATACUBE_MSI;
+    const url = TestConstants.DATACUBE_MSI_URL;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
