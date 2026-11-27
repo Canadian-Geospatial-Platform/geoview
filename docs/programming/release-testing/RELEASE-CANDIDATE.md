@@ -343,6 +343,7 @@ _(WCAG fixes and improvements)_
 - Swiper bar is now exposed as an accessible `slider` (`aria-valuenow`/`aria-valuetext`, orientation-aware label and keyboard instructions, decorative handle hidden), with the announced position updated live while dragging and debounced render cancelled on stop/unmount (new `positionLabel`, `positionFromLeft`, `positionFromTop`, `instructionsHorizontal`, `instructionsVertical` translations in EN/FR) (#3691)
 - Focus ring styling and accessibility documentation updates following the MUI 9.4 focus-indicator migration (tabs, slider and switch styles, guide/app-bar/data-table style clean-up, `docs/app/accessibility.md` and WCAG release-test page).
 - Fixed right-panel and Data Table scrolling: the panel scroller is keyboard-focusable and contains vertical scroll chaining, while flex sizing keeps the table and horizontal scrollbar visible below wrapped toolbar controls and the focus-trap Exit button (#3697).
+- Fixed non-semantic markup in the layer info panel: each section heading (Service Information, Active Filters, Temporal Settings, Temporal Dimension) now renders as an `<h3>` instead of a `<p>`, and each section's rows render as a semantic list (`<ul>`/`<li>`) instead of non-semantic `<div>`s; refined related header typography and spacing (reduced layer-title heading size, kept the Details panel clear-all button right-aligned when the coordinate switch is hidden, adjusted top-row and full-screen dialog header spacing) (#3781)
 
 ## Documentation & Cleanup
 
