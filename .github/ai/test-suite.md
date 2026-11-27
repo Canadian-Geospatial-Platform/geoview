@@ -42,23 +42,19 @@ Read only the linked section of each doc: search for its heading and read to the
   ([helper contract](../../docs/app/testing/creating-tests.md#helper-methods)). Preserve source options,
   legend acceptance flags, sibling waits, and metadata-derived paths when extracting setup. Keep
   subsequent queries/reloads/visibility changes in the test; a readiness wait after a reload is not fixture addition.
-- Fixture helpers return an immediate `GVLayerFixtureResult`: capture `layerPath` before awaiting
-  `promiseLayer`, which lazily waits for configuration, loading and legend readiness and is cached.
-  Configuration rejection is logged and remains observable via either promise. Use the layer's runtime path for
-  assertions and operations; use the captured fixture path for cleanup even when loading rejects.
-  For metadata-derived children or fixtures with siblings, `layerPath` may be the GeoView root cleanup
-  scope while `promiseLayer` still resolves to the actual selected child. Root-scope cleanup removes
-  the entries beneath that root.
-- Fixture authoring follows the linked helper contract: normal synchronous configuration setup and
-  `#createLayerFixture()` to connect configuration readiness with the lazy load/legend wait.
-  Keep specialized GeoCore and metadata-selection chains. Synchronous setup errors propagate directly;
-  async read/add/readiness failures reject `promiseLayer`, preserving the captured cleanup path.
-  Keep sibling waits serial and metadata-path discovery after addition.
+- Fixture helpers return a single layer promise. Capture the assigned root and selected config paths in
+  `onLayerPath(rootLayerPath, configLayerPath)` and await
+  optional `onConfig` before the load/legend wait. Preserve distinct config and layer wait paths and
+  legend flags. Use the provided root for fixture cleanup; never use the unsuffixed UUID to clean up
+  a duplicate GeoCore fixture.
+- Pass callbacks to `addLayerOnMap` or `addLayerOnMapFromUUID`; these helpers invoke them.
+  GeoPackage reports both paths before reading the file, then passes only
+  `onConfig` to `addLayerOnMap` to avoid reporting the path twice.
 
 ### Gotchas & Pitfalls
 
-- Layer-add panel checks for configuration-based fixtures await `promiseLayerConfig`, then
-  `LayerTester.#waitForLayerBoxInPanels` on the selected path, and finally `promiseLayer`.
+- Layer-add panel checks for configuration-based fixtures can await
+  `LayerTester.#waitForLayerBoxInPanels` in `onConfig` before awaiting the helper's layer promise.
   Preserve the fixture's empty-legend option and any preceding sibling waits. The panel wait does not expand
   groups or switch tabs; a child hidden beneath a collapsed group cannot have a rendered legend box.
   Use the path-based `DomHelper` getters, not names that can repeat across fixtures

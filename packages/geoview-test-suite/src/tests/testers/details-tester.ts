@@ -201,16 +201,18 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving with the observed feature and rendered table fields
    */
   testPolygonFeatureDetailsTable(): Promise<Test<DetailsFeatureTableResult>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test polygon feature details table and configured date format...',
       async (test) => {
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-
         // Save the cleanup path before loading, so a failed load can still be cleaned up.
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+
         const layerPath = layer.getLayerPath();
         const mapId = this.getMapId();
 
@@ -289,7 +291,8 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsArrayEqual(result.rows[2].images, typeof result.imageValue === 'string' ? result.imageValue.split(';') : []);
       },
       (test) => {
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -301,7 +304,7 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving with the observed feature and rendered table fields
    */
   testAirborneFeatureDetailsTable(isRunningOnVPN: boolean): Promise<Test<WmsFeatureTableResult>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     let initialExtent: Extent | undefined;
     const clickCoordinate = [-71.35, 46.7]; // Quebec
 
@@ -312,9 +315,11 @@ export class DetailsTester extends GVAbstractTester {
 
         // The Airborne fixture changes the zoom before adding the layer.
         initialExtent = this.getMapViewer().getView().calculateExtent();
-        const fixture = this.addLayerWMSAirborneWithWFS(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
+        const layer = await this.addLayerWMSAirborneWithWFS(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
         const layerPath = layer.getLayerPath();
         const mapId = this.getMapId();
 
@@ -359,9 +364,11 @@ export class DetailsTester extends GVAbstractTester {
       },
       async (test) => {
         try {
-          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         } finally {
           if (initialExtent) {
+dddd
             test.addStep('Restoring the pre-test map extent...');
             await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
           }
@@ -376,16 +383,18 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving with the observed feature and rendered table fields
    */
   testCitiesFeatureDetailsTable(): Promise<Test<WmsFeatureTableResult>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     const clickCoordinate = [-71.25, 46.8]; // Quebec city in the Cities WFS
 
     return this.test(
       'Test Cities WMS feature details table via WFS...',
       async (test) => {
         // Capture the fixture path before waiting for the layer to load.
-        const fixture = this.addLayerWMSCitiesWithWFS(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
+        const layer = await this.addLayerWMSCitiesWithWFS(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
         const layerPath = layer.getLayerPath();
         const mapId = this.getMapId();
 
@@ -428,7 +437,8 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(populationRow.value, '641568');
       },
       (test) => {
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -439,15 +449,17 @@ export class DetailsTester extends GVAbstractTester {
    * @returns A promise resolving when the test completes
    */
   testClearAllHighlights(): Promise<Test<TestDetailsHighlights>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       `Test Clear all highlights across multiple layers...`,
       async (test) => {
         // Add the Commemorative layer
-        const fixture = this.addLayerCommemorativeViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        await this.addLayerCommemorativeViaGeocore(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
         await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
@@ -537,8 +549,8 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsArrayLengthEqual(result.highlighted3After, 1);
       },
       (test) => {
-        // Cleanup the map
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -551,15 +563,17 @@ export class DetailsTester extends GVAbstractTester {
    */
   testZoomToFeatureWithPanelOffset(): Promise<Test<TestZoomWithPanelOffset>> {
     const initialExtent = this.getMapViewer().getView().calculateExtent();
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       `Test Zoom to feature keeps the feature out of the open details panel...`,
       async (test) => {
         // Add the GeoJson Polygons layer
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        const gvLayer = await fixture.promiseLayer;
+        const gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Get the layer and query the coordinate to get features
         const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
@@ -579,7 +593,7 @@ export class DetailsTester extends GVAbstractTester {
         // Zoom to the feature with the computed padding
         test.addStep('Zooming to feature extent with the panel-aware padding...');
         await this.getControllersRegistry().layerController.zoomToExtentRestrictedAndHighlight(
-          fixtureLayerPath,
+          gvLayer.getLayerPath(),
           feature,
           feature.extent,
           GVAbstractTester.USE_ZOOM_ANIMATION,
@@ -628,9 +642,10 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(result.zoom.centerPixelX <= result.zoom.mapWidth - result.zoom.paddingRight, true);
       },
       async (test) => {
+ddddd
         try {
-          // Cleanup the map
-          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         } finally {
           test.addStep('Restoring the pre-test map extent...');
           await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
@@ -649,15 +664,17 @@ export class DetailsTester extends GVAbstractTester {
    */
   testZoomToResultsGroupExtent(): Promise<Test<TestZoomToResultsGroupExtent>> {
     const initialExtent = this.getMapViewer().getView().calculateExtent();
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     let cleanupLookup: (() => void) | undefined;
     return this.test(
       'Test Zoom to all results for a polygon fixture layer...',
       async (test) => {
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
-        const layerPath = fixture.selectedLayerPath;
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
 
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
@@ -877,7 +894,8 @@ export class DetailsTester extends GVAbstractTester {
           try {
             cleanupLookup?.();
           } finally {
-            if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+            // Clear the layer from the map and assert it was removed
+            if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
           }
         } finally {
           test.addStep('Restoring the pre-test map extent...');
@@ -896,14 +914,16 @@ export class DetailsTester extends GVAbstractTester {
    */
   testZoomToFeatureBoundAndPan(): Promise<Test<TestZoomToFeatureBoundAndPan>> {
     const initialExtent = this.getMapViewer().getView().calculateExtent();
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test Zoom to point feature bound and pan to next feature on a polygon fixture layer...',
       async (test) => {
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
-        const layerPath = fixture.selectedLayerPath;
+        const layer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = layer.getLayerPath();
 
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
@@ -1015,8 +1035,10 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(zoom.backToSmallIsFeatureZoomView, false);
       },
       async (test) => {
+ddd
         try {
-          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         } finally {
           test.addStep('Restoring the pre-test map extent...');
           await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
@@ -1034,15 +1056,17 @@ export class DetailsTester extends GVAbstractTester {
   testZoomToResultsButtonUnavailableUntilViewChanges(): Promise<Test<TestZoomButtonState>> {
     const BUTTON_SELECTOR = 'button[aria-label="Zoom to all results for this layer"]';
     const initialExtent = this.getMapViewer().getView().calculateExtent();
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test Zoom to all results button is unavailable until the map view changes on a polygon fixture layer...',
       async (test) => {
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
-        const layerPath = fixture.selectedLayerPath;
+        const fixtureLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        const layerPath = fixtureLayer.getLayerPath();
         const root = DomHelper.getGVRootElement(this.getMapId());
 
         // Vector queries use a pixel hit tolerance, so the result count depends on the view: go back to the initial view
@@ -1124,8 +1148,10 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(result.followsAfterLayerSwitch, false);
       },
       async (test) => {
+ddd
         try {
-          if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         } finally {
           test.addStep('Restoring the pre-test map extent...');
           await this.getControllersRegistry().mapController.zoomToExtent(initialExtent, false);
@@ -1143,19 +1169,23 @@ export class DetailsTester extends GVAbstractTester {
     // Retain each fixture independently so cleanup can run even if adding the second layer fails.
     let polygons: AbstractGVLayer | undefined;
     let projects: AbstractBaseGVLayer | undefined;
-    let polygonLayerPath: string | undefined;
-    let projectLayerPath: string | undefined;
+    let polygonRootLayerPath: string | undefined;
+    let projectRootLayerPath: string | undefined;
     return this.test(
       'Test details layer selection persistence across map clicks',
       async (test) => {
         // Create the candidates here rather than relying on layers configured by the host page.
-        const polygonsFixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        polygonLayerPath = polygonsFixture.layerPath;
-        polygons = await polygonsFixture.promiseLayer;
+        polygons = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            polygonRootLayerPath = rootPath;
+          },
+        });
 
-        const projectsFixture = this.addLayerEsriFeatureTopProjects(test);
-        projectLayerPath = projectsFixture.layerPath;
-        projects = await projectsFixture.promiseLayer;
+        projects = await this.addLayerEsriFeatureTopProjects(test, {
+          onLayerPath: (rootPath): void => {
+            projectRootLayerPath = rootPath;
+          },
+        });
 
         // Fixture IDs are generated, so selection and cleanup must use the returned runtime paths.
         const layerPath1 = polygons.getLayerPath();
@@ -1196,11 +1226,13 @@ export class DetailsTester extends GVAbstractTester {
         Test.assertIsEqual(result.secondFeatureCount, 1);
       },
       (test) => {
+ddd
         try {
-          if (projectLayerPath) this.removeLayerConfigAndAssert(test, projectLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (projectRootLayerPath) this.removeLayerConfigAndAssert(test, projectRootLayerPath);
         } finally {
-          // Attempt polygon cleanup even if removing Top Projects fails.
-          if (polygonLayerPath) this.removeLayerConfigAndAssert(test, polygonLayerPath);
+          // Clear the layer from the map and assert it was removed
+          if (polygonRootLayerPath) this.removeLayerConfigAndAssert(test, polygonRootLayerPath);
         }
       }
     );

@@ -690,14 +690,16 @@ export class MapTester extends GVAbstractTester {
   testFooterBarSelectTab(): Promise<Test<string>> {
     const targetTab = 'data-table';
 
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test footer bar select tab',
       async (test) => {
         // Making sure there's at least 1 layer with data, otherwise the footer bar tab might not be visible at all
-        const fixture = this.addLayerEsriFeatureTopProjects(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        await this.addLayerEsriFeatureTopProjects(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Selecting the footer bar tab
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
@@ -712,12 +714,9 @@ export class MapTester extends GVAbstractTester {
         const { tabId } = getStoreUIActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
       },
-      () => {
-        // If a layer
-        if (fixtureLayerPath) {
-          // Remove the layer
-          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(fixtureLayerPath);
-        }
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -1062,6 +1061,8 @@ export class MapTester extends GVAbstractTester {
         // Remove the layer using its path prefix
         test.addStep('Removing the Vector Tiles layer...');
         const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
+
+        // Clear the layer from the map and assert it was removed
         const vtLayerPath = orderedLayers.find((path) => path.startsWith(gvLayerId));
         if (vtLayerPath) {
           this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(vtLayerPath);

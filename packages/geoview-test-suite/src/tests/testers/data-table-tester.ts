@@ -57,14 +57,16 @@ export class DataTableTester extends GVAbstractTester {
     const expectedRowsFiltered = 3;
 
     let gvLayer: AbstractBaseGVLayer | undefined;
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       `Test allFeaturesDataArray is populated for layer GeoJson...`,
       async (test) => {
         // Wait for fixture loading and legend readiness before opening its data table.
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        gvLayer = await fixture.promiseLayer;
+        gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // The fixture generates its own ID, so every operation must use the returned layer's path.
         const layerPath = gvLayer.getLayerPath();
@@ -103,11 +105,8 @@ export class DataTableTester extends GVAbstractTester {
           // Leave no highlights behind if execution fails before automatic expiry.
           this.getControllersRegistry().mapController.removeHighlightedFeature('all');
 
-          // If a layer
-          if (fixtureLayerPath) {
-            // Remove the layer
-            this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-          }
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
 
           // Await view restoration so the next test cannot start while this test is still changing the map.
           test.addStep('Restoring the initial map extent...');
@@ -132,20 +131,22 @@ export class DataTableTester extends GVAbstractTester {
       { id: 'CONFLICT_EN', value: 'First' },
     ];
 
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       `Test allFeaturesDataArray is populated for layer Commemorative...`,
       async (test) => {
         // Add the Commemorative layer to the map and wait for it to be registered
-        const fixture = this.addLayerCommemorativeViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerCommemorativeViaGeocore(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        const commemorativeData = await this.openDataTableAndWait(test, fixtureLayerPath);
+        const commemorativeData = await this.openDataTableAndWait(test, addedLayer.getLayerPath());
 
         // Get the settings
-        const settings = getStoreDataTableLayerSettings(this.getMapId())[fixtureLayerPath];
+        const settings = getStoreDataTableLayerSettings(this.getMapId())[addedLayer.getLayerPath()];
 
         test.addStep('Capturing rendered data rows, cell text, and the feature summary...');
         await DomHelper.waitForReactIdle();
@@ -161,15 +162,15 @@ export class DataTableTester extends GVAbstractTester {
         const expectedSummary = `600 ${getLocalizedMessage(getStoreAppDisplayLanguage(this.getMapId()), 'dataTable.features')}`;
 
         test.addStep(`Setting ${columnFilters.length} active column filters and an empty range filter in the store...`);
-        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(fixtureLayerPath, [
+        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(addedLayer.getLayerPath(), [
           ...columnFilters,
           { id: 'emptyRange', value: [undefined, undefined] },
         ]);
-        const filtersBefore = getStoreDataTableLayerSettings(this.getMapId())[fixtureLayerPath]?.columnFiltersRecord;
+        const filtersBefore = getStoreDataTableLayerSettings(this.getMapId())[addedLayer.getLayerPath()]?.columnFiltersRecord;
 
         test.addStep('Clearing column filters...');
-        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(fixtureLayerPath, []);
-        const filtersAfter = getStoreDataTableLayerSettings(this.getMapId())[fixtureLayerPath]?.columnFiltersRecord;
+        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(addedLayer.getLayerPath(), []);
+        const filtersAfter = getStoreDataTableLayerSettings(this.getMapId())[addedLayer.getLayerPath()]?.columnFiltersRecord;
 
         // Return the data
         return {
@@ -206,11 +207,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsArrayLengthEqual(result.filtersAfter, 0);
       },
       (test) => {
-        // If a layer
-        if (fixtureLayerPath) {
-          // Remove the layer
-          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-        }
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -225,17 +223,19 @@ export class DataTableTester extends GVAbstractTester {
    * @returns A promise resolving with the queried features and rendered table
    */
   testEmptyFieldNameDoesNotCrashDataTable(): Promise<Test<EmptyFieldNameDataTableResult>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test empty field name renders the data table without crashing...',
       async (test) => {
         // The reader override was removed; fixture failure coverage belongs in a separate test.
-        const fixture = this.addGeopackageRailwaysCartoFerDebarcadere(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const fixtureLayer = await this.addGeopackageRailwaysCartoFerDebarcadere(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Select the GeoPackage table entry, not its root cleanup scope.
-        const features = await this.openDataTableAndWait(test, fixture.selectedLayerPath);
+        const features = await this.openDataTableAndWait(test, fixtureLayer.getLayerPath());
         const table = await DomHelper.DataTable.waitForDataTable(this.getMapId());
 
         return { features, table };
@@ -253,7 +253,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsDefined('table', result.table);
       },
       (test) => {
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -266,37 +267,39 @@ export class DataTableTester extends GVAbstractTester {
   testCitiesNameFilterCount(): Promise<
     Test<{ nameFilterCount: number; populationMinFilterCount: number; populationMaxFilterCount: number }>
   > {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     const minimumPopulation = '1000000';
     const maximumPopulation = '1750000';
 
     return this.test(
       'Test Cities DataTable name and population range filters return 30, 6, and 3 rows...',
       async (test) => {
-        const fixture = this.addLayerWMSCitiesWithWFS(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerWMSCitiesWithWFS(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.openDataTableAndWait(test, fixtureLayerPath);
+        await this.openDataTableAndWait(test, addedLayer.getLayerPath());
 
         // Find the data table column filter input for the 'name' column and set its value
-        await this.setDataTableColumnFilterInput(test, fixtureLayerPath, 'name', 'mo');
+        await this.setDataTableColumnFilterInput(test, addedLayer.getLayerPath(), 'name', 'mo');
 
         // Get the data table rows count after applying the name filter
-        const nameFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), fixtureLayerPath);
+        const nameFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), addedLayer.getLayerPath());
 
         // Set the data table column filter input for the 'population' column and set its value min value
-        await this.setDataTableColumnFilterInputMin(test, fixtureLayerPath, 'population', minimumPopulation);
+        await this.setDataTableColumnFilterInputMin(test, addedLayer.getLayerPath(), 'population', minimumPopulation);
 
         // Get the data table rows count after applying the minimum population filter
-        const populationMinFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), fixtureLayerPath);
+        const populationMinFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), addedLayer.getLayerPath());
 
         // Set the data table column filter input for the 'population' column and set its value max value
-        await this.setDataTableColumnFilterInputMax(test, fixtureLayerPath, 'population', maximumPopulation);
+        await this.setDataTableColumnFilterInputMax(test, addedLayer.getLayerPath(), 'population', maximumPopulation);
 
         // Get the data table rows count after applying the maximum population filter
-        const populationMaxFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), fixtureLayerPath);
+        const populationMaxFilterCount = getStoreDataTableRowsFilteredCount(this.getMapId(), addedLayer.getLayerPath());
         return { nameFilterCount, populationMinFilterCount, populationMaxFilterCount };
       },
       (test, result) => {
@@ -311,7 +314,7 @@ export class DataTableTester extends GVAbstractTester {
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -322,17 +325,19 @@ export class DataTableTester extends GVAbstractTester {
    * @returns A promise that resolves with whether the filter-by-extent toggle is present
    */
   testFilterByExtentAvailableForVector(): Promise<Test<boolean>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       'Test filter-by-extent toggle present for vector layer...',
       async (test) => {
         // Add the metadata polygons layer to make this test
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.openDataTableAndWait(test, fixtureLayerPath);
+        await this.openDataTableAndWait(test, addedLayer.getLayerPath());
 
         // Check DOM — FilterDataToExtent IS rendered for vector layers
         test.addStep('Checking DOM for presence of filter-by-extent switch...');
@@ -343,8 +348,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(result, true);
       },
       (test) => {
-        // Cleanup
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -355,18 +360,20 @@ export class DataTableTester extends GVAbstractTester {
    * @returns A promise that resolves with whether the filter-by-extent toggle is present
    */
   testFilterByExtentUnavailableForEsriDynamic(): Promise<Test<boolean>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test filter-by-extent toggle absent for Esri Dynamic layer...',
       async (test) => {
         // Add the Esri Dynamic layer
-        const fixture = this.addLayerEsriDynamicHistoFloodEvents(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const layer = await this.addLayerEsriDynamicHistoFloodEvents(test, undefined, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        await this.openDataTableAndWait(test, fixtureLayerPath);
+        await this.openDataTableAndWait(test, layer.getLayerPath());
 
         // Check DOM — FilterDataToExtent is NOT rendered for Esri Dynamic (conditional: {!isEsriDynamic && ...})
         // The component uses the label t('dataTable.filterDataToExtent') — look for its absence
@@ -378,8 +385,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(result, false);
       },
       (test) => {
-        // Cleanup
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -390,7 +397,7 @@ export class DataTableTester extends GVAbstractTester {
    * @returns A promise that resolves with the feature count and summary text
    */
   testShowUnsymbolizedFeaturesTrue(): Promise<Test<{ featureCount: number; summaryText: string }>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     const countTotal = 213;
 
     // Get the global settings before the test
@@ -403,15 +410,17 @@ export class DataTableTester extends GVAbstractTester {
         setStoreAppShowUnsymbolizedFeatures(this.getMapId(), true);
 
         // Add Permafrost layer
-        const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
+        const layer = await this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Turn the layer visible, because it's invisible by default
         layer.setVisible(true);
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        const features = await this.openDataTableAndWait(test, fixtureLayerPath);
+        const features = await this.openDataTableAndWait(test, layer.getLayerPath());
         const featureCount = features?.length ?? 0;
 
         // Read results summary to check for content
@@ -427,10 +436,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(summaryText.includes(`${countTotal} feature(s)`), true);
       },
       (test) => {
-        // Cleanup: remove the added layer if it exists
-        if (fixtureLayerPath) {
-          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-        }
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
 
         // Reset the global setting
         setStoreAppShowUnsymbolizedFeatures(this.getMapId(), showUnsymbolizedFeaturesBefore);
@@ -444,7 +451,7 @@ export class DataTableTester extends GVAbstractTester {
    * @returns A promise that resolves with the feature count and summary text
    */
   testShowUnsymbolizedFeaturesFalse(): Promise<Test<{ featureCount: number; summaryText: string }>> {
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     const countFilter = 68;
     const countTotal = 213;
 
@@ -458,15 +465,17 @@ export class DataTableTester extends GVAbstractTester {
         setStoreAppShowUnsymbolizedFeatures(this.getMapId(), false);
 
         // Add Permafrost layer
-        const fixture = this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        const layer = await fixture.promiseLayer;
+        const layer = await this.addLayerEsriFeaturePermafrostEcoprovinceViaGeocore(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Turn the layer visible, because it's invisible by default
         layer.setVisible(true);
 
         // Wait for layer registration and data-table to be loaded with the layer in question
-        const features = await this.openDataTableAndWait(test, fixtureLayerPath);
+        const features = await this.openDataTableAndWait(test, layer.getLayerPath());
         const featureCount = features?.length ?? 0;
 
         // Read results summary to check for content
@@ -483,10 +492,8 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsEqual(summaryText.includes(countTotal.toString()), true);
       },
       (test) => {
-        // Cleanup: remove the added layer if it exists
-        if (fixtureLayerPath) {
-          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-        }
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
 
         // Reset the global setting
         setStoreAppShowUnsymbolizedFeatures(this.getMapId(), showUnsymbolizedFeaturesBefore);

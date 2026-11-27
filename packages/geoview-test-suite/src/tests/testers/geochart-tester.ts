@@ -94,7 +94,7 @@ export class GeochartTester extends GVAbstractTester {
 
     // Test
     let gvLayer: AbstractBaseGVLayer;
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       `Test Geochart on GeoJSON Polygons...`,
       async (test) => {
@@ -102,9 +102,11 @@ export class GeochartTester extends GVAbstractTester {
         if (!geoChartController) throw new TestError('The GeoChart controller is unavailable.');
 
         // Add the Polygons layer
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        gvLayer = await fixture.promiseLayer;
+        gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Set the layer path in the geochart configuration
         geochartConfig.layers[0].layerId = gvLayer.getLayerPath();
@@ -127,8 +129,8 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), gvLayer.getLayerPath());
       },
       (test) => {
-        // Clear
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -168,17 +170,21 @@ export class GeochartTester extends GVAbstractTester {
     };
 
     // Test
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
+    let configLayerPath: string | undefined;
     return this.test(
       'Test Geochart',
       async (test) => {
         // Add the geoview layer by geocore uuid
-        const fixture = this.addLayerEsriDynamicAirborneViaGeocore(test);
-        fixtureLayerPath = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerEsriDynamicAirborneViaGeocore(test, undefined, undefined, {
+          onLayerPath: (rootPath, configPath): void => {
+            rootLayerPath = rootPath;
+            configLayerPath = configPath;
+          },
+        });
 
         // Continue the test and return the layer
-        return this.queryLonLatSelectLayerInPanel(test, fixtureLayerPath, GVAbstractTester.OTTAWA_LONLAT);
+        return this.queryLonLatSelectLayerInPanel(test, addedLayer.getLayerPath(), GVAbstractTester.OTTAWA_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -191,12 +197,12 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep(`Verifying ${fixtureLayerPath} is the selected layer for the geochart...`);
-        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), fixtureLayerPath);
+        test.addStep(`Verifying ${configLayerPath} is the selected layer for the geochart...`);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), configLayerPath);
       },
       (test) => {
-        // Clear
-        if (fixtureLayerPath) this.removeLayerConfigAndAssert(test, fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }

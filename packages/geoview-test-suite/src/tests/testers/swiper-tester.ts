@@ -30,25 +30,29 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperPerLayerSides(): Promise<Test<SwiperSideResult>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper per-layer side semantics...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        await fixture.promiseLayer;
+        const msiLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        await fixtureOgc.promiseLayer;
+        const lakesLayer = await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         const swiperController = this.getControllersRegistry().swiperController!;
         const mapSize = this.getMapViewer().map.getSize()!;
-        const verticalPath = fixtureLayerPathMSI;
-        const horizontalPath = fixtureLayerPathLakes;
+        const verticalPath = msiLayer.getLayerPath();
+        const horizontalPath = lakesLayer.getLayerPath();
         const entries = [
           { layerPath: verticalPath, side: 'left' as SwipeSide },
           { layerPath: horizontalPath, side: 'right' as SwipeSide },
@@ -83,8 +87,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsEqual(result.downVisible, true);
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
         this.getControllersRegistry().swiperController!.setOrientation('vertical');
       }
     );
@@ -96,23 +101,29 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperConfigPersistence(): Promise<Test<SwiperPersistenceResult>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
+    let configLayerPathMSI: string | undefined;
     return this.test(
       'Test Swiper interactive configuration persistence...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        await fixture.promiseLayer;
+        const msiLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath, configPath): void => {
+            rootLayerPathMSI = rootPath;
+            configLayerPathMSI = configPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        await fixtureOgc.promiseLayer;
+        await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         const swiperController = this.getControllersRegistry().swiperController!;
-        const layers = [{ layerPath: fixtureLayerPathMSI, side: 'right' as SwipeSide }];
+        const layers = [{ layerPath: msiLayer.getLayerPath(), side: 'right' as SwipeSide }];
 
         test.addStep('Setting interactive Swiper state and per-layer side...');
         swiperController.setInteractive(true);
@@ -132,12 +143,13 @@ export class SwiperTester extends GVAbstractTester {
         test.addStep('Verifying interactive mode and layer sides were persisted...');
         Test.assertIsEqual(result.interactive, true);
         Test.assertIsArrayLengthEqual(result.layers, 1);
-        Test.assertIsEqual(result.layers[0].layerPath, fixtureLayerPathMSI);
+        Test.assertIsEqual(result.layers[0].layerPath, configLayerPathMSI);
         Test.assertIsEqual(result.layers[0].side, 'right');
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
         this.getControllersRegistry().swiperController!.setInteractive(false);
       }
     );
@@ -149,20 +161,24 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperProgressiveRegistration(): Promise<Test<{ wmsHandlers: number; nonTargetHandlers: number }>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper progressive layer registration...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        const msiLayer = await fixture.promiseLayer;
+        const msiLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        const lakesLayer = await fixtureOgc.promiseLayer;
+        const lakesLayer = await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         const wmsOLLayer = msiLayer.getOLLayer();
         const nonTargetOLLayer = lakesLayer.getOLLayer();
@@ -172,7 +188,7 @@ export class SwiperTester extends GVAbstractTester {
         const nonTargetPostRenderBaseline = nonTargetOLLayer.getListeners('postrender')?.length ?? 0;
 
         test.addStep('Selecting both layers for the Swiper...');
-        this.getControllersRegistry().swiperController?.setLayerPaths([fixtureLayerPathMSI, fixtureLayerPathLakes]);
+        this.getControllersRegistry().swiperController?.setLayerPaths([msiLayer.getLayerPath(), lakesLayer.getLayerPath()]);
         await SwiperTester.#waitForLayerRenderHandlers(msiLayer, wmsBaseline + 1, wmsPostRenderBaseline + 1);
         const wmsHandlers = wmsOLLayer.getListeners('prerender')?.length ?? 0;
 
@@ -186,8 +202,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsEqual(result.nonTargetHandlers > 0, true);
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
       }
     );
   }
@@ -198,22 +215,26 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperSettingsGating(): Promise<Test<{ interactive: boolean; settingsButtonVisible: boolean }>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper settings-panel gating...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        await fixtureOgc.promiseLayer;
+        await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
-        const layerPath = fixtureLayerPathMSI;
+        const layerPath = addedLayer.getLayerPath();
 
         test.addStep('Enabling interactive Swiper mode and selecting a layer...');
         this.getControllersRegistry().swiperController!.setInteractive(true);
@@ -234,8 +255,10 @@ export class SwiperTester extends GVAbstractTester {
       (test) => {
         this.getControllersRegistry().swiperController!.setInteractive(false);
         this.getControllersRegistry().layerController.setSelectedLayerPath('');
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
       }
     );
   }
@@ -246,8 +269,8 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperHoverSuppression(): Promise<Test<{ overBar: boolean; overHandle: boolean; away: boolean }>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper hover-query suppression over the bar and handle...',
       async (test) => {
@@ -255,17 +278,21 @@ export class SwiperTester extends GVAbstractTester {
         const dividerX = mapSize[0] / 2;
 
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        await fixture.promiseLayer;
+        const addedLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        await fixtureOgc.promiseLayer;
+        await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         test.addStep('Activating a Swiper layer and checking the bar band...');
-        this.getControllersRegistry().swiperController!.addLayerPath(fixtureLayerPathMSI);
+        this.getControllersRegistry().swiperController!.addLayerPath(addedLayer.getLayerPath());
         const overBar = this.getControllersRegistry().swiperController!.isPointerOverSwiper([dividerX, 10], mapSize);
         const overHandle = this.getControllersRegistry().swiperController!.isPointerOverSwiper(
           [dividerX + 20, mapSize[1] / 2 + 20],
@@ -281,8 +308,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsEqual(result.away, false);
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
       }
     );
   }
@@ -293,20 +321,24 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperRenderIsolation(): Promise<Test<SwiperRenderIsolationResult>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper rendering isolation with a higher-level layer selector...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        const msiLayer = await fixture.promiseLayer;
+        const msiLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        const lakesLayer = await fixtureOgc.promiseLayer;
+        const lakesLayer = await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         test.addStep('Capturing render listener baselines...');
         const targetPreRenderBaseline = msiLayer.getOLLayer().getListeners('prerender')?.length ?? 0;
@@ -368,8 +400,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsEqual(result.nonTargetPostRenderClean, result.nonTargetPostRenderBaseline);
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
         this.getControllersRegistry().swiperController!.setOrientation('vertical');
       }
     );
@@ -381,20 +414,24 @@ export class SwiperTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testSwiperLifecycle(): Promise<Test<void>> {
-    let fixtureLayerPathMSI: string | undefined;
-    let fixtureLayerPathLakes: string | undefined;
+    let rootLayerPathMSI: string | undefined;
+    let rootLayerPathLakes: string | undefined;
     return this.test(
       'Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all...',
       async (test) => {
         // Add the MSI layer on the map
-        const fixture = this.addLayerWMSWithDatacubeMSI(test);
-        fixtureLayerPathMSI = fixture.layerPath;
-        await fixture.promiseLayer;
+        const msiLayer = await this.addLayerWMSWithDatacubeMSI(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathMSI = rootPath;
+          },
+        });
 
         // Add the OGC Feature layer Lakes
-        const fixtureOgc = this.addLayerOGCFeatureLakes(test);
-        fixtureLayerPathLakes = fixtureOgc.layerPath;
-        await fixtureOgc.promiseLayer;
+        const lakesLayer = await this.addLayerOGCFeatureLakes(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPathLakes = rootPath;
+          },
+        });
 
         // Step 2: Verify swiper starts with no active layers (config has empty layers array)
         test.addStep('Verifying swiper starts with no active layers...');
@@ -408,18 +445,18 @@ export class SwiperTester extends GVAbstractTester {
 
         // Step 4: Activate swiper for WMS layer
         test.addStep('Activating swiper for WMS layer...');
-        this.getControllersRegistry().swiperController!.addLayerPath(fixtureLayerPathMSI);
+        this.getControllersRegistry().swiperController!.addLayerPath(msiLayer.getLayerPath());
 
         // Step 5: Assert swiper is active with 1 layer in vertical mode
         test.addStep('Verifying swiper is active with 1 layer...');
         const afterAddOne = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(afterAddOne, 1);
-        Test.assertArrayIncludes(afterAddOne, fixtureLayerPathMSI);
+        Test.assertArrayIncludes(afterAddOne, msiLayer.getLayerPath());
         Test.assertIsEqual(getStoreSwiperOrientation(this.getMapId()), 'vertical');
 
         // Step 6: Remove the WMS layer from swiper
         test.addStep('Removing WMS layer from swiper...');
-        this.getControllersRegistry().swiperController!.removeLayerPath(fixtureLayerPathMSI);
+        this.getControllersRegistry().swiperController!.removeLayerPath(msiLayer.getLayerPath());
 
         // Step 7: Assert swiper has no layers
         test.addStep('Verifying swiper has no active layers after removal...');
@@ -428,17 +465,17 @@ export class SwiperTester extends GVAbstractTester {
 
         // Step 8: Add WMS layer back and add OGC Feature layer
         test.addStep('Adding WMS layer back to swiper...');
-        this.getControllersRegistry().swiperController!.addLayerPath(fixtureLayerPathMSI);
+        this.getControllersRegistry().swiperController!.addLayerPath(msiLayer.getLayerPath());
 
         test.addStep('Adding OGC Feature layer to swiper...');
-        this.getControllersRegistry().swiperController!.addLayerPath(fixtureLayerPathLakes);
+        this.getControllersRegistry().swiperController!.addLayerPath(lakesLayer.getLayerPath());
 
         // Step 9: Assert swiper is active with 2 layers
         test.addStep('Verifying swiper is active with 2 layers...');
         const afterAddTwo = getStoreSwiperLayerPaths(this.getMapId());
         Test.assertIsArrayLengthEqual(afterAddTwo, 2);
-        Test.assertArrayIncludes(afterAddTwo, fixtureLayerPathMSI);
-        Test.assertArrayIncludes(afterAddTwo, fixtureLayerPathLakes);
+        Test.assertArrayIncludes(afterAddTwo, msiLayer.getLayerPath());
+        Test.assertArrayIncludes(afterAddTwo, lakesLayer.getLayerPath());
 
         // Step 10: Set orientation to horizontal
         test.addStep('Setting swiper orientation to horizontal...');
@@ -472,8 +509,9 @@ export class SwiperTester extends GVAbstractTester {
         Test.assertIsArrayLengthEqual(finalLayerPaths, 0);
       },
       (test) => {
-        if (fixtureLayerPathMSI) this.removeLayerConfigAndAssert(test, fixtureLayerPathMSI);
-        if (fixtureLayerPathLakes) this.removeLayerConfigAndAssert(test, fixtureLayerPathLakes);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPathMSI) this.removeLayerConfigAndAssert(test, rootLayerPathMSI);
+        if (rootLayerPathLakes) this.removeLayerConfigAndAssert(test, rootLayerPathLakes);
         this.getControllersRegistry().swiperController!.setOrientation('vertical');
       }
     );

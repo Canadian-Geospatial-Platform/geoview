@@ -55,16 +55,18 @@ export class TimeSliderTester extends GVAbstractTester {
   testResetValues(): Promise<Test<TimeSliderResetResult>> {
     let originalValues: number[] | undefined;
     let gvLayer: AbstractBaseGVLayer | undefined;
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
 
     return this.test(
       'Test Time Slider reset restores registered default values...',
       async (test) => {
         // Add the layer
         test.addStep('Adding the Historical Flood layer...');
-        const fixture = this.addLayerEsriDynamicHistoFloodEvents(test);
-        fixtureLayerPath = fixture.layerPath;
-        gvLayer = await fixture.promiseLayer;
+        gvLayer = await this.addLayerEsriDynamicHistoFloodEvents(test, undefined, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         // Get the registered time-slider values for the added layer
         const registeredValues = await waitForStoreTimeSliderLayer(this.getMapId(), gvLayer.getLayerPath());
@@ -103,13 +105,13 @@ export class TimeSliderTester extends GVAbstractTester {
       },
       (test) => {
         // If we had original values, restore them before removing the layer
-        if (fixtureLayerPath && originalValues) {
+        if (gvLayer && originalValues) {
           test.addStep('Restoring the original time-slider values...');
-          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(fixtureLayerPath, originalValues);
+          this.getControllersRegistry().timeSliderController!.updateTimeSliderValues(gvLayer.getLayerPath(), originalValues);
         }
 
-        // Remove the layer
-        if (fixtureLayerPath) this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(fixtureLayerPath);
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
   }
@@ -270,6 +272,7 @@ export class TimeSliderTester extends GVAbstractTester {
       (test) => {
         // If the test was running
         if (isRunningOnVPN) {
+          // Clear the layer from the map and assert it was removed
           this.removeLayerConfigAndAssert(test, groupPath);
         }
       }

@@ -76,14 +76,16 @@ export class MapConfigTester extends GVAbstractTester {
 
     // Test
     let gvLayer: AbstractGVLayer | undefined;
-    let fixtureLayerPath: string | undefined;
+    let rootLayerPath: string | undefined;
     return this.test(
       `Test Details on Polygons layer...`,
       async (test) => {
         // Add the Polygons layer
-        const fixture = this.addLayerGeoJSONWithMetadataPolygons(test);
-        fixtureLayerPath = fixture.layerPath;
-        gvLayer = await fixture.promiseLayer;
+        gvLayer = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
 
         const visibilityAndZoomResults = await this.#executeVisibilityAndZoomScenarios(test, gvLayer);
         const featureInfoResults = await this.#executeFeatureInfoConfigurationScenarios(
@@ -100,11 +102,8 @@ export class MapConfigTester extends GVAbstractTester {
         MapConfigTester.#assertFeatureInfoConfigurationResults(test, results, nameField, aliasValue);
       },
       async (test) => {
-        // Map recreation replaces the original fixture with this configured layer.
-        // This removes the layer when test is cleaning up.
-        if (fixtureLayerPath && this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(fixtureLayerPath)) {
-          this.removeLayerConfigAndAssert(test, fixtureLayerPath);
-        }
+        // Clear the layer from the map and assert it was removed
+        if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
         if (this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPathFromMapConfig)) {
           this.removeLayerConfigAndAssert(test, layerPathFromMapConfig);
         }
@@ -407,6 +406,7 @@ export class MapConfigTester extends GVAbstractTester {
         Test.assertIsEqual(selectedLayerPath, expectedLayerPath);
       },
       (test) => {
+        // Clear the layer from the map and assert it was removed
         this.removeLayerConfigAndAssert(test, geocoreUuid);
       }
     );
