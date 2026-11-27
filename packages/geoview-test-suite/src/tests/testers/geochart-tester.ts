@@ -1,4 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
+
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -116,7 +118,7 @@ export class GeochartTester extends GVAbstractTester {
         uiController.showTabButton('geochart');
 
         // Continue the test and return the layer
-        return this.queryLonLatSelectLayerInPanel(test, gvLayer.getLayerPath(), GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryLonLatSelectLayerInPanel(test, gvLayer.getLayerPath(), TestConstants.ONTARIO_CENTER_LONLAT);
       },
       (test) => {
         // Perform assertions
@@ -142,10 +144,10 @@ export class GeochartTester extends GVAbstractTester {
    */
   testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
     const expectedGeochartChartsConfig = {
-      [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
+      [TestConstants.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
         layers: [
           {
-            layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
+            layerId: TestConstants.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
             propertyValue: 'OBJECTID',
             propertyDisplay: 'Location_Emplacement',
           },
@@ -184,7 +186,7 @@ export class GeochartTester extends GVAbstractTester {
         });
 
         // Continue the test and return the layer
-        return this.queryLonLatSelectLayerInPanel(test, addedLayer.getLayerPath(), GVAbstractTester.OTTAWA_LONLAT);
+        return this.queryLonLatSelectLayerInPanel(test, addedLayer.getLayerPath(), TestConstants.OTTAWA_LONLAT);
       },
       (test) => {
         // Perform assertions

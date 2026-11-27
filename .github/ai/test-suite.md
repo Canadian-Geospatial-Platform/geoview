@@ -27,6 +27,7 @@ Read only the linked section of each doc: search for its heading and read to the
 
 - Put `Test.assert*` calls in `callbackAssert`, never in the execution `callback`; return observations for assertion, use `callbackFinalize` for cleanup, and match `Test<T>` to the result.
 - Use `test.addStep`, generated IDs, shared constants, instance helpers and `testError` for expected errors.
+- Shared readonly test constants live in `TestConstants` in `testers/constants.ts`; tester-specific constants stay with their tester.
 - Map-state-changing tests run sequentially after independent parallel tests.
 - When `onLaunchTestSuite()` calls change, review and update `getDescriptionAsHtml()` to reflect the
   current coverage in source call order. Group only adjacent related tests; split nonadjacent topics.

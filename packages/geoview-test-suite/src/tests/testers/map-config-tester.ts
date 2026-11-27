@@ -1,5 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { TestError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -127,50 +128,38 @@ export class MapConfigTester extends GVAbstractTester {
     gvLayer: AbstractGVLayer
   ): Promise<DetailsVisibilityAndZoomResult> {
     const layerPath = gvLayer.getLayerPath();
-    const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(
-      test,
-      gvLayer,
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
-    );
+    const resultsOntarioResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
 
     test.addStep(`Selecting the details for the added layer...`);
     this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
 
     test.addStep(`Make the layer invisible...`);
     gvLayer.setVisible(false);
-    const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(
-      test,
-      gvLayer,
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
-    );
+    const resultsOntarioNoResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
 
     test.addStep(`Make the layer visible...`);
     gvLayer.setVisible(true);
     const resultsAlbertaNoResults1 = await this.queryAtCoordinateRetrieveResultsForLayer(
       test,
       gvLayer,
-      GVAbstractTester.ALBERTA_CENTER_LONLAT
+      TestConstants.ALBERTA_CENTER_LONLAT
     );
 
     let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
     await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
-    const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(
-      test,
-      gvLayer,
-      GVAbstractTester.ALBERTA_CENTER_LONLAT
-    );
+    const resultsAlbertaResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ALBERTA_CENTER_LONLAT);
 
     item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
     await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
     const resultsAlbertaNoResults2 = await this.queryAtCoordinateRetrieveResultsForLayer(
       test,
       gvLayer,
-      GVAbstractTester.ALBERTA_CENTER_LONLAT
+      TestConstants.ALBERTA_CENTER_LONLAT
     );
 
     test.addStep('Recording initial zoom level...');
     const initialZoom = this.getMapViewer().getView().getZoom();
-    const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
     test.addStep('Verifying feature has extent for zoom...');
     Test.assertIsDefined('features', features);
     Test.assertIsArrayLengthMinimal(features, 1);
@@ -178,7 +167,7 @@ export class MapConfigTester extends GVAbstractTester {
     Test.assertIsDefined('feature.extent', feature.extent);
 
     test.addStep('Zooming to feature extent...');
-    await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, GVAbstractTester.USE_ZOOM_ANIMATION, {
+    await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, TestConstants.USE_ZOOM_ANIMATION, {
       maxZoom: 13,
     });
     const finalZoom = this.getMapViewer().getView().getZoom();
@@ -219,7 +208,7 @@ export class MapConfigTester extends GVAbstractTester {
     const nameFieldResults = await this.queryAtCoordinateRetrieveResultsForLayer(
       test,
       configuredLayer,
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
+      TestConstants.ONTARIO_CENTER_LONLAT
     );
 
     test.addStep('Creating map with outfields summary:false configuration...');
@@ -233,7 +222,7 @@ export class MapConfigTester extends GVAbstractTester {
     });
     test.addStep('Getting the layer...');
     const summaryLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-    const summaryResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, summaryLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    const summaryResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, summaryLayer, TestConstants.ONTARIO_CENTER_LONLAT);
 
     test.addStep('Creating map with outfields alias configuration...');
     await this.#helperCreateMapWithFeatureInfoConfig(test, {
@@ -243,7 +232,7 @@ export class MapConfigTester extends GVAbstractTester {
     });
     test.addStep('Getting the layer...');
     const aliasLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-    const aliasResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, aliasLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+    const aliasResults = await this.queryAtCoordinateRetrieveResultsForLayer(test, aliasLayer, TestConstants.ONTARIO_CENTER_LONLAT);
 
     return { nameFieldResults, summaryResults, aliasResults };
   }
@@ -378,8 +367,8 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testSelectedLayersLayerPathGeoCoreResolution(): Promise<Test<MapViewer>> {
     const mapId = this.getMapId();
-    const geocoreUuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
-    const expectedLayerPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP;
+    const geocoreUuid = TestConstants.AIRBORNE_RADIOACTIVITY_UUID;
+    const expectedLayerPath = TestConstants.AIRBORNE_RADIOACTIVITY_GROUP;
 
     // Test
     return this.test(
@@ -1001,7 +990,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom to 8 (above threshold)
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for the React useEffect to update visibility
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -1013,7 +1002,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom back to 4 (below threshold)
         test.addStep('Zooming back to level 4 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(false);
@@ -1047,7 +1036,7 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Zoom to 8 (above threshold) so overview map is visible
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for overview map to become visible
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -1071,7 +1060,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom below threshold in 3857
         test.addStep('Zooming to level 4 in 3857 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(false);
@@ -1095,7 +1084,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom above threshold in 3978
         test.addStep('Zooming to level 8 in 3978 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(8, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn true
         await this.getControllersRegistry().mapController.waitForOverviewMapVisibility(true);
@@ -1140,7 +1129,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Call zoomToInitialExtent which uses homeView
         test.addStep('Calling zoomToInitialExtent() which navigates to homeView...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Verify zoom changed to 4 (from homeView)
         test.addStep('Verifying zoom changed to 4 from homeView...');
@@ -1176,7 +1165,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Call zoomToInitialExtent which navigates to homeView
         test.addStep('Calling zoomToInitialExtent() to navigate to homeView...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         return mapViewer;
       },
@@ -1237,7 +1226,7 @@ export class MapConfigTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results
@@ -1281,7 +1270,7 @@ export class MapConfigTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results
@@ -1325,7 +1314,7 @@ export class MapConfigTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        return this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         // Verify we got results
@@ -1972,7 +1961,7 @@ export class MapConfigTester extends GVAbstractTester {
               {
                 geoviewLayerId: 'geojsonLYR5',
                 geoviewLayerName: 'GeoJSON Sample',
-                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+                metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
                 geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
                 serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
                 listOfLayerEntryConfig: [
@@ -2012,7 +2001,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersOgcFeature(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'ogcFeatureLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const FILTER_EXPRESSION = "name = 'Lake Huron'";
 
     return this.test(
@@ -2026,11 +2015,11 @@ export class MapConfigTester extends GVAbstractTester {
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'OGC Feature Lakes',
-                metadataAccessPath: GVAbstractTester.PYGEOAPI_B6RYUVAKK5,
+                metadataAccessPath: TestConstants.PYGEOAPI_B6RYUVAKK5,
                 geoviewLayerType: 'ogcFeature' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES,
+                    layerId: TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
@@ -2062,7 +2051,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersWfs(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'wfsLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const FILTER_EXPRESSION = "element_name_e = 'Temperature'";
 
     return this.test(
@@ -2076,11 +2065,11 @@ export class MapConfigTester extends GVAbstractTester {
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'WFS Current Conditions',
-                metadataAccessPath: GVAbstractTester.GEOMET_URL,
+                metadataAccessPath: TestConstants.GEOMET_URL,
                 geoviewLayerType: 'ogcWfs' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID,
+                    layerId: TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
@@ -2112,7 +2101,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersEsriDynamic(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'esriDynamicLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.HISTORICAL_FLOOD_LAYER_ID}`;
     const FILTER_EXPRESSION = "event_type = 'freshet'";
 
     return this.test(
@@ -2126,11 +2115,11 @@ export class MapConfigTester extends GVAbstractTester {
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Historical Flood Events',
-                metadataAccessPath: GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
+                metadataAccessPath: TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER,
                 geoviewLayerType: 'esriDynamic' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID,
+                    layerId: TestConstants.HISTORICAL_FLOOD_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
@@ -2162,7 +2151,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersEsriFeature(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'esriFeatureLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${TestConstants.FOREST_INDUSTRY_LAYER_ID}`;
     const FILTER_EXPRESSION = "Province = 'Ontario'";
 
     return this.test(
@@ -2176,11 +2165,11 @@ export class MapConfigTester extends GVAbstractTester {
               {
                 geoviewLayerId: GV_LAYER_ID,
                 geoviewLayerName: 'Forest Industry',
-                metadataAccessPath: GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER,
+                metadataAccessPath: TestConstants.FOREST_INDUSTRY_MAP_SERVER,
                 geoviewLayerType: 'esriFeature' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID,
+                    layerId: TestConstants.FOREST_INDUSTRY_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
@@ -2425,7 +2414,7 @@ export class MapConfigTester extends GVAbstractTester {
           Test.assertIsEqualWithinTolerance(midpoints.e[0], corners.se[0], 1e-6);
           Test.assertIsEqualWithinTolerance(midpoints.n[1], corners.ne[1], 1e-6);
           Test.assertIsEqualWithinTolerance(midpoints.s[1], corners.sw[1], 1e-6);
-          if (center === GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT) Test.assertIsEqual(midpoints.e[0] > 180, true);
+          if (center === TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT) Test.assertIsEqual(midpoints.e[0] > 180, true);
         }
         if (interaction === 'dynamic') Test.assertIsNotEqual(result.boundary.midpoints.s[1], result.canvasSouth[1]);
         else Test.assertIsArrayEqual(result.boundary.midpoints.s, result.canvasSouth, 6);
@@ -2688,7 +2677,7 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2732,7 +2721,7 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2778,7 +2767,7 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2824,7 +2813,7 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2872,7 +2861,7 @@ export class MapConfigTester extends GVAbstractTester {
           {
             geoviewLayerId: 'geojsonLYR5',
             geoviewLayerName: 'GeoJSON Sample',
-            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            metadataAccessPath: TestConstants.GEOJSON_METADATA_META,
             geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
             serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
             listOfLayerEntryConfig: [
@@ -2930,7 +2919,7 @@ export class MapConfigTester extends GVAbstractTester {
   ): Promise<MapViewer> {
     host.style.setProperty('width', '800px');
     // Keep the near-pole round-trip fixture below the projection singularity.
-    const zoom = center === GVAbstractTester.VIEWPORT_POLAR_LONLAT ? 8 : MAP_ZOOM_LEVEL[projection];
+    const zoom = center === TestConstants.VIEWPORT_POLAR_LONLAT ? 8 : MAP_ZOOM_LEVEL[projection];
     const viewer = await this.replaceMap(test, host.id, {
       map: {
         interaction,

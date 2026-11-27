@@ -1,5 +1,11 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
+
+import { TestConstants } from './constants';
+import { TestError, TestSkippedError } from '../core/exceptions';
+import { Test } from '../core/test';
+import { GVAbstractTester } from './abstract-gv-tester';
+import { A11yEntryTester } from './a11y-entry-tester';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { delay, getFullscreenElement, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
@@ -14,10 +20,6 @@ import { getStoreLayerSelectedLayerPath } from 'geoview-core/core/stores/states/
 import { getStoreDetailsCurrentFeatureIndex, getStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/states/feature-info-state';
 import { getStoreMapPointerPosition, setStoreMapPointerPosition } from 'geoview-core/core/stores/states/map-state';
 import type { FeatureInfoLayerSet, QueryEndedEvent } from 'geoview-core/geo/layer/layer-sets/feature-info-layer-set';
-import { TestError, TestSkippedError } from '../core/exceptions';
-import { Test } from '../core/test';
-import { GVAbstractTester } from './abstract-gv-tester';
-import { A11yEntryTester } from './a11y-entry-tester';
 
 /** The polygon fixture extent that returns multiple features for navigation checks. */
 const MULTI_FEATURE_QUERY_EXTENT: Extent = [-88.5, 52.2, -85.5, 52.8];
@@ -317,7 +319,7 @@ export class A11yUxTester extends GVAbstractTester {
         const panel = DomHelper.getAppBarPanel(mapId, 'layers');
         const panelClose = DomHelper.getAppBarPanelCloseButton(mapId, 'layers');
         if (!panel || !panelClose) throw new TestError('Layers must expose its panel and header Close');
-        await whenThisThen(() => DomHelper.getActiveElement() === panelClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => DomHelper.getActiveElement() === panelClose, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         const layerRow = panel.querySelector<HTMLElement>('[role="button"][id*="-appBar-layers-"]');
         if (!layerRow) throw new TestError('Layers must contain a selectable layer row');
         layerRow.focus();
@@ -325,7 +327,7 @@ export class A11yUxTester extends GVAbstractTester {
         await DomHelper.waitForReactIdle();
         selectionClose = panel.querySelector<HTMLButtonElement>('button[aria-label="Close selection"]') ?? undefined;
         if (!selectionClose) throw new TestError('Selecting a layer must expose its sub-panel Close');
-        await whenThisThen(() => DomHelper.getActiveElement() === selectionClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => DomHelper.getActiveElement() === selectionClose, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
         // Observe focus between press and release, before the Settings click opens its popover.
         test.addStep('Pressing Settings and applying the browser mousedown focus default before mouseup...');
@@ -355,7 +357,7 @@ export class A11yUxTester extends GVAbstractTester {
         settings.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
         await DomHelper.waitForReactIdle();
         const settingsOpened = settings.getAttribute('aria-expanded') === 'true';
-        await whenThisThen(() => switchReceivedFocus, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => switchReceivedFocus, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         await DomHelper.waitForReactIdle();
         return {
           pointerFocusRetained,
@@ -489,7 +491,7 @@ export class A11yUxTester extends GVAbstractTester {
         settings.click();
         await whenThisThen(
           () => DomHelper.getActiveElement() === DomHelper.getGVElementById(mapId, 'appBar-settings-panel-keyboard-navigation'),
-          GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS
+          TestConstants.KEYBOARD_QUERY_TIMEOUT_MS
         );
 
         /** Detects even a transient opener restore before the pointer is released. */
@@ -640,7 +642,7 @@ export class A11yUxTester extends GVAbstractTester {
           await DomHelper.waitForReactIdle();
           closeButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'resize-close-button');
           if (!closeButton) throw new TestError('Resize must expose its Close button');
-          await whenThisThen(() => DomHelper.getActiveElement() === closeButton, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => DomHelper.getActiveElement() === closeButton, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         };
 
         await openResize();
@@ -718,7 +720,7 @@ export class A11yUxTester extends GVAbstractTester {
         closeButton?.click();
         if (enteredFullscreen) {
           uiController.setFullScreen(false);
-          await whenThisThen(() => !getFullscreenElement(), GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => !getFullscreenElement(), TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         }
         if (originalResizeValue !== undefined) uiController.setFooterPanelResizeValue(originalResizeValue);
         uiController.setActiveFooterBarTab(originalFooter.tabId, false);
@@ -815,7 +817,7 @@ export class A11yUxTester extends GVAbstractTester {
 
           // Render the new view before synchronizing the crosshair used by the next query.
           await mapController.zoomToLonLatExtentOrCoordinate(
-            expectsFeatures ? MULTI_FEATURE_QUERY_EXTENT : GVAbstractTester.ALBERTA_CENTER_LONLAT,
+            expectsFeatures ? MULTI_FEATURE_QUERY_EXTENT : TestConstants.ALBERTA_CENTER_LONLAT,
             false
           );
           viewer.map.renderSync();
@@ -838,14 +840,14 @@ export class A11yUxTester extends GVAbstractTester {
           detailsPanel.addEventListener('focusin', recordFocus);
           try {
             pressKey('Enter');
-            await whenThisThen(() => queries.length === index + 1, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+            await whenThisThen(() => queries.length === index + 1, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
             await GVAbstractTester.waitForBatchedQueryPropagation(test);
             test.addStep(`Query ${index + 1}: waiting for rendered content and the sub-panel autofocus animation frame...`);
             await whenThisThen(
               () =>
                 !!detailsPanel.querySelector(expectsFeatures ? '[aria-label="Feature navigation"]' : '.guide-container')?.getClientRects()
                   .length,
-              GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS
+              TestConstants.KEYBOARD_QUERY_TIMEOUT_MS
             );
             await DomHelper.waitForReactIdle();
             await delay(TIMEOUT.focusDelay);
@@ -1000,7 +1002,7 @@ export class A11yUxTester extends GVAbstractTester {
             '[role="group"][aria-label="Feature navigation"] button[aria-label="Next feature"]'
           );
           return !!nextButton && nextButton.getAttribute('aria-disabled') !== 'true';
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         const nextButton = detailsPanel.querySelector<HTMLButtonElement>(
           '[role="group"][aria-label="Feature navigation"] button[aria-label="Next feature"]'
         );
@@ -1327,9 +1329,9 @@ export class A11yUxTester extends GVAbstractTester {
         test.addStep('Querying from the active crosshair and waiting for Details focus...');
         await DomHelper.waitForReactIdle();
         pressKey('Enter');
-        await whenThisThen(() => queries.length === 1, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => queries.length === 1, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         await GVAbstractTester.waitForBatchedQueryPropagation(test);
-        await whenThisThen(hasDetailsFocus, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(hasDetailsFocus, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
         const targetPanel = DomHelper.getAppBarPanel(mapId, 'details');
         const closeButton = DomHelper.getAppBarPanelCloseButton(mapId, 'details');
@@ -1342,7 +1344,7 @@ export class A11yUxTester extends GVAbstractTester {
             '[role="group"][aria-label="Feature navigation"] button[aria-label="Next feature"]'
           );
           return !!nextButton && nextButton.getAttribute('aria-disabled') !== 'true';
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
         const navigationGroup = targetPanel.querySelector('[role="group"][aria-label="Feature navigation"]');
         const nextFeatureButton = navigationGroup?.querySelector<HTMLButtonElement>('button[aria-label="Next feature"]');
@@ -1512,9 +1514,9 @@ export class A11yUxTester extends GVAbstractTester {
           target.focus();
           await DomHelper.waitForReactIdle();
           pressKey('Enter');
-          await whenThisThen(() => queries.length === startingQueryCount + 1, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => queries.length === startingQueryCount + 1, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
           await GVAbstractTester.waitForBatchedQueryPropagation(test);
-          await whenThisThen(hasDetailsFocus, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(hasDetailsFocus, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         };
 
         await queryIntoDetails();
@@ -1531,7 +1533,7 @@ export class A11yUxTester extends GVAbstractTester {
             '[role="group"][aria-label="Feature navigation"] button[aria-label="Next feature"]'
           );
           return !!nextButton && nextButton.getAttribute('aria-disabled') !== 'true';
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
         const navigationGroup = detailsPanel.querySelector('[role="group"][aria-label="Feature navigation"]');
         const nextFeatureButton = navigationGroup?.querySelector<HTMLButtonElement>('button[aria-label="Next feature"]');
@@ -1570,7 +1572,7 @@ export class A11yUxTester extends GVAbstractTester {
           await DomHelper.waitForReactIdle();
         }
         detailsButton.click();
-        await whenThisThen(() => getStoreUIActiveAppBarTab(mapId).isOpen, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => getStoreUIActiveAppBarTab(mapId).isOpen, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         closeButton.focus();
         pressKey('Escape');
         await delay(TIMEOUT.dataPanelLoading);
@@ -1582,7 +1584,7 @@ export class A11yUxTester extends GVAbstractTester {
         }
         if (!getStoreUIActiveAppBarTab(mapId).isOpen) {
           detailsButton.click();
-          await whenThisThen(() => getStoreUIActiveAppBarTab(mapId).isOpen, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => getStoreUIActiveAppBarTab(mapId).isOpen, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         }
         closeButton.click();
         await delay(TIMEOUT.dataPanelLoading);
@@ -1707,7 +1709,7 @@ export class A11yUxTester extends GVAbstractTester {
         test.addStep('Querying from the active crosshair and focusing the Details feature sub-panel...');
         await DomHelper.waitForReactIdle();
         pressKey('Enter');
-        await whenThisThen(() => queries.length === 1, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => queries.length === 1, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         await GVAbstractTester.waitForBatchedQueryPropagation(test);
         await DomHelper.waitForReactIdle();
         const layerButton = detailsPanel.querySelector<HTMLButtonElement>('ul button');
@@ -1835,7 +1837,7 @@ export class A11yUxTester extends GVAbstractTester {
               `#${CSS.escape(DomHelper.buildGVElementId(mapId, 'export-dialog'))} [role="dialog"][aria-modal="true"]`
             ) ?? undefined;
           return !!exportDialog;
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         const openedExportDialog = exportDialog;
         if (!openedExportDialog) throw new TestError('The Export modal must be mounted after opening');
         const exportTitleInput = openedExportDialog.querySelector<HTMLInputElement>(`#${CSS.escape(`${mapId}-export-title-input`)}`);
@@ -1845,7 +1847,7 @@ export class A11yUxTester extends GVAbstractTester {
           const activeElement = DomHelper.getActiveElement();
           if (withFormatDropdown) return activeElement === exportTitleInput;
           return !!activeElement && openedExportDialog.contains(activeElement);
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         const notificationsBeforeOrdinaryKey = keyboardEvents.length;
         pressActiveKey('x');
         const ordinaryKeyboardNotification = keyboardEvents.length > notificationsBeforeOrdinaryKey;
@@ -1863,7 +1865,7 @@ export class A11yUxTester extends GVAbstractTester {
             formatDropdown = listId ? DomHelper.getGVElementByFullId(mapId, listId) : undefined;
             const activeElement = DomHelper.getActiveElement();
             return formatSelect?.getAttribute('aria-expanded') === 'true' && !!activeElement && !!formatDropdown?.contains(activeElement);
-          }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         }
         const dropdownExpandedBeforeShortcut = formatSelect?.getAttribute('aria-expanded') === 'true';
         test.addStep('Pressing Ctrl+M from the focused Export control...');
@@ -1990,7 +1992,7 @@ export class A11yUxTester extends GVAbstractTester {
         const shareDialogElement = await DomHelper.waitForDomElement(
           '[role="dialog"][aria-labelledby="share-dialog-title"][aria-modal="true"]',
           shareButton.ownerDocument.body,
-          GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS
+          TestConstants.KEYBOARD_QUERY_TIMEOUT_MS
         );
         if (!(shareDialogElement instanceof HTMLElement)) throw new TestError('The open Share modal must be an HTML dialog');
         const openedShareDialog = shareDialogElement;
@@ -2003,7 +2005,7 @@ export class A11yUxTester extends GVAbstractTester {
         await whenThisThen(() => {
           const activeElement = DomHelper.getActiveElement();
           return !!activeElement && openedShareDialog.contains(activeElement);
-        }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
         // Share lives outside the map root, unlike the viewer-owned Export dialog.
         test.addStep('Pressing Ctrl+M while focus is inside Share...');
@@ -2144,7 +2146,7 @@ export class A11yUxTester extends GVAbstractTester {
         // Dismiss the overlay before restoring its underlying panels and focus owner.
         if (dialog?.isConnected && closeButton) {
           closeButton.click();
-          await whenThisThen(() => !dialog?.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => !dialog?.isConnected, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         }
         uiController.setCrosshairActive(false);
         uiController.setActiveAppBarTab(originalAppBar.tabId, originalAppBar.isOpen, originalAppBar.isFocusTrapped ?? false);
@@ -2210,12 +2212,12 @@ export class A11yUxTester extends GVAbstractTester {
         await DomHelper.waitForReactIdle();
         const layersClose = DomHelper.getGVElementById(mapId, 'appBar-layers-panel-close-btn');
         if (!layersClose) throw new TestError('The Layers close button must be mounted');
-        await whenThisThen(() => DomHelper.getActiveElement() === layersClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => DomHelper.getActiveElement() === layersClose, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         legend.click();
         await DomHelper.waitForReactIdle();
         const legendClose = DomHelper.getGVElementById(companionId, 'appBar-legend-panel-close-btn');
         if (!legendClose) throw new TestError('The companion Legend close button must be mounted');
-        await whenThisThen(() => DomHelper.getActiveElement() === legendClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => DomHelper.getActiveElement() === legendClose, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         const button = DomHelper.getAppBarPanel(companionId, 'legend')?.querySelector<HTMLButtonElement>(
           'button[aria-label="Ouvrir en plein écran"]'
         );
@@ -2227,7 +2229,7 @@ export class A11yUxTester extends GVAbstractTester {
             dialog = DomHelper.queryGVSelector<HTMLElement>(companionId, '[role="dialog"][aria-modal="true"]');
             return !!dialog;
           },
-          GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS,
+          TestConstants.KEYBOARD_QUERY_TIMEOUT_MS,
           10
         );
 
@@ -2263,7 +2265,7 @@ export class A11yUxTester extends GVAbstractTester {
         // Close the companion dialog before restoring each viewer's independent state.
         if (dialog?.isConnected) {
           dialog.querySelector<HTMLButtonElement>('button')?.click();
-          await whenThisThen(() => !dialog?.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+          await whenThisThen(() => !dialog?.isConnected, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         }
         originalState.forEach(({ id, appBar, focusItem, mode }) => {
           const controller = this.getApi().getMapViewer(id).controllers.uiController;
@@ -2309,21 +2311,21 @@ export class A11yUxTester extends GVAbstractTester {
       await DomHelper.waitForReactIdle();
       const layerButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'footerBar-data-table-geojsonLYR5/polygons.json');
       if (!layerButton) throw new TestError('The Polygons Data Table layer must be mounted');
-      await whenThisThen(() => !layerButton.disabled, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+      await whenThisThen(() => !layerButton.disabled, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
       layerButton.click();
     }
     await DomHelper.waitForReactIdle();
     panelButton.click();
     await whenThisThen(
       () => getStoreUIActiveAppBarTab(mapId).isOpen && getStoreUIActiveAppBarTab(mapId).tabId === panelId,
-      GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS
+      TestConstants.KEYBOARD_QUERY_TIMEOUT_MS
     );
     await DomHelper.waitForReactIdle();
     const panelClose = DomHelper.getGVElementById(mapId, `appBar-${panelId}-panel-close-btn`);
     if (!panelClose) throw new TestError('The app-bar panel close button must be mounted');
 
     // The panel focuses its close button after opening; let that finish before opening the dialog.
-    await whenThisThen(() => DomHelper.getActiveElement() === panelClose, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+    await whenThisThen(() => DomHelper.getActiveElement() === panelClose, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
   }
 
   /**
@@ -2425,7 +2427,7 @@ export class A11yUxTester extends GVAbstractTester {
     const promptOpened = !!DomHelper.getGVElementById(mapId, 'wcag-dialog-title');
     if (promptOpened) {
       DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'skip-focus')?.click();
-      await whenThisThen(() => !DomHelper.getGVElementById(mapId, 'wcag-dialog-title'), GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+      await whenThisThen(() => !DomHelper.getGVElementById(mapId, 'wcag-dialog-title'), TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     }
 
     test.addStep('Pressing Ctrl+Q with keyboard mode enabled, then repeating after closing the dialog...');
@@ -2441,10 +2443,10 @@ export class A11yUxTester extends GVAbstractTester {
     const modeStayedEnabled = getStoreUIActiveTrapGeoView(mapId);
     const ctrlQFocusStayed = DomHelper.getActiveElement() === landingFocus;
     closeButton.click();
-    await whenThisThen(() => !dialog.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+    await whenThisThen(() => !dialog.isConnected, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     const reopenedTrigger = A11yUxTester.#getFullscreenButton(mapId, kind, panelId);
     if (!reopenedTrigger) throw new TestError('The fullscreen trigger must be mounted again after close');
-    await whenThisThen(() => DomHelper.getActiveElement() === reopenedTrigger, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+    await whenThisThen(() => DomHelper.getActiveElement() === reopenedTrigger, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
 
     // Restore the precondition if the regression already turned keyboard mode off.
     uiController.setActiveTrapGeoView(true);
@@ -2506,7 +2508,7 @@ export class A11yUxTester extends GVAbstractTester {
         const tableButton = DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'appBar-table-details');
         openButton = tableButton;
         return !!tableButton && !tableButton.disabled;
-      }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+      }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     } else if (kind === 'fullscreen' || kind === 'legend fullscreen') {
       openButton = A11yUxTester.#getFullscreenButton(mapId, kind, panelId);
     } else if (kind === 'export') {
@@ -2518,7 +2520,7 @@ export class A11yUxTester extends GVAbstractTester {
             ? DomHelper.queryGVSelector<HTMLButtonElement>(mapId, 'button[id$="_myImages"]')
             : DomHelper.getGVElementById<HTMLButtonElement>(mapId, 'footerBar-table-details-btn-0');
         return !!openButton;
-      }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+      }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     }
     if (!openButton) throw new TestError(`The ${kind} opening button must be mounted`);
     openButton.click();
@@ -2531,7 +2533,7 @@ export class A11yUxTester extends GVAbstractTester {
       );
       closeButton = dialog?.querySelector<HTMLButtonElement>(kind === 'lightbox' ? 'button[aria-label="Close"]' : 'button') ?? undefined;
       return !!dialog && !!closeButton;
-    }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+    }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     if (!dialog || !closeButton) throw new TestError('The overlay and its close button must be mounted');
     return { dialog, closeButton };
   }
@@ -2547,7 +2549,7 @@ export class A11yUxTester extends GVAbstractTester {
       const settledFocus =
         kind === 'export' ? dialog.querySelector<HTMLInputElement>(`#${CSS.escape(`${mapId}-export-title-input`)}`) : closeButton;
       return !!settledFocus && DomHelper.getActiveElement() === settledFocus;
-    }, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+    }, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
     if (kind === 'lightbox') await delay(MODAL_FOCUS_SETTLE_MS);
   }
 

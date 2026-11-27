@@ -1,5 +1,6 @@
+import { TestConstants } from '../testers/constants';
 import { AbstractTestSuite } from '../core/abstract-test-suite';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
+import type { GVAbstractTester } from '../testers/abstract-gv-tester';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
@@ -97,7 +98,7 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite<GVAbstractTe
    */
   zoomToInitialExtent(): Promise<void> {
     this.addStep('Zooming back to initial extent before continuing the tests...');
-    return this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    return this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
   }
 
   // #endregion METHODS

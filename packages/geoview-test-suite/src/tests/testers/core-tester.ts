@@ -1,4 +1,5 @@
-﻿import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
+import { TestConstants } from './constants';
+import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
 import type {
   TypeMetadataWMSCapabilities,
   TypeMetadataWFSCapabilities,
@@ -47,7 +48,7 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test validateAndPingUrl (simple) with a directly reachable URL...`,
       async (test) => {
-        const url = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+        const url = TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER;
         test.addStep(`Simple pinging valid reachable URL: ${url}...`);
         const result = await validateAndPingUrl(url);
         return result;
@@ -211,7 +212,7 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test validateAndPingUrl with a WMS service URL...`,
       async (test) => {
-        const url = GVAbstractTester.GEOMET_URL;
+        const url = TestConstants.GEOMET_URL;
         test.addStep(`Pinging WMS service URL: ${url}...`);
         const result = await validateAndPingUrlOGC(url);
         return result;
@@ -457,7 +458,7 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test GeoUtilities.getWMSServiceMetadata with Forest Burn (proxy fallback)...`,
       (test) => {
-        const url = GVAbstractTester.FOREST_BURN_WMS_URL;
+        const url = TestConstants.FOREST_BURN_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
         return GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
@@ -497,7 +498,7 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...`,
       (test) => {
-        const url = GVAbstractTester.BELGIUM_WFS_URL;
+        const url = TestConstants.BELGIUM_WFS_URL;
         test.addStep(`Fetching WFS metadata from: ${url}...`);
         return GeoUtilities.getWFSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
@@ -537,7 +538,7 @@ export class CoreTester extends GVAbstractTester {
     return this.test(
       `Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service (proxy fallback)...`,
       (test) => {
-        const url = GVAbstractTester.TAIWAN_WMTS_URL;
+        const url = TestConstants.TAIWAN_WMTS_URL;
         test.addStep(`Fetching WMTS metadata from: ${url}...`);
         return GeoUtilities.getWMTSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },

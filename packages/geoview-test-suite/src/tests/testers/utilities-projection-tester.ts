@@ -1,8 +1,9 @@
-import { Projection } from 'geoview-core/geo/utils/projection';
 import type { Projection as OLProjection } from 'ol/proj';
 
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Projection utilities testing class for cgpv.api.utilities.projection (Projection) functions.
@@ -28,7 +29,7 @@ export class UtilitiesProjectionTester extends GVAbstractTester {
           Projection.addProjectionIfMissing('urn:ogc:def:crs:EPSG::4326'),
           Projection.addProjectionIfMissing({ wkid: 4326 }),
           Projection.addProjectionIfMissing({ wkid: 3857, latestWkid: 4326 }),
-          Projection.addProjectionIfMissing({ wkt: GVAbstractTester.WGS84_WKT }),
+          Projection.addProjectionIfMissing({ wkt: TestConstants.WGS84_WKT }),
         ]);
       },
       (test, projections) => {

@@ -1,9 +1,9 @@
+import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { MapConfigTester } from '../testers/map-config-tester';
+import { TestConstants } from '../testers/constants';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
-import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { MapConfigTester } from '../testers/map-config-tester';
-import { GVAbstractTester } from '../testers/abstract-gv-tester';
 
 /**
  * The GeoView Test Suite for Map Configuration.
@@ -227,7 +227,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       'dynamic',
       'none',
       true,
-      GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT
+      TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT
     );
     await this.#mapConfigTester.testInvalidViewportMidpoints();
     await this.#mapConfigTester.testErrorFitViewportMidpointsCancelled();
@@ -236,7 +236,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     await this.#mapConfigTester.testViewportBoundaryLonLat(3978, Math.PI / 4);
     await this.#mapConfigTester.testViewportBoundaryLonLat(3857);
     await this.#mapConfigTester.testViewportBoundaryLonLat(3978, 0, 'static');
-    await this.#mapConfigTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', GVAbstractTester.VIEWPORT_ANTIMERIDIAN_LONLAT);
+    await this.#mapConfigTester.testViewportBoundaryLonLat(3857, 0, 'dynamic', TestConstants.VIEWPORT_ANTIMERIDIAN_LONLAT);
     await this.#mapConfigTester.testViewportBoundaryPaddingAndResize();
     await this.#mapConfigTester.testViewportBoundaryUnavailable();
 

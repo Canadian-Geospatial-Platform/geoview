@@ -1,3 +1,4 @@
+import { TestConstants } from './constants';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { Test } from '../core/test';
 import { TestSkippedError } from '../core/exceptions';
@@ -60,8 +61,8 @@ export class ConfigTester extends GVAbstractTester {
   testInitEsriDynamicWithHistoricalFlood(): Promise<Test<TypeGeoviewLayerConfig>> {
     // Redirect
     return this.testInitEsriDynamic(
-      ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
-      ConfigTester.HISTORICAL_FLOOD_LAYER_NAME,
+      TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER,
+      TestConstants.HISTORICAL_FLOOD_LAYER_NAME,
       EsriDynamicLayerEntryConfig
     );
   }
@@ -73,7 +74,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitEsriDynamicWithCESI(): Promise<Test<TypeGeoviewLayerConfig>> {
     // Redirect
-    return this.testInitEsriDynamic(ConfigTester.CESI_MAP_SERVER, ConfigTester.CESI_GROUP_0_LAYER_NAME, GroupLayerEntryConfig);
+    return this.testInitEsriDynamic(TestConstants.CESI_MAP_SERVER, TestConstants.CESI_GROUP_0_LAYER_NAME, GroupLayerEntryConfig);
   }
 
   /**
@@ -139,7 +140,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitEsriDynamicBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriDynamic config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -163,9 +164,9 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-    const layerId = ConfigTester.HISTORICAL_FLOOD_LAYER_ID;
-    const layerName = ConfigTester.HISTORICAL_FLOOD_LAYER_NAME;
+    const metadataAccessPath = TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER;
+    const layerId = TestConstants.HISTORICAL_FLOOD_LAYER_ID;
+    const layerName = TestConstants.HISTORICAL_FLOOD_LAYER_NAME;
 
     // Test
     return this.test(
@@ -196,7 +197,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], EsriDynamicLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], GVAbstractTester.HISTORICAL_FLOOD_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], TestConstants.HISTORICAL_FLOOD_OUTFIELDS);
       }
     );
   }
@@ -213,9 +214,9 @@ export class ConfigTester extends GVAbstractTester {
   testInitEsriFeatureWithTorontoNeighbourhoods(): Promise<Test<TypeGeoviewLayerConfig>> {
     // Redirect
     return this.testInitEsriFeature(
-      ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL,
-      ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID,
-      ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME
+      TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL,
+      TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID,
+      TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME
     );
   }
 
@@ -227,9 +228,9 @@ export class ConfigTester extends GVAbstractTester {
   testInitEsriFeatureWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
     // Redirect
     return this.testInitEsriFeature(
-      ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
-      ConfigTester.HISTORICAL_FLOOD_LAYER_ID,
-      ConfigTester.HISTORICAL_FLOOD_LAYER_NAME
+      TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER,
+      TestConstants.HISTORICAL_FLOOD_LAYER_ID,
+      TestConstants.HISTORICAL_FLOOD_LAYER_NAME
     );
   }
 
@@ -241,9 +242,9 @@ export class ConfigTester extends GVAbstractTester {
   testInitEsriFeatureWithForestIndustry(): Promise<Test<TypeGeoviewLayerConfig>> {
     // Redirect
     return this.testInitEsriFeature(
-      ConfigTester.FOREST_INDUSTRY_MAP_SERVER,
-      ConfigTester.FOREST_INDUSTRY_LAYER_ID,
-      ConfigTester.FOREST_INDUSTRY_LAYER_NAME
+      TestConstants.FOREST_INDUSTRY_MAP_SERVER,
+      TestConstants.FOREST_INDUSTRY_LAYER_ID,
+      TestConstants.FOREST_INDUSTRY_LAYER_NAME
     );
   }
 
@@ -309,7 +310,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitEsriFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriFeature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -333,9 +334,9 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
-    const layerId = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID;
-    const layerName = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME;
+    const metadataAccessPath = TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
+    const layerId = TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID;
+    const layerName = TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME;
 
     // Test
     return this.test(
@@ -366,7 +367,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], EsriFeatureLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], TestConstants.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_OUTFIELDS);
       }
     );
   }
@@ -385,8 +386,8 @@ export class ConfigTester extends GVAbstractTester {
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
     const gvLayerType: TypeGeoviewLayerType = 'esriImage';
-    const metadataAccessPath = ConfigTester.IMAGE_SERVER_ELEVATION_URL;
-    const layerId = ConfigTester.IMAGE_SERVER_ELEVATION_LAYER_ID;
+    const metadataAccessPath = TestConstants.IMAGE_SERVER_ELEVATION_URL;
+    const layerId = TestConstants.IMAGE_SERVER_ELEVATION_LAYER_ID;
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
     const expectedConfigFull = {
@@ -432,7 +433,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test an EsriImage config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -455,7 +456,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithOWSTerrestris(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.OWS_TERRESTRIS;
+    const url = TestConstants.OWS_TERRESTRIS;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -514,7 +515,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithOWSTerrestrisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.OWS_TERRESTRIS;
+    const url = TestConstants.OWS_TERRESTRIS;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -566,7 +567,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithDatacubeMSI(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.DATACUBE_MSI;
+    const url = TestConstants.DATACUBE_MSI;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -613,13 +614,13 @@ export class ConfigTester extends GVAbstractTester {
         test.addStep('Verifying 1st sub layer entry...');
         const subLayerEntry1 = layerEntry.listOfLayerEntryConfig[0];
         Test.assertIsInstance(subLayerEntry1, OgcWmsLayerEntryConfig);
-        Test.assertIsEqual(subLayerEntry1.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI);
+        Test.assertIsEqual(subLayerEntry1.layerId, TestConstants.DATACUBE_MSI_LAYER_NAME_MSI);
 
         // Take the second layer entry
         test.addStep('Verifying 2nd layer entry...');
         const subLayerEntry2 = layerEntry.listOfLayerEntryConfig[1];
         Test.assertIsInstance(subLayerEntry2, OgcWmsLayerEntryConfig);
-        Test.assertIsEqual(subLayerEntry2.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE);
+        Test.assertIsEqual(subLayerEntry2.layerId, TestConstants.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE);
       }
     );
   }
@@ -631,7 +632,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSLayerWithDatacubeMSINoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.DATACUBE_MSI;
+    const url = TestConstants.DATACUBE_MSI;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -687,7 +688,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test a WMS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -713,7 +714,7 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_URL;
+    const metadataAccessPath = TestConstants.AIRBORNE_RADIOACTIVITY_WMS_URL;
     const layerName = 'Airborne Radioactivity';
 
     // Test
@@ -736,7 +737,7 @@ export class ConfigTester extends GVAbstractTester {
           metadataAccessPath,
           [
             {
-              id: GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID,
+              id: TestConstants.AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID,
               layerName,
             },
           ],
@@ -750,7 +751,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], OgcWmsLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], GVAbstractTester.AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], TestConstants.AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS);
       }
     );
   }
@@ -766,7 +767,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWFSLayerWithGeometCurrentConditions(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.GEOMET_URL;
+    const url = TestConstants.GEOMET_URL;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -802,7 +803,7 @@ export class ConfigTester extends GVAbstractTester {
         // Check at least one has the correct layerId
         test.addStep('Verifying Current Conditions in the list...');
         const foundLayerEntry = result.listOfLayerEntryConfig.find(
-          (layerEntry) => layerEntry.layerId === GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID
+          (layerEntry) => layerEntry.layerId === TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID
         );
         Test.assertIsDefined('listOfLayerEntryConfig with Current Conditions', foundLayerEntry);
 
@@ -824,7 +825,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test a WFS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -846,7 +847,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testInitWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url which still respond something (not a 404, 500, etc)
-    const urlBad: string = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
+    const urlBad: string = TestConstants.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
 
     // Test
     return this.testError(
@@ -874,7 +875,7 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = GVAbstractTester.GEOMET_URL;
+    const metadataAccessPath = TestConstants.GEOMET_URL;
     const layerName = 'Current Conditions';
 
     // Test
@@ -892,7 +893,7 @@ export class ConfigTester extends GVAbstractTester {
           metadataAccessPath,
           [
             {
-              id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID,
+              id: TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID,
               layerName,
             },
           ],
@@ -906,7 +907,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], OgcWfsLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], ConfigTester.GEOMET_WFS_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], TestConstants.GEOMET_WFS_OUTFIELDS);
       }
     );
   }
@@ -922,7 +923,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeojsonWithMetadataMeta(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.GEOJSON_METADATA_META;
+    const url = TestConstants.GEOJSON_METADATA_META;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -957,7 +958,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOJSON_METADATA_META_FILE);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.GEOJSON_METADATA_META_FILE);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -973,7 +974,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeojsonWithGeometryCollection(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = `${GVAbstractTester.GEOJSON_DATASET_ROOT}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
+    const url = `${TestConstants.GEOJSON_DATASET_ROOT}/${TestConstants.GEOJSON_GEOMETRY_COLLECTION}`;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -985,7 +986,7 @@ export class ConfigTester extends GVAbstractTester {
       geoviewLayerId: gvLayerId,
       geoviewLayerType: gvLayerType,
       geoviewLayerName: gvLayerName,
-      metadataAccessPath: GVAbstractTester.GEOJSON_DATASET_ROOT,
+      metadataAccessPath: TestConstants.GEOJSON_DATASET_ROOT,
     };
 
     return this.test(
@@ -1003,7 +1004,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
 
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.GEOJSON_GEOMETRY_COLLECTION);
 
         test.addStep('Verifying layer entry is of the right type...');
         Test.assertIsInstance(result.listOfLayerEntryConfig[0], GeoJSONLayerEntryConfig);
@@ -1023,7 +1024,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeoJSONBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.test(
@@ -1081,7 +1082,7 @@ export class ConfigTester extends GVAbstractTester {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
-    const metadataAccessPath = GVAbstractTester.GEOJSON_METADATA_META;
+    const metadataAccessPath = TestConstants.GEOJSON_METADATA_META;
     const layerName = 'Polygons';
 
     // Test
@@ -1099,7 +1100,7 @@ export class ConfigTester extends GVAbstractTester {
           metadataAccessPath,
           [
             {
-              id: GVAbstractTester.GEOJSON_POLYGONS,
+              id: TestConstants.GEOJSON_POLYGONS,
               layerName,
             },
           ],
@@ -1113,7 +1114,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertIsInstance(result[0], GeoJSONLayerEntryConfig);
 
         // Verify the layer outfields
-        ConfigTester.#helperStepOutfields(test, result[0], ConfigTester.GEOJSON_POLYGONS_OUTFIELDS);
+        ConfigTester.#helperStepOutfields(test, result[0], TestConstants.GEOJSON_POLYGONS_OUTFIELDS);
       }
     );
   }
@@ -1129,7 +1130,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testCSVWithStationList(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.CSV_STATION_LIST;
+    const url = TestConstants.CSV_STATION_LIST;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -1164,7 +1165,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.CSV_STATION_LIST_FILE);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.CSV_STATION_LIST_FILE);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -1182,7 +1183,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testCSVBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.test(
@@ -1212,7 +1213,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testOGCFeatureLakes(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
+    const url = TestConstants.PYGEOAPI_B6RYUVAKK5;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -1247,7 +1248,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -1267,7 +1268,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testOGCFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.testError(`Test an OGC Feature config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -1290,7 +1291,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testWKBWithSouthAfrica(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.WKB_SOUTH_AFRICA;
+    const url = TestConstants.WKB_SOUTH_AFRICA;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -1325,7 +1326,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.WKB_SOUTH_AFRICA);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.WKB_SOUTH_AFRICA);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -1368,7 +1369,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testKMLWithTornado(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.KML_TORNADO;
+    const url = TestConstants.KML_TORNADO;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -1403,7 +1404,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.KML_TORNADO_FILE);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.KML_TORNADO_FILE);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -1422,7 +1423,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testKMLBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.test(
@@ -1452,7 +1453,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeoTIFFWithVegetation(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = GVAbstractTester.GEOTIFF_VEGETATION;
+    const url = TestConstants.GEOTIFF_VEGETATION;
 
     // Dummy names
     const gvLayerId = 'gvLayerId';
@@ -1487,7 +1488,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check at least one has the correct layerId
         test.addStep('Verifying layer id in the list...');
-        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOTIFF_VEGETATION_FILE);
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, TestConstants.GEOTIFF_VEGETATION_FILE);
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
@@ -1506,7 +1507,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeoTIFFBadUrlExpectSkip(): Promise<Test<void>> {
     // The bad url
-    const urlBad: string = GVAbstractTester.BAD_URL;
+    const urlBad: string = TestConstants.BAD_URL;
 
     // Test
     return this.test(
@@ -1536,15 +1537,15 @@ export class ConfigTester extends GVAbstractTester {
    */
   testStandaloneGeocoreWithAirborne(): Promise<Test<GeoCoreLayerConfigResponse>> {
     // The values
-    const uuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
+    const uuid = TestConstants.AIRBORNE_RADIOACTIVITY_UUID;
     const expectedConfig = {
       config: {
-        geoviewLayerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
+        geoviewLayerId: TestConstants.AIRBORNE_RADIOACTIVITY_UUID,
         geoviewLayerType: 'esriDynamic',
-        geoviewLayerName: GVAbstractTester.AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME,
+        geoviewLayerName: TestConstants.AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME,
       },
       geocharts: {
-        [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
+        [TestConstants.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
           layers: [],
           chart: 'line',
         },
@@ -1572,14 +1573,14 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves with the initialized GeoCore configuration
    */
   testInitGeocoreEsriFeaturePreservesLayerId(): Promise<Test<ConfigFromTypeInfo>> {
-    const uuid = GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_UUID;
+    const uuid = TestConstants.GEOCORE_PERMAFROST_ECOPROVINCE_UUID;
     const layerName = 'Permafrost by Ecoprovince';
     const expectedConfig = {
       configInfo: {
         geoviewLayerId: uuid,
         geoviewLayerType: 'esriFeature',
         geoviewLayerName: layerName,
-        listOfLayerEntryConfig: [{ layerId: GVAbstractTester.GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_ID }],
+        listOfLayerEntryConfig: [{ layerId: TestConstants.GEOCORE_PERMAFROST_ECOPROVINCE_LAYER_ID }],
       },
     };
 

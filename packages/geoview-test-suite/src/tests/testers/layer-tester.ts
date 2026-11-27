@@ -1,4 +1,5 @@
-﻿import { Test } from '../core/test';
+import { TestConstants } from './constants';
+import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { TestError, TestSkippedError } from '../core/exceptions';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
@@ -63,359 +64,6 @@ import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation
  */
 export class LayerTester extends GVAbstractTester {
   /**
-   * Tests the combined extent of GeoJSON, Esri Feature, Esri Dynamic, and WMS fixtures.
-   *
-   * @returns A promise resolving with individual bounds and combined extent observations
-   */
-  testGetExtentOfMultipleLayers(): Promise<Test<MultipleLayersExtentResult>> {
-    const rootLayerPaths: string[] = [];
-    const expectedExtentAll = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
-    const expectedExtentVectors = [-15490107.081926208, 5653062.530474714, -6097718.768649618, 10332401.648523508];
-    const expectedExtentRasters = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
-
-    return this.test(
-      'Test getExtentOfMultipleLayers with GeoJSON, Esri Feature, Esri Dynamic and WMS...',
-      async (test) => {
-        // Capture each cleanup path before awaiting loading, including partially loaded fixtures.
-        const polygons = await this.addLayerGeoJSONWithMetadataPolygons(test, {
-          onLayerPath: (rootPath): void => {
-            rootLayerPaths.push(rootPath);
-          },
-        });
-
-        const projects = await this.addLayerEsriFeatureTopProjects(test, {
-          onLayerPath: (rootPath): void => {
-            rootLayerPaths.push(rootPath);
-          },
-        });
-
-        // Include a raster-backed ESRI layer alongside the two vector fixtures.
-        const boundaries = await this.addLayerEsriDynamicGNWTBoundaries(test, {
-          onLayerPath: (rootPath): void => {
-            rootLayerPaths.push(rootPath);
-          },
-        });
-
-        // Use a regional WMS fixture rather than the global Cities layer.
-        const halifax = await this.addLayerWMSWithDatacubeRingOfFire(test, {
-          onLayerPath: (rootPath): void => {
-            rootLayerPaths.push(rootPath);
-          },
-        });
-
-        // Loaded layers may still be initializing bounds; wait for each projected extent.
-        const layers = [polygons, projects, boundaries, halifax];
-        const bounds = await Promise.all(layers.map((layer) => layer.waitForBounds()));
-        const { layerController } = this.getControllersRegistry();
-
-        test.addStep('Combining the bounds of four different layer types...');
-        const allExtent = await layerController.getExtentOfMultipleLayers([
-          polygons.getLayerPath(),
-          projects.getLayerPath(),
-          boundaries.getLayerPath(),
-          halifax.getLayerPath(),
-        ]);
-
-        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
-        const vectorExtent = await layerController.getExtentOfMultipleLayers([polygons.getLayerPath(), projects.getLayerPath()]);
-
-        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
-        const rasterExtent = await layerController.getExtentOfMultipleLayers([boundaries.getLayerPath(), halifax.getLayerPath()]);
-
-        // Return test results
-        return { bounds, allExtent, vectorExtent, rasterExtent };
-      },
-      (test, result) => {
-        test.addStep('Verifying four distinct layer types have finite bounds...');
-        Test.assertIsEqual(result.bounds.length, 4);
-        const validBounds: Extent[] = [];
-        result.bounds.forEach((bounds) => {
-          Test.assertIsDefined('fixture bounds', bounds);
-          Test.assertIsEqual(bounds.length, 4);
-          Test.assertIsEqual(bounds.every(Number.isFinite), true);
-          Test.assertIsEqual(bounds[0] <= bounds[2] && bounds[1] <= bounds[3], true);
-          validBounds.push(bounds);
-        });
-
-        test.addStep('Verifying the combined extent matches the union of all fixture bounds...');
-        Test.assertIsDefined('combined extent', result.allExtent);
-        Test.assertIsArrayEqual(result.allExtent, expectedExtentAll);
-        Test.assertIsDefined('vector extent', result.vectorExtent);
-        Test.assertIsArrayEqual(result.vectorExtent, expectedExtentVectors);
-        Test.assertIsDefined('raster extent', result.rasterExtent);
-        Test.assertIsArrayEqual(result.rasterExtent, expectedExtentRasters);
-      },
-      (test) => {
-        // Clear the layer from the map and assert it was removed
-        rootLayerPaths.reverse().forEach((layerPath) => this.removeLayerConfigAndAssert(test, layerPath));
-      }
-    );
-  }
-
-  /**
-   * Tests object injection followed by JSON-string replacement through the public API.
-   *
-   * @returns Source and query snapshots after both injections
-   */
-  testSetGeojsonSourceReplacesFeatures(): Promise<Test<GeojsonInjectionResult>> {
-    return this.#testGeojsonSource(false);
-  }
-
-  /**
-   * Tests that injected replacement features survive a map projection change.
-   *
-   * @returns Injection snapshots including the reprojected source
-   */
-  testSetGeojsonSourceReprojectsFeatures(): Promise<Test<GeojsonInjectionResult>> {
-    return this.#testGeojsonSource(true);
-  }
-
-  /**
-   * Exercises isolated public injections, optionally changing the shared map projection.
-   *
-   * @param reproject - Whether to switch map projection after replacement
-   * @returns Immutable feature and query results for assertion
-   */
-  #testGeojsonSource(reproject: boolean): Promise<Test<GeojsonInjectionResult>> {
-    let rootLayerPath: string | undefined;
-    const mapViewer = this.getMapViewer();
-    const initialProjection = getStoreMapStateJson(this.getMapId()).currentProjection;
-
-    // The test switches only between projections supported by its coordinate fixtures.
-    if (initialProjection !== 3978 && initialProjection !== 3857) throw new TestError('Unsupported test map projection');
-
-    // Snapshot the shared map view because the projection variant must leave the map as it found it.
-    const initialCenter = mapViewer.getView().getCenter()?.slice();
-    const initialZoom = mapViewer.getView().getZoom();
-    const initialRotation = mapViewer.getView().getRotation();
-
-    // The first injection has two distinguishable features so replacement can be checked exactly.
-    const originalCoordinates1 = [-75, 45];
-    const originalCoordinates2 = [-80, 50];
-    const original: GeoJSONObject = {
-      type: 'FeatureCollection',
-      features: [
-        { type: 'Feature', id: 'original-1', properties: { Red: 11 }, geometry: { type: 'Point', coordinates: originalCoordinates1 } },
-        { type: 'Feature', id: 'original-2', properties: { Red: 12 }, geometry: { type: 'Point', coordinates: originalCoordinates2 } },
-      ],
-    };
-
-    // A single replacement makes stale features obvious in both the source and query results.
-    const replacementCoordinates = [-100, 55];
-    const replacement: GeoJSONObject = {
-      type: 'FeatureCollection',
-      features: [
-        { type: 'Feature', id: 'replacement', properties: { Red: 33 }, geometry: { type: 'Point', coordinates: replacementCoordinates } },
-      ],
-    };
-
-    let layer: AbstractBaseGVLayer | undefined;
-    let loadedEvents = 0;
-    // Count public injection completion events separately from the layer's initial load.
-    const loadedHandler = (): void => {
-      loadedEvents++;
-    };
-    return this.test(
-      reproject
-        ? 'Test public GeoJSON replacement features reproject after a map projection change...'
-        : 'Test public GeoJSON object injection and JSON-string replacement...',
-      async (test) => {
-        // Add the fixture and wait for its selected layer to be ready
-        layer = await this.addLayerGeoJSONBlank(test, {
-          onLayerPath: (rootPath): void => {
-            rootLayerPath = rootPath;
-          },
-        });
-        if (!(layer instanceof GVGeoJSON)) throw new TestError('Expected a GeoJSON layer for injection');
-        const layerPath = layer.getLayerPath();
-
-        // Subscribe after initial layer setup so this count reflects the two injections and optional reinjection.
-        layer.onLayerLoaded(loadedHandler);
-        const allFeatureInfo = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet;
-
-        // Wait until the query layer exists before triggering source updates that should refresh its results.
-        await allFeatureInfo.waitForLayerToGetRegistered(layerPath);
-
-        // The public API accepts a GeoJSON object; wait for its asynchronous query refresh before taking a snapshot.
-        test.addStep('Awaiting public object injection and its asynchronous feature-info refresh...');
-        await mapViewer.layer.setGeojsonSource(layerPath, original);
-        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
-
-        // Get the initial Geojson injection
-        const initial = this.#snapshotGeojsonInjection(layer, loadedEvents);
-
-        // Replace through the string overload to verify parsing and replacement, not feature accumulation.
-        test.addStep('Replacing features using JSON-string input and the stored source projection...');
-        await mapViewer.layer.setGeojsonSource(layerPath, JSON.stringify(replacement));
-        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
-
-        // Prepare the result object with the initial and replacement snapshots.
-        const result: GeojsonInjectionResult = {
-          gvLayer: layer,
-          initial,
-          replacement: this.#snapshotGeojsonInjection(layer, loadedEvents),
-        };
-
-        // If reprojecting
-        if (reproject) {
-          // The helper listens for the next loaded event before changing projection, avoiding a missed fast completion.
-          test.addStep('Changing map projection and waiting for the injected layer to finish reinjection...');
-          await LayerTester.#withGeojsonLoaded(layer, () =>
-            this.getControllersRegistry().mapController.setProjection(initialProjection === 3978 ? 3857 : 3978)
-          );
-          // Projection switches reset table results, so query the reprojected source explicitly before snapshotting.
-          await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
-          result.reprojected = this.#snapshotGeojsonInjection(layer, loadedEvents);
-        }
-
-        // Return the final result of the GeoJSON injection, including any reprojected snapshot if applicable.
-        return result;
-      },
-      (test, result) => {
-        // Compare identities, values, coordinates, query contents, status, projection metadata, and completion counts.
-        test.addStep('Verifying exact feature identities, properties, positions, loaded events and query replacement...');
-        LayerTester.#assertGeojsonInjection(
-          result.initial,
-          [String(original.features[0].id ?? ''), String(original.features[1].id ?? '')],
-          [original.features[0].properties?.Red, original.features[1].properties?.Red],
-          [originalCoordinates1, originalCoordinates2],
-          1
-        );
-        LayerTester.#assertGeojsonInjection(
-          result.replacement,
-          ['replacement'],
-          [replacement.features[0].properties?.Red],
-          [[-100, 55]],
-          2
-        );
-
-        if (reproject) {
-          Test.assertIsDefined('reprojected', result.reprojected);
-          LayerTester.#assertGeojsonInjection(
-            result.reprojected,
-            ['replacement'],
-            [replacement.features[0].properties?.Red],
-            [replacementCoordinates],
-            3
-          );
-        }
-      },
-      async (test, result) => {
-        const gvLayer = result?.gvLayer ?? layer;
-        // Remove the observer before teardown so layer removal cannot affect the injection event count.
-        if (gvLayer instanceof AbstractGVLayer) {
-          gvLayer.offLayerLoaded(loadedHandler);
-        }
-
-        try {
-          // Clear the layer from the map and assert it was removed
-          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
-        } finally {
-          if (reproject) {
-            // Restore the shared map state even when injection, assertions, or layer cleanup failed.
-            await this.getControllersRegistry().mapController.setProjection(initialProjection);
-            const view = mapViewer.getView();
-            view.setCenter(initialCenter);
-            if (initialZoom !== undefined) view.setZoom(initialZoom);
-            this.getControllersRegistry().mapController.rotate(initialRotation, false);
-            // Wait for rendering to settle before another test uses this map.
-            await mapViewer.waitForRender();
-          }
-        }
-      }
-    );
-  }
-
-  /**
-   * Captures source coordinates in longitude/latitude and the asynchronously refreshed query result.
-   *
-   * @param layer - Injected layer to inspect
-   * @param loadedEvents - Number of injection completion events observed
-   * @returns An immutable snapshot
-   */
-  #snapshotGeojsonInjection(layer: GVGeoJSON, loadedEvents: number): GeojsonInjectionSnapshot {
-    const source = layer.getOLLayer().getSource();
-    if (!(source instanceof GVVectorSource)) throw new TestError('Injected layer has no GeoView vector source');
-    return {
-      features: source.getFeatures().map((feature) => {
-        const geometry = feature.getGeometry();
-        if (!(geometry instanceof Point)) throw new TestError('Injected feature must have point geometry');
-        return {
-          id: feature.getId(),
-          value: feature.get('Red'),
-          lonlat: Projection.transformToLonLat(geometry.getCoordinates(), this.getMapViewer().getProjection()),
-        };
-      }),
-      queryValues: (getStoreDataTableFeaturesByPath(this.getMapId(), layer.getLayerPath()) ?? []).map(
-        (feature) => feature.fieldInfo.Red?.value
-      ),
-      status: layer.getLayerStatus(),
-      sourceProjection: layer.getDataProjection()?.getCode(),
-      storedProjectionIsObject: source.getDataProjection() instanceof OLProjection,
-      loadedEvents,
-    };
-  }
-
-  /**
-   * Verifies an injection snapshot without repeating the injection operation.
-   *
-   * @param snapshot - Observed source and query state
-   * @param ids - Expected feature identifiers
-   * @param values - Expected Red properties
-   * @param coordinates - Expected longitude/latitude positions
-   * @param loadedEvents - Minimum expected completion events
-   */
-  static #assertGeojsonInjection(
-    snapshot: GeojsonInjectionSnapshot,
-    ids: string[],
-    values: number[],
-    coordinates: number[][],
-    loadedEvents: number
-  ): void {
-    Test.assertIsArrayEqual(
-      snapshot.features.map((feature) => feature.id),
-      ids
-    );
-    Test.assertIsArrayEqual(
-      snapshot.features.map((feature) => feature.value),
-      values
-    );
-    Test.assertIsArrayEqual([...snapshot.queryValues].sort(), [...values].sort());
-    Test.assertIsEqual(snapshot.status, 'loaded');
-    Test.assertIsEqual(snapshot.sourceProjection, 'EPSG:4326');
-    Test.assertIsEqual(snapshot.storedProjectionIsObject, true);
-    Test.assertIsEqual(snapshot.loadedEvents >= loadedEvents, true);
-    snapshot.features.forEach((feature, index) => {
-      Test.assertIsEqualWithinTolerance(feature.lonlat[0], coordinates[index][0], 1e-6);
-      Test.assertIsEqualWithinTolerance(feature.lonlat[1], coordinates[index][1], 1e-6);
-    });
-  }
-
-  /**
-   * Subscribes before a projection change so an already-loaded status cannot mask unfinished reinjection.
-   *
-   * @param layer - Layer whose next loading completion is required
-   * @param action - Operation that starts reinjection
-   */
-  static async #withGeojsonLoaded(layer: GVGeoJSON, action: () => Promise<void>): Promise<void> {
-    const completion = Promise.withResolvers<void>();
-    const loaded = (): void => completion.resolve();
-    const failed = (): void => completion.reject(new TestError('GeoJSON reinjection emitted a layer error'));
-    const signal = AbortSignal.timeout(10000); // TODO: Fix this timeout
-    const timedOut = (): void => completion.reject(new TestError('Timed out waiting for GeoJSON reinjection'));
-    layer.onLayerLoaded(loaded);
-    layer.onLayerError(failed);
-    signal.addEventListener('abort', timedOut, { once: true });
-    try {
-      await Promise.all([action(), completion.promise]);
-    } finally {
-      layer.offLayerLoaded(loaded);
-      layer.offLayerError(failed);
-      signal.removeEventListener('abort', timedOut);
-    }
-  }
-
-  /**
    * Returns the name of the Tester.
    *
    * @returns The name of the Tester
@@ -459,13 +107,13 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsEqual(registeredConfigLayerPath, configLayerPath);
 
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
           undefined,
-          GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST
+          TestConstants.HISTORICAL_FLOOD_ICON_LIST
         );
       },
       (test) => {
@@ -495,7 +143,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // At this point, the layer successfully loaded
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -516,8 +164,8 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriDynamicBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.HISTORICAL_FLOOD_LAYER_ID}`;
     const gvLayerName = 'Esri Dynamic Histo Flood Events';
 
     // Test
@@ -528,7 +176,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
+          { id: TestConstants.HISTORICAL_FLOOD_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -567,13 +215,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
           undefined,
-          GVAbstractTester.FOREST_INDUSTRY_ICON_LIST
+          TestConstants.FOREST_INDUSTRY_ICON_LIST
         );
       },
       (test) => {
@@ -595,8 +243,8 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.FOREST_INDUSTRY_LAYER_ID}`;
     const gvLayerName = 'Esri Feature Forest Industry';
 
     // Test
@@ -607,7 +255,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID },
+          { id: TestConstants.FOREST_INDUSTRY_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -642,7 +290,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
@@ -683,7 +331,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -714,16 +362,16 @@ export class LayerTester extends GVAbstractTester {
         // Perform assertions
         const group = result.getParentRoot();
         Test.assertIsDefined('group', group);
-        const layerPathCities = `${group.getLayerPath()}/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
+        const layerPathCities = `${group.getLayerPath()}/${TestConstants.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
 
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           layerPathCities,
           this.getControllersRegistry().layerController.getGeoviewLayer(layerPathCities).getLayerName()
         );
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -744,8 +392,8 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = `${GVAbstractTester.BAD_URL}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}/ImageServer`; // Has to be formatted like this, because we're guessing the layer id with url parsing!
-    const layerPath = `${gvLayerId}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
+    const layerUrl = `${TestConstants.BAD_URL}/${TestConstants.IMAGE_SERVER_ELEVATION_LAYER_ID}/ImageServer`; // Has to be formatted like this, because we're guessing the layer id with url parsing!
+    const layerPath = `${gvLayerId}/${TestConstants.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const gvLayerName = 'Esri Image Elevation';
 
     // Test
@@ -798,12 +446,12 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
-          GVAbstractTester.OWS_TERRESTRIS_ICON_IMAGE
+          TestConstants.OWS_TERRESTRIS_ICON_IMAGE
         );
       },
       (test) => {
@@ -834,12 +482,12 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
-          GVAbstractTester.DATACUBE_MSI_ICON_IMAGE
+          TestConstants.DATACUBE_MSI_ICON_IMAGE
         );
       },
       (test) => {
@@ -870,12 +518,12 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
-          GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
+          TestConstants.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
         );
       },
       (test) => {
@@ -915,7 +563,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Validate the layer is a group layer
         Test.assertIsInstance(result, GVGroupLayer);
@@ -974,7 +622,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Validate the layer is a group layer
         Test.assertIsInstance(result, GVGroupLayer);
@@ -1023,7 +671,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1047,8 +695,8 @@ export class LayerTester extends GVAbstractTester {
 
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const gvLayerName = 'Datacube MSI';
 
     // Test
@@ -1064,7 +712,7 @@ export class LayerTester extends GVAbstractTester {
           layerUrl,
           undefined,
           false,
-          [{ id: GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE }],
+          [{ id: TestConstants.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE }],
           false
         );
 
@@ -1104,8 +752,8 @@ export class LayerTester extends GVAbstractTester {
         });
       },
       (test, result) => {
-        const groupPath = `${result.getGeoviewLayerId()}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
-        const duplicateGroupPath = `${groupPath}/${GVAbstractTester.CANIMAGE_WMS_GROUP_ID}`;
+        const groupPath = `${result.getGeoviewLayerId()}/${TestConstants.CANIMAGE_WMS_GROUP_ID}`;
+        const duplicateGroupPath = `${groupPath}/${TestConstants.CANIMAGE_WMS_GROUP_ID}`;
         // Perform assertions
         test.addStep('Verifying the duplicate nested group path was created...');
 
@@ -1113,7 +761,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), duplicateGroupPath);
 
         // The deeply-nested leaf must exist and have loaded
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1189,7 +837,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1210,8 +858,8 @@ export class LayerTester extends GVAbstractTester {
   testAddWMTSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
     const gvLayerName = 'World Timezones WMTS';
 
     // Test
@@ -1223,8 +871,8 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WMTS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           {
-            id: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
-            tileMatrixSet: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID,
+            id: TestConstants.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
+            tileMatrixSet: TestConstants.WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID,
           },
         ]);
 
@@ -1266,7 +914,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1287,9 +935,9 @@ export class LayerTester extends GVAbstractTester {
   testAddXYZTilesBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.XYZ_TILES_OSM_LAYER_ID}`;
-    const gvLayerName = GVAbstractTester.XYZ_TILES_OSM_LAYER_ID;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.XYZ_TILES_OSM_LAYER_ID}`;
+    const gvLayerName = TestConstants.XYZ_TILES_OSM_LAYER_ID;
 
     // Test
     return this.testError(
@@ -1299,7 +947,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = XYZTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.XYZ_TILES_OSM_LAYER_ID },
+          { id: TestConstants.XYZ_TILES_OSM_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1342,7 +990,7 @@ export class LayerTester extends GVAbstractTester {
         },
         (test, result) => {
           // Perform assertions
-          LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+          LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
         },
         (test) => {
           // Clear the layer from the map and assert it was removed
@@ -1353,13 +1001,13 @@ export class LayerTester extends GVAbstractTester {
 
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
-    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+    const layerUrl = TestConstants.VECTOR_TILES_CBMT_3978_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
+    const gvLayerName = TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME;
 
     // Create the config
     const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-      { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
+      { id: TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME },
     ]);
 
     // Test a true negative, it's supposed to crash
@@ -1393,9 +1041,9 @@ export class LayerTester extends GVAbstractTester {
   testAddVectorTilesBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
-    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
+    const gvLayerName = TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME;
 
     // Test
     return this.testError(
@@ -1405,7 +1053,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
+          { id: TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1448,7 +1096,7 @@ export class LayerTester extends GVAbstractTester {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         // GV Current Conditions isn't returning a legend for us anymore, sending checkIconsList = undefined now
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
@@ -1476,8 +1124,8 @@ export class LayerTester extends GVAbstractTester {
   testAddWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Test
@@ -1488,7 +1136,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WFS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, 'all', [
-          { id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID },
+          { id: TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1516,8 +1164,8 @@ export class LayerTester extends GVAbstractTester {
   testAddWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
+    const layerUrl = TestConstants.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
+    const layerPath = `${gvLayerId}/${TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Test
@@ -1528,7 +1176,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = WFS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, 'all', [
-          { id: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID },
+          { id: TestConstants.GEOMET_URL_CURRENT_COND_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1570,13 +1218,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
           undefined,
-          GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST
+          TestConstants.GEOJSON_POLYGONS_ICON_LIST
         );
       },
       (test) => {
@@ -1606,7 +1254,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists and legend information was created
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1629,8 +1277,8 @@ export class LayerTester extends GVAbstractTester {
     // GV: we have to wait until the layer gets on the map and throws an error, which will since the layer can't reach the data.
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_POLYGONS}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.GEOJSON_POLYGONS}`;
     const gvLayerName = 'Polygons JSON';
 
     // Test
@@ -1641,7 +1289,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.GEOJSON_POLYGONS },
+          { id: TestConstants.GEOJSON_POLYGONS },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1683,7 +1331,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        return LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1706,8 +1354,8 @@ export class LayerTester extends GVAbstractTester {
     // GV: we have to wait until the layer gets on the map and throws an error, which will since the layer can't reach the data.
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOTIFF_VEGETATION_FILE}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.GEOTIFF_VEGETATION_FILE}`;
     const gvLayerName = 'GeoTIFF Vegetation';
 
     // Test
@@ -1718,7 +1366,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = GeoTIFF.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.GEOTIFF_VEGETATION_FILE },
+          { id: TestConstants.GEOTIFF_VEGETATION_FILE },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1760,13 +1408,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
           undefined,
-          GVAbstractTester.CSV_STATION_ICON_LIST
+          TestConstants.CSV_STATION_ICON_LIST
         );
       },
       (test) => {
@@ -1790,8 +1438,8 @@ export class LayerTester extends GVAbstractTester {
     // GV: we have to wait until the layer gets on the map and throws an error, which will since the layer can't reach the data.
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.CSV_STATION_LIST_FILE}`;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.CSV_STATION_LIST_FILE}`;
     const gvLayerName = 'Station List CSV';
 
     // Test
@@ -1802,7 +1450,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = CSV.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.CSV_STATION_LIST_FILE },
+          { id: TestConstants.CSV_STATION_LIST_FILE },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1844,13 +1492,13 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(
+        LayerTester.#assertCheckLayerExistsInStore(
           test,
           this.getMapId(),
           result.getLayerPath(),
           result.getLayerName(),
           undefined,
-          GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
+          TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
         );
       },
       (test) => {
@@ -1872,9 +1520,9 @@ export class LayerTester extends GVAbstractTester {
   testAddOGCFeatureWithBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
-    const gvLayerName = GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES}`;
+    const gvLayerName = TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES;
 
     // Test
     return this.testError(
@@ -1884,7 +1532,7 @@ export class LayerTester extends GVAbstractTester {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
         const gvConfig = OgcFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES },
+          { id: TestConstants.PYGEOAPI_B6RYUVAKK5_LAKES },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -1926,7 +1574,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -1949,9 +1597,9 @@ export class LayerTester extends GVAbstractTester {
     // GV: we have to wait until the layer gets on the map and throws an error, which will since the layer can't reach the data.
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.WKB_SOUTH_AFRICA}`;
-    const gvLayerName = GVAbstractTester.WKB_SOUTH_AFRICA;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.WKB_SOUTH_AFRICA}`;
+    const gvLayerName = TestConstants.WKB_SOUTH_AFRICA;
 
     // Test
     return this.testError(
@@ -1960,7 +1608,7 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
-        const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
+        const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: TestConstants.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
@@ -2001,7 +1649,7 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
       },
       (test) => {
         // Clear the layer from the map and assert it was removed
@@ -2024,9 +1672,9 @@ export class LayerTester extends GVAbstractTester {
     // GV: we have to wait until the layer gets on the map and throws an error, which will since the layer can't reach the data.
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.KML_TORNADO_FILE}`;
-    const gvLayerName = GVAbstractTester.KML_TORNADO_FILE;
+    const layerUrl = TestConstants.BAD_URL;
+    const layerPath = `${gvLayerId}/${TestConstants.KML_TORNADO_FILE}`;
+    const gvLayerName = TestConstants.KML_TORNADO_FILE;
 
     // Test
     return this.testError(
@@ -2035,7 +1683,7 @@ export class LayerTester extends GVAbstractTester {
       async (test) => {
         // Create the config
         test.addStep('Creating the GeoView Layer Configuration...');
-        const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
+        const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: TestConstants.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
         await this.addLayerOnMap(test, gvConfig, layerPath);
@@ -2138,7 +1786,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -2152,8 +1800,8 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(outfields, 1);
 
         // Find the "material" field
-        test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
-        const materialField = outfields.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        test.addStep(`Finding the "${TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
+        const materialField = outfields.find((f) => f.name === TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME);
         Test.assertIsDefined('materialField', materialField);
 
         // Verify it has a domain
@@ -2197,7 +1845,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -2211,8 +1859,8 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(outfields, 1);
 
         // Find the "material" field
-        test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
-        const materialField = outfields.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        test.addStep(`Finding the "${TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
+        const materialField = outfields.find((f) => f.name === TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME);
         Test.assertIsDefined('materialField', materialField);
 
         // Verify it has a domain
@@ -2264,7 +1912,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        await this.getControllersRegistry().mapController.zoomMap(17.4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(17.4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -2284,7 +1932,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('firstFeature.fieldInfo', firstFeature.fieldInfo);
 
         // Get the material field value
-        const fieldName = GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME;
+        const fieldName = TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME;
         test.addStep(`Getting the "${fieldName}" field from the feature...`);
         const materialFieldEntry = firstFeature.fieldInfo[fieldName];
         Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
@@ -2346,7 +1994,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        await this.getControllersRegistry().mapController.zoomMap(17.4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(17.4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -2366,7 +2014,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsDefined('firstFeature.fieldInfo', firstFeature.fieldInfo);
 
         // Get the material field value
-        const fieldName = GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME;
+        const fieldName = TestConstants.WATER_NETWORK_DOMAIN_FIELD_NAME;
         test.addStep(`Getting the "${fieldName}" field from the feature...`);
         const materialFieldEntry = firstFeature.fieldInfo[fieldName];
         Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
@@ -2489,7 +2137,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result.getLayerPath());
+        LayerTester.#assertCheckLayerExistsInPanels(test, this.getMapId(), result.getLayerPath());
 
         const gvLayerPathWithGroupVisibilityFalse = result.getLayerPath();
         // Get the root layer (group)
@@ -3028,7 +2676,7 @@ export class LayerTester extends GVAbstractTester {
    */
   testSetLayerWmsStyle(): Promise<Test<LayerTestResult<(string | undefined)[]>>> {
     let rootLayerPath: string | undefined;
-    const style = GVAbstractTester.DATACUBE_MSI_THRESHOLD_STYLE;
+    const style = TestConstants.DATACUBE_MSI_THRESHOLD_STYLE;
 
     return this.test(
       'Test LayerController.setLayerWmsStyle synchronizes runtime, WMS source, and legend store...',
@@ -3070,6 +2718,112 @@ export class LayerTester extends GVAbstractTester {
         if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
       }
     );
+  }
+  /**
+   * Tests the combined extent of GeoJSON, Esri Feature, Esri Dynamic, and WMS fixtures.
+   *
+   * @returns A promise resolving with individual bounds and combined extent observations
+   */
+  testGetExtentOfMultipleLayers(): Promise<Test<MultipleLayersExtentResult>> {
+    const rootLayerPaths: string[] = [];
+    const expectedExtentAll = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
+    const expectedExtentVectors = [-15490107.081926208, 5653062.530474714, -6097718.768649618, 10332401.648523508];
+    const expectedExtentRasters = [-19541079.422498688, 4268968.397697891, -1200639.4449692357, 18780693.365674984];
+
+    return this.test(
+      'Test getExtentOfMultipleLayers with GeoJSON, Esri Feature, Esri Dynamic and WMS...',
+      async (test) => {
+        // Capture each cleanup path before awaiting loading, including partially loaded fixtures.
+        const polygons = await this.addLayerGeoJSONWithMetadataPolygons(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPaths.push(rootPath);
+          },
+        });
+
+        const projects = await this.addLayerEsriFeatureTopProjects(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPaths.push(rootPath);
+          },
+        });
+
+        // Include a raster-backed ESRI layer alongside the two vector fixtures.
+        const boundaries = await this.addLayerEsriDynamicGNWTBoundaries(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPaths.push(rootPath);
+          },
+        });
+
+        // Use a regional WMS fixture rather than the global Cities layer.
+        const halifax = await this.addLayerWMSWithDatacubeRingOfFire(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPaths.push(rootPath);
+          },
+        });
+
+        // Loaded layers may still be initializing bounds; wait for each projected extent.
+        const layers = [polygons, projects, boundaries, halifax];
+        const bounds = await Promise.all(layers.map((layer) => layer.waitForBounds()));
+        const { layerController } = this.getControllersRegistry();
+
+        test.addStep('Combining the bounds of four different layer types...');
+        const allExtent = await layerController.getExtentOfMultipleLayers([
+          polygons.getLayerPath(),
+          projects.getLayerPath(),
+          boundaries.getLayerPath(),
+          halifax.getLayerPath(),
+        ]);
+
+        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
+        const vectorExtent = await layerController.getExtentOfMultipleLayers([polygons.getLayerPath(), projects.getLayerPath()]);
+
+        // Check the vector pair separately so raster bounds cannot mask missing vector contributions.
+        const rasterExtent = await layerController.getExtentOfMultipleLayers([boundaries.getLayerPath(), halifax.getLayerPath()]);
+
+        // Return test results
+        return { bounds, allExtent, vectorExtent, rasterExtent };
+      },
+      (test, result) => {
+        test.addStep('Verifying four distinct layer types have finite bounds...');
+        Test.assertIsEqual(result.bounds.length, 4);
+        const validBounds: Extent[] = [];
+        result.bounds.forEach((bounds) => {
+          Test.assertIsDefined('fixture bounds', bounds);
+          Test.assertIsEqual(bounds.length, 4);
+          Test.assertIsEqual(bounds.every(Number.isFinite), true);
+          Test.assertIsEqual(bounds[0] <= bounds[2] && bounds[1] <= bounds[3], true);
+          validBounds.push(bounds);
+        });
+
+        test.addStep('Verifying the combined extent matches the union of all fixture bounds...');
+        Test.assertIsDefined('combined extent', result.allExtent);
+        Test.assertIsArrayEqual(result.allExtent, expectedExtentAll);
+        Test.assertIsDefined('vector extent', result.vectorExtent);
+        Test.assertIsArrayEqual(result.vectorExtent, expectedExtentVectors);
+        Test.assertIsDefined('raster extent', result.rasterExtent);
+        Test.assertIsArrayEqual(result.rasterExtent, expectedExtentRasters);
+      },
+      (test) => {
+        // Clear the layer from the map and assert it was removed
+        rootLayerPaths.reverse().forEach((layerPath) => this.removeLayerConfigAndAssert(test, layerPath));
+      }
+    );
+  }
+  /**
+   * Tests object injection followed by JSON-string replacement through the public API.
+   *
+   * @returns Source and query snapshots after both injections
+   */
+  testSetGeojsonSourceReplacesFeatures(): Promise<Test<GeojsonInjectionResult>> {
+    return this.#testGeojsonSource(false);
+  }
+
+  /**
+   * Tests that injected replacement features survive a map projection change.
+   *
+   * @returns Injection snapshots including the reprojected source
+   */
+  testSetGeojsonSourceReprojectsFeatures(): Promise<Test<GeojsonInjectionResult>> {
+    return this.#testGeojsonSource(true);
   }
 
   // #region GEOCORE CUSTOM CONFIG
@@ -3116,14 +2870,14 @@ export class LayerTester extends GVAbstractTester {
           onLayerPath: (rootPath): void => {
             rootLayerPath = rootPath;
           },
-        }); // `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0/1`
+        }); // `${TestConstants.AIRBORNE_RADIOACTIVITY_UUID}/0/1`
 
         // Create map config from map state
         return layer.getLayerPath();
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result);
+        LayerTester.#assertCheckLayerExistsInPanels(test, this.getMapId(), result);
 
         // Get the layer
         const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(result);
@@ -3179,7 +2933,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInPanels(test, this.getMapId(), result);
+        LayerTester.#assertCheckLayerExistsInPanels(test, this.getMapId(), result);
 
         // Get the layer
         const layer = this.getControllersRegistry().layerController.getGeoviewLayer(result);
@@ -3200,7 +2954,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise resolving with the selected layer and its initial store and configuration observations
    */
   testAddGeocoreWithInlineLandCoverEntryOverride(): Promise<Test<LayerTestResult<LandCoverOverrideResult>>> {
-    const layerId = GVAbstractTester.GEOCORE_LAND_COVER_LAYER_ID;
+    const layerId = TestConstants.GEOCORE_LAND_COVER_LAYER_ID;
     const layerName = '2010 Land Cover of Canada';
     const customLayerEntryConfig = JSON.stringify([
       {
@@ -3229,7 +2983,7 @@ export class LayerTester extends GVAbstractTester {
         const layerPath = gvLayer.getLayerPath();
 
         test.addStep(`Waiting for the selected land-cover entry '${layerPath}' and its legend store entry...`);
-        await whenThisThen(() => getStoreLayerLegendLayerByPath(this.getMapId(), layerPath), GVAbstractTester.UI_STATE_TIMEOUT_MS);
+        await whenThisThen(() => getStoreLayerLegendLayerByPath(this.getMapId(), layerPath), TestConstants.UI_STATE_TIMEOUT_MS);
 
         // Inspect the store directly rather than requiring the panel boxes to be rendered.
         const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
@@ -3290,7 +3044,7 @@ export class LayerTester extends GVAbstractTester {
         listOfLayerEntryConfig: [{ layerId: '5' }],
       },
     ]);
-    const customLayerPathWaterQuantity = `${GVAbstractTester.GEOCORE_CESI_UUID}/base-group/0/1`;
+    const customLayerPathWaterQuantity = `${TestConstants.GEOCORE_CESI_UUID}/base-group/0/1`;
 
     let rootLayerPath: string | undefined;
     return this.test(
@@ -3315,7 +3069,7 @@ export class LayerTester extends GVAbstractTester {
         await whenThisThen(() => {
           if (layerWaterQualityGroup.getLayerStatus() === 'error') throw new TestError('CESI quality group failed to load');
           return layerWaterQualityGroup.loadedOnce;
-        }, GVAbstractTester.UI_STATE_TIMEOUT_MS);
+        }, TestConstants.UI_STATE_TIMEOUT_MS);
 
         const layerPathQuantity = layerWaterQuantity.getLayerPath();
         const layerPathQuantityGroup = layerWaterQuantityGroup.getLayerPath();
@@ -3328,7 +3082,7 @@ export class LayerTester extends GVAbstractTester {
             [layerPathQuantity, layerPathQuantityGroup, layerPathQuality, layerPathQualityGroup].every(
               (path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined
             ),
-          GVAbstractTester.UI_STATE_TIMEOUT_MS
+          TestConstants.UI_STATE_TIMEOUT_MS
         );
         const storeWaterQuantity = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQuantity);
         const storeWaterQuantityGroup = getStoreLayerLegendLayerByPath(this.getMapId(), layerPathQuantityGroup);
@@ -3382,7 +3136,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise resolving with the group and child state observations
    */
   testAddGeocoreWithInlineIAACGroupOverride(): Promise<Test<IaacGroupOverrideResult>> {
-    const uuid = GVAbstractTester.GEOCORE_IAAC_UUID;
+    const uuid = TestConstants.GEOCORE_IAAC_UUID;
     const groupName = 'IAAC Projects';
     const customLayerEntryConfig = JSON.stringify([
       {
@@ -3415,7 +3169,7 @@ export class LayerTester extends GVAbstractTester {
         // The API supplies base-group when the inline group has no explicit layerId.
         test.addStep('Waiting for the generated group and its configured children...');
         const [group, ...children] = await Promise.all(
-          [groupPath, ...childPaths].map((path) => layerController.waitForLayerRegistered(path, GVAbstractTester.UI_STATE_TIMEOUT_MS))
+          [groupPath, ...childPaths].map((path) => layerController.waitForLayerRegistered(path, TestConstants.UI_STATE_TIMEOUT_MS))
         );
         if (!(group instanceof GVGroupLayer)) throw new TestError(`Expected the IAAC entry '${groupPath}' to be a group`);
 
@@ -3424,13 +3178,13 @@ export class LayerTester extends GVAbstractTester {
         await whenThisThen(() => {
           if (children.some((child) => child.getLayerStatus() === 'error')) throw new TestError('An IAAC child layer failed to load');
           return children.every((child) => child.loadedOnce);
-        }, GVAbstractTester.UI_STATE_TIMEOUT_MS);
+        }, TestConstants.UI_STATE_TIMEOUT_MS);
 
         // Inspect the store directly without changing the requested collapsed states.
         test.addStep('Waiting for the group and child legend entries...');
         await whenThisThen(
           () => [groupPath, ...childPaths].every((path) => getStoreLayerLegendLayerByPath(this.getMapId(), path) !== undefined),
-          GVAbstractTester.UI_STATE_TIMEOUT_MS
+          TestConstants.UI_STATE_TIMEOUT_MS
         );
 
         return {
@@ -3505,7 +3259,7 @@ export class LayerTester extends GVAbstractTester {
         await layer.waitForBounds();
 
         // Call zoom to layer extent, it should work
-        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, TestConstants.USE_ZOOM_ANIMATION);
 
         // Return the layer
         return layer;
@@ -3545,7 +3299,7 @@ export class LayerTester extends GVAbstractTester {
         // Call zoom to layer extent, it should throw a NoBoundsError
         await this.getControllersRegistry().layerController.zoomToLayerExtent(
           fixtureLayer.getLayerPath(),
-          GVAbstractTester.USE_ZOOM_ANIMATION
+          TestConstants.USE_ZOOM_ANIMATION
         );
       },
       undefined,
@@ -3579,7 +3333,7 @@ export class LayerTester extends GVAbstractTester {
         await layer.waitForBounds();
 
         // Call zoom to layer extent, it should work
-        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().layerController.zoomToLayerExtent(layerPath, TestConstants.USE_ZOOM_ANIMATION);
 
         // Return the layer
         return layer;
@@ -3749,7 +3503,7 @@ export class LayerTester extends GVAbstractTester {
    */
   testEsriDynamicJunctionGeometryPairing(): Promise<Test<LayerTestResult<{ comparisons: { oid: number; distance: number }[] }>>> {
     let rootLayerPath: string | undefined;
-    const junctionLonLat = GVAbstractTester.GNWT_BOUNDARIES_JUNCTION_LONLAT;
+    const junctionLonLat = TestConstants.GNWT_BOUNDARIES_JUNCTION_LONLAT;
 
     return this.test(
       `Test ESRI Dynamic junction geometry pairs to its own OBJECTID...`,
@@ -3809,7 +3563,7 @@ export class LayerTester extends GVAbstractTester {
         // Each entry's paired geometry must belong to its own OBJECTID (center within tolerance of ground truth)
         result.data.comparisons.forEach((comparison) => {
           test.addStep(`Verifying geometry pairing for OBJECTID ${comparison.oid} (distance ${Math.round(comparison.distance)} m)...`);
-          Test.assertIsEqualWithinTolerance(comparison.distance, 0, GVAbstractTester.JUNCTION_PAIRING_TOLERANCE_METERS);
+          Test.assertIsEqualWithinTolerance(comparison.distance, 0, TestConstants.JUNCTION_PAIRING_TOLERANCE_METERS);
         });
       },
       async (test) => {
@@ -3900,7 +3654,7 @@ export class LayerTester extends GVAbstractTester {
         });
 
         // This layer is only visible within a certain zoom range, so zoom in before interacting with it.
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Get the layer
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(gvLayer.getLayerPath());
@@ -3930,134 +3684,6 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion LAYER FUNCTIONS
-
-  // #region HELPERS
-
-  /**
-   * Asserts that a layer has mounted entries in both the Legend and Layers panels.
-   *
-   * @param test - The test instance used to record the verification steps
-   * @param mapId - The map identifier
-   * @param layerPath - The full path of the layer to verify
-   */
-  static assertCheckLayerExistsInPanels(test: Test, mapId: string, layerPath: string): void {
-    // Use full paths rather than labels, which may be duplicated across concurrent fixtures.
-    test.addStep(`Verifying layer '${layerPath}' exists in the Layers panel...`);
-    Test.assertIsDefined(
-      'layers panel layer',
-      DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
-        DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
-    );
-
-    test.addStep(`Verifying layer '${layerPath}' exists in the Legend panel...`);
-    Test.assertIsDefined(
-      'legend panel layer',
-      DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
-        DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
-    );
-  }
-
-  /**
-   * Asserts that a layer exists in the legend store and in both rendered panels.
-   *
-   * Logs the verification step in the test instance.
-   * If `checkIconImage` or `checkIconsList` is provided, this method will also
-   * verify that the layer's style has been applied by delegating to
-   * `assertStyleApplied`.
-   *
-   * @param test - The test instance used to record the verification steps
-   * @param mapId - The map id
-   * @param layerPath - The path or ID of the layer to verify
-   * @param layerName - Expected display name in the Layers panel
-   * @param checkIconImage - Optional expected icon image.
-   *   If provided, the function will additionally check that the legend contains a matching icon
-   * @param checkIconsList - Optional list of expected legend icon items.
-   *   If provided, the function will additionally verify that the legend's icon list matches this array
-   */
-  static assertCheckLayerExistsInStore(
-    test: Test<AbstractBaseGVLayer>,
-    mapId: string,
-    layerPath: string,
-    layerName: string,
-    checkIconImage?: string,
-    checkIconsList?: Partial<TypeLegendItem>[]
-  ): void {
-    // Get the layer legend
-    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-
-    // Verify the layer has a legend information
-    test.addStep(`Verify the layer ${layerPath} has legend information...`);
-    Test.assertIsDefined('legendLayer', legendLayer);
-
-    // Store registration alone does not prove that either React panel rendered the layer.
-    this.assertCheckLayerExistsInPanels(test, mapId, layerPath);
-
-    // Read the primary label rather than the whole row, which also contains controls and status text.
-    test.addStep(`Verifying layer '${layerPath}' is named '${layerName}' in the Layers panel...`);
-    Test.assertIsEqual(
-      DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
-        DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR),
-      layerName
-    );
-
-    // If checking the style
-    if (checkIconImage || checkIconsList) {
-      // Redirect
-      this.assertStyleApplied(test, mapId, layerPath, checkIconImage, checkIconsList);
-    }
-  }
-
-  /**
-   * Asserts that a layer with the given path has icons for its style.
-   *
-   * Logs the verification step in the test instance.
-   * This validates that the layer's legend contains at least one icon and that the
-   * first icon indicates a valid style (i.e., the icon image is present and not `"no data"`).
-   * Optionally validates:
-   * - that the first icon's image matches `checkIconImage`
-   * - that the first icon's list of legend items matches `checkIconsList`
-   *
-   * @param test - The test instance used to record the verification steps
-   * @param mapId - The map id
-   * @param layerPath - The path or ID of the layer whose style icons are being verified
-   * @param checkIconImage - Optional expected icon image to validate against the legend
-   * @param checkIconsList - Optional expected list of legend icon items
-   */
-  static assertStyleApplied(
-    test: Test<AbstractBaseGVLayer>,
-    mapId: string,
-    layerPath: string,
-    checkIconImage?: string,
-    checkIconsList?: Partial<TypeLegendItem>[]
-  ): void {
-    // Get the layer legend from the store
-    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-
-    // Verify the icon were also loaded for the layer
-    test.addStep(`Verify the icons were loaded for the layer...`);
-    Test.assertIsArrayLengthMinimal(legendLayer?.icons, 1);
-
-    // Take the first one
-    const firstIcon = legendLayer!.icons[0];
-    const hasStyleIcon = firstIcon.iconImage && firstIcon.iconImage !== 'no data';
-    Test.assertIsEqual(hasStyleIcon, true);
-
-    // If checking the icon image
-    if (checkIconImage) {
-      // Verify the layer has icon image
-      test.addStep(`Verify the legend has an icon image...`);
-      Test.assertIsEqual(firstIcon.iconImage, checkIconImage);
-    }
-
-    // If comparing the icons list
-    if (checkIconsList && firstIcon.iconList) {
-      // Verify the layer has icons list
-      test.addStep(`Verify each legend icon information...`);
-      Test.assertIsArrayEqualJsons(firstIcon.iconList, checkIconsList);
-    }
-  }
-
-  // #endregion HELPERS
 
   // #region PRIVATE METHODS
 
@@ -4124,7 +3750,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         // Verify the layer exists
-        LayerTester.assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
+        LayerTester.#assertCheckLayerExistsInStore(test, this.getMapId(), result.getLayerPath(), result.getLayerName());
 
         test.addStep('Verifying the resolved ZPEGT group name and metadata-derived sublayer names...');
         Test.assertIsInstance(result, GVGroupLayer);
@@ -4152,8 +3778,381 @@ export class LayerTester extends GVAbstractTester {
       }
     );
   }
+  /**
+   * Exercises isolated public injections, optionally changing the shared map projection.
+   *
+   * @param reproject - Whether to switch map projection after replacement
+   * @returns Immutable feature and query results for assertion
+   */
+  #testGeojsonSource(reproject: boolean): Promise<Test<GeojsonInjectionResult>> {
+    let rootLayerPath: string | undefined;
+    const mapViewer = this.getMapViewer();
+    const initialProjection = getStoreMapStateJson(this.getMapId()).currentProjection;
+
+    // The test switches only between projections supported by its coordinate fixtures.
+    if (initialProjection !== 3978 && initialProjection !== 3857) throw new TestError('Unsupported test map projection');
+
+    // Snapshot the shared map view because the projection variant must leave the map as it found it.
+    const initialCenter = mapViewer.getView().getCenter()?.slice();
+    const initialZoom = mapViewer.getView().getZoom();
+    const initialRotation = mapViewer.getView().getRotation();
+
+    // The first injection has two distinguishable features so replacement can be checked exactly.
+    const originalCoordinates1 = [-75, 45];
+    const originalCoordinates2 = [-80, 50];
+    const original: GeoJSONObject = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', id: 'original-1', properties: { Red: 11 }, geometry: { type: 'Point', coordinates: originalCoordinates1 } },
+        { type: 'Feature', id: 'original-2', properties: { Red: 12 }, geometry: { type: 'Point', coordinates: originalCoordinates2 } },
+      ],
+    };
+
+    // A single replacement makes stale features obvious in both the source and query results.
+    const replacementCoordinates = [-100, 55];
+    const replacement: GeoJSONObject = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', id: 'replacement', properties: { Red: 33 }, geometry: { type: 'Point', coordinates: replacementCoordinates } },
+      ],
+    };
+
+    let layer: AbstractBaseGVLayer | undefined;
+    let loadedEvents = 0;
+    // Count public injection completion events separately from the layer's initial load.
+    const loadedHandler = (): void => {
+      loadedEvents++;
+    };
+
+    return this.test(
+      reproject
+        ? 'Test public GeoJSON replacement features reproject after a map projection change...'
+        : 'Test public GeoJSON object injection and JSON-string replacement...',
+      async (test) => {
+        // Add the fixture and wait for its selected layer to be ready
+        layer = await this.addLayerGeoJSONBlank(test, {
+          onLayerPath: (rootPath): void => {
+            rootLayerPath = rootPath;
+          },
+        });
+        if (!(layer instanceof GVGeoJSON)) throw new TestError('Expected a GeoJSON layer for injection');
+        const layerPath = layer.getLayerPath();
+
+        // Subscribe after initial layer setup so this count reflects the two injections and optional reinjection.
+        layer.onLayerLoaded(loadedHandler);
+        const allFeatureInfo = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet;
+
+        // Wait until the query layer exists before triggering source updates that should refresh its results.
+        await allFeatureInfo.waitForLayerToGetRegistered(layerPath);
+
+        // The public API accepts a GeoJSON object; wait for its asynchronous query refresh before taking a snapshot.
+        test.addStep('Awaiting public object injection and its asynchronous feature-info refresh...');
+        await mapViewer.layer.setGeojsonSource(layerPath, original);
+        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
+
+        // Get the initial Geojson injection
+        const initial = this.#snapshotGeojsonInjection(layer, loadedEvents);
+
+        // Replace through the string overload to verify parsing and replacement, not feature accumulation.
+        test.addStep('Replacing features using JSON-string input and the stored source projection...');
+        await mapViewer.layer.setGeojsonSource(layerPath, JSON.stringify(replacement));
+        await allFeatureInfo.waitForLayerQueryToFinish(layerPath);
+
+        // Prepare the result object with the initial and replacement snapshots.
+        const result: GeojsonInjectionResult = {
+          gvLayer: layer,
+          initial,
+          replacement: this.#snapshotGeojsonInjection(layer, loadedEvents),
+        };
+
+        // If reprojecting
+        if (reproject) {
+          // The helper listens for the next loaded event before changing projection, avoiding a missed fast completion.
+          test.addStep('Changing map projection and waiting for the injected layer to finish reinjection...');
+          await LayerTester.#withGeojsonLoaded(layer, () =>
+            this.getControllersRegistry().mapController.setProjection(initialProjection === 3978 ? 3857 : 3978)
+          );
+          // Projection switches reset table results, so query the reprojected source explicitly before snapshotting.
+          await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
+          result.reprojected = this.#snapshotGeojsonInjection(layer, loadedEvents);
+        }
+
+        // Return the final result of the GeoJSON injection, including any reprojected snapshot if applicable.
+        return result;
+      },
+      (test, result) => {
+        // Compare identities, values, coordinates, query contents, status, projection metadata, and completion counts.
+        test.addStep('Verifying exact feature identities, properties, positions, loaded events and query replacement...');
+        LayerTester.#assertGeojsonInjection(
+          result.initial,
+          [String(original.features[0].id ?? ''), String(original.features[1].id ?? '')],
+          [original.features[0].properties?.Red, original.features[1].properties?.Red],
+          [originalCoordinates1, originalCoordinates2],
+          1
+        );
+        LayerTester.#assertGeojsonInjection(
+          result.replacement,
+          ['replacement'],
+          [replacement.features[0].properties?.Red],
+          [[-100, 55]],
+          2
+        );
+
+        if (reproject) {
+          Test.assertIsDefined('reprojected', result.reprojected);
+          LayerTester.#assertGeojsonInjection(
+            result.reprojected,
+            ['replacement'],
+            [replacement.features[0].properties?.Red],
+            [replacementCoordinates],
+            3
+          );
+        }
+      },
+      async (test, result) => {
+        const gvLayer = result?.gvLayer ?? layer;
+        // Remove the observer before teardown so layer removal cannot affect the injection event count.
+        if (gvLayer instanceof AbstractGVLayer) {
+          gvLayer.offLayerLoaded(loadedHandler);
+        }
+
+        try {
+          // Clear the layer from the map and assert it was removed
+          if (rootLayerPath) this.removeLayerConfigAndAssert(test, rootLayerPath);
+        } finally {
+          if (reproject) {
+            // Restore the shared map state even when injection, assertions, or layer cleanup failed.
+            await this.getControllersRegistry().mapController.setProjection(initialProjection);
+            const view = mapViewer.getView();
+            view.setCenter(initialCenter);
+            if (initialZoom !== undefined) view.setZoom(initialZoom);
+            this.getControllersRegistry().mapController.rotate(initialRotation, false);
+            // Wait for rendering to settle before another test uses this map.
+            await mapViewer.waitForRender();
+          }
+        }
+      }
+    );
+  }
+
+  /**
+   * Captures source coordinates in longitude/latitude and the asynchronously refreshed query result.
+   *
+   * @param layer - Injected layer to inspect
+   * @param loadedEvents - Number of injection completion events observed
+   * @returns An immutable snapshot
+   */
+  #snapshotGeojsonInjection(layer: GVGeoJSON, loadedEvents: number): GeojsonInjectionSnapshot {
+    const source = layer.getOLLayer().getSource();
+    if (!(source instanceof GVVectorSource)) throw new TestError('Injected layer has no GeoView vector source');
+    return {
+      features: source.getFeatures().map((feature) => {
+        const geometry = feature.getGeometry();
+        if (!(geometry instanceof Point)) throw new TestError('Injected feature must have point geometry');
+        return {
+          id: feature.getId(),
+          value: feature.get('Red'),
+          lonlat: Projection.transformToLonLat(geometry.getCoordinates(), this.getMapViewer().getProjection()),
+        };
+      }),
+      queryValues: (getStoreDataTableFeaturesByPath(this.getMapId(), layer.getLayerPath()) ?? []).map(
+        (feature) => feature.fieldInfo.Red?.value
+      ),
+      status: layer.getLayerStatus(),
+      sourceProjection: layer.getDataProjection()?.getCode(),
+      storedProjectionIsObject: source.getDataProjection() instanceof OLProjection,
+      loadedEvents,
+    };
+  }
 
   // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
+
+  /**
+   * Asserts that a layer has mounted entries in both the Legend and Layers panels.
+   *
+   * @param test - The test instance used to record the verification steps
+   * @param mapId - The map identifier
+   * @param layerPath - The full path of the layer to verify
+   */
+  static #assertCheckLayerExistsInPanels(test: Test, mapId: string, layerPath: string): void {
+    // Use full paths rather than labels, which may be duplicated across concurrent fixtures.
+    test.addStep(`Verifying layer '${layerPath}' exists in the Layers panel...`);
+    Test.assertIsDefined(
+      'layers panel layer',
+      DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxInLayersPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
+    );
+
+    test.addStep(`Verifying layer '${layerPath}' exists in the Legend panel...`);
+    Test.assertIsDefined(
+      'legend panel layer',
+      DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxInLegendPanel(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR)
+    );
+  }
+
+  /**
+   * Asserts that a layer exists in the legend store and in both rendered panels.
+   *
+   * Logs the verification step in the test instance.
+   * If `checkIconImage` or `checkIconsList` is provided, this method will also
+   * verify that the layer's style has been applied by delegating to
+   * `assertStyleApplied`.
+   *
+   * @param test - The test instance used to record the verification steps
+   * @param mapId - The map id
+   * @param layerPath - The path or ID of the layer to verify
+   * @param layerName - Expected display name in the Layers panel
+   * @param checkIconImage - Optional expected icon image.
+   *   If provided, the function will additionally check that the legend contains a matching icon
+   * @param checkIconsList - Optional list of expected legend icon items.
+   *   If provided, the function will additionally verify that the legend's icon list matches this array
+   */
+  static #assertCheckLayerExistsInStore(
+    test: Test<AbstractBaseGVLayer>,
+    mapId: string,
+    layerPath: string,
+    layerName: string,
+    checkIconImage?: string,
+    checkIconsList?: Partial<TypeLegendItem>[]
+  ): void {
+    // Get the layer legend
+    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+
+    // Verify the layer has a legend information
+    test.addStep(`Verify the layer ${layerPath} has legend information...`);
+    Test.assertIsDefined('legendLayer', legendLayer);
+
+    // Store registration alone does not prove that either React panel rendered the layer.
+    this.#assertCheckLayerExistsInPanels(test, mapId, layerPath);
+
+    // Read the primary label rather than the whole row, which also contains controls and status text.
+    test.addStep(`Verifying layer '${layerPath}' is named '${layerName}' in the Layers panel...`);
+    Test.assertIsEqual(
+      DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.APP_BAR) ??
+        DomHelper.getLayerBoxLayerName(mapId, layerPath, CONTAINER_TYPE.FOOTER_BAR),
+      layerName
+    );
+
+    // If checking the style
+    if (checkIconImage || checkIconsList) {
+      // Redirect
+      this.#assertStyleApplied(test, mapId, layerPath, checkIconImage, checkIconsList);
+    }
+  }
+
+  /**
+   * Asserts that a layer with the given path has icons for its style.
+   *
+   * Logs the verification step in the test instance.
+   * This validates that the layer's legend contains at least one icon and that the
+   * first icon indicates a valid style (i.e., the icon image is present and not `"no data"`).
+   * Optionally validates:
+   * - that the first icon's image matches `checkIconImage`
+   * - that the first icon's list of legend items matches `checkIconsList`
+   *
+   * @param test - The test instance used to record the verification steps
+   * @param mapId - The map id
+   * @param layerPath - The path or ID of the layer whose style icons are being verified
+   * @param checkIconImage - Optional expected icon image to validate against the legend
+   * @param checkIconsList - Optional expected list of legend icon items
+   */
+  static #assertStyleApplied(
+    test: Test<AbstractBaseGVLayer>,
+    mapId: string,
+    layerPath: string,
+    checkIconImage?: string,
+    checkIconsList?: Partial<TypeLegendItem>[]
+  ): void {
+    // Get the layer legend from the store
+    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+
+    // Verify the icon were also loaded for the layer
+    test.addStep(`Verify the icons were loaded for the layer...`);
+    Test.assertIsArrayLengthMinimal(legendLayer?.icons, 1);
+
+    // Take the first one
+    const firstIcon = legendLayer!.icons[0];
+    const hasStyleIcon = firstIcon.iconImage && firstIcon.iconImage !== 'no data';
+    Test.assertIsEqual(hasStyleIcon, true);
+
+    // If checking the icon image
+    if (checkIconImage) {
+      // Verify the layer has icon image
+      test.addStep(`Verify the legend has an icon image...`);
+      Test.assertIsEqual(firstIcon.iconImage, checkIconImage);
+    }
+
+    // If comparing the icons list
+    if (checkIconsList && firstIcon.iconList) {
+      // Verify the layer has icons list
+      test.addStep(`Verify each legend icon information...`);
+      Test.assertIsArrayEqualJsons(firstIcon.iconList, checkIconsList);
+    }
+  }
+
+  /**
+   * Verifies an injection snapshot without repeating the injection operation.
+   *
+   * @param snapshot - Observed source and query state
+   * @param ids - Expected feature identifiers
+   * @param values - Expected Red properties
+   * @param coordinates - Expected longitude/latitude positions
+   * @param loadedEvents - Minimum expected completion events
+   */
+  static #assertGeojsonInjection(
+    snapshot: GeojsonInjectionSnapshot,
+    ids: string[],
+    values: number[],
+    coordinates: number[][],
+    loadedEvents: number
+  ): void {
+    Test.assertIsArrayEqual(
+      snapshot.features.map((feature) => feature.id),
+      ids
+    );
+    Test.assertIsArrayEqual(
+      snapshot.features.map((feature) => feature.value),
+      values
+    );
+    Test.assertIsArrayEqual([...snapshot.queryValues].sort(), [...values].sort());
+    Test.assertIsEqual(snapshot.status, 'loaded');
+    Test.assertIsEqual(snapshot.sourceProjection, 'EPSG:4326');
+    Test.assertIsEqual(snapshot.storedProjectionIsObject, true);
+    Test.assertIsEqual(snapshot.loadedEvents >= loadedEvents, true);
+    snapshot.features.forEach((feature, index) => {
+      Test.assertIsEqualWithinTolerance(feature.lonlat[0], coordinates[index][0], 1e-6);
+      Test.assertIsEqualWithinTolerance(feature.lonlat[1], coordinates[index][1], 1e-6);
+    });
+  }
+
+  /**
+   * Subscribes before a projection change so an already-loaded status cannot mask unfinished reinjection.
+   *
+   * @param layer - Layer whose next loading completion is required
+   * @param action - Operation that starts reinjection
+   */
+  static async #withGeojsonLoaded(layer: GVGeoJSON, action: () => Promise<void>): Promise<void> {
+    const completion = Promise.withResolvers<void>();
+    const loaded = (): void => completion.resolve();
+    const failed = (): void => completion.reject(new TestError('GeoJSON reinjection emitted a layer error'));
+    const signal = AbortSignal.timeout(10000); // TODO: Fix this timeout
+    const timedOut = (): void => completion.reject(new TestError('Timed out waiting for GeoJSON reinjection'));
+    layer.onLayerLoaded(loaded);
+    layer.onLayerError(failed);
+    signal.addEventListener('abort', timedOut, { once: true });
+    try {
+      await Promise.all([action(), completion.promise]);
+    } finally {
+      layer.offLayerLoaded(loaded);
+      layer.offLayerError(failed);
+      signal.removeEventListener('abort', timedOut);
+    }
+  }
+
+  // #endregion STATIC METHODS
 }
 
 // #region TYPES AND INTERFACES

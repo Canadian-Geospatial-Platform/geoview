@@ -2,6 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Size } from 'ol/size';
 import { Draw } from 'geoview-core/geo/interaction/draw';
 
+import { TestConstants } from './constants';
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -238,7 +239,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a zoom
         test.addStep('Performing zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, TestConstants.USE_ZOOM_ANIMATION);
 
         // Return the result
         return getStoreMapStateJson(this.getMapId()).currentZoom;
@@ -251,7 +252,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(currentZoom, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(currentZoom, TestConstants.USE_ZOOM_ANIMATION);
       }
     );
   }
@@ -491,7 +492,7 @@ export class MapTester extends GVAbstractTester {
     zoomLevel: number
   ): Promise<Test<Extent>> {
     // Zoom to initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
     // Get the current init extent
     const { mapExtent, currentProjection } = getStoreMapStateJson(this.getMapId());
@@ -512,7 +513,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, TestConstants.USE_ZOOM_ANIMATION);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
@@ -524,7 +525,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zomm to inital extent...');
 
         // Zoom to initial extent
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -625,7 +626,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Zoom to extent
         test.addStep(`Zooming to extent ${extent.join(',')}...`);
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(extent, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(extent, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -661,7 +662,7 @@ export class MapTester extends GVAbstractTester {
 
         // Zoom to coordinate
         this.getMapViewer().setMapZoomLevel(8);
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(coordinates, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(coordinates, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -953,7 +954,7 @@ export class MapTester extends GVAbstractTester {
         }
 
         test.addStep('Zooming to British Columbia extent...');
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, TestConstants.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
@@ -998,8 +999,8 @@ export class MapTester extends GVAbstractTester {
    */
   testVectorTileProjectionWarning(): Promise<Test<MapViewer>> {
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
-    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+    const layerUrl = TestConstants.VECTOR_TILES_CBMT_3978_URL;
+    const gvLayerName = TestConstants.VECTOR_TILES_CBMT_3978_LAYER_NAME;
 
     return this.test<MapViewer>(
       'Test vector tile projection warning on projection switch',
@@ -1192,7 +1193,7 @@ export class MapTester extends GVAbstractTester {
    */
   static async #createScrollContext(test: Test, mapId: string): Promise<TypeScrollContext> {
     // The app-bar button only exists once the shell has rendered, so it doubles as the readiness signal
-    const button = await DomHelper.waitForLegendPanelButton(mapId, 'appBar', GVAbstractTester.UI_SCROLL_TIMEOUT_MS);
+    const button = await DomHelper.waitForLegendPanelButton(mapId, 'appBar', TestConstants.UI_SCROLL_TIMEOUT_MS);
 
     // Fail fast with a clear message if any control is missing, rather than a null error mid-scenario
     const section = MapTester.#requireElement(mapId, 'map');
@@ -1285,7 +1286,7 @@ export class MapTester extends GVAbstractTester {
     await MapTester.#positionSection(context, -section.getBoundingClientRect().height);
 
     // The footer must still be on screen, otherwise this is not the footer-view position
-    preconditions.push(footer.getBoundingClientRect().top >= -GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+    preconditions.push(footer.getBoundingClientRect().top >= -TestConstants.UI_SCROLL_TOLERANCE_PX);
     await MapTester.#activateAppBarFromClosed(context);
 
     // Last transition: the map-info bar while the map is clipped at the top
@@ -1363,7 +1364,7 @@ export class MapTester extends GVAbstractTester {
     test.addStep(`Footer bounds after activation: top=${footerRect.top}, bottom=${footerRect.bottom}, viewport=${window.innerHeight}`);
 
     // The helper must leave the footer's bottom edge at the viewport bottom minus its clearance
-    preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= GVAbstractTester.UI_SCROLL_TOLERANCE_PX);
+    preconditions.push(Math.abs(footerRect.bottom - (window.innerHeight - helperOffset)) <= TestConstants.UI_SCROLL_TOLERANCE_PX);
   }
 
   /**
@@ -1466,7 +1467,7 @@ export class MapTester extends GVAbstractTester {
       Test.assertIsEqualWithinTolerance(
         result.measurements[1].scrollY,
         result.measurements[0].scrollY,
-        GVAbstractTester.UI_SCROLL_TOLERANCE_PX
+        TestConstants.UI_SCROLL_TOLERANCE_PX
       );
     }
   }
@@ -1479,7 +1480,7 @@ export class MapTester extends GVAbstractTester {
    * @param viewportHeight - The viewport height when the test ran
    */
   static #assertScrollMeasurement(scenario: TypeScrollScenario, measurement: TypeScrollMeasurement, viewportHeight: number): void {
-    const tolerance = GVAbstractTester.UI_SCROLL_TOLERANCE_PX;
+    const tolerance = TestConstants.UI_SCROLL_TOLERANCE_PX;
     const gap = PAGE_SCROLL_GAP_PX;
 
     // A section taller than the viewport cannot fit, so it is aligned with its top at the standard gap and nothing else applies
@@ -1534,9 +1535,9 @@ export class MapTester extends GVAbstractTester {
           previous = current;
           stableSince = performance.now();
         }
-        return performance.now() - stableSince >= GVAbstractTester.UI_SCROLL_SETTLE_MS;
+        return performance.now() - stableSince >= TestConstants.UI_SCROLL_SETTLE_MS;
       },
-      GVAbstractTester.UI_SCROLL_TIMEOUT_MS,
+      TestConstants.UI_SCROLL_TIMEOUT_MS,
       50
     );
   }

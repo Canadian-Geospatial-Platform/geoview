@@ -200,13 +200,14 @@ LayerTester.helperStepAssertStyleApplied(test, this.getMapId(), layerPath, iconI
 
 ### Shared Constants
 
-URLs, UUIDs, and expected icon lists are defined as `static readonly` on `GVAbstractTester`:
+Shared URLs, UUIDs, and expected icon lists are defined as `static readonly` on `TestConstants`
+in `src/tests/testers/constants.ts`.
 
 ```typescript
-GVAbstractTester.BAD_URL; // 'https://badurl/oops'
-GVAbstractTester.QUEBEC_LONLAT; // [-71.356, 46.780]
-GVAbstractTester.ONTARIO_CENTER_LONLAT; // [-87, 51]
-GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+TestConstants.BAD_URL; // 'https://badurl/oops'
+TestConstants.QUEBEC_LONLAT; // [-71.356, 46.780]
+TestConstants.ONTARIO_CENTER_LONLAT; // [-88.31, 51.97]
+TestConstants.HISTORICAL_FLOOD_URL_MAP_SERVER;
 // etc.
 ```
 

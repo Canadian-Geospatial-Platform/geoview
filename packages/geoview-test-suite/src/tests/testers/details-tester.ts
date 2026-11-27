@@ -1,5 +1,6 @@
 import { containsExtent, getCenter } from 'ol/extent';
 
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { TestSkippedError } from '../core/exceptions';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -78,7 +79,7 @@ export class DetailsTester extends GVAbstractTester {
         }
 
         // Store an Ottawa click while coordinate information is off; no coordinate content should appear yet.
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.OTTAWA_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.OTTAWA_LONLAT);
         await DomHelper.waitForReactIdle();
         const enabledAfterClick = !toggle.disabled;
         const hiddenBeforeEnable = !DomHelper.Details.getCoordinateInfoContent(mapId);
@@ -87,12 +88,12 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Enabling coordinate information through the toggle...');
         toggle.click();
         await DomHelper.waitForReactIdle();
-        const first = await this.#readCoordinateInfo(GVAbstractTester.OTTAWA_LONLAT, toggle);
+        const first = await this.#readCoordinateInfo(TestConstants.OTTAWA_LONLAT, toggle);
 
         // Keep the toggle enabled and verify that a different click replaces the displayed coordinates.
         test.addStep('Clicking another location and reading the updated coordinate information...');
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.QUEBEC_LONLAT);
-        const second = await this.#readCoordinateInfo(GVAbstractTester.QUEBEC_LONLAT, toggle);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.QUEBEC_LONLAT);
+        const second = await this.#readCoordinateInfo(TestConstants.QUEBEC_LONLAT, toggle);
 
         test.addStep('Disabling coordinate information and clicking while it is disabled...');
         toggle.click();
@@ -104,7 +105,7 @@ export class DetailsTester extends GVAbstractTester {
         const featureRemoved = !getStoreDetailsLayerDataArrayFeature(mapId);
 
         // Clicking while disabled must not recreate either the coordinate feature or its content.
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ALBERTA_CENTER_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ALBERTA_CENTER_LONLAT);
         await DomHelper.waitForReactIdle();
         const hiddenAfterDisabledClick = !DomHelper.Details.getCoordinateInfoContent(mapId);
         const featureAbsentAfterDisabledClick = !getStoreDetailsLayerDataArrayFeature(mapId);
@@ -112,7 +113,7 @@ export class DetailsTester extends GVAbstractTester {
         // Re-enabling must use the Alberta click recorded while off, rather than the previous Quebec click.
         test.addStep('Re-enabling coordinate information for the latest clicked location...');
         toggle.click();
-        const reenabled = await this.#readCoordinateInfo(GVAbstractTester.ALBERTA_CENTER_LONLAT, toggle);
+        const reenabled = await this.#readCoordinateInfo(TestConstants.ALBERTA_CENTER_LONLAT, toggle);
 
         // Return observations only; all behavioral assertions belong in the assertion callback.
         return {
@@ -143,7 +144,7 @@ export class DetailsTester extends GVAbstractTester {
 
         test.addStep('Verifying decimal and DMS coordinates match each clicked location...');
         // Pair each captured state with the click that should have produced it.
-        const coordinates = [GVAbstractTester.OTTAWA_LONLAT, GVAbstractTester.QUEBEC_LONLAT, GVAbstractTester.ALBERTA_CENTER_LONLAT];
+        const coordinates = [TestConstants.OTTAWA_LONLAT, TestConstants.QUEBEC_LONLAT, TestConstants.ALBERTA_CENTER_LONLAT];
         [result.first, result.second, result.reenabled].forEach((observation, index) => {
           const [longitude, latitude] = coordinates[index];
 
@@ -180,7 +181,7 @@ export class DetailsTester extends GVAbstractTester {
           mapController.toggleCoordinateInfoEnabled(new AbortController().signal);
           await whenThisThen(
             () => getStoreDetailsQueryStatus(mapId, LAYER_PATH_COORDINATE_INFO) === 'processed',
-            GVAbstractTester.UI_STATE_TIMEOUT_MS,
+            TestConstants.UI_STATE_TIMEOUT_MS,
             50
           );
         }
@@ -217,7 +218,7 @@ export class DetailsTester extends GVAbstractTester {
         const mapId = this.getMapId();
 
         test.addStep('Returning to the initial extent and querying the polygon fixture...');
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
         await this.toggleAppbarTabDetails(test, true);
         this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
         await DomHelper.waitForReactIdle();
@@ -323,7 +324,7 @@ export class DetailsTester extends GVAbstractTester {
         const mapId = this.getMapId();
 
         // This layer is only visible within a certain zoom range, so zoom in before interacting with it.
-        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomMap(4, TestConstants.USE_ZOOM_ANIMATION);
 
         // Synchronize the render before querying, then wait for the Details store update.
         await this.simulateMapClickWaitForBatchedQuery(test, clickCoordinate);
@@ -457,7 +458,7 @@ export class DetailsTester extends GVAbstractTester {
         });
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open...`);
@@ -482,7 +483,7 @@ export class DetailsTester extends GVAbstractTester {
         const clickMarkerAfter = getStoreMapClickMarker(this.getMapId());
 
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
 
         // Wait for the React UI to actually pick up on the store update
         test.addStep(`Waiting on UI to refresh and the details panel to open (should already be open in fact)...`);
@@ -571,7 +572,7 @@ export class DetailsTester extends GVAbstractTester {
         });
 
         // Get the layer and query the coordinate to get features
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, gvLayer, TestConstants.ONTARIO_CENTER_LONLAT);
 
         const feature = features?.[0];
         if (!feature?.extent) return { features };
@@ -591,7 +592,7 @@ export class DetailsTester extends GVAbstractTester {
           gvLayer.getLayerPath(),
           feature,
           feature.extent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           { padding }
         );
 
@@ -671,10 +672,10 @@ export class DetailsTester extends GVAbstractTester {
 
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
+        const fitOptions = TestConstants.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build the group results from
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
         const polygon = features?.[0];
         if (!polygon?.extent) return { features };
         const [cx, cy] = getCenter(polygon.extent);
@@ -816,7 +817,7 @@ export class DetailsTester extends GVAbstractTester {
           [createResult([cx + 900000, cy, cx + 950000, cy + 50000], 0)],
           { ...fitOptions, duration: 60000 }
         );
-        await whenThisThen(() => view.getAnimating(), GVAbstractTester.UI_STATE_TIMEOUT_MS, 10);
+        await whenThisThen(() => view.getAnimating(), TestConstants.UI_STATE_TIMEOUT_MS, 10);
         view.cancelAnimations();
         const cancelledZoomed = await interruptedZoom;
 
@@ -920,10 +921,10 @@ export class DetailsTester extends GVAbstractTester {
 
         const { layerController, mapController } = this.getControllersRegistry();
         const view = this.getMapViewer().getView();
-        const fitOptions = GVAbstractTester.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
+        const fitOptions = TestConstants.USE_ZOOM_ANIMATION ? {} : { duration: 0 };
 
         // Get a real result to build a point feature from
-        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        const features = await this.queryAtCoordinateRetrieveResultsForLayer(test, layer, TestConstants.ONTARIO_CENTER_LONLAT);
         const feature = features?.[0];
         if (!feature?.extent) return { features };
         const [cx, cy] = getCenter(feature.extent);
@@ -936,7 +937,7 @@ export class DetailsTester extends GVAbstractTester {
           layerPath,
           { ...feature, extent: pointExtent },
           pointExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const pointZoomResolution = view.getResolution();
@@ -948,7 +949,7 @@ export class DetailsTester extends GVAbstractTester {
         const panIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           nextExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const panResolution = view.getResolution();
@@ -960,7 +961,7 @@ export class DetailsTester extends GVAbstractTester {
         const largeIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           largeExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
         const largeResolution = view.getResolution();
@@ -971,7 +972,7 @@ export class DetailsTester extends GVAbstractTester {
         const backToSmallIsFeatureZoomView = await layerController.panToExtentRestrictedAndOutline(
           layerPath,
           nextExtent,
-          GVAbstractTester.USE_ZOOM_ANIMATION,
+          TestConstants.USE_ZOOM_ANIMATION,
           fitOptions
         );
 
@@ -1063,11 +1064,11 @@ export class DetailsTester extends GVAbstractTester {
         // Vector queries use a pixel hit tolerance, so the result count depends on the view: go back to the initial view
         // (previous tests zoomed in) where the click returns several results for the layer
         test.addStep('Zooming to the initial extent...');
-        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(TestConstants.USE_ZOOM_ANIMATION);
 
         // Click the map and select the layer, so the Details panel shows its results
         await this.getControllersRegistry().layerController.waitForLayersLoaded();
-        await this.simulateMapClickWaitForBatchedQuery(test, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+        await this.simulateMapClickWaitForBatchedQuery(test, TestConstants.ONTARIO_CENTER_LONLAT);
         await DomHelper.waitForAppbarTabSelected(this.getMapId(), 'details');
         this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
 
@@ -1079,7 +1080,7 @@ export class DetailsTester extends GVAbstractTester {
         // Get the button
         test.addStep('Waiting for the zoom to all results button...');
         const waitForElement = async (selector: string): Promise<Element> => {
-          const element = await whenThisThen(() => root.querySelector(selector), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50);
+          const element = await whenThisThen(() => root.querySelector(selector), TestConstants.UI_STATE_TIMEOUT_MS, 50);
           if (!element) throw new Error(`Element not found: ${selector}`);
           return element;
         };
@@ -1097,7 +1098,7 @@ export class DetailsTester extends GVAbstractTester {
         const center = this.getMapViewer().getView().getCenter()!;
         await this.getControllersRegistry().mapController.zoomToExtent(
           [center[0] + 1000, center[1] + 1000, center[0] + 2000, center[1] + 2000],
-          GVAbstractTester.USE_ZOOM_ANIMATION
+          TestConstants.USE_ZOOM_ANIMATION
         );
         const disabledAfterViewChange =
           (await waitForElement(`${BUTTON_SELECTOR}[aria-disabled="false"]`)).getAttribute('aria-disabled') ?? undefined;
@@ -1239,12 +1240,12 @@ export class DetailsTester extends GVAbstractTester {
           feature?.fieldInfo.longitude?.value === coordinate[0].toFixed(6)
         );
       },
-      GVAbstractTester.UI_STATE_TIMEOUT_MS,
+      TestConstants.UI_STATE_TIMEOUT_MS,
       50
     );
     this.getControllersRegistry().detailsController.setSelectedLayerPath(LAYER_PATH_COORDINATE_INFO);
     await DomHelper.waitForReactIdle();
-    const content = await whenThisThen(() => DomHelper.Details.getCoordinateInfoContent(mapId), GVAbstractTester.UI_STATE_TIMEOUT_MS, 50);
+    const content = await whenThisThen(() => DomHelper.Details.getCoordinateInfoContent(mapId), TestConstants.UI_STATE_TIMEOUT_MS, 50);
     if (!content) throw new Error('Coordinate information content was not rendered');
     return {
       checked: toggle.checked,

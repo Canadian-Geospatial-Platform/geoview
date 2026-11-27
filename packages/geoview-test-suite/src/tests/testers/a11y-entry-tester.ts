@@ -1,11 +1,12 @@
+import { TestConstants } from './constants';
+import { TestError, TestSkippedError } from '../core/exceptions';
+import { Test } from '../core/test';
+import { GVAbstractTester } from './abstract-gv-tester';
 import { getStoreAppIsCrosshairsActive } from 'geoview-core/core/stores/states/app-state';
 import { getStoreMapInteraction } from 'geoview-core/core/stores/states/map-state';
 import { getStoreUIActiveTrapGeoView } from 'geoview-core/core/stores/states/ui-state';
 import { DomHelper } from 'geoview-core/core/utils/dom-helper';
 import { whenThisThen } from 'geoview-core/core/utils/utilities';
-import { TestError, TestSkippedError } from '../core/exceptions';
-import { Test } from '../core/test';
-import { GVAbstractTester } from './abstract-gv-tester';
 
 /** Map-relative IDs that must exist only while the entry prompt is open. */
 const PROMPT_IDS = ['wcag-dialog-title', 'wcag-dialog-description', 'enable-focus', 'skip-focus'];
@@ -50,7 +51,7 @@ export class A11yEntryTester extends GVAbstractTester {
         const trigger = A11yEntryTester.#requireControl(b, 'appBar-settings-btn');
         await entry.activate(trigger, 'Open Settings in the companion viewer');
         const toggle = A11yEntryTester.#requireControl(b, SETTINGS_SWITCH);
-        await whenThisThen(() => DomHelper.getActiveElement() === toggle, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => DomHelper.getActiveElement() === toggle, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         entry.focus(b, SETTINGS_SWITCH);
         entry.ids(b, SETTINGS_SWITCH);
         entry.mode(b, false);
@@ -349,7 +350,7 @@ export class A11yEntryTester extends GVAbstractTester {
     if (DomHelper.getActiveElement() === DomHelper.getGVElementById(mapId, 'mapTargetElement')) {
       await entry.pressKey('ArrowRight', `Press ArrowRight after ${label}`);
       try {
-        await whenThisThen(() => view.getCenter()?.[0] !== startX, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+        await whenThisThen(() => view.getCenter()?.[0] !== startX, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
         isPanned = true;
       } catch {
         isPanned = false;
@@ -429,7 +430,7 @@ export class A11yEntryTester extends GVAbstractTester {
             if (enable) {
               enable.click();
               // eslint-disable-next-line no-await-in-loop -- The next case must not observe a closing modal from this case.
-              await whenThisThen(() => !enable.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+              await whenThisThen(() => !enable.isConnected, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
             }
             const viewer = this.getApi().getMapViewer(id);
             if (getStoreMapInteraction(id) !== interaction) {
@@ -508,7 +509,7 @@ export class A11yEntryTester extends GVAbstractTester {
             control.click();
             await DomHelper.waitForReactIdle();
             if (/-(enable|skip)-focus$/.test(control.id)) {
-              await whenThisThen(() => !control.isConnected, GVAbstractTester.KEYBOARD_QUERY_TIMEOUT_MS);
+              await whenThisThen(() => !control.isConnected, TestConstants.KEYBOARD_QUERY_TIMEOUT_MS);
             }
           },
           prompt: (id): void => {

@@ -1,3 +1,4 @@
+import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -748,8 +749,8 @@ export class DataTableTester extends GVAbstractTester {
     this.getMapViewer().map.updateSize();
     test.addStep('Zooming to Ontario extent...');
     await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(
-      GVAbstractTester.ONTARIO_EXTENT,
-      GVAbstractTester.USE_ZOOM_ANIMATION
+      TestConstants.ONTARIO_EXTENT,
+      TestConstants.USE_ZOOM_ANIMATION
     );
 
     // Wait for the fitted map to finish rendering before observing the extent-dependent table.
