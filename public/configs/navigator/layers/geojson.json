@@ -1,0 +1,219 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "Geometry Collection Sample",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "geometrycollection.json",
+            "layerName": "Geometry Collection",
+            "layerStyle": {
+              "GeometryCollection": {
+                "type": "uniqueValue",
+                "fields": [
+                  "status"
+                ],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "Active",
+                    "visible": true,
+                    "values": [
+                      "active"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(46, 204, 113, 0.35)",
+                      "stroke": {
+                        "color": "rgba(39, 174, 96, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Inactive",
+                    "visible": true,
+                    "values": [
+                      "inactive"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(231, 76, 60, 0.35)",
+                      "stroke": {
+                        "color": "rgba(192, 57, 43, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Maintenance",
+                    "visible": true,
+                    "values": [
+                      "maintenance"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(241, 196, 15, 0.35)",
+                      "stroke": {
+                        "color": "rgba(243, 156, 18, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(149, 165, 166, 0.25)",
+                      "stroke": {
+                        "color": "rgba(127, 140, 141, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3",
+        "geoviewLayerType": "GeoJSON",
+        "metadataAccessPath": "./datasets/geojson/metadata-blank.meta",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json",
+            "layerName": "Blank"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3X",
+        "geoviewLayerType": "GeoJSON",
+        "metadataAccessPath": "./datasets/geojson/metadata-blank.meta",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json",
+            "layerName": "Blank w/ extent in Ontario",
+            "source": {
+              "extent": [
+                -87.77486341686723,
+                51.62285357468582,
+                -84.57727128084842,
+                53.833354975551075
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR4",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "single_point.json",
+            "layerName": "Single feature (no meta)",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/single_point.json"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

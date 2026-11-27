@@ -1,0 +1,73 @@
+{
+  "configMeta": {
+    "description": "Experimental: WMS vector layer examples covering SLD styles, unique-value rules, and vector time filters.<ul><li>National Burned Area Composite (1972-2025): Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable.</li><li>Reported Wildland Fires: Test of a WMS failing to create their style due to unsupported GetStyles queries. Nonetheless, the vector data is available in DataTable though it's a LOT of data and can cause performance issues.</li></ul>"
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true,
+      "labelZIndex": 20
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "nrcan-cwfif",
+        "geoviewLayerName": "NRCan CWFIF",
+        "metadataAccessPath": "https://geoserver.cwfif.nrcan.gc.ca/geoserver/ows",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "public:nbac"
+          },
+          {
+            "layerId": "public:cwfif_national_reportedfires"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

@@ -1,0 +1,161 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Package - STAC Browser (beta) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Package - STAC Browser (beta)</h4><p>This page is used to showcase the "STAC Browser" package for browsing and filtering STAC API catalogs.</p><ul class="demo-list" style="display: flex; flex-direction: column"><li><a href="#HLCONF1">1. Stac browser for datacube</a></li><li><a href="#HLCONF2">2. Stac browser for NAPL</a></li><li><a href="#HLCONF3">3. Stac browser for EODMS Sentinel collections</a></li></ul></div></div><div class="demo-section"><h4 id="HLCONF1">1. Stac browser for datacube</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+            'zoomAndCenter': [4, [-90, 60]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'stac-browser']
+          }
+        },
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://datacube.services.geo.ca/stac/api',
+            'filters': {
+              'collections': true,
+              'temporal': true,
+              'spatial': true,
+              'keyword': false,
+              'sort': true,
+              'properties': false
+            },
+            'defaults': {
+              'limit': 20,
+              'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTACCS" class="panel"></pre><div class="demo-section"><h4 id="HLCONF2">2. Stac browser for NAPL</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC2" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+            'zoomAndCenter': [4, [-90, 60]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'navBar': ['zoom', 'fullscreen', 'home'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'stac-browser']
+          }
+        },
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://eodms-sgdot.nrcan-rncan.gc.ca/search',
+            'browseEnabled': false,
+            'defaultMode': 'search',
+            'searchDescription': 'Use the geolocator to search within a predefined extent.',
+            'collections': {
+              'include': ['NAPL'],
+              'default': 'NAPL'
+            },
+            'filters': {
+              'temporal': true,
+              'spatial': true,
+              'sort': true,
+              'properties': [
+                { 'field': 'roll_number', 'label': 'Roll number' },
+                { 'field': 'delivery_date', 'label': 'Delivery date' }
+              ]
+            },
+            'defaults': {
+              'limit': 50,
+              'useMapExtent': true,
+              'containedInExtent': true,
+              'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
+            },
+            'collectionOverrides': {
+              'NAPL': {
+                'footprintStyles': {
+                  'collection': { 'color': '#90CAF9' }
+                },
+                'itemView': {
+                  'titleField': 'properties.order_key',
+                  'summaryFields': [
+                    { 'field': 'properties.datetime', 'label': 'Date', 'format': 'date' },
+                    { 'field': 'properties.scale', 'label': 'Scale', 'format': 'number' },
+                    { 'field': 'properties.nts_map', 'label': 'NTS' },
+                    { 'field': 'properties.altitude', 'label': 'Altitude', 'format': 'number' }
+                  ],
+                  'metadataFields': 'all',
+                  'excludeFields': ['properties.thumbnail']
+                },
+                'preview': {
+                  'mode': 'thumbnail',
+                  'opacity': 0.8
+                }
+              }
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTAC2CS" class="panel"></pre><div class="demo-section"><h4 id="HLCONF3">3. Stac browser for EODMS Sentinel collections</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSTAC3" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+            'zoomAndCenter': [4, [-90, 60]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'navBar': ['zoom', 'fullscreen', 'home'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'stac-browser']
+          }
+        },
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://eodms-sgdot.nrcan-rncan.gc.ca/search',
+            'collections': {
+              'include': ['Sentinel-1', 'Sentinel-2', 'Sentinel-3']
+            },
+            'filters': {
+              'collections': true,
+              'temporal': true,
+              'spatial': true,
+              'keyword': false,
+              'sort': true,
+              'properties': false
+            },
+            'defaults': {
+              'limit': 20,
+              'sortBy': [{ 'field': 'datetime', 'direction': 'desc' }]
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="mapSTAC3CS" class="panel"></pre><script src="./js/page-header.js"></script><script src="codedoc.js"></script><script>cgpv.init();
+
+      // Create configuration snippets for all demos.
+      window.addEventListener('load', () => {
+        createConfigSnippet();
+      });</script></body></html>

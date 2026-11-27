@@ -1,0 +1,88 @@
+{
+  "configMeta": {
+    "description": "OGC API Features examples with associated WMS services for style retrieval. Includes weather and climate stations and current and archived flood extents; the flood examples demonstrate incomplete WMS GetStyles information that prevents their styles from loading correctly."
+  },
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "weather-clim-group",
+        "geoviewLayerName": "Weather Climate Group",
+        "metadataAccessPath": "https://api.weather.gc.ca",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ahccd-stations",
+            "wmsUrl": "https://geo.weather.gc.ca/geomet-climate",
+            "wmsLayerId": "AHCCD.STATIONS"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "flood-eodms-sgdot",
+        "geoviewLayerName": "Flood EODMS-SGDOT (style not working, incomplete GetStyles information)",
+        "metadataAccessPath": "https://eodms-sgdot.nrcan-rncan.gc.ca/maps/egs/wfs3",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "EGS_Flood_Extent_Current_en",
+            "wmsUrl": "https://maps-cartes.services.geo.ca/egs_sgu/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer/WMSServer",
+            "wmsLayerId": "2"
+          },
+          {
+            "layerId": "EGS_Flood_Extent_Archive_en",
+            "wmsUrl": "https://maps-cartes.services.geo.ca/egs_sgu/services/Flood_Inondation/EGS_Flood_Product_Archive_en/MapServer/WMSServer",
+            "wmsLayerId": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
+}

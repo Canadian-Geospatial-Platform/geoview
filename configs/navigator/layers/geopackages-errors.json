@@ -1,0 +1,93 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "GeoPackageLYR1",
+        "geoviewLayerName": "Class Break Test (valid)",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Test.gpkg",
+            "layerName": "Class breaks",
+            "source": {
+              "dataAccessPath": "./datasets/geopackages"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "GeoPackageLYR2",
+        "geoviewLayerName": "Error dataAccessPath",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Test.gpkg",
+            "layerName": "Class breaks",
+            "source": {
+              "dataAccessPath": "./datasets/geopackagesERROR"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "GeoPackageLYR3",
+        "geoviewLayerName": "Error layerId (missing gpkg)",
+        "geoviewLayerType": "GeoPackage",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "TestERROR.gpkg",
+            "layerName": "Class breaks",
+            "source": {
+              "dataAccessPath": "./datasets/geopackages"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

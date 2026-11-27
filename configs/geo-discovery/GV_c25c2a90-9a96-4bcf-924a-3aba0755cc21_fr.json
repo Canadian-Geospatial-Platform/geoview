@@ -1,0 +1,141 @@
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ORiver_rimnet_fr",
+        "geoviewLayerName": "Réseau régional information et de suivi",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/CNSC/ORiver_rimnet_fr/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "Bassin_versant_riviere_Outaouais",
+        "geoviewLayerName": "Bassin versant de la rivière des Outaouais",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/CNSC/ORiver_rimnet_fr/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "ORiver_rimnet_fr/1",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Station_echantillon_substance"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/CNSC/ORiver_rimnet_fr/MapServer/3",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "Station_echantillon_substance",
+                    "prefix": "'",
+                    "valueFrom": "Station_echantillon_substance",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "Annee"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "timeFormat": {
+                  "en": "MMM dd, yyyy",
+                  "fr": "d MMM yyyy"
+                },
+                "ticksRule": "data",
+                "type": "time",
+                "property": "Annee",
+                "label": "Année"
+              },
+              "yAxis": {
+                "type": "linear",
+                "property": "Resultat",
+                "label": "Résultats",
+                "tooltipSuffix": ""
+              },
+              "borderWidth": 1
+            },
+            "category": {
+              "property": "Nom_de_substance"
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": true
+              },
+              "stepsSwitcher": true,
+              "description": "",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
