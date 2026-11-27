@@ -119,9 +119,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     display: 'flex',
     gap: theme.spacing(1.25),
-    justifyContent: 'space-between',
-    marginBottom: theme.spacing(1.25),
     width: '100%',
+  },
+  clearAllButton: {
+    marginLeft: 'auto',
   },
   imageButton: {
     background: 'transparent',

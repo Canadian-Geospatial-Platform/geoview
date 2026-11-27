@@ -435,6 +435,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
   /** Memoizes the checked features and active current feature that should be highlighted. */
   const memoFeaturesToHighlight = useMemo((): TypeFeatureInfoEntry[] => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoFeaturesToHighlight', checkedFeatures, memoCurrentFeature);
+
     const featuresToHighlight = checkedFeatures.filter(hasValidGeometry);
     // The current feature is an additional highlight only while its detail pane is visible.
     if (memoIsPanelOpen && memoCurrentFeature && memoCurrentFeatureHasGeometry && !isFeatureInCheckedFeatures(memoCurrentFeature)) {
@@ -1070,6 +1073,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             onClick={handleClearAllHighlights}
             className="buttonOutline"
             aria-disabled={checkedFeatures.length === 0}
+            sx={memoSxClasses.clearAllButton}
           >
             <Box sx={memoSxClasses.clearHighlightIconContainer}>
               <ClearHighlightIcon fontSize="medium" />
