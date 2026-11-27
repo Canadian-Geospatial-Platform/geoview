@@ -1,4 +1,4 @@
-import { TestConstants } from './constants';
+﻿import { TestConstants } from './constants';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { TestError, TestSkippedError } from '../core/exceptions';
@@ -93,7 +93,7 @@ export class LayerTester extends GVAbstractTester {
             configLayerPath = confLayerPath;
           },
           onConfig: (config): Promise<void> => {
-            // Keep track of the layer name as the time the config has been registered
+            // Keep track of the layer name at the time the config has been registered
             registeredLayerName = config.getLayerNameCascade();
             return Promise.resolve();
           },
